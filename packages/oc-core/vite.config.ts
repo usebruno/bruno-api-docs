@@ -12,6 +12,22 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  // Add server configuration for WASM files
+  server: {
+    fs: {
+      allow: ['../..']
+    },
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    }
+  },
+  // Configure asset handling for WASM files
+  assetsInclude: ['**/*.wasm'],
+  // Add optimizeDeps configuration
+  optimizeDeps: {
+    exclude: ['quickjs-emscripten']
+  },
   build: {
     lib: {
       entry: {

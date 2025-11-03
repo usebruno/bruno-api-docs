@@ -1,7 +1,7 @@
 import { HttpRequest, OpenCollectionCollection, Environment } from '../types';
 import { RequestExecutor } from './RequestExecutor';
-import { ScriptRunner } from './ScriptRunner';
 import { VariableInterpolator } from './VariableInterpolator';
+import ScriptRuntime from '../scripting/runtime/script-runtime';
 
 export interface RunRequestOptions {
   item: HttpRequest;
@@ -24,13 +24,13 @@ export interface RunRequestResponse {
 
 export class RequestRunner {
   private executor: RequestExecutor;
-  private scriptRunner: ScriptRunner;
   private interpolator: VariableInterpolator;
+  private scriptRuntime: ScriptRuntime;
 
   constructor(proxyUrl?: string) {
     this.executor = new RequestExecutor(proxyUrl);
-    this.scriptRunner = new ScriptRunner();
     this.interpolator = new VariableInterpolator();
+    this.scriptRuntime = new ScriptRuntime();
   }
 
   async runRequest(options: RunRequestOptions): Promise<RunRequestResponse> {
@@ -38,41 +38,64 @@ export class RequestRunner {
     
     try {
       const envVars = this.getEnvironmentVariables(environment);
-      const globalVars = this.scriptRunner.getGlobalVariables();
-      const allVars = { ...envVars, ...globalVars, ...runtimeVariables };
+      const allVars = { ...envVars, ...runtimeVariables };
       
       const processedRequest = await this.preprocessRequest(item, collection, allVars);
       
       if (processedRequest.scripts?.preRequest) {
-        await this.scriptRunner.runPreRequestScript(
-          processedRequest.scripts.preRequest,
-          processedRequest,
-          allVars,
-          collection
-        );
+        await this.scriptRuntime.runScript({
+          script: processedRequest.scripts.preRequest,
+          request: processedRequest,
+          variables: {
+            envVariables: envVars,
+            runtimeVariables: runtimeVariables,
+            globalEnvironmentVariables: {},
+            collectionVariables: {},
+            folderVariables: {},
+            requestVariables: {}
+          },
+          collectionName: collection.name,
+          collectionPath: ""
+        });
       }
       
       const interpolatedRequest = this.interpolator.interpolateRequest(processedRequest, allVars);
       const response = await this.executor.executeRequest(interpolatedRequest);
       
       if (processedRequest.scripts?.postResponse) {
-        await this.scriptRunner.runPostResponseScript(
-          processedRequest.scripts.postResponse,
-          interpolatedRequest,
+        await this.scriptRuntime.runScript({
+          script: processedRequest.scripts.postResponse,
+          request: interpolatedRequest,
           response,
-          allVars,
-          collection
-        );
+          variables: {
+            envVariables: envVars,
+            runtimeVariables: runtimeVariables,
+            globalEnvironmentVariables: {},
+            collectionVariables: {},
+            folderVariables: {},
+            requestVariables: {}
+          },
+          collectionName: collection.name,
+          collectionPath: ""
+        });
       }
       
       if (processedRequest.scripts?.tests) {
-        await this.scriptRunner.runTests(
-          processedRequest.scripts.tests,
-          interpolatedRequest,
+        await this.scriptRuntime.runScript({
+          script: processedRequest.scripts.tests,
+          request: interpolatedRequest,
           response,
-          allVars,
-          collection
-        );
+          variables: {
+            envVariables: envVars,
+            runtimeVariables: runtimeVariables,
+            globalEnvironmentVariables: {},
+            collectionVariables: {},
+            folderVariables: {},
+            requestVariables: {}
+          },
+          collectionName: collection.name,
+          collectionPath: ""
+        });
       }
       
       return response;
@@ -96,8 +119,8 @@ export class RequestRunner {
 
   private async preprocessRequest(
     item: HttpRequest, 
-    collection: OpenCollectionCollection, 
-    variables: Record<string, any>
+    _collection: OpenCollectionCollection, 
+    _variables: Record<string, any>
   ): Promise<HttpRequest> {
     const processed = { ...item };
     
@@ -105,11 +128,12 @@ export class RequestRunner {
   }
 
   getGlobalVariables(): Record<string, any> {
-    return this.scriptRunner.getGlobalVariables();
+    // todo
+    return {};
   }
 
   clearGlobalVariables(): void {
-    this.scriptRunner.clearGlobalVariables();
+    // todo
   }
 }
 

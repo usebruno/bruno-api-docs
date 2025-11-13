@@ -37,7 +37,7 @@
     "dev": "vite",
     "server": "node server.js",
     "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
-    "build:bundle": "vite build --config vite.config.libraries-bundle.ts",
+    "build:lib-bundle": "vite build --config vite.config.libraries-bundle.ts",
     "prebuild": "npm run build:bundle",
     "build": "npm run clean && tsc --emitDeclarationOnly && vite build",
     "build:standalone": "npm run clean:standalone && vite build --config vite.config.standalone.ts",

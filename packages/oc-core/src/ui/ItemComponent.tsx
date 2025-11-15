@@ -83,7 +83,7 @@ const ItemComponent = memo(({
               columns={[
                 { key: 'name', label: 'Name', width: '30%' },
                 { key: 'value', label: 'Value', width: '50%' },
-                { key: 'enabled', label: '', width: '20%', render: (val: any) => <StatusBadge status={val !== false ? 'active' : 'inactive'} /> }
+                { key: 'enabled', label: '', width: '20%', render: (val: any) => val === false ? <StatusBadge status="inactive" text="Disabled" /> : null }
               ]}
             />
           )}
@@ -211,7 +211,7 @@ const ItemComponent = memo(({
                 columns={[
                   { key: 'name', label: 'Name', width: '35%' },
                   { key: 'value', label: 'Value', width: '45%' },
-                  { key: 'enabled', label: '', width: '20%', render: (val: any) => <StatusBadge status={val !== false ? 'active' : 'inactive'} /> }
+                  { key: 'enabled', label: '', width: '20%', render: (val: any) => val === false ? <StatusBadge status="inactive" text="Disabled" /> : null }
                 ]}
               />
             )}
@@ -223,7 +223,7 @@ const ItemComponent = memo(({
                 columns={[
                   { key: 'name', label: 'Name', width: '35%' },
                   { key: 'value', label: 'Value', width: '45%' },
-                  { key: 'enabled', label: '', width: '20%', render: (val: any) => <StatusBadge status={val !== false ? 'active' : 'inactive'} /> }
+                  { key: 'enabled', label: '', width: '20%', render: (val: any) => val === false ? <StatusBadge status="inactive" text="Disabled" /> : null }
                 ]}
               />
             )}

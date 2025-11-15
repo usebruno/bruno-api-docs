@@ -39,19 +39,19 @@ export const HeadersTable: React.FC<{ headers: HeaderItem[] }> = ({ headers }) =
       key: 'enabled',
       label: 'Status',
       width: '10%',
-      render: (enabled: boolean) => (
+      render: (enabled: boolean) => enabled === false ? (
         <span style={{
           display: 'inline-block',
           padding: '3px 8px',
           borderRadius: '4px',
           fontSize: '11px',
           fontWeight: '500',
-          backgroundColor: enabled !== false ? 'var(--success-color, #10b981)' : 'var(--error-color, #ef4444)',
+          backgroundColor: 'var(--error-color, #ef4444)',
           color: 'white'
         }}>
-          {enabled !== false ? 'Enabled' : 'Disabled'}
+          Disabled
         </span>
-      )
+      ) : null
     }
   ];
 

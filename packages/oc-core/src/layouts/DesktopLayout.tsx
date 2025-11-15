@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { OpenCollectionCollection, CustomPage, OpenCollectionItem, HttpRequest } from '../types';
 import SearchModal from '../ui/SearchModal';
-import Sidebar from '../ui/Sidebar';
+import Sidebar from '../components/Sidebar/Sidebar';
 import AllEndpointsView from '../ui/AllEndpointsView';
 import PlaygroundDrawer from '../ui/PlaygroundDrawer';
 import { getItemId, generateSafeId } from '../utils/itemUtils';

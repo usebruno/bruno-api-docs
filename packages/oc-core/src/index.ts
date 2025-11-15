@@ -1,6 +1,6 @@
 import OpenCollection from './core/OpenCollection';
 import FileCollectionLoader from './core/FileCollectionLoader';
-import Sidebar from './ui/Sidebar';
+import Sidebar from './components/Sidebar/Sidebar';
 
 import './styles/index.css';
 

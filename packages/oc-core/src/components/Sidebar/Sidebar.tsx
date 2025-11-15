@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, CustomPage, Folder } from '../types';
-import Method from '../components/Method/Method';
-import { getItemId, generateSafeId } from '../utils/itemUtils';
-import OpenCollectionLogo from '../assets/opencollection-logo.svg';
+import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, CustomPage, Folder } from '../../types';
+import Method from '../Method/Method';
+import { getItemId, generateSafeId } from '../../utils/itemUtils';
+import OpenCollectionLogo from '../../assets/opencollection-logo.svg';
+import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
 
 interface ApiEndpoint {
   id: string;
@@ -195,11 +196,12 @@ const Sidebar: React.FC<SidebarProps> = ({
 
     return (
       <div key={itemId} className="relative">
-        <div 
+        <SidebarItem
           className={`
-            sidebar-item flex items-center select-none text-sm cursor-pointer
+            flex items-center select-none text-sm cursor-pointer
             ${isActive ? 'active' : ''}
             ${isHovered && !isActive ? 'hovered' : ''}
+            ${isFolder ? 'folder' : ''}
             transition-all duration-200
           `}
           style={{ 
@@ -239,7 +241,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <div className="truncate flex-1">
             {itemName}
           </div>
-        </div>
+        </SidebarItem>
         
         
         {isFolder && isExpanded && (item as Folder).items && (
@@ -263,7 +265,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className={`sidebar h-full flex flex-col ${isCompact ? 'compact' : ''} ${className}`} style={{ width: isCompact ? 'var(--sidebar-width-compact)' : 'var(--sidebar-width)' }}>
+    <SidebarContainer className={`h-full flex flex-col ${isCompact ? 'compact' : ''} ${className}`} style={{ width: isCompact ? 'var(--sidebar-width-compact)' : 'var(--sidebar-width)' }}>
       {/* Collection name at top */}
       <div className="p-4 pt-0 border-b" style={{ borderColor: 'var(--border-color)' }}>
         <div className="flex items-center">
@@ -273,8 +275,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
       
-      <div className="sidebar-items overflow-y-auto flex-grow">
-  
+      <SidebarItems>
   
         {filteredCustomPages.length > 0 && (
           <div className="mt-1">
@@ -286,9 +287,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               
               return (
                 <div key={pageId} className="relative">
-                  <div 
+                  <SidebarItem
                     className={`
-                      sidebar-item flex items-center select-none text-sm cursor-pointer py-1.5 px-2 rounded-md
+                      flex items-center select-none text-sm cursor-pointer py-1.5 px-2 rounded-md
                       ${isActive ? 'active' : ''}
                       ${isHovered && !isActive ? 'hovered' : ''}
                       transition-colors duration-150
@@ -321,7 +322,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       </svg>
                     </div>
                     <div className="truncate flex-1">{page.name}</div>
-                  </div>
+                  </SidebarItem>
                 </div>
               );
             })}
@@ -345,9 +346,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               const isHovered = hoveredItemId === fullPathId;
               
               return (
-                <button 
+                <SidebarItem
                   key={endpointId}
-                  className={`sidebar-item endpoint flex items-center w-full text-left px-3 py-2 ${isActive ? 'active' : ''} ${isHovered ? 'hovered' : ''}`}
+                  as="button"
+                  className={`endpoint flex items-center w-full text-left px-3 py-2 ${isActive ? 'active' : ''} ${isHovered ? 'hovered' : ''}`}
                   onClick={() => handleItemSelect(safeEndpointId, endpoint.path)}
                   onMouseEnter={() => setHoveredItemId(fullPathId)}
                   onMouseLeave={() => setHoveredItemId(null)}
@@ -359,12 +361,12 @@ const Sidebar: React.FC<SidebarProps> = ({
                     className="flex-shrink-0 text-xs"
                   />
                   <span className="truncate">{endpoint.path}</span>
-                </button>
+                </SidebarItem>
               );
             })}
           </>
         )}
-      </div>
+      </SidebarItems>
       
       {/* OpenCollection Logo */}
       <div className="p-2" style={{ borderColor: 'var(--border-color)' }}>
@@ -384,8 +386,9 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
         </a>
       </div>
-    </div>
+    </SidebarContainer>
   );
 };
 
-export default Sidebar; 
+export default Sidebar;
+

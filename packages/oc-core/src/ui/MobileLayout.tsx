@@ -1,6 +1,6 @@
 import React from 'react';
 import { OpenCollectionCollection, CustomPage, OpenCollectionItem } from '../types';
-import Sidebar from './Sidebar';
+import Sidebar from '../components/Sidebar/Sidebar';
 import SinglePageRenderer from './SinglePageRenderer';
 
 interface MobileLayoutProps {

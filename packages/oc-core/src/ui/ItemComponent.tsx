@@ -114,53 +114,6 @@ const ItemComponent = memo(({
               language="javascript"
             />
           )}
-
-          {folderItem.items && folderItem.items.length > 0 && (
-            <div className="folder-items-section">
-              <h3 className="section-title">Contents</h3>
-              <div className="folder-items-grid">
-                {folderItem.items.map((nestedItem, index) => {
-                  const nestedItemId = getItemId(nestedItem);
-                  const safeId = generateSafeId(nestedItemId);
-
-                  return (
-                    <div
-                      key={`${nestedItemId}-${index}`}
-                      className="folder-item-card"
-                      onClick={() => {
-                        if (typeof window !== 'undefined') {
-                          const url = new URL(window.location.href);
-                          url.searchParams.set('page', safeId);
-                          window.history.pushState({}, '', url.toString());
-                          window.location.reload();
-                        }
-                      }}
-                    >
-                      {nestedItem.type === 'http' && (
-                        <div className="item-method-badge" style={{ backgroundColor: methodColors[(nestedItem as any).method?.toUpperCase() || 'GET'] }}>
-                          {(nestedItem as any).method || 'GET'}
-                        </div>
-                      )}
-                      {nestedItem.type === 'folder' && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" strokeWidth="2">
-                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                        </svg>
-                      )}
-                      <div className="item-card-content">
-                        <h4>{nestedItem.name || nestedItemId}</h4>
-                        {nestedItem.type === 'http' && (nestedItem as any).url && (
-                          <p className="item-card-url">{(nestedItem as any).url}</p>
-                        )}
-                      </div>
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="item-card-arrow">
-                        <path d="M9 18l6-6-6-6"/>
-                      </svg>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     );

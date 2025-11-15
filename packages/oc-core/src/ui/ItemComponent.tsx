@@ -10,9 +10,9 @@ import { generateSectionId, getItemId, generateSafeId } from '../utils/itemUtils
 import {
   MinimalDataTable,
   CompactCodeView,
-  StatusBadge,
-  TabGroup
+  StatusBadge
 } from './MinimalComponents';
+import { CodeSnippets } from '../components/CodeSnippets/CodeSnippets';
 
 const methodColors: Record<string, string> = {
   'GET': '#16a34a',
@@ -164,21 +164,6 @@ const ItemComponent = memo(({
       script: httpItem.scripts || {}
     };
 
-    const generateCurlCommand = () => {
-      const headers = endpoint.headers?.filter((h: any) => h.enabled !== false)
-        .map((h: any) => `-H "${h.name}: ${h.value}"`).join(" \\\n  ") || '';
-      
-      let bodyData = '';
-      if (endpoint.body && typeof endpoint.body === 'object' && 'data' in endpoint.body) {
-        const rawBody = endpoint.body as any;
-        if (rawBody.type === 'json' && rawBody.data) {
-          bodyData = ` \\\n  -d '${rawBody.data}'`;
-        }
-      }
-
-      return `curl -X ${endpoint.method} "${endpoint.url}"${headers ? ` \\\n  ${headers}` : ''}${bodyData}`;
-    };
-
 
     return (
       <div className={`item-container ${theme}`} id={`section-${sectionId}`} ref={sectionRefCallback}>
@@ -265,48 +250,12 @@ const ItemComponent = memo(({
             )}
           </div>
 
-          <div className="code-example-section">
-            <h3 className="section-title">Example Request</h3>
-            <div className="code-example-card">
-              <TabGroup
-                tabs={[
-                  { id: 'curl', label: 'cURL' },
-                  { id: 'javascript', label: 'JavaScript' },
-                  { id: 'python', label: 'Python' }
-                ]}
-                defaultTab="curl"
-                renderContent={(activeTab: string) => {
-                  if (activeTab === 'curl') {
-                    return <CompactCodeView code={generateCurlCommand()} language="bash" />;
-                  } else if (activeTab === 'javascript') {
-                    const jsCode = `const response = await fetch("${endpoint.url}", {
-  method: "${endpoint.method}",
-  headers: {
-${endpoint.headers?.filter((h: any) => h.enabled !== false).map((h: any) => `    "${h.name}": "${h.value}"`).join(',\n')}
-  }${endpoint.body && typeof endpoint.body === 'object' && 'data' in endpoint.body ? `,
-  body: JSON.stringify(${(endpoint.body as any).data || '{}'})` : ''}
-});
-
-const data = await response.json();`;
-                    return <CompactCodeView code={jsCode} language="javascript" />;
-                  } else {
-                    const pyCode = `import requests
-
-response = requests.${endpoint.method.toLowerCase()}(
-    "${endpoint.url}",
-    headers={
-${endpoint.headers?.filter((h: any) => h.enabled !== false).map((h: any) => `        "${h.name}": "${h.value}"`).join(',\n')}
-    }${endpoint.body && typeof endpoint.body === 'object' && 'data' in endpoint.body ? `,
-    json=${(endpoint.body as any).data || '{}'}` : ''}
-)
-
-data = response.json()`;
-                    return <CompactCodeView code={pyCode} language="python" />;
-                  }
-                }}
-              />
-            </div>
-          </div>
+          <CodeSnippets
+            method={endpoint.method}
+            url={endpoint.url}
+            headers={endpoint.headers}
+            body={endpoint.body}
+          />
         </div>
       </div>
     );

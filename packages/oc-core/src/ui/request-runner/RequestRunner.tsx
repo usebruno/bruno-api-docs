@@ -99,7 +99,6 @@ const RequestRunner: React.FC<RequestRunnerProps> = ({ item, collection, proxyUr
         collection={collection}
         selectedEnvironment={selectedEnvironment}
         onEnvironmentChange={setSelectedEnvironment}
-        toggleRunnerMode={toggleRunnerMode}
       />
       
       <QueryBar 

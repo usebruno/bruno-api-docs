@@ -155,10 +155,30 @@ interface StatusBadgeProps {
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, text }) => {
   const statusConfig = {
-    active: { color: '#16a34a', label: 'Active' },
-    inactive: { color: '#6b7280', label: 'Inactive' },
-    warning: { color: '#f97316', label: 'Warning' },
-    error: { color: '#dc2626', label: 'Error' }
+    active: { 
+      bg: '#d1fae5', 
+      color: '#047857', 
+      border: '#10b981',
+      label: 'Active' 
+    },
+    inactive: { 
+      bg: '#f3f4f6', 
+      color: '#6b7280', 
+      border: '#d1d5db',
+      label: 'Inactive' 
+    },
+    warning: { 
+      bg: '#fed7aa', 
+      color: '#c2410c', 
+      border: '#f97316',
+      label: 'Warning' 
+    },
+    error: { 
+      bg: '#fecaca', 
+      color: '#b91c1c', 
+      border: '#dc2626',
+      label: 'Error' 
+    }
   };
 
   const config = statusConfig[status];
@@ -166,7 +186,11 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, text }) => {
   return (
     <span 
       className="status-badge" 
-      style={{ backgroundColor: config.color }}
+      style={{ 
+        backgroundColor: config.bg,
+        color: config.color,
+        border: `1px solid ${config.border}`
+      }}
     >
       {text || config.label}
     </span>

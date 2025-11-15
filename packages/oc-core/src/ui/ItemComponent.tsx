@@ -266,8 +266,8 @@ const ItemComponent = memo(({
           </div>
 
           <div className="code-example-section">
-            <div className="code-example-header">
-              <h3 className="section-title">Example Request</h3>
+            <h3 className="section-title">Example Request</h3>
+            <div className="code-example-card">
               <TabGroup
                 tabs={[
                   { id: 'curl', label: 'cURL' },

@@ -29,8 +29,8 @@ export class RequestRunner {
   private interpolator: VariableInterpolator;
   private scriptRuntime: ScriptRuntime;
 
-  constructor(proxyUrl?: string) {
-    this.executor = new RequestExecutor(proxyUrl);
+  constructor() {
+    this.executor = new RequestExecutor();
     this.interpolator = new VariableInterpolator();
     this.scriptRuntime = new ScriptRuntime();
   }
@@ -139,7 +139,7 @@ export class RequestRunner {
   }
 }
 
-export const createRequestRunner = (proxyUrl?: string) => new RequestRunner(proxyUrl);
+export const createRequestRunner = () => new RequestRunner();
 
 export const requestRunner = new RequestRunner();
 

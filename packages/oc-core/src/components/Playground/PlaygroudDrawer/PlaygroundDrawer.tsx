@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Item as OpenCollectionItem, HttpRequest, Folder } from '@opencollection/types';
+import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RequestRunner } from '../../../ui/request-runner';
 import { getItemId, generateSafeId } from '../../../utils/itemUtils';
 import Method from '../../Method/Method';
@@ -12,7 +13,6 @@ interface PlaygroundDrawerProps {
   collection: OpenCollectionCollection | null;
   selectedItem: HttpRequest | null;
   onSelectItem: (item: HttpRequest) => void;
-  proxyUrl?: string;
   theme?: 'light' | 'dark' | 'auto';
 }
 
@@ -27,7 +27,6 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   collection,
   selectedItem,
   onSelectItem,
-  proxyUrl,
   theme = 'light'
 }) => {
   const [height, setHeight] = useState(() => isOpen ? getDefaultHeight() : 0);
@@ -46,7 +45,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
     
     const traverseItems = (items: OpenCollectionItem[]) => {
       items.forEach((item) => {
-        if (item.type === 'folder') {
+        if ((item as any).type === 'folder') {
           const itemId = getItemId(item);
           initExpandedFolders[itemId] = false;
           if ('items' in item && item.items) {
@@ -90,7 +89,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   const renderItem = (item: OpenCollectionItem, level = 0) => {
     const itemId = getItemId(item);
     const safeItemId = generateSafeId(itemId);
-    const isFolder = item.type === 'folder';
+    const isFolder = (item as any).type === 'folder';
     const isExpanded = expandedFolders[itemId] || false;
     const isSelected = !isFolder && selectedItem && getItemId(selectedItem) === itemId;
 
@@ -138,14 +137,14 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
               </span>
             </div>
           </div>
-          {isExpanded && folder.items && (
+              {isExpanded && folder.items && (
             <div>
-              {folder.items.map((child) => renderItem(child, level + 1))}
+                  {folder.items.map((child: OpenCollectionItem) => renderItem(child, level + 1))}
             </div>
           )}
         </div>
       );
-    } else if (item.type === 'http') {
+    } else if ((item as any).type === 'http') {
       const httpItem = item as HttpRequest;
       return (
         <div
@@ -438,7 +437,6 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
                 <RequestRunner
                   item={selectedItem}
                   collection={collection}
-                  proxyUrl={proxyUrl}
                   toggleRunnerMode={onClose}
                 />
               ) : (

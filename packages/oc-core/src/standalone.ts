@@ -1,8 +1,8 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import './styles/index.css';
-import OpenCollection from './core/OpenCollection';
-import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import OpenCollection from './components/OpenCollection/OpenCollection';
+import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import { parseCollectionContent } from './utils/yamlUtils';
 
 export interface OpenCollectionOptions {
@@ -10,14 +10,6 @@ export interface OpenCollectionOptions {
   opencollection: any;
   theme?: 'light' | 'dark' | 'auto';
   logo?: string;
-  customPages?: Array<{
-    name: string;
-    content?: string;
-    contentPath?: string;
-  }>;
-  hideSidebar?: boolean;
-  hideHeader?: boolean;
-  onlyShow?: string[];
 }
 
 export class OpenCollectionRenderer {
@@ -61,17 +53,17 @@ export class OpenCollectionRenderer {
     this.render();
   }
 
-  private convertCollection(opencollection: any): OpenCollectionCollection {
+  private convertCollection(opencollection: any): IOpenCollection {
     if (typeof opencollection === 'string') {
       try {
-        return parseCollectionContent(opencollection) as OpenCollectionCollection;
+        return parseCollectionContent(opencollection) as IOpenCollection;
       } catch (error) {
         console.error('Failed to parse collection:', error);
         throw new Error(`Invalid collection format: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 
-    return opencollection as OpenCollectionCollection;
+    return opencollection as IOpenCollection;
   }
 
   private createLogoElement(): React.ReactNode {
@@ -89,17 +81,11 @@ export class OpenCollectionRenderer {
 
     const collection = this.convertCollection(this.options.opencollection);
     
-    const playgroundElement = React.createElement(OpenCollection, {
+    this.root.render(React.createElement(OpenCollection, {
       collection,
       theme: this.options.theme || 'light',
-      logo: this.createLogoElement(),
-      customPages: this.options.customPages,
-      hideSidebar: this.options.hideSidebar,
-      hideHeader: this.options.hideHeader,
-      onlyShow: this.options.onlyShow
-    });
-
-    this.root.render(playgroundElement);
+      logo: this.createLogoElement()
+    }));
   }
 
   public updateCollection(opencollection: any) {

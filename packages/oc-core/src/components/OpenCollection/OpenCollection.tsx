@@ -1,57 +1,40 @@
-import React, { useState, useMemo } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Item as OpenCollectionItem, HttpRequest } from '@opencollection/types';
-import SearchModal from '../ui/SearchModal';
-import Sidebar from '../components/Sidebar/Sidebar';
-import AllEndpointsView from '../ui/AllEndpointsView';
-import PlaygroundDrawer from '../components/Playground/PlaygroudDrawer/PlaygroundDrawer';
-import { getItemId, generateSafeId } from '../utils/itemUtils';
+import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import {
+  useCollectionData,
+  useTheme,
+  useRunnerMode
+} from '../../hooks';
+import type { OpenCollectionProps } from '../../types/component-types';
+import Sidebar from '../Sidebar/Sidebar';
+import AllEndpointsView from '../../ui/AllEndpointsView';
+import PlaygroundDrawer from '../Playground/PlaygroudDrawer/PlaygroundDrawer';
+import { getItemId, generateSafeId } from '../../utils/itemUtils';
 
 interface DesktopLayoutProps {
   collectionData: OpenCollectionCollection | null;
-  hideSidebar: boolean;
   logo: React.ReactNode;
   theme: 'light' | 'dark' | 'auto';
   currentPageId: string | null;
   currentPageItem: OpenCollectionItem | null;
   onSelectItem: (id: string, path?: string) => void;
-  onlyShow?: string[];
-  isSearchOpen: boolean;
-  setIsSearchOpen: (open: boolean) => void;
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  searchResults: Array<{id: string; name: string; path?: string; type: string}>;
-  searchInputRef: React.RefObject<HTMLInputElement | null>;
-  handleSearchResultSelect: (result: {id: string; path?: string; type: string}) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
   filteredCollectionItems: any[];
-  md: any;
-  customPageContents: Record<string, string>;
   children?: React.ReactNode;
   isRunnerMode?: boolean;
   toggleRunnerMode?: () => void;
-  proxyUrl?: string;
 }
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   collectionData,
-  hideSidebar,
   logo,
   theme,
   currentPageId,
   onSelectItem,
-  onlyShow,
-  isSearchOpen,
-  setIsSearchOpen,
-  searchQuery,
-  setSearchQuery,
-  searchResults,
-  searchInputRef,
-  handleSearchResultSelect,
   containerRef,
-  filteredCollectionItems,
-  md,
-  proxyUrl
+  filteredCollectionItems
 }) => {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(currentPageId);
   const [playgroundItem, setPlaygroundItem] = useState<HttpRequest | null>(null);
@@ -86,7 +69,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   }, [selectedItemId, collectionData]);
 
   // Update playground item when selection changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedItem && selectedItem.type === 'http') {
       setPlaygroundItem(selectedItem);
       // If drawer is open and we select a new HTTP item, update it
@@ -141,7 +124,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   };
 
   // Sync with external currentPageId changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (currentPageId) {
       setSelectedItemId(currentPageId);
     }
@@ -149,36 +132,23 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
 
   return (
     <div className="flex h-screen">
-      <SearchModal
-        isSearchOpen={isSearchOpen}
-        setIsSearchOpen={setIsSearchOpen}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        searchResults={searchResults}
-        searchInputRef={searchInputRef}
-        handleSearchResultSelect={handleSearchResultSelect}
-      />
-      
       {/* Left Pane: Sidebar */}
-      {!hideSidebar && (
-        <div
-          className="playground-sidebar h-full overflow-hidden flex flex-shrink-0"
-          style={{
-            width: 'var(--sidebar-width)',
-            transition: 'width 0.3s ease',
-            borderRight: '1px solid var(--border-color)'
-          }}
-        >
-          <Sidebar
-            collection={collectionData}
-            activeItemId={selectedItemId}
-            onSelectItem={(id) => handleItemSelect(id, false)}
-            logo={logo}
-            theme={theme}
-            onlyShow={onlyShow}
-          />
-        </div>
-      )}
+      <div
+        className="playground-sidebar h-full overflow-hidden flex flex-shrink-0"
+        style={{
+          width: 'var(--sidebar-width)',
+          transition: 'width 0.3s ease',
+          borderRight: '1px solid var(--border-color)'
+        }}
+      >
+        <Sidebar
+          collection={collectionData}
+          activeItemId={selectedItemId}
+          onSelectItem={(id) => handleItemSelect(id, false)}
+          logo={logo}
+          theme={theme}
+        />
+      </div>
 
       {/* Middle Pane: All Endpoints View */}
       <div
@@ -187,9 +157,8 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
       >
         <AllEndpointsView
           collection={collectionData}
-          filteredCollectionItems={filteredCollectionItems}
+          collectionItems={filteredCollectionItems}
           theme={theme}
-          md={md}
           selectedItemId={selectedItemId}
           onItemSelect={(id, openPlayground) => handleItemSelect(id, openPlayground || false)}
         />
@@ -202,11 +171,103 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         collection={collectionData}
         selectedItem={playgroundItem}
         onSelectItem={handlePlaygroundItemSelect}
-        proxyUrl={proxyUrl}
         theme={theme}
       />
     </div>
   );
 };
 
-export default DesktopLayout;
+const OpenCollection: React.FC<OpenCollectionProps> = ({
+  collection,
+  theme = 'light',
+  logo,
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const { collectionData, isLoading, error } = useCollectionData(collection);
+  useTheme(theme);
+
+  const filteredCollectionItems = collectionData?.items || [];
+
+  // Page selection state
+  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
+  const [currentPageItem, setCurrentPageItem] = useState<any>(null);
+
+  // Handle item selection
+  const handleSelectItem = (id: string, path?: string) => {
+    console.log('Selecting item:', id, 'path:', path);
+    setCurrentPageId(id);
+    
+    // Find the item in the collection
+    const findItem = (items: any[]): any => {
+      for (const item of items) {
+        const itemId = item.id || item.uid || item.name || 'unnamed-item';
+        if (itemId === id || itemId.toLowerCase().replace(/[^a-z0-9\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') === id) {
+          return item;
+        }
+        if (item.type === 'folder' && item.items) {
+          const found = findItem(item.items);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    
+    if (collectionData && 'items' in collectionData && collectionData.items) {
+      const item = findItem(collectionData.items);
+      setCurrentPageItem(item);
+    }
+  };
+
+  // Set initial page to first root-level request when collection loads
+  useEffect(() => {
+    if (collectionData && currentPageId === null) {
+      const items = collectionData.items as any[] | undefined;
+
+      const firstRequest = items?.find((item) => item.type === 'http');
+      if (firstRequest?.name) {
+        handleSelectItem(firstRequest.name);
+      } else if (items && items.length > 0) {
+        const firstItem = items[0];
+        if (firstItem && 'name' in firstItem && firstItem.name) {
+          handleSelectItem(firstItem.name);
+        }
+      }
+    }
+  }, [collectionData, currentPageId]);
+
+  const { isRunnerMode, toggleRunnerMode } = useRunnerMode();
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="flex items-center justify-center h-screen text-red-500">Error: {error}</div>;
+  }
+
+  const commonProps = {
+    collectionData,
+    theme,
+    currentPageId,
+    currentPageItem,
+    onSelectItem: handleSelectItem,
+    containerRef,
+    filteredCollectionItems
+  };
+
+  const desktopProps = {
+    ...commonProps,
+    logo,
+    isRunnerMode,
+    toggleRunnerMode
+  };
+
+  return (
+    <div className={`oc-playground ${theme}`}>
+      <DesktopLayout {...desktopProps} />
+    </div>
+  );
+};
+
+export default OpenCollection;

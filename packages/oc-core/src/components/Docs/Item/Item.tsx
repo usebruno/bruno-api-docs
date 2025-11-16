@@ -5,7 +5,8 @@ import 'prismjs/components/prism-graphql';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-xml-doc';
 import 'prismjs/components/prism-python';
-import type { Item as OpenCollectionItem, HttpRequest, Script, Folder } from '@opencollection/types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { Variable } from '@opencollection/types/common/variables';
 import { generateSectionId, getItemId } from '../../../utils/itemUtils';
 import {
   MinimalDataTable,
@@ -15,6 +16,7 @@ import {
 import { CodeSnippets } from '../CodeSnippets/CodeSnippets';
 import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
+import { useMarkdownRenderer } from '../../../hooks';
 
 const methodColors: Record<string, string> = {
   GET: '#10b981',
@@ -30,21 +32,20 @@ const Item = memo(({
   item,
   registerSectionRef,
   theme,
-  md,
   parentPath = '',
   collection,
   toggleRunnerMode,
   onTryClick
 }: {
-  item: OpenCollectionItem;
+  item: any;
   registerSectionRef: (id: string, ref: HTMLDivElement | null) => void;
   theme: 'light' | 'dark' | 'auto';
-  md: any;
   parentPath?: string;
   collection?: any;
   toggleRunnerMode?: () => void;
   onTryClick?: () => void;
 }) => {
+  const md = useMarkdownRenderer();
   const itemId = getItemId(item);
   const sectionId = generateSectionId(item, parentPath);
 
@@ -58,7 +59,7 @@ const Item = memo(({
   }, [sectionId, registerSectionRef]);
 
   if (item.type === 'folder') {
-    const folderItem = item as Folder;
+    const folderItem = item as any;
 
     return (
       <StyledWrapper
@@ -81,7 +82,7 @@ const Item = memo(({
 
         {folderItem.docs && (
           <div className="item-docs">
-            <div dangerouslySetInnerHTML={{ __html: md.render(folderItem.docs) }} />
+            <div dangerouslySetInnerHTML={{ __html: md.render(String(folderItem.docs)) }} />
           </div>
         )}
 
@@ -100,7 +101,7 @@ const Item = memo(({
 
           {folderItem.variables && folderItem.variables.length > 0 && (
             <MinimalDataTable
-              data={folderItem.variables.map(v => ({
+              data={folderItem.variables.map((v: Variable) => ({
                 name: v.name,
                 value: v.value || v.default || '',
                 enabled: !v.disabled
@@ -124,7 +125,7 @@ const Item = memo(({
   }
 
   if (item.type === 'script') {
-    const scriptItem = item as Script;
+    const scriptItem = item as any;
 
     return (
       <StyledWrapper

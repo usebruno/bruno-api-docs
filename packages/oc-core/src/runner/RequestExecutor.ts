@@ -2,52 +2,7 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RunRequestResponse } from './index';
 
 export class RequestExecutor {
-  constructor(private proxyUrl?: string) {}
-
   async executeRequest(request: HttpRequest): Promise<RunRequestResponse> {
-    if (this.proxyUrl) {
-      return this.executeViaProxy(request);
-    }
-    return this.executeDirectly(request);
-  }
-
-  private async executeViaProxy(request: HttpRequest): Promise<RunRequestResponse> {
-    try {
-      const proxyPayload = {
-        url: request.url,
-        method: request.method || 'GET',
-        headers: this.buildHeaders(request),
-        body: await this.buildBody(request),
-        timeout: 30000
-      };
-
-      const response = await fetch(`${this.proxyUrl}/proxy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(proxyPayload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Proxy error: ${response.statusText}`);
-      }
-
-      const result = await response.json();
-      
-      if (result.error) {
-        return { error: result.error };
-      }
-
-      return result;
-    } catch (error) {
-      return {
-        error: error instanceof Error ? error.message : 'Proxy request failed'
-      };
-    }
-  }
-
-  private async executeDirectly(request: HttpRequest): Promise<RunRequestResponse> {
     const startTime = Date.now();
 
     try {
@@ -88,7 +43,7 @@ export class RequestExecutor {
     return options;
   }
 
-    private buildHeaders(request: HttpRequest): HeadersInit {
+  private buildHeaders(request: HttpRequest): HeadersInit {
     const headers: Record<string, string> = {};
 
     if (request.headers) {

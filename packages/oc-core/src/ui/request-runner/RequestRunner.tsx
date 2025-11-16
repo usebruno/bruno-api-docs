@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import { requestRunner, createRequestRunner } from '../../runner';
+import { requestRunner } from '../../runner';
 import RequestHeader from './RequestHeader';
 import QueryBar from '../../components/Playground/QueryBar/QueryBar';
 import RequestPane from './RequestPane';
@@ -10,27 +10,17 @@ import ResponsePane from './ResponsePane';
 interface RequestRunnerProps {
   item: HttpRequest;
   collection: OpenCollectionCollection;
-  proxyUrl?: string;
   toggleRunnerMode?: () => void;
 }
 
-const globalRunners = new Map<string, any>();
-
-const RequestRunner: React.FC<RequestRunnerProps> = ({ item, collection, proxyUrl, toggleRunnerMode }) => {
+const RequestRunner: React.FC<RequestRunnerProps> = ({ item, collection, toggleRunnerMode }) => {
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>('');
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [requestPaneWidth, setRequestPaneWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
-
-  const runner = useMemo(() => {
-    const key = proxyUrl || 'default';
-    if (!globalRunners.has(key)) {
-      globalRunners.set(key, proxyUrl ? createRequestRunner(proxyUrl) : requestRunner);
-    }
-    return globalRunners.get(key);
-  }, [proxyUrl]);
+  const runner = useMemo(() => requestRunner, []);
 
   useEffect(() => {
     setEditableItem(item);
@@ -40,9 +30,9 @@ const RequestRunner: React.FC<RequestRunnerProps> = ({ item, collection, proxyUr
   const handleSendRequest = async () => {
     setIsLoading(true);
     try {
-      const environment = collection.environments?.find(env => env.name === selectedEnvironment);
-      const runner = createRequestRunner(proxyUrl);
-      
+      const environment = (collection as any).environments?.find(
+        (env: any) => env.name === selectedEnvironment
+      );
       const result = await runner.runRequest({
         item: editableItem,
         collection,

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Item as OpenCollectionItem, HttpRequest, Folder } from '@opencollection/types';
-import type { CustomPage } from '../../types/component-types';
+import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import Method from '../Method/Method';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
 import OpenCollectionLogo from '../../assets/opencollection-logo.svg';
@@ -28,8 +28,6 @@ export interface SidebarProps {
   logo?: React.ReactNode;
   className?: string;
   theme?: 'light' | 'dark' | 'auto';
-  customPages?: CustomPage[];
-  onlyShow?: string[];
   isCompact?: boolean;
 }
 
@@ -40,19 +38,10 @@ const Sidebar: React.FC<SidebarProps> = ({
   logo,
   className = '',
   theme = 'light',
-  customPages = [],
-  onlyShow = [],
   isCompact = false
 }) => {
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
-
-  const shouldShowItem = useCallback((itemId: string): boolean => {
-    if (!onlyShow.length) {
-      return true;
-    }
-    return onlyShow.includes(itemId);
-  }, [onlyShow]);
 
   useEffect(() => {
     if (!collection) return;
@@ -61,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     
     if ('items' in collection) {
       const items = collection.items || [];
-      items.forEach((item) => {
+      items.forEach((item: any) => {
         if (item.type === 'folder') {
           const itemId = getItemId(item);
           initExpandedFolders[itemId] = false;
@@ -92,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     onSelectItem(id, parentPath);
   };
 
-  const normalizedItems = useMemo(() => {
+  const normalizedItems = useMemo<any[]>(() => {
     if (!collection) return [];
     
     if ('endpoints' in collection) {
@@ -103,58 +92,23 @@ const Sidebar: React.FC<SidebarProps> = ({
         url: endpoint.path
       }));
     } else if ('items' in collection) {
-      return collection.items;
+      return collection.items as any[];
     }
     
     return [];
   }, [collection]);
 
   const filteredItems = useMemo(() => {
-    let items = normalizedItems;
-    
-    if (onlyShow.length && collection !== null && 'items' in collection) {
-      const filterItemsByOnlyShow = (items: OpenCollectionItem[]): OpenCollectionItem[] => {
-        return items.filter(item => {
-          const itemName = item.type === 'http' ? (item as HttpRequest).name || item.type : item.type;
-          if (shouldShowItem(itemName)) {
-            return true;
-          }
-          
-          
-          return false;
-        });
-      };
-      
-      items = filterItemsByOnlyShow(items as OpenCollectionItem[]);
-    }
-    
-    // Return items in their original order
-    return items as OpenCollectionItem[];
-  }, [normalizedItems, onlyShow, collection, shouldShowItem]);
+    return normalizedItems as OpenCollectionItem[];
+  }, [normalizedItems]);
 
   const filteredEndpoints = useMemo(() => {
     if (!collection || !('endpoints' in collection) || !collection.endpoints) {
       return [];
     }
     
-    let endpoints = collection.endpoints;
-    if (onlyShow.length) {
-      endpoints = endpoints.filter((endpoint: ApiEndpoint) => 
-        shouldShowItem(endpoint.id) || shouldShowItem(endpoint.path)
-      );
-    }
-    
-    return endpoints;
-  }, [collection, onlyShow, shouldShowItem]);
-
-  const filteredCustomPages = useMemo(() => {
-    let pages = customPages;
-    if (onlyShow.length) {
-      pages = pages.filter(page => shouldShowItem(page.name));
-    }
-    
-    return pages
-  }, [customPages, onlyShow, shouldShowItem]);
+    return collection.endpoints;
+  }, [collection]);
 
   const renderFolderIcon = (isExpanded: boolean) => (
     <svg 
@@ -176,7 +130,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     </svg>
   );
 
-  const renderItem = (item: OpenCollectionItem, level = 0, parentPath = '') => {
+  const renderItem = (item: any, level = 0, parentPath = '') => {
     const itemId = getItemId(item);
     const itemName = itemId;
     const itemPath = parentPath ? `${parentPath}/${itemName}` : itemName;
@@ -191,11 +145,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     const isHovered = hoveredItemId === fullPathId;
     const isExpanded = expandedFolders[itemId] || false;
     
-    // Don't render if this item should be filtered out
-    if (!shouldShowItem(itemId)) {
-      return null;
-    }
-
     return (
       <div key={itemId} className="relative">
         <SidebarItem
@@ -278,63 +227,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
       
       <SidebarItems>
-  
-        {filteredCustomPages.length > 0 && (
-          <div className="mt-1">
-            {filteredCustomPages.map((page) => {
-              const pageId = page.name;
-              const safePageId = generateSafeId(pageId);
-              const isActive = activeItemId === safePageId;
-              const isHovered = hoveredItemId === pageId;
-              
-              return (
-                <div key={pageId} className="relative">
-                  <SidebarItem
-                    className={`
-                      flex items-center select-none text-sm cursor-pointer py-1.5 px-2 rounded-md
-                      ${isActive ? 'active' : ''}
-                      ${isHovered && !isActive ? 'hovered' : ''}
-                      transition-colors duration-150
-                    `}
-                    style={{ 
-                      paddingLeft: '8px',
-                      color: isActive ? 'var(--primary-color)' : 'var(--text-primary)'
-                    }}
-                    onClick={() => handleItemSelect(safePageId, '')}
-                    onMouseEnter={() => setHoveredItemId(pageId)}
-                    onMouseLeave={() => setHoveredItemId(null)}
-                    id={`sidebar-item-${pageId}`}
-                    data-testid={`custom-page-${pageId}`}
-                  >
-                    <div className="mr-2 flex-shrink-0 opacity-70">
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M9 13h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V20a2 2 0 01-2 2z"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
-                    <div className="truncate flex-1">{page.name}</div>
-                  </SidebarItem>
-                </div>
-              );
-            })}
-          </div>
-        )}
-        
-  
         {collection && 'items' in collection && filteredItems && filteredItems.length > 0 && (
           <>
-            {filteredItems.map((item: OpenCollectionItem) => renderItem(item))}
+            {filteredItems.map((item) => renderItem(item))}
           </>
         )}
         

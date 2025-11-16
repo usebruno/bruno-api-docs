@@ -1,29 +1,26 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Item as OpenCollectionItem, HttpRequest, Folder } from '@opencollection/types';
 import Item from '../components/Docs/Item/Item';
 import { getItemId, generateSafeId } from '../utils/itemUtils';
 
 interface AllEndpointsViewProps {
   collection: OpenCollectionCollection | null;
-  filteredCollectionItems: OpenCollectionItem[];
+  collectionItems: any[];
   theme: 'light' | 'dark' | 'auto';
-  md: any;
   selectedItemId: string | null;
   onItemSelect?: (id: string, openPlayground?: boolean) => void;
 }
 
 const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
   collection,
-  filteredCollectionItems,
+  collectionItems,
   theme,
-  md,
   selectedItemId,
   onItemSelect
 }) => {
   // Flatten all items recursively for rendering
-  const flattenItems = (items: OpenCollectionItem[], parentPath = ''): OpenCollectionItem[] => {
-    const result: OpenCollectionItem[] = [];
+  const flattenItems = (items: any[], parentPath = ''): any[] => {
+    const result: any[] = [];
     
     for (const item of items) {
       const itemId = getItemId(item);
@@ -34,7 +31,7 @@ const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
       
       // If it's a folder, recursively add its children
       if (item.type === 'folder') {
-        const folder = item as Folder;
+        const folder = item as any;
         if (folder.items && folder.items.length > 0) {
           result.push(...flattenItems(folder.items, itemPath));
         }
@@ -45,9 +42,9 @@ const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
   };
 
   const allItems = useMemo(() => {
-    const items = flattenItems(filteredCollectionItems);
+    const items = flattenItems(collectionItems);
     return items;
-  }, [filteredCollectionItems]);
+  }, [collectionItems]);
 
   const registerSectionRef = (id: string, ref: HTMLDivElement | null) => {
     // No-op for now, but can be used for scroll tracking
@@ -72,7 +69,6 @@ const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
               item={item}
               registerSectionRef={registerSectionRef}
               theme={theme}
-              md={md}
               parentPath=""
               collection={collection || undefined}
               onTryClick={() => {

@@ -1,6 +1,6 @@
 {
-  "name": "@opencollection/core",
-  "version": "1.0.0",
+  "name": "@opencollection/docs",
+  "version": "0.0.1",
   "description": "Interactive API documentation component for OpenCollection - supports both React components and standalone JavaScript",
   "type": "module",
   "main": "dist/oc-playground.umd.js",

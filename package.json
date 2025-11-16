@@ -4,7 +4,7 @@
   "workspaces": [
     "packages/oc-converters",
     "packages/oc-schema",
-    "packages/oc-core",
+    "packages/oc-docs",
     "packages/oc-express",
     "packages/oc-schema-explorer",
     "packages/oc-types"

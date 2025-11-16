@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TabGroup, CompactCodeView } from '../../ui/MinimalComponents';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -66,31 +66,99 @@ ${headersString}
 data = response.json()`;
   };
 
+  const tabDefinitions = [
+    {
+      id: 'curl',
+      label: 'cURL',
+      code: generateCurlCommand(),
+      language: 'bash',
+    },
+    {
+      id: 'javascript',
+      label: 'JavaScript',
+      code: generateJavaScriptCode(),
+      language: 'javascript',
+    },
+    {
+      id: 'python',
+      label: 'Python',
+      code: generatePythonCode(),
+      language: 'python',
+    },
+  ];
+
   return (
     <StyledWrapper>
       <div className="code-example-section">
         <h3 className="section-title">Example Request</h3>
         <div className="code-example-card">
           <TabGroup
-            tabs={[
-              { id: 'curl', label: 'cURL' },
-              { id: 'javascript', label: 'JavaScript' },
-              { id: 'python', label: 'Python' }
-            ]}
+            tabs={tabDefinitions.map(({ id, label }) => ({ id, label }))}
             defaultTab="curl"
             renderContent={(activeTab: string) => {
-              if (activeTab === 'curl') {
-                return <CompactCodeView code={generateCurlCommand()} language="bash" />;
-              } else if (activeTab === 'javascript') {
-                return <CompactCodeView code={generateJavaScriptCode()} language="javascript" />;
-              } else {
-                return <CompactCodeView code={generatePythonCode()} language="python" />;
-              }
+              const tab =
+                tabDefinitions.find(({ id }) => id === activeTab) ??
+                tabDefinitions[0];
+
+              return (
+                <ExampleCodeContent
+                  code={tab?.code || ''}
+                  language={tab?.language || 'text'}
+                />
+              );
             }}
           />
         </div>
       </div>
     </StyledWrapper>
+  );
+};
+
+const ExampleCodeContent: React.FC<{ code: string; language: string }> = ({
+  code,
+  language
+}) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    if (typeof navigator !== 'undefined' && navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(code || '');
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (error) {
+        console.error('Failed to copy code snippet', error);
+      }
+    }
+  };
+
+  return (
+    <div className="code-example-code-wrapper">
+      <CompactCodeView
+        copyButton={false}
+        code={code}
+        language={language}
+      />
+      <button
+        className={`code-copy-button${copied ? ' copied' : ''}`}
+        onClick={handleCopy}
+        aria-label={copied ? 'Code copied' : 'Copy code'}
+        type="button"
+      >
+        {copied ? (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        ) : (
+          <>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          </>
+        )}
+      </button>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TabGroup, CompactCodeView } from '../../ui/MinimalComponents';
+import { TabGroup, CompactCodeView } from '../../../ui/MinimalComponents';
 import { StyledWrapper } from './StyledWrapper';
 
 interface CodeSnippetsProps {

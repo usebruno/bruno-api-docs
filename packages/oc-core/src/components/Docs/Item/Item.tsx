@@ -12,7 +12,7 @@ import {
   CompactCodeView,
   StatusBadge
 } from '../../../ui/MinimalComponents';
-import { CodeSnippets } from '../../CodeSnippets/CodeSnippets';
+import { CodeSnippets } from '../CodeSnippets/CodeSnippets';
 import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { OpenCollectionItem, OpenCollectionCollection, CustomPage, HttpRequest } from '../types';
-import ItemComponent from './ItemComponent';
+import Item from '../components/Docs/Item/Item';
 import CustomPageRenderer from './CustomPageRenderer';
 import { RequestRunner } from './request-runner';
 
@@ -92,7 +92,7 @@ const SinglePageRenderer: React.FC<SinglePageRendererProps> = ({
     
     return (
       <div className="min-h-full">
-          <ItemComponent
+          <Item
             key={`${item.type}-${currentPageId}`}
             item={item}
             registerSectionRef={() => {}} // No-op since we don't need section refs in page mode

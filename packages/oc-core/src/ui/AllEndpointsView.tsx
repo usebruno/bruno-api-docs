@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, Folder, CustomPage } from '../types';
-import ItemComponent from './ItemComponent';
+import Item from '../components/Docs/Item/Item';
 import CustomPageRenderer from './CustomPageRenderer';
 import { getItemId, generateSafeId } from '../utils/itemUtils';
 
@@ -103,7 +103,7 @@ const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
             id={sectionId}
             className={`endpoint-section mb-12 scroll-mt-20 ${isSelected ? 'selected' : ''}`}
           >
-            <ItemComponent
+            <Item
               item={item}
               registerSectionRef={registerSectionRef}
               theme={theme}

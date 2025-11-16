@@ -1440,6 +1440,53 @@ tr.dark-row:nth-child(even) {
   color: var(--code-text);
 }
 
+/* Scrollbar styles - hidden by default, visible on hover */
+.code-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.code-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.code-content::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.code-content:hover::-webkit-scrollbar-thumb {
+  background-color: #d1d5db;
+}
+
+.code-content::-webkit-scrollbar-thumb:hover {
+  background-color: #9ca3af;
+}
+
+/* Dark mode scrollbar */
+.dark .code-content:hover::-webkit-scrollbar-thumb {
+  background-color: #4d4d4d;
+}
+
+.dark .code-content::-webkit-scrollbar-thumb:hover {
+  background-color: #6b7280;
+}
+
+/* Firefox scrollbar */
+.code-content {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.code-content:hover {
+  scrollbar-color: #d1d5db transparent;
+}
+
+.dark .code-content:hover {
+  scrollbar-color: #4d4d4d transparent;
+}
+
 .code-content pre {
   @apply m-0 text-xs leading-relaxed;
   color: var(--code-text);

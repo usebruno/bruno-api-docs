@@ -144,8 +144,8 @@ export const StyledWrapper = styled.div`
   }
 
   .item-content-main {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
   }
 
@@ -230,7 +230,17 @@ export const StyledWrapper = styled.div`
 
   @media (min-width: 1024px) {
     .item-content-main {
-      grid-template-columns: 1fr 1fr;
+      flex-direction: row;
+    }
+
+    .request-details {
+      flex: 4;
+      min-width: 0;
+    }
+
+    .code-snippets-wrapper {
+      flex: 3;
+      min-width: 0;
     }
   }
 `;

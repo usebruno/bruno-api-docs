@@ -259,12 +259,14 @@ const Item = memo(({
             />
           </div>
 
-          <CodeSnippets
-            method={endpoint.method}
-            url={endpoint.url}
-            headers={endpoint.headers}
-            body={endpoint.body}
-          />
+          <div className="code-snippets-wrapper">
+            <CodeSnippets
+              method={endpoint.method}
+              url={endpoint.url}
+              headers={endpoint.headers}
+              body={endpoint.body}
+            />
+          </div>
         </div>
       </StyledWrapper>
     );

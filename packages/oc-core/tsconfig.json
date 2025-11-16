@@ -16,7 +16,11 @@
     "jsx": "react-jsx",
     "declaration": true,
     "outDir": "dist",
-    "module": "ESNext"
+    "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@slices/*": ["src/store/slices/*"]
+    }
   },
   "include": [
     "src"

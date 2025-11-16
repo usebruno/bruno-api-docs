@@ -1,10 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
-import opencollectionReducer from './opencollectionSlice';
+import appReducer from '@slices/app';
+import docsReducer from '@slices/docs';
+import playgroundReducer from '@slices/playground';
 
 export const createOpenCollectionStore = () =>
   configureStore({
     reducer: {
-      opencollection: opencollectionReducer,
+      app: appReducer,
+      docs: docsReducer,
+      playground: playgroundReducer,
     },
   });
 

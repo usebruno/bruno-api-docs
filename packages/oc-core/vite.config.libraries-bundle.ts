@@ -21,6 +21,11 @@ ${chunk.code}
 
 // Vite config for bundling libraries similar to bundle-libraries.js
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@slices': resolve(__dirname, 'src/store/slices')
+    }
+  },
   build: {
     lib: {
       entry: resolve(__dirname, 'src/scripting/sandbox/quickjs/bundle-entry.ts'),

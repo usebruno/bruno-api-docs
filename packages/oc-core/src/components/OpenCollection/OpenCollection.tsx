@@ -12,17 +12,70 @@ import Sidebar from '../Sidebar/Sidebar';
 import AllEndpointsView from '../../ui/AllEndpointsView';
 import PlaygroundDrawer from '../Playground/PlaygroudDrawer/PlaygroundDrawer';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
+import { parseYaml } from '../../utils/yamlUtils';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
-  loadCollection,
-  selectCollectionData,
+  selectDocsCollection,
+  setDocsCollection,
+  clearDocsCollection
+} from '@slices/docs';
+import {
+  selectPlaygroundCollection,
+  setPlaygroundCollection,
+  clearPlaygroundCollection
+} from '@slices/playground';
+import {
+  selectCollectionStatus,
   selectCollectionError,
-  selectCollectionStatus
-} from '../../store/opencollectionSlice';
+  setCollectionLoading,
+  setCollectionSucceeded,
+  setCollectionFailed,
+  resetCollectionState
+} from '@slices/app';
 import { createOpenCollectionStore, type AppStore } from '../../store/store';
 
+const isFileInstance = (value: unknown): value is File =>
+  typeof File !== 'undefined' && value instanceof File;
+
+const parseCollectionContent = (content: string): OpenCollectionCollection => {
+  try {
+    return parseYaml(content) as OpenCollectionCollection;
+  } catch (yamlError) {
+    try {
+      return JSON.parse(content) as OpenCollectionCollection;
+    } catch (jsonError) {
+      throw new Error('Failed to parse collection as YAML or JSON');
+    }
+  }
+};
+
+const resolveCollectionSource = async (
+  source: OpenCollectionCollection | string | File
+): Promise<OpenCollectionCollection> => {
+  if (isFileInstance(source)) {
+    const text = await source.text();
+    return parseCollectionContent(text);
+  }
+
+  if (typeof source === 'string') {
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      const response = await fetch(source);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch collection: ${response.statusText}`);
+      }
+      const text = await response.text();
+      return parseCollectionContent(text);
+    }
+
+    return parseCollectionContent(source);
+  }
+
+  return source;
+};
+
 interface DesktopLayoutProps {
-  collectionData: OpenCollectionCollection | null;
+  docsCollection: OpenCollectionCollection | null;
+  playgroundCollection: OpenCollectionCollection | null;
   logo: React.ReactNode;
   theme: 'light' | 'dark' | 'auto';
   currentPageId: string | null;
@@ -36,7 +89,8 @@ interface DesktopLayoutProps {
 }
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
-  collectionData,
+  docsCollection,
+  playgroundCollection,
   logo,
   theme,
   currentPageId,
@@ -50,7 +104,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
 
   // Find the selected item for playground
   const selectedItem = useMemo(() => {
-    if (!selectedItemId || !collectionData) return null;
+    if (!selectedItemId || !docsCollection) return null;
     
     const findItem = (items: any[]): any => {
       for (const item of items) {
@@ -67,14 +121,14 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
       return null;
     };
 
-    if (collectionData.items) {
-      const item = findItem(collectionData.items);
+    if (docsCollection.items) {
+      const item = findItem(docsCollection.items);
       if (item && item.type === 'http') {
         return item as HttpRequest;
       }
     }
     return null;
-  }, [selectedItemId, collectionData]);
+  }, [selectedItemId, docsCollection]);
 
   // Update playground item when selection changes
   useEffect(() => {
@@ -92,7 +146,8 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
     onSelectItem(id);
     
     // Find the item to set as playground item if it's an HTTP request
-    if (collectionData && collectionData.items) {
+    const collectionItems = playgroundCollection?.items ?? docsCollection?.items;
+    if (collectionItems) {
       const findItem = (items: any[]): any => {
         for (const item of items) {
           const itemId = getItemId(item);
@@ -108,7 +163,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         return null;
       };
 
-      const item = findItem(collectionData.items);
+      const item = findItem(collectionItems);
       if (item && item.type === 'http') {
         setPlaygroundItem(item as HttpRequest);
         if (openPlayground) {
@@ -150,7 +205,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         }}
       >
         <Sidebar
-          collection={collectionData}
+          collection={docsCollection}
           activeItemId={selectedItemId}
           onSelectItem={(id) => handleItemSelect(id, false)}
           logo={logo}
@@ -164,7 +219,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         ref={containerRef}
       >
         <AllEndpointsView
-          collection={collectionData}
+          collection={docsCollection}
           collectionItems={filteredCollectionItems}
           theme={theme}
           selectedItemId={selectedItemId}
@@ -176,7 +231,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
       <PlaygroundDrawer
         isOpen={showPlaygroundDrawer}
         onClose={() => setShowPlaygroundDrawer(false)}
-        collection={collectionData}
+        collection={playgroundCollection}
         selectedItem={playgroundItem}
         onSelectItem={handlePlaygroundItemSelect}
         theme={theme}
@@ -200,24 +255,71 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   logo,
 }) => {
   const dispatch = useAppDispatch();
-  const collectionData = useAppSelector(selectCollectionData);
+  const docsCollection = useAppSelector(selectDocsCollection);
+  const playgroundCollection = useAppSelector(selectPlaygroundCollection);
   const collectionStatus = useAppSelector(selectCollectionStatus);
-  const error = useAppSelector(selectCollectionError);
+  const collectionError = useAppSelector(selectCollectionError);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useTheme(theme);
 
   useEffect(() => {
-    dispatch(loadCollection(collection));
+    let isActive = true;
+
+    const load = async () => {
+      dispatch(setCollectionLoading());
+
+      try {
+        const resolved = await resolveCollectionSource(collection);
+        if (!isActive) {
+          return;
+        }
+        dispatch(setDocsCollection(resolved));
+        dispatch(setPlaygroundCollection(resolved));
+        dispatch(setCollectionSucceeded());
+      } catch (err) {
+        if (!isActive) {
+          return;
+        }
+        const message = err instanceof Error ? err.message : 'Failed to load API collection';
+        dispatch(setCollectionFailed(message));
+        dispatch(clearDocsCollection());
+        dispatch(clearPlaygroundCollection());
+      }
+    };
+
+    if (collection == null) {
+      dispatch(clearDocsCollection());
+      dispatch(clearPlaygroundCollection());
+      dispatch(resetCollectionState());
+      return () => {
+        isActive = false;
+      };
+    }
+
+    if (isFileInstance(collection) || typeof collection === 'string') {
+      void load();
+    } else {
+      dispatch(setDocsCollection(collection as OpenCollectionCollection));
+      dispatch(setPlaygroundCollection(collection as OpenCollectionCollection));
+      dispatch(setCollectionSucceeded());
+    }
+
+    return () => {
+      isActive = false;
+    };
   }, [collection, dispatch]);
 
-  const filteredCollectionItems = collectionData?.items || [];
+  const filteredCollectionItems = docsCollection?.items || [];
 
   // Page selection state
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [currentPageItem, setCurrentPageItem] = useState<any>(null);
 
-  const isLoading = collectionStatus === 'loading' || (collectionStatus === 'idle' && !collectionData);
+  const isInitialLoad =
+    collectionStatus === 'idle' && !docsCollection && !playgroundCollection;
+  const isLoading = collectionStatus === 'loading' || isInitialLoad;
+  const error = collectionError;
 
   // Handle item selection
   const handleSelectItem = (id: string, path?: string) => {
@@ -239,16 +341,16 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
       return null;
     };
     
-    if (collectionData && 'items' in collectionData && collectionData.items) {
-      const item = findItem(collectionData.items);
+    if (docsCollection && 'items' in docsCollection && docsCollection.items) {
+      const item = findItem(docsCollection.items);
       setCurrentPageItem(item);
     }
   };
 
   // Set initial page to first root-level request when collection loads
   useEffect(() => {
-    if (collectionData && currentPageId === null) {
-      const items = collectionData.items as any[] | undefined;
+    if (docsCollection && currentPageId === null) {
+      const items = docsCollection.items as any[] | undefined;
 
       const firstRequest = items?.find((item) => item.type === 'http');
       if (firstRequest?.name) {
@@ -260,7 +362,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
         }
       }
     }
-  }, [collectionData, currentPageId]);
+  }, [docsCollection, currentPageId]);
 
   const { isRunnerMode, toggleRunnerMode } = useRunnerMode();
 
@@ -273,7 +375,8 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   }
 
   const commonProps = {
-    collectionData,
+    docsCollection,
+    playgroundCollection,
     theme,
     currentPageId,
     currentPageItem,

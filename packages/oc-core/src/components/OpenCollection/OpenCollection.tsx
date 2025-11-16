@@ -1,17 +1,25 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
+import { Provider } from 'react-redux';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import {
-  useCollectionData,
   useTheme,
   useRunnerMode
 } from '../../hooks';
-import type { OpenCollectionProps } from '../../types/component-types';
+import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import Sidebar from '../Sidebar/Sidebar';
 import AllEndpointsView from '../../ui/AllEndpointsView';
 import PlaygroundDrawer from '../Playground/PlaygroudDrawer/PlaygroundDrawer';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import {
+  loadCollection,
+  selectCollectionData,
+  selectCollectionError,
+  selectCollectionStatus
+} from '../../store/opencollectionSlice';
+import { createOpenCollectionStore, type AppStore } from '../../store/store';
 
 interface DesktopLayoutProps {
   collectionData: OpenCollectionCollection | null;
@@ -177,21 +185,39 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   );
 };
 
-const OpenCollection: React.FC<OpenCollectionProps> = ({
+/**
+ * OpenCollection React component props
+ */
+export interface OpenCollectionProps {
+  collection: IOpenCollection | string | File;
+  theme?: 'light' | 'dark' | 'auto';
+  logo?: React.ReactNode;
+}
+
+const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   theme = 'light',
   logo,
 }) => {
+  const dispatch = useAppDispatch();
+  const collectionData = useAppSelector(selectCollectionData);
+  const collectionStatus = useAppSelector(selectCollectionStatus);
+  const error = useAppSelector(selectCollectionError);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const { collectionData, isLoading, error } = useCollectionData(collection);
   useTheme(theme);
+
+  useEffect(() => {
+    dispatch(loadCollection(collection));
+  }, [collection, dispatch]);
 
   const filteredCollectionItems = collectionData?.items || [];
 
   // Page selection state
   const [currentPageId, setCurrentPageId] = useState<string | null>(null);
   const [currentPageItem, setCurrentPageItem] = useState<any>(null);
+
+  const isLoading = collectionStatus === 'loading' || (collectionStatus === 'idle' && !collectionData);
 
   // Handle item selection
   const handleSelectItem = (id: string, path?: string) => {
@@ -267,6 +293,20 @@ const OpenCollection: React.FC<OpenCollectionProps> = ({
     <div className={`oc-playground ${theme}`}>
       <DesktopLayout {...desktopProps} />
     </div>
+  );
+};
+
+const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
+  const storeRef = useRef<AppStore | null>(null);
+
+  if (!storeRef.current) {
+    storeRef.current = createOpenCollectionStore();
+  }
+
+  return (
+    <Provider store={storeRef.current!}>
+      <OpenCollectionContent {...props} />
+    </Provider>
   );
 };
 

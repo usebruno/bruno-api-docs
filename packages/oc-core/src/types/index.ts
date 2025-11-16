@@ -128,18 +128,10 @@ export interface OpenCollectionCollection {
   docs?: string;
 }
 
-export interface CustomPage {
-  name: string;
-  content?: string;
-  contentPath?: string;
-  consoleView?: React.ReactNode;
-}
-
 export interface OpenCollectionProps {
   collection: OpenCollectionCollection | string | File;
   theme?: 'light' | 'dark' | 'auto';
   logo?: React.ReactNode;
-  customPages?: CustomPage[];
   hideSidebar?: boolean;
   hideHeader?: boolean;
   onlyShow?: string[];

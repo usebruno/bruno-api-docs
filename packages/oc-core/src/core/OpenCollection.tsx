@@ -10,7 +10,6 @@ import {
   useRunnerMode
 } from '../hooks';
 import { OpenCollectionProps } from '../types';
-import MobileLayout from '../ui/MobileLayout';
 import DesktopLayout from '../layouts/DesktopLayout';
 
 const OpenCollection: React.FC<OpenCollectionProps> = ({
@@ -153,11 +152,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className={`oc-playground ${theme}`}>
-      {isMobile ? (
-        <MobileLayout {...mobileProps} />
-      ) : (
-        <DesktopLayout {...desktopProps} />
-      )}
+      <DesktopLayout {...desktopProps} />
     </div>
   );
 };

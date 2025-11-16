@@ -187,7 +187,7 @@ export const StyledWrapper = styled.div`
     font-size: 0.75rem;
     font-family: var(--font-mono);
     background-color: var(--badge-bg);
-    color: var(--badge-text);
+    color: #313131;
   }
 
   .badge-try {

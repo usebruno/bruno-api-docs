@@ -1,14 +1,11 @@
 import React, { useMemo } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, Folder, CustomPage } from '../types';
+import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, Folder } from '../types';
 import Item from '../components/Docs/Item/Item';
-import CustomPageRenderer from './CustomPageRenderer';
 import { getItemId, generateSafeId } from '../utils/itemUtils';
 
 interface AllEndpointsViewProps {
   collection: OpenCollectionCollection | null;
   filteredCollectionItems: OpenCollectionItem[];
-  filteredCustomPages: CustomPage[];
-  customPageContents: Record<string, string>;
   theme: 'light' | 'dark' | 'auto';
   md: any;
   selectedItemId: string | null;
@@ -18,8 +15,6 @@ interface AllEndpointsViewProps {
 const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
   collection,
   filteredCollectionItems,
-  filteredCustomPages,
-  customPageContents,
   theme,
   md,
   selectedItemId,
@@ -59,37 +54,6 @@ const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
 
   return (
     <div className="all-endpoints-view h-full overflow-y-auto" style={{ padding: '2rem', maxWidth: '100%' }}>
-      {/* Render custom pages first */}
-      {filteredCustomPages.map((page) => {
-        const pageId = generateSafeId(page.name);
-        const content = customPageContents[page.name] || '';
-        
-        return (
-          <div
-            key={pageId}
-            id={`section-${pageId}`}
-            className="endpoint-section mb-12 scroll-mt-20"
-          >
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-4 flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {page.name}
-              </h1>
-              <CustomPageRenderer
-                pageName={page.name}
-                customPage={page}
-                content={content}
-                theme={theme}
-                md={md}
-                registerSectionRef={registerSectionRef}
-              />
-            </div>
-          </div>
-        );
-      })}
-
       {/* Render all collection items */}
       {allItems.map((item, index) => {
         const itemId = getItemId(item);
@@ -126,7 +90,7 @@ const AllEndpointsView: React.FC<AllEndpointsViewProps> = ({
         );
       })}
 
-      {allItems.length === 0 && filteredCustomPages.length === 0 && (
+      {allItems.length === 0 && (
         <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
           <div className="text-center">
             <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">

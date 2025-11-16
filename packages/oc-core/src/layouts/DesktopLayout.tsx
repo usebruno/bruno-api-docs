@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { OpenCollectionCollection, CustomPage, OpenCollectionItem, HttpRequest } from '../types';
+import { OpenCollectionCollection, OpenCollectionItem, HttpRequest } from '../types';
 import SearchModal from '../ui/SearchModal';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AllEndpointsView from '../ui/AllEndpointsView';
@@ -12,9 +12,8 @@ interface DesktopLayoutProps {
   logo: React.ReactNode;
   theme: 'light' | 'dark' | 'auto';
   currentPageId: string | null;
-  currentPageItem: OpenCollectionItem | CustomPage | null;
+  currentPageItem: OpenCollectionItem | null;
   onSelectItem: (id: string, path?: string) => void;
-  filteredCustomPages: CustomPage[];
   onlyShow?: string[];
   isSearchOpen: boolean;
   setIsSearchOpen: (open: boolean) => void;
@@ -39,9 +38,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   logo,
   theme,
   currentPageId,
-  currentPageItem,
   onSelectItem,
-  filteredCustomPages,
   onlyShow,
   isSearchOpen,
   setIsSearchOpen,
@@ -53,10 +50,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   containerRef,
   filteredCollectionItems,
   md,
-  customPageContents,
-  children,
-  isRunnerMode,
-  toggleRunnerMode,
   proxyUrl
 }) => {
   const [selectedItemId, setSelectedItemId] = useState<string | null>(currentPageId);
@@ -181,7 +174,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
             onSelectItem={(id) => handleItemSelect(id, false)}
             logo={logo}
             theme={theme}
-            customPages={filteredCustomPages}
             onlyShow={onlyShow}
           />
         </div>
@@ -195,8 +187,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         <AllEndpointsView
           collection={collectionData}
           filteredCollectionItems={filteredCollectionItems}
-          filteredCustomPages={filteredCustomPages}
-          customPageContents={customPageContents}
           theme={theme}
           md={md}
           selectedItemId={selectedItemId}

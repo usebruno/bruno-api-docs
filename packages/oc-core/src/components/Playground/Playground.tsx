@@ -10,10 +10,9 @@ import ResponsePane from './ResponsePane/ResponsePane';
 interface PlaygroundProps {
   item: HttpRequest;
   collection: OpenCollectionCollection;
-  toggleRunnerMode?: () => void;
 }
 
-const Playground: React.FC<PlaygroundProps> = ({ item, collection, toggleRunnerMode }) => {
+const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>('');
   const [response, setResponse] = useState<any>(null);

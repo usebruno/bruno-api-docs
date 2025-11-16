@@ -8,9 +8,8 @@ import {
   useRunnerMode
 } from '../../hooks';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
-import Sidebar from '../Sidebar/Sidebar';
-import AllEndpointsView from '../../ui/AllEndpointsView';
 import PlaygroundDrawer from '../Playground/PlaygroudDrawer/PlaygroundDrawer';
+import Docs from '../Docs/Docs';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
 import { parseYaml } from '../../utils/yamlUtils';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -195,39 +194,16 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
 
   return (
     <div className="flex h-screen">
-      {/* Left Pane: Sidebar */}
-      <div
-        className="playground-sidebar h-full overflow-hidden flex flex-shrink-0"
-        style={{
-          width: 'var(--sidebar-width)',
-          transition: 'width 0.3s ease',
-          borderRight: '1px solid var(--border-color)'
-        }}
-      >
-        <Sidebar
-          collection={docsCollection}
-          activeItemId={selectedItemId}
-          onSelectItem={(id) => handleItemSelect(id, false)}
-          logo={logo}
-          theme={theme}
-        />
-      </div>
+      <Docs
+        docsCollection={docsCollection}
+        selectedItemId={selectedItemId}
+        onItemSelect={handleItemSelect}
+        logo={logo}
+        theme={theme}
+        containerRef={containerRef}
+        filteredCollectionItems={filteredCollectionItems}
+      />
 
-      {/* Middle Pane: All Endpoints View */}
-      <div
-        className="playground-content h-full overflow-y-auto flex-1"
-        ref={containerRef}
-      >
-        <AllEndpointsView
-          collection={docsCollection}
-          collectionItems={filteredCollectionItems}
-          theme={theme}
-          selectedItemId={selectedItemId}
-          onItemSelect={(id, openPlayground) => handleItemSelect(id, openPlayground || false)}
-        />
-      </div>
-
-      {/* Bottom Drawer: Playground */}
       <PlaygroundDrawer
         isOpen={showPlaygroundDrawer}
         onClose={() => setShowPlaygroundDrawer(false)}

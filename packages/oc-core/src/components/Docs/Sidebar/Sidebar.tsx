@@ -2,9 +2,9 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import Method from '../Docs/Method/Method';
-import { getItemId, generateSafeId } from '../../utils/itemUtils';
-import OpenCollectionLogo from '../../assets/opencollection-logo.svg';
+import Method from '../Method/Method';
+import { getItemId, generateSafeId } from '../../../utils/itemUtils';
+import OpenCollectionLogo from '../../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
 
 interface ApiEndpoint {
@@ -218,7 +218,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <SidebarContainer className={`h-full flex flex-col ${isCompact ? 'compact' : ''} ${className}`} style={{ width: isCompact ? 'var(--sidebar-width-compact)' : 'var(--sidebar-width)' }}>
       {/* Collection name at top */}
-      <div className="p-4 pt-0 border-b" style={{ borderColor: 'var(--border-color)' }}>
+      <div className="p-4 pt-0">
         <div className="flex items-center">
           <h1 className="font-semibold truncate flex-1" style={{ color: 'var(--text-primary)' }}>
             {collection?.name || 'API Collection'}

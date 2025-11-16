@@ -6,7 +6,8 @@
     "packages/oc-schema",
     "packages/oc-core",
     "packages/oc-express",
-    "packages/oc-schema-explorer"
+    "packages/oc-schema-explorer",
+    "packages/oc-types"
   ],
   "homepage": "https://uwww.opencollection.com"
 }

@@ -41,7 +41,7 @@
   --sidebar-color-dark: #ccc;
   
   /* Table colors */
-  --table-header-bg-light: rgb(252, 252, 253);
+  --table-header-bg-light: #fafafa;
   --table-header-bg-dark: #333333;
   --table-row-odd-bg-light: #ffffff;
   --table-row-odd-bg-dark: #2A2D2F;
@@ -1537,9 +1537,7 @@ tr.dark-row:nth-child(even) {
 }
 
 .tab-header {
-  @apply flex gap-0 border-b;
-  border-color: var(--border-color);
-  background-color: var(--background-color);
+  @apply flex gap-0;
 }
 
 .tab-button {

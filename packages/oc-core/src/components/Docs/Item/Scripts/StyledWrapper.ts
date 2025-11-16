@@ -17,7 +17,6 @@ export const StyledWrapper = styled.div`
   .scripts-card .tab-header {
     padding-inline: 16px;
     padding-top: 6px;
-    border-bottom: 1px solid var(--border-color);
   }
 
   .scripts-card .tab-header .tab-button {

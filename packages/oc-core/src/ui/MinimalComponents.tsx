@@ -157,26 +157,26 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, text }) => {
   const statusConfig = {
     active: { 
       bg: '#d1fae5', 
-      color: '#047857', 
+      color: '#059669', 
       border: '#10b981',
       label: 'Active' 
     },
     inactive: { 
-      bg: '#f3f4f6', 
-      color: '#6b7280', 
-      border: '#d1d5db',
+      bg: '#f1f5f9', 
+      color: '#64748b', 
+      border: '#cbd5e1',
       label: 'Inactive' 
     },
     warning: { 
-      bg: '#fed7aa', 
-      color: '#c2410c', 
-      border: '#f97316',
+      bg: '#fef3c7', 
+      color: '#d97706', 
+      border: '#f59e0b',
       label: 'Warning' 
     },
     error: { 
-      bg: '#fecaca', 
-      color: '#b91c1c', 
-      border: '#dc2626',
+      bg: '#fee2e2', 
+      color: '#dc2626', 
+      border: '#ef4444',
       label: 'Error' 
     }
   };

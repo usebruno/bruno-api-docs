@@ -36,7 +36,6 @@ export const StyledWrapper = styled.div`
 
   /* Tab styling based on reference design */
   .tab-header {
-    border-bottom: 1px solid var(--border-color);
     padding-inline: 16px;
     padding-top: 6px;
     

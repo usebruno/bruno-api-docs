@@ -90,7 +90,7 @@ data = response.json()`;
   return (
     <StyledWrapper>
       <div className="code-example-section">
-        <h3 className="section-title">Example Request</h3>
+        <h3 className="section-title">Code Snippet</h3>
         <div className="code-example-card">
           <TabGroup
             tabs={tabDefinitions.map(({ id, label }) => ({ id, label }))}

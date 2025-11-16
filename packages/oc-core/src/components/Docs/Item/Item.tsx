@@ -17,13 +17,13 @@ import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
 
 const methodColors: Record<string, string> = {
-  GET: '#16a34a',
-  POST: '#2563eb',
-  PUT: '#f97316',
-  PATCH: '#8b5cf6',
-  DELETE: '#dc2626',
-  HEAD: '#6b7280',
-  OPTIONS: '#6b7280'
+  GET: '#10b981',
+  POST: '#3b82f6',
+  PUT: '#f59e0b',
+  PATCH: '#a855f7',
+  DELETE: '#ef4444',
+  HEAD: '#8b5cf6',
+  OPTIONS: '#06b6d4'
 };
 
 const Item = memo(({

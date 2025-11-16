@@ -3,7 +3,7 @@ import { OpenCollectionCollection, CustomPage, OpenCollectionItem, HttpRequest }
 import SearchModal from '../ui/SearchModal';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AllEndpointsView from '../ui/AllEndpointsView';
-import PlaygroundDrawer from '../ui/PlaygroundDrawer';
+import PlaygroundDrawer from '../components/Playground/PlaygroudDrawer/PlaygroundDrawer';
 import { getItemId, generateSafeId } from '../utils/itemUtils';
 
 interface DesktopLayoutProps {

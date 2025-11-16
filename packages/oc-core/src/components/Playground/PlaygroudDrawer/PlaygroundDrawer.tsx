@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, Folder } from '../types';
-import { RequestRunner } from './request-runner';
-import { getItemId, generateSafeId } from '../utils/itemUtils';
-import Method from '../components/Method/Method';
+import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, Folder } from '../../../types';
+import { RequestRunner } from '../../../ui/request-runner';
+import { getItemId, generateSafeId } from '../../../utils/itemUtils';
+import Method from '../../Method/Method';
+import { StyledBackdrop, StyledDrawer, StyledDragBar } from './StyledWrapper';
 
 interface PlaygroundDrawerProps {
   isOpen: boolean;
@@ -282,19 +283,10 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="playground-drawer-backdrop"
+      <StyledBackdrop
         style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.3)',
-          zIndex: 9998,
           opacity: isOpen ? 1 : 0,
           pointerEvents: isOpen ? 'auto' : 'none',
-          transition: 'none',
           backdropFilter: isOpen ? 'blur(2px)' : 'blur(0px)',
           WebkitBackdropFilter: isOpen ? 'blur(2px)' : 'blur(0px)'
         }}
@@ -302,44 +294,16 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
       />
 
       {/* Drawer */}
-      <div
+      <StyledDrawer
         ref={drawerRef}
-        className="playground-drawer"
         style={{
-          position: 'fixed',
-          bottom: 0,
-          left: 0,
-          right: 0,
           height: isCollapsed ? `${MIN_HEIGHT}px` : (isOpen ? `${getDefaultHeight()}px` : `${height}px`),
           maxHeight: `${getMaxHeight()}px`,
-          backgroundColor: '#ffffff',
-          borderTop: '1px solid var(--border-color)',
-          boxShadow: isOpen ? '0 -4px 20px rgba(0, 0, 0, 0.15)' : '0 0 0 rgba(0, 0, 0, 0)',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          transition: 'none',
-          transform: 'translateY(0)',
-          transformOrigin: 'bottom'
+          boxShadow: isOpen ? '0 -4px 20px rgba(0, 0, 0, 0.15)' : '0 0 0 rgba(0, 0, 0, 0)'
         }}
       >
         {/* Drag Bar */}
-        <div
-          className="playground-drawer-dragbar"
-          onMouseDown={handleDragStart}
-          style={{
-            height: '24px',
-            cursor: 'row-resize',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f8f9fa',
-            borderBottom: '1px solid var(--border-color)',
-            userSelect: 'none',
-            position: 'relative'
-          }}
-        >
+        <StyledDragBar onMouseDown={handleDragStart}>
           <div
             style={{
               width: '40px',
@@ -426,7 +390,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
               Close
             </button>
           </div>
-        </div>
+        </StyledDragBar>
 
         {/* Drawer Content */}
         {!isCollapsed && (
@@ -493,7 +457,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
             </div>
           </div>
         )}
-      </div>
+      </StyledDrawer>
     </>
   );
 };

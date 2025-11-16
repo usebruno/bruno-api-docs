@@ -360,24 +360,6 @@ html, body {
     position: relative;
   }
 
-  /* Playground Drawer Styles */
-  .playground-drawer {
-    will-change: transform, height, box-shadow;
-    transition: none !important;
-  }
-
-  .playground-drawer-backdrop {
-    will-change: opacity, backdrop-filter;
-    transition: none !important;
-  }
-
-  .playground-drawer-dragbar {
-    touch-action: none;
-  }
-
-  .playground-drawer-dragbar:hover {
-    background-color: var(--bg-primary);
-  }
 }
 
 /* Mobile Layout */

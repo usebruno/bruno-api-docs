@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { RequestRunner } from '../../../ui/request-runner';
+import Playground from '../Playground';
 import { getItemId, generateSafeId } from '../../../utils/itemUtils';
-import Method from '../../Method/Method';
+import Method from '../../Docs/Method/Method';
 import { StyledBackdrop, StyledDrawer, StyledDragBar } from './StyledWrapper';
 
 interface PlaygroundDrawerProps {
@@ -434,7 +434,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
               minHeight: 0
             }}>
               {selectedItem && collection ? (
-                <RequestRunner
+                <Playground
                   item={selectedItem}
                   collection={collection}
                   toggleRunnerMode={onClose}

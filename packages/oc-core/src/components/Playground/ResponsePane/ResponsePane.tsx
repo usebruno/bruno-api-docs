@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import CodeEditor from '../CodeEditor';
-import Tabs from '../Tabs/Tabs';
+import CodeEditor from '../../../ui/CodeEditor/CodeEditor';
+import Tabs from '../../../ui/Tabs/Tabs';
 
 interface ResponsePaneProps {
   response: any;

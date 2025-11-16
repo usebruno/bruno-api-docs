@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import CodeEditor from '../CodeEditor';
-import Tabs from '../Tabs/Tabs';
+import CodeEditor from '../../../ui/CodeEditor/CodeEditor';
+import Tabs from '../../../ui/Tabs/Tabs';
 
 interface RequestPaneProps {
   item: HttpRequest;

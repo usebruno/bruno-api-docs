@@ -2,18 +2,18 @@ import React, { useState, useEffect, useMemo } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import { requestRunner } from '../../runner';
-import RequestHeader from './RequestHeader';
-import QueryBar from '../../components/Playground/QueryBar/QueryBar';
-import RequestPane from './RequestPane';
-import ResponsePane from './ResponsePane';
+import RequestHeader from './RequestPane/RequestHeader/RequestHeader';
+import QueryBar from './QueryBar/QueryBar';
+import RequestPane from './RequestPane/RequestPane';
+import ResponsePane from './ResponsePane/ResponsePane';
 
-interface RequestRunnerProps {
+interface PlaygroundProps {
   item: HttpRequest;
   collection: OpenCollectionCollection;
   toggleRunnerMode?: () => void;
 }
 
-const RequestRunner: React.FC<RequestRunnerProps> = ({ item, collection, toggleRunnerMode }) => {
+const Playground: React.FC<PlaygroundProps> = ({ item, collection, toggleRunnerMode }) => {
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>('');
   const [response, setResponse] = useState<any>(null);
@@ -136,4 +136,4 @@ const RequestRunner: React.FC<RequestRunnerProps> = ({ item, collection, toggleR
   );
 };
 
-export default RequestRunner; 
+export default Playground; 

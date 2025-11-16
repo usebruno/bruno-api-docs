@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import Method from '../Method/Method';
+import Method from '../Docs/Method/Method';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
 import OpenCollectionLogo from '../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';

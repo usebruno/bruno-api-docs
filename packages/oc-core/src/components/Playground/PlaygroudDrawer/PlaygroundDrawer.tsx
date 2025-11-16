@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, Folder } from '../../../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item as OpenCollectionItem, HttpRequest, Folder } from '@opencollection/types';
 import { RequestRunner } from '../../../ui/request-runner';
 import { getItemId, generateSafeId } from '../../../utils/itemUtils';
 import Method from '../../Method/Method';

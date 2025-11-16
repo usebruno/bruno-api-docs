@@ -1,5 +1,6 @@
 import React from 'react';
-import { HttpRequest, OpenCollectionCollection } from '../../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 
 interface RequestHeaderProps {
   item: HttpRequest;

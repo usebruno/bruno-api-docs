@@ -1,4 +1,4 @@
-import { HttpRequest } from '../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RunRequestResponse } from './index';
 
 export class RequestExecutor {

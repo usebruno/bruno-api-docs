@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest } from '../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item as OpenCollectionItem, HttpRequest } from '@opencollection/types';
 import SearchModal from '../ui/SearchModal';
 import Sidebar from '../components/Sidebar/Sidebar';
 import AllEndpointsView from '../ui/AllEndpointsView';

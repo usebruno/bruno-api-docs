@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import MarkdownIt from 'markdown-it';
 import '../styles/index.css';
-import { OpenCollectionItem, HttpRequest } from '../types';
+import type { Item as OpenCollectionItem, HttpRequest } from '@opencollection/types';
 
 interface ApiEndpoint {
   id: string;

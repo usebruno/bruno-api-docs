@@ -1,4 +1,4 @@
-import { HttpRequest } from '../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 
 export class VariableInterpolator {
   interpolateRequest(request: HttpRequest, variables: Record<string, any>): HttpRequest {

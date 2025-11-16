@@ -9,7 +9,7 @@ import {
   useSearchModal,
   useRunnerMode
 } from '../hooks';
-import { OpenCollectionProps } from '../types';
+import type { OpenCollectionProps } from '../types/component-types';
 import DesktopLayout from '../layouts/DesktopLayout';
 
 const OpenCollection: React.FC<OpenCollectionProps> = ({

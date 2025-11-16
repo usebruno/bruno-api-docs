@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { HttpRequest } from '../../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import CodeEditor from '../CodeEditor';
 import Tabs from '../Tabs/Tabs';
 

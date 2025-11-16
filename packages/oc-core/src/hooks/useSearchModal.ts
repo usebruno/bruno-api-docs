@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, CustomPage } from '../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item as OpenCollectionItem, HttpRequest } from '@opencollection/types';
+import type { CustomPage } from '../types/component-types';
 import { getItemId, generateSafeId } from '../utils/itemUtils';
 
 interface SearchResult {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest } from '../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item as OpenCollectionItem, HttpRequest } from '@opencollection/types';
 import { getItemId, generateSafeId } from '../utils/itemUtils';
 
 interface UseSectionTrackingReturn {

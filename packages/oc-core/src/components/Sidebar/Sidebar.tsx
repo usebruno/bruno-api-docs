@@ -1,5 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, CustomPage, Folder } from '../../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item as OpenCollectionItem, HttpRequest, Folder } from '@opencollection/types';
+import type { CustomPage } from '../../types/component-types';
 import Method from '../Method/Method';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
 import OpenCollectionLogo from '../../assets/opencollection-logo.svg';

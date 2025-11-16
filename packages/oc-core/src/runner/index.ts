@@ -1,4 +1,6 @@
-import { HttpRequest, OpenCollectionCollection, Environment } from '../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Environment } from '@opencollection/types/config/environments';
 import { RequestExecutor } from './RequestExecutor';
 import { VariableInterpolator } from './VariableInterpolator';
 import ScriptRuntime from '../scripting/runtime/script-runtime';

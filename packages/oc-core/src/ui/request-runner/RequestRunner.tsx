@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { HttpRequest, OpenCollectionCollection } from '../../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import { requestRunner, createRequestRunner } from '../../runner';
 import RequestHeader from './RequestHeader';
 import QueryBar from '../../components/Playground/QueryBar/QueryBar';

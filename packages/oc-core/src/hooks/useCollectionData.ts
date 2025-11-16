@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isYamlFile, parseYaml } from '../utils/yamlUtils';
-import { OpenCollectionCollection } from '../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 
 const loadOpenCollectionData = async (source: string | File): Promise<OpenCollectionCollection> => {
   let content: string;

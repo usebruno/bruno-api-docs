@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HttpRequest } from '../../../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { StyledWrapper } from './StyledWrapper';
 
 interface QueryBarProps {

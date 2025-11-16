@@ -8,7 +8,31 @@ export {
   FileCollectionLoader,
 };
 
-export * from './types';
+// Re-export types from @opencollection/types
+export type {
+  OpenCollection as OpenCollectionCollection,
+  Item as OpenCollectionItem,
+  HttpRequest,
+  Folder,
+  Script,
+  Environment,
+  RequestDefaults as BaseConfiguration,
+  Auth,
+  Scripts,
+  Variable,
+  Assertion,
+  HttpHeader as RequestHeader,
+  HttpRequestParam as RequestParam,
+  RawBody,
+  FormUrlEncodedBody,
+  MultipartFormBody,
+  FileBody,
+  HttpRequestBody as RequestBody,
+} from '@opencollection/types';
+
+// Re-export component-specific types
+export type { OpenCollectionProps, CustomPage } from './types/component-types';
+
 export * from './hooks';
 export { 
   CodeEditor, 

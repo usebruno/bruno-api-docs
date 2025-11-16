@@ -1,4 +1,5 @@
-import { HttpRequest, OpenCollectionCollection } from '../types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import { RunRequestResponse } from './index';
 
 interface ScriptContext {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CustomPage } from '../types';
+import type { CustomPage } from '../types/component-types';
 
 interface UseCustomPagesReturn {
   validCustomPages: CustomPage[];

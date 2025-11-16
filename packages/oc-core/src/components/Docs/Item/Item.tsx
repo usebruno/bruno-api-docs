@@ -5,7 +5,7 @@ import 'prismjs/components/prism-graphql';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-xml-doc';
 import 'prismjs/components/prism-python';
-import { OpenCollectionItem, HttpRequest, Script, Folder } from '../../../types';
+import type { Item as OpenCollectionItem, HttpRequest, Script, Folder } from '@opencollection/types';
 import { generateSectionId, getItemId } from '../../../utils/itemUtils';
 import {
   MinimalDataTable,

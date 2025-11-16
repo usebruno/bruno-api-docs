@@ -2,7 +2,7 @@
  * Utility functions for handling OpenCollection items
  */
 
-import { OpenCollectionItem } from '../types';
+import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 
 /**
  * Generate a safe HTML ID from an item name or ID

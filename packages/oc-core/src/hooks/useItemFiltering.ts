@@ -1,5 +1,7 @@
 import { useMemo, useCallback } from 'react';
-import { OpenCollectionCollection, OpenCollectionItem, HttpRequest, CustomPage } from '../types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item as OpenCollectionItem, HttpRequest } from '@opencollection/types';
+import type { CustomPage } from '../types/component-types';
 
 interface UseItemFilteringReturn {
   shouldShowItem: (itemId: string) => boolean;

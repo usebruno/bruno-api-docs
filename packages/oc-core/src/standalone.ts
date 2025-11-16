@@ -2,7 +2,7 @@ import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import './styles/index.css';
 import OpenCollection from './core/OpenCollection';
-import { OpenCollectionCollection } from './types';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import { parseCollectionContent } from './utils/yamlUtils';
 
 export interface OpenCollectionOptions {

@@ -6,6 +6,8 @@ import Method from '../Method/Method';
 import { getItemId, generateSafeId } from '../../../utils/itemUtils';
 import OpenCollectionLogo from '../../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
+import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { toggleItem, selectItem, selectSelectedItemId } from '../../../store/slices/docs';
 
 interface ApiEndpoint {
   id: string;
@@ -23,62 +25,23 @@ interface ApiCollection {
 
 export interface SidebarProps {
   collection: OpenCollectionCollection | ApiCollection | null;
-  activeItemId: string | null;
-  onSelectItem: (id: string, parentPath?: string) => void;
-  logo?: React.ReactNode;
-  className?: string;
   theme?: 'light' | 'dark' | 'auto';
-  isCompact?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   collection,
-  activeItemId,
-  onSelectItem,
-  logo,
-  className = '',
-  theme = 'light',
-  isCompact = false
+  theme = 'light'
 }) => {
-  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const dispatch = useAppDispatch();
+  const selectedItemId = useAppSelector(selectSelectedItemId);
   const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!collection) return;
-    
-    const initExpandedFolders: Record<string, boolean> = {};
-    
-    if ('items' in collection) {
-      const items = collection.items || [];
-      items.forEach((item: any) => {
-        if (item.type === 'folder') {
-          const itemId = getItemId(item);
-          initExpandedFolders[itemId] = false;
-        }
-      });
-    }
-    
-    setExpandedFolders(initExpandedFolders);
-  }, [collection]);
+  const toggleFolder = useCallback((itemUuid: string) => {
+    dispatch(toggleItem(itemUuid));
+  }, [dispatch]);
 
-  const toggleFolder = useCallback((folderPath: string) => {
-    setExpandedFolders((prev) => ({
-      ...prev,
-      [folderPath]: !prev[folderPath]
-    }));
-  }, []);
-
-  const handleMouseEnter = useCallback((itemId: string) => {
-    setHoveredItemId(itemId);
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    setHoveredItemId(null);
-  }, []);
-
-  const handleItemSelect = (id: string, parentPath: string = '') => {
-    console.log('handleItemSelect', id, 'parentPath:', parentPath);
-    onSelectItem(id, parentPath);
+  const handleItemSelect = (uuid: string) => {
+    dispatch(selectItem(uuid));
   };
 
   const normalizedItems = useMemo<any[]>(() => {
@@ -132,18 +95,21 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const renderItem = (item: any, level = 0, parentPath = '') => {
     const itemId = getItemId(item);
+    const itemUuid = (item as any).uuid || itemId; // Use UUID if available, fallback to itemId
     const itemName = itemId;
     const itemPath = parentPath ? `${parentPath}/${itemName}` : itemName;
     
-    const fullPathId = parentPath ? `${parentPath.replace(/^\//, '')}/${itemId}` : itemId;
+    const fullPathId = parentPath ? `${parentPath.replace(/^\//, '')}/${itemUuid}` : itemUuid;
     
     const isFolder = item.type === 'folder';
     const safeItemId = generateSafeId(itemId);
-    const isActive = !isFolder && (activeItemId === safeItemId || activeItemId === itemId);
+    // Use UUID for active state comparison
+    const isActive = !isFolder && selectedItemId === itemUuid;
     
     // Use fullPathId for hover state tracking
     const isHovered = hoveredItemId === fullPathId;
-    const isExpanded = expandedFolders[itemId] || false;
+    // Read isCollapsed from the item itself (defaults to true if not set)
+    const isExpanded = isFolder ? !((item as any).isCollapsed ?? true) : false;
     
     return (
       <div key={itemId} className="relative">
@@ -158,7 +124,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={{ 
             paddingLeft: `${level * 16 + 8}px`
           }}
-          onClick={() => isFolder ? toggleFolder(itemId) : handleItemSelect(safeItemId, itemPath)}
+          onClick={() => isFolder ? toggleFolder(itemUuid) : handleItemSelect(itemUuid)}
           onMouseEnter={() => setHoveredItemId(fullPathId)}
           onMouseLeave={() => setHoveredItemId(null)}
           id={`sidebar-item-${fullPathId}`}
@@ -216,7 +182,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <SidebarContainer className={`h-full flex flex-col ${isCompact ? 'compact' : ''} ${className}`} style={{ width: isCompact ? 'var(--sidebar-width-compact)' : 'var(--sidebar-width)' }}>
+    <SidebarContainer className="h-full flex flex-col" style={{ width: 'var(--sidebar-width)' }}>
       {/* Collection name at top */}
       <div className="p-4 pt-0">
         <div className="flex items-center">
@@ -238,8 +204,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             {filteredEndpoints.map((endpoint: ApiEndpoint) => {
               const endpointId = endpoint.id || `endpoint-${endpoint.path}`;
               const safeEndpointId = generateSafeId(endpointId);
-              const fullPathId = endpoint.path ? `${endpoint.path.replace(/^\//, '')}/${endpointId}` : endpointId;
-              const isActive = activeItemId === safeEndpointId;
+              // For endpoints, use the endpoint ID as UUID (they don't have UUIDs assigned)
+              const endpointUuid = endpointId;
+              const fullPathId = endpoint.path ? `${endpoint.path.replace(/^\//, '')}/${endpointUuid}` : endpointUuid;
+              const isActive = selectedItemId === endpointUuid;
               const isHovered = hoveredItemId === fullPathId;
               
               return (
@@ -247,7 +215,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   key={endpointId}
                   as="button"
                   className={`endpoint flex items-center w-full text-left px-3 py-2 ${isActive ? 'active' : ''} ${isHovered ? 'hovered' : ''}`}
-                  onClick={() => handleItemSelect(safeEndpointId, endpoint.path)}
+                  onClick={() => handleItemSelect(endpointUuid)}
                   onMouseEnter={() => setHoveredItemId(fullPathId)}
                   onMouseLeave={() => setHoveredItemId(null)}
                   id={`sidebar-item-${fullPathId}`}

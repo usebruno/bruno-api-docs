@@ -3,11 +3,11 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import Sidebar from './Sidebar/Sidebar';
 import Item from './Item/Item';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { selectSelectedItemId, selectItem } from '../../store/slices/docs';
 
 interface DocsProps {
   docsCollection: OpenCollectionCollection | null;
-  selectedItemId: string | null;
-  onItemSelect: (id: string, openPlayground?: boolean) => void;
   logo: React.ReactNode;
   theme: 'light' | 'dark' | 'auto';
   containerRef: React.RefObject<HTMLDivElement | null>;
@@ -16,13 +16,13 @@ interface DocsProps {
 
 const Docs: React.FC<DocsProps> = ({
   docsCollection,
-  selectedItemId,
-  onItemSelect,
   logo,
   theme,
   containerRef,
   filteredCollectionItems
 }) => {
+  const dispatch = useAppDispatch();
+  const selectedItemId = useAppSelector(selectSelectedItemId);
   // Flatten all items recursively for rendering
   const flattenItems = (items: any[], parentPath = ''): any[] => {
     const result: any[] = [];
@@ -67,9 +67,6 @@ const Docs: React.FC<DocsProps> = ({
       >
         <Sidebar
           collection={docsCollection}
-          activeItemId={selectedItemId}
-          onSelectItem={(id) => onItemSelect(id, false)}
-          logo={logo}
           theme={theme}
         />
       </div>
@@ -82,13 +79,15 @@ const Docs: React.FC<DocsProps> = ({
           {/* Render all collection items */}
           {allItems.map((item, index) => {
             const itemId = getItemId(item);
+            const itemUuid = (item as any).uuid || itemId; // Use UUID if available, fallback to itemId
             const safeId = generateSafeId(itemId);
             const sectionId = `section-${safeId}`;
-            const isSelected = selectedItemId === safeId || selectedItemId === itemId;
+            // Compare with UUID first, then fallback to safeId/itemId for backward compatibility
+            const isSelected = selectedItemId === itemUuid || selectedItemId === safeId || selectedItemId === itemId;
 
             return (
               <div
-                key={`${itemId}-${index}`}
+                key={`${itemUuid}-${index}`}
                 id={sectionId}
                 className={`endpoint-section mb-12 scroll-mt-20 ${isSelected ? 'selected' : ''}`}
               >
@@ -99,8 +98,8 @@ const Docs: React.FC<DocsProps> = ({
                   parentPath=""
                   collection={docsCollection || undefined}
                   onTryClick={() => {
-                    // Select the item and trigger playground open
-                    onItemSelect(safeId, true);
+                    // Select the item by UUID
+                    dispatch(selectItem(itemUuid));
                     // Scroll to the item
                     setTimeout(() => {
                       const element = document.getElementById(`section-${safeId}`);

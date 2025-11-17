@@ -1,7 +1,7 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import {
   useTheme,
@@ -16,7 +16,9 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   selectDocsCollection,
   setDocsCollection,
-  clearDocsCollection
+  clearDocsCollection,
+  selectItem,
+  selectSelectedItemId
 } from '@slices/docs';
 import {
   selectPlaygroundCollection,
@@ -77,9 +79,6 @@ interface DesktopLayoutProps {
   playgroundCollection: OpenCollectionCollection | null;
   logo: React.ReactNode;
   theme: 'light' | 'dark' | 'auto';
-  currentPageId: string | null;
-  currentPageItem: OpenCollectionItem | null;
-  onSelectItem: (id: string, path?: string) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
   filteredCollectionItems: any[];
   children?: React.ReactNode;
@@ -92,112 +91,46 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   playgroundCollection,
   logo,
   theme,
-  currentPageId,
-  onSelectItem,
   containerRef,
   filteredCollectionItems
 }) => {
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(currentPageId);
+  const selectedItemId = useAppSelector(selectSelectedItemId);
   const [playgroundItem, setPlaygroundItem] = useState<HttpRequest | null>(null);
   const [showPlaygroundDrawer, setShowPlaygroundDrawer] = useState(false);
 
-  // Find the selected item for playground
-  const selectedItem = useMemo(() => {
-    if (!selectedItemId || !docsCollection) return null;
-    
-    const findItem = (items: any[]): any => {
-      for (const item of items) {
-        const itemId = getItemId(item);
-        const safeId = generateSafeId(itemId);
-        if (itemId === selectedItemId || safeId === selectedItemId) {
-          return item;
-        }
-        if (item.type === 'folder' && item.items) {
-          const found = findItem(item.items);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-
-    if (docsCollection.items) {
-      const item = findItem(docsCollection.items);
-      if (item && item.type === 'http') {
-        return item as HttpRequest;
-      }
-    }
-    return null;
-  }, [selectedItemId, docsCollection]);
-
-  // Update playground item when selection changes
+  // Update playground item when selected item changes
   useEffect(() => {
-    if (selectedItem && selectedItem.type === 'http') {
-      setPlaygroundItem(selectedItem);
-      // If drawer is open and we select a new HTTP item, update it
-      if (showPlaygroundDrawer) {
-        // Item is already set, drawer will update automatically
-      }
-    }
-  }, [selectedItem, showPlaygroundDrawer]);
-
-  const handleItemSelect = (id: string, openPlayground = false) => {
-    setSelectedItemId(id);
-    onSelectItem(id);
-    
-    // Find the item to set as playground item if it's an HTTP request
-    const collectionItems = playgroundCollection?.items ?? docsCollection?.items;
-    if (collectionItems) {
+    if (selectedItemId && docsCollection) {
       const findItem = (items: any[]): any => {
         for (const item of items) {
-          const itemId = getItemId(item);
-          const safeId = generateSafeId(itemId);
-          if (itemId === id || safeId === id) {
+          const itemUuid = (item as any).uuid;
+          if (itemUuid === selectedItemId) {
             return item;
           }
-          if (item.type === 'folder' && item.items) {
-            const found = findItem(item.items);
+          if ('type' in item && item.type === 'folder' && (item as Folder).items) {
+            const found = findItem((item as Folder).items || []);
             if (found) return found;
           }
         }
         return null;
       };
 
-      const item = findItem(collectionItems);
+      const item = docsCollection.items ? findItem(docsCollection.items) : null;
       if (item && item.type === 'http') {
         setPlaygroundItem(item as HttpRequest);
-        if (openPlayground) {
-          setShowPlaygroundDrawer(true);
-        }
       }
     }
-    
-    // Scroll to the selected item after a short delay to ensure DOM is updated
-    setTimeout(() => {
-      const element = document.getElementById(`section-${id}`);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 50);
-  };
+  }, [selectedItemId, docsCollection]);
 
   const handlePlaygroundItemSelect = (item: HttpRequest) => {
     // Only update the playground item, don't affect the docs view
     setPlaygroundItem(item);
   };
 
-  // Sync with external currentPageId changes
-  useEffect(() => {
-    if (currentPageId) {
-      setSelectedItemId(currentPageId);
-    }
-  }, [currentPageId]);
-
   return (
     <div className="flex h-screen">
       <Docs
         docsCollection={docsCollection}
-        selectedItemId={selectedItemId}
-        onItemSelect={handleItemSelect}
         logo={logo}
         theme={theme}
         containerRef={containerRef}
@@ -235,6 +168,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   const playgroundCollection = useAppSelector(selectPlaygroundCollection);
   const collectionStatus = useAppSelector(selectCollectionStatus);
   const collectionError = useAppSelector(selectCollectionError);
+  const selectedItemId = useAppSelector((state) => state.docs.selectedItemId);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useTheme(theme);
@@ -288,57 +222,27 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   const filteredCollectionItems = docsCollection?.items || [];
 
-  // Page selection state
-  const [currentPageId, setCurrentPageId] = useState<string | null>(null);
-  const [currentPageItem, setCurrentPageItem] = useState<any>(null);
-
   const isInitialLoad =
     collectionStatus === 'idle' && !docsCollection && !playgroundCollection;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
   const error = collectionError;
 
-  // Handle item selection
-  const handleSelectItem = (id: string, path?: string) => {
-    console.log('Selecting item:', id, 'path:', path);
-    setCurrentPageId(id);
-    
-    // Find the item in the collection
-    const findItem = (items: any[]): any => {
-      for (const item of items) {
-        const itemId = item.id || item.uid || item.name || 'unnamed-item';
-        if (itemId === id || itemId.toLowerCase().replace(/[^a-z0-9\-_]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '') === id) {
-          return item;
-        }
-        if (item.type === 'folder' && item.items) {
-          const found = findItem(item.items);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    
-    if (docsCollection && 'items' in docsCollection && docsCollection.items) {
-      const item = findItem(docsCollection.items);
-      setCurrentPageItem(item);
-    }
-  };
-
   // Set initial page to first root-level request when collection loads
   useEffect(() => {
-    if (docsCollection && currentPageId === null) {
+    if (docsCollection && selectedItemId === null) {
       const items = docsCollection.items as any[] | undefined;
 
       const firstRequest = items?.find((item) => item.type === 'http');
-      if (firstRequest?.name) {
-        handleSelectItem(firstRequest.name);
+      if (firstRequest && (firstRequest as any).uuid) {
+        dispatch(selectItem((firstRequest as any).uuid));
       } else if (items && items.length > 0) {
         const firstItem = items[0];
-        if (firstItem && 'name' in firstItem && firstItem.name) {
-          handleSelectItem(firstItem.name);
+        if (firstItem && (firstItem as any).uuid) {
+          dispatch(selectItem((firstItem as any).uuid));
         }
       }
     }
-  }, [docsCollection, currentPageId]);
+  }, [docsCollection, selectedItemId, dispatch]);
 
   const { isRunnerMode, toggleRunnerMode } = useRunnerMode();
 
@@ -354,9 +258,6 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     docsCollection,
     playgroundCollection,
     theme,
-    currentPageId,
-    currentPageItem,
-    onSelectItem: handleSelectItem,
     containerRef,
     filteredCollectionItems
   };

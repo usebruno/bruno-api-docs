@@ -29,12 +29,6 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
       <div className="flex items-center gap-2 min-w-0">
         <h2 
           className="text-base font-medium truncate"
-          style={{
-            color: 'var(--text-primary)',
-            fontSize: 'var(--text-2xl)',
-            fontWeight: 'var(--font-weight-semibold)',
-            lineHeight: 'var(--tw-leading,var(--text-2xl--line-height))'
-          }}
           title={item.name || 'Untitled Request'}
         >
           {item.name || 'Untitled Request'}

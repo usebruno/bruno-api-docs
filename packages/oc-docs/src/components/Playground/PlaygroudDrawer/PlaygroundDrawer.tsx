@@ -3,8 +3,8 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import Playground from '../Playground';
-import { getItemId, generateSafeId } from '../../../utils/itemUtils';
-import Method from '../../Docs/Method/Method';
+import Sidebar from '../Sidebar/Sidebar';
+import { hydrateWithUUIDs, findAndUpdateItem } from '../../../utils/items';
 import { StyledBackdrop, StyledDrawer, StyledDragBar } from './StyledWrapper';
 
 interface PlaygroundDrawerProps {
@@ -30,166 +30,135 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   const [height, setHeight] = useState(() => isOpen ? getDefaultHeight() : 0);
   const [isDragging, setIsDragging] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const [hydratedCollection, setHydratedCollection] = useState<OpenCollectionCollection | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartHeight = useRef<number>(0);
 
-  // Initialize expanded folders
+  // Hydrate collection with UUIDs and initialize collapsed state
   useEffect(() => {
-    if (!collection?.items) return;
+    if (!collection) {
+      setHydratedCollection(null);
+      return;
+    }
     
-    const initExpandedFolders: Record<string, boolean> = {};
+    const hydrated = hydrateWithUUIDs(collection);
     
-    const traverseItems = (items: OpenCollectionItem[]) => {
-      items.forEach((item) => {
-        if ((item as any).type === 'folder') {
-          const itemId = getItemId(item);
-          initExpandedFolders[itemId] = false;
-          if ('items' in item && item.items) {
-            traverseItems(item.items);
+    // Initialize isCollapsed for all folders
+    const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void => {
+      if (!items) return;
+      
+      for (const item of items) {
+        if ('type' in item && item.type === 'folder') {
+          // Initialize isCollapsed to true (collapsed) if not already set
+          if ((item as any).isCollapsed === undefined) {
+            (item as any).isCollapsed = true;
+          }
+          const folder = item as Folder;
+          if (folder.items) {
+            initializeCollapsedState(folder.items);
           }
         }
-      });
+      }
     };
     
-    traverseItems(collection.items);
-    setExpandedFolders(initExpandedFolders);
+    if (hydrated.items) {
+      initializeCollapsedState(hydrated.items);
+    }
+    
+    setHydratedCollection(hydrated);
   }, [collection]);
 
-  const toggleFolder = useCallback((folderId: string) => {
-    setExpandedFolders((prev) => ({
-      ...prev,
-      [folderId]: !prev[folderId]
-    }));
-  }, []);
-
-  const renderFolderIcon = (isExpanded: boolean) => (
-    <svg 
-      width="14" 
-      height="14" 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      xmlns="http://www.w3.org/2000/svg"
-      className="transform transition-transform duration-300"
-      style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
-    >
-      <path 
-        d="M9 6L15 12L9 18" 
-        stroke="currentColor" 
-        strokeWidth="2" 
-        strokeLinecap="round" 
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-
-  const renderItem = (item: OpenCollectionItem, level = 0) => {
-    const itemId = getItemId(item);
-    const safeItemId = generateSafeId(itemId);
-    const isFolder = (item as any).type === 'folder';
-    const isExpanded = expandedFolders[itemId] || false;
-    const isSelected = !isFolder && selectedItem && getItemId(selectedItem) === itemId;
-
-    if (isFolder) {
-      const folder = item as Folder;
-      return (
-        <div key={itemId}>
-          <div
-            onClick={() => toggleFolder(itemId)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
-              paddingLeft: `${level * 16 + 12}px`,
-              cursor: 'pointer',
-              borderRadius: '6px',
-              marginBottom: '2px',
-              color: '#212529',
-              transition: 'all 0.15s ease',
-              userSelect: 'none'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#e9ecef';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '14px' }}>
-                {renderFolderIcon(isExpanded)}
-              </div>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-              </svg>
-              <span style={{ 
-                fontSize: '13px',
-                flex: 1,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }}>
-                {itemId}
-              </span>
-            </div>
-          </div>
-              {isExpanded && folder.items && (
-            <div>
-                  {folder.items.map((child: OpenCollectionItem) => renderItem(child, level + 1))}
-            </div>
-          )}
-        </div>
-      );
-    } else if ((item as any).type === 'http') {
-      const httpItem = item as HttpRequest;
-      return (
-        <div
-          key={safeItemId}
-          onClick={() => onSelectItem(httpItem)}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '8px 12px',
-            paddingLeft: `${level * 16 + 12}px`,
-            cursor: 'pointer',
-            borderRadius: '6px',
-            marginBottom: '2px',
-            backgroundColor: isSelected ? '#0d6efd' : 'transparent',
-            color: isSelected ? 'white' : '#212529',
-            transition: 'all 0.15s ease'
-          }}
-          onMouseEnter={(e) => {
-            if (!isSelected) {
-              e.currentTarget.style.backgroundColor = '#e9ecef';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isSelected) {
-              e.currentTarget.style.backgroundColor = 'transparent';
-            }
-          }}
-        >
-          <Method 
-            method={httpItem.method || 'GET'}
-            className="text-xs"
-          />
-          <span style={{ 
-            fontSize: '13px',
-            flex: 1,
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap'
-          }}>
-            {httpItem.name || itemId}
-          </span>
-        </div>
-      );
+  // Update selectedItemId when selectedItem changes
+  useEffect(() => {
+    if (!selectedItem || !hydratedCollection) {
+      setSelectedItemId(null);
+      return;
     }
-    return null;
-  };
+    
+    // Find the UUID of the selected item
+    const findItemUUID = (items: OpenCollectionItem[] | undefined): string | null => {
+      if (!items) return null;
+      
+      for (const item of items) {
+        const itemUuid = (item as any).uuid;
+        // Compare by checking if this is the selected item
+        if (itemUuid && 'type' in item && (item as any).type === 'http') {
+          const httpItem = item as HttpRequest;
+          if (httpItem.name === selectedItem.name && 
+              httpItem.method === selectedItem.method &&
+              httpItem.url === selectedItem.url) {
+            return itemUuid;
+          }
+        }
+        
+        if ('type' in item && (item as any).type === 'folder') {
+          const folder = item as Folder;
+          if (folder.items) {
+            const found = findItemUUID(folder.items);
+            if (found) return found;
+          }
+        }
+      }
+      
+      return null;
+    };
+    
+    const uuid = findItemUUID(hydratedCollection.items);
+    setSelectedItemId(uuid);
+  }, [selectedItem, hydratedCollection]);
+
+  const toggleFolder = useCallback((uuid: string) => {
+    if (!hydratedCollection?.items) return;
+    
+    setHydratedCollection((prev) => {
+      if (!prev) return prev;
+      
+      const updated = { ...prev };
+      findAndUpdateItem(updated.items, uuid, (item) => {
+        const currentCollapsed = (item as any).isCollapsed ?? true;
+        (item as any).isCollapsed = !currentCollapsed;
+      });
+      
+      return updated;
+    });
+  }, [hydratedCollection]);
+
+  const handleSelectItem = useCallback((uuid: string) => {
+    if (!hydratedCollection?.items) return;
+    
+    // Find the item by UUID
+    let foundItem: HttpRequest | null = null;
+    
+    const findItem = (items: OpenCollectionItem[] | undefined): boolean => {
+      if (!items) return false;
+      
+      for (const item of items) {
+        const itemUuid = (item as any).uuid;
+        if (itemUuid === uuid && 'type' in item && (item as any).type === 'http') {
+          foundItem = item as HttpRequest;
+          return true;
+        }
+        
+        if ('type' in item && (item as any).type === 'folder') {
+          const folder = item as Folder;
+          if (folder.items && findItem(folder.items)) {
+            return true;
+          }
+        }
+      }
+      
+      return false;
+    };
+    
+    findItem(hydratedCollection.items);
+    
+    if (foundItem) {
+      onSelectItem(foundItem);
+    }
+  }, [hydratedCollection, onSelectItem]);
+
 
   useEffect(() => {
     if (isOpen) {
@@ -396,30 +365,20 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
             {/* Sidebar */}
             <div
               style={{
-                width: '250px',
-                minWidth: '250px',
+                width: 'var(--sidebar-width)',
+                minWidth: 'var(--sidebar-width)',
                 borderRight: '1px solid var(--border-color)',
-                backgroundColor: '#f8f9fa',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                padding: '16px 0',
-                flexShrink: 0
+                backgroundColor: 'var(--bg-secondary)',
+                flexShrink: 0,
+                overflow: 'hidden'
               }}
             >
-              <div style={{ padding: '0 16px 12px', borderBottom: '1px solid var(--border-color)', marginBottom: '12px' }}>
-                <h3 style={{ 
-                  fontSize: '14px', 
-                  fontWeight: '600', 
-                  color: 'var(--text-primary)',
-                  margin: 0
-                }}>
-                  Playground
-                </h3>
-              </div>
-              
-              <div style={{ padding: '0 8px' }}>
-                {collection?.items && collection.items.map((item) => renderItem(item))}
-              </div>
+              <Sidebar
+                collection={hydratedCollection}
+                selectedItemId={selectedItemId}
+                onSelectItem={handleSelectItem}
+                onToggleFolder={toggleFolder}
+              />
             </div>
 
             {/* Main Playground Content */}
@@ -435,7 +394,6 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
                 <Playground
                   item={selectedItem}
                   collection={collection}
-                  toggleRunnerMode={onClose}
                 />
               ) : (
                 <div style={{

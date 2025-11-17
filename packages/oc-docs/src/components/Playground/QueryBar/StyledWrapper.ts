@@ -1,12 +1,8 @@
 import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.div`
-  background-color: var(--input-bg);
-  border-top-left-radius: var(--oc-radius);
-  border-bottom-left-radius: var(--oc-radius);
-  border-top-right-radius: var(--oc-radius);
-  border-bottom-right-radius: var(--oc-radius);
   border: 1px solid var(--border-color);
+  border-radius: 6px;
 
   select {
     background-color: transparent;

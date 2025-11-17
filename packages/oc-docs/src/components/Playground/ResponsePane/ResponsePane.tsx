@@ -20,11 +20,11 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
 
   const getStatusColor = (status?: number) => {
     if (!status) return '#6b7280';
-    if (status >= 200 && status < 300) return '#10b981';
-    if (status >= 300 && status < 400) return '#f59e0b';
-    if (status >= 400 && status < 500) return '#ef4444';
-    if (status >= 500) return '#dc2626';
-    return '#6b7280';
+    if (status >= 200 && status < 300) return 'rgb(29 122 91)';
+    if (status >= 300 && status < 400) return 'rgb(234 179 8)';
+    if (status >= 400 && status < 500) return 'rgb(239 68 68)';
+    if (status >= 500) return 'rgb(220 38 38)';
+    return 'rgb(107 114 128)';
   };
 
   const renderResponseBody = () => {
@@ -58,22 +58,44 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
   };
 
   const renderHeaders = () => (
-    <div className="h-full py-4 overflow-auto">
-      <div className="space-y-2">
+    <div className="h-full overflow-auto">
+      <div className="py-3">
         {response.headers ? (
-          Object.entries(response.headers).map(([key, value]) => (
-            <div key={key} className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-              <span className="font-mono text-sm font-medium" style={{ color: 'var(--text-primary)', minWidth: '150px' }}>
-                {key}:
-              </span>
-              <span className="font-mono text-sm" style={{ color: 'var(--text-secondary)' }}>
-                {String(value)}
-              </span>
-            </div>
-          ))
+          <div className="space-y-0">
+            {Object.entries(response.headers).map(([key, value], index) => (
+              <div 
+                key={key} 
+                className="flex items-center gap-4 py-1.5 border-b"
+                style={{ 
+                  borderColor: 'var(--border-color)',
+                  borderBottomWidth: index === Object.entries(response.headers).length - 1 ? '0' : '1px'
+                }}
+              >
+                <span 
+                  className="font-mono text-xs font-medium" 
+                  style={{ 
+                    color: 'var(--text-primary)', 
+                    minWidth: '180px',
+                    letterSpacing: '0.01em'
+                  }}
+                >
+                  {key}
+                </span>
+                <span 
+                  className="font-mono text-xs flex-1 break-all" 
+                  style={{ 
+                    color: 'var(--text-secondary)',
+                    letterSpacing: '0.01em'
+                  }}
+                >
+                  {String(value)}
+                </span>
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-8" style={{ color: 'var(--text-secondary)' }}>
-            No response headers
+          <div className="text-center py-12" style={{ color: 'var(--text-secondary)' }}>
+            <span className="text-xs">No response headers</span>
           </div>
         )}
       </div>
@@ -130,11 +152,9 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
       <div className="flex items-center gap-2">
         <span style={{ color: 'var(--text-secondary)' }}>Status:</span>
         <span 
-          className="px-2 py-0.5 font-medium rounded"
+          className="font-mono font-medium"
           style={{
-            backgroundColor: getStatusColor(response.status),
-            color: 'white',
-            fontSize: '11px'
+            color: getStatusColor(response.status),
           }}
         >
           {response.status} {response.statusText}

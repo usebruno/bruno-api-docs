@@ -871,11 +871,6 @@ tr.themed-row:nth-child(even) {
   font-weight: 600;
 }
 
-.request-runner-container {
-  @apply px-6 py-4;
-}
-
-
 .section-title {
   @apply text-xs font-semibold mb-2 uppercase tracking-wide;
   color: var(--text-secondary);

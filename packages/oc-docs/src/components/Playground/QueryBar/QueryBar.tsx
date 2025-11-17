@@ -23,24 +23,17 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
     onItemChange({ ...item, url: newUrl });
   };
 
-  const handleMethodChange = (newMethod: string) => {
-    setMethod(newMethod);
-    onItemChange({ ...item, method: newMethod });
-  };
-
-  const methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
-
   const getMethodColor = (method: string) => {
     const colors: { [key: string]: string } = {
-      'GET': '#10b981',
-      'POST': '#f59e0b',
-      'PUT': '#3b82f6',
-      'PATCH': '#8b5cf6',
-      'DELETE': '#ef4444',
-      'HEAD': '#6b7280',
-      'OPTIONS': '#6b7280'
+      'GET': '#059669',      // muted green
+      'POST': '#d97706',     // muted orange
+      'PUT': '#2563eb',      // muted blue
+      'PATCH': '#7c3aed',    // muted purple
+      'DELETE': '#dc2626',   // muted red
+      'HEAD': '#64748b',     // muted gray
+      'OPTIONS': '#64748b'   // muted gray
     };
-    return colors[method] || '#6b7280';
+    return colors[method] || '#64748b';
   };
 
   return (
@@ -50,18 +43,19 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
         height: '36px'
       }}
     >
-      <div className="relative">
-        <select
-          value={method}
-          onChange={(e) => handleMethodChange(e.target.value)}
-          className="h-full px-3 text-xs font-semibold cursor-pointer"
+      <div className="relative flex items-center">
+        <div
+          className="h-full pl-3 text-xs font-semibold flex items-center"
+          style={{
+            color: getMethodColor(method),
+            fontWeight: 600,
+            letterSpacing: '0.02em',
+            pointerEvents: 'none',
+            userSelect: 'none'
+          }}
         >
-          {methods.map((m) => (
-            <option key={m} value={m}>
-              {m}
-            </option>
-          ))}
-        </select>
+          {method}
+        </div>
       </div>
 
       <input
@@ -69,7 +63,12 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
         value={url}
         onChange={(e) => handleUrlChange(e.target.value)}
         placeholder="Enter request URL"
-        className="flex-1 px-3 text-sm"
+        className="flex-1 px-3 text-xs font-normal"
+        style={{
+          fontFamily: 'var(--font-mono)',
+          fontSize: '12px',
+          fontWeight: 400
+        }}
         onKeyPress={(e) => {
           if (e.key === 'Enter' && url.trim() && !isLoading) {
             onSendRequest();
@@ -80,10 +79,10 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
       <button
         onClick={onSendRequest}
         disabled={isLoading || !url.trim()}
-        className="send px-4 text-xs font-medium text-white disabled:cursor-not-allowed flex items-center gap-2 transition-all"
+        className="send px-4 uppercase text-xs font-semibold text-white disabled:cursor-not-allowed flex items-center gap-2 transition-all"
       >
         {isLoading && (
-          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div className="w-2.5 h-2.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
         )}
         {isLoading ? 'Sending' : 'Send'}
       </button>

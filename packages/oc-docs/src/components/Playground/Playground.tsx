@@ -83,7 +83,7 @@ const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
   }, [isDragging]);
 
   return (
-    <div className="request-runner-container h-full flex flex-col" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div className="request-runner-container h-full flex flex-col px-6 py-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
       <RequestHeader 
         item={editableItem} 
         collection={collection}

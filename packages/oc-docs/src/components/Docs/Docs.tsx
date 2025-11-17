@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import Sidebar from './Sidebar/Sidebar';
 import Item from './Item/Item';
@@ -8,21 +8,55 @@ import { selectSelectedItemId, selectItem } from '../../store/slices/docs';
 
 interface DocsProps {
   docsCollection: OpenCollectionCollection | null;
-  logo: React.ReactNode;
-  theme: 'light' | 'dark' | 'auto';
-  containerRef: React.RefObject<HTMLDivElement | null>;
   filteredCollectionItems: any[];
+  onOpenPlayground?: () => void;
 }
 
 const Docs: React.FC<DocsProps> = ({
   docsCollection,
-  logo,
-  theme,
-  containerRef,
-  filteredCollectionItems
+  filteredCollectionItems,
+  onOpenPlayground
 }) => {
   const dispatch = useAppDispatch();
   const selectedItemId = useAppSelector(selectSelectedItemId);
+
+  // Scroll to selected item when it changes
+  useEffect(() => {
+    if (selectedItemId && filteredCollectionItems.length > 0) {
+      // Find the item by UUID to get its safe ID for scrolling
+      const findItemForScroll = (items: any[]): any => {
+        for (const item of items) {
+          const itemUuid = (item as any).uuid;
+          const itemId = getItemId(item);
+          const safeId = generateSafeId(itemId);
+          
+          // Check if this is the selected item
+          if (itemUuid === selectedItemId || safeId === selectedItemId || itemId === selectedItemId) {
+            return { item, safeId };
+          }
+          
+          // If it's a folder, search recursively
+          if (item.type === 'folder' && item.items) {
+            const found = findItemForScroll(item.items);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const result = findItemForScroll(filteredCollectionItems);
+      if (result) {
+        // Scroll to the item after a short delay to ensure DOM is updated
+        setTimeout(() => {
+          const element = document.getElementById(`section-${result.safeId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      }
+    }
+  }, [selectedItemId, filteredCollectionItems]);
+
   // Flatten all items recursively for rendering
   const flattenItems = (items: any[], parentPath = ''): any[] => {
     const result: any[] = [];
@@ -51,10 +85,6 @@ const Docs: React.FC<DocsProps> = ({
     return items;
   }, [filteredCollectionItems]);
 
-  const registerSectionRef = (id: string, ref: HTMLDivElement | null) => {
-    // No-op for now, but can be used for scroll tracking
-  };
-
   return (
     <>
       <div
@@ -65,15 +95,11 @@ const Docs: React.FC<DocsProps> = ({
           borderRight: '1px solid var(--border-color)'
         }}
       >
-        <Sidebar
-          collection={docsCollection}
-          theme={theme}
-        />
+        <Sidebar />
       </div>
 
       <div
         className="playground-content h-full overflow-y-auto flex-1"
-        ref={containerRef}
       >
         <div className="all-endpoints-view h-full overflow-y-auto" style={{ padding: '2rem', maxWidth: '100%' }}>
           {/* Render all collection items */}
@@ -93,13 +119,15 @@ const Docs: React.FC<DocsProps> = ({
               >
                 <Item
                   item={item}
-                  registerSectionRef={registerSectionRef}
-                  theme={theme}
                   parentPath=""
                   collection={docsCollection || undefined}
                   onTryClick={() => {
                     // Select the item by UUID
                     dispatch(selectItem(itemUuid));
+                    // Open the playground drawer
+                    if (onOpenPlayground) {
+                      onOpenPlayground();
+                    }
                     // Scroll to the item
                     setTimeout(() => {
                       const element = document.getElementById(`section-${safeId}`);

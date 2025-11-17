@@ -30,16 +30,12 @@ const methodColors: Record<string, string> = {
 
 const Item = memo(({
   item,
-  registerSectionRef,
-  theme,
   parentPath = '',
   collection,
   toggleRunnerMode,
   onTryClick
 }: {
   item: any;
-  registerSectionRef: (id: string, ref: HTMLDivElement | null) => void;
-  theme: 'light' | 'dark' | 'auto';
   parentPath?: string;
   collection?: any;
   toggleRunnerMode?: () => void;
@@ -50,13 +46,6 @@ const Item = memo(({
   const sectionId = generateSectionId(item, parentPath);
 
   const baseContainerClass = 'item-container';
-  const themedContainerClass = theme ? `${baseContainerClass} ${theme}` : baseContainerClass;
-
-  const sectionRefCallback = useCallback((element: HTMLDivElement | null) => {
-    if (element) {
-      registerSectionRef(sectionId, element);
-    }
-  }, [sectionId, registerSectionRef]);
 
   if (item.type === 'folder') {
     const folderItem = item as any;
@@ -65,7 +54,6 @@ const Item = memo(({
       <StyledWrapper
         key={itemId}
         id={`section-${sectionId}`}
-        ref={sectionRefCallback}
         className={baseContainerClass}
       >
         <div className="item-header-minimal">
@@ -131,7 +119,6 @@ const Item = memo(({
       <StyledWrapper
         key={itemId}
         id={`section-${sectionId}`}
-        ref={sectionRefCallback}
         className={baseContainerClass}
       >
         <div className="item-header-minimal">
@@ -179,9 +166,8 @@ const Item = memo(({
     return (
       <StyledWrapper
         key={itemId}
-        className={themedContainerClass}
+        className={baseContainerClass}
         id={`section-${sectionId}`}
-        ref={sectionRefCallback}
       >
         <div className="item-header-minimal">
           <div className="item-title-section">
@@ -277,7 +263,6 @@ const Item = memo(({
     <StyledWrapper
       key={itemId}
       id={`section-${sectionId}`}
-      ref={sectionRefCallback}
       className={baseContainerClass}
     >
       <div className="item-header-minimal">
@@ -298,7 +283,6 @@ const Item = memo(({
   }
 
   return (
-    prevProps.theme === nextProps.theme &&
     prevProps.parentPath === nextProps.parentPath
   );
 });

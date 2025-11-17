@@ -3,14 +3,9 @@ import { Provider } from 'react-redux';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import {
-  useTheme,
-  useRunnerMode
-} from '../../hooks';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import PlaygroundDrawer from '../Playground/PlaygroudDrawer/PlaygroundDrawer';
 import Docs from '../Docs/Docs';
-import { getItemId, generateSafeId } from '../../utils/itemUtils';
 import { parseYaml } from '../../utils/yamlUtils';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
@@ -77,28 +72,20 @@ const resolveCollectionSource = async (
 interface DesktopLayoutProps {
   docsCollection: OpenCollectionCollection | null;
   playgroundCollection: OpenCollectionCollection | null;
-  logo: React.ReactNode;
-  theme: 'light' | 'dark' | 'auto';
-  containerRef: React.RefObject<HTMLDivElement | null>;
   filteredCollectionItems: any[];
   children?: React.ReactNode;
-  isRunnerMode?: boolean;
-  toggleRunnerMode?: () => void;
 }
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   docsCollection,
   playgroundCollection,
-  logo,
-  theme,
-  containerRef,
   filteredCollectionItems
 }) => {
   const selectedItemId = useAppSelector(selectSelectedItemId);
   const [playgroundItem, setPlaygroundItem] = useState<HttpRequest | null>(null);
   const [showPlaygroundDrawer, setShowPlaygroundDrawer] = useState(false);
 
-  // Update playground item when selected item changes
+  // Update playground item when selected item changes (but don't open drawer)
   useEffect(() => {
     if (selectedItemId && docsCollection) {
       const findItem = (items: any[]): any => {
@@ -118,6 +105,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
       const item = docsCollection.items ? findItem(docsCollection.items) : null;
       if (item && item.type === 'http') {
         setPlaygroundItem(item as HttpRequest);
+        // Don't open drawer automatically - only open when "Try" is clicked
       }
     }
   }, [selectedItemId, docsCollection]);
@@ -127,14 +115,16 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
     setPlaygroundItem(item);
   };
 
+  const handleOpenPlayground = () => {
+    setShowPlaygroundDrawer(true);
+  };
+
   return (
     <div className="flex h-screen">
       <Docs
         docsCollection={docsCollection}
-        logo={logo}
-        theme={theme}
-        containerRef={containerRef}
         filteredCollectionItems={filteredCollectionItems}
+        onOpenPlayground={handleOpenPlayground}
       />
 
       <PlaygroundDrawer
@@ -143,7 +133,6 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         collection={playgroundCollection}
         selectedItem={playgroundItem}
         onSelectItem={handlePlaygroundItemSelect}
-        theme={theme}
       />
     </div>
   );
@@ -154,14 +143,11 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
  */
 export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
-  theme?: 'light' | 'dark' | 'auto';
   logo?: React.ReactNode;
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
-  theme = 'light',
-  logo,
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);
@@ -169,9 +155,6 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   const collectionStatus = useAppSelector(selectCollectionStatus);
   const collectionError = useAppSelector(selectCollectionError);
   const selectedItemId = useAppSelector((state) => state.docs.selectedItemId);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useTheme(theme);
 
   useEffect(() => {
     let isActive = true;
@@ -244,8 +227,6 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     }
   }, [docsCollection, selectedItemId, dispatch]);
 
-  const { isRunnerMode, toggleRunnerMode } = useRunnerMode();
-
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
@@ -254,23 +235,14 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     return <div className="flex items-center justify-center h-screen text-red-500">Error: {error}</div>;
   }
 
-  const commonProps = {
+  const desktopProps = {
     docsCollection,
     playgroundCollection,
-    theme,
-    containerRef,
-    filteredCollectionItems
-  };
-
-  const desktopProps = {
-    ...commonProps,
-    logo,
-    isRunnerMode,
-    toggleRunnerMode
+    filteredCollectionItems,
   };
 
   return (
-    <div className={`oc-playground ${theme}`}>
+    <div className="oc-playground">
       <DesktopLayout {...desktopProps} />
     </div>
   );

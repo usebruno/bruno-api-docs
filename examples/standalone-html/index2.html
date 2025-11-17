@@ -44,8 +44,8 @@ items:
     items:
       - type: "http"
         name: "Register User"
-        url: "{{baseUrl}}/auth/register"
-        method: "POST"
+        url: "https://jsonplaceholder.typicode.com/users"
+        method: "GET"
         headers:
           - name: "Content-Type"
             value: "application/json"
@@ -58,6 +58,41 @@ items:
               "password": "password123"
             }
         docs: "Register a new user account"
+      
+      - type: "folder"
+        name: "Verification"
+        docs: "Account verification endpoints"
+        items:
+          - type: "http"
+            name: "Verify Email"
+            url: "{{baseUrl}}/auth/verify-email"
+            method: "POST"
+            headers:
+              - name: "Content-Type"
+                value: "application/json"
+            body:
+              type: "json"
+              data: |
+                {
+                  "email": "test@example.com",
+                  "verificationCode": "123456"
+                }
+            docs: "Verify user email address with verification code"
+          
+          - type: "http"
+            name: "Resend Verification Code"
+            url: "{{baseUrl}}/auth/resend-verification"
+            method: "POST"
+            headers:
+              - name: "Content-Type"
+                value: "application/json"
+            body:
+              type: "json"
+              data: |
+                {
+                  "email": "test@example.com"
+                }
+            docs: "Resend email verification code to user"
 
   # Login folder
   - type: "folder"

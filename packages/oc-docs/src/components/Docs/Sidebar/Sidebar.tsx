@@ -1,77 +1,28 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import React from 'react';
+import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import Method from '../Method/Method';
-import { getItemId, generateSafeId } from '../../../utils/itemUtils';
 import OpenCollectionLogo from '../../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { toggleItem, selectItem, selectSelectedItemId } from '../../../store/slices/docs';
-
-interface ApiEndpoint {
-  id: string;
-  method: string;
-  path: string;
-  description?: string;
-}
-
-interface ApiCollection {
-  name: string;
-  description?: string;
-  version?: string;
-  endpoints: ApiEndpoint[];
-}
+import { toggleItem, selectItem, selectSelectedItemId, selectDocsCollection } from '../../../store/slices/docs';
 
 export interface SidebarProps {
-  collection: OpenCollectionCollection | ApiCollection | null;
-  theme?: 'light' | 'dark' | 'auto';
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  collection,
-  theme = 'light'
-}) => {
+const Sidebar: React.FC<SidebarProps> = () => {
   const dispatch = useAppDispatch();
   const selectedItemId = useAppSelector(selectSelectedItemId);
-  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const collection = useAppSelector(selectDocsCollection);
 
-  const toggleFolder = useCallback((itemUuid: string) => {
+  const toggleFolder = (itemUuid: string) => {
     dispatch(toggleItem(itemUuid));
-  }, [dispatch]);
+  };
 
   const handleItemSelect = (uuid: string) => {
     dispatch(selectItem(uuid));
   };
-
-  const normalizedItems = useMemo<any[]>(() => {
-    if (!collection) return [];
-    
-    if ('endpoints' in collection) {
-      return collection.endpoints.map((endpoint: ApiEndpoint, index: number) => ({
-        type: 'http' as const,
-        name: endpoint.path,
-        method: endpoint.method,
-        url: endpoint.path
-      }));
-    } else if ('items' in collection) {
-      return collection.items as any[];
-    }
-    
-    return [];
-  }, [collection]);
-
-  const filteredItems = useMemo(() => {
-    return normalizedItems as OpenCollectionItem[];
-  }, [normalizedItems]);
-
-  const filteredEndpoints = useMemo(() => {
-    if (!collection || !('endpoints' in collection) || !collection.endpoints) {
-      return [];
-    }
-    
-    return collection.endpoints;
-  }, [collection]);
 
   const renderFolderIcon = (isExpanded: boolean) => (
     <svg 
@@ -94,41 +45,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
 
   const renderItem = (item: any, level = 0, parentPath = '') => {
-    const itemId = getItemId(item);
-    const itemUuid = (item as any).uuid || itemId; // Use UUID if available, fallback to itemId
-    const itemName = itemId;
-    const itemPath = parentPath ? `${parentPath}/${itemName}` : itemName;
-    
-    const fullPathId = parentPath ? `${parentPath.replace(/^\//, '')}/${itemUuid}` : itemUuid;
     
     const isFolder = item.type === 'folder';
-    const safeItemId = generateSafeId(itemId);
     // Use UUID for active state comparison
-    const isActive = !isFolder && selectedItemId === itemUuid;
+    const isActive = !isFolder && selectedItemId === item.uuid;
     
-    // Use fullPathId for hover state tracking
-    const isHovered = hoveredItemId === fullPathId;
     // Read isCollapsed from the item itself (defaults to true if not set)
     const isExpanded = isFolder ? !((item as any).isCollapsed ?? true) : false;
     
     return (
-      <div key={itemId} className="relative">
+      <div key={item.uuid} className="relative">
         <SidebarItem
           className={`
             flex items-center select-none text-sm cursor-pointer
             ${isActive ? 'active' : ''}
-            ${isHovered && !isActive ? 'hovered' : ''}
             ${isFolder ? 'folder' : ''}
             transition-all duration-200
           `}
           style={{ 
             paddingLeft: `${level * 16 + 8}px`
           }}
-          onClick={() => isFolder ? toggleFolder(itemUuid) : handleItemSelect(itemUuid)}
-          onMouseEnter={() => setHoveredItemId(fullPathId)}
-          onMouseLeave={() => setHoveredItemId(null)}
-          id={`sidebar-item-${fullPathId}`}
-          data-item-id={fullPathId}
+          onClick={() => isFolder ? toggleFolder(item.uuid) : handleItemSelect(item.uuid)}
         >
           
           {level > 0 && (
@@ -141,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({
               }}
             />
           )}
-          
           
           {isFolder ? (
             <div className="mr-2 flex-shrink-0">
@@ -156,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           
           
           <div className="truncate flex-1">
-            {itemName}
+            {item.name}
           </div>
         </SidebarItem>
         
@@ -173,8 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               }}
             />
             
-            
-            {((item as Folder).items || []).map((child: OpenCollectionItem) => renderItem(child, level + 1, itemPath))}
+            {((item as Folder).items || []).map((child: OpenCollectionItem) => renderItem(child, level + 1))}
           </div>
         )}
       </div>
@@ -193,43 +128,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
       
       <SidebarItems>
-        {collection && 'items' in collection && filteredItems && filteredItems.length > 0 && (
-          <>
-            {filteredItems.map((item) => renderItem(item))}
-          </>
-        )}
-        
-        {collection && 'endpoints' in collection && filteredEndpoints.length > 0 && (
-          <>
-            {filteredEndpoints.map((endpoint: ApiEndpoint) => {
-              const endpointId = endpoint.id || `endpoint-${endpoint.path}`;
-              const safeEndpointId = generateSafeId(endpointId);
-              // For endpoints, use the endpoint ID as UUID (they don't have UUIDs assigned)
-              const endpointUuid = endpointId;
-              const fullPathId = endpoint.path ? `${endpoint.path.replace(/^\//, '')}/${endpointUuid}` : endpointUuid;
-              const isActive = selectedItemId === endpointUuid;
-              const isHovered = hoveredItemId === fullPathId;
-              
-              return (
-                <SidebarItem
-                  key={endpointId}
-                  as="button"
-                  className={`endpoint flex items-center w-full text-left px-3 py-2 ${isActive ? 'active' : ''} ${isHovered ? 'hovered' : ''}`}
-                  onClick={() => handleItemSelect(endpointUuid)}
-                  onMouseEnter={() => setHoveredItemId(fullPathId)}
-                  onMouseLeave={() => setHoveredItemId(null)}
-                  id={`sidebar-item-${fullPathId}`}
-                  data-item-id={fullPathId}
-                >
-                  <Method 
-                    method={endpoint.method}
-                    className="flex-shrink-0 text-xs"
-                  />
-                  <span className="truncate">{endpoint.path}</span>
-                </SidebarItem>
-              );
-            })}
-          </>
+        {collection?.items?.length && (
+          collection.items.map((item) => renderItem(item))
         )}
       </SidebarItems>
       
@@ -246,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             alt="OpenCollection" 
             className="w-full max-w-[140px] mx-auto"
             style={{ 
-              filter: theme === 'dark' ? 'invert(1) grayscale(100%)' : 'grayscale(100%)'
+              filter: 'grayscale(100%)'
             }}
           />
         </a>

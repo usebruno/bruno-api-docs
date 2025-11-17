@@ -24,19 +24,11 @@ export const SidebarContainer = styled.div`
     border-radius: 10px;
   }
 
-  .dark & ::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2);
-  }
-
   /* Sidebar Logo styling */
   & .logo {
     padding: 0 8px 12px 8px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     margin-bottom: 6px;
-  }
-
-  .dark & .logo {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   &.compact .logo {
@@ -78,48 +70,19 @@ export const SidebarItem = styled.div`
     color: #212121;
   }
 
-  .dark & {
-    color: rgba(255, 255, 255, 0.6);
-  }
-
-  .dark &:hover, .dark &.hovered {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: rgba(255, 255, 255, 0.9);
-  }
-
   &.active {
     background-color: rgba(0, 0, 0, 0.08);
     color: #212121;
     font-weight: 500;
   }
 
-  .dark &.active {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    font-weight: 500;
-  }
-
-  &.active:hover, &.active.hovered {
+  &.active:hover {
     background-color: rgba(0, 0, 0, 0.1);
-  }
-
-  .dark &.active:hover, .dark &.active.hovered {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-
-  .dark &.folder {
-    color: rgba(255, 255, 255, 0.4);
-    background-color: transparent;
   }
 
   &.folder:hover {
     background-color: transparent;
     color: #212121;
-  }
-
-  .dark &.folder:hover {
-    background-color: transparent;
-    color: rgba(255, 255, 255, 0.5);
   }
 
   & .method-badge {
@@ -134,10 +97,6 @@ export const SidebarItem = styled.div`
     text-transform: uppercase;
     margin-right: 8px;
     opacity: 0.85;
-  }
-
-  .dark & .method-badge {
-    opacity: 0.9;
   }
 
   ${SidebarContainer}.compact & .method-badge {

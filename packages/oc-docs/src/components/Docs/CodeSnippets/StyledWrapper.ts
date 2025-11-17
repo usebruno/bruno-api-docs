@@ -132,26 +132,6 @@ export const StyledWrapper = styled.div`
     background-color: rgba(34, 197, 94, 0.15);
   }
 
-  .dark & .code-copy-button {
-    background-color: rgba(255, 255, 255, 0.06);
-    color: var(--text-secondary);
-  }
-
-  .dark & .code-copy-button:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-    color: var(--text-primary);
-  }
-
-  .dark & .code-copy-button.copied {
-    color: #4ade80;
-    background-color: rgba(34, 197, 94, 0.2);
-  }
-
-  .dark & .code-copy-button.copied:hover {
-    background-color: rgba(34, 197, 94, 0.3);
-    color: #bbf7d0;
-  }
-
   @media (max-width: 1100px) {
     .code-samples-container {
       position: static;

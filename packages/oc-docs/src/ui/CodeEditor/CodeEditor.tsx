@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Editor from '@monaco-editor/react';
 
 interface CodeEditorProps {
@@ -16,27 +16,6 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   readOnly = false, 
   height = '300px'
 }) => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    // Detect current theme from document classes
-    const root = document.documentElement;
-    const isDark = root.classList.contains('dark');
-    setTheme(isDark ? 'dark' : 'light');
-
-    // Listen for theme changes
-    const observer = new MutationObserver(() => {
-      const isDark = root.classList.contains('dark');
-      setTheme(isDark ? 'dark' : 'light');
-    });
-
-    observer.observe(root, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-
-    return () => observer.disconnect();
-  }, []);
   
   const handleChange = (newValue: string | undefined) => {
     onChange(newValue || '');
@@ -55,7 +34,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         language={language}
         value={value}
         onChange={handleChange}
-        theme={theme === 'dark' ? 'vs-dark' : 'vs'}
+        theme="vs"
         options={{
           readOnly,
           minimap: { enabled: false },

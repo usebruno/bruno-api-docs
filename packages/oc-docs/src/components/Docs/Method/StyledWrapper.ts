@@ -42,36 +42,4 @@ export const StyledWrapper = styled.div`
     background-color: #f0f0f0;
     color: #4a4a4a;
   }
-
-  .dark & {
-    &.get {
-      background-color: #1a3a5c;
-      color: #0077ff;
-    }
-
-    &.post {
-      background-color: #1a4d1a;
-      color: #00a060;
-    }
-
-    &.put {
-      background-color: #4d2a00;
-      color: #ff6b00;
-    }
-
-    &.delete {
-      background-color: #4d0000;
-      color: #ff0000;
-    }
-
-    &.patch {
-      background-color: #3d003d;
-      color: #9500b3;
-    }
-
-    &.options, &.head {
-      background-color: #2a2a2a;
-      color: #888888;
-    }
-  }
 `;

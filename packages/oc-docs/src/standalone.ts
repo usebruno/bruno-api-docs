@@ -1,14 +1,27 @@
 import React from 'react';
 import { createRoot, Root } from 'react-dom/client';
 import './styles/index.css';
+// Import Prism and language components to ensure they're bundled
+import Prism from 'prismjs';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-xml-doc';
+import 'prismjs/components/prism-http';
+import 'prismjs/components/prism-graphql';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import { parseCollectionContent } from './utils/yamlUtils';
 
+// Ensure Prism is available globally for any code that might access it
+if (typeof window !== 'undefined') {
+  (window as any).Prism = Prism;
+}
+
 export interface OpenCollectionOptions {
   target: HTMLElement;
   opencollection: any;
-  theme?: 'light' | 'dark' | 'auto';
   logo?: string;
 }
 
@@ -83,7 +96,6 @@ export class OpenCollectionRenderer {
     
     this.root.render(React.createElement(OpenCollection, {
       collection,
-      theme: this.options.theme || 'light',
       logo: this.createLogoElement()
     }));
   }
@@ -93,10 +105,6 @@ export class OpenCollectionRenderer {
     this.render();
   }
 
-  public updateTheme(theme: 'light' | 'dark' | 'auto') {
-    this.options.theme = theme;
-    this.render();
-  }
 
   public destroy() {
     if (this.root) {

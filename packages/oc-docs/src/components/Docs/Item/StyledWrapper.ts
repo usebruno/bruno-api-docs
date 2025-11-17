@@ -209,25 +209,6 @@ export const StyledWrapper = styled.div`
     background-color: #bfdbfe;
   }
 
-  .dark & .item-type-badge.folder {
-    background-color: #312e81;
-    color: #a5b4fc;
-  }
-
-  .dark & .item-type-badge.script {
-    background-color: #064e3b;
-    color: #86efac;
-  }
-
-  .dark & .badge-try {
-    color: #bfdbfe;
-    background-color: #1e3a8a;
-  }
-
-  .dark & .badge-try:hover {
-    background-color: #1d4ed8;
-  }
-
   @media (min-width: 1024px) {
     .item-content-main {
       flex-direction: row;

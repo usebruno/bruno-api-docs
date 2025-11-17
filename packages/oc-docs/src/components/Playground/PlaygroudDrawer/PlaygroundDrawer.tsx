@@ -13,7 +13,6 @@ interface PlaygroundDrawerProps {
   collection: OpenCollectionCollection | null;
   selectedItem: HttpRequest | null;
   onSelectItem: (item: HttpRequest) => void;
-  theme?: 'light' | 'dark' | 'auto';
 }
 
 const MIN_HEIGHT = 300;
@@ -26,8 +25,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   onClose,
   collection,
   selectedItem,
-  onSelectItem,
-  theme = 'light'
+  onSelectItem
 }) => {
   const [height, setHeight] = useState(() => isOpen ? getDefaultHeight() : 0);
   const [isDragging, setIsDragging] = useState(false);

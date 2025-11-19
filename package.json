@@ -3,10 +3,11 @@
   "private": true,
   "workspaces": [
     "packages/oc-converters",
-    "packages/oc-schema",
     "packages/oc-docs",
-    "packages/oc-express",
+    "packages/oc-schema",
     "packages/oc-schema-explorer",
+    "packages/oc-spec",
+    "packages/oc-spec-site",
     "packages/oc-types"
   ],
   "homepage": "https://uwww.opencollection.com"

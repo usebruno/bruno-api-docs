@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import CodeEditor from '../../../ui/CodeEditor/CodeEditor';
 import Tabs from '../../../ui/Tabs/Tabs';
+import KeyValueTable, { KeyValueRow } from '../../../ui/KeyValueTable/KeyValueTable';
 
 interface RequestPaneProps {
   item: HttpRequest;
@@ -11,191 +12,89 @@ interface RequestPaneProps {
 const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
   const [activeTab, setActiveTab] = useState('params');
 
-  const handleParamChange = (index: number, field: 'name' | 'value' | 'enabled', value: any) => {
-    const updatedParams = [...(item.params || [])];
-    updatedParams[index] = { ...updatedParams[index], [field]: value };
+  const handleParamsChange = (params: KeyValueRow[]) => {
+    const updatedParams = params.map(p => ({
+      name: p.name,
+      value: p.value,
+      disabled: !p.enabled,
+      type: 'query' as const
+    }));
     onItemChange({ ...item, params: updatedParams });
   };
 
-  const handleHeaderChange = (index: number, field: 'name' | 'value' | 'disabled', value: any) => {
-    const updatedHeaders = [...(item.headers || [])];
-    updatedHeaders[index] = { ...updatedHeaders[index], [field]: value };
+  const handleHeadersChange = (headers: KeyValueRow[]) => {
+    const updatedHeaders = headers.map(h => ({
+      name: h.name,
+      value: h.value,
+      disabled: !h.enabled
+    }));
     onItemChange({ ...item, headers: updatedHeaders });
   };
 
-  const addParam = () => {
-    const newParams = [...(item.params || []), { name: '', value: '', enabled: true, type: 'query' as const }];
-    onItemChange({ ...item, params: newParams });
+  const handleFormBodyChange = (formData: KeyValueRow[]) => {
+    const updatedBody = formData.map(f => ({
+      name: f.name,
+      value: f.value,
+      enabled: f.enabled
+    }));
+    onItemChange({ ...item, body: updatedBody });
   };
 
-  const addHeader = () => {
-    const newHeaders = [...(item.headers || []), { name: '', value: '', disabled: false }];
-    onItemChange({ ...item, headers: newHeaders });
+  const renderParams = () => {
+    const paramsData: KeyValueRow[] = (item.params || []).map((param, index) => ({
+      id: `param-${index}`,
+      name: param.name || '',
+      value: param.value || '',
+      enabled: !param.disabled,
+      type: param.type || 'query'
+    }));
+
+    return (
+      <div className="py-4">
+        <div className="mb-4">
+          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            Query Parameters
+          </span>
+        </div>
+        <KeyValueTable
+          data={paramsData}
+          onChange={handleParamsChange}
+          keyPlaceholder="Key"
+          valuePlaceholder="Value"
+          showEnabled={true}
+        />
+      </div>
+    );
   };
 
-  const removeParam = (index: number) => {
-    const updatedParams = (item.params || []).filter((_, i) => i !== index);
-    onItemChange({ ...item, params: updatedParams });
+  const renderHeaders = () => {
+    const headersData: KeyValueRow[] = (item.headers || []).map((header, index) => ({
+      id: `header-${index}`,
+      name: header.name || '',
+      value: header.value || '',
+      enabled: !header.disabled
+    }));
+
+    return (
+      <div className="py-4">
+        <div className="mb-4">
+          <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+            Headers
+          </span>
+        </div>
+        <KeyValueTable
+          data={headersData}
+          onChange={handleHeadersChange}
+          keyPlaceholder="Header"
+          valuePlaceholder="Value"
+          showEnabled={true}
+        />
+      </div>
+    );
   };
-
-  const removeHeader = (index: number) => {
-    const updatedHeaders = (item.headers || []).filter((_, i) => i !== index);
-    onItemChange({ ...item, headers: updatedHeaders });
-  };
-
-  const renderParams = () => (
-          <div className="py-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Query Parameters
-                </span>
-                <button
-                  onClick={addParam}
-                  className="px-3 py-1 text-xs rounded border hover:bg-opacity-80 transition-colors"
-                  style={{
-                    backgroundColor: 'var(--primary-color)',
-                    borderColor: 'var(--primary-color)',
-                    color: 'white'
-                  }}
-                >
-                  Add Parameter
-                </button>
-              </div>
-              
-              {(item.params || []).length === 0 ? (
-                <div className="text-center py-8 border-2 border-dashed rounded" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
-                  No parameters defined. Click "Add Parameter" to add one.
-                </div>
-              ) : (
-                (item.params || []).map((param, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                    <input
-                      type="checkbox"
-                      checked={param.enabled !== false}
-                      onChange={(e) => handleParamChange(index, 'enabled', e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                    <input
-                      type="text"
-                      value={param.name}
-                      onChange={(e) => handleParamChange(index, 'name', e.target.value)}
-                      placeholder="Key"
-                      className="flex-1 px-2 py-1 text-sm border rounded"
-                      style={{
-                        backgroundColor: 'var(--bg-primary)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      value={param.value}
-                      onChange={(e) => handleParamChange(index, 'value', e.target.value)}
-                      placeholder="Value"
-                      className="flex-1 px-2 py-1 text-sm border rounded"
-                      style={{
-                        backgroundColor: 'var(--bg-primary)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
-                    <span className="px-2 py-1 text-xs rounded" style={{ backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
-                      {param.type || 'query'}
-                    </span>
-                    <button
-                      onClick={() => removeParam(index)}
-                      className="px-2 py-1 text-xs rounded hover:bg-opacity-80 transition-colors"
-                      style={{
-                        backgroundColor: '#ef4444',
-                        color: 'white'
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-  );
-
-  const renderHeaders = () => (
-          <div className="p-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  Headers
-                </span>
-                <button
-                  onClick={addHeader}
-                  className="px-3 py-1 text-xs rounded border hover:bg-opacity-80 transition-colors"
-                  style={{
-                    backgroundColor: 'var(--primary-color)',
-                    borderColor: 'var(--primary-color)',
-                    color: 'white'
-                  }}
-                >
-                  Add Header
-                </button>
-              </div>
-              
-              {(item.headers || []).length === 0 ? (
-                <div className="text-center py-8 border-2 border-dashed rounded" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
-                  No headers defined. Click "Add Header" to add one.
-                </div>
-              ) : (
-                (item.headers || []).map((header, index) => (
-                  <div key={index} className="flex items-center gap-2 p-2 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                    <input
-                      type="checkbox"
-                      checked={!header.disabled}
-                      onChange={(e) => handleHeaderChange(index, 'disabled', !e.target.checked)}
-                      className="w-4 h-4"
-                    />
-                    <input
-                      type="text"
-                      value={header.name}
-                      onChange={(e) => handleHeaderChange(index, 'name', e.target.value)}
-                      placeholder="Header"
-                      className="flex-1 px-2 py-1 text-sm border rounded"
-                      style={{
-                        backgroundColor: 'var(--bg-primary)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
-                    <input
-                      type="text"
-                      value={header.value}
-                      onChange={(e) => handleHeaderChange(index, 'value', e.target.value)}
-                      placeholder="Value"
-                      className="flex-1 px-2 py-1 text-sm border rounded"
-                      style={{
-                        backgroundColor: 'var(--bg-primary)',
-                        borderColor: 'var(--border-color)',
-                        color: 'var(--text-primary)'
-                      }}
-                    />
-                    <button
-                      onClick={() => removeHeader(index)}
-                      className="px-2 py-1 text-xs rounded hover:bg-opacity-80 transition-colors"
-                      style={{
-                        backgroundColor: '#ef4444',
-                        color: 'white'
-                      }}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-  );
 
   const renderBody = () => (
-          <div className="p-4">
+          <div className="py-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -259,93 +158,31 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                   height="300px"
                 />
               ) : Array.isArray(item.body) ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                      Form Data
-                    </span>
-                    <button
-                      onClick={() => {
-                        const newFormData = [...(item.body as any[] || []), { name: '', value: '', enabled: true }];
-                        onItemChange({ ...item, body: newFormData });
-                      }}
-                      className="px-3 py-1 text-xs rounded border hover:bg-opacity-80 transition-colors"
-                      style={{
-                        backgroundColor: 'var(--primary-color)',
-                        borderColor: 'var(--primary-color)',
-                        color: 'white'
-                      }}
-                    >
-                      Add Field
-                    </button>
-                  </div>
-                  
-                  {(item.body as any[]).length === 0 ? (
-                    <div className="text-center py-8 border-2 border-dashed rounded" style={{ borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}>
-                      No form fields defined. Click "Add Field" to add one.
-                    </div>
-                  ) : (
-                    (item.body as any[]).map((field: any, index: number) => (
-                      <div key={index} className="flex items-center gap-2 p-2 rounded" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                        <input
-                          type="checkbox"
-                          checked={field.enabled !== false}
-                          onChange={(e) => {
-                            const updatedBody = [...(item.body as any[])];
-                            updatedBody[index] = { ...updatedBody[index], enabled: e.target.checked };
-                            onItemChange({ ...item, body: updatedBody });
-                          }}
-                          className="w-4 h-4"
-                        />
-                        <input
-                          type="text"
-                          value={field.name || ''}
-                          onChange={(e) => {
-                            const updatedBody = [...(item.body as any[])];
-                            updatedBody[index] = { ...updatedBody[index], name: e.target.value };
-                            onItemChange({ ...item, body: updatedBody });
-                          }}
-                          placeholder="Key"
-                          className="flex-1 px-2 py-1 text-sm border rounded"
-                          style={{
-                            backgroundColor: 'var(--bg-primary)',
-                            borderColor: 'var(--border-color)',
-                            color: 'var(--text-primary)'
-                          }}
-                        />
-                        <input
-                          type="text"
-                          value={field.value || ''}
-                          onChange={(e) => {
-                            const updatedBody = [...(item.body as any[])];
-                            updatedBody[index] = { ...updatedBody[index], value: e.target.value };
-                            onItemChange({ ...item, body: updatedBody });
-                          }}
-                          placeholder="Value"
-                          className="flex-1 px-2 py-1 text-sm border rounded"
-                          style={{
-                            backgroundColor: 'var(--bg-primary)',
-                            borderColor: 'var(--border-color)',
-                            color: 'var(--text-primary)'
-                          }}
-                        />
-                        <button
-                          onClick={() => {
-                            const updatedBody = (item.body as any[]).filter((_, i) => i !== index);
-                            onItemChange({ ...item, body: updatedBody });
-                          }}
-                          className="px-2 py-1 text-xs rounded hover:bg-opacity-80 transition-colors"
-                          style={{
-                            backgroundColor: '#ef4444',
-                            color: 'white'
-                          }}
-                        >
-                          ×
-                        </button>
+                (() => {
+                  const formBodyData: KeyValueRow[] = (item.body as any[]).map((field: any, index: number) => ({
+                    id: `form-${index}`,
+                    name: field.name || '',
+                    value: field.value || '',
+                    enabled: field.enabled !== false
+                  }));
+
+                  return (
+                    <div>
+                      <div className="mb-4">
+                        <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                          Form Data
+                        </span>
                       </div>
-                    ))
-                  )}
-                </div>
+                      <KeyValueTable
+                        data={formBodyData}
+                        onChange={handleFormBodyChange}
+                        keyPlaceholder="Key"
+                        valuePlaceholder="Value"
+                        showEnabled={true}
+                      />
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="text-center py-8" style={{ color: 'var(--text-secondary)' }}>
                   Unsupported body type
@@ -356,7 +193,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
   );
 
   const renderAuth = () => (
-          <div className="p-4">
+          <div className="py-4">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -415,7 +252,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                           onChange={(e) => {
                             onItemChange({
                               ...item,
-                              auth: { ...item.auth!, username: e.target.value }
+                              auth: { type: 'basic', username: e.target.value, password: item.auth?.type === 'basic' ? item.auth.password : undefined }
                             });
                           }}
                           className="flex-1 px-2 py-1 text-sm border rounded"
@@ -437,7 +274,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                           onChange={(e) => {
                             onItemChange({
                               ...item,
-                              auth: { ...item.auth!, password: e.target.value }
+                              auth: { type: 'basic', password: e.target.value, username: item.auth?.type === 'basic' ? item.auth.username : undefined }
                             });
                           }}
                           className="flex-1 px-2 py-1 text-sm border rounded"
@@ -463,7 +300,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                         onChange={(e) => {
                           onItemChange({
                             ...item,
-                            auth: { ...item.auth!, token: e.target.value }
+                            auth: { type: 'bearer', token: e.target.value }
                           });
                         }}
                         className="flex-1 px-2 py-1 text-sm border rounded"
@@ -487,9 +324,10 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                           type="text"
                           value={item.auth.key || ''}
                           onChange={(e) => {
+                            const currentAuth = item.auth?.type === 'apikey' ? item.auth : { type: 'apikey' as const };
                             onItemChange({
                               ...item,
-                              auth: { ...item.auth!, key: e.target.value }
+                              auth: { ...currentAuth, type: 'apikey', key: e.target.value }
                             });
                           }}
                           className="flex-1 px-2 py-1 text-sm border rounded"
@@ -509,9 +347,10 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                           type="text"
                           value={item.auth.value || ''}
                           onChange={(e) => {
+                            const currentAuth = item.auth?.type === 'apikey' ? item.auth : { type: 'apikey' as const };
                             onItemChange({
                               ...item,
-                              auth: { ...item.auth!, value: e.target.value }
+                              auth: { ...currentAuth, type: 'apikey', value: e.target.value }
                             });
                           }}
                           className="flex-1 px-2 py-1 text-sm border rounded"
@@ -530,9 +369,11 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
                         <select
                           value={item.auth.placement || 'header'}
                           onChange={(e) => {
+                            const placement = e.target.value as 'header' | 'query';
+                            const currentAuth = item.auth?.type === 'apikey' ? item.auth : { type: 'apikey' as const };
                             onItemChange({
                               ...item,
-                              auth: { ...item.auth!, placement: e.target.value }
+                              auth: { ...currentAuth, type: 'apikey', placement }
                             });
                           }}
                           className="flex-1 px-2 py-1 text-sm border rounded"
@@ -561,7 +402,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
   );
 
   const renderScripts = () => (
-          <div className="p-4">
+          <div className="py-4">
             <div className="space-y-6">
               <div>
                 <h4 className="text-sm font-medium mb-2" style={{ color: 'var(--text-primary)' }}>
@@ -605,7 +446,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
   );
 
   const renderTests = () => (
-          <div className="p-4">
+          <div className="py-4">
             <div className="space-y-4">
               <h4 className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
                 Tests

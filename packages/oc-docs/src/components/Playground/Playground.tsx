@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import { requestRunner } from '../../runner';
@@ -6,6 +6,8 @@ import RequestHeader from './RequestPane/RequestHeader/RequestHeader';
 import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
+import { useAppDispatch } from '../../store/hooks';
+import { updatePlaygroundItem } from '../../store/slices/playground';
 
 interface PlaygroundProps {
   item: HttpRequest;
@@ -13,6 +15,7 @@ interface PlaygroundProps {
 }
 
 const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
+  const dispatch = useAppDispatch();
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>('');
   const [response, setResponse] = useState<any>(null);
@@ -20,16 +23,45 @@ const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
   const [requestPaneWidth, setRequestPaneWidth] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const runner = useMemo(() => requestRunner, []);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setEditableItem(item);
     setResponse(null);
   }, [item]);
 
-  const handleSendRequest = async () => {
+  // Save changes to Redux with debouncing
+  const handleItemChange = useCallback((updatedItem: HttpRequest) => {
+    setEditableItem(updatedItem);
+    
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    
+    saveTimeoutRef.current = setTimeout(() => {
+      const itemUuid = (updatedItem as any).uuid || (item as any).uuid;
+      if (itemUuid) {
+        const itemWithUuid = { ...updatedItem, uuid: itemUuid } as any;
+        dispatch(updatePlaygroundItem({ uuid: itemUuid, item: itemWithUuid }));
+      }
+    }, 500);
+  }, [dispatch, item]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleSendRequest = useCallback(async () => {
     setIsLoading(true);
     try {
-      const environment = (collection as any).environments?.find(
+      // Check both root level and config level for environments
+      // TODO: Remove this
+      const envs = (collection as any).environments || collection?.config?.environments || [];
+      const environment = envs.find(
         (env: any) => env.name === selectedEnvironment
       );
       const result = await runner.runRequest({
@@ -47,14 +79,14 @@ const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [collection, editableItem, runner, selectedEnvironment]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
     e.preventDefault();
-  };
+  }, []);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
     const container = document.querySelector('.request-runner-container');
     if (!container) return;
@@ -65,13 +97,13 @@ const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
     if (newWidth >= 20 && newWidth <= 80) {
       setRequestPaneWidth(newWidth);
     }
-  };
+  }, [isDragging]);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -80,7 +112,7 @@ const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
   return (
     <div className="request-runner-container h-full flex flex-col px-6 py-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -95,22 +127,22 @@ const Playground: React.FC<PlaygroundProps> = ({ item, collection }) => {
         item={editableItem}
         onSendRequest={handleSendRequest}
         isLoading={isLoading}
-        onItemChange={setEditableItem}
+        onItemChange={handleItemChange}
       />
       
       <div className="flex flex-1 overflow-hidden pt-5">
         <div 
-          className="flex-shrink-0 overflow-hidden"
+          className="shrink-0 overflow-hidden"
           style={{ 
             width: `${requestPaneWidth}%`,
             borderColor: 'var(--border-color)'
           }}
         >
-          <RequestPane item={editableItem} onItemChange={setEditableItem} />
+          <RequestPane item={editableItem} onItemChange={handleItemChange} />
         </div>
         
         <div 
-          className="cursor-col-resize flex-shrink-0 relative hover:bg-opacity-10"
+          className="cursor-col-resize shrink-0 relative hover:bg-opacity-10"
           style={{ 
             width: '1px',
             backgroundColor: 'var(--border-color)',

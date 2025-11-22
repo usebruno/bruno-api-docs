@@ -49,7 +49,6 @@ export const SidebarItems = styled.div`
 export const SidebarItem = styled.div`
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0;
   margin-bottom: 0;
   position: relative;
   overflow: hidden;

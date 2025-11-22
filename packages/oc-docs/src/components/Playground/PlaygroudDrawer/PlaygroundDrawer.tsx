@@ -4,8 +4,11 @@ import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/c
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import Playground from '../Playground';
 import Sidebar from '../Sidebar/Sidebar';
+import EnvironmentsView from '../EnvironmentsView/EnvironmentsView';
 import { hydrateWithUUIDs, findAndUpdateItem } from '../../../utils/items';
 import { StyledBackdrop, StyledDrawer, StyledDragBar } from './StyledWrapper';
+
+type ViewMode = 'playground' | 'environments';
 
 interface PlaygroundDrawerProps {
   isOpen: boolean;
@@ -13,6 +16,7 @@ interface PlaygroundDrawerProps {
   collection: OpenCollectionCollection | null;
   selectedItem: HttpRequest | null;
   onSelectItem: (item: HttpRequest) => void;
+  onCollectionUpdate?: (collection: OpenCollectionCollection) => void;
 }
 
 const MIN_HEIGHT = 300;
@@ -25,18 +29,20 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   onClose,
   collection,
   selectedItem,
-  onSelectItem
+  onSelectItem,
+  onCollectionUpdate
 }) => {
   const [height, setHeight] = useState(() => isOpen ? getDefaultHeight() : 0);
   const [isDragging, setIsDragging] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hydratedCollection, setHydratedCollection] = useState<OpenCollectionCollection | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('playground');
   const drawerRef = useRef<HTMLDivElement>(null);
   const dragStartY = useRef<number>(0);
   const dragStartHeight = useRef<number>(0);
 
-  // Hydrate collection with UUIDs and initialize collapsed state
+  // Hydrate collection with UUIDs and preserve collapsed state
   useEffect(() => {
     if (!collection) {
       setHydratedCollection(null);
@@ -45,7 +51,33 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
     
     const hydrated = hydrateWithUUIDs(collection);
     
-    // Initialize isCollapsed for all folders
+    const preserveCollapsedState = (
+      newItems: OpenCollectionItem[],
+      oldItems: OpenCollectionItem[]
+    ): void => {
+      for (const newItem of newItems) {
+        const newUuid = (newItem as any).uuid;
+        
+        const oldItem = oldItems.find((old: any) => old.uuid === newUuid);
+        
+        if ('type' in newItem && newItem.type === 'folder') {
+          if (oldItem && 'type' in oldItem && oldItem.type === 'folder') {
+            (newItem as any).isCollapsed = (oldItem as any).isCollapsed;
+            
+            const newFolder = newItem as Folder;
+            const oldFolder = oldItem as Folder;
+            if (newFolder.items && oldFolder.items) {
+              preserveCollapsedState(newFolder.items, oldFolder.items);
+            }
+          } else {
+            if ((newItem as any).isCollapsed === undefined) {
+              (newItem as any).isCollapsed = true;
+            }
+          }
+        }
+      }
+    };
+    
     const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void => {
       if (!items) return;
       
@@ -63,7 +95,10 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
       }
     };
     
-    if (hydrated.items) {
+    // Preserve existing collapsed states from previous hydrated collection
+    if (hydratedCollection?.items && hydrated.items) {
+      preserveCollapsedState(hydrated.items, hydratedCollection.items);
+    } else if (hydrated.items) {
       initializeCollapsedState(hydrated.items);
     }
     
@@ -72,19 +107,27 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
 
   // Update selectedItemId when selectedItem changes
   useEffect(() => {
-    if (!selectedItem || !hydratedCollection) {
+    if (!selectedItem) {
+      setSelectedItemId(null);
+      return;
+    }
+
+    const itemWithUuid = selectedItem as any;
+    if (itemWithUuid.uuid) {
+      setSelectedItemId(itemWithUuid.uuid);
+      return;
+    }
+    
+    if (!hydratedCollection?.items) {
       setSelectedItemId(null);
       return;
     }
     
-    // Find the UUID of the selected item
-    const findItemUUID = (items: OpenCollectionItem[] | undefined): string | null => {
-      if (!items) return null;
-      
+    const findItemUUID = (items: OpenCollectionItem[]): string | null => {
       for (const item of items) {
         const itemUuid = (item as any).uuid;
         // Compare by checking if this is the selected item
-        if (itemUuid && 'type' in item && (item as any).type === 'http') {
+        if (itemUuid && 'type' in item && item.type === 'http') {
           const httpItem = item as HttpRequest;
           if (httpItem.name === selectedItem.name && 
               httpItem.method === selectedItem.method &&
@@ -93,7 +136,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
           }
         }
         
-        if ('type' in item && (item as any).type === 'folder') {
+        if ('type' in item && item.type === 'folder') {
           const folder = item as Folder;
           if (folder.items) {
             const found = findItemUUID(folder.items);
@@ -110,10 +153,8 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
   }, [selectedItem, hydratedCollection]);
 
   const toggleFolder = useCallback((uuid: string) => {
-    if (!hydratedCollection?.items) return;
-    
     setHydratedCollection((prev) => {
-      if (!prev) return prev;
+      if (!prev?.items) return prev;
       
       const updated = { ...prev };
       findAndUpdateItem(updated.items, uuid, (item) => {
@@ -123,36 +164,33 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
       
       return updated;
     });
-  }, [hydratedCollection]);
+  }, []);
 
   const handleSelectItem = useCallback((uuid: string) => {
     if (!hydratedCollection?.items) return;
     
-    // Find the item by UUID
-    let foundItem: HttpRequest | null = null;
+    setViewMode('playground');
     
-    const findItem = (items: OpenCollectionItem[] | undefined): boolean => {
-      if (!items) return false;
-      
+    const findItem = (items: OpenCollectionItem[]): HttpRequest | null => {
       for (const item of items) {
         const itemUuid = (item as any).uuid;
-        if (itemUuid === uuid && 'type' in item && (item as any).type === 'http') {
-          foundItem = item as HttpRequest;
-          return true;
+        if (itemUuid === uuid && 'type' in item && item.type === 'http') {
+          return item as HttpRequest;
         }
         
-        if ('type' in item && (item as any).type === 'folder') {
+        if ('type' in item && item.type === 'folder') {
           const folder = item as Folder;
-          if (folder.items && findItem(folder.items)) {
-            return true;
+          if (folder.items) {
+            const found = findItem(folder.items);
+            if (found) return found;
           }
         }
       }
       
-      return false;
+      return null;
     };
     
-    findItem(hydratedCollection.items);
+    const foundItem = findItem(hydratedCollection.items);
     
     if (foundItem) {
       onSelectItem(foundItem);
@@ -165,20 +203,27 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
       // When opening, set to default height immediately
       setIsCollapsed(false);
       setHeight(getDefaultHeight());
+      setViewMode('playground');
     } else {
       // When closing, reset height to 0
       setHeight(0);
+      setViewMode('playground');
     }
   }, [isOpen]);
 
-  const handleDragStart = (e: React.MouseEvent) => {
+  const handleEnvironmentsClick = useCallback(() => {
+    setViewMode('environments');
+    setSelectedItemId(null);
+  }, []);
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
     setIsDragging(true);
     dragStartY.current = e.clientY;
     dragStartHeight.current = height;
     e.preventDefault();
-  };
+  }, [height]);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging) return;
 
     // Calculate delta - dragging up (decreasing clientY) increases height
@@ -195,7 +240,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
     } else {
       setIsCollapsed(false);
     }
-  };
+  }, [isDragging]);
 
   // Update MAX_HEIGHT when window resizes
   useEffect(() => {
@@ -209,9 +254,9 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleMouseUp = () => {
+  const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (isDragging) {
@@ -222,9 +267,9 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging]);
+  }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  const handleToggleCollapse = () => {
+  const handleToggleCollapse = useCallback(() => {
     if (isCollapsed) {
       setIsCollapsed(false);
       setHeight(getDefaultHeight());
@@ -232,7 +277,7 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
       setIsCollapsed(true);
       setHeight(MIN_HEIGHT);
     }
-  };
+  }, [isCollapsed]);
 
   // Don't render if not open
   if (!isOpen) return null;
@@ -373,41 +418,50 @@ const PlaygroundDrawer: React.FC<PlaygroundDrawerProps> = ({
                 overflow: 'hidden'
               }}
             >
-              <Sidebar
-                collection={hydratedCollection}
-                selectedItemId={selectedItemId}
-                onSelectItem={handleSelectItem}
-                onToggleFolder={toggleFolder}
-              />
+                  <Sidebar
+                    collection={hydratedCollection}
+                    selectedItemId={selectedItemId}
+                    onSelectItem={handleSelectItem}
+                    onToggleFolder={toggleFolder}
+                    onEnvironmentsClick={handleEnvironmentsClick}
+                    isEnvironmentsSelected={viewMode === 'environments'}
+                  />
             </div>
 
             {/* Main Playground Content */}
             <div style={{ 
               flex: 1, 
-              overflow: 'auto', 
+              overflow: 'hidden', 
               display: 'flex', 
               flexDirection: 'column', 
               backgroundColor: '#ffffff',
               minHeight: 0
             }}>
-              {selectedItem && collection ? (
-                <Playground
-                  item={selectedItem}
-                  collection={collection}
-                />
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: '#6c757d',
-                  backgroundColor: '#ffffff'
-                }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <p>Select an endpoint from the sidebar to get started</p>
+              {viewMode === 'playground' ? (
+                selectedItem && collection ? (
+                  <Playground
+                    item={selectedItem}
+                    collection={collection}
+                  />
+                ) : (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    color: '#6c757d',
+                    backgroundColor: '#ffffff'
+                  }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <p>Select an endpoint from the sidebar to get started</p>
+                    </div>
                   </div>
-                </div>
+                )
+              ) : (
+                <EnvironmentsView
+                  collection={collection}
+                  onCollectionUpdate={onCollectionUpdate}
+                />
               )}
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Provider } from 'react-redux';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
@@ -7,6 +7,7 @@ import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import PlaygroundDrawer from '../Playground/PlaygroudDrawer/PlaygroundDrawer';
 import Docs from '../Docs/Docs';
 import { parseYaml } from '../../utils/yamlUtils';
+import { hydrateWithUUIDs } from '../../utils/items';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   selectDocsCollection,
@@ -72,9 +73,25 @@ const resolveCollectionSource = async (
 interface DesktopLayoutProps {
   docsCollection: OpenCollectionCollection | null;
   playgroundCollection: OpenCollectionCollection | null;
-  filteredCollectionItems: any[];
+  filteredCollectionItems: OpenCollectionItem[];
   children?: React.ReactNode;
 }
+
+const findItemByUuid = (items: OpenCollectionItem[] | undefined, uuid: string): OpenCollectionItem | null => {
+  if (!items) return null;
+  
+  for (const item of items) {
+    const itemUuid = (item as any).uuid;
+    if (itemUuid === uuid) {
+      return item;
+    }
+    if ('type' in item && item.type === 'folder' && (item as Folder).items) {
+      const found = findItemByUuid((item as Folder).items, uuid);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   docsCollection,
@@ -84,40 +101,44 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
   const selectedItemId = useAppSelector(selectSelectedItemId);
   const [playgroundItem, setPlaygroundItem] = useState<HttpRequest | null>(null);
   const [showPlaygroundDrawer, setShowPlaygroundDrawer] = useState(false);
+  const prevSelectedItemIdRef = useRef(selectedItemId);
+  const playgroundItemUuidRef = useRef<string | undefined>(undefined);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    playgroundItemUuidRef.current = (playgroundItem as any)?.uuid;
+  }, [playgroundItem]);
 
   // Update playground item when selected item changes (but don't open drawer)
   useEffect(() => {
-    if (selectedItemId && docsCollection) {
-      const findItem = (items: any[]): any => {
-        for (const item of items) {
-          const itemUuid = (item as any).uuid;
-          if (itemUuid === selectedItemId) {
-            return item;
-          }
-          if ('type' in item && item.type === 'folder' && (item as Folder).items) {
-            const found = findItem((item as Folder).items || []);
-            if (found) return found;
-          }
-        }
-        return null;
-      };
+    const selectionChanged = prevSelectedItemIdRef.current !== selectedItemId;
+    prevSelectedItemIdRef.current = selectedItemId;
 
-      const item = docsCollection.items ? findItem(docsCollection.items) : null;
+    if (selectedItemId && playgroundCollection) {
+      if (!selectionChanged && playgroundItemUuidRef.current && playgroundItemUuidRef.current !== selectedItemId) {
+        return;
+      }
+
+      const item = findItemByUuid(playgroundCollection.items, selectedItemId);
       if (item && item.type === 'http') {
         setPlaygroundItem(item as HttpRequest);
         // Don't open drawer automatically - only open when "Try" is clicked
       }
     }
-  }, [selectedItemId, docsCollection]);
+  }, [selectedItemId, playgroundCollection]);
 
-  const handlePlaygroundItemSelect = (item: HttpRequest) => {
+  const handlePlaygroundItemSelect = useCallback((item: HttpRequest) => {
     // Only update the playground item, don't affect the docs view
     setPlaygroundItem(item);
-  };
+  }, []);
 
-  const handleOpenPlayground = () => {
+  const handleOpenPlayground = useCallback(() => {
     setShowPlaygroundDrawer(true);
-  };
+  }, []);
+  
+  const handleCollectionUpdate = useCallback((updatedCollection: OpenCollectionCollection) => {
+    dispatch(setPlaygroundCollection(updatedCollection));
+  }, [dispatch]);
 
   return (
     <div className="flex h-screen">
@@ -133,6 +154,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         collection={playgroundCollection}
         selectedItem={playgroundItem}
         onSelectItem={handlePlaygroundItemSelect}
+        onCollectionUpdate={handleCollectionUpdate}
       />
     </div>
   );
@@ -167,8 +189,11 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
         if (!isActive) {
           return;
         }
-        dispatch(setDocsCollection(resolved));
-        dispatch(setPlaygroundCollection(resolved));
+        // Hydrate collection with UUIDs before saving to Redux
+        const hydrated = hydrateWithUUIDs(resolved);
+        
+        dispatch(setDocsCollection(hydrated));
+        dispatch(setPlaygroundCollection(hydrated));
         dispatch(setCollectionSucceeded());
       } catch (err) {
         if (!isActive) {
@@ -193,8 +218,9 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     if (isFileInstance(collection) || typeof collection === 'string') {
       void load();
     } else {
-      dispatch(setDocsCollection(collection as OpenCollectionCollection));
-      dispatch(setPlaygroundCollection(collection as OpenCollectionCollection));
+      const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
+      dispatch(setDocsCollection(hydrated));
+      dispatch(setPlaygroundCollection(hydrated));
       dispatch(setCollectionSucceeded());
     }
 
@@ -203,7 +229,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     };
   }, [collection, dispatch]);
 
-  const filteredCollectionItems = docsCollection?.items || [];
+  const filteredCollectionItems: OpenCollectionItem[] = docsCollection?.items || [];
 
   const isInitialLoad =
     collectionStatus === 'idle' && !docsCollection && !playgroundCollection;
@@ -213,7 +239,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   // Set initial page to first root-level request when collection loads
   useEffect(() => {
     if (docsCollection && selectedItemId === null) {
-      const items = docsCollection.items as any[] | undefined;
+      const items = docsCollection.items;
 
       const firstRequest = items?.find((item) => item.type === 'http');
       if (firstRequest && (firstRequest as any).uuid) {

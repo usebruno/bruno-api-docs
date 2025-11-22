@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
@@ -11,15 +11,19 @@ export interface SidebarProps {
   selectedItemId: string | null;
   onSelectItem: (uuid: string) => void;
   onToggleFolder: (uuid: string) => void;
+  onEnvironmentsClick?: () => void;
+  isEnvironmentsSelected?: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   collection,
   selectedItemId,
   onSelectItem,
-  onToggleFolder
+  onToggleFolder,
+  onEnvironmentsClick,
+  isEnvironmentsSelected = false
 }) => {
-  const renderFolderIcon = (isExpanded: boolean) => (
+  const renderFolderIcon = useCallback((isExpanded: boolean) => (
     <svg 
       width="14" 
       height="14" 
@@ -37,19 +41,21 @@ const Sidebar: React.FC<SidebarProps> = ({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  ), []);
 
-  const renderItem = (item: any, level = 0, parentPath = '') => {
+  const renderItem = useCallback((item: OpenCollectionItem, level = 0): React.ReactNode => {
     
     const isFolder = item.type === 'folder';
     // Use UUID for active state comparison
-    const isActive = !isFolder && selectedItemId === item.uuid;
+    const isActive = !isFolder && !isEnvironmentsSelected && selectedItemId === (item as any).uuid;
     
     // Read isCollapsed from the item itself (defaults to true if not set)
     const isExpanded = isFolder ? !((item as any).isCollapsed ?? true) : false;
     
+    const itemUuid = (item as any).uuid;
+    
     return (
-      <div key={item.uuid} className="relative">
+      <div key={itemUuid} className="relative">
         <SidebarItem
           className={`
             flex items-center select-none text-sm cursor-pointer
@@ -60,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           style={{ 
             paddingLeft: `${level * 16 + 8}px`
           }}
-          onClick={() => isFolder ? onToggleFolder(item.uuid) : onSelectItem(item.uuid)}
+          onClick={() => isFolder ? onToggleFolder(itemUuid) : onSelectItem(itemUuid)}
         >
           
           {level > 0 && (
@@ -75,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}
           
           {isFolder ? (
-            <div className="mr-2 flex-shrink-0">
+            <div className="mr-2 shrink-0">
               {renderFolderIcon(isExpanded)}
             </div>
           ) : (
@@ -87,7 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           
           
           <div className="truncate flex-1">
-            {item.name}
+            {(item as any).name}
           </div>
         </SidebarItem>
         
@@ -109,17 +115,48 @@ const Sidebar: React.FC<SidebarProps> = ({
         )}
       </div>
     );
-  };
+  }, [isEnvironmentsSelected, selectedItemId, onToggleFolder, onSelectItem, renderFolderIcon]);
 
   return (
     <SidebarContainer className="h-full flex flex-col" style={{ width: 'var(--sidebar-width)' }}>
       {/* Collection name at top */}
-      <div className="p-4 pt-0">
+      <div className="p-4 pb-0">
         <div className="flex items-center">
           <h1 className="font-semibold truncate flex-1" style={{ color: 'var(--text-primary)' }}>
-            {collection?.name || 'API Collection'}
+            {collection?.info?.name || 'API Collection'}
           </h1>
         </div>
+      </div>
+
+      <div className="p-2">
+      {onEnvironmentsClick && (
+          <SidebarItem
+            className={`
+              flex items-center select-none text-sm cursor-pointer border border-gray-200 rounded-md p-2
+              ${isEnvironmentsSelected ? 'active' : ''}
+              transition-all duration-200
+            `}
+            onClick={onEnvironmentsClick}
+          >
+            <svg 
+              width="14" 
+              height="14" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2"
+              style={{ marginRight: '8px', flexShrink: 0 }}
+            >
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+            <div className="truncate flex-1">
+              Environments ({((collection as any).environments?.length || collection?.config?.environments?.length || 0)})
+            </div>
+          </SidebarItem>
+        )}
       </div>
       
       <SidebarItems>

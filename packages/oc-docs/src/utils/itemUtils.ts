@@ -3,6 +3,7 @@
  */
 
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import { getItemName, getItemType, isFolder } from './schemaHelpers';
 
 /**
  * Generate a safe HTML ID from an item name or ID
@@ -20,18 +21,18 @@ export const generateSafeId = (input: string): string => {
 };
 
 /**
- * Get the effective ID for an item (prefers id, falls back to uid, then name)
- * @param item The Bruno item
+ * Get the effective ID for an item (prefers id, falls back to uid, then name from info block)
+ * @param item The OpenCollection item
  * @returns The effective ID string
  */
 export const getItemId = (item: any): string => {
   if (!item) return 'unnamed-item';
-  return item.id || item.uid || item.name || 'unnamed-item';
+  return item.id || item.uid || getItemName(item) || item.name || 'unnamed-item';
 };
 
 /**
  * Generate a section ID for use in HTML elements
- * @param item The Bruno item
+ * @param item The OpenCollection item
  * @param parentPath Optional parent path for nested items
  * @returns A safe section ID
  */
@@ -59,8 +60,11 @@ export const sortItemsWithFoldersFirst = (items: OpenCollectionItem[]): OpenColl
   
   return [...items].filter(item => item != null).sort((a, b) => {
     // Folders come first
-    if (a.type === 'folder' && b.type !== 'folder') return -1;
-    if (a.type !== 'folder' && b.type === 'folder') return 1;
+    const aIsFolder = isFolder(a);
+    const bIsFolder = isFolder(b);
+    
+    if (aIsFolder && !bIsFolder) return -1;
+    if (!aIsFolder && bIsFolder) return 1;
     
     // Within the same type, sort alphabetically by name
     const nameA = getItemId(a).toLowerCase();

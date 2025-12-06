@@ -8,6 +8,7 @@ import PlaygroundDrawer from '../PlaygroundDrawer/PlaygroundDrawer';
 import Docs from '../Docs/Docs';
 import { parseYaml } from '../../utils/yamlUtils';
 import { hydrateWithUUIDs } from '../../utils/items';
+import { getItemType, isFolder, isHttpRequest } from '../../utils/schemaHelpers';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   selectDocsCollection,
@@ -85,7 +86,7 @@ const findItemByUuid = (items: OpenCollectionItem[] | undefined, uuid: string): 
     if (itemUuid === uuid) {
       return item;
     }
-    if ('type' in item && item.type === 'folder' && (item as Folder).items) {
+    if (isFolder(item) && (item as Folder).items) {
       const found = findItemByUuid((item as Folder).items, uuid);
       if (found) return found;
     }
@@ -120,7 +121,8 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
       }
 
       const item = findItemByUuid(playgroundCollection.items, selectedItemId);
-      if (item && (item.type === 'http' || item.type === 'folder')) {
+      const itemType = item ? getItemType(item) : undefined;
+      if (item && (itemType === 'http' || itemType === 'folder')) {
         setPlaygroundItem(item as HttpRequest | Folder);
         // Don't open drawer automatically - only open when "Try" is clicked
       }
@@ -236,7 +238,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     if (docsCollection && selectedItemId === null) {
       const items = docsCollection.items;
 
-      const firstRequest = items?.find((item) => item.type === 'http');
+      const firstRequest = items?.find((item) => isHttpRequest(item));
       if (firstRequest && (firstRequest as any).uuid) {
         dispatch(selectItem((firstRequest as any).uuid));
       } else if (items && items.length > 0) {

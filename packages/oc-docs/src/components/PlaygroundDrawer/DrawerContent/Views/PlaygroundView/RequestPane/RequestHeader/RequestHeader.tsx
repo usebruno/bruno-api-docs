@@ -1,6 +1,7 @@
 import React from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import { getItemName } from '../../../../../../../utils/schemaHelpers';
 
 interface RequestHeaderProps {
   item: HttpRequest;
@@ -19,6 +20,8 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
   toggleRunnerMode,
   readOnlyEnvironment = false
 }) => {
+  const itemName = getItemName(item) || 'Untitled Request';
+  
   return (
     <div 
       className="flex items-center justify-between my-4"
@@ -35,9 +38,9 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
             letterSpacing: '-0.015em',
             lineHeight: '1.3'
           }}
-          title={item.name || 'Untitled Request'}
+          title={itemName}
         >
-          {item.name || 'Untitled Request'}
+          {itemName}
         </h2>
       </div>
     </div>

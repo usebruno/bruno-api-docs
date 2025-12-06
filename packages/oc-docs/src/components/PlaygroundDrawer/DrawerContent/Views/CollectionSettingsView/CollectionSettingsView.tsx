@@ -5,6 +5,7 @@ import { type KeyValueRow } from '../../../../../ui/KeyValueTable/KeyValueTable'
 import { HeadersTab, VariablesTab, AuthTab, ScriptsTab } from '../Common';
 import { useAppDispatch } from '../../../../../store/hooks';
 import { updateCollectionSettings } from '@slices/playground';
+import { scriptsArrayToObject, scriptsObjectToArray } from '../../../../../utils/schemaHelpers';
 
 interface CollectionSettingsProps {
   collection: OpenCollection;
@@ -49,16 +50,16 @@ const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection }) =
   };
 
   const handleScriptChange = (scriptType: 'preRequest' | 'postResponse' | 'tests', value: string) => {
+    const currentScriptsObj = scriptsArrayToObject(collection.request?.scripts);
+    const updatedScriptsObj = { ...currentScriptsObj, [scriptType]: value };
+    
     const updatedCollection = {
       ...collection,
       request: {
         ...collection.request,
-        scripts: {
-          ...collection.request?.scripts,
-          [scriptType]: value
-        }
+        scripts: scriptsObjectToArray(updatedScriptsObj)
       }
-    };
+    } as OpenCollection;
     dispatch(updateCollectionSettings(updatedCollection));
   };
 
@@ -202,7 +203,7 @@ const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection }) =
 
   const renderScripts = () => (
     <ScriptsTab
-      scripts={collection.request?.scripts || {}}
+      scripts={scriptsArrayToObject(collection.request?.scripts)}
       onScriptChange={handleScriptChange}
       title="Collection Scripts"
       description="These scripts will run for all requests in this collection"

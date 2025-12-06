@@ -1,5 +1,6 @@
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
+import { getItemType, isFolder } from './schemaHelpers';
 
 /**
  * Helper function to find and update an item by UUID
@@ -22,7 +23,7 @@ export const findAndUpdateItem = (
       return true;
     }
     
-    if ('type' in item && item.type === 'folder') {
+    if (isFolder(item)) {
       const folder = item as Folder;
       if (folder.items && findAndUpdateItem(folder.items, uuid, updater)) {
         return true;
@@ -47,7 +48,7 @@ export const hydrateWithUUIDs = (collection: OpenCollectionCollection): OpenColl
     const hydratedItem = { ...item, uuid } as any;
     
     // If it's a folder, recursively hydrate its children
-    if ('type' in item && item.type === 'folder') {
+    if (isFolder(item)) {
       const folder = item as Folder;
       if (folder.items && folder.items.length > 0) {
         hydratedItem.items = folder.items.map(assignUUID);

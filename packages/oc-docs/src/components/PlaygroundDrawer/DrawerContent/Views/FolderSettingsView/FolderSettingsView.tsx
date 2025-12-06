@@ -6,6 +6,7 @@ import { type KeyValueRow } from '../../../../../ui/KeyValueTable/KeyValueTable'
 import { HeadersTab, VariablesTab, AuthTab, ScriptsTab } from '../Common';
 import { useAppDispatch } from '../../../../../store/hooks';
 import { updateFolderInCollection } from '@slices/playground';
+import { getItemName, getRequestScripts, scriptsArrayToObject, scriptsObjectToArray } from '../../../../../utils/schemaHelpers';
 
 interface FolderSettingsProps {
   folder: Folder;
@@ -66,16 +67,16 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({
   };
 
   const handleScriptChange = (scriptType: 'preRequest' | 'postResponse' | 'tests', value: string) => {
+    const currentScriptsObj = scriptsArrayToObject(folder.request?.scripts);
+    const updatedScriptsObj = { ...currentScriptsObj, [scriptType]: value };
+    
     const updatedFolder = {
       ...folder,
       request: {
         ...folder.request,
-        scripts: {
-          ...folder.request?.scripts,
-          [scriptType]: value
-        }
+        scripts: scriptsObjectToArray(updatedScriptsObj)
       }
-    };
+    } as Folder;
     
     const uuid = (folder as any).uuid;
     if (uuid) {
@@ -149,7 +150,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({
 
   const renderScripts = () => (
     <ScriptsTab
-      scripts={folder.request?.scripts || {}}
+      scripts={scriptsArrayToObject(folder.request?.scripts)}
       onScriptChange={handleScriptChange}
       title="Folder Scripts"
       description="These scripts will run for all requests in this folder"
@@ -186,7 +187,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({
     <div className="h-full flex flex-col px-4">
       <div className="border-b my-2 py-2" style={{ borderColor: 'var(--border-color)' }}>
         <h2 className="text-lg font-semibold leading-tight mb-2" style={{ color: 'var(--text-primary)' }}>
-          {folder.name || 'Folder Settings'}
+          {getItemName(folder) || 'Folder Settings'}
         </h2>
         <p className="text-sm mt-1 leading-tight" style={{ color: 'var(--text-secondary)' }}>
           Configure default settings for all requests in this folder

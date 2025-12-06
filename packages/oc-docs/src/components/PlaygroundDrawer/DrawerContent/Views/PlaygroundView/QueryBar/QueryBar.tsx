@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { StyledWrapper } from './StyledWrapper';
+import { getHttpMethod, getRequestUrl } from '../../../../../../utils/schemaHelpers';
 
 interface QueryBarProps {
   item: HttpRequest;
@@ -10,17 +11,25 @@ interface QueryBarProps {
 }
 
 const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onItemChange }) => {
-  const [url, setUrl] = useState(item.url || '');
-  const [method, setMethod] = useState(item.method || 'GET');
+  const [url, setUrl] = useState(getRequestUrl(item));
+  const [method, setMethod] = useState(getHttpMethod(item));
 
   useEffect(() => {
-    setUrl(item.url || '');
-    setMethod(item.method || 'GET');
+    setUrl(getRequestUrl(item));
+    setMethod(getHttpMethod(item));
   }, [item]);
 
   const handleUrlChange = (newUrl: string) => {
     setUrl(newUrl);
-    onItemChange({ ...item, url: newUrl });
+    // Update URL in new schema structure
+    const updatedItem = {
+      ...item,
+      http: {
+        ...item.http,
+        url: newUrl
+      }
+    };
+    onItemChange(updatedItem);
   };
 
   const getMethodColor = (method: string) => {

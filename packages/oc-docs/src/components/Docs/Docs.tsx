@@ -3,6 +3,7 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import Sidebar from './Sidebar/Sidebar';
 import Item from './Item/Item';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
+import { isFolder } from '../../utils/schemaHelpers';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectSelectedItemId, selectItem } from '../../store/slices/docs';
 
@@ -36,7 +37,7 @@ const Docs: React.FC<DocsProps> = ({
           }
           
           // If it's a folder, search recursively
-          if (item.type === 'folder' && item.items) {
+          if (isFolder(item) && item.items) {
             const found = findItemForScroll(item.items);
             if (found) return found;
           }
@@ -69,7 +70,7 @@ const Docs: React.FC<DocsProps> = ({
       result.push(item);
       
       // If it's a folder, recursively add its children
-      if (item.type === 'folder') {
+      if (isFolder(item)) {
         const folder = item as any;
         if (folder.items && folder.items.length > 0) {
           result.push(...flattenItems(folder.items, itemPath));

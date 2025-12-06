@@ -4,6 +4,17 @@ import type { Assertion } from '@opencollection/types/common/assertions';
 import Tabs from '../../../../../../ui/Tabs/Tabs';
 import { KeyValueRow } from '../../../../../../ui/KeyValueTable/KeyValueTable';
 import { HeadersTab, ParamsTab, BodyTab, AuthTab, ScriptsTab, TestsTab, AssertsTab, VariablesTab } from '../../Common';
+import { 
+  getHttpParams, 
+  getHttpHeaders, 
+  getHttpBody, 
+  getRequestAuth, 
+  getRequestVariables, 
+  getRequestAssertions,
+  getRequestScripts,
+  scriptsArrayToObject,
+  scriptsObjectToArray
+} from '../../../../../../utils/schemaHelpers';
 
 interface RequestPaneProps {
   item: HttpRequest;
@@ -20,7 +31,13 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
       disabled: !p.enabled,
       type: 'query' as const
     }));
-    onItemChange({ ...item, params: updatedParams });
+    onItemChange({ 
+      ...item, 
+      http: { 
+        ...item.http, 
+        params: updatedParams 
+      } 
+    });
   };
 
   const handleHeadersChange = (headers: KeyValueRow[]) => {
@@ -29,41 +46,71 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
       value: h.value,
       disabled: !h.enabled
     }));
-    onItemChange({ ...item, headers: updatedHeaders });
+    onItemChange({ 
+      ...item, 
+      http: { 
+        ...item.http, 
+        headers: updatedHeaders 
+      } 
+    });
   };
 
   const handleScriptChange = (scriptType: 'preRequest' | 'postResponse' | 'tests', value: string) => {
-    const scripts = item.scripts || {};
+    const scriptsObj = scriptsArrayToObject(getRequestScripts(item));
+    const updatedScriptsObj = { ...scriptsObj, [scriptType]: value };
     onItemChange({
       ...item,
-      scripts: { ...scripts, [scriptType]: value }
+      runtime: { 
+        ...item.runtime, 
+        scripts: scriptsObjectToArray(updatedScriptsObj) 
+      }
     });
   };
 
   const handleAssertionsChange = (assertions: Assertion[]) => {
-    onItemChange({ ...item, assertions });
+    onItemChange({ 
+      ...item, 
+      runtime: { 
+        ...item.runtime, 
+        assertions 
+      } 
+    });
   };
 
   const handleRequestVariablesChange = (variables: KeyValueRow[]) => {
-    onItemChange({ ...item, variables });
     const updatedVariables = variables.map(v => ({
       name: v.name,
       value: v.value,
       disabled: !v.enabled
     }));
-    onItemChange({ ...item, variables: updatedVariables });
+    onItemChange({ 
+      ...item, 
+      runtime: { 
+        ...item.runtime, 
+        variables: updatedVariables 
+      } 
+    });
   };
+
+  // Get values using helper functions
+  const params = getHttpParams(item);
+  const headers = getHttpHeaders(item);
+  const body = getHttpBody(item);
+  const auth = getRequestAuth(item);
+  const variables = getRequestVariables(item);
+  const assertions = getRequestAssertions(item);
+  const scriptsObj = scriptsArrayToObject(getRequestScripts(item));
 
   const renderParams = () => (
     <ParamsTab
-      params={item.params || []}
+      params={params}
       onParamsChange={handleParamsChange}
     />
   );
 
   const renderVariables = () => (
     <VariablesTab
-      variables={item.variables || []}
+      variables={variables}
       onVariablesChange={handleRequestVariablesChange}
       title="Request Variables"
       description="These variables will be available to this request"
@@ -72,14 +119,14 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
 
   const renderHeaders = () => (
     <HeadersTab
-      headers={item.headers || []}
+      headers={headers}
       onHeadersChange={handleHeadersChange}
     />
   );
 
   const renderBody = () => (
     <BodyTab
-      body={item.body}
+      body={body}
       onItemChange={onItemChange}
       item={item}
     />
@@ -87,7 +134,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
 
   const renderAuth = () => (
     <AuthTab
-      auth={item.auth}
+      auth={auth}
       onAuthChange={() => {}} // Not used for full auth
       onItemChange={onItemChange}
       item={item}
@@ -97,7 +144,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
 
   const renderScripts = () => (
     <ScriptsTab
-      scripts={item.scripts || {}}
+      scripts={scriptsObj}
       onScriptChange={handleScriptChange}
       showTests={false}
     />
@@ -105,46 +152,46 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
 
   const renderAssertions = () => (
     <AssertsTab
-      assertions={item.assertions || []}
+      assertions={assertions}
       onAssertionsChange={handleAssertionsChange}
     />
   );
 
   const renderTests = () => (
     <TestsTab
-      scripts={item.scripts || {}}
+      scripts={scriptsObj}
       onScriptChange={handleScriptChange}
     />
   );
 
   // Calculate content indicators
-  const hasBody = item.body && (
-    (item.body as any).data || 
-    (Array.isArray(item.body) && item.body.length > 0)
+  const hasBody = body && (
+    (body as any).data || 
+    (Array.isArray(body) && body.length > 0)
   );
-  const hasScripts = item.scripts && (
-    item.scripts.preRequest || 
-    item.scripts.postResponse
+  const hasScripts = scriptsObj && (
+    scriptsObj.preRequest || 
+    scriptsObj.postResponse
   );
-  const hasTests = item.scripts?.tests;
+  const hasTests = scriptsObj?.tests;
 
   const tabs = [
     { 
       id: 'params', 
       label: 'Params', 
-      contentIndicator: item.params?.length || undefined, 
+      contentIndicator: params?.length || undefined, 
       content: <div className="py-3">{renderParams()}</div> 
     },
     { 
       id: 'variables', 
       label: 'Variables', 
-      contentIndicator: item.variables?.length || undefined,
+      contentIndicator: variables?.length || undefined,
       content: <div className="py-3">{renderVariables()}</div>
     },
     { 
       id: 'headers', 
       label: 'Headers', 
-      contentIndicator: item.headers?.length || undefined, 
+      contentIndicator: headers?.length || undefined, 
       content: <div className="py-3">{renderHeaders()}</div> 
     },
     { 
@@ -156,7 +203,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
     { 
       id: 'auth', 
       label: 'Auth',
-      contentIndicator: item.auth ? '•' : undefined,
+      contentIndicator: auth ? '•' : undefined,
       content: <div className="py-3">{renderAuth()}</div> 
     },
     { 
@@ -168,7 +215,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange }) => {
     { 
       id: 'assertions', 
       label: 'Assertions', 
-      contentIndicator: item.assertions?.length || undefined, 
+      contentIndicator: assertions?.length || undefined, 
       content: <div className="py-3">{renderAssertions()}</div> 
     },
     { 

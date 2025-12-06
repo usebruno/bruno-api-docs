@@ -1,5 +1,6 @@
-import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Environment } from '@opencollection/types/config/environments';
+import { getRequestUrl, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '../../utils/schemaHelpers';
 
 /**
  * Simple variable interpolation function
@@ -110,36 +111,50 @@ export const interpolateVars = (
     return interpolate(str, combinedVariables, options);
   };
 
+  // Ensure http block exists for mutations
+  if (!interpolatedRequest.http) {
+    interpolatedRequest.http = { method: 'GET', url: '' };
+  }
+  
+  // Ensure runtime block exists for mutations
+  if (!interpolatedRequest.runtime) {
+    interpolatedRequest.runtime = {};
+  }
+
   // Interpolate URL
-  if (interpolatedRequest.url) {
-    interpolatedRequest.url = _interpolate(interpolatedRequest.url);
+  const currentUrl = getRequestUrl(interpolatedRequest);
+  if (currentUrl) {
+    interpolatedRequest.http.url = _interpolate(currentUrl);
   }
 
   // Interpolate headers
-  if (interpolatedRequest.headers) {
-    const newHeaders: typeof interpolatedRequest.headers = [];
-    interpolatedRequest.headers.forEach(header => {
+  const currentHeaders = getHttpHeaders(interpolatedRequest);
+  if (currentHeaders && currentHeaders.length > 0) {
+    const newHeaders: HttpRequestHeader[] = [];
+    currentHeaders.forEach((header: HttpRequestHeader) => {
       newHeaders.push({
         ...header,
         name: _interpolate(header.name),
         value: _interpolate(header.value)
       });
     });
-    interpolatedRequest.headers = newHeaders;
+    interpolatedRequest.http.headers = newHeaders;
   }
 
   // Get content type for body interpolation
   const headerMap: Record<string, string> = {};
-  if (interpolatedRequest.headers) {
-    interpolatedRequest.headers.forEach(header => {
+  const headersForContentType = getHttpHeaders(interpolatedRequest);
+  if (headersForContentType) {
+    headersForContentType.forEach((header: HttpRequestHeader) => {
       headerMap[header.name] = header.value;
     });
   }
   const contentType = getContentType(headerMap);
 
   // Interpolate body based on content type
-  if (interpolatedRequest.body) {
-    const body = interpolatedRequest.body;
+  const currentBody = getHttpBody(interpolatedRequest);
+  if (currentBody) {
+    const body = currentBody;
     
     if ('type' in body && 'data' in body) {
       if (contentType.includes('json') && body.type === 'json') {
@@ -150,7 +165,7 @@ export const interpolateVars = (
       } else if (contentType === 'application/x-www-form-urlencoded' && body.type === 'form-urlencoded') {
         // Handle form-urlencoded body
         if ('data' in body && Array.isArray(body.data)) {
-          body.data = body.data.map(entry => ({
+          body.data = body.data.map((entry: any) => ({
             ...entry,
             value: _interpolate(entry.value)
           }));
@@ -158,10 +173,10 @@ export const interpolateVars = (
       } else if (contentType === 'multipart/form-data' && body.type === 'multipart-form') {
         // Handle multipart form body
         if ('data' in body && Array.isArray(body.data)) {
-          body.data = body.data.map(entry => ({
+          body.data = body.data.map((entry: any) => ({
             ...entry,
             value: Array.isArray(entry.value) 
-              ? entry.value.map(v => _interpolate(String(v)))
+              ? entry.value.map((v: any) => _interpolate(String(v)))
               : _interpolate(String(entry.value))
           }));
         }
@@ -171,12 +186,14 @@ export const interpolateVars = (
           body.data = _interpolate(body.data);
         }
       }
+      interpolatedRequest.http.body = body;
     }
   }
 
   // Interpolate query parameters
-  if (interpolatedRequest.params) {
-    interpolatedRequest.params = interpolatedRequest.params.map(param => ({
+  const currentParams = getHttpParams(interpolatedRequest);
+  if (currentParams && currentParams.length > 0) {
+    interpolatedRequest.http.params = currentParams.map((param: any) => ({
       ...param,
       name: _interpolate(param.name),
       value: _interpolate(param.value)
@@ -184,8 +201,9 @@ export const interpolateVars = (
   }
 
   // Interpolate authentication
-  if (interpolatedRequest.auth && typeof interpolatedRequest.auth === 'object') {
-    const auth = interpolatedRequest.auth;
+  const currentAuth = getRequestAuth(interpolatedRequest);
+  if (currentAuth && typeof currentAuth === 'object') {
+    const auth = currentAuth;
     
     switch (auth.type) {
       case 'basic':

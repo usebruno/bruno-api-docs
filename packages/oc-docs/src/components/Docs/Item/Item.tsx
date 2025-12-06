@@ -9,6 +9,23 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable } from '@opencollection/types/common/variables';
 import { generateSectionId, getItemId } from '../../../utils/itemUtils';
 import {
+  getItemType,
+  getItemName,
+  getItemDocs,
+  getHttpMethod,
+  getRequestUrl,
+  getHttpHeaders,
+  getHttpBody,
+  getHttpParams,
+  getRequestAuth,
+  getRequestVariables,
+  getRequestAssertions,
+  getRequestScripts,
+  scriptsArrayToObject,
+  isFolder,
+  isHttpRequest
+} from '../../../utils/schemaHelpers';
+import {
   MinimalDataTable,
   CompactCodeView,
   StatusBadge
@@ -47,8 +64,13 @@ const Item = memo(({
 
   const baseContainerClass = 'item-container';
 
-  if (item.type === 'folder') {
+  if (isFolder(item)) {
     const folderItem = item as any;
+    const folderName = getItemName(folderItem) || 'Untitled Folder';
+    const folderDocs = getItemDocs(folderItem);
+    const folderHeaders = folderItem.request?.headers || [];
+    const folderVariables = getRequestVariables(folderItem);
+    const folderScripts = scriptsArrayToObject(getRequestScripts(folderItem));
 
     return (
       <StyledWrapper
@@ -64,20 +86,20 @@ const Item = memo(({
               </svg>
               <span>Folder</span>
             </div>
-            <h1 className="item-title">{folderItem.name || 'Untitled Folder'}</h1>
+            <h1 className="item-title">{folderName}</h1>
           </div>
         </div>
 
-        {folderItem.docs && (
+        {folderDocs && (
           <div className="item-docs">
-            <div dangerouslySetInnerHTML={{ __html: md.render(String(folderItem.docs)) }} />
+            <div dangerouslySetInnerHTML={{ __html: md.render(String(folderDocs)) }} />
           </div>
         )}
 
         <div className="item-content-grid">
-          {folderItem.headers && folderItem.headers.length > 0 && (
+          {folderHeaders && folderHeaders.length > 0 && (
             <MinimalDataTable
-              data={folderItem.headers}
+              data={folderHeaders}
               title="Headers"
               columns={[
                 { key: 'name', label: 'Name', width: '30%' },
@@ -87,11 +109,11 @@ const Item = memo(({
             />
           )}
 
-          {folderItem.variables && folderItem.variables.length > 0 && (
+          {folderVariables && folderVariables.length > 0 && (
             <MinimalDataTable
-              data={folderItem.variables.map((v: Variable) => ({
+              data={folderVariables.map((v: Variable) => ({
                 name: v.name,
-                value: v.value || v.default || '',
+                value: v.value || '',
                 enabled: !v.disabled
               }))}
               title="Variables"
@@ -104,16 +126,19 @@ const Item = memo(({
           )}
 
           <Scripts
-            preRequest={folderItem.scripts?.preRequest}
-            postResponse={folderItem.scripts?.postResponse}
+            preRequest={folderScripts.preRequest}
+            postResponse={folderScripts.postResponse}
           />
         </div>
       </StyledWrapper>
     );
   }
 
-  if (item.type === 'script') {
+  const itemType = getItemType(item);
+  
+  if (itemType === 'script') {
     const scriptItem = item as any;
+    const scriptName = getItemName(scriptItem) || 'Untitled Script';
 
     return (
       <StyledWrapper
@@ -130,7 +155,7 @@ const Item = memo(({
               </svg>
               <span>Script</span>
             </div>
-            <h1 className="item-title">{scriptItem.name || 'Untitled Script'}</h1>
+            <h1 className="item-title">{scriptName}</h1>
           </div>
         </div>
 
@@ -144,23 +169,24 @@ const Item = memo(({
     );
   }
 
-  if (item.type === 'http') {
+  if (itemType === 'http') {
     const httpItem = item as HttpRequest;
+    const scripts = scriptsArrayToObject(getRequestScripts(httpItem));
 
     const endpoint = {
       id: itemId,
-      name: httpItem.name || 'Untitled',
-      method: httpItem.method || 'GET',
-      url: httpItem.url || '',
-      description: httpItem.docs || '',
-      headers: httpItem.headers || [],
-      body: httpItem.body || { mode: 'none' },
-      params: httpItem.params || [],
-      auth: httpItem.auth || { mode: 'none' },
-      vars: httpItem.variables || {},
-      assertions: httpItem.assertions || [],
+      name: getItemName(httpItem) || 'Untitled',
+      method: getHttpMethod(httpItem),
+      url: getRequestUrl(httpItem),
+      description: getItemDocs(httpItem) || '',
+      headers: getHttpHeaders(httpItem),
+      body: getHttpBody(httpItem) || { mode: 'none' },
+      params: getHttpParams(httpItem),
+      auth: getRequestAuth(httpItem) || { mode: 'none' },
+      vars: getRequestVariables(httpItem),
+      assertions: getRequestAssertions(httpItem),
       tests: '',
-      script: httpItem.scripts || {}
+      script: scripts
     };
 
     return (
@@ -295,13 +321,13 @@ const Item = memo(({
       className={baseContainerClass}
     >
       <div className="item-header-minimal">
-        <h1 className="item-title">{(item as any).name || 'Untitled Item'}</h1>
-        <p className="item-subtitle">Unsupported item type: {(item as any).type}</p>
+        <h1 className="item-title">{getItemName(item) || 'Untitled Item'}</h1>
+        <p className="item-subtitle">Unsupported item type: {itemType}</p>
       </div>
     </StyledWrapper>
   );
 }, (prevProps, nextProps) => {
-  if (prevProps.item.type !== nextProps.item.type) {
+  if (getItemType(prevProps.item) !== getItemType(nextProps.item)) {
     return false;
   }
 

@@ -3,6 +3,7 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { RootState } from '../store';
 import { hydrateWithUUIDs, findAndUpdateItem } from '../../utils/items';
+import { isFolder } from '../../utils/schemaHelpers';
 
 export interface DocsState {
   collection: OpenCollectionCollection | null;
@@ -19,7 +20,7 @@ const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void
   if (!items) return;
   
   for (const item of items) {
-    if ('type' in item && item.type === 'folder') {
+    if (isFolder(item)) {
       // Initialize isCollapsed to true (collapsed) if not already set
       if ((item as any).isCollapsed === undefined) {
         (item as any).isCollapsed = true;

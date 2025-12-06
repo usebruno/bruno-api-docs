@@ -1,6 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item, Folder } from '@opencollection/types/collection/item';
+import { getItemType, getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest } from '../../utils/schemaHelpers';
 
 /**
  * Find the path from collection root to a specific item
@@ -17,12 +18,12 @@ export const getTreePathFromCollectionToItem = (
     for (const item of items) {
       const newPath = [...currentPath, item];
       
-      if (item.type === 'http' && isSameHttpRequest(item as HttpRequest, targetItem)) {
+      if (isHttpRequest(item) && isSameHttpRequest(item as HttpRequest, targetItem)) {
         path.push(...newPath);
         return true;
       }
       
-      if (item.type === 'folder') {
+      if (isFolder(item)) {
         const folder = item as Folder;
         if (findItemPath(folder.items, newPath)) {
           return true;
@@ -44,8 +45,8 @@ export const getTreePathFromCollectionToItem = (
  */
 const isSameHttpRequest = (item1: HttpRequest, item2: HttpRequest): boolean => {
   return (
-    item1.name === item2.name &&
-    item1.method === item2.method &&
-    item1.url === item2.url
+    getItemName(item1) === getItemName(item2) &&
+    getHttpMethod(item1) === getHttpMethod(item2) &&
+    getRequestUrl(item1) === getRequestUrl(item2)
   );
 };

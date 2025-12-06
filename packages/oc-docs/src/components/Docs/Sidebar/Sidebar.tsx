@@ -7,6 +7,7 @@ import OpenCollectionLogo from '../../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { toggleItem, selectItem, selectSelectedItemId, selectDocsCollection } from '../../../store/slices/docs';
+import { getItemType, getItemName, getHttpMethod, isFolder, isHttpRequest } from '../../../utils/schemaHelpers';
 
 export interface SidebarProps {
 }
@@ -46,26 +47,29 @@ const Sidebar: React.FC<SidebarProps> = () => {
 
   const renderItem = (item: any, level = 0, parentPath = '') => {
     
-    const isFolder = item.type === 'folder';
+    const itemIsFolder = isFolder(item);
+    const itemType = getItemType(item);
+    const itemName = getItemName(item);
+    const itemUuid = (item as any).uuid;
     // Use UUID for active state comparison
-    const isActive = !isFolder && selectedItemId === item.uuid;
+    const isActive = !itemIsFolder && selectedItemId === itemUuid;
     
     // Read isCollapsed from the item itself (defaults to true if not set)
-    const isExpanded = isFolder ? !((item as any).isCollapsed ?? true) : false;
+    const isExpanded = itemIsFolder ? !((item as any).isCollapsed ?? true) : false;
     
     return (
-      <div key={item.uuid} className="relative">
+      <div key={itemUuid} className="relative">
         <SidebarItem
           className={`
             flex items-center select-none text-sm cursor-pointer
             ${isActive ? 'active' : ''}
-            ${isFolder ? 'folder' : ''}
+            ${itemIsFolder ? 'folder' : ''}
             transition-all duration-200
           `}
           style={{ 
             paddingLeft: `${level * 16 + 8}px`
           }}
-          onClick={() => isFolder ? toggleFolder(item.uuid) : handleItemSelect(item.uuid)}
+          onClick={() => itemIsFolder ? toggleFolder(itemUuid) : handleItemSelect(itemUuid)}
         >
           
           {level > 0 && (
@@ -79,25 +83,25 @@ const Sidebar: React.FC<SidebarProps> = () => {
             />
           )}
           
-          {isFolder ? (
+          {itemIsFolder ? (
             <div className="mr-2 flex-shrink-0">
               {renderFolderIcon(isExpanded)}
             </div>
           ) : (
             <Method 
-              method={item.type === "http" ? (item as HttpRequest).method || 'GET' : 'GET'}
+              method={itemType === "http" ? getHttpMethod(item as HttpRequest) : 'GET'}
               className="text-xs"
             />
           )}
           
           
           <div className="truncate flex-1">
-            {item.name}
+            {itemName}
           </div>
         </SidebarItem>
         
         
-        {isFolder && isExpanded && (item as Folder).items && (
+        {itemIsFolder && isExpanded && (item as Folder).items && (
           <div className="relative">
             
             <div 

@@ -23,7 +23,13 @@ export const BodyTab: React.FC<BodyTabProps> = ({
         disabled: !f.enabled
       }))
     };
-    onItemChange({ ...item, body: updatedBody });
+    onItemChange({ 
+      ...item, 
+      http: { 
+        ...item.http, 
+        body: updatedBody 
+      } 
+    });
   };
 
   return (
@@ -42,16 +48,28 @@ export const BodyTab: React.FC<BodyTabProps> = ({
             onChange={(e) => {
               const bodyType = e.target.value;
               if (bodyType === 'none') {
-                onItemChange({ ...item, body: undefined });
+                onItemChange({ 
+                  ...item, 
+                  http: { 
+                    ...item.http, 
+                    body: undefined 
+                  } 
+                });
               } else if (['json', 'text', 'xml', 'sparql'].includes(bodyType)) {
                 onItemChange({ 
                   ...item, 
-                  body: { type: bodyType as any, data: '' }
+                  http: { 
+                    ...item.http, 
+                    body: { type: bodyType as any, data: '' } 
+                  }
                 });
               } else if (bodyType === 'form-urlencoded') {
                 onItemChange({ 
                   ...item, 
-                  body: []
+                  http: { 
+                    ...item.http, 
+                    body: [] as any 
+                  }
                 });
               }
             }}
@@ -82,7 +100,10 @@ export const BodyTab: React.FC<BodyTabProps> = ({
             if ('data' in body && typeof body.data === 'string') {
               onItemChange({
                 ...item,
-                body: { ...body, data: value } as typeof body
+                http: {
+                  ...item.http,
+                  body: { ...body, data: value } as typeof body
+                }
               });
             }
           }}

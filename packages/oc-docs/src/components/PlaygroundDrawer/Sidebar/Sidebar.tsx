@@ -5,6 +5,7 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import Method from '../../Docs/Method/Method';
 import OpenCollectionLogo from '../../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
+import { getItemType, getItemName, getHttpMethod, isFolder as isFolderType, isHttpRequest } from '../../../utils/schemaHelpers';
 
 export interface SidebarProps {
   collection: OpenCollection | null;
@@ -53,7 +54,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const renderItem = useCallback((item: OpenCollectionItem, level = 0): React.ReactNode => {
     
-    const isFolder = item.type === 'folder';
+    const isFolder = isFolderType(item);
+    const itemType = getItemType(item);
+    const itemName = getItemName(item);
     // Use UUID for active state comparison - now folders can also be active
     const isActive = !isEnvironmentsSelected && !isCollectionSettingsSelected && selectedItemId === (item as any).uuid;
     
@@ -108,14 +111,14 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           ) : (
             <Method 
-              method={item.type === "http" ? (item as HttpRequest).method || 'GET' : 'GET'}
+              method={itemType === "http" ? getHttpMethod(item as HttpRequest) : 'GET'}
               className="text-xs"
             />
           )}
           
           
           <div className="truncate flex-1">
-            {(item as any).name}
+            {itemName}
           </div>
         </SidebarItem>
         

@@ -6,6 +6,7 @@ import ScriptRuntime from '../scripting/runtime/script-runtime';
 import AssertRuntime, { type AssertionResult } from '../scripting/runtime/assert-runtime';
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars } from './utils';
 import { getCollectionFolderRequestVariables } from './utils/variable-merger';
+import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '../utils/schemaHelpers';
 
 export interface RunRequestOptions {
   item: HttpRequest;
@@ -97,12 +98,16 @@ export class RequestRunner {
         requestVariables
       };
       
+      // Get scripts in object format for easier access
+      const scriptsObj = scriptsArrayToObject(getRequestScripts(processedRequest));
+      const assertions = getRequestAssertions(processedRequest);
+      
       // Pre-request script
-      if (processedRequest.scripts?.preRequest) {
+      if (scriptsObj.preRequest) {
         
         try {
           await this.scriptRuntime.runScript({
-            script: processedRequest.scripts.preRequest,
+            script: scriptsObj.preRequest,
             request: processedRequest,
             variables: allVariables,
             collectionName: collection.info?.name || '',
@@ -121,10 +126,10 @@ export class RequestRunner {
       const response = await this.executor.executeRequest(interpolatedRequest, { timeout });
       
       // Post-response script
-      if (processedRequest.scripts?.postResponse) {
+      if (scriptsObj.postResponse) {
         try {
           await this.scriptRuntime.runScript({
-            script: processedRequest.scripts.postResponse,
+            script: scriptsObj.postResponse,
             request: interpolatedRequest,
             response,
             variables: allVariables,
@@ -141,10 +146,10 @@ export class RequestRunner {
       let testResultsResponse: TestResultsResponse | undefined;
       
       // Run assertions
-      if (processedRequest.assertions && processedRequest.assertions.length > 0) {
+      if (assertions && assertions.length > 0) {
         try {
           assertionResults = this.assertRuntime.runAssertions(
-            processedRequest.assertions,
+            assertions,
             interpolatedRequest,
             response,
             allVariables
@@ -156,10 +161,10 @@ export class RequestRunner {
       }
       
       // Tests
-      if (processedRequest.scripts?.tests) {
+      if (scriptsObj.tests) {
         try {
           const bru = await this.scriptRuntime.runScript({
-            script: processedRequest.scripts.tests,
+            script: scriptsObj.tests,
             request: interpolatedRequest,
             response,
             variables: allVariables,
@@ -202,9 +207,11 @@ export class RequestRunner {
   private getEnvironmentVariables(environment?: Environment): Record<string, any> {
     if (!environment?.variables) return {};
     
-    return environment.variables.reduce((vars, variable) => {
-      if (variable.name && !variable.disabled) {
-        vars[variable.name] = variable.value || variable.default || '';
+    return environment.variables.reduce((vars, variable: any) => {
+      const name = variable.name;
+      if (name && !variable.disabled) {
+        // Handle both Variable and SecretVariable types
+        vars[name] = variable.value ?? '';
       }
       return vars;
     }, {} as Record<string, any>);

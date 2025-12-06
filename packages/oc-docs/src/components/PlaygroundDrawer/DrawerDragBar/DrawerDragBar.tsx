@@ -13,6 +13,7 @@ import {
   setDrawerDragging,
   setLastExpandedHeight
 } from '@slices/playground';
+import { getItemType, getItemName, getHttpMethod, isHttpRequest, isFolder } from '../../../utils/schemaHelpers';
 
 interface DrawerDragBarProps {
   isCollapsed: boolean;
@@ -123,29 +124,35 @@ const DrawerDragBar: React.FC<DrawerDragBarProps> = ({ isCollapsed, selectedItem
         }}
       />
       
-      {isCollapsed && selectedItem && (
-        <div style={{
-          position: 'absolute',
-          left: '16px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          fontSize: '13px',
-          color: 'var(--text-primary)',
-          fontWeight: 500
-        }}>
-          <span style={{
-            color: (selectedItem.type === 'http' && (selectedItem as HttpRequest).method && methodColors[(selectedItem as HttpRequest).method!]) || '#6b7280',
-            fontWeight: 600,
-            fontSize: '11px'
+      {isCollapsed && selectedItem && (() => {
+        const itemType = getItemType(selectedItem);
+        const itemName = getItemName(selectedItem);
+        const httpMethod = isHttpRequest(selectedItem) ? getHttpMethod(selectedItem as HttpRequest) : undefined;
+        
+        return (
+          <div style={{
+            position: 'absolute',
+            left: '16px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '13px',
+            color: 'var(--text-primary)',
+            fontWeight: 500
           }}>
-            {selectedItem.type === 'http' ? (selectedItem as HttpRequest).method : selectedItem.type === 'folder' ? 'FOLDER' : ''}
-          </span>
-          <span>{selectedItem.name || ''}</span>
-        </div>
-      )}
+            <span style={{
+              color: (itemType === 'http' && httpMethod && methodColors[httpMethod]) || '#6b7280',
+              fontWeight: 600,
+              fontSize: '11px'
+            }}>
+              {itemType === 'http' ? httpMethod : itemType === 'folder' ? 'FOLDER' : ''}
+            </span>
+            <span>{itemName || ''}</span>
+          </div>
+        );
+      })()}
       
       <div style={{
         position: 'absolute',

@@ -1,15 +1,26 @@
 import type { OpenCollection } from '@opencollection/types';
-import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
-import type { HttpHeader } from '@opencollection/types/requests/http';
-import type { Scripts } from '@opencollection/types/common/scripts';
+import type { Scripts, Script, ScriptType } from '@opencollection/types/common/scripts';
 import type { Auth } from '@opencollection/types/common/auth';
+import { 
+  isFolder, 
+  getHttpHeaders, 
+  getRequestAuth, 
+  getRequestScripts,
+  scriptsArrayToObject,
+  scriptsObjectToArray,
+  getPreRequestScript,
+  getPostResponseScript,
+  getTestsScript,
+  type ScriptsObject
+} from '../../utils/schemaHelpers';
 
 /**
  * Merge headers from collection and folder hierarchy into the request
  */
 export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, requestTreePath: Item[] = []): void => {
-  const headers = new Map<string, HttpHeader>();
+  const headers = new Map<string, HttpRequestHeader>();
   
   // Start with collection-level headers
   const collectionHeaders = collection.request?.headers || [];
@@ -21,7 +32,7 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
   
   // Apply folder-level headers in order (parent to child)
   for (const item of requestTreePath) {
-    if (item.type === 'folder') {
+    if (isFolder(item)) {
       const folderHeaders = item.request?.headers || [];
       folderHeaders.forEach((header) => {
         if (!header.disabled) {
@@ -31,21 +42,27 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
     }
   }
   
-  // Initialize request headers if not present
-  if (!request.headers) {
-    request.headers = [];
+  // Get current request headers
+  const currentHeaders = getHttpHeaders(request);
+  
+  // Initialize request http block if not present
+  if (!request.http) {
+    request.http = { method: 'GET', url: '' };
+  }
+  if (!request.http.headers) {
+    request.http.headers = [];
   }
   
   // Merge with existing request headers (request headers take precedence)
-  const requestHeaderMap = new Map<string, HttpHeader>();
-  request.headers.forEach((header) => {
+  const requestHeaderMap = new Map<string, HttpRequestHeader>();
+  currentHeaders.forEach((header) => {
     requestHeaderMap.set(header.name.toLowerCase(), header);
   });
   
   // Add merged headers that don't exist in request
   headers.forEach((header, name) => {
     if (!requestHeaderMap.has(name)) {
-      request.headers!.push(header);
+      request.http!.headers!.push(header);
     }
   });
 };
@@ -54,28 +71,36 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
  * Merge authentication from collection and folder hierarchy into the request
  */
 export const mergeAuth = (collection: OpenCollection, request: HttpRequest, requestTreePath: Item[] = []): void => {
+  const requestAuth = getRequestAuth(request);
+  
   // If request already has auth that's not 'inherit', don't override
-  if (request.auth && request.auth !== 'inherit') {
+  if (requestAuth && requestAuth !== 'inherit') {
     return;
+  }
+  
+  // Initialize runtime block if not present
+  if (!request.runtime) {
+    request.runtime = {};
   }
   
   // Look for auth in reverse order (closest to request wins)
   for (let i = requestTreePath.length - 1; i >= 0; i--) {
     const item = requestTreePath[i];
-    if (item.type === 'folder' && item.request?.auth && item.request.auth !== 'inherit') {
-      request.auth = item.request.auth;
+    if (isFolder(item) && item.request?.auth && item.request.auth !== 'inherit') {
+      request.runtime.auth = item.request.auth;
       return;
     }
   }
   
   // Finally, check collection-level auth
   if (collection.request?.auth && collection.request.auth !== 'inherit') {
-    request.auth = collection.request.auth;
+    request.runtime.auth = collection.request.auth;
   }
 };
 
 /**
  * Merge scripts from collection and folder hierarchy into the request
+ * Scripts are now in array format: [{ type: 'before-request' | 'after-response' | 'tests' | 'hooks', code: string }]
  */
 export const mergeScripts = (
   collection: OpenCollection, 
@@ -83,20 +108,21 @@ export const mergeScripts = (
   requestTreePath: Item[] = [], 
   flow: 'sandwich' | 'sequential' = 'sandwich'
 ): void => {
-  const collectionScripts = collection.request?.scripts || {};
-  const folderScripts: Scripts[] = [];
+  // Convert all scripts to object format for easier merging
+  const collectionScriptsObj = scriptsArrayToObject(collection.request?.scripts as Scripts | undefined);
+  const folderScriptsObjs: ScriptsObject[] = [];
   
   // Collect folder scripts in order
   for (const item of requestTreePath) {
-    if (item.type === 'folder' && item.request?.scripts) {
-      folderScripts.push(item.request.scripts);
+    if (isFolder(item) && item.request?.scripts) {
+      folderScriptsObjs.push(scriptsArrayToObject(item.request.scripts as Scripts));
     }
   }
   
-  const requestScripts = request.scripts || {};
+  const requestScriptsObj = scriptsArrayToObject(getRequestScripts(request));
   
-  // Initialize merged scripts
-  const mergedScripts: Scripts = {};
+  // Initialize merged scripts as object
+  const mergedScriptsObj: Record<string, string | undefined> = {};
   
   if (flow === 'sandwich') {
     // Sandwich flow: collection -> folders -> request -> folders (reverse) -> collection
@@ -105,73 +131,79 @@ export const mergeScripts = (
     const testsParts: string[] = [];
     
     // Add collection pre-request
-    if (collectionScripts.preRequest) {
-      preRequestParts.push(collectionScripts.preRequest);
+    if (collectionScriptsObj.preRequest) {
+      preRequestParts.push(collectionScriptsObj.preRequest);
     }
     
     // Add folder pre-request scripts
-    folderScripts.forEach((scripts) => {
+    folderScriptsObjs.forEach((scripts) => {
       if (scripts.preRequest) {
         preRequestParts.push(scripts.preRequest);
       }
     });
     
     // Add request pre-request
-    if (requestScripts.preRequest) {
-      preRequestParts.push(requestScripts.preRequest);
+    if (requestScriptsObj.preRequest) {
+      preRequestParts.push(requestScriptsObj.preRequest);
     }
     
     // Add request post-response
-    if (requestScripts.postResponse) {
-      postResponseParts.push(requestScripts.postResponse);
+    if (requestScriptsObj.postResponse) {
+      postResponseParts.push(requestScriptsObj.postResponse);
     }
     
     // Add folder post-response scripts in reverse order
-    folderScripts.reverse().forEach((scripts) => {
+    [...folderScriptsObjs].reverse().forEach((scripts) => {
       if (scripts.postResponse) {
         postResponseParts.push(scripts.postResponse);
       }
     });
     
     // Add collection post-response
-    if (collectionScripts.postResponse) {
-      postResponseParts.push(collectionScripts.postResponse);
+    if (collectionScriptsObj.postResponse) {
+      postResponseParts.push(collectionScriptsObj.postResponse);
     }
     
     // Tests are additive
-    if (collectionScripts.tests) {
-      testsParts.push(collectionScripts.tests);
+    if (collectionScriptsObj.tests) {
+      testsParts.push(collectionScriptsObj.tests);
     }
-    folderScripts.forEach((scripts) => {
+    folderScriptsObjs.forEach((scripts) => {
       if (scripts.tests) {
         testsParts.push(scripts.tests);
       }
     });
-    if (requestScripts.tests) {
-      testsParts.push(requestScripts.tests);
+    if (requestScriptsObj.tests) {
+      testsParts.push(requestScriptsObj.tests);
     }
     
-    mergedScripts.preRequest = preRequestParts.length > 0 ? preRequestParts.join('\n\n') : undefined;
-    mergedScripts.postResponse = postResponseParts.length > 0 ? postResponseParts.join('\n\n') : undefined;
-    mergedScripts.tests = testsParts.length > 0 ? testsParts.join('\n\n') : undefined;
+    mergedScriptsObj.preRequest = preRequestParts.length > 0 ? preRequestParts.join('\n\n') : undefined;
+    mergedScriptsObj.postResponse = postResponseParts.length > 0 ? postResponseParts.join('\n\n') : undefined;
+    mergedScriptsObj.tests = testsParts.length > 0 ? testsParts.join('\n\n') : undefined;
   } else {
     // Sequential flow: collection -> folders -> request (each overrides previous)
-    let currentScripts = { ...collectionScripts };
+    let currentScripts = { ...collectionScriptsObj };
     
-    folderScripts.forEach((scripts) => {
+    folderScriptsObjs.forEach((scripts) => {
       if (scripts.preRequest) currentScripts.preRequest = scripts.preRequest;
       if (scripts.postResponse) currentScripts.postResponse = scripts.postResponse;
       if (scripts.tests) currentScripts.tests = scripts.tests;
     });
     
-    if (requestScripts.preRequest) currentScripts.preRequest = requestScripts.preRequest;
-    if (requestScripts.postResponse) currentScripts.postResponse = requestScripts.postResponse;
-    if (requestScripts.tests) currentScripts.tests = requestScripts.tests;
+    if (requestScriptsObj.preRequest) currentScripts.preRequest = requestScriptsObj.preRequest;
+    if (requestScriptsObj.postResponse) currentScripts.postResponse = requestScriptsObj.postResponse;
+    if (requestScriptsObj.tests) currentScripts.tests = requestScriptsObj.tests;
     
-    mergedScripts.preRequest = currentScripts.preRequest;
-    mergedScripts.postResponse = currentScripts.postResponse;
-    mergedScripts.tests = currentScripts.tests;
+    mergedScriptsObj.preRequest = currentScripts.preRequest;
+    mergedScriptsObj.postResponse = currentScripts.postResponse;
+    mergedScriptsObj.tests = currentScripts.tests;
   }
   
-  request.scripts = mergedScripts;
+  // Initialize runtime block if not present
+  if (!request.runtime) {
+    request.runtime = {};
+  }
+  
+  // Convert merged scripts back to array format
+  request.runtime.scripts = scriptsObjectToArray(mergedScriptsObj);
 };

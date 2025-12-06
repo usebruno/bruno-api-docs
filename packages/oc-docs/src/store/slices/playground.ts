@@ -4,6 +4,7 @@ import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/c
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { RootState } from '../store';
 import { hydrateWithUUIDs, findAndUpdateItem } from '../../utils/items';
+import { isFolder, getItemType } from '../../utils/schemaHelpers';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings';
 
@@ -54,7 +55,7 @@ const findAndUpdateItemInCollection = (
       return true;
     }
     
-    if ('type' in item && item.type === 'folder') {
+    if (isFolder(item)) {
       const folder = item as Folder;
       if (folder.items && findAndUpdateItemInCollection(folder.items, uuid, updatedItem)) {
         return true;
@@ -69,7 +70,7 @@ const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void
   if (!items) return;
   
   for (const item of items) {
-    if ('type' in item && item.type === 'folder') {
+    if (isFolder(item)) {
       // Initialize isCollapsed to true (collapsed) if not already set
       if ((item as any).isCollapsed === undefined) {
         (item as any).isCollapsed = true;
@@ -91,8 +92,8 @@ const preserveCollapsedState = (
     
     const oldItem = oldItems.find((old: any) => old.uuid === newUuid);
     
-    if ('type' in newItem && newItem.type === 'folder') {
-      if (oldItem && 'type' in oldItem && oldItem.type === 'folder') {
+    if (isFolder(newItem)) {
+      if (oldItem && isFolder(oldItem)) {
         (newItem as any).isCollapsed = (oldItem as any).isCollapsed;
         
         const newFolder = newItem as Folder;

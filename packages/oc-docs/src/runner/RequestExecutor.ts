@@ -1,5 +1,6 @@
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RunRequestResponse } from './index';
+import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth } from '../utils/schemaHelpers';
 
 export class RequestExecutor {
   async executeRequest(request: HttpRequest, options: { timeout?: number } = {}): Promise<RunRequestResponse> {
@@ -7,7 +8,8 @@ export class RequestExecutor {
 
     try {
       const fetchOptions = await this.buildFetchOptions(request, options.timeout);
-      const response = await fetch(request.url || '', fetchOptions);
+      const requestUrl = getRequestUrl(request);
+      const response = await fetch(requestUrl, fetchOptions);
       const endTime = Date.now();
 
       const responseData = await this.parseResponse(response);
@@ -50,13 +52,15 @@ export class RequestExecutor {
   }
 
   private async buildFetchOptions(request: HttpRequest, timeout = 30000): Promise<RequestInit> {
+    const method = getHttpMethod(request);
     const options: RequestInit = {
-      method: request.method || 'GET',
+      method,
       headers: this.buildHeaders(request),
       signal: AbortSignal.timeout(timeout)
     };
 
-    if (request.body && ['POST', 'PUT', 'PATCH'].includes(request.method || '')) {
+    const body = getHttpBody(request);
+    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
       options.body = await this.buildBody(request);
     }
 
@@ -65,9 +69,12 @@ export class RequestExecutor {
 
   private buildHeaders(request: HttpRequest): HeadersInit {
     const headers: Record<string, string> = {};
+    const requestHeaders = getHttpHeaders(request);
+    const body = getHttpBody(request);
+    const auth = getRequestAuth(request);
 
-    if (request.headers) {
-      request.headers.forEach(header => {
+    if (requestHeaders) {
+      requestHeaders.forEach(header => {
         if (!header.disabled && header.name && header.value) {
           headers[header.name] = header.value;
         }
@@ -75,8 +82,8 @@ export class RequestExecutor {
     }
 
     // Auto-set Content-Type for JSON bodies if not already set
-    if (request.body && 'type' in request.body && request.body.type === 'json') {
-      const hasContentType = request.headers?.some(h => 
+    if (body && 'type' in body && body.type === 'json') {
+      const hasContentType = requestHeaders?.some(h => 
         !h.disabled && h.name.toLowerCase() === 'content-type'
       );
       if (!hasContentType) {
@@ -84,8 +91,8 @@ export class RequestExecutor {
       }
     }
 
-    if (request.auth) {
-      this.setAuthHeaders(headers, request.auth);
+    if (auth) {
+      this.setAuthHeaders(headers, auth);
     }
 
     return headers;
@@ -115,24 +122,27 @@ export class RequestExecutor {
   }
 
   private async buildBody(request: HttpRequest): Promise<BodyInit | null> {
-    if (!request.body) return null;
+    const body = getHttpBody(request);
+    const headers = getHttpHeaders(request);
+    
+    if (!body) return null;
 
-    if ('type' in request.body) {
-      switch (request.body.type) {
+    if ('type' in body) {
+      switch (body.type) {
         case 'json':
-          return request.body.data;
+          return body.data;
         case 'text':
         case 'xml':
         case 'sparql':
-          return request.body.data;
+          return body.data;
         default:
           return null;
       }
-    } else if (Array.isArray(request.body)) {
-      if (request.headers?.some(h => h.name.toLowerCase() === 'content-type' && h.value === 'application/x-www-form-urlencoded')) {
-        return this.buildUrlEncodedBody(request.body);
+    } else if (Array.isArray(body)) {
+      if (headers?.some(h => h.name.toLowerCase() === 'content-type' && h.value === 'application/x-www-form-urlencoded')) {
+        return this.buildUrlEncodedBody(body);
       } else {
-        return this.buildFormDataBody(request.body);
+        return this.buildFormDataBody(body);
       }
     }
 

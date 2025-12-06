@@ -18,6 +18,7 @@ import {
   setSelectedEnvironment,
   toggleFolderCollapse
 } from '@slices/playground';
+import { getItemType, isFolder, isHttpRequest } from '../../../utils/schemaHelpers';
 
 interface DrawerContentProps {
   collection: OpenCollectionCollection | null;
@@ -42,13 +43,15 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
     const findItem = (items: OpenCollectionItem[]): HttpRequest | Folder | null => {
       for (const item of items) {
         const itemUuid = (item as any).uuid;
+        const itemType = getItemType(item);
+        
         if (itemUuid === uuid) {
-          if ('type' in item && (item.type === 'http' || item.type === 'folder')) {
+          if (itemType === 'http' || itemType === 'folder') {
             return item as HttpRequest | Folder;
           }
         }
         
-        if ('type' in item && item.type === 'folder') {
+        if (isFolder(item)) {
           const folder = item as Folder;
           if (folder.items) {
             const found = findItem(folder.items);
@@ -64,7 +67,8 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
     
     if (foundItem) {
       // Set view mode based on item type
-      if (foundItem.type === 'folder') {
+      const foundItemType = getItemType(foundItem);
+      if (foundItemType === 'folder') {
         dispatch(setViewMode('folder-settings'));
       } else {
         dispatch(setViewMode('playground'));
@@ -125,7 +129,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
         minHeight: 0
       }}>
         {viewMode === 'playground' ? (
-          selectedItem && selectedItem.type === 'http' && collection ? (
+          selectedItem && getItemType(selectedItem) === 'http' && collection ? (
             <Playground
               item={selectedItem as HttpRequest}
               collection={collection}
@@ -146,7 +150,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
             </div>
           )
         ) : viewMode === 'folder-settings' ? (
-          selectedItem && selectedItem.type === 'folder' && collection ? (
+          selectedItem && getItemType(selectedItem) === 'folder' && collection ? (
             <FolderSettingsView
               folder={selectedItem as Folder}
               collection={collection}

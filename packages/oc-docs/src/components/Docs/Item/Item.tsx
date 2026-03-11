@@ -1,4 +1,4 @@
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-http';
 import 'prismjs/components/prism-graphql';
@@ -34,8 +34,7 @@ import {
 import { CodeSnippets } from '../CodeSnippets/CodeSnippets';
 import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
-import { RequestExamples } from './Examples/RequestExamples';
-import { ResponseExamples } from './Examples/ResponseExamples';
+import { Examples } from './Examples/Examples';
 import { useMarkdownRenderer } from '../../../hooks';
 
 const methodColors: Record<string, string> = {
@@ -64,7 +63,6 @@ const Item = memo(({
   const md = useMarkdownRenderer();
   const itemId = getItemId(item);
   const sectionId = generateSectionId(item, parentPath);
-  const [activeExampleName, setActiveExampleName] = useState<string | null>(null);
 
   if (isFolder(item)) {
     const folderItem = item as any;
@@ -297,14 +295,6 @@ const Item = memo(({
               </div>
             )}
 
-            {endpoint.examples && endpoint.examples.length > 0 && (
-              <RequestExamples
-                examples={endpoint.examples}
-                activeExampleName={activeExampleName}
-                onExampleChange={setActiveExampleName}
-              />
-            )}
-
             <Scripts
               preRequest={endpoint.script?.preRequest}
               postResponse={endpoint.script?.postResponse}
@@ -318,16 +308,16 @@ const Item = memo(({
               headers={endpoint.headers}
               body={endpoint.body}
             />
-
-            {endpoint.examples && endpoint.examples.length > 0 && (
-              <ResponseExamples
-                examples={endpoint.examples}
-                activeExampleName={activeExampleName}
-                onExampleChange={setActiveExampleName}
-              />
-            )}
           </div>
         </div>
+
+        {endpoint.examples && endpoint.examples.length > 0 && (
+          <Examples
+            examples={endpoint.examples}
+            method={endpoint.method}
+            url={endpoint.url}
+          />
+        )}
       </StyledWrapper>
     );
   }

@@ -54,7 +54,7 @@ request:
     token: "{{bearer_auth_token}}"
 docs:
   content: |
-    # Bruno Testbench 🐶
+    # Bruno Testbench
 
     This is a comprehensive API collection for testing OpenCollection features.
 
@@ -105,6 +105,13 @@ items:
     examples:
       - name: "Create User"
         request:
+          headers:
+            - name: "Content-Type"
+              value: "application/json"
+            - name: "Authorization"
+              value: "Bearer token123"
+            - name: "X-Request-ID"
+              value: "abc-123-def"
           body:
             type: "json"
             data: |

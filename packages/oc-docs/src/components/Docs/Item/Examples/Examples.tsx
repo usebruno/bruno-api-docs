@@ -45,6 +45,46 @@ const StyledExamples = styled.div`
     padding-right: 0.75rem;
   }
 
+  .example-url-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-primary, #ffffff);
+    border-bottom: 1px solid var(--border-color, #e5e7eb);
+    font-family: var(--font-mono, 'SF Mono', 'Consolas', monospace);
+    font-size: 0.75rem;
+  }
+
+  .example-url-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .example-method {
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  .example-method.get { background-color: #10b981; }
+  .example-method.post { background-color: #3b82f6; }
+  .example-method.put { background-color: #f59e0b; }
+  .example-method.patch { background-color: #a855f7; }
+  .example-method.delete { background-color: #ef4444; }
+
+  .example-url {
+    color: var(--text-primary, #111827);
+    word-break: break-all;
+  }
+
   .example-tab {
     padding: 0.5rem 1rem;
     font-size: 0.75rem;
@@ -362,7 +402,7 @@ const getStatusClass = (status: number): string => {
 
 export const Examples: React.FC<ExamplesProps> = ({ examples, method = 'GET', url = '' }) => {
   const [activeExampleIndex, setActiveExampleIndex] = useState(0);
-  const [requestTab, setRequestTab] = useState<'body' | 'headers'>('body');
+  const [requestTab, setRequestTab] = useState<'body' | 'headers' | 'params'>('body');
   const [responseTab, setResponseTab] = useState<'body' | 'headers'>('body');
   const [copied, setCopied] = useState<string | null>(null);
   const [bodyCopied, setBodyCopied] = useState<'request' | 'response' | null>(null);
@@ -397,7 +437,8 @@ export const Examples: React.FC<ExamplesProps> = ({ examples, method = 'GET', ur
   const activeExample = validExamples[activeExampleIndex];
   const hasRequestBody = !!activeExample?.request?.body;
   const hasRequestHeaders = activeExample?.request?.headers && activeExample.request.headers.length > 0;
-  const hasRequest = hasRequestBody || hasRequestHeaders;
+  const hasRequestParams = activeExample?.request?.params && activeExample.request.params.length > 0;
+  const hasRequest = hasRequestBody || hasRequestHeaders || hasRequestParams;
   const hasResponse = !!activeExample?.response;
   const hasResponseHeaders = activeExample?.response?.headers && activeExample.response.headers.length > 0;
   const hasResponseBody = !!activeExample?.response?.body?.data;
@@ -528,52 +569,59 @@ data = response.json()`;
               </button>
             ))}
           </div>
-          <div className="example-tabs-right">
-            <div className="copy-dropdown" ref={dropdownRef}>
-              <button
-                className={`copy-curl-btn ${copied ? 'copied' : ''}`}
-                onClick={() => setShowCopyMenu(!showCopyMenu)}
-                disabled={!hasRequest}
-                title="Copy as code"
-              >
-                {copied ? (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                ) : (
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                )}
-                Code Snippet
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="6 9 12 15 18 9" />
+        </div>
+
+        <div className="example-url-row">
+          <div className="example-url-left">
+            <span className={`example-method ${(activeExample?.request?.method || method).toLowerCase()}`}>
+              {activeExample?.request?.method || method}
+            </span>
+            <span className="example-url">{activeExample?.request?.url || url}</span>
+          </div>
+          <div className="copy-dropdown" ref={dropdownRef}>
+            <button
+              className={`copy-curl-btn ${copied ? 'copied' : ''}`}
+              onClick={() => setShowCopyMenu(!showCopyMenu)}
+              disabled={!hasRequest}
+              title="Copy as code"
+            >
+              {copied ? (
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
-              </button>
-              {showCopyMenu && (
-                <div className="copy-menu">
-                  <button
-                    className={`copy-menu-item ${copied === 'curl' ? 'copied' : ''}`}
-                    onClick={() => handleCopy('curl')}
-                  >
-                    {copied === 'curl' ? '✓' : ''} cURL
-                  </button>
-                  <button
-                    className={`copy-menu-item ${copied === 'javascript' ? 'copied' : ''}`}
-                    onClick={() => handleCopy('javascript')}
-                  >
-                    {copied === 'javascript' ? '✓' : ''} JavaScript
-                  </button>
-                  <button
-                    className={`copy-menu-item ${copied === 'python' ? 'copied' : ''}`}
-                    onClick={() => handleCopy('python')}
-                  >
-                    {copied === 'python' ? '✓' : ''} Python
-                  </button>
-                </div>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="16 18 22 12 16 6" />
+                  <polyline points="8 6 2 12 8 18" />
+                </svg>
               )}
-            </div>
+              Code Snippet
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            {showCopyMenu && (
+              <div className="copy-menu">
+                <button
+                  className={`copy-menu-item ${copied === 'curl' ? 'copied' : ''}`}
+                  onClick={() => handleCopy('curl')}
+                >
+                  {copied === 'curl' ? '✓' : ''} cURL
+                </button>
+                <button
+                  className={`copy-menu-item ${copied === 'javascript' ? 'copied' : ''}`}
+                  onClick={() => handleCopy('javascript')}
+                >
+                  {copied === 'javascript' ? '✓' : ''} JavaScript
+                </button>
+                <button
+                  className={`copy-menu-item ${copied === 'python' ? 'copied' : ''}`}
+                  onClick={() => handleCopy('python')}
+                >
+                  {copied === 'python' ? '✓' : ''} Python
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -596,6 +644,13 @@ data = response.json()`;
                   disabled={!hasRequest}
                 >
                   Headers
+                </button>
+                <button
+                  className={`toggle-btn ${requestTab === 'params' ? 'active' : ''} ${!hasRequest ? 'disabled' : ''}`}
+                  onClick={() => hasRequest && setRequestTab('params')}
+                  disabled={!hasRequest}
+                >
+                  Params
                 </button>
               </div>
             </div>
@@ -648,6 +703,29 @@ data = response.json()`;
                     </table>
                   ) : (
                     <div className="no-content">No request headers</div>
+                  )
+                )}
+
+                {requestTab === 'params' && (
+                  hasRequestParams ? (
+                    <table className="headers-table">
+                      <thead>
+                        <tr>
+                          <th>Name</th>
+                          <th>Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activeExample.request?.params?.map((param: any, idx: number) => (
+                          <tr key={idx}>
+                            <td>{param.name}</td>
+                            <td>{param.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <div className="no-content">No request params</div>
                   )
                 )}
               </>

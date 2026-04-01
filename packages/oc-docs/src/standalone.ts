@@ -23,6 +23,7 @@ export interface OpenCollectionOptions {
   target: HTMLElement;
   opencollection: any;
   logo?: string;
+  gitCollectionUrl?: string;
 }
 
 export class OpenCollectionRenderer {
@@ -96,7 +97,8 @@ export class OpenCollectionRenderer {
     
     this.root.render(React.createElement(OpenCollection, {
       collection,
-      logo: this.createLogoElement()
+      logo: this.createLogoElement(),
+      gitCollectionUrl: this.options.gitCollectionUrl
     }));
   }
 

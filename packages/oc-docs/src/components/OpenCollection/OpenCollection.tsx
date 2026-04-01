@@ -27,7 +27,8 @@ import {
   setCollectionLoading,
   setCollectionSucceeded,
   setCollectionFailed,
-  resetCollectionState
+  resetCollectionState,
+  setGitCollectionUrl
 } from '@slices/app';
 import { createOpenCollectionStore, type AppStore } from '../../store/store';
 
@@ -162,10 +163,12 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
 export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
+  gitCollectionUrl?: string;
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
+  gitCollectionUrl,
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);
@@ -173,6 +176,10 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   const collectionStatus = useAppSelector(selectCollectionStatus);
   const collectionError = useAppSelector(selectCollectionError);
   const selectedItemId = useAppSelector((state) => state.docs.selectedItemId);
+
+  useEffect(() => {
+    gitCollectionUrl && dispatch(setGitCollectionUrl(gitCollectionUrl));
+  }, [gitCollectionUrl, dispatch]);
 
   useEffect(() => {
     let isActive = true;

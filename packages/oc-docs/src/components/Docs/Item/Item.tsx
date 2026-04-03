@@ -34,7 +34,7 @@ import {
 import { CodeSnippets } from '../CodeSnippets/CodeSnippets';
 import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
-import { Examples } from './Examples/ExamplesView';
+import { Examples } from './Examples/ExamplesView/ExamplesView';
 import { useMarkdownRenderer } from '../../../hooks';
 
 const methodColors: Record<string, string> = {

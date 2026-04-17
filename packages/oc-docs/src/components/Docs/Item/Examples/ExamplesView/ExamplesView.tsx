@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
 import StyledWrapper from './StyledWrapper';
+import { generateCurlCommand, generateJavaScriptCode, generatePythonCode } from '../../../CodeSnippets/generateCodeSnippets';
 
 interface ExamplesProps {
   examples: HttpRequestExample[];
@@ -80,72 +81,15 @@ export const Examples: React.FC<ExamplesProps> = ({ examples, method = 'GET', ur
     return { method: exampleMethod, url: exampleUrl, headers, body };
   };
 
-  const generateCurlCommand = (): string => {
-    const { method: m, url: u, headers, body } = getRequestData();
-
-    const headersString = headers
-      .map((h: any) => `-H "${h.name}: ${h.value}"`)
-      .join(' \\\n  ');
-
-    let bodyData = '';
-    if (body?.data) {
-      const data = typeof body.data === 'string' ? body.data.trim() : JSON.stringify(body.data);
-      bodyData = ` \\\n  -d '${data}'`;
-    }
-
-    return `curl -X ${m} "${u}"${headersString ? ` \\\n  ${headersString}` : ''}${bodyData}`;
-  };
-
-  const generateJavaScriptCode = (): string => {
-    const { method: m, url: u, headers, body } = getRequestData();
-    const headersString = headers.map((h: any) => `    "${h.name}": "${h.value}"`).join(',\n');
-    const bodyString = body?.data
-      ? `,\n  body: JSON.stringify(${typeof body.data === 'string' ? body.data.trim() : JSON.stringify(body.data)})`
-      : '';
-
-    return `const response = await fetch("${u}", {
-  method: "${m}",
-  headers: {
-${headersString}
-  }${bodyString}
-});
-
-const data = await response.json();`;
-  };
-
-  const generatePythonCode = (): string => {
-    const { method: m, url: u, headers, body } = getRequestData();
-    const headersString = headers.map((h: any) => `        "${h.name}": "${h.value}"`).join(',\n');
-    const bodyString = body?.data
-      ? `,\n    json=${typeof body.data === 'string' ? body.data.trim() : JSON.stringify(body.data)}`
-      : '';
-
-    return `import requests
-
-response = requests.${m.toLowerCase()}(
-    "${u}",
-    headers={
-${headersString}
-    }${bodyString}
-)
-
-data = response.json()`;
-  };
-
   const handleCopy = async (type: 'curl' | 'javascript' | 'python') => {
     try {
-      let code = '';
-      switch (type) {
-        case 'curl':
-          code = generateCurlCommand();
-          break;
-        case 'javascript':
-          code = generateJavaScriptCode();
-          break;
-        case 'python':
-          code = generatePythonCode();
-          break;
-      }
+      const snippetInput = getRequestData();
+      const generators = {
+        curl: generateCurlCommand,
+        javascript: generateJavaScriptCode,
+        python: generatePythonCode,
+      };
+      const code = generators[type](snippetInput);
       await navigator.clipboard.writeText(code);
       setCopied(type);
       setShowCopyMenu(false);

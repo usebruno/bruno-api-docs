@@ -3,10 +3,12 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import type { StructuredText } from '@opencollection/types/common/description';
 import Sidebar from './Sidebar/Sidebar';
 import Item from './Item/Item';
+import FetchInBrunoButton from './Sidebar/FetchInBrunoButton';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
 import { isFolder } from '../../utils/schemaHelpers';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectSelectedItemId, selectItem } from '../../store/slices/docs';
+import { selectGitCollectionUrl } from '../../store/slices/app';
 import { useMarkdownRenderer } from '../../hooks';
 
 interface DocsProps {
@@ -22,6 +24,7 @@ const Docs: React.FC<DocsProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const selectedItemId = useAppSelector(selectSelectedItemId);
+  const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const md = useMarkdownRenderer();
   const isInitialMount = useRef(true);
 
@@ -112,6 +115,28 @@ const Docs: React.FC<DocsProps> = ({
         className="playground-content h-full overflow-y-auto flex-1"
       >
         <div className="all-endpoints-view h-full overflow-y-auto" style={{ padding: '2rem', maxWidth: '100%' }}>
+          {docsCollection?.info?.name && (
+            <div
+              className="flex items-center gap-3 mb-6"
+              style={{ maxWidth: '80rem' }}
+            >
+              <h1
+                className="text-2xl font-semibold truncate"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {docsCollection.info.name}
+              </h1>
+              {gitCollectionUrl && (
+                <a
+                  href={`bruno://app/collection/import/git?url=${encodeURIComponent(gitCollectionUrl)}`}
+                  className="flex-shrink-0"
+                >
+                  <FetchInBrunoButton />
+                </a>
+              )}
+            </div>
+          )}
+
           {/* Collection-level documentation/introduction */}
           {docsCollection?.docs && (
             <div

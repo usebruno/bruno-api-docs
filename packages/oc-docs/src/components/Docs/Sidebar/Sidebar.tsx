@@ -5,10 +5,8 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import Method from '../Method/Method';
 import OpenCollectionLogo from '../../../assets/opencollection-logo.svg';
 import { SidebarContainer, SidebarItems, SidebarItem } from './StyledWrapper';
-import FetchInBrunoButton from './FetchInBrunoButton';
 import { useAppDispatch, useAppSelector } from '../../../store/hooks';
 import { toggleItem, selectItem, selectSelectedItemId, selectDocsCollection } from '../../../store/slices/docs';
-import { selectGitCollectionUrl } from '../../../store/slices/app';
 import { getItemType, getItemName, getHttpMethod, isFolder, isHttpRequest } from '../../../utils/schemaHelpers';
 
 export interface SidebarProps {
@@ -18,7 +16,6 @@ const Sidebar: React.FC<SidebarProps> = () => {
   const dispatch = useAppDispatch();
   const selectedItemId = useAppSelector(selectSelectedItemId);
   const collection = useAppSelector(selectDocsCollection);
-  const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
 
   const toggleFolder = (itemUuid: string) => {
     dispatch(toggleItem(itemUuid));
@@ -125,23 +122,6 @@ const Sidebar: React.FC<SidebarProps> = () => {
 
   return (
     <SidebarContainer className="h-full flex flex-col" style={{ width: 'var(--sidebar-width)' }}>
-      {/* Collection name at top */}
-      <div className="p-4 pt-0">
-        <div className="flex items-center gap-2">
-          <h1 className="font-semibold truncate flex-1" style={{ color: 'var(--text-primary)' }}>
-            {collection?.info?.name || 'API Collection'}
-          </h1>
-          {gitCollectionUrl && (
-            <a
-              href={`bruno://app/collection/import/git?url=${encodeURIComponent(gitCollectionUrl)}`}
-              className="flex-shrink-0"
-            >
-              <FetchInBrunoButton />
-            </a>
-          )}
-        </div>
-      </div>
-      
       <SidebarItems>
         {collection?.items?.length && (
           collection.items.map((item) => renderItem(item))

@@ -6,11 +6,13 @@ export type CollectionStatus = 'idle' | 'loading' | 'succeeded' | 'failed';
 export interface AppState {
   collectionStatus: CollectionStatus;
   collectionError: string | null;
+  gitCollectionUrl: string | null;
 }
 
 const initialState: AppState = {
   collectionStatus: 'idle',
-  collectionError: null
+  collectionError: null,
+  gitCollectionUrl: null
 };
 
 const appSlice = createSlice({
@@ -32,6 +34,9 @@ const appSlice = createSlice({
     resetCollectionState: (state: AppState) => {
       state.collectionStatus = 'idle';
       state.collectionError = null;
+    },
+    setGitCollectionUrl: (state: AppState, action: PayloadAction<string | null>) => {
+      state.gitCollectionUrl = action.payload;
     }
   }
 });
@@ -40,11 +45,13 @@ export const {
   setCollectionLoading,
   setCollectionSucceeded,
   setCollectionFailed,
-  resetCollectionState
+  resetCollectionState,
+  setGitCollectionUrl
 } = appSlice.actions;
 export default appSlice.reducer;
 
 export const selectCollectionStatus = (state: RootState) => state.app.collectionStatus;
 export const selectCollectionError = (state: RootState) => state.app.collectionError;
+export const selectGitCollectionUrl = (state: RootState) => state.app.gitCollectionUrl;
 
 

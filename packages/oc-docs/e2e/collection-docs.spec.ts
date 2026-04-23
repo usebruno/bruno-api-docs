@@ -19,10 +19,20 @@ test.describe('Collection-level documentation', () => {
 
   test('renders markdown headings', async ({ page }) => {
     const docs = page.locator('.collection-docs');
-    await expect(docs.getByRole('heading', { name: 'Bruno Testbench', level: 1 })).toBeVisible();
     await expect(docs.getByRole('heading', { name: 'Getting Started', level: 2 })).toBeVisible();
     await expect(docs.getByRole('heading', { name: 'Authentication', level: 2 })).toBeVisible();
     await expect(docs.getByRole('heading', { name: 'Rate Limits', level: 2 })).toBeVisible();
+  });
+
+  test('renders collection name as page header above docs', async ({ page }) => {
+    const heading = page
+      .locator('.playground-content')
+      .getByRole('heading', { name: 'Bruno Testbench', level: 1 });
+    await expect(heading).toBeVisible();
+
+    const headingBox = await heading.boundingBox();
+    const docsBox = await page.locator('.collection-docs').boundingBox();
+    expect(headingBox!.y).toBeLessThan(docsBox!.y);
   });
 
   test('renders markdown paragraphs with inline formatting', async ({ page }) => {

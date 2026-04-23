@@ -32,8 +32,6 @@ request:
     token: "{{bearer_auth_token}}"
 docs:
   content: |
-    # Bruno Testbench
-
     This is a comprehensive API collection for testing **OpenCollection** features.
 
     ## Getting Started

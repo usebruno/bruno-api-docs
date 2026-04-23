@@ -25,7 +25,9 @@ test.describe('Collection-level documentation', () => {
   });
 
   test('renders collection name as page header above docs', async ({ page }) => {
-    const heading = page.getByRole('heading', { name: 'Bruno Testbench', level: 1 });
+    const heading = page
+      .locator('.playground-content')
+      .getByRole('heading', { name: 'Bruno Testbench', level: 1 });
     await expect(heading).toBeVisible();
 
     const headingBox = await heading.boundingBox();

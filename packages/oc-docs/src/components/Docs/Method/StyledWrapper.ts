@@ -5,41 +5,42 @@ export const StyledWrapper = styled.div`
   align-items: center;
   justify-content: center;
   padding: 0.1rem 0.4rem;
-  font-size: 10px;
-  font-weight: 600;
-  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  border-radius: 3px;
   text-transform: uppercase;
   font-family: var(--font-sans);
-  min-width: 42px;
+  min-width: 36px;
   margin-right: 8px;
+  letter-spacing: 0.05em;
 
   &.get {
-    background-color: #e6f0ff;
-    color: #0057b7;
+    background-color: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
   }
 
   &.post {
-    background-color: #e6f9e6;
-    color: #00824d;
+    background-color: rgba(22, 163, 74, 0.1);
+    color: #16a34a;
   }
 
   &.put {
-    background-color: #fff0e6;
-    color: #b74600;
+    background-color: rgba(217, 119, 6, 0.1);
+    color: #d97706;
   }
 
   &.delete {
-    background-color: #ffe6e6;
-    color: #b70000;
+    background-color: rgba(220, 38, 38, 0.1);
+    color: #dc2626;
   }
 
   &.patch {
-    background-color: #f9e6f9;
-    color: #6b0082;
+    background-color: rgba(147, 51, 234, 0.1);
+    color: #9333ea;
   }
 
   &.options, &.head {
-    background-color: #f0f0f0;
-    color: #4a4a4a;
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
   }
 `;

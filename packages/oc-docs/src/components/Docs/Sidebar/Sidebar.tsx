@@ -123,9 +123,15 @@ const Sidebar: React.FC<SidebarProps> = () => {
   return (
     <SidebarContainer className="h-full flex flex-col" style={{ width: 'var(--sidebar-width)' }}>
       {/* Collection name at top */}
-      <div className="p-4 pt-0">
+      <div style={{ padding: '0 14px 10px 14px' }}>
         <div className="flex items-center gap-2">
-          <h1 className="font-semibold truncate flex-1" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="truncate flex-1" style={{
+            color: 'var(--text-primary)',
+            fontWeight: 600,
+            fontSize: '0.875rem',
+            letterSpacing: '-0.01em',
+            margin: 0
+          }}>
             {collection?.info?.name || 'API Collection'}
           </h1>
         </div>

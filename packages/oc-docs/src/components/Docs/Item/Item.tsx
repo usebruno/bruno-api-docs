@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-http';
 import 'prismjs/components/prism-graphql';
@@ -28,9 +28,9 @@ import {
 } from '../../../utils/schemaHelpers';
 import {
   MinimalDataTable,
-  CompactCodeView,
   StatusBadge
 } from '../../../ui/MinimalComponents';
+import { Code } from '../../../ui/Code/Code';
 import { CodeSnippets } from '../CodeSnippets/CodeSnippets';
 import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
@@ -50,19 +50,46 @@ const methodColors: Record<string, string> = {
 const Item = memo(({
   item,
   parentPath = '',
+  breadcrumb = [],
   collection,
   toggleRunnerMode,
-  onTryClick
+  onTryClick,
+  onBreadcrumbClick
 }: {
   item: any;
   parentPath?: string;
+  breadcrumb?: Array<{ name: string; uuid: string }>;
   collection?: any;
   toggleRunnerMode?: () => void;
   onTryClick?: () => void;
+  onBreadcrumbClick?: (uuid: string) => void;
 }) => {
   const md = useMarkdownRenderer();
+  const [bodyScriptsView, setBodyScriptsView] = useState<'body' | 'scripts'>('body');
   const itemId = getItemId(item);
   const sectionId = generateSectionId(item, parentPath);
+
+  const renderBreadcrumb = () => {
+    if (breadcrumb.length === 0) return null;
+    return (
+      <div className="item-breadcrumb">
+        {breadcrumb.map((segment, i) => (
+          <span key={i}>
+            {i > 0 && <span className="breadcrumb-sep">/</span>}
+            <span
+              className="breadcrumb-link"
+              onClick={() => onBreadcrumbClick?.(segment.uuid)}
+            >
+              <svg className="breadcrumb-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+              {segment.name}
+            </span>
+          </span>
+        ))}
+      </div>
+    );
+  };
 
   if (isFolder(item)) {
     const folderItem = item as any;
@@ -78,14 +105,14 @@ const Item = memo(({
         id={`section-${sectionId}`}
       >
         <div className="item-header-minimal">
+          {renderBreadcrumb()}
           <div className="item-title-section">
-            <div className="item-type-badge folder">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <h1 className="item-title">
+              <svg className="item-title-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
               </svg>
-              <span>Folder</span>
-            </div>
-            <h1 className="item-title">{folderName}</h1>
+              {folderName}
+            </h1>
           </div>
         </div>
 
@@ -145,6 +172,7 @@ const Item = memo(({
         id={`section-${sectionId}`}
       >
         <div className="item-header-minimal">
+          {renderBreadcrumb()}
           <div className="item-title-section">
             <div className="item-type-badge script">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -158,7 +186,7 @@ const Item = memo(({
         </div>
 
         {scriptItem.script && (
-          <CompactCodeView
+          <Code
             code={scriptItem.script}
             language="javascript"
           />
@@ -196,30 +224,33 @@ const Item = memo(({
         id={`section-${sectionId}`}
       >
         <div className="item-header-minimal">
+          {renderBreadcrumb()}
           <div className="item-title-section">
             <h1 className="item-title">{endpoint.name}</h1>
             <div className="endpoint-badges">
               <span className="badge-method" style={{ backgroundColor: methodColors[endpoint.method?.toUpperCase()] }}>
                 {endpoint.method}
               </span>
-              <span className="badge-url">{endpoint.url}</span>
-              {(onTryClick || toggleRunnerMode) && (
-                <button
-                  className="badge-try"
-                  onClick={() => {
-                    if (onTryClick) {
-                      onTryClick();
-                    } else if (toggleRunnerMode) {
-                      toggleRunnerMode();
-                    }
-                  }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                  Try
-                </button>
-              )}
+              <div className="endpoint-url-container">
+                <span className="badge-url">{endpoint.url}</span>
+                {(onTryClick || toggleRunnerMode) && (
+                  <button
+                    className="badge-try"
+                    onClick={() => {
+                      if (onTryClick) {
+                        onTryClick();
+                      } else if (toggleRunnerMode) {
+                        toggleRunnerMode();
+                      }
+                    }}
+                  >
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                    Try
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -256,49 +287,109 @@ const Item = memo(({
               />
             )}
 
-            {endpoint.body && typeof endpoint.body === 'object' && 'data' in endpoint.body && (
-              <div className="request-body-section">
-                <h3 className="section-title">Body</h3>
-                <CompactCodeView
-                  code={(() => {
-                    const bodyData = (endpoint.body as any).data;
-                    const bodyType = (endpoint.body as any).type;
-                    
-                    // Handle different body types
-                    if (bodyType === 'form-urlencoded' && Array.isArray(bodyData)) {
-                      // Convert FormUrlEncodedEntry[] to string
-                      return bodyData
-                        .filter((entry: any) => entry.disabled !== true)
-                        .map((entry: any) => `${encodeURIComponent(entry.name)}=${encodeURIComponent(entry.value)}`)
-                        .join('&');
-                    } else if (bodyType === 'multipart-form' && Array.isArray(bodyData)) {
-                      // Convert MultipartFormEntry[] to readable format
-                      return bodyData
-                        .filter((entry: any) => entry.disabled !== true)
-                        .map((entry: any) => `${entry.name}: ${entry.value}`)
-                        .join('\n');
-                    } else if (typeof bodyData === 'string') {
-                      // Handle string data (json, text, xml, etc.)
-                      return bodyData;
-                    } else {
-                      // Fallback: stringify objects
-                      return JSON.stringify(bodyData, null, 2);
-                    }
-                  })()}
-                  language={(() => {
-                    const bodyType = (endpoint.body as any).type;
-                    if (bodyType === 'form-urlencoded') return 'text';
-                    if (bodyType === 'multipart-form') return 'text';
-                    return bodyType || 'json';
-                  })()}
-                />
-              </div>
-            )}
+            {(() => {
+              const hasBody = endpoint.body && typeof endpoint.body === 'object' && 'data' in endpoint.body;
+              const hasScripts = !!(endpoint.script?.preRequest || endpoint.script?.postResponse);
 
-            <Scripts
-              preRequest={endpoint.script?.preRequest}
-              postResponse={endpoint.script?.postResponse}
-            />
+              if (!hasBody && !hasScripts) return null;
+              if (!hasBody && hasScripts) {
+                return (
+                  <Scripts
+                    preRequest={endpoint.script?.preRequest}
+                    postResponse={endpoint.script?.postResponse}
+                  />
+                );
+              }
+
+              if (hasBody && !hasScripts) {
+                return (
+                  <div className="request-body-section">
+                    <h3 className="section-title">Body</h3>
+                    <Code
+                      code={(() => {
+                        const bodyData = (endpoint.body as any).data;
+                        const bodyType = (endpoint.body as any).type;
+                        if (bodyType === 'form-urlencoded' && Array.isArray(bodyData)) {
+                          return bodyData
+                            .filter((entry: any) => entry.disabled !== true)
+                            .map((entry: any) => `${encodeURIComponent(entry.name)}=${encodeURIComponent(entry.value)}`)
+                            .join('&');
+                        } else if (bodyType === 'multipart-form' && Array.isArray(bodyData)) {
+                          return bodyData
+                            .filter((entry: any) => entry.disabled !== true)
+                            .map((entry: any) => `${entry.name}: ${entry.value}`)
+                            .join('\n');
+                        } else if (typeof bodyData === 'string') {
+                          return bodyData;
+                        } else {
+                          return JSON.stringify(bodyData, null, 2);
+                        }
+                      })()}
+                      language={(() => {
+                        const bodyType = (endpoint.body as any).type;
+                        if (bodyType === 'form-urlencoded') return 'text';
+                        if (bodyType === 'multipart-form') return 'text';
+                        return bodyType || 'json';
+                      })()}
+                    />
+                  </div>
+                );
+              }
+
+              return (
+                <div className="request-body-section">
+                  <div className="section-title-tabs">
+                    <h3
+                      className={`section-title-tab ${bodyScriptsView === 'body' ? 'active' : ''}`}
+                      onClick={() => setBodyScriptsView('body')}
+                    >
+                      Body
+                    </h3>
+                    <h3
+                      className={`section-title-tab ${bodyScriptsView === 'scripts' ? 'active' : ''}`}
+                      onClick={() => setBodyScriptsView('scripts')}
+                    >
+                      Scripts
+                    </h3>
+                  </div>
+                  {bodyScriptsView === 'body' ? (
+                    <Code
+                      code={(() => {
+                        const bodyData = (endpoint.body as any).data;
+                        const bodyType = (endpoint.body as any).type;
+                        if (bodyType === 'form-urlencoded' && Array.isArray(bodyData)) {
+                          return bodyData
+                            .filter((entry: any) => entry.disabled !== true)
+                            .map((entry: any) => `${encodeURIComponent(entry.name)}=${encodeURIComponent(entry.value)}`)
+                            .join('&');
+                        } else if (bodyType === 'multipart-form' && Array.isArray(bodyData)) {
+                          return bodyData
+                            .filter((entry: any) => entry.disabled !== true)
+                            .map((entry: any) => `${entry.name}: ${entry.value}`)
+                            .join('\n');
+                        } else if (typeof bodyData === 'string') {
+                          return bodyData;
+                        } else {
+                          return JSON.stringify(bodyData, null, 2);
+                        }
+                      })()}
+                      language={(() => {
+                        const bodyType = (endpoint.body as any).type;
+                        if (bodyType === 'form-urlencoded') return 'text';
+                        if (bodyType === 'multipart-form') return 'text';
+                        return bodyType || 'json';
+                      })()}
+                    />
+                  ) : (
+                    <Scripts
+                      preRequest={endpoint.script?.preRequest}
+                      postResponse={endpoint.script?.postResponse}
+                      hideTitle
+                    />
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="code-snippets-wrapper">

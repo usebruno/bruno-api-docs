@@ -4,19 +4,20 @@ export const StyledWrapper = styled.div`
   .scripts-section {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.375rem;
   }
 
   .scripts-card {
-    border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow: hidden;
-    background-color: var(--background-color);
+    background-color: var(--code-bg);
+    border: 1px solid #ebeef1;
   }
 
   .scripts-card .tab-header {
     padding-inline: 16px;
-    padding-top: 6px;
+    padding-top: 8px;
+    background-color: #ebeef1;
   }
 
   .scripts-card .tab-header .tab-button {
@@ -25,11 +26,11 @@ export const StyledWrapper = styled.div`
     border-bottom: 2px solid transparent;
     margin-right: 1.25rem;
     background: none;
-    color: var(--oc-tabs-color);
+    color: #687385;
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 500;
-    transition: color 0.2s ease, border-color 0.2s ease;
+    transition: color 0.15s ease, border-color 0.15s ease;
   }
 
   .scripts-card .tab-header .tab-button:focus,
@@ -42,17 +43,17 @@ export const StyledWrapper = styled.div`
   }
 
   .scripts-card .tab-header .tab-button:hover {
-    color: var(--oc-tabs-active-color);
+    color: #30313d;
   }
 
   .scripts-card .tab-header .tab-button.active {
-    color: var(--oc-tabs-active-color) !important;
+    color: #30313d !important;
     border-bottom-color: var(--primary-color) !important;
   }
 
   .scripts-card .tab-content {
     border-top: none;
-    background-color: var(--background-color);
+    background-color: var(--code-bg);
   }
 
   .scripts-code-wrapper {
@@ -68,7 +69,7 @@ export const StyledWrapper = styled.div`
   .scripts-code-wrapper .compact-code-view .code-content {
     padding: 32px 16px 16px;
     background-color: var(--code-bg);
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid #ebeef1;
   }
 
   .scripts-copy-button {
@@ -79,17 +80,17 @@ export const StyledWrapper = styled.div`
     align-items: center;
     gap: 0.25rem;
     padding: 0.35rem 0.5rem;
-    border-radius: 0.375rem;
+    border-radius: 4px;
     font-size: 0.7rem;
     font-weight: 500;
-    color: var(--text-secondary);
-    background-color: rgba(0, 0, 0, 0.04);
+    color: #687385;
+    background-color: transparent;
     border: none;
     cursor: pointer;
     opacity: 0;
     pointer-events: none;
     transform: translateY(-4px);
-    transition: background-color 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+    transition: all 0.15s ease;
   }
 
   .scripts-code-wrapper:hover .scripts-copy-button,
@@ -102,18 +103,16 @@ export const StyledWrapper = styled.div`
   }
 
   .scripts-copy-button:hover {
-    background-color: rgba(0, 0, 0, 0.08);
-    color: var(--text-primary);
+    background-color: rgba(0, 0, 0, 0.04);
+    color: #30313d;
   }
 
   .scripts-copy-button.copied {
-    color: #15803d;
-    background-color: rgba(34, 197, 94, 0.15);
+    color: #059669;
+    background-color: rgba(5, 150, 105, 0.08);
   }
-
 
   .scripts-card .compact-code-view pre {
     margin: 0;
   }
 `;
-

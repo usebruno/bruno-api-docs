@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { TabGroup, CompactCodeView } from '../../../../ui/MinimalComponents';
+import { TabGroup } from '../../../../ui/MinimalComponents';
+import { Code } from '../../../../ui/Code/Code';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ScriptsProps {
   preRequest?: string | null;
   postResponse?: string | null;
+  hideTitle?: boolean;
 }
 
 export const Scripts: React.FC<ScriptsProps> = ({
   preRequest,
-  postResponse
+  postResponse,
+  hideTitle = false
 }) => {
   const tabs = [
     ...(preRequest ? [{ id: 'pre', label: 'Pre-request', code: preRequest }] : []),
@@ -25,7 +28,7 @@ export const Scripts: React.FC<ScriptsProps> = ({
   return (
     <StyledWrapper>
       <div className="scripts-section">
-        <h3 className="section-title">Scripts</h3>
+        {!hideTitle && <h3 className="section-title">Scripts</h3>}
         <div className="scripts-card">
           <TabGroup
             tabs={tabs.map(({ id, label }) => ({ id, label }))}
@@ -62,8 +65,7 @@ const ScriptsCodeContent: React.FC<{ code: string }> = ({ code }) => {
 
   return (
     <div className="scripts-code-wrapper">
-      <CompactCodeView
-        copyButton={false}
+      <Code
         code={code || ''}
         language="javascript"
       />

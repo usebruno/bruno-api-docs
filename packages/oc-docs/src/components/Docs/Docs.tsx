@@ -5,7 +5,7 @@ import Sidebar from './Sidebar/Sidebar';
 import Item from './Item/Item';
 import FetchInBrunoButton from './Sidebar/FetchInBrunoButton';
 import { getItemId, generateSafeId } from '../../utils/itemUtils';
-import { isFolder } from '../../utils/schemaHelpers';
+import { isFolder, getItemName } from '../../utils/schemaHelpers';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectSelectedItemId, selectItem } from '../../store/slices/docs';
 import { selectGitCollectionUrl } from '../../store/slices/app';
@@ -71,29 +71,32 @@ const Docs: React.FC<DocsProps> = ({
   }, [selectedItemId, filteredCollectionItems]);
 
   // Flatten all items recursively for rendering
-  const flattenItems = (items: any[], parentPath = ''): any[] => {
+  const breadcrumbMap = useRef<Map<string, Array<{ name: string; uuid: string }>>>(new Map());
+
+  const flattenItems = (items: any[], breadcrumbPath: Array<{ name: string; uuid: string }> = []): any[] => {
     const result: any[] = [];
-    
+
     for (const item of items) {
-      const itemId = getItemId(item);
-      const itemPath = parentPath ? `${parentPath}/${itemId}` : itemId;
-      
-      // Add the item itself
+      const itemName = getItemName(item) || '';
+      const itemUuid = (item as any).uuid || getItemId(item);
+
+      breadcrumbMap.current.set(itemUuid, breadcrumbPath);
+
       result.push(item);
-      
-      // If it's a folder, recursively add its children
+
       if (isFolder(item)) {
         const folder = item as any;
         if (folder.items && folder.items.length > 0) {
-          result.push(...flattenItems(folder.items, itemPath));
+          result.push(...flattenItems(folder.items, [...breadcrumbPath, { name: itemName, uuid: itemUuid }]));
         }
       }
     }
-    
+
     return result;
   };
 
   const allItems = useMemo(() => {
+    breadcrumbMap.current.clear();
     const items = flattenItems(filteredCollectionItems);
     return items;
   }, [filteredCollectionItems]);
@@ -105,7 +108,8 @@ const Docs: React.FC<DocsProps> = ({
         style={{
           width: 'var(--sidebar-width)',
           transition: 'width 0.3s ease',
-          borderRight: '1px solid var(--border-color)'
+          borderRight: '1px solid var(--border-color)',
+          backgroundColor: 'var(--oc-sidebar-bg)'
         }}
       >
         <Sidebar />
@@ -114,15 +118,26 @@ const Docs: React.FC<DocsProps> = ({
       <div
         className="playground-content h-full overflow-y-auto flex-1"
       >
-        <div className="all-endpoints-view h-full overflow-y-auto" style={{ padding: '2rem', maxWidth: '100%' }}>
+        <div className="all-endpoints-view h-full overflow-y-auto" style={{ maxWidth: '100%' }}>
           {docsCollection?.info?.name && (
             <div
-              className="flex items-center gap-3 mb-6"
-              style={{ maxWidth: '80rem' }}
+              className="flex items-center gap-3"
+              style={{
+                maxWidth: '80rem',
+                paddingBottom: '1.5rem',
+                borderBottom: '1px solid var(--border-color)'
+              }}
             >
               <h1
-                className="text-2xl font-semibold truncate"
-                style={{ color: 'var(--text-primary)' }}
+                className="truncate"
+                style={{
+                  color: 'var(--text-primary)',
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                  letterSpacing: '-0.025em',
+                  lineHeight: 1.2,
+                  margin: 0
+                }}
               >
                 {docsCollection.info.name}
               </h1>
@@ -140,12 +155,11 @@ const Docs: React.FC<DocsProps> = ({
           {/* Collection-level documentation/introduction */}
           {docsCollection?.docs && (
             <div
-              className="collection-docs mb-10"
+              className="collection-docs"
               style={{
                 maxWidth: '80rem',
-                marginLeft: 0,
-                marginRight: 'auto',
-                paddingBottom: '1.5rem',
+                paddingTop: '1.5rem',
+                paddingBottom: '2rem',
                 borderBottom: '1px solid var(--border-color)'
               }}
             >
@@ -175,12 +189,39 @@ const Docs: React.FC<DocsProps> = ({
               <div
                 key={`${itemUuid}-${index}`}
                 id={sectionId}
-                className={`endpoint-section mb-12 scroll-mt-20 ${isSelected ? 'selected' : ''}`}
+                className={`endpoint-section scroll-mt-20 ${isSelected ? 'selected' : ''}`}
               >
                 <Item
                   item={item}
                   parentPath=""
+                  breadcrumb={breadcrumbMap.current.get(itemUuid) || []}
                   collection={docsCollection || undefined}
+                  onBreadcrumbClick={(targetUuid: string) => {
+                    dispatch(selectItem(targetUuid));
+                    // Find the target item to get its safe ID for scrolling
+                    const findTarget = (searchItems: any[]): string | null => {
+                      for (const searchItem of searchItems) {
+                        const searchUuid = (searchItem as any).uuid || getItemId(searchItem);
+                        if (searchUuid === targetUuid) {
+                          return generateSafeId(getItemId(searchItem));
+                        }
+                        if (isFolder(searchItem) && searchItem.items) {
+                          const found = findTarget(searchItem.items);
+                          if (found) return found;
+                        }
+                      }
+                      return null;
+                    };
+                    const targetSafeId = findTarget(filteredCollectionItems);
+                    if (targetSafeId) {
+                      setTimeout(() => {
+                        const element = document.getElementById(`section-${targetSafeId}`);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                      }, 100);
+                    }
+                  }}
                   onTryClick={() => {
                     // Select the item by UUID
                     dispatch(selectItem(itemUuid));

@@ -4,15 +4,14 @@ export const SidebarContainer = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   &.compact {
     min-width: var(--sidebar-width-compact);
     max-width: var(--sidebar-width-compact);
   }
 
-  /* Sidebar scrollbar styling */
   & ::-webkit-scrollbar {
-    width: 6px;
+    width: 0;
   }
 
   & ::-webkit-scrollbar-track {
@@ -20,11 +19,13 @@ export const SidebarContainer = styled.div`
   }
 
   & ::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    background-color: transparent;
   }
 
-  /* Sidebar Logo styling */
+  &:hover ::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.12);
+  }
+
   & .logo {
     padding: 0 8px 12px 8px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
@@ -37,7 +38,7 @@ export const SidebarContainer = styled.div`
 `;
 
 export const SidebarItems = styled.div`
-  padding: 0;
+  padding: 0 6px;
   overflow-y: auto;
   flex-grow: 1;
 
@@ -48,16 +49,16 @@ export const SidebarItems = styled.div`
 
 export const SidebarItem = styled.div`
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0;
+  transition: all 0.12s ease;
+  border-radius: 6px;
   margin-bottom: 0;
   position: relative;
   overflow: hidden;
-  padding: 6px 12px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
-//   font-size: 13px;
-  color: #212121;
+  color: var(--text-secondary);
+  font-size: 13px;
 
   ${SidebarContainer}.compact & {
     padding: 4px 8px;
@@ -67,36 +68,41 @@ export const SidebarItem = styled.div`
 
   &:hover, &.hovered {
     background-color: rgba(0, 0, 0, 0.04);
-    color: #212121;
+    color: var(--text-primary);
   }
 
   &.active {
-    background-color: rgba(0, 0, 0, 0.08);
-    color: #212121;
+    background-color: rgba(217, 119, 6, 0.08);
+    color: var(--text-primary);
     font-weight: 500;
   }
 
   &.active:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(217, 119, 6, 0.1);
+  }
+
+  &.folder {
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 12.5px;
   }
 
   &.folder:hover {
     background-color: transparent;
-    color: #212121;
   }
 
   & .method-badge {
-    font-size: 10px;
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-weight: 600;
-    min-width: 42px;
+    font-size: 9px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-weight: 700;
+    min-width: 36px;
     text-align: center;
-    letter-spacing: 0.03em;
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.05em;
+    transition: all 0.12s ease;
     text-transform: uppercase;
     margin-right: 8px;
-    opacity: 0.85;
+    font-family: var(--font-mono);
   }
 
   ${SidebarContainer}.compact & .method-badge {
@@ -105,11 +111,10 @@ export const SidebarItem = styled.div`
     font-size: 10px;
   }
 
-  /* Fix for click events */
   & * {
     pointer-events: none;
   }
-  
+
   & svg {
     pointer-events: all;
   }
@@ -119,4 +124,3 @@ export const SidebarItem = styled.div`
     height: 14px;
   }
 `;
-

@@ -37,7 +37,7 @@ export const StyledWrapper = styled.div`
   .tab-header {
     padding-inline: 16px;
     padding-top: 8px;
-    background-color: #ebeef1;
+    background-color: var(--oc-background-surface0);
 
     .tab-button {
       padding: 6px 0px;
@@ -45,7 +45,7 @@ export const StyledWrapper = styled.div`
       border-bottom: solid 2px transparent;
       margin-right: 1.25rem;
       margin-left: 0;
-      color: #687385;
+      color: var(--oc-colors-text-muted);
       cursor: pointer;
       background: none;
       font-size: 0.75rem;
@@ -62,11 +62,11 @@ export const StyledWrapper = styled.div`
       }
 
       &:hover {
-        color: #30313d;
+        color: var(--oc-text);
       }
 
       &.active {
-        color: #30313d !important;
+        color: var(--oc-text) !important;
         border-bottom: solid 2px var(--primary-color) !important;
       }
     }
@@ -85,7 +85,7 @@ export const StyledWrapper = styled.div`
   .code-example-code-wrapper .compact-code-view .code-content {
     padding: 32px 16px 16px;
     background-color: var(--code-bg);
-    border-top: 1px solid #ebeef1;
+    border-top: 1px solid var(--oc-border-border1);
   }
 
   .code-example-code-wrapper .compact-code-view pre {

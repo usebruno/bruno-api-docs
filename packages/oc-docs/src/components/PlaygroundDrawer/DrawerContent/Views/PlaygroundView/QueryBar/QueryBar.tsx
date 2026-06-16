@@ -3,6 +3,7 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import { StyledWrapper } from './StyledWrapper';
 import { getHttpMethod, getRequestUrl, getHttpParams } from '../../../../../../utils/schemaHelpers';
 import { syncPathParams } from '../../../../../../utils/pathParams';
+import { methodColorVars, getMethodColorVar } from '../../../../../../theme/methodColors';
 
 interface QueryBarProps {
   item: HttpRequest;
@@ -51,17 +52,7 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
     onItemChange(updatedItem);
   };
 
-  const HTTP_METHODS: Record<string, string> = {
-    'GET': '#059669',
-    'POST': '#d97706',
-    'PUT': '#2563eb',
-    'PATCH': '#7c3aed',
-    'DELETE': '#dc2626',
-    'HEAD': '#64748b',
-    'OPTIONS': '#64748b'
-  };
-
-  const getMethodColor = (method: string) => HTTP_METHODS[method] || '#64748b';
+  const getMethodColor = getMethodColorVar;
 
   return (
     <StyledWrapper 
@@ -77,7 +68,7 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
           onChange={(e) => handleMethodChange(e.target.value)}
           style={{ color: getMethodColor(method) }}
         >
-          {Object.keys(HTTP_METHODS).map((m) => (
+          {Object.keys(methodColorVars).map((m) => (
             <option key={m} value={m} style={{ color: getMethodColor(m) }}>
               {m}
             </option>
@@ -89,7 +80,7 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
           height="12"
           viewBox="0 0 24 24"
           fill="none"
-          stroke="#64748b"
+          stroke="var(--oc-colors-text-muted)"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"

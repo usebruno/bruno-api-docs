@@ -68,7 +68,7 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
             }}
             onFocus={(e) => {
               e.currentTarget.style.borderColor = 'var(--primary-color)';
-              e.currentTarget.style.boxShadow = '0 0 0 3px rgba(217, 119, 6, 0.12)';
+              e.currentTarget.style.boxShadow = '0 0 0 3px color-mix(in srgb, var(--oc-brand) 12%, transparent)';
               e.currentTarget.style.backgroundColor = 'var(--bg-secondary)';
             }}
             onBlur={(e) => {
@@ -78,7 +78,7 @@ const RequestHeader: React.FC<RequestHeaderProps> = ({
             }}
             onMouseEnter={(e) => {
               if (document.activeElement !== e.currentTarget) {
-                e.currentTarget.style.borderColor = 'rgba(0, 0, 0, 0.15)';
+                e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--oc-text) 15%, transparent)';
               }
             }}
             onMouseLeave={(e) => {

@@ -11,13 +11,13 @@ export const StyledWrapper = styled.div`
     border-radius: 8px;
     overflow: hidden;
     background-color: var(--code-bg);
-    border: 1px solid #ebeef1;
+    border: 1px solid var(--oc-border-border1);
   }
 
   .scripts-card .tab-header {
     padding-inline: 16px;
     padding-top: 8px;
-    background-color: #ebeef1;
+    background-color: var(--oc-background-surface0);
   }
 
   .scripts-card .tab-header .tab-button {
@@ -26,7 +26,7 @@ export const StyledWrapper = styled.div`
     border-bottom: 2px solid transparent;
     margin-right: 1.25rem;
     background: none;
-    color: #687385;
+    color: var(--oc-colors-text-muted);
     cursor: pointer;
     font-size: 0.75rem;
     font-weight: 500;
@@ -43,11 +43,11 @@ export const StyledWrapper = styled.div`
   }
 
   .scripts-card .tab-header .tab-button:hover {
-    color: #30313d;
+    color: var(--oc-text);
   }
 
   .scripts-card .tab-header .tab-button.active {
-    color: #30313d !important;
+    color: var(--oc-text) !important;
     border-bottom-color: var(--primary-color) !important;
   }
 
@@ -69,7 +69,7 @@ export const StyledWrapper = styled.div`
   .scripts-code-wrapper .compact-code-view .code-content {
     padding: 32px 16px 16px;
     background-color: var(--code-bg);
-    border-top: 1px solid #ebeef1;
+    border-top: 1px solid var(--oc-border-border1);
   }
 
   .scripts-copy-button {
@@ -83,7 +83,7 @@ export const StyledWrapper = styled.div`
     border-radius: 4px;
     font-size: 0.7rem;
     font-weight: 500;
-    color: #687385;
+    color: var(--oc-colors-text-muted);
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -103,13 +103,13 @@ export const StyledWrapper = styled.div`
   }
 
   .scripts-copy-button:hover {
-    background-color: rgba(0, 0, 0, 0.04);
-    color: #30313d;
+    background-color: color-mix(in srgb, var(--oc-text) 4%, transparent);
+    color: var(--oc-text);
   }
 
   .scripts-copy-button.copied {
-    color: #059669;
-    background-color: rgba(5, 150, 105, 0.08);
+    color: var(--oc-colors-text-green);
+    background-color: color-mix(in srgb, var(--oc-colors-text-green) 8%, transparent);
   }
 
   .scripts-card .compact-code-view pre {

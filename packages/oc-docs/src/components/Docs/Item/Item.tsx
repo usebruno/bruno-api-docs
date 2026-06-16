@@ -35,16 +35,7 @@ import { StyledWrapper } from './StyledWrapper';
 import { Scripts } from './Scripts/Scripts';
 import { Examples } from './Examples/ExamplesView/ExamplesView';
 import { useMarkdownRenderer } from '../../../hooks';
-
-const methodColors: Record<string, string> = {
-  GET: '#10b981',
-  POST: '#3b82f6',
-  PUT: '#f59e0b',
-  PATCH: '#a855f7',
-  DELETE: '#ef4444',
-  HEAD: '#8b5cf6',
-  OPTIONS: '#06b6d4'
-};
+import { getMethodColorVar } from '../../../theme/methodColors';
 
 const Item = memo(({
   item,
@@ -235,7 +226,7 @@ const Item = memo(({
           <div className="item-title-section">
             <h1 className="item-title">{endpoint.name}</h1>
             <div className="endpoint-badges">
-              <span className="badge-method" style={{ backgroundColor: methodColors[endpoint.method?.toUpperCase()] }}>
+              <span className="badge-method" style={{ backgroundColor: getMethodColorVar(endpoint.method) }}>
                 {endpoint.method}
               </span>
               <div className="endpoint-url-container">

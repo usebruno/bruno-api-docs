@@ -136,7 +136,7 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
         overflow: 'hidden', 
         display: 'flex', 
         flexDirection: 'column', 
-        backgroundColor: '#ffffff',
+        backgroundColor: 'var(--oc-background-base)',
         minHeight: 0
       }}>
         {viewMode === 'playground' ? (
@@ -152,8 +152,8 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              color: '#6c757d',
-              backgroundColor: '#ffffff'
+              color: 'var(--oc-colors-text-muted)',
+              backgroundColor: 'var(--oc-background-base)'
             }}>
               <div style={{ textAlign: 'center' }}>
                 <p>Select an endpoint from the sidebar to get started</p>
@@ -173,8 +173,8 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              color: '#6c757d',
-              backgroundColor: '#ffffff'
+              color: 'var(--oc-colors-text-muted)',
+              backgroundColor: 'var(--oc-background-base)'
             }}>
               <div style={{ textAlign: 'center' }}>
                 <p>Select a folder from the sidebar to configure its settings</p>
@@ -190,8 +190,8 @@ const DrawerContent: React.FC<DrawerContentProps> = ({ collection, selectedItem,
               alignItems: 'center',
               justifyContent: 'center',
               height: '100%',
-              color: '#6c757d',
-              backgroundColor: '#ffffff'
+              color: 'var(--oc-colors-text-muted)',
+              backgroundColor: 'var(--oc-background-base)'
             }}>
               <div style={{ textAlign: 'center' }}>
                 <p>No collection available for settings</p>

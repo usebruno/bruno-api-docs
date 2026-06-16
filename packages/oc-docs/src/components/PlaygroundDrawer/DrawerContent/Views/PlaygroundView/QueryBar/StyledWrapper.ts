@@ -10,8 +10,8 @@ export const StyledWrapper = styled.div`
 
   &:focus-within {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1), 
-                0 1px 2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--oc-brand) 10%, transparent),
+                0 1px 2px color-mix(in srgb, var(--oc-text) 5%, transparent);
   }
 
   input {
@@ -33,7 +33,7 @@ export const StyledWrapper = styled.div`
     }
     
     &:focus {
-      background-color: rgba(0, 0, 0, 0.01);
+      background-color: color-mix(in srgb, var(--oc-text) 1%, transparent);
     }
   }
 
@@ -76,11 +76,11 @@ export const StyledWrapper = styled.div`
       top: 0;
       bottom: 0;
       width: 1px;
-      background: rgba(0, 0, 0, 0.08);
+      background: color-mix(in srgb, var(--oc-text) 8%, transparent);
     }
-    
+
     &:hover:not(:disabled) {
-      background-color: #c2690a;
+      background-color: color-mix(in srgb, var(--oc-brand) 85%, black);
     }
     
     &:disabled {

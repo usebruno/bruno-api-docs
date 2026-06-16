@@ -31,6 +31,10 @@ import {
   setGitCollectionUrl
 } from '@slices/app';
 import { createOpenCollectionStore, type AppStore } from '../../store/store';
+import { applyTheme } from '../../theme/applyTheme';
+
+// Set data-theme on the root element before the component first paints to avoid a flash.
+applyTheme();
 
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== 'undefined' && value instanceof File;

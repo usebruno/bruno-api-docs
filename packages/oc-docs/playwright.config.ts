@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { appConfig } from './e2e/config/app.config';
 
 export default defineConfig({
   testDir: './e2e',
@@ -6,14 +7,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  outputDir: './test-results',
   reporter: [
     ['list'],
-    ['html', { outputFolder: './playwright-report', open: 'never' }],
-    ['json', { outputFile: './test-results/results.json' }],
+    ['html'],
+    ['json', { outputFile: 'playwright-report/results.json' }],
   ],
   use: {
-    baseURL: 'http://127.0.0.1:3001',
+    baseURL: appConfig.baseURL,
     trace: 'on-first-retry',
   },
   projects: [
@@ -23,8 +23,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://127.0.0.1:3001',
+    command: appConfig.webServerCommand,
+    url: appConfig.baseURL,
     reuseExistingServer: !process.env.CI,
   },
 });

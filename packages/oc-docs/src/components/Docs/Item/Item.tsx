@@ -62,7 +62,7 @@ const Item = memo(({
   const renderBreadcrumb = () => {
     if (breadcrumb.length === 0) return null;
     return (
-      <div className="item-breadcrumb">
+      <div className="item-breadcrumb" data-testid="breadcrumb">
         {breadcrumb.map((segment, i) => (
           <span key={i}>
             {i > 0 && <span className="breadcrumb-sep">/</span>}

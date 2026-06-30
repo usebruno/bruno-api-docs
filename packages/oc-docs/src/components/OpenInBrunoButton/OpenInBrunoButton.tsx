@@ -3,7 +3,7 @@ import { BrunoGlyph } from '../../assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface OpenInBrunoButtonProps {
-  /** When provided, renders a real `bruno://` deep link (`<a href>`). */
+  /** When provided, renders an `<a href>` to the Fetch-in-Bruno page (new tab). */
   href?: string;
   /** Click handler; used when no href is given (renders a `<button>`). */
   onClick?: () => void;
@@ -21,10 +21,10 @@ const OpenInBrunoButton: React.FC<OpenInBrunoButtonProps> = ({
   testId = 'open-in-bruno',
 }) => {
   const className = iconOnly ? 'is-icon' : 'is-full';
-  // A real deep link renders an anchor (right-click-copy, accessible); without
-  // one it falls back to a button driven by onClick.
+  // With an href it renders an anchor opening the Fetch-in-Bruno page in a new
+  // tab (keeps the docs open); without one it falls back to an onClick button.
   const tagProps = href
-    ? ({ as: 'a' as const, href })
+    ? ({ as: 'a' as const, href, target: '_blank' as const, rel: 'noopener noreferrer' })
     : ({ as: 'button' as const, type: 'button' as const, onClick });
 
   return (

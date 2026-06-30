@@ -17,7 +17,7 @@ export interface TopbarProps {
   /** Secondary controls slot (env switcher + show-vars). */
   envSwitcherSlot?: React.ReactNode;
   onOpenInBruno?: () => void;
-  /** Optional `bruno://` deep link; when set the CTA renders as a real anchor. */
+  /** Optional Fetch-in-Bruno URL; when set the CTA renders as an anchor. */
   openInBrunoHref?: string;
   /** Invoked by the mobile hamburger. */
   onToggleSidebar?: () => void;

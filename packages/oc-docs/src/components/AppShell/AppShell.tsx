@@ -10,7 +10,7 @@ import { selectDocsCollection } from '../../store/slices/docs';
 import { selectPlaygroundCollection } from '../../store/slices/playground';
 import { selectGitCollectionUrl } from '../../store/slices/app';
 import { useActiveResolution } from '../../routing/hooks';
-import { buildBrunoDeepLink } from '../../utils/buildBrunoDeepLink';
+import { buildFetchInBrunoUrl } from '../../utils/buildFetchInBrunoUrl';
 import { StyledWrapper } from './StyledWrapper';
 
 interface AppShellProps {
@@ -42,7 +42,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo }) => {
         collectionName={collection?.info?.name || 'API Collection'}
         version={collection?.info?.version}
         logo={logo}
-        openInBrunoHref={buildBrunoDeepLink(gitCollectionUrl)}
+        openInBrunoHref={buildFetchInBrunoUrl(gitCollectionUrl)}
       />
 
       <div className="appshell-row">

@@ -35,13 +35,15 @@ test.describe('Page header', () => {
     await expect(pageHeader.brandInitials).toHaveText('BT');
   });
 
-  test('Open-in-Bruno CTA deep-links via bruno:// and is pinned right', async ({ page, pageHeader }) => {
+  test('Open-in-Bruno CTA links to the Fetch-in-Bruno page (new tab) and is pinned right', async ({ page, pageHeader }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto('/');
 
     await expect(pageHeader.openInBruno).toBeVisible();
     const href = await pageHeader.openInBruno.getAttribute('href');
-    expect(href).toMatch(/^bruno:\/\/app\/collection\/import\/git\?url=/);
+    expect(href).toMatch(/^https:\/\/fetch\.usebruno\.com\?url=/);
+    expect(await pageHeader.openInBruno.getAttribute('target')).toBe('_blank');
+    expect(await pageHeader.openInBruno.getAttribute('rel')).toContain('noopener');
 
     // CTA hugs the right edge (within the 20px bar padding), not the brand.
     const headerBox = await pageHeader.root.boundingBox();

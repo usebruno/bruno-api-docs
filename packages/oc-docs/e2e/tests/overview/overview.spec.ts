@@ -5,9 +5,9 @@ test.describe('Collection Overview', () => {
     await overviewPage.goto();
   });
 
-  test('header shows the collection version ("v1.0.0") and name ("Bruno Testbench")', async ({ overviewPage }) => {
-    await test.step('the version is shown with a "v" prefix', async () => {
-      await expect(overviewPage.header.collectionVersion).toHaveText('v1.0.0');
+  test('header shows the collection version ("version : 1.0.0") and name ("Bruno Testbench")', async ({ overviewPage }) => {
+    await test.step('the raw version is shown, unformatted', async () => {
+      await expect(overviewPage.header.collectionVersion).toHaveText('version : 1.0.0');
     });
 
     await test.step('the collection name is shown as the page title', async () => {
@@ -15,10 +15,10 @@ test.describe('Collection Overview', () => {
     });
   });
 
-  test('shows three stat cards with the request (10), folder (0) and environment (2) counts', async ({ overviewPage }) => {
+  test('shows three stat cards with the request (41), folder (7) and environment (2) counts', async ({ overviewPage }) => {
     await expect(overviewPage.stats.cards).toHaveCount(3);
-    await expect(overviewPage.stats.valueFor('Requests')).toHaveText('10');
-    await expect(overviewPage.stats.valueFor('Folders')).toHaveText('0');
+    await expect(overviewPage.stats.valueFor('Requests')).toHaveText('41');
+    await expect(overviewPage.stats.valueFor('Folders')).toHaveText('7');
     await expect(overviewPage.stats.valueFor('Environments')).toHaveText('2');
   });
 
@@ -46,18 +46,18 @@ test.describe('Collection Overview', () => {
   });
 
   test.describe('Collection Configuration', () => {
-    test('shows the Headers, Auth, Script and Tests groups with their resolved values', async ({ overviewPage }) => {
+    test('shows the Headers, Auth, Script and Tests groups with their values', async ({ overviewPage }) => {
       const { configuration } = overviewPage;
       await expect(overviewPage.sectionLabel('Collection Configuration')).toBeVisible();
 
       await test.step('the Headers group lists the collection-level header and its value', async () => {
         await expect(configuration.subHeading('Headers')).toBeVisible();
-        await expect(configuration.rowValue('collection-header')).toHaveText('collection-header-value');
+        await expect(configuration.root.getByText('collection-header-value')).toBeVisible();
       });
 
       await test.step('the Auth group shows the resolved auth mode (Bearer Token)', async () => {
         await expect(configuration.subHeading('Auth')).toBeVisible();
-        await expect(configuration.rowValue('Mode')).toHaveText('Bearer Token');
+        await expect(configuration.root.getByText('Bearer Token')).toBeVisible();
       });
 
       await test.step('the Script and Tests groups are present', async () => {

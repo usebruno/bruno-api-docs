@@ -3,15 +3,15 @@
  * 
  * The new schema groups request properties into:
  * - info: name, type, seq, description, tags
- * - http/graphql/grpc/websocket: protocol-specific details (method, url, headers, body, params)
- * - runtime: auth, variables, assertions, scripts
+ * - http/graphql/grpc/websocket: protocol-specific details (method, url, headers, body, params, auth)
+ * - runtime: variables, assertions, scripts, actions
  * - settings: timeout, followRedirects, etc.
  * - docs: documentation at root level
  * 
  * Scripts are now an array of { type, code } instead of { preRequest, postResponse, tests, hooks }
  */
 
-import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
+import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollection/types/collection/item';
 import type { HttpRequest, HttpRequestHeader, HttpRequestExample } from '@opencollection/types/requests/http';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
@@ -90,6 +90,13 @@ export const isHttpRequest = (item: OpenCollectionItem | null | undefined): item
 };
 
 /**
+ * Check if an item is a standalone script file (`type: 'script'`).
+ */
+export const isScriptFile = (item: OpenCollectionItem | null | undefined): item is ScriptFile => {
+  return getItemType(item) === 'script';
+};
+
+/**
  * Check if an item is a GraphQL request
  */
 export const isGraphQLRequest = (item: OpenCollectionItem | null | undefined): item is GraphQLRequest => {
@@ -108,6 +115,13 @@ export const isGrpcRequest = (item: OpenCollectionItem | null | undefined): item
  */
 export const isWebSocketRequest = (item: OpenCollectionItem | null | undefined): item is WebSocketRequest => {
   return getItemType(item) === 'websocket';
+};
+
+// Check if an item is a request the docs viewer can't render (GraphQL, gRPC or WebSocket).
+export const isUnsupportedRequest = (
+  item: OpenCollectionItem | null | undefined
+): item is GraphQLRequest | GrpcRequest | WebSocketRequest => {
+  return isGraphQLRequest(item) || isGrpcRequest(item) || isWebSocketRequest(item);
 };
 
 /**
@@ -214,22 +228,27 @@ export const getHttpParams = (item: HttpRequest | null | undefined): HttpRequest
   return [];
 };
 
-/**
- * Get auth from a request (from runtime block or root)
- */
 export const getRequestAuth = (item: RequestItem | null | undefined): any => {
   if (!item) return undefined;
-  
-  // New schema: auth in runtime block
+
+  // Current schema: auth is part of the protocol-detail block.
+  const blocks = item as Record<string, { auth?: unknown } | undefined>;
+  for (const key of ['http', 'graphql', 'grpc', 'websocket']) {
+    if (blocks[key]?.auth !== undefined) {
+      return blocks[key]?.auth;
+    }
+  }
+
+  // Legacy: auth grouped under a runtime block.
   if ('runtime' in item && (item as any).runtime?.auth) {
     return (item as any).runtime.auth;
   }
-  
-  // Backwards compatibility: auth at root level
+
+  // Backwards compatibility: auth at root level.
   if ('auth' in item) {
     return (item as any).auth;
   }
-  
+
   return undefined;
 };
 

@@ -8,5 +8,5 @@ export const StyledWrapper = styled.h2`
   line-height: 1;
   letter-spacing: 1.4px;
   text-transform: uppercase;
-  color: var(--oc-colors-text-subtext1);
+  color: var(--oc-text);
 `;

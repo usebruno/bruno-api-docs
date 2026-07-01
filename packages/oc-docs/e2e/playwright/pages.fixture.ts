@@ -1,15 +1,19 @@
 import { test as base } from '@playwright/test';
 import { OverviewPage } from '../pages/overview.page';
+import { RequestPage } from '../pages/request.page';
+import { ScriptPage } from '../pages/script.page';
+import { UnsupportedRequestPage } from '../pages/unsupported-request.page';
+import { SidebarComponent } from '../components/sidebar.component';
+import { ThemeToggleComponent } from '../components/layout/theme-toggle.component';
 import { PageHeaderComponent } from '../components/layout/page-header.component';
-import { ThemeToggleComponent } from '../components/theme-toggle.component';
 
-/**
- * Registers the page objects and shared components as Playwright fixtures, so a
- * spec receives a ready instance by destructuring (e.g. `{ pageHeader }`) and
- * calls `pageHeader.brandName` directly instead of constructing it.
- */
+
 type Fixtures = {
   overviewPage: OverviewPage;
+  requestPage: RequestPage;
+  scriptPage: ScriptPage;
+  unsupportedRequestPage: UnsupportedRequestPage;
+  sidebar: SidebarComponent;
   pageHeader: PageHeaderComponent;
   themeToggle: ThemeToggleComponent;
 };
@@ -20,6 +24,18 @@ export const test = base.extend<Fixtures>({
   },
   pageHeader: async ({ page }, use) => {
     await use(new PageHeaderComponent(page));
+  },
+  requestPage: async ({ page }, use) => {
+    await use(new RequestPage(page));
+  },
+  scriptPage: async ({ page }, use) => {
+    await use(new ScriptPage(page));
+  },
+  unsupportedRequestPage: async ({ page }, use) => {
+    await use(new UnsupportedRequestPage(page));
+  },
+  sidebar: async ({ page }, use) => {
+    await use(new SidebarComponent(page));
   },
   themeToggle: async ({ page }, use) => {
     await use(new ThemeToggleComponent(page));

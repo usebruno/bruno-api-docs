@@ -14,7 +14,6 @@ import { ThemeToggleComponent } from '../components/layout/theme-toggle.componen
 import { PageHeaderComponent } from '../components/layout/page-header.component';
 import { SearchComponent } from '../components/search/search.component';
 import { EnvSwitcherComponent } from '../components/layout/env-switcher.component';
-import { VariableCardComponent } from '../components/variable-card.component';
 import { KeyValueTableComponent } from '../components/key-value-table.component';
 
 type Fixtures = {
@@ -33,7 +32,6 @@ type Fixtures = {
   envSwitcher: EnvSwitcherComponent;
   themeToggle: ThemeToggleComponent;
   search: SearchComponent;
-  variableCard: VariableCardComponent;
   keyValueTable: KeyValueTableComponent;
 };
 
@@ -82,9 +80,6 @@ export const test = base.extend<Fixtures>({
   },
   search: async ({ page }, use) => {
     await use(new SearchComponent(page));
-  },
-  variableCard: async ({ page }, use) => {
-    await use(new VariableCardComponent(page));
   },
   keyValueTable: async ({ page }, use) => {
     await use(new KeyValueTableComponent(page));

@@ -40,6 +40,8 @@ export const ScriptsTab: React.FC<ScriptsTabProps> = ({
           onChange={(value: string) => onScriptChange('preRequest', value)}
           language="javascript"
           height="300px"
+          hintsFor={['req', 'bru']}
+          testId="scripts-editor-pre-request"
         />
       )
     },
@@ -52,6 +54,7 @@ export const ScriptsTab: React.FC<ScriptsTabProps> = ({
           onChange={(value: string) => onScriptChange('postResponse', value)}
           language="javascript"
           height="300px"
+          hintsFor={['req', 'res', 'bru']}
         />
       )
     }
@@ -81,6 +84,7 @@ export const ScriptsTab: React.FC<ScriptsTabProps> = ({
               onChange={(value: string) => onScriptChange('tests', value)}
               language="javascript"
               height="150px"
+              hintsFor={['req', 'res', 'bru']}
             />
           </div>
         )}

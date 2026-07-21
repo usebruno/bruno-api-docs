@@ -2,13 +2,7 @@
   "name": "opencollection",
   "private": true,
   "workspaces": [
-    "packages/oc-converters",
-    "packages/oc-docs",
-    "packages/oc-schema",
-    "packages/oc-schema-explorer",
-    "packages/oc-spec",
-    "packages/oc-spec-site",
-    "packages/oc-types"
+    "packages/oc-docs"
   ],
   "homepage": "https://www.opencollection.com"
 }

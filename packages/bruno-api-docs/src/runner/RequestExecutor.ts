@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RunRequestResponse } from './index';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams } from '../utils/schemaHelpers';
@@ -28,9 +29,14 @@ export class RequestExecutor {
       getRequestAuth(request)
     );
 
+    // In dev, route through the Vite dev proxy (see vite.config.ts) so requests to non-CORS
+    // APIs succeed; a direct browser fetch would be blocked by CORS. Prod calls the API directly.
+    const useDevProxy = import.meta.env.DEV && typeof window !== 'undefined';
+    const fetchUrl = useDevProxy ? `/__proxy?url=${encodeURIComponent(requestUrl)}` : requestUrl;
+
     try {
       const fetchOptions = await this.buildFetchOptions(request, timeoutMs);
-      const response = await fetch(requestUrl, fetchOptions);
+      const response = await fetch(fetchUrl, fetchOptions);
       const endTime = Date.now();
 
       const responseData = await this.parseResponse(response);
@@ -41,9 +47,10 @@ export class RequestExecutor {
         statusText: response.statusText,
         headers: responseHeaders,
         data: responseData.data,
+        base64Data: responseData.base64Data,
         size: responseData.size,
         duration: endTime - startTime,
-        url: response.url
+        url: useDevProxy ? requestUrl : response.url
       };
     } catch (error) {
       const endTime = Date.now();
@@ -218,22 +225,22 @@ export class RequestExecutor {
   private async parseResponse(response: Response) {
     const contentType = response.headers.get('content-type') || '';
     let data: any;
-    let size = 0;
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const size = buffer.length;
 
     if (contentType.includes('application/json')) {
-      const text = await response.text();
-      size = new Blob([text]).size;
+      const text = buffer.toString('utf-8');
       try {
         data = JSON.parse(text);
       } catch {
         data = text;
       }
     } else {
-      data = await response.text();
-      size = new Blob([data]).size;
+      data = buffer.toString('utf-8');
     }
 
-    return { data, size };
+    return { data, size, base64Data: buffer.toString('base64') };
   }
 
   private parseHeaders(headers: Headers): Record<string, any> {

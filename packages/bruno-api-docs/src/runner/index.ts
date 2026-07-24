@@ -56,6 +56,7 @@ export interface RunRequestResponse {
   statusText?: string;
   headers?: Record<string, any>;
   data?: any;
+  base64Data?: string;
   size?: number;
   duration?: number;
   url?: string;

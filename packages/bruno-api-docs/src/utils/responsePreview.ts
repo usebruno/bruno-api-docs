@@ -1,0 +1,1 @@
+export type ResponseBodyPreview = "preview-web" | "preview-json" | "preview-xml" | "preview-text" | "preview-image" | "preview-pdf" | "preview-audio" | "preview-video" | null;

@@ -162,6 +162,10 @@ describe('detectContentTypeFromBuffer', () => {
     expect(detectContentTypeFromBuffer(buf([0xff, 0xfb, 0x00, 0x00]))).toBe('audio/mpeg');
   });
 
+  it('detects mp3 with a leading ID3v2 tag ("ID3")', () => {
+    expect(detectContentTypeFromBuffer(buf([0x49, 0x44, 0x33, 0x03, 0x00, 0x00, 0x00, 0x00]))).toBe('audio/mpeg');
+  });
+
   it('detects tiff little-endian and big-endian', () => {
     expect(detectContentTypeFromBuffer(buf([0x49, 0x49, 0x2a, 0x00]))).toBe('image/tiff');
     expect(detectContentTypeFromBuffer(buf([0x4d, 0x4d, 0x00, 0x2a]))).toBe('image/tiff');

@@ -29,13 +29,11 @@ export const getContentType = (headers: RunRequestResponse['headers']): string =
 
 export function useInitialResponseFormat(detectedContentType: string | null, headerContentType: string): ResponseBodyFormatViewData {
   return useMemo<ResponseBodyFormatViewData>(() => {
-    // Hold the default until the body has actually arrived and been sniffed; the
-    // format itself is driven by the declared content-type header.
     if (detectedContentType === null) {
       return { format: 'raw', view: 'editor' };
     }
 
-    return getDefaultResponseFormat(headerContentType)
+    return getDefaultResponseFormat(headerContentType || detectedContentType);
   }, [detectedContentType, headerContentType]);
 }
 
@@ -243,7 +241,10 @@ export const detectContentTypeFromBuffer = (buffer: Buffer) => {
   }
 
   if (bytes[0] === 0xFF && (bytes[1] & 0xE0) === 0xE0) {
-    return 'audio/mpeg'; // MP3
+    return 'audio/mpeg'; // MP3 frame sync
+  }
+  if (bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33) {
+    return 'audio/mpeg'; // "ID3" — MP3 with a leading ID3v2 tag
   }
   if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
     && bytes[8] === 0x57 && bytes[9] === 0x41 && bytes[10] === 0x56 && bytes[11] === 0x45) {

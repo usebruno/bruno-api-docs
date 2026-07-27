@@ -359,7 +359,7 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
       <div className="highlight-input-mirror" aria-hidden="true" ref={mirrorRef}>
         {renderTokens(value, isFound)}
       </div>
-      {multiline ? <textarea {...fieldProps} rows={1} /> : <input {...fieldProps} type="text" />}
+      {multiline ? <textarea {...fieldProps} rows={1} wrap="off" /> : <input {...fieldProps} type="text" />}
       {hovered && (
         <Portal>
           <HoverCard

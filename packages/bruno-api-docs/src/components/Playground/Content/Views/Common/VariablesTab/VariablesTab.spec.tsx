@@ -105,7 +105,7 @@ describe('VariablesTab', () => {
     );
     const columns = root.querySelectorAll('thead th').map((th) => th.text.trim());
     expect(columns).toContain('Description');
-    // The description cell is a single-line input (not multiline), so long text scrolls in place.
-    expect(query(root, 'td.col-description input.text-input').getAttribute('value')).toBe('The auth token');
+    // The description cell is a multiline editor (a textarea), matching the app — Enter adds a line.
+    expect(query(root, 'td.col-description textarea').text).toBe('The auth token');
   });
 });

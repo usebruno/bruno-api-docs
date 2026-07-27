@@ -15,6 +15,7 @@ interface EnvVarCardsProps {
   makeNewRow?: () => Partial<KeyValueRow>;
   disableNewRow?: boolean;
   editableDataType?: boolean;
+  showDescription?: boolean;
   secretEditByDefault?: boolean;
   addWhenComplete?: boolean;
   testId?: string;
@@ -26,6 +27,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
   makeNewRow,
   disableNewRow = false,
   editableDataType = false,
+  showDescription = false,
   secretEditByDefault = false,
   addWhenComplete = false,
   testId
@@ -37,7 +39,11 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
       {rows.map((row, index) => {
         const isBlankRow = index === rows.length - 1 && (!row.name || row.name.trim() === '');
         return (
-          <div key={row.id} className={cx('env-card', { disabled: !row.enabled })}>
+          <div
+            key={row.id}
+            className={cx('env-card', { disabled: !row.enabled })}
+            data-testid={testId ? `${testId}-card` : undefined}
+          >
             {!isBlankRow && (
               <Checkbox
                 className="enabled"
@@ -50,7 +56,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
               <div className="name-row">
                 <input
                   className="name"
-                  data-testid={testId ? `${testId}-name-${index}` : undefined}
+                  data-testid={testId ? `${testId}-name-input` : undefined}
                   placeholder="Name"
                   value={row.name}
                   onChange={(e) => updateRow(index, { name: e.target.value })}
@@ -80,7 +86,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
                 ) : (
                   <textarea
                     className="value-input"
-                    data-testid={testId ? `${testId}-value-${index}` : undefined}
+                    data-testid={testId ? `${testId}-value-input` : undefined}
                     placeholder="Value"
                     rows={1}
                     value={row.value}
@@ -96,6 +102,16 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
                   />
                 )}
               </div>
+              {showDescription && (
+                <textarea
+                  className="description-input"
+                  data-testid={testId ? `${testId}-description-input` : undefined}
+                  placeholder="Description"
+                  rows={1}
+                  value={typeof row.description === 'string' ? row.description : ''}
+                  onChange={(e) => updateRow(index, { description: e.target.value })}
+                />
+              )}
             </div>
           </div>
         );

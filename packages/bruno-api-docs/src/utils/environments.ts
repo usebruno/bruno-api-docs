@@ -24,6 +24,7 @@ export interface EnvVarRow {
   enabled: boolean;
   dataType?: string;
   secret?: boolean;
+  description?: string;
   source?: Variable;
 }
 
@@ -34,6 +35,7 @@ export const envVariableToRow = (variable: Variable, index: number): EnvVarRow =
   dataType: getVariableTypeLabel(variable),
   enabled: !variable.disabled,
   secret: isSecretVariable(variable),
+  description: getDescription(variable),
   source: variable
 });
 
@@ -46,6 +48,8 @@ export const envRowToVariable = (row: EnvVarRow): Variable => {
     else delete secret.type;
     if (row.value) secret.value = row.value;
     else delete secret.value;
+    if (row.description) secret.description = row.description;
+    else delete secret.description;
     return secret;
   }
   return rowToVariable({
@@ -53,7 +57,7 @@ export const envRowToVariable = (row: EnvVarRow): Variable => {
     value: row.value,
     enabled: row.enabled,
     dataType: row.dataType,
-    description: source.description,
+    description: row.description,
     originalValue: source.value
   });
 };

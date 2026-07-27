@@ -71,12 +71,11 @@ export const StyledWrapper = styled.div`
 
   &.highlight-input--multiline .text-input {
     resize: none;
-    overflow-x: hidden;
+    overflow-x: auto;
     overflow-y: auto;
     max-height: 12.5rem;
     line-height: 1.4;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
+    white-space: pre;
     scrollbar-width: none;
   }
 
@@ -87,8 +86,7 @@ export const StyledWrapper = styled.div`
   &.highlight-input--multiline .highlight-input-mirror {
     overflow: hidden;
     line-height: 1.4;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
+    white-space: pre;
   }
 `;
 

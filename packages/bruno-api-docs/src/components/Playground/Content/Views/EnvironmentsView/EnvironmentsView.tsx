@@ -134,12 +134,13 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
     makeNewRow?: () => Partial<KeyValueRow>;
     disableNewRow?: boolean;
     editableDataType?: boolean;
+    showDescription?: boolean;
   }
 
   const renderVars = (
     rows: KeyValueRow[],
     onChange: (rows: KeyValueRow[]) => void,
-    { makeNewRow, disableNewRow = false, editableDataType = false }: RenderVarsOptions = {}
+    { makeNewRow, disableNewRow = false, editableDataType = false, showDescription = false }: RenderVarsOptions = {}
   ): React.ReactNode =>
     compact ? (
       <EnvVarCards
@@ -148,6 +149,7 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
         makeNewRow={makeNewRow}
         disableNewRow={disableNewRow}
         editableDataType={editableDataType}
+        showDescription={showDescription}
         secretEditByDefault
         addWhenComplete
         testId="env-var-cards"
@@ -161,6 +163,7 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
         showEnabled={true}
         multilineValues
         inlineActions={editableDataType}
+        showDescription={showDescription}
         disableNewRow={disableNewRow}
         makeNewRow={makeNewRow}
         addWhenComplete
@@ -173,11 +176,15 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
   const panels: Record<EnvTabId, { contentIndicator: number; content: React.ReactNode }> = {
     variables: {
       contentIndicator: plainRows.length,
-      content: renderVars(plainRows, (rows) => commit(rows, secretRows), { editableDataType: true })
+      content: renderVars(plainRows, (rows) => commit(rows, secretRows), { editableDataType: true, showDescription: true })
     },
     secrets: {
       contentIndicator: secretRows.length,
-      content: renderVars(secretRows, (rows) => commit(plainRows, rows), { makeNewRow: () => ({ secret: true }), editableDataType: true })
+      content: renderVars(secretRows, (rows) => commit(plainRows, rows), {
+        makeNewRow: () => ({ secret: true }),
+        editableDataType: true,
+        showDescription: true
+      })
     },
     external: {
       contentIndicator: externalRows.length,

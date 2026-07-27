@@ -45,4 +45,28 @@ test.describe('Playground — field descriptions', () => {
     await playground.selectTab('params');
     await expect(playground.keyValueTable.descriptionInputs.first()).toHaveValue('Only open, unfulfilled orders');
   });
+
+  test('a description is multiline — pressing Enter starts a new line', async ({ page, playground }) => {
+    await playground.selectTab('params');
+    const description = playground.keyValueTable.descriptionInputs.first();
+    await description.click();
+    await description.press('ControlOrMeta+a');
+    await page.keyboard.type('first line');
+    await page.keyboard.press('Enter');
+    await page.keyboard.type('second line');
+    await expect(description).toHaveValue('first line\nsecond line');
+  });
+
+  test('a description does not soft-wrap — long text stays on one line until Enter', async ({ page, playground }) => {
+    await playground.selectTab('params');
+    const description = playground.keyValueTable.descriptionInputs.first();
+    await description.click();
+    await description.press('ControlOrMeta+a');
+    const oneLineHeight = (await description.boundingBox())!.height;
+
+    await page.keyboard.type(
+      'this is a very long single line of description text that would wrap onto several lines if soft wrapping were enabled in this column'
+    );
+    expect((await description.boundingBox())!.height).toBeLessThan(oneLineHeight + 4);
+  });
 });

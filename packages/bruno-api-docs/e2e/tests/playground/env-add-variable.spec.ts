@@ -38,4 +38,33 @@ test.describe('Environment variables — adding rows (card view)', () => {
     await expect(toggle).toBeChecked();
     await expect(card).not.toHaveClass(disabled);
   });
+
+  test('a variable description is editable below the value and persists across an environment switch', async ({
+    playground,
+    envEditor
+  }) => {
+    await playground.open('inline');
+    await playground.openEnvironments();
+
+    // Each variable card carries a Description field (placeholder "Description") under its value.
+    const description = envEditor.descriptionInputs.first();
+    await description.fill('The API host');
+    await expect(description).toHaveValue('The API host');
+
+    // Switching environments and back re-derives the rows from the store; the edit was committed.
+    await envEditor.selectEnvironment('Prod');
+    await envEditor.selectEnvironment('Local');
+    await expect(envEditor.descriptionInputs.first()).toHaveValue('The API host');
+  });
+});
+
+test.describe('Environment variables — descriptions (desktop table)', () => {
+  test.use({ viewport: { width: 1400, height: 900 } });
+
+  test('the non-inline table renders a Description column for variables', async ({ page, playground }) => {
+    // A non-inline dock uses the full KeyValueTable (not the compact cards).
+    await playground.open('bottom');
+    await playground.openEnvironments();
+    await expect(page.getByRole('columnheader', { name: 'Description' })).toBeVisible();
+  });
 });

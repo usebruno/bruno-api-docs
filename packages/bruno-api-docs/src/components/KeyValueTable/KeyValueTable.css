@@ -249,10 +249,7 @@
   align-items: center;
   gap: 0.5rem;
   padding-left: 0.625rem;
-  /* Right gap keeps the last trailing control (the variable-type dropdown, or the delete button when
-     it renders inline) clear of the cell's right border — delete no longer supplies it once it moves
-     to its own column. */
-  padding-right: 1.25rem;
+  padding-right: 0.625rem;
 }
 
 .key-value-table .value-cell:has(.secret-value) .value-cell-trailing {

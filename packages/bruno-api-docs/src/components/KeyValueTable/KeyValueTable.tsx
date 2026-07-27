@@ -366,6 +366,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                         isFound={isFound}
                         names={names}
                         variablesAutocomplete={false}
+                        multiline
                         testId={`${testId}-description-input`}
                       />
                     </td>

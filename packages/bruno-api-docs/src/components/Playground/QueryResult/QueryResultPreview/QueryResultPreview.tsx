@@ -1,13 +1,13 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import HtmlPreview from './HtmlPreview';
 import JsonPreview from './JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
-import { detectContentTypeFromBase64, ResponseBodyFormat } from 'src/utils/response';
+import { ResponseBodyFormat } from 'src/utils/response';
 import { RunRequestResponse } from 'src/runner';
-import { ResponseBodyPreview } from 'src/utils/responsePreview';
 import { Document, Page } from 'react-pdf';
 import VideoPreview from './VideoPreview/VideoPreview';
+import { formatToPreviewMode } from './previewMode';
 
 export interface QueryResultPreviewProps {
   /** The response body to preview. */
@@ -26,27 +26,7 @@ export interface QueryResultPreviewProps {
  * XML, and plain text). Editor rendering stays in ResponseBodyTab's CodeEditor.
  */
 const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentType, dataBuffer, selectedFormat, baseUrl }) => {
-  const previewMode: ResponseBodyPreview = useMemo(() => {
-    // Derive preview mode based on selected format
-    if (selectedFormat === 'html') return 'preview-web';
-    if (selectedFormat === 'json') return 'preview-json';
-    if (selectedFormat === 'xml') return 'preview-xml';
-    if (selectedFormat === 'raw') return 'preview-text';
-    if (selectedFormat === 'javascript') return 'preview-web';
-
-    // For base64/hex, check content type to determine binary preview type
-    if (selectedFormat === 'base64' || selectedFormat === 'hex') {
-      if (contentType) {
-        if (contentType.includes('image')) return 'preview-image';
-        if (contentType.includes('pdf')) return 'preview-pdf';
-        if (contentType.includes('audio')) return 'preview-audio';
-        if (contentType.includes('video')) return 'preview-video';
-      }
-      // for all other content types, return preview-text
-      return 'preview-text';
-    }
-    return 'preview-text';
-  }, [selectedFormat, contentType]);
+  const previewMode = formatToPreviewMode(selectedFormat, contentType);
   const [pdfPagesNum, setPdfPagesNum] = useState<number | null>(null)
   
   const handleDocumentLoad = ({ numPages }: { numPages: number }) => {

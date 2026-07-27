@@ -5,6 +5,8 @@ import { ResponseBodyFormat } from '../../../../../../../utils/response';
 interface ResponseFormatSelectorProps {
   handleSelection?: (value: ResponseBodyFormat) => void;
   selectedFormat?: ResponseBodyFormat;
+  /** Formats offered for the current body; structured formats are dropped for binary responses. */
+  allowedFormats?: ResponseBodyFormat[];
   /** Whether the response is shown as a rendered preview vs the raw editor. */
   showPreview?: boolean;
   /** Called when the preview toggle is flipped. */
@@ -53,35 +55,39 @@ const PreviewToggleHeader: FC<{ checked: boolean; onChange: (next: boolean) => v
   </div>
 );
 
-const FORMAT_GROUPS: Array<{options: Array<{id: ResponseBodyFormat, value: ResponseBodyFormat, text: string}>}> = [
-  {
-    options: [
-      { id: 'json', value: 'json', text: 'JSON' },
-      { id: 'html', value: 'html', text: 'HTML' },
-      { id: 'xml', value: 'xml', text: 'XML' },
-      { id: 'javascript', value: 'javascript', text: 'Javascript' }
-    ]
-  },
-  {
-    options: [
-      { id: 'raw', value: 'raw', text: 'Raw' },
-      { id: 'hex', value: 'hex', text: 'Hex' },
-      { id: 'base64', value: 'base64', text: 'Base64' }
-    ]
-  }
-];
+const FORMAT_LABELS: Record<ResponseBodyFormat, string> = {
+  json: 'JSON',
+  html: 'HTML',
+  xml: 'XML',
+  javascript: 'Javascript',
+  raw: 'Raw',
+  hex: 'Hex',
+  base64: 'Base64'
+};
+
+const STRUCTURED_FORMATS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
+const BYTE_FORMATS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'];
+
+const ALL_FORMATS: ResponseBodyFormat[] = [...STRUCTURED_FORMATS, ...BYTE_FORMATS];
 
 const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
   handleSelection,
   selectedFormat,
+  allowedFormats = ALL_FORMATS,
   showPreview = false,
   onPreviewToggle
 }) => {
-  const items: MenuDropdownItems = FORMAT_GROUPS.map((group) => ({
-    options: group.options.map(({ id, value, text }) => ({
-      id,
-      label: text,
-      onClick: () => handleSelection?.(value)
+  // Preserve the two-group visual layout, but drop a group entirely when none of its
+  // formats are allowed (binary responses collapse to the byte-format group only).
+  const groups = [STRUCTURED_FORMATS, BYTE_FORMATS]
+    .map((group) => group.filter((format) => allowedFormats.includes(format)))
+    .filter((group) => group.length > 0);
+
+  const items: MenuDropdownItems = groups.map((group) => ({
+    options: group.map((format) => ({
+      id: format,
+      label: FORMAT_LABELS[format],
+      onClick: () => handleSelection?.(format)
     }))
   }));
 

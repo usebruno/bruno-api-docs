@@ -7,13 +7,21 @@ import HtmlPreview from './HtmlPreview';
 
 describe('formatToPreviewMode', () => {
   it('maps formats to preview modes', () => {
-    expect(formatToPreviewMode('html')).toBe('web');
-    expect(formatToPreviewMode('json')).toBe('json');
-    expect(formatToPreviewMode('xml')).toBe('xml');
-    expect(formatToPreviewMode('javascript')).toBe('text');
-    expect(formatToPreviewMode('raw')).toBe('text');
-    expect(formatToPreviewMode('base64')).toBe('text');
-    expect(formatToPreviewMode('hex')).toBe('text');
+    expect(formatToPreviewMode('html')).toBe('preview-web');
+    expect(formatToPreviewMode('json')).toBe('preview-json');
+    expect(formatToPreviewMode('xml')).toBe('preview-xml');
+    expect(formatToPreviewMode('javascript')).toBe('preview-web');
+    expect(formatToPreviewMode('raw')).toBe('preview-text');
+    expect(formatToPreviewMode('base64')).toBe('preview-text');
+    expect(formatToPreviewMode('hex')).toBe('preview-text');
+  });
+
+  it('maps byte formats to binary previews by content type', () => {
+    expect(formatToPreviewMode('base64', 'image/png')).toBe('preview-image');
+    expect(formatToPreviewMode('base64', 'application/pdf')).toBe('preview-pdf');
+    expect(formatToPreviewMode('hex', 'audio/mpeg')).toBe('preview-audio');
+    expect(formatToPreviewMode('hex', 'video/mp4')).toBe('preview-video');
+    expect(formatToPreviewMode('base64', 'application/octet-stream')).toBe('preview-text');
   });
 });
 

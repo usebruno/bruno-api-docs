@@ -93,6 +93,7 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
           onClick={onSendRequest}
           disabled={isLoading || !url.trim()}
           className="send"
+          data-testid="query-bar-send"
         >
           {isLoading ? (
             <div className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin" />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Tabs from '../../../../../../ui/Tabs/Tabs';
 import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
@@ -9,7 +9,7 @@ import { SendIcon } from '../../../../../../assets/icons';
 import ResponseFormatSelector from './ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/useResponseFormatter';
 import { RunRequestResponse } from '../../../../../../runner';
-import type { ResponseBodyFormat } from '../../../../../../utils/response';
+import { getResponseFormatOptions, type ResponseBodyFormat } from '../../../../../../utils/response';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
@@ -18,7 +18,14 @@ interface ResponsePaneProps {
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
   const [activeTab, setActiveTab] = useState('response');
-  const { selectedFormat, showPreview, handleFormatChange, handleViewChange } = useResponseFormatter(response);
+  const allowedFormats = useMemo(
+    () => getResponseFormatOptions(response?.base64Data, response?.headers),
+    [response?.base64Data, response?.headers]
+  );
+  const { selectedFormat, showPreview, handleFormatChange, handleViewChange } = useResponseFormatter(
+    response,
+    allowedFormats
+  );
 
   const getStatusColor = (status?: number) => {
     if (!status) return 'var(--oc-request-tab-panel-response-status)';
@@ -105,6 +112,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     <div className="flex items-center gap-3 flex-wrap text-xs">
       <ResponseFormatSelector
         selectedFormat={selectedFormat}
+        allowedFormats={allowedFormats}
         handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
         showPreview={showPreview}
         onPreviewToggle={handleViewChange}

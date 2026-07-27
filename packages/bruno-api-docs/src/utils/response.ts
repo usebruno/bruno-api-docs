@@ -52,6 +52,36 @@ const extractMimeType = (contentType = '') => {
 
 export type ResponseBodyFormat = 'html' | 'json' | 'xml' | 'javascript' | 'base64' | 'raw' | 'hex';
 
+// Encodings that always apply to any body, structured or not.
+const BYTE_FORMAT_OPTIONS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'];
+
+// Structured decoders only make sense for text-ish bodies; prepend them for those.
+const STRUCTURED_FORMAT_OPTIONS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
+
+// SVG is XML text and stays selectable as a structured format, unlike other image/*.
+const isByteFormatContentType = (contentType: string): boolean => {
+  if (/svg/i.test(contentType)) return false;
+  return /^(image|video|audio)\//i.test(contentType) || /pdf/i.test(contentType) || /zip/i.test(contentType);
+};
+
+/**
+ * The format options offered for a response body: byte formats (raw/hex/base64) only for
+ * binary content, otherwise the structured decoders too. Content type is sniffed from the
+ * body first, then falls back to the declared header. Pure — safe under SSR/node.
+ */
+export const getResponseFormatOptions = (
+  base64Data: RunRequestResponse['base64Data'],
+  headers: RunRequestResponse['headers']
+): ResponseBodyFormat[] => {
+  const contentType = detectContentTypeFromBase64(base64Data) ?? getContentType(headers);
+
+  if (isByteFormatContentType(contentType)) {
+    return [...BYTE_FORMAT_OPTIONS];
+  }
+
+  return [...STRUCTURED_FORMAT_OPTIONS, ...BYTE_FORMAT_OPTIONS];
+};
+
 export type ResponseBodyView = 'preview' | 'editor';
 
 export interface ResponseBodyFormatViewData {

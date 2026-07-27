@@ -11,7 +11,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "lint:verbose": "eslint --debug",
-    "changeset": "changeset",
+    "changeset": "sh scripts/changeset.sh",
     "version": "changeset version"
   },
   "devDependencies": {

@@ -23,6 +23,7 @@
     "@typescript-eslint/parser": "^8.39.0",
     "eslint": "^9.21.0",
     "eslint-plugin-diff": "^2.0.3",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "globals": "^15.15.0",
     "husky": "^9.1.7",

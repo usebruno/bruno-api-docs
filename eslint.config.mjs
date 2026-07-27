@@ -4,8 +4,13 @@ import { fixupPluginRules } from '@eslint/compat';
 import eslintPluginDiff from 'eslint-plugin-diff';
 import stylistic from '@stylistic/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
+import importPlugin from 'eslint-plugin-import';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+
+// Anything that looks like a hex colour literal. Colours belong in the theme
+// tokens and reach components as CSS custom properties.
+const HEX_COLOUR = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 
 export default [
   {
@@ -23,7 +28,8 @@ export default [
       'diff': fixupPluginRules(eslintPluginDiff),
       '@stylistic': stylistic,
       '@typescript-eslint': tsPlugin,
-      'react-hooks': reactHooks
+      'react-hooks': reactHooks,
+      'import': importPlugin
     },
     languageOptions: {
       parser: tsParser,
@@ -56,22 +62,22 @@ export default [
       '@stylistic/comma-dangle': ['error', 'never'],
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       '@stylistic/arrow-parens': ['error', 'always'],
-      '@stylistic/curly-newline': ['error', {
-        multiline: true,
-        minElements: 2,
-        consistent: true
-      }],
-      '@stylistic/function-paren-newline': ['off'],
       '@stylistic/array-bracket-spacing': ['error', 'never'],
       '@stylistic/arrow-spacing': ['error', { before: true, after: true }],
       '@stylistic/function-call-spacing': ['error', 'never'],
+      '@stylistic/semi-style': ['error', 'last'],
+      '@stylistic/max-len': ['error', {
+        code: 120,
+        ignoreUrls: true,
+        ignoreStrings: true,
+        ignoreTemplateLiterals: true,
+        ignoreRegExpLiterals: true
+      }],
+      // JSX makes these three noisy without making anything safer.
       '@stylistic/multiline-ternary': ['off'],
       '@stylistic/padding-line-between-statements': ['off'],
-      '@stylistic/semi-style': ['error', 'last'],
-      '@stylistic/max-len': ['off'],
       '@stylistic/jsx-one-expression-per-line': ['off'],
       '@stylistic/max-statements-per-line': ['off'],
-      '@stylistic/no-mixed-operators': ['off'],
 
       // TypeScript already resolves identifiers and reports unused code more
       // accurately than the core rules, which misfire on types and interfaces.
@@ -83,14 +89,56 @@ export default [
         caughtErrorsIgnorePattern: '^_'
       }],
 
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
+
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
       'no-debugger': 'error',
       'no-var': 'error',
       'prefer-const': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
 
+      // This package is published, so anything imported by runtime code has to
+      // be a real dependency — a devDependency would break consumers the moment
+      // a dep stops being bundled.
+      'import/no-extraneous-dependencies': ['error', {
+        packageDir: ['.', './packages/bruno-api-docs'],
+        devDependencies: [
+          '**/*.{test,spec}.{ts,tsx}',
+          '**/e2e/**',
+          '**/test-utils/**',
+          '**/*.config.{ts,mts,js,mjs,cjs}',
+          '**/scripts/**'
+        ]
+      }],
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['**/store/slices/*'],
+          message: 'Import slices through the @slices/* alias.'
+        }]
+      }],
+
+      'no-restricted-syntax': ['error',
+        {
+          selector: `Literal[value=/^${HEX_COLOUR.source}$/]`,
+          message: 'Use a theme CSS variable (var(--…)) instead of a hardcoded colour.'
+        },
+        {
+          selector: `TemplateElement[value.raw=/${HEX_COLOUR.source}/]`,
+          message: 'Use a theme CSS variable (var(--…)) instead of a hardcoded colour.'
+        }
+      ],
+
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn'
+    }
+  },
+  {
+    // The theme tokens are where colours are allowed to be literal — everything
+    // else consumes them as CSS custom properties.
+    files: ['packages/**/src/theme/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': 'off'
     }
   },
   {

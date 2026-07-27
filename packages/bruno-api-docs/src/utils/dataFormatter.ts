@@ -16,7 +16,7 @@ const applyJSONPathFilter = (data: RunRequestResponse['data'], filter: string): 
 };
 
 export const safeStringifyJSON = (obj: unknown, indent = false) => {
-  if (obj === undefined) {
+  if (obj == null) {
     return obj;
   }
   try {
@@ -119,7 +119,7 @@ export const isHexFormat = (str: unknown): boolean => {
 };
 
 // Memory threshold to prevent crashes when decoding large buffers
-const LARGE_BUFFER_THRESHOLD = 50 * 1024 * 1024; // 50 MB
+export const LARGE_BUFFER_THRESHOLD = 50 * 1024 * 1024; // 50 MB
 
 export const formatResponse = (
   data: RunRequestResponse['data'],
@@ -138,7 +138,7 @@ export const formatResponse = (
     if (typeof body === 'string') {
       return body;
     }
-    if (body === null || body === undefined) {
+    if (body == null) {
       return String(body);
     }
     if (typeof body === 'object') {

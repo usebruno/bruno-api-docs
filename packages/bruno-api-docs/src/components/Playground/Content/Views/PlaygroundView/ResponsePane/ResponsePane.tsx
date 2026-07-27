@@ -115,13 +115,15 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
 
   const statusInfo = (
     <div className="flex items-center gap-3 flex-wrap text-xs">
-      <ResponseFormatSelector
-        selectedFormat={selectedFormat}
-        allowedFormats={allowedFormats}
-        handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
-        showPreview={showPreview}
-        onPreviewToggle={handleViewChange}
-      />
+      {activeTab === 'response' && (
+        <ResponseFormatSelector
+          selectedFormat={selectedFormat}
+          allowedFormats={allowedFormats}
+          handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
+          showPreview={showPreview}
+          onPreviewToggle={handleViewChange}
+        />
+      )}
       <div className="flex items-center gap-2">
         <span style={{ color: 'var(--text-secondary)' }}>Status:</span>
         <span 

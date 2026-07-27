@@ -62,6 +62,7 @@ export const StyledWrapper = styled.div`
 
   .env-card .value .value-secret .secret-value-input {
     font-size: var(--oc-font-size-sm);
+    font-family: 'Fira Code', var(--font-mono);
   }
 
   .env-card .value-input,
@@ -84,6 +85,7 @@ export const StyledWrapper = styled.div`
   .env-card .value-input {
     flex: 0 1 auto;
     max-width: 100%;
+    font-family: 'Fira Code', var(--font-mono);
   }
 
   .env-card .description-input {

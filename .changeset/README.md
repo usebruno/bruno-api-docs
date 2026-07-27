@@ -5,8 +5,15 @@ becomes the release's CHANGELOG entry and decides the version bump.
 
 ## Add one
 
-Create a `.md` file in this folder with a short, descriptive name
-(e.g. `header-auth-fix.md`) and this shape:
+```
+npm run changeset
+```
+
+Select the package, pick a bump level, write a one-line summary. It creates a
+`.md` file here (the random filename is fine — these files are consumed and
+deleted at release). Commit it with your PR.
+
+You can also write the file by hand if you prefer:
 
 ```md
 ---
@@ -15,9 +22,6 @@ Create a `.md` file in this folder with a short, descriptive name
 
 Short, user-facing summary of what changed.
 ```
-
-Writing the file by hand keeps the name meaningful. (`npx changeset` also works,
-but it generates a random filename you'd have to rename.)
 
 ## Bump levels
 

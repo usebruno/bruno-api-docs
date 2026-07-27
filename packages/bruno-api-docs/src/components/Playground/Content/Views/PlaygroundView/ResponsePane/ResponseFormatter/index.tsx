@@ -1,6 +1,11 @@
 import type { FC } from 'react';
 import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '../../../../../../../ui/MenuDropdown';
-import { ResponseBodyFormat } from '../../../../../../../utils/response';
+import {
+  ResponseBodyFormat,
+  STRUCTURED_FORMAT_OPTIONS,
+  BYTE_FORMAT_OPTIONS,
+  ALL_FORMAT_OPTIONS
+} from '../../../../../../../utils/response';
 
 interface ResponseFormatSelectorProps {
   handleSelection?: (value: ResponseBodyFormat) => void;
@@ -65,21 +70,16 @@ const FORMAT_LABELS: Record<ResponseBodyFormat, string> = {
   base64: 'Base64'
 };
 
-const STRUCTURED_FORMATS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
-const BYTE_FORMATS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'];
-
-const ALL_FORMATS: ResponseBodyFormat[] = [...STRUCTURED_FORMATS, ...BYTE_FORMATS];
-
 const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
   handleSelection,
   selectedFormat,
-  allowedFormats = ALL_FORMATS,
+  allowedFormats = ALL_FORMAT_OPTIONS,
   showPreview = false,
   onPreviewToggle
 }) => {
   // Preserve the two-group visual layout, but drop a group entirely when none of its
   // formats are allowed (binary responses collapse to the byte-format group only).
-  const groups = [STRUCTURED_FORMATS, BYTE_FORMATS]
+  const groups = [STRUCTURED_FORMAT_OPTIONS, BYTE_FORMAT_OPTIONS]
     .map((group) => group.filter((format) => allowedFormats.includes(format)))
     .filter((group) => group.length > 0);
 

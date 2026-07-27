@@ -9,7 +9,7 @@ import { SendIcon } from '../../../../../../assets/icons';
 import ResponseFormatSelector from './ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/useResponseFormatter';
 import { RunRequestResponse } from '../../../../../../runner';
-import { getResponseFormatOptions, type ResponseBodyFormat } from '../../../../../../utils/response';
+import { detectContentTypeFromBase64, getContentType, getResponseFormatOptions, type ResponseBodyFormat } from '../../../../../../utils/response';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
@@ -18,12 +18,19 @@ interface ResponsePaneProps {
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
   const [activeTab, setActiveTab] = useState('response');
+  const detectedContentType = useMemo(
+    () => detectContentTypeFromBase64(response?.base64Data),
+    [response?.base64Data]
+  );
+  const headerContentType = useMemo(() => getContentType(response?.headers), [response?.headers]);
+  const contentType = detectedContentType ?? headerContentType;
   const allowedFormats = useMemo(
-    () => getResponseFormatOptions(response?.base64Data, response?.headers),
-    [response?.base64Data, response?.headers]
+    () => getResponseFormatOptions(detectedContentType, headerContentType),
+    [detectedContentType, headerContentType]
   );
   const { selectedFormat, showPreview, handleFormatChange, handleViewChange } = useResponseFormatter(
-    response,
+    detectedContentType,
+    headerContentType,
     allowedFormats
   );
 
@@ -72,7 +79,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
 
   const renderResponseBody = () =>
     response.error ? renderErrorBanner() : (
-      <ResponseBodyTab response={response} selectedFormat={selectedFormat} showPreview={showPreview} />
+      <ResponseBodyTab response={response} selectedFormat={selectedFormat} showPreview={showPreview} contentType={contentType} />
     );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (

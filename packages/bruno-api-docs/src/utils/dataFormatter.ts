@@ -50,7 +50,6 @@ export const prettifyHtmlString = (htmlString: string): string => {
       lineSeparator: '\n'
     });
   } catch (error) {
-    console.log('error formatting html data!');
     console.error(error);
     return htmlString;
   }
@@ -128,10 +127,26 @@ export const formatResponse = (
   mode: string,
   filter?: string,
   bufferThreshold = LARGE_BUFFER_THRESHOLD
-) => {
+): string => {
   if (data === undefined || !dataBufferString || !mode) {
     return '';
   }
+
+  // Cheapest safe stringification for a large body: keep strings as-is, coerce
+  // null/undefined via String, and JSON-encode objects without indentation.
+  const stringifyLargeBody = (body: RunRequestResponse['data']): string => {
+    if (typeof body === 'string') {
+      return body;
+    }
+    if (body === null || body === undefined) {
+      return String(body);
+    }
+    if (typeof body === 'object') {
+      const stringified = safeStringifyJSON(body, false);
+      return typeof stringified === 'string' ? stringified : String(body);
+    }
+    return String(body);
+  };
 
   let bufferSize = 0, rawData = '', isVeryLargeResponse = false;
   try {
@@ -148,14 +163,15 @@ export const formatResponse = (
   if (mode.includes('json')) {
     try {
       if (filter) {
-        return safeStringifyJSON(applyJSONPathFilter(data, filter), true);
+        const filtered = safeStringifyJSON(applyJSONPathFilter(data, filter), true);
+        return typeof filtered === 'string' ? filtered : String(filtered);
       }
     } catch {
       // fall back to unfiltered formatting
     }
 
     if (isVeryLargeResponse) {
-      return safeStringifyJSON(data, false);
+      return stringifyLargeBody(data);
     }
 
     try {
@@ -174,28 +190,20 @@ export const formatResponse = (
 
   if (mode.includes('xml')) {
     if (isVeryLargeResponse) {
-      return typeof data === 'string' ? data : safeStringifyJSON(data, false);
+      return stringifyLargeBody(data);
     }
 
     const parsed = safeParseXML(data, { collapseContent: true });
     if (typeof parsed === 'string') {
       return parsed;
     }
-    return safeStringifyJSON(parsed, true);
+    const stringified = safeStringifyJSON(parsed, true);
+    return typeof stringified === 'string' ? stringified : String(parsed);
   }
 
   if (mode.includes('html')) {
     if (isVeryLargeResponse) {
-      if (typeof data === 'string') {
-        return data;
-      }
-      if (data === null || data === undefined) {
-        return String(data);
-      }
-      if (typeof data === 'object') {
-        return safeStringifyJSON(data, false);
-      }
-      return String(data);
+      return stringifyLargeBody(data);
     }
 
     try {
@@ -207,16 +215,7 @@ export const formatResponse = (
 
   if (mode.includes('javascript')) {
     if (isVeryLargeResponse) {
-      if (typeof data === 'string') {
-        return data;
-      }
-      if (data === null || data === undefined) {
-        return String(data);
-      }
-      if (typeof data === 'object') {
-        return safeStringifyJSON(data, false);
-      }
-      return String(data);
+      return stringifyLargeBody(data);
     }
 
     try {
@@ -261,16 +260,7 @@ export const formatResponse = (
   // Handle raw format - return data as-is without any formatting
   if (mode.includes('text') || mode.includes('raw')) {
     if (isVeryLargeResponse) {
-      if (typeof data === 'string') {
-        return data;
-      }
-      if (data === null || data === undefined) {
-        return String(data);
-      }
-      if (typeof data === 'object') {
-        return safeStringifyJSON(data, false);
-      }
-      return String(data);
+      return stringifyLargeBody(data);
     }
     // Return the raw decoded buffer data
     return rawData;
@@ -280,5 +270,6 @@ export const formatResponse = (
     return data;
   }
 
-  return safeStringifyJSON(data, !isVeryLargeResponse);
+  const stringified = safeStringifyJSON(data, !isVeryLargeResponse);
+  return typeof stringified === 'string' ? stringified : String(data);
 };

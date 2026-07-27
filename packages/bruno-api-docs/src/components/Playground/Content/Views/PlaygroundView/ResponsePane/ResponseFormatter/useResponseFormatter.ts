@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RunRequestResponse } from '../../../../../../../runner';
 import { ResponseBodyFormat, useInitialResponseFormat } from '../../../../../../../utils/response';
 
-export function useResponseFormatter(response: RunRequestResponse, allowedFormats: ResponseBodyFormat[]) {
-  const { format, view } = useInitialResponseFormat(response?.base64Data, response?.headers);
+export function useResponseFormatter(
+  detectedContentType: string | null,
+  headerContentType: string,
+  allowedFormats: ResponseBodyFormat[]
+) {
+  const { format, view } = useInitialResponseFormat(detectedContentType, headerContentType);
   const [userSelectedFormat, setUserSelectedFormat] = useState<ResponseBodyFormat>();
   const [showPreview, setShowPreview] = useState(view === 'preview');
 

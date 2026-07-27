@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import CodeEditor from '../../../../../ui/CodeEditor/CodeEditor';
-import { detectContentTypeFromBase64, getContentType, ResponseBodyFormat } from '../../../../../utils/response';
+import { ResponseBodyFormat } from '../../../../../utils/response';
 import { formatResponse } from '../../../../../utils/dataFormatter';
 import { RunRequestResponse } from '../../../../../runner';
 import { QueryResultPreview } from '../../../QueryResult/QueryResult';
@@ -9,6 +9,7 @@ interface ResponseBodyTabProps {
   response: RunRequestResponse;
   selectedFormat: ResponseBodyFormat;
   showPreview: boolean;
+  contentType: string;
 }
 
 // The byte encodings (raw/hex/base64) aren't Monaco grammars; feed plaintext so
@@ -23,16 +24,13 @@ const FORMAT_TO_MONACO: Record<ResponseBodyFormat, string> = {
   base64: 'plaintext'
 };
 
-const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFormat, showPreview }) => {
-  const contentType = useMemo(
-    () => detectContentTypeFromBase64(response.base64Data) ?? getContentType(response.headers),
-    [response.base64Data, response.headers]
-  )
-
-  const editorValue = useMemo(() => {
-    const result = formatResponse(response?.data, response?.base64Data ?? '', selectedFormat);
-    return typeof result === 'string' ? result : String(result ?? '');
-  }, [response?.data, response?.base64Data, selectedFormat]);
+const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFormat, showPreview, contentType }) => {
+  // The editor isn't mounted while the preview is showing, so skip the full-body
+  // decode + prettify until the editor view is actually active.
+  const editorValue = useMemo(
+    () => (showPreview ? '' : formatResponse(response?.data, response?.base64Data ?? '', selectedFormat)),
+    [response?.data, response?.base64Data, selectedFormat, showPreview]
+  );
 
   // The tab-panel is height-constrained; own the scroll here so a tall body
   // (e.g. a large JSON tree) scrolls within the response area instead of

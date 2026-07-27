@@ -1,7 +1,6 @@
 import { Buffer } from 'buffer';
 import { useMemo } from 'react';
 import { RunRequestResponse } from '../runner';
-import { ResponseBodyPreview } from './responsePreview';
 
 // Normalize a response's content-type header into a canonical MIME type, or '' when absent.
 export const getContentType = (headers: RunRequestResponse['headers']): string => {
@@ -28,19 +27,16 @@ export const getContentType = (headers: RunRequestResponse['headers']): string =
   return contentType;
 };
 
-export function useInitialResponseFormat(base64Data: RunRequestResponse['base64Data'], headers: RunRequestResponse['headers']): ResponseBodyFormatViewData {
+export function useInitialResponseFormat(detectedContentType: string | null, headerContentType: string): ResponseBodyFormatViewData {
   return useMemo<ResponseBodyFormatViewData>(() => {
-    const detectedContentType = detectContentTypeFromBase64(base64Data);
-    const contentType = getContentType(headers);
-
     // Hold the default until the body has actually arrived and been sniffed; the
     // format itself is driven by the declared content-type header.
     if (detectedContentType === null) {
       return { format: 'raw', view: 'editor' };
     }
 
-    return getDefaultResponseFormat(contentType)
-  }, [base64Data, headers]);
+    return getDefaultResponseFormat(headerContentType)
+  }, [detectedContentType, headerContentType]);
 }
 
 // Normalize & extract MIME type from full header
@@ -52,11 +48,14 @@ const extractMimeType = (contentType = '') => {
 
 export type ResponseBodyFormat = 'html' | 'json' | 'xml' | 'javascript' | 'base64' | 'raw' | 'hex';
 
-// Encodings that always apply to any body, structured or not.
-const BYTE_FORMAT_OPTIONS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'];
-
 // Structured decoders only make sense for text-ish bodies; prepend them for those.
-const STRUCTURED_FORMAT_OPTIONS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
+export const STRUCTURED_FORMAT_OPTIONS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
+
+// Encodings that always apply to any body, structured or not.
+export const BYTE_FORMAT_OPTIONS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'];
+
+// Every format in dropdown order: structured group first, then the byte-encoding group.
+export const ALL_FORMAT_OPTIONS: ResponseBodyFormat[] = [...STRUCTURED_FORMAT_OPTIONS, ...BYTE_FORMAT_OPTIONS];
 
 // SVG is XML text and stays selectable as a structured format, unlike other image/*.
 const isByteFormatContentType = (contentType: string): boolean => {
@@ -66,20 +65,20 @@ const isByteFormatContentType = (contentType: string): boolean => {
 
 /**
  * The format options offered for a response body: byte formats (raw/hex/base64) only for
- * binary content, otherwise the structured decoders too. Content type is sniffed from the
- * body first, then falls back to the declared header. Pure — safe under SSR/node.
+ * binary content, otherwise the structured decoders too. Content type is the body-sniffed
+ * value when present, otherwise the declared header. Pure — safe under SSR/node.
  */
 export const getResponseFormatOptions = (
-  base64Data: RunRequestResponse['base64Data'],
-  headers: RunRequestResponse['headers']
+  detectedContentType: string | null,
+  headerContentType: string
 ): ResponseBodyFormat[] => {
-  const contentType = detectContentTypeFromBase64(base64Data) ?? getContentType(headers);
+  const contentType = detectedContentType ?? headerContentType;
 
   if (isByteFormatContentType(contentType)) {
     return [...BYTE_FORMAT_OPTIONS];
   }
 
-  return [...STRUCTURED_FORMAT_OPTIONS, ...BYTE_FORMAT_OPTIONS];
+  return [...ALL_FORMAT_OPTIONS];
 };
 
 export type ResponseBodyView = 'preview' | 'editor';
@@ -89,10 +88,11 @@ export interface ResponseBodyFormatViewData {
   view: ResponseBodyView;
 }
 
-export function getDefaultResponseFormat(contentType: string): Omit<ResponseBodyFormatViewData, 'detectedContentType'> {
+// Mirrors bruno-app's packages/bruno-app/src/utils/response/index.js getDefaultResponseFormat; keep in sync.
+export function getDefaultResponseFormat(contentType: string): ResponseBodyFormatViewData {
   const mime = extractMimeType(contentType);
 
-  const rules = [
+  const rules: { test: RegExp; result: ResponseBodyFormatViewData }[] = [
     // ====== HTML ======
     { test: /^text\/html$/, result: { format: 'html', view: 'preview' } },
 
@@ -137,7 +137,7 @@ export function getDefaultResponseFormat(contentType: string): Omit<ResponseBody
 
   for (const rule of rules) {
     if (rule.test.test(mime)) {
-      return rule.result as ResponseBodyFormatViewData;
+      return rule.result;
     }
   }
 
@@ -179,6 +179,7 @@ const decodeBase64Head = (base64: RunRequestResponse['base64Data'], byteCount: n
   }
 };
 
+// Mirrors bruno-app's packages/bruno-app/src/utils/response/index.js detectContentTypeFromBuffer; keep in sync.
 export const detectContentTypeFromBuffer = (buffer: Buffer) => {
   if (!buffer || buffer.length < 4) {
     return null;

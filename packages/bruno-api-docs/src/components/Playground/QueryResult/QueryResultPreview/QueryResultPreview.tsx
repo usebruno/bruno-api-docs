@@ -38,7 +38,7 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentTy
       return <HtmlPreview data={data} baseUrl={baseUrl} />;
     }
     case 'preview-image': {
-      return <img src={`data:${contentType.replace(/\;(.*)/, '')};base64,${dataBuffer}`} />;
+      return <img src={`data:${contentType.split(';')[0].trim()};base64,${dataBuffer}`} />;
     }
     case 'preview-pdf': {
       return (
@@ -53,7 +53,7 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentTy
     }
     case 'preview-audio': {
       return (
-        <audio controls src={`data:${contentType.replace(/\;(.*)/, '')};base64,${dataBuffer}`} className="mx-auto" />
+        <audio controls src={`data:${contentType.split(';')[0].trim()};base64,${dataBuffer}`} className="mx-auto" />
       );
     }
     case 'preview-video': {

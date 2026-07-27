@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
+import { query } from '../../test-utils/dom';
 import KeyValueTable, { type KeyValueRow } from './KeyValueTable';
 
 const noop = () => {};
@@ -31,6 +32,15 @@ describe('KeyValueTable — description column', () => {
     const root = useRenderToDom(<KeyValueTable data={rows} onChange={noop} inlineActions showDescription />);
     const columnClasses = root.querySelectorAll('colgroup col').map((col) => col.getAttribute('class'));
     expect(columnClasses).toEqual(['col-key', 'col-value', 'col-description', 'col-actions']);
+  });
+
+  it('makes only the description no-wrap; a multiline value cell keeps soft-wrapping', () => {
+    const root = useRenderToDom(<KeyValueTable data={rows} onChange={noop} multilineValues showDescription />);
+    const valueClass = query(root, '.col-value .highlight-input').getAttribute('class');
+    const descriptionClass = query(root, '.col-description .highlight-input').getAttribute('class');
+    expect(valueClass).toContain('highlight-input--multiline');
+    expect(valueClass).not.toContain('highlight-input--nowrap');
+    expect(descriptionClass).toContain('highlight-input--nowrap');
   });
 });
 

@@ -2,6 +2,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable, VariableValueType } from '@opencollection/types/common/variables';
 import { MANAGER_LABELS } from '../constants';
 import { getDescription, getVariableTypeLabel } from './request';
+import { resolveDescription } from './description';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
 
@@ -48,7 +49,8 @@ export const envRowToVariable = (row: EnvVarRow): Variable => {
     else delete secret.type;
     if (row.value) secret.value = row.value;
     else delete secret.value;
-    if (row.description) secret.description = row.description;
+    const description = resolveDescription(row.description);
+    if (description !== undefined) secret.description = description;
     else delete secret.description;
     return secret;
   }

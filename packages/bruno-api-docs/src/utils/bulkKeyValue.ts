@@ -34,41 +34,27 @@ export function serializeBulkKeyValue(items: BulkKeyValueItem[]): string {
 
 /**
  * Re-attach descriptions to freshly-parsed bulk rows. The bulk text only carries name/value/enabled,
- * so each row's description is matched back from `original` — a snapshot of the rows taken when bulk
- * edit was entered — by exact name, then (among same-named rows) the closest by index, consuming each
- * original once. A reordered row keeps its description, while
- * a renamed key or an extra duplicate gets none. `original` is not mutated.
+ * so each row's description is reclaimed from `original` — a snapshot of the rows taken when bulk edit
+ * was entered — by exact name, in order (first-in-first-out among same-named rows), consuming each
+ * original once. A reordered row keeps its description, while a renamed key or an extra duplicate gets
+ * none. `original` is not mutated.
  */
 export function preserveDescriptions(
   parsed: BulkKeyValueItem[],
   original: KeyValueRow[],
   idPrefix: string
 ): KeyValueRow[] {
-  const candidatesByName = new Map<string, { index: number; description: unknown; matched: boolean }[]>();
-  original.forEach((row, index) => {
+  const descriptionsByName = new Map<string, unknown[]>();
+  original.forEach((row) => {
     const name = row.name || '';
-    const candidates = candidatesByName.get(name) ?? [];
-    candidates.push({ index, description: row.description, matched: false });
-    candidatesByName.set(name, candidates);
+    const list = descriptionsByName.get(name) ?? [];
+    list.push(row.description);
+    descriptionsByName.set(name, list);
   });
 
   return parsed.map((item, index) => {
     const row: KeyValueRow = { id: `${idPrefix}-${index}`, name: item.name, value: item.value, enabled: item.enabled };
-    const candidates = candidatesByName.get(item.name || '');
-    if (!candidates?.length) return row;
-
-    let best: { index: number; description: unknown; matched: boolean } | null = null;
-    let bestDistance = Infinity;
-    for (const candidate of candidates) {
-      if (candidate.matched) continue;
-      const distance = Math.abs(candidate.index - index);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = candidate;
-      }
-    }
-    if (!best) return row;
-    best.matched = true;
-    return best.description ? { ...row, description: best.description } : row;
+    const description = descriptionsByName.get(item.name || '')?.shift();
+    return description ? { ...row, description } : row;
   });
 }

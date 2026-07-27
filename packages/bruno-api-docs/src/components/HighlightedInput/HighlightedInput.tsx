@@ -25,6 +25,7 @@ interface HighlightedInputProps {
   title?: string;
   testId?: string;
   multiline?: boolean;
+  noWrap?: boolean;
 }
 
 interface HoveredToken {
@@ -75,7 +76,8 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
   variablesAutocomplete = true,
   title,
   testId,
-  multiline = false
+  multiline = false,
+  noWrap = false
 }) => {
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const mirrorRef = useRef<HTMLDivElement | null>(null);
@@ -178,6 +180,11 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
     if (!multiline || !el) return;
     el.style.height = 'auto';
     el.style.height = `${el.scrollHeight}px`;
+    const mirror = mirrorRef.current;
+    if (mirror) {
+      mirror.scrollTop = el.scrollTop;
+      mirror.scrollLeft = el.scrollLeft;
+    }
   }, [value, multiline]);
 
   useLayoutEffect(() => {
@@ -352,14 +359,20 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
 
   return (
     <StyledWrapper
-      className={`highlight-input${multiline ? ' highlight-input--multiline' : ''}`}
+      className={`highlight-input${multiline ? ' highlight-input--multiline' : ''}${
+        multiline && noWrap ? ' highlight-input--nowrap' : ''
+      }`}
       onMouseMove={handleMouseMove}
       onMouseLeave={scheduleClose}
     >
       <div className="highlight-input-mirror" aria-hidden="true" ref={mirrorRef}>
         {renderTokens(value, isFound)}
       </div>
-      {multiline ? <textarea {...fieldProps} rows={1} wrap="off" /> : <input {...fieldProps} type="text" />}
+      {multiline ? (
+        <textarea {...fieldProps} rows={1} wrap={noWrap ? 'off' : undefined} />
+      ) : (
+        <input {...fieldProps} type="text" />
+      )}
       {hovered && (
         <Portal>
           <HoverCard

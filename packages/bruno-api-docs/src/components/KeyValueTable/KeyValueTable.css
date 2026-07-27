@@ -70,10 +70,12 @@
   position: absolute;
   top: 0;
   bottom: 0;
+  height: var(--kvt-height);
   right: -0.125rem;
   z-index: 2;
   width: 0.25rem;
   cursor: col-resize;
+  touch-action: none;
   background-color: transparent;
 }
 

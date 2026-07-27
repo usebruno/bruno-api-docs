@@ -15,7 +15,7 @@ describe('keyValueRowToEntry', () => {
     });
   });
 
-  it('writes a non-empty description and omits an empty or absent one', () => {
+  it('writes a non-empty description and omits an empty, whitespace-only or absent one', () => {
     expect(
       keyValueRowToEntry({ id: '1', name: 'X', value: 'v', enabled: true, description: 'why it exists' })
     ).toEqual({ name: 'X', value: 'v', disabled: false, description: 'why it exists' });
@@ -24,6 +24,17 @@ describe('keyValueRowToEntry', () => {
       keyValueRowToEntry({ id: '1', name: 'X', value: 'v', enabled: true, description: '' })
     ).not.toHaveProperty('description');
 
+    // A whitespace-only description is dropped, not persisted invisibly.
+    expect(
+      keyValueRowToEntry({ id: '1', name: 'X', value: 'v', enabled: true, description: '   ' })
+    ).not.toHaveProperty('description');
+
     expect(keyValueRowToEntry({ id: '1', name: 'X', value: 'v', enabled: true })).not.toHaveProperty('description');
+  });
+
+  it('never persists "[object Object]" for a non-string description', () => {
+    expect(
+      keyValueRowToEntry({ id: '1', name: 'X', value: 'v', enabled: true, description: { content: 'x' } as unknown as string })
+    ).not.toHaveProperty('description');
   });
 });

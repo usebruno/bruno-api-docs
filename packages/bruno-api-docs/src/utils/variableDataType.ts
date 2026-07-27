@@ -1,5 +1,6 @@
 import type { Variable, VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import { unwrapVariableTyped } from './variableResolution';
+import { resolveDescription } from './description';
 
 /** The data types offered in the pre-request variable value dropdown (Bruno's BRUNO_VARIABLE_DATATYPES). */
 export type VariableDataType = 'string' | 'number' | 'boolean' | 'object';
@@ -87,7 +88,8 @@ export interface VariableRowInput {
  */
 export const rowToVariable = (row: VariableRowInput): Variable => {
   const dataType = row.dataType && row.dataType !== 'string' ? (row.dataType as VariableValueType) : undefined;
-  const description = row.description ? { description: row.description } : {};
+  const resolvedDescription = resolveDescription(row.description);
+  const description = resolvedDescription !== undefined ? { description: resolvedDescription } : {};
 
   const nextValue = dataType ? { type: dataType, data: row.value } : row.value;
 

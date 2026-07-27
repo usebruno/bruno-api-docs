@@ -14,6 +14,7 @@ import type { Scripts } from '@opencollection/types/common/scripts';
 import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';
 import type { Action, ActionSetVariable, ActionVariableScope } from '@opencollection/types/common/actions';
 import type { Description } from '@opencollection/types/common/description';
+import { descriptionText, resolveDescription } from './description';
 import {
   getRequestAuth,
   getItemName,
@@ -66,13 +67,7 @@ export const resolveInheritedAuth = (
 
 export const getDescription = (item: unknown): string | undefined => {
   if (!item || typeof item !== 'object') return undefined;
-  const desc = (item as { description?: unknown }).description;
-  if (typeof desc === 'string') return desc.trim() ? desc : undefined;
-  if (desc && typeof desc === 'object' && 'content' in desc) {
-    const content = (desc as { content?: unknown }).content;
-    return typeof content === 'string' && content.trim() ? content : undefined;
-  }
-  return undefined;
+  return descriptionText((item as { description?: unknown }).description);
 };
 
 export const headerRows = (headers: (HttpRequestHeader | HttpResponseHeader)[]): PropertyRow[] =>
@@ -464,14 +459,17 @@ export const actionsToPostResponseVars = (actions: Action[] = []): PostResponseV
 
 export const postResponseVarsToActions = (rows: PostResponseRowInput[], actions: Action[] = []): Action[] => {
   const others = actions.filter((action) => !isAfterResponseSetVariable(action));
-  const postActions: ActionSetVariable[] = rows.map((row) => ({
-    type: 'set-variable',
-    phase: 'after-response',
-    selector: { expression: row.value ?? '', method: 'jsonq' },
-    variable: { name: row.name ?? '', scope: row.scope || 'runtime' },
-    disabled: !row.enabled,
-    ...(row.description ? { description: row.description } : {})
-  }));
+  const postActions: ActionSetVariable[] = rows.map((row) => {
+    const description = resolveDescription(row.description);
+    return {
+      type: 'set-variable',
+      phase: 'after-response',
+      selector: { expression: row.value ?? '', method: 'jsonq' },
+      variable: { name: row.name ?? '', scope: row.scope || 'runtime' },
+      disabled: !row.enabled,
+      ...(description !== undefined ? { description } : {})
+    };
+  });
   return [...others, ...postActions];
 };
 

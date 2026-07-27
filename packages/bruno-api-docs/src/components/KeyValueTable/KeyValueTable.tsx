@@ -101,16 +101,20 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
   const dragCleanup = useRef<(() => void) | null>(null);
   useEffect(() => () => dragCleanup.current?.(), []);
 
-  // The resize divider spans the whole column (header + rows), like the app, so the handle — anchored
-  // in the header cell — is stretched to the full table height. Tracked with a ResizeObserver so it
-  // follows rows being added or removed. (Effects don't run under SSR, so this is server-safe.)
-  const [tableHeight, setTableHeight] = useState(0);
+  // The resize divider spans the whole column (header + rows), like the app. The handle is anchored in
+  // the header cell, so it's stretched to the full table height via a `--kvt-height` CSS variable set
+  // imperatively from a ResizeObserver — no React state, so growing/removing rows (e.g. autosizing a
+  // multiline cell) never re-renders the table. (Effects don't run under SSR; until measured the
+  // handle falls back to header height.)
   useEffect(() => {
     const table = tableRef.current;
     if (!table || typeof ResizeObserver === 'undefined') return;
-    const measure = () => setTableHeight(table.offsetHeight);
-    measure();
-    const observer = new ResizeObserver(measure);
+    const setHeight = (h: number) => table.style.setProperty('--kvt-height', `${h}px`);
+    setHeight(table.offsetHeight);
+    const observer = new ResizeObserver((entries) => {
+      const box = entries[0]?.borderBoxSize?.[0];
+      setHeight(box ? box.blockSize : table.offsetHeight);
+    });
     observer.observe(table);
     return () => observer.disconnect();
   }, []);
@@ -128,10 +132,11 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
   const lastResizableKey = resizableKeys[resizableKeys.length - 1];
 
   // Drag a divider to resize: the dragged column and its right neighbour trade width zero-sum, so the
-  // table width never changes and no other column shifts. Each new width is written straight to the
-  // <col> elements during the drag (no re-render per mouse-move) and committed to state as percentages
-  // on release, so the columns keep scaling with the pane afterwards.
-  const startResize = (event: React.MouseEvent, columnKey: string) => {
+  // table width never changes and no other column shifts. Widths are written straight to the two <col>
+  // elements during the drag (coalesced to one write per animation frame, no re-render) and only the
+  // two changed columns are committed to state as percentages on release, so they keep scaling with the
+  // pane. Pointer capture keeps the drag alive even if the pointer leaves the window/iframe.
+  const startResize = (event: React.PointerEvent<HTMLElement>, columnKey: string) => {
     event.preventDefault();
     event.stopPropagation();
     const table = tableRef.current;
@@ -144,39 +149,53 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
     const nextHeader = table.querySelector<HTMLElement>(`thead th.col-${nextKey}`);
     if (!columnCol || !nextCol || !columnHeader || !nextHeader) return;
 
+    const handle = event.currentTarget;
+    const pointerId = event.pointerId;
     const startX = event.clientX;
     const startWidth = columnHeader.offsetWidth;
     const nextStartWidth = nextHeader.offsetWidth;
 
-    const onMove = (moveEvent: MouseEvent) => {
-      const delta = moveEvent.clientX - startX;
-      const clamped = Math.max(MIN_COLUMN_WIDTH - startWidth, Math.min(nextStartWidth - MIN_COLUMN_WIDTH, delta));
+    let frame = 0;
+    let clamped = 0;
+    const paint = () => {
+      frame = 0;
       columnCol.style.width = `${startWidth + clamped}px`;
       nextCol.style.width = `${nextStartWidth - clamped}px`;
     };
+    const onMove = (moveEvent: PointerEvent) => {
+      const delta = moveEvent.clientX - startX;
+      clamped = Math.max(MIN_COLUMN_WIDTH - startWidth, Math.min(nextStartWidth - MIN_COLUMN_WIDTH, delta));
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
 
     const finish = () => {
+      if (frame) {
+        cancelAnimationFrame(frame);
+        paint();
+      }
       dragCleanup.current?.();
       dragCleanup.current = null;
       setResizingKey(null);
       const tableWidth = table.offsetWidth;
       if (tableWidth <= 0) return;
-      setColumnWidths((current) => {
-        const next = { ...current };
-        resizableKeys.forEach((key) => {
-          const header = table.querySelector<HTMLElement>(`thead th.col-${key}`);
-          if (header) next[key] = `${(header.offsetWidth / tableWidth) * 100}%`;
-        });
-        return next;
-      });
+      setColumnWidths((current) => ({
+        ...current,
+        [columnKey]: `${(columnHeader.offsetWidth / tableWidth) * 100}%`,
+        [nextKey]: `${(nextHeader.offsetWidth / tableWidth) * 100}%`
+      }));
     };
 
+    handle.setPointerCapture?.(pointerId);
     dragCleanup.current = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', finish);
+      cancelAnimationFrame(frame);
+      handle.releasePointerCapture?.(pointerId);
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', finish);
+      handle.removeEventListener('pointercancel', finish);
     };
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', finish);
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', finish);
+    handle.addEventListener('pointercancel', finish);
     setResizingKey(columnKey);
   };
 
@@ -184,8 +203,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
     resizableColumns && columnKey !== lastResizableKey ? (
       <span
         className={`col-resize-handle${resizingKey === columnKey ? ' is-resizing' : ''}`}
-        style={tableHeight ? { height: `${tableHeight}px` } : undefined}
-        onMouseDown={(event) => startResize(event, columnKey)}
+        onPointerDown={(event) => startResize(event, columnKey)}
         aria-hidden="true"
       />
     ) : null;
@@ -367,6 +385,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                         names={names}
                         variablesAutocomplete={false}
                         multiline
+                        noWrap
                         testId={`${testId}-description-input`}
                       />
                     </td>

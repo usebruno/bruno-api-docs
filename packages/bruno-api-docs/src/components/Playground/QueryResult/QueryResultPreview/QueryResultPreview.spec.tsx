@@ -1,9 +1,10 @@
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import { formatToPreviewMode } from './previewMode';
 import TextPreview from './TextPreview';
 import HtmlPreview from './HtmlPreview';
+import { useRenderToDom } from '../../../../hooks/useRenderToDom';
+import { query } from '../../../../test-utils/dom';
 
 describe('formatToPreviewMode', () => {
   it('maps formats to preview modes', () => {
@@ -27,17 +28,17 @@ describe('formatToPreviewMode', () => {
 
 describe('TextPreview', () => {
   it('stringifies object data', () => {
-    const html = renderToStaticMarkup(<TextPreview data={{ a: 1 }} />);
-    expect(html).toContain('{&quot;a&quot;:1}');
+    const root = useRenderToDom(<TextPreview data={{ a: 1 }} />);
+    expect(root.text).toContain('{"a":1}');
   });
 });
 
 describe('HtmlPreview', () => {
   it('renders a sandboxed iframe with an injected base href and no scripts', () => {
-    const html = renderToStaticMarkup(<HtmlPreview data="<body>hi</body>" baseUrl="https://api.example.com/" />);
-    expect(html).toContain('<iframe');
-    expect(html).toContain('sandbox="allow-same-origin"');
-    expect(html).not.toContain('allow-scripts');
-    expect(html).toContain('base href=');
+    const root = useRenderToDom(<HtmlPreview data="<body>hi</body>" baseUrl="https://api.example.com/" />);
+    const iframe = query(root, 'iframe');
+    expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+    expect(iframe.getAttribute('sandbox')).not.toContain('allow-scripts');
+    expect(iframe.getAttribute('srcdoc')).toContain('base href=');
   });
 });

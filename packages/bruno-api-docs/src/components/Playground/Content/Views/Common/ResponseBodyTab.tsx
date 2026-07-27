@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import { ResponseBodyFormat } from '../../../../../utils/response';
 import { formatResponse } from '../../../../../utils/dataFormatter';
 import { RunRequestResponse } from '../../../../../runner';
@@ -15,8 +15,6 @@ interface ResponseBodyTabProps {
   contentType: string;
 }
 
-// The byte encodings (raw/hex/base64) aren't Monaco grammars; feed plaintext so
-// the editor never receives a language it can't tokenise.
 const FORMAT_TO_MONACO: Record<ResponseBodyFormat, string> = {
   json: 'json',
   xml: 'xml',
@@ -55,14 +53,16 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
           baseUrl={response?.url}
         />
       ) : (
-        <CodeEditor
-          value={editorValue}
-          onChange={() => {}} // Read-only
-          language={FORMAT_TO_MONACO[selectedFormat]}
-          height="100%"
-          readOnly={true}
-          testId="response-body-editor"
-        />
+        <React.Suspense fallback={<div className="h-full w-full flex items-center justify-center">Loading editor...</div>}>
+          <CodeEditor
+            value={editorValue}
+            onChange={() => {}} // Read-only
+            language={FORMAT_TO_MONACO[selectedFormat]}
+            height="100%"
+            readOnly={true}
+            testId="response-body-editor"
+          />
+        </React.Suspense>
       )}
     </div>
   );

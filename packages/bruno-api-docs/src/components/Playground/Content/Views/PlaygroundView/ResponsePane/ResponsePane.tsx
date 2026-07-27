@@ -6,8 +6,8 @@ import TestResultsTab from '../../Common/TestResultsTab';
 import ErrorBanner from '../../../../../../ui/ErrorBanner/ErrorBanner';
 import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
 import { SendIcon } from '../../../../../../assets/icons';
-import ResponseFormatSelector from './ResponseFormatter';
-import { useResponseFormatter } from './ResponseFormatter/useResponseFormatter';
+import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
+import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
 import { RunRequestResponse } from '../../../../../../runner';
 import { detectContentTypeFromBase64, getContentType, getResponseFormatOptions, type ResponseBodyFormat } from '../../../../../../utils/response';
 

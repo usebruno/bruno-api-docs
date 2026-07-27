@@ -5,9 +5,13 @@ import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
 import { ResponseBodyFormat } from 'src/utils/response';
 import { RunRequestResponse } from 'src/runner';
-import { Document, Page } from 'react-pdf';
-import VideoPreview from './VideoPreview/VideoPreview';
 import { formatToPreviewMode } from './previewMode';
+
+// react-pdf (pdfjs) and react-player are large and only needed for binary previews,
+// so load them on demand to keep them out of the initial bundle.
+const VideoPreview = React.lazy(() => import('./VideoPreview/VideoPreview'));
+const PdfDocument = React.lazy(() => import('react-pdf').then((module) => ({ default: module.Document })));
+const PdfPage = React.lazy(() => import('react-pdf').then((module) => ({ default: module.Page })));
 
 export interface QueryResultPreviewProps {
   /** The response body to preview. */
@@ -42,13 +46,15 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentTy
     }
     case 'preview-pdf': {
       return (
-        <div className="preview-pdf" style={{ height: '100%', overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
-          <Document file={`data:application/pdf;base64,${dataBuffer}`} onLoadSuccess={handleDocumentLoad}>
-            {Array.from(new Array(pdfPagesNum), (el, index) => (
-              <Page key={`page_${index + 1}`} pageNumber={index + 1} renderAnnotationLayer={false} />
-            ))}
-          </Document>
-        </div>
+        <React.Suspense fallback={<div className="p-4 text-center">Loading PDF…</div>}>
+          <div className="preview-pdf" style={{ height: '100%', overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
+            <PdfDocument file={`data:application/pdf;base64,${dataBuffer}`} onLoadSuccess={handleDocumentLoad}>
+              {Array.from(new Array(pdfPagesNum), (el, index) => (
+                <PdfPage key={`page_${index + 1}`} pageNumber={index + 1} renderAnnotationLayer={false} />
+              ))}
+            </PdfDocument>
+          </div>
+        </React.Suspense>
       );
     }
     case 'preview-audio': {
@@ -57,7 +63,11 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentTy
       );
     }
     case 'preview-video': {
-      return <VideoPreview contentType={contentType} dataBuffer={dataBuffer as string} />;
+      return (
+        <React.Suspense fallback={<div className="p-4 text-center">Loading player…</div>}>
+          <VideoPreview contentType={contentType} dataBuffer={dataBuffer as string} />
+        </React.Suspense>
+      );
     }
     case 'preview-json': {
       return <JsonPreview data={data} />;

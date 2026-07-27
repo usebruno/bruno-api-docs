@@ -1,10 +1,16 @@
-import { useState, useRef, useMemo } from "react";
-import { RunRequestResponse } from "../runner";
-import { LARGE_BUFFER_THRESHOLD } from "../utils/dataFormatter";
+import { useState, useRef, useMemo } from 'react';
+import { RunRequestResponse } from '../runner';
+
+const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 
 export default function useLargeResponse(response: RunRequestResponse | undefined) {
-  const responseSize = response?.size ?? 0;
-  const isLargeResponse = responseSize > LARGE_BUFFER_THRESHOLD;
+  const responseSize =
+    typeof response?.size === 'number'
+      ? response.size
+      : response?.base64Data
+        ? Math.floor(response.base64Data.length * 0.75) // base64 is ~4/3 of the raw bytes
+        : 0;
+  const isLargeResponse = responseSize > LARGE_RESPONSE_THRESHOLD;
 
   const [revealed, setRevealed] = useState(false);
   const prevResponseRef = useRef(response);
@@ -13,11 +19,9 @@ export default function useLargeResponse(response: RunRequestResponse | undefine
     if (revealed) setRevealed(false);
   }
   const hideForLargeResponse = isLargeResponse && !revealed;
-  const result =  useMemo(() => ({ 
-    hideForLargeResponse,
-    responseSize,
-    setRevealed
-  }), [hideForLargeResponse, responseSize]);
 
-  return result;
+  return useMemo(
+    () => ({ hideForLargeResponse, responseSize, setRevealed }),
+    [hideForLargeResponse, responseSize]
+  );
 }

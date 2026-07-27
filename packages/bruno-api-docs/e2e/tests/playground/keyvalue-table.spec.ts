@@ -71,4 +71,21 @@ test.describe('KeyValueTable — tooltips & mobile scroll', () => {
     await toggle.check();
     await expect(toggle).toBeChecked();
   });
+
+  test('columns are resizable by dragging a header divider', async ({ page, playground }) => {
+    const { keyValueTable } = playground;
+    const valueHeader = keyValueTable.columnHeader('col-value');
+    const before = (await valueHeader.boundingBox())!.width;
+
+    // Drag the Name/Value divider (the first handle) to the right: Name grows and Value shrinks by
+    // the same amount (zero-sum), so the Value column gets measurably narrower.
+    const handle = keyValueTable.resizeHandles.first();
+    const box = (await handle.boundingBox())!;
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 80, box.y + box.height / 2, { steps: 6 });
+    await page.mouse.up();
+
+    await expect.poll(async () => (await valueHeader.boundingBox())!.width).toBeLessThan(before - 30);
+  });
 });

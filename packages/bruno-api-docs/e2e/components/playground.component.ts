@@ -6,6 +6,7 @@ import type { DockMode } from '../../src/utils/playgroundDock';
 
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);
+  readonly preRequestVars = new KeyValueTableComponent(this.page, 'variables-pre-request');
   readonly preRequestScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-pre-request');
   readonly postResponseScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-post-response');
   readonly bodyEditor = new CodeEditorComponent(this.page, 'body-editor');
@@ -21,10 +22,10 @@ export class PlaygroundComponent extends BaseComponent {
   readonly sidebarBackdrop = this.page.getByTestId('playground-sidebar-backdrop');
   readonly collectionNode = this.page.getByTestId('sidebar-collection-root');
   readonly collectionCollapseToggle = this.collectionNode.getByRole('button', {
-    name: /Collapse collection|Expand collection/,
+    name: /Collapse collection|Expand collection/
   });
   readonly collectionRootLink = this.collectionNode.getByRole('button', {
-    name: /Bruno Testbench|Collection/,
+    name: /Bruno Testbench|Collection/
   });
   readonly envSwitcher = this.page.getByTestId('playground-env-switcher');
   readonly gear = this.page.getByTestId('playground-env-settings');
@@ -57,6 +58,7 @@ export class PlaygroundComponent extends BaseComponent {
 
   async open(dock: DockMode = 'bottom'): Promise<void> {
     await this.page.goto(`/#/?pg=1&dock=${dock}`);
+    await this.runner.waitFor({ state: 'visible' });
   }
 
   sidebarItem(name: string): Locator {
@@ -77,7 +79,7 @@ export class PlaygroundComponent extends BaseComponent {
 
   async openTreeItem(names: string[]): Promise<void> {
     for (const name of names) {
-      await this.treeItems.filter({ hasText: name }).first().click();
+      await this.sidebarItem(name).click();
     }
   }
 
@@ -89,13 +91,8 @@ export class PlaygroundComponent extends BaseComponent {
     return this.page.getByTestId(`playground-dock-${mode}-panel`);
   }
 
-  async open(mode: DockMode): Promise<void> {
-    await this.page.goto(`/#/?pg=1&dock=${mode}`);
-    await this.runner.waitFor({ state: 'visible' });
-  }
-
   async openRequest(name: string): Promise<void> {
-    await this.treeItems.filter({ hasText: name }).first().click();
+    await this.sidebarItem(name).click();
     await this.view.waitFor({ state: 'visible' });
   }
 

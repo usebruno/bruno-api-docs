@@ -57,4 +57,20 @@ describe('HeadersTab', () => {
     );
     expect(root.querySelector('.cell-error')).toBeNull();
   });
+
+  it('shows a Description column with authored descriptions (bare string or {content} form)', () => {
+    const root = useRenderToDom(
+      <HeadersTab
+        headers={[
+          { name: 'Authorization', value: 'Bearer x', description: 'The bearer token' },
+          { name: 'Accept', value: 'text/html', description: { content: 'The media type', type: 'text' } }
+        ]}
+        onHeadersChange={noop}
+      />
+    );
+    const columns = root.querySelectorAll('thead th').map((th) => th.text.trim());
+    expect(columns).toContain('Description');
+    expect(root.text).toContain('The bearer token');
+    expect(root.text).toContain('The media type');
+  });
 });

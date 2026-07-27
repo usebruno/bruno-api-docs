@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import CodeEditor from '../../../../../../ui/CodeEditor/CodeEditor';
 import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import { parseBulkKeyValue, serializeBulkKeyValue } from '../../../../../../utils/bulkKeyValue';
+import { parseBulkKeyValue, preserveDescriptions, serializeBulkKeyValue } from '../../../../../../utils/bulkKeyValue';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface BulkEditProps {
@@ -11,19 +11,12 @@ export interface BulkEditProps {
 }
 
 const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix = 'bulk' }) => {
+  const originalRef = useRef(data);
   const [text, setText] = useState(() => serializeBulkKeyValue(data));
 
   const handleChange = (value: string) => {
     setText(value);
-    const parsed = parseBulkKeyValue(value);
-    onChange(
-      parsed.map((item, index) => ({
-        id: `${idPrefix}-${index}`,
-        name: item.name,
-        value: item.value,
-        enabled: item.enabled
-      }))
-    );
+    onChange(preserveDescriptions(parseBulkKeyValue(value), originalRef.current, idPrefix));
   };
 
   return (

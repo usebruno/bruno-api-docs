@@ -2,6 +2,8 @@ import React from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import CodeEditor from '../../../../../ui/CodeEditor/CodeEditor';
 import KeyValueTable, { type KeyValueRow } from '../../../../../components/KeyValueTable/KeyValueTable';
+import { getDescription } from '../../../../../utils/request';
+import { keyValueRowToEntry } from '../../../../../utils/keyValueRow';
 import type { RequestBody } from '../../../../../utils/schemaHelpers';
 
 interface BodyTabProps {
@@ -20,11 +22,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
   const handleFormBodyChange = (formData: KeyValueRow[]) => {
     const updatedBody = {
       type: 'form-urlencoded' as const,
-      data: formData.map(f => ({
-        name: f.name,
-        value: f.value,
-        disabled: !f.enabled
-      }))
+      data: formData.map(keyValueRowToEntry)
     };
     onItemChange({
       ...item,
@@ -37,12 +35,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
 
   const handleMultipartChange = (rows: KeyValueRow[]) => {
     // Rebuild the text fields from the table; preserve any file fields untouched.
-    const textEntries = rows.map(r => ({
-      name: r.name,
-      value: r.value,
-      type: 'text' as const,
-      disabled: !r.enabled
-    }));
+    const textEntries = rows.map((r) => ({ ...keyValueRowToEntry(r), type: 'text' as const }));
     const fileEntries = (((body as { data?: any[] })?.data as any[]) || []).filter(e => e?.type === 'file');
     onItemChange({
       ...item,
@@ -94,7 +87,8 @@ export const BodyTab: React.FC<BodyTabProps> = ({
             id: `form-${index}`,
             name: field.name || '',
             value: field.value || '',
-            enabled: field.disabled !== true
+            enabled: field.disabled !== true,
+            description: getDescription(field)
           }));
 
           return (
@@ -110,6 +104,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
                 keyPlaceholder="Key"
                 valuePlaceholder="Value"
                 showEnabled={true}
+                showDescription
               />
             </div>
           );
@@ -123,7 +118,8 @@ export const BodyTab: React.FC<BodyTabProps> = ({
               id: `mp-${index}`,
               name: e.name || '',
               value: e.value || '',
-              enabled: e.disabled !== true
+              enabled: e.disabled !== true,
+              description: getDescription(e)
             }));
           const fileEntries = entries.filter(e => e?.type === 'file');
 
@@ -140,6 +136,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
                 keyPlaceholder="Key"
                 valuePlaceholder="Value"
                 showEnabled={true}
+                showDescription
               />
               {fileEntries.length > 0 && (
                 <div className="mt-4 text-sm" style={{ color: 'var(--text-secondary)' }}>

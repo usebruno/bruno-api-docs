@@ -2,6 +2,11 @@ import { Buffer } from 'buffer';
 import { useMemo } from 'react';
 import { RunRequestResponse } from '../runner';
 
+const JSON_PATTERN = /^[\w-]+\/([\w-]+\+)?json/;
+const SVG_PATTERN = /^image\/svg/i;
+const XML_PATTERN = /^[\w-]+\/([\w-]+\+)?xml/;
+const JAVASCRIPT_PATTERN = /^(application|text)\/(javascript|ecmascript)/i;
+
 // Normalize a response's content-type header into a canonical MIME type, or '' when absent.
 export const getContentType = (headers: RunRequestResponse['headers']): string => {
   if (!headers || typeof headers !== 'object' || Object.keys(headers).length === 0) {
@@ -13,11 +18,6 @@ export const getContentType = (headers: RunRequestResponse['headers']): string =
   if (!contentType || typeof contentType !== 'string') {
     return '';
   }
-
-  const JSON_PATTERN = /^[\w-]+\/([\w-]+\+)?json/;
-  const SVG_PATTERN = /^image\/svg/i;
-  const XML_PATTERN = /^[\w-]+\/([\w-]+\+)?xml/;
-  const JAVASCRIPT_PATTERN = /^(application|text)\/(javascript|ecmascript)/i;
 
   if (JSON_PATTERN.test(contentType)) return 'application/ld+json';
   if (SVG_PATTERN.test(contentType)) return 'image/svg+xml';
@@ -39,10 +39,13 @@ export function useInitialResponseFormat(detectedContentType: string | null, hea
   }, [detectedContentType, headerContentType]);
 }
 
+// Everything up to the first ";" — strips parameters like "; charset=utf-8".
+const MIME_TYPE_PATTERN = /^[^;]+/;
+
 // Normalize & extract MIME type from full header
 const extractMimeType = (contentType = '') => {
   const cleaned = String(contentType).trim().toLowerCase();
-  const match = cleaned.match(/^[^;]+/); // strip "; charset=utf-8"
+  const match = cleaned.match(MIME_TYPE_PATTERN);
   return match ? match[0] : cleaned;
 };
 
@@ -57,10 +60,17 @@ export const BYTE_FORMAT_OPTIONS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'
 // Every format in dropdown order: structured group first, then the byte-encoding group.
 export const ALL_FORMAT_OPTIONS: ResponseBodyFormat[] = [...STRUCTURED_FORMAT_OPTIONS, ...BYTE_FORMAT_OPTIONS];
 
+const SVG_CONTENT_TYPE_PATTERN = /svg/i;
+const IMAGE_VIDEO_AUDIO_PATTERN = /^(image|video|audio)\//i;
+const PDF_CONTENT_TYPE_PATTERN = /pdf/i;
+const ZIP_CONTENT_TYPE_PATTERN = /zip/i;
+
 // SVG is XML text and stays selectable as a structured format, unlike other image/*.
 const isByteFormatContentType = (contentType: string): boolean => {
-  if (/svg/i.test(contentType)) return false;
-  return /^(image|video|audio)\//i.test(contentType) || /pdf/i.test(contentType) || /zip/i.test(contentType);
+  if (SVG_CONTENT_TYPE_PATTERN.test(contentType)) return false;
+  return IMAGE_VIDEO_AUDIO_PATTERN.test(contentType)
+    || PDF_CONTENT_TYPE_PATTERN.test(contentType)
+    || ZIP_CONTENT_TYPE_PATTERN.test(contentType);
 };
 
 /**
@@ -88,54 +98,56 @@ export interface ResponseBodyFormatViewData {
   view: ResponseBodyView;
 }
 
+// Ordered content-type → format/view rules; first match wins. Order is significant:
+// the specific application/pdf etc. rules must precede the catch-all text/* rule.
+const RESPONSE_FORMAT_RULES: { test: RegExp; result: ResponseBodyFormatViewData }[] = [
+  // ====== HTML ======
+  { test: /^text\/html$/, result: { format: 'html', view: 'preview' } },
+
+  // ====== JSON (including custom +json types) ======
+  {
+    test: /^application\/(json|.+\+json)$/,
+    result: { format: 'json', view: 'editor' }
+  },
+  {
+    test: /^text\/(json|.+\+json)$/,
+    result: { format: 'json', view: 'editor' }
+  },
+
+  // ====== XML (including custom +xml types) ======
+  {
+    test: /^application\/(xml|.+\+xml)$/,
+    result: { format: 'xml', view: 'editor' }
+  },
+  {
+    test: /^text\/(xml|.+\+xml)$/,
+    result: { format: 'xml', view: 'editor' }
+  },
+
+  // ====== JavaScript ======
+  {
+    test: /^(application|text)\/javascript$/,
+    result: { format: 'javascript', view: 'editor' }
+  },
+
+  // ====== Images, audio, video, PDFs → preview (base64) ======
+  { test: /^image\//, result: { format: 'base64', view: 'preview' } },
+  { test: /^audio\//, result: { format: 'base64', view: 'preview' } },
+  { test: /^video\//, result: { format: 'base64', view: 'preview' } },
+  {
+    test: /^application\/pdf$/,
+    result: { format: 'base64', view: 'preview' }
+  },
+
+  // ====== Any other text types ======
+  { test: /^text\//, result: { format: 'raw', view: 'editor' } }
+];
+
 // Mirrors bruno-app's packages/bruno-app/src/utils/response/index.js getDefaultResponseFormat; keep in sync.
 export function getDefaultResponseFormat(contentType: string): ResponseBodyFormatViewData {
   const mime = extractMimeType(contentType);
 
-  const rules: { test: RegExp; result: ResponseBodyFormatViewData }[] = [
-    // ====== HTML ======
-    { test: /^text\/html$/, result: { format: 'html', view: 'preview' } },
-
-    // ====== JSON (including custom +json types) ======
-    {
-      test: /^application\/(json|.+\+json)$/,
-      result: { format: 'json', view: 'editor' }
-    },
-    {
-      test: /^text\/(json|.+\+json)$/,
-      result: { format: 'json', view: 'editor' }
-    },
-
-    // ====== XML (including custom +xml types) ======
-    {
-      test: /^application\/(xml|.+\+xml)$/,
-      result: { format: 'xml', view: 'editor' }
-    },
-    {
-      test: /^text\/(xml|.+\+xml)$/,
-      result: { format: 'xml', view: 'editor' }
-    },
-
-    // ====== JavaScript ======
-    {
-      test: /^(application|text)\/javascript$/,
-      result: { format: 'javascript', view: 'editor' }
-    },
-
-    // ====== Images, audio, video, PDFs → preview (base64) ======
-    { test: /^image\//, result: { format: 'base64', view: 'preview' } },
-    { test: /^audio\//, result: { format: 'base64', view: 'preview' } },
-    { test: /^video\//, result: { format: 'base64', view: 'preview' } },
-    {
-      test: /^application\/pdf$/,
-      result: { format: 'base64', view: 'preview' }
-    },
-
-    // ====== Any other text types ======
-    { test: /^text\//, result: { format: 'raw', view: 'editor' } }
-  ];
-
-  for (const rule of rules) {
+  for (const rule of RESPONSE_FORMAT_RULES) {
     if (rule.test.test(mime)) {
       return rule.result;
     }
@@ -144,6 +156,11 @@ export function getDefaultResponseFormat(contentType: string): ResponseBodyForma
   // ====== Fallback ======
   return { format: 'raw', view: 'editor' };
 }
+
+// Data URL prefix, e.g. "data:image/png;base64,". Used only with String.match.
+const DATA_URL_PREFIX_PATTERN = /^data:[^;]*;base64,/;
+// Characters that are not valid base64. Used only with String.replace (no lastIndex state).
+const NON_BASE64_CHARS_PATTERN = /[^A-Za-z0-9+/=]/g;
 
 /**
  * Decode only the first N bytes from a Base64 string.
@@ -156,7 +173,7 @@ const decodeBase64Head = (base64: RunRequestResponse['base64Data'], byteCount: n
 
   try {
     // Strip a data URL prefix (e.g. "data:image/png;base64,") when present.
-    const prefixMatch = base64.match(/^data:[^;]*;base64,/);
+    const prefixMatch = base64.match(DATA_URL_PREFIX_PATTERN);
     const cleanedBase64 = prefixMatch ? base64.slice(prefixMatch[0].length) : base64;
 
     if (!cleanedBase64) {
@@ -168,7 +185,7 @@ const decodeBase64Head = (base64: RunRequestResponse['base64Data'], byteCount: n
 
     let slice = cleanedBase64.slice(0, neededChars);
     // Drop any non-base64 characters (whitespace, invalid chars) before decoding.
-    slice = slice.replace(/[^A-Za-z0-9+/=]/g, '');
+    slice = slice.replace(NON_BASE64_CHARS_PATTERN, '');
     // Pad to a multiple of 4 so the slice is valid base64.
     const padLength = (4 - (slice.length % 4)) % 4;
     slice = slice + '='.repeat(padLength);

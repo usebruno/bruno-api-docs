@@ -81,15 +81,15 @@ export interface InheritedAuthSummary {
 
 /**
  * Resolve the inherited-auth summary an Auth tab shows ("Auth inherited from {name}: {mode}"),
- * or undefined when the item doesn't inherit. Names the nearest configured parent (falling back
+ * or null when the item doesn't inherit. Names the nearest configured parent (falling back
  * to the collection) and its effective mode, matching the desktop app.
  */
 export const getInheritedAuthSummary = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
   item: Item
-): InheritedAuthSummary | undefined => {
-  if (getRequestAuth(item as HttpRequest) !== 'inherit') return undefined;
+): InheritedAuthSummary | null => {
+  if (getRequestAuth(item as HttpRequest) !== 'inherit') return null;
   const resolved = resolveInheritedAuth(collection, ancestors, item);
   return {
     sourceName: resolved.source?.name || collection?.info?.name || 'Collection',

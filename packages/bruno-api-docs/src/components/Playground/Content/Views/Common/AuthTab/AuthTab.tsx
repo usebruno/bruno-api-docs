@@ -15,7 +15,7 @@ interface AuthTabProps {
   description?: string;
   showInherit?: boolean;
   showFullAuth?: boolean;
-  inheritedAuth?: InheritedAuthSummary;
+  inheritedAuth?: InheritedAuthSummary | null;
 }
 
 export const AuthTab: React.FC<AuthTabProps> = ({

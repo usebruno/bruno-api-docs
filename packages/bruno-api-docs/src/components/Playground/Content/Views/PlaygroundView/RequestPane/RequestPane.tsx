@@ -34,7 +34,7 @@ import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAut
 interface RequestPaneProps {
   item: HttpRequest;
   onItemChange: (item: HttpRequest) => void;
-  inheritedAuth?: InheritedAuthSummary;
+  inheritedAuth?: InheritedAuthSummary | null;
 }
 
 const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inheritedAuth }) => {

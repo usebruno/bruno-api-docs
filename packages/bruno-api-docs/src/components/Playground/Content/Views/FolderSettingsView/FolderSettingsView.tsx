@@ -35,7 +35,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
   const [activeTab, setActiveTab] = useState('overview');
 
   const inheritedAuth = useMemo(() => {
-    if (folder.request?.auth !== 'inherit') return undefined;
+    if (folder.request?.auth !== 'inherit') return null;
     const uuid = getItemUuid(folder);
     const ancestry = uuid ? getAncestorsByUuid(collection, uuid) : [];
     return getInheritedAuthSummary(collection, ancestry, folder);

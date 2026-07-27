@@ -48,9 +48,9 @@ export default [
       'packages/**/src/**/*.{ts,tsx}',
       'packages/**/e2e/**/*.{ts,tsx}'
     ],
-    // Only lint lines changed vs the git diff, so the @stylistic rules apply
-    // to new/changed code without reformatting the existing tree.
-    processor: 'diff/diff',
+    // Lint only changed lines. `diff/ci` diffs against the PR base but no-ops
+    // when CI is unset, so it cannot replace `diff/diff` locally.
+    processor: process.env.CI ? 'diff/ci' : 'diff/diff',
     rules: {
       ...js.configs.recommended.rules,
       ...stylistic.configs.customize({

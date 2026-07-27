@@ -1,10 +1,9 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
-import type { Scripts, Script, ScriptType } from '@opencollection/types/common/scripts';
-import type { Auth } from '@opencollection/types/common/auth';
-import { 
-  isFolder, 
+import type { Scripts } from '@opencollection/types/common/scripts';
+import {
+  isFolder,
   getHttpHeaders, 
   getRequestAuth, 
   getHttpMethod,
@@ -12,11 +11,9 @@ import {
   getRequestScripts,
   scriptsArrayToObject,
   scriptsObjectToArray,
-  getPreRequestScript,
-  getPostResponseScript,
-  getTestsScript,
   type ScriptsObject
 } from '../../utils/schemaHelpers';
+import { resolveInheritedAuth } from '../../utils/request';
 
 /**
  * Merge headers from collection and folder hierarchy into the request
@@ -55,7 +52,7 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
   if (!request.http.headers) {
     request.http.headers = [];
   }
-  
+
   // Merge with existing request headers (request headers take precedence)
   const requestHeaderMap = new Map<string, HttpRequestHeader>();
   currentHeaders.forEach((header) => {
@@ -71,34 +68,27 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
 };
 
 /**
- * Merge authentication from collection and folder hierarchy into the request
+ * Resolve inherited authentication into the request for the send path. Delegates to the shared
+ * resolver (`utils/request.ts` resolveInheritedAuth) so the wire and the docs display can never
+ * drift: only an explicit `inherit` resolves; the closest level that made an auth choice wins (a
+ * concrete mode applies, an explicit No Auth blocks a parent, an `inherit` folder is transparent) —
+ * matching the desktop app (bruno-electron `mergeAuth`).
  */
 export const mergeAuth = (collection: OpenCollection, request: HttpRequest, requestTreePath: Item[] = []): void => {
-  const requestAuth = getRequestAuth(request);
-  
-  // If request already has auth that's not 'inherit', don't override
-  if (requestAuth && requestAuth !== 'inherit') {
+  if (getRequestAuth(request) !== 'inherit') {
     return;
   }
-  
+
+  const { auth } = resolveInheritedAuth(collection, requestTreePath, request);
+
   // Auth lives on the protocol-detail block (request.http.auth); ensure it exists.
   if (!request.http) {
     request.http = {};
   }
-
-  // Look for auth in reverse order (closest to request wins)
-  for (let i = requestTreePath.length - 1; i >= 0; i--) {
-    const item = requestTreePath[i];
-    if (isFolder(item) && item.request?.auth && item.request.auth !== 'inherit') {
-      request.http.auth = item.request.auth;
-      return;
-    }
-  }
-
-  // Finally, check collection-level auth
-  if (collection.request?.auth && collection.request.auth !== 'inherit') {
-    request.http.auth = collection.request.auth;
-  }
+  // The resolved auth is copied through untouched whatever its `type` (mode-agnostic). Deep-clone so
+  // the per-run request never aliases the shared collection/folder auth, including nested structure
+  // a richer type carries (e.g. oauth2 additional-parameter arrays).
+  request.http.auth = auth ? JSON.parse(JSON.stringify(auth)) : undefined;
 };
 
 /**
@@ -126,7 +116,7 @@ export const mergeScripts = (
   
   // Initialize merged scripts as object
   const mergedScriptsObj: Record<string, string | undefined> = {};
-  
+
   if (flow === 'sandwich') {
     // Sandwich flow: collection -> folders -> request -> folders (reverse) -> collection
     const preRequestParts: string[] = [];
@@ -179,13 +169,13 @@ export const mergeScripts = (
     if (requestScriptsObj.tests) {
       testsParts.push(requestScriptsObj.tests);
     }
-    
+
     mergedScriptsObj.preRequest = preRequestParts.length > 0 ? preRequestParts.join('\n\n') : undefined;
     mergedScriptsObj.postResponse = postResponseParts.length > 0 ? postResponseParts.join('\n\n') : undefined;
     mergedScriptsObj.tests = testsParts.length > 0 ? testsParts.join('\n\n') : undefined;
   } else {
     // Sequential flow: collection -> folders -> request (each overrides previous)
-    let currentScripts = { ...collectionScriptsObj };
+    const currentScripts = { ...collectionScriptsObj };
     
     folderScriptsObjs.forEach((scripts) => {
       if (scripts.preRequest) currentScripts.preRequest = scripts.preRequest;

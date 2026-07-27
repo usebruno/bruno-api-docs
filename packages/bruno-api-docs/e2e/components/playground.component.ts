@@ -2,10 +2,13 @@ import type { Locator } from '@playwright/test';
 import { BaseComponent } from './base.component';
 import { KeyValueTableComponent } from './key-value-table/key-value-table.component';
 import { CodeEditorComponent } from './code-editor/code-editor.component';
+import { RequestAuthComponent } from './playground/auth.component';
 import type { DockMode } from '../../src/utils/playgroundDock';
 
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);
+  // The Auth tab lives inside the playground request pane; open it with selectTab('auth').
+  readonly auth = new RequestAuthComponent(this.page);
   readonly preRequestScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-pre-request');
   readonly postResponseScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-post-response');
   readonly bodyEditor = new CodeEditorComponent(this.page, 'body-editor');
@@ -21,10 +24,10 @@ export class PlaygroundComponent extends BaseComponent {
   readonly sidebarBackdrop = this.page.getByTestId('playground-sidebar-backdrop');
   readonly collectionNode = this.page.getByTestId('sidebar-collection-root');
   readonly collectionCollapseToggle = this.collectionNode.getByRole('button', {
-    name: /Collapse collection|Expand collection/,
+    name: /Collapse collection|Expand collection/
   });
   readonly collectionRootLink = this.collectionNode.getByRole('button', {
-    name: /Bruno Testbench|Collection/,
+    name: /Bruno Testbench|Collection/
   });
   readonly envSwitcher = this.page.getByTestId('playground-env-switcher');
   readonly gear = this.page.getByTestId('playground-env-settings');
@@ -55,10 +58,6 @@ export class PlaygroundComponent extends BaseComponent {
     return this.sidebarPanel.getByTestId('sidebar-example').filter({ hasText: exampleName });
   }
 
-  async open(dock: DockMode = 'bottom'): Promise<void> {
-    await this.page.goto(`/#/?pg=1&dock=${dock}`);
-  }
-
   sidebarItem(name: string): Locator {
     return this.treeItems.filter({ hasText: name }).first();
   }
@@ -77,7 +76,7 @@ export class PlaygroundComponent extends BaseComponent {
 
   async openTreeItem(names: string[]): Promise<void> {
     for (const name of names) {
-      await this.treeItems.filter({ hasText: name }).first().click();
+      await this.sidebarItem(name).click();
     }
   }
 
@@ -89,13 +88,13 @@ export class PlaygroundComponent extends BaseComponent {
     return this.page.getByTestId(`playground-dock-${mode}-panel`);
   }
 
-  async open(mode: DockMode): Promise<void> {
-    await this.page.goto(`/#/?pg=1&dock=${mode}`);
+  async open(dock: DockMode = 'bottom'): Promise<void> {
+    await this.page.goto(`/#/?pg=1&dock=${dock}`);
     await this.runner.waitFor({ state: 'visible' });
   }
 
   async openRequest(name: string): Promise<void> {
-    await this.treeItems.filter({ hasText: name }).first().click();
+    await this.sidebarItem(name).click();
     await this.view.waitFor({ state: 'visible' });
   }
 

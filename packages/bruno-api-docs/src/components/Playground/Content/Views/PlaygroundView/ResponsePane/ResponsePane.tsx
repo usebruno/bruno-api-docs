@@ -43,7 +43,6 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     return 'var(--oc-request-tab-panel-response-status)';
   };
 
-  // Handle loading, empty, and error states
   if (isLoading) {
     return (
       <div className="h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
@@ -89,7 +88,6 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     />
   );
 
-  // Calculate content indicators
   const headersCount = response.headers ? Object.keys(response.headers).length : 0;
   const hasTestResults = response.testResults && response.testResults.results.length > 0;
   const hasAssertionResults = response.assertionResults && response.assertionResults.results.length > 0;

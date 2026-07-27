@@ -183,7 +183,6 @@ export const formatResponse = (
     if (typeof data === 'string') {
       return data;
     }
-    // Try to stringify the data, fallback to String conversion if needed
     const stringified = safeStringifyJSON(data, false);
     return typeof stringified === 'string' ? stringified : String(data);
   }
@@ -225,21 +224,16 @@ export const formatResponse = (
     }
   }
 
-  // Handle hex format - return hex representation
   if (mode.includes('hex')) {
-    // Check if data is already in hex format
     if (typeof data === 'string' && isHexFormat(data)) {
-      // Data is already in hex format, return it as-is
       return data;
     }
 
-    // Data is not in hex format, encode it to hex
     try {
       const dataBuffer = Buffer.from(dataBufferString, 'base64');
       const hexView = formatHexView(dataBuffer);
       return hexView;
     } catch {
-      // If buffer conversion fails, try to encode the string data directly
       if (typeof data === 'string') {
         try {
           const stringBuffer = Buffer.from(data, 'utf8');
@@ -252,17 +246,14 @@ export const formatResponse = (
     }
   }
 
-  // Handle base64 format - return base64 string as-is
   if (mode.includes('base64')) {
     return dataBufferString;
   }
 
-  // Handle raw format - return data as-is without any formatting
   if (mode.includes('text') || mode.includes('raw')) {
     if (isVeryLargeResponse) {
       return stringifyLargeBody(data);
     }
-    // Return the raw decoded buffer data
     return rawData;
   }
 

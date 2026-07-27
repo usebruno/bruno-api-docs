@@ -42,7 +42,6 @@ export function useInitialResponseFormat(detectedContentType: string | null, hea
 // Everything up to the first ";" — strips parameters like "; charset=utf-8".
 const MIME_TYPE_PATTERN = /^[^;]+/;
 
-// Normalize & extract MIME type from full header
 const extractMimeType = (contentType = '') => {
   const cleaned = String(contentType).trim().toLowerCase();
   const match = cleaned.match(MIME_TYPE_PATTERN);
@@ -101,10 +100,8 @@ export interface ResponseBodyFormatViewData {
 // Ordered content-type → format/view rules; first match wins. Order is significant:
 // the specific application/pdf etc. rules must precede the catch-all text/* rule.
 const RESPONSE_FORMAT_RULES: { test: RegExp; result: ResponseBodyFormatViewData }[] = [
-  // ====== HTML ======
   { test: /^text\/html$/, result: { format: 'html', view: 'preview' } },
 
-  // ====== JSON (including custom +json types) ======
   {
     test: /^application\/(json|.+\+json)$/,
     result: { format: 'json', view: 'editor' }
@@ -114,7 +111,6 @@ const RESPONSE_FORMAT_RULES: { test: RegExp; result: ResponseBodyFormatViewData 
     result: { format: 'json', view: 'editor' }
   },
 
-  // ====== XML (including custom +xml types) ======
   {
     test: /^application\/(xml|.+\+xml)$/,
     result: { format: 'xml', view: 'editor' }
@@ -124,13 +120,11 @@ const RESPONSE_FORMAT_RULES: { test: RegExp; result: ResponseBodyFormatViewData 
     result: { format: 'xml', view: 'editor' }
   },
 
-  // ====== JavaScript ======
   {
     test: /^(application|text)\/javascript$/,
     result: { format: 'javascript', view: 'editor' }
   },
 
-  // ====== Images, audio, video, PDFs → preview (base64) ======
   { test: /^image\//, result: { format: 'base64', view: 'preview' } },
   { test: /^audio\//, result: { format: 'base64', view: 'preview' } },
   { test: /^video\//, result: { format: 'base64', view: 'preview' } },
@@ -139,7 +133,6 @@ const RESPONSE_FORMAT_RULES: { test: RegExp; result: ResponseBodyFormatViewData 
     result: { format: 'base64', view: 'preview' }
   },
 
-  // ====== Any other text types ======
   { test: /^text\//, result: { format: 'raw', view: 'editor' } }
 ];
 
@@ -153,7 +146,6 @@ export function getDefaultResponseFormat(contentType: string): ResponseBodyForma
     }
   }
 
-  // ====== Fallback ======
   return { format: 'raw', view: 'editor' };
 }
 
@@ -202,10 +194,8 @@ export const detectContentTypeFromBuffer = (buffer: Buffer) => {
     return null;
   }
 
-  // Get first few bytes for magic number checking
   const bytes = buffer.subarray(0, 12);
 
-  // Image formats
   if (bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF) {
     return 'image/jpeg';
   }
@@ -235,12 +225,10 @@ export const detectContentTypeFromBuffer = (buffer: Buffer) => {
   if (bytes[0] === 0x3C && bytes[1] === 0x73 && bytes[2] === 0x76 && bytes[3] === 0x67 && bytes[4] === 0x20) {
     return 'image/svg+xml';
   }
-  // PDF
   if (bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) {
     return 'application/pdf';
   }
 
-  // Video formats
   if (bytes[0] === 0x00 && bytes[1] === 0x00 && bytes[2] === 0x00
     && (bytes[3] === 0x18 || bytes[3] === 0x20)
     && bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) {
@@ -254,7 +242,6 @@ export const detectContentTypeFromBuffer = (buffer: Buffer) => {
     return 'video/x-msvideo'; // AVI
   }
 
-  // Audio formats
   if (bytes[0] === 0xFF && (bytes[1] & 0xE0) === 0xE0) {
     return 'audio/mpeg'; // MP3
   }
@@ -270,7 +257,6 @@ export const detectContentTypeFromBuffer = (buffer: Buffer) => {
     return 'audio/m4a';
   }
 
-  // Archive formats
   if (bytes[0] === 0x50 && bytes[1] === 0x4B
     && (bytes[2] === 0x03 || bytes[2] === 0x05 || bytes[2] === 0x07)) {
     return 'application/zip';
@@ -322,7 +308,6 @@ const isLikelyText = (buffer: Buffer) => {
 
   for (let i = 0; i < sampleSize; i++) {
     const byte = buffer[i];
-    // Check for common text characters (printable ASCII + common control chars)
     if ((byte >= 0x20 && byte <= 0x7E) // Printable ASCII
       || byte === 0x09 // Tab
       || byte === 0x0A // Line feed
@@ -331,7 +316,6 @@ const isLikelyText = (buffer: Buffer) => {
     }
   }
 
-  // If more than 85% are text characters, likely text
   return (textChars / sampleSize) > 0.85;
 };
 

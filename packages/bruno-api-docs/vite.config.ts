@@ -17,7 +17,8 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@slices': resolve(__dirname, 'src/store/slices')
+      '@slices': resolve(__dirname, 'src/store/slices'),
+      '@': resolve(__dirname, 'src')
     }
   },
   server: {

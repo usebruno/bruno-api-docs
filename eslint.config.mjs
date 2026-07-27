@@ -1,8 +1,10 @@
 import globals from 'globals';
+import js from '@eslint/js';
 import { fixupPluginRules } from '@eslint/compat';
 import eslintPluginDiff from 'eslint-plugin-diff';
 import stylistic from '@stylistic/eslint-plugin';
 import reactHooks from 'eslint-plugin-react-hooks';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 
 export default [
@@ -20,6 +22,7 @@ export default [
     plugins: {
       'diff': fixupPluginRules(eslintPluginDiff),
       '@stylistic': stylistic,
+      '@typescript-eslint': tsPlugin,
       'react-hooks': reactHooks
     },
     languageOptions: {
@@ -43,6 +46,7 @@ export default [
     // to new/changed code without reformatting the existing tree.
     processor: 'diff/diff',
     rules: {
+      ...js.configs.recommended.rules,
       ...stylistic.configs.customize({
         indent: 2,
         quotes: 'single',
@@ -68,8 +72,35 @@ export default [
       '@stylistic/jsx-one-expression-per-line': ['off'],
       '@stylistic/max-statements-per-line': ['off'],
       '@stylistic/no-mixed-operators': ['off'],
+
+      // TypeScript already resolves identifiers and reports unused code more
+      // accurately than the core rules, which misfire on types and interfaces.
+      'no-undef': 'off',
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }],
+
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'no-debugger': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn'
+    }
+  },
+  {
+    // Tests and dev scripts legitimately log.
+    files: [
+      'packages/**/*.{test,spec}.{ts,tsx}',
+      'packages/**/e2e/**/*.{ts,tsx}'
+    ],
+    rules: {
+      'no-console': 'off'
     }
   },
   {

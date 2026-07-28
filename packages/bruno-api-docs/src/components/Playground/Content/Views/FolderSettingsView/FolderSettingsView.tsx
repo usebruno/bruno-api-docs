@@ -100,6 +100,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, onFolderChange 
       description="Configures authentication for this folder. This applies to all requests using the Inherit option in the Auth tab."
       showInherit={true}
       showFullAuth={true}
+      inheritedAuth={inheritedAuth}
     />
   );
 

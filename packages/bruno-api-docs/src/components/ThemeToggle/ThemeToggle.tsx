@@ -12,7 +12,7 @@ const Button = styled.button`
   height: 1.75rem;
   background: transparent;
   color: var(--oc-colors-text-muted, var(--oc-text));
-  border: 0.0625rem solid var(--oc-border-border0);
+  border: 0.0625rem solid var(--oc-border-border1);
   border-radius: var(--oc-radius);
   cursor: pointer;
   transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;

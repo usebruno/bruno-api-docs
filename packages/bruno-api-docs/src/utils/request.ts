@@ -19,7 +19,8 @@ import {
   getItemName,
   getRequestScripts,
   scriptsArrayToObject,
-  getRequestVariables
+  getRequestVariables,
+  getHttpHeaders
 } from './schemaHelpers';
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
@@ -32,9 +33,15 @@ export const humanizeAuthMode = (auth: Auth | undefined, labels: Record<string, 
   return labels[auth.type] || auth.type;
 };
 
+export interface InheritedSource {
+  level: 'collection' | 'folder';
+  name: string;
+  uuid: string;
+}
+
 export interface ResolvedAuth {
   auth?: Auth;
-  source?: { level: 'collection' | 'folder'; name: string };
+  source?: InheritedSource;
 }
 
 const folderAuth = (folder: Item): Auth | undefined =>
@@ -60,13 +67,16 @@ export const resolveInheritedAuth = (
     if (auth === 'inherit') continue;
     return {
       auth: isConcrete(auth) ? auth : undefined,
-      source: { level: 'folder', name: getItemName(ancestors[i]) || 'Folder' }
+      source: { level: 'folder', name: getItemName(ancestors[i]) || 'Folder', uuid: getItemUuid(ancestors[i]) || '' }
     };
   }
 
   const collectionAuth = collection?.request?.auth as Auth | undefined;
   if (isConcrete(collectionAuth)) {
-    return { auth: collectionAuth, source: { level: 'collection', name: collection?.info?.name || 'Collection' } };
+    return {
+      auth: collectionAuth,
+      source: { level: 'collection', name: collection?.info?.name || 'Collection', uuid: COLLECTION_ROOT_CRUMB }
+    };
   }
 
   // Nothing concrete anywhere up the chain — the request effectively sends No Auth, not "Inherit".
@@ -532,6 +542,128 @@ export const getRequestDefaultsVars = (
 export const getCollectionVariables = (
   collection: OpenCollection | null | undefined
 ): { preVars: PreRequestVarRow[]; postVars: PostResponseVarRow[] } => getRequestDefaultsVars(collection);
+
+export const inheritedCountLabel = (count: number, noun: string): string =>
+  `${count} ${noun}${count === 1 ? '' : 's'} inherited`;
+
+export interface InheritedHeaderRow {
+  name: string;
+  value?: string;
+  disabled?: boolean;
+  description?: string;
+  source: InheritedSource;
+}
+
+export type InheritedPreRequestVarRow = PreRequestVarRow & { source: InheritedSource };
+export type InheritedPostResponseVarRow = PostResponseVarRow & { source: InheritedSource };
+
+type InheritanceNode = { request?: { headers?: HttpRequestHeader[]; variables?: Variable[]; actions?: Action[] } };
+
+const inheritanceLevels = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[]
+): { source: InheritedSource; node: InheritanceNode }[] => {
+  const levels: { source: InheritedSource; node: InheritanceNode }[] = [];
+  if (collection) {
+    levels.push({
+      source: { level: 'collection', name: collection.info?.name || 'Collection', uuid: COLLECTION_ROOT_CRUMB },
+      node: collection as InheritanceNode
+    });
+  }
+  ancestry.forEach((folder) => {
+    levels.push({
+      source: { level: 'folder', name: getItemName(folder) || 'Folder', uuid: getItemUuid(folder) || '' },
+      node: folder as unknown as InheritanceNode
+    });
+  });
+  return levels;
+};
+
+// Collect the inherited rows of one config kind for an item (request OR folder): walk the
+// collection->folders levels, de-dupe by key keeping the nearest source (Map last-write-wins), and
+// drop any key the item defines itself (`ownKeys` — its own value overrides the inherited one, so
+// the inherited row is hidden) — matching the effective-request merge in the desktop app and the
+// send path.
+const collectInherited = <T>(
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  rowsOf: (node: InheritanceNode) => T[],
+  keyOf: (row: T) => string,
+  ownKeys: Set<string>
+): (T & { source: InheritedSource })[] => {
+  const byKey = new Map<string, T & { source: InheritedSource }>();
+  inheritanceLevels(collection, ancestry).forEach(({ source, node }) => {
+    rowsOf(node).forEach((row) => {
+      const key = keyOf(row);
+      if (!key || ownKeys.has(key)) return;
+      byKey.set(key, { ...row, source });
+    });
+  });
+  return Array.from(byKey.values());
+};
+
+// The collectors below take the item's own keys to exclude, so both requests and folders reuse the
+// same inheritance logic — only how they derive their own keys differs.
+
+/** Inherited headers (collection + ancestor folders, nearest wins, case-insensitive de-dup),
+ *  excluding the case-insensitive header names in `ownNames`. */
+export const collectInheritedHeaders = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  ownNames: Set<string>
+): InheritedHeaderRow[] =>
+  collectInherited<HttpRequestHeader>(
+    collection,
+    ancestry,
+    (node) => node?.request?.headers ?? [],
+    (h) => (h.name || '').toLowerCase(),
+    ownNames
+  ).map((h) => ({ name: h.name, value: h.value, disabled: h.disabled, description: getDescription(h), source: h.source }));
+
+/** Inherited pre-request variables (nearest wins), excluding the variable names in `ownNames`. */
+export const collectInheritedPreVars = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  ownNames: Set<string>
+): InheritedPreRequestVarRow[] =>
+  collectInherited<PreRequestVarRow>(collection, ancestry, (node) => getRequestDefaultsVars(node).preVars, (v) => v.name, ownNames);
+
+/** Inherited post-response variables (nearest wins), excluding the variable names in `ownNames`. */
+export const collectInheritedPostVars = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  ownNames: Set<string>
+): InheritedPostResponseVarRow[] =>
+  collectInherited<PostResponseVarRow>(collection, ancestry, (node) => getRequestDefaultsVars(node).postVars, (v) => v.name, ownNames);
+
+const nameSet = (names: (string | undefined)[]): Set<string> => new Set(names.filter((n): n is string => Boolean(n)));
+
+/** Headers the request inherits from its collection/folder ancestry (nearest parent wins), excluding
+ *  any it overrides by name. Case-insensitive de-dup, matching the send-path header merge. */
+export const getInheritedHeaders = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedHeaderRow[] =>
+  collectInheritedHeaders(collection, ancestry, nameSet(getHttpHeaders(item).map((h) => (h.name || '').toLowerCase())));
+
+/** Pre-request variables the request inherits from its collection/folder ancestry (nearest parent
+ *  wins), excluding any it defines itself. */
+export const getInheritedPreRequestVars = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedPreRequestVarRow[] =>
+  collectInheritedPreVars(collection, ancestry, nameSet(getPreRequestVars(item).map((v) => v.name)));
+
+/** Post-response variables the request inherits from its collection/folder ancestry (nearest parent
+ *  wins), excluding any it defines itself. */
+export const getInheritedPostResponseVars = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedPostResponseVarRow[] =>
+  collectInheritedPostVars(collection, ancestry, nameSet(getPostResponseVars(item).map((v) => v.name)));
 
 /**
  * Short, uppercased method name matching the design (DELETE -> DEL, OPTIONS ->

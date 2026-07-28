@@ -87,7 +87,10 @@ test.describe('Collection Overview', () => {
     });
   });
 
-  test('mobile: every Disabled chip stays pinned at the row end without overflowing', async ({ overviewPage, page }) => {
+  test('mobile: values truncate so the Disabled chip stays pinned in the card (no whole-table scroll)', async ({
+    overviewPage,
+    page
+  }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     const { configuration } = overviewPage;
 
@@ -107,17 +110,47 @@ test.describe('Collection Overview', () => {
         expect(chip.x).toBeGreaterThanOrEqual(valueBox.x + valueBox.width);
       });
 
-      await test.step(`row ${i}: the chip stays within the config card, never clipped or overflowing`, () => {
-        expect(chip.x + chip.width).toBeLessThanOrEqual(card.x + card.width);
+      await test.step(`row ${i}: the chip stays pinned within the card, never scrolled off`, () => {
+        expect(chip.x + chip.width).toBeLessThanOrEqual(card.x + card.width + 1);
       });
+    }
 
-      await test.step(`row ${i}: the value keeps its truncation styling, so a long value ellipsizes rather than pushing the chip off`, async () => {
-        const style = await value.evaluate((el) => {
-          const cs = getComputedStyle(el);
-          return { overflow: cs.overflow, textOverflow: cs.textOverflow, whiteSpace: cs.whiteSpace };
-        });
-        expect(style).toEqual({ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' });
+    await test.step('the table does not scroll on mobile — the value truncates instead', async () => {
+      const info = await configuration.root
+        .locator('.property-table')
+        .first()
+        .evaluate((el) => ({ scrollWidth: el.scrollWidth, clientWidth: el.clientWidth }));
+      expect(info.scrollWidth).toBeLessThanOrEqual(info.clientWidth + 1);
+    });
+  });
+
+  test('desktop: every property table (single- and multi-row) scrolls as one unit when a value overflows', async ({
+    overviewPage,
+    page
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const tables = overviewPage.configuration.root.locator('.property-table');
+    const count = await tables.count();
+    expect(count).toBeGreaterThan(0);
+
+    for (let i = 0; i < count; i += 1) {
+      const table = tables.nth(i);
+      const rowCount = await table.locator('.property-row').count();
+      await table.getByTestId('property-value').first().evaluate((el) => {
+        el.textContent = 'x'.repeat(400);
       });
+      const info = await table.evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return {
+          overflowX: cs.overflowX,
+          borderRightWidth: cs.borderRightWidth,
+          scrollWidth: el.scrollWidth,
+          clientWidth: el.clientWidth
+        };
+      });
+      expect(info.overflowX, `table ${i} (${rowCount} rows) overflowX`).toBe('auto');
+      expect(info.scrollWidth, `table ${i} (${rowCount} rows) should scroll`).toBeGreaterThan(info.clientWidth);
+      expect(info.borderRightWidth, `table ${i} (${rowCount} rows) keeps its right border`).not.toBe('0px');
     }
   });
 });

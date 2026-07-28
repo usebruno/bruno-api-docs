@@ -25,10 +25,14 @@ import {
   resolveInheritedAuth,
   getPreRequestVars,
   getPostResponseVars,
+  getInheritedHeaders,
+  getInheritedPreRequestVars,
+  getInheritedPostResponseVars,
+  inheritedCountLabel,
   buildScriptChain,
   getScriptFlow,
   getBodyView,
-  getDescription
+  headerRows
 } from '../../utils/request';
 import { collectAssertions } from '../../utils/assertions';
 import { collectTests, collectRawTestScripts } from '../../utils/fileUtils';
@@ -47,6 +51,8 @@ import { RequestParams } from '../../components/Request/RequestParams/RequestPar
 import { RequestBody } from '../../components/Request/RequestBody/RequestBody';
 import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeBadge';
 import { PropertyTable } from '../../components/PropertyTable/PropertyTable';
+import { InheritedAuthBadge } from '../../components/InheritedSourceLink/InheritedAuthBadge';
+import { inheritedHeaderRows } from '../../utils/inheritedRows';
 import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTabs';
 import { Examples } from '../../components/Examples/Examples';
 import { ExecutionContext } from '../../components/ExecutionContext/ExecutionContext';
@@ -101,11 +107,21 @@ const RequestContent: React.FC<RequestContentProps> = ({
   const resolved = useMemo(() => resolveInheritedAuth(collection, ancestry, item), [collection, ancestry, item]);
   const effectiveAuth = ownAuth === 'inherit' ? resolved.auth : ownAuth;
   const showAuth = ownAuth !== undefined;
-  const authInheritedBadge =
-    ownAuth === 'inherit' ? (resolved.source ? `Inherited from ${resolved.source.level}` : 'Inherited') : undefined;
+  const authSource = ownAuth === 'inherit' ? resolved.source : undefined;
+  const authBadge =
+    ownAuth === 'inherit' ? (
+      authSource ? (
+        <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
+      ) : (
+        <ContentTypeBadge label="Inherited" />
+      )
+    ) : undefined;
 
   const preVars = useMemo(() => getPreRequestVars(item), [item]);
   const postVars = useMemo(() => getPostResponseVars(item), [item]);
+  const inheritedHeaders = useMemo(() => getInheritedHeaders(collection, ancestry, item), [collection, ancestry, item]);
+  const inheritedPreVars = useMemo(() => getInheritedPreRequestVars(collection, ancestry, item), [collection, ancestry, item]);
+  const inheritedPostVars = useMemo(() => getInheritedPostResponseVars(collection, ancestry, item), [collection, ancestry, item]);
 
   const scriptChain = useMemo(() => buildScriptChain(collection, ancestry, item), [collection, ancestry, item]);
   const scriptFlow = useMemo(() => getScriptFlow(collection), [collection]);
@@ -124,12 +140,14 @@ const RequestContent: React.FC<RequestContentProps> = ({
   // Resolve the body once — drives whether the section renders at all and its heading badge.
   const bodyView = useMemo(() => getBodyView(body), [body]);
   const hasHeaders = headers.length > 0;
+  const hasInheritedHeaders = inheritedHeaders.length > 0;
   const hasParams = pathParams.length > 0 || queryParams.length > 0;
   const hasBody = bodyView.render !== 'none';
-  const hasVars = preVars.length > 0 || postVars.length > 0;
+  const hasVars =
+    preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
   const hasExamples = examples.length > 0;
   const hasExecutionContext = scriptChain.length > 0 || hasVars || assertions.length > 0 || tests.length > 0;
-  const hasLeftColumn = showAuth || hasParams || hasBody || hasHeaders;
+  const hasLeftColumn = showAuth || hasParams || hasBody || hasHeaders || hasInheritedHeaders;
 
   const bodyContentType = bodyView.render !== 'none' ? bodyView.contentTypeLabel : undefined;
 
@@ -170,25 +188,24 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   </Section>
                 )}
 
-                {hasHeaders && (
-                  <Section label="Headers" testId="request-section-headers">
+                {(hasHeaders || hasInheritedHeaders) && (
+                  <Section
+                    label="Headers"
+                    testId="request-section-headers"
+                    badge={
+                      hasInheritedHeaders ? (
+                        <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
+                      ) : undefined
+                    }
+                  >
                     <PropertyTable
-                      rows={headers.map((h) => ({
-                        label: h.name,
-                        value: h.value,
-                        disabled: h.disabled,
-                        description: getDescription(h)
-                      }))}
+                      rows={[...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders, onBreadcrumbClick)]}
                     />
                   </Section>
                 )}
 
                 {showAuth && (
-                  <Section
-                    label="Auth"
-                    testId="request-section-auth"
-                    badge={authInheritedBadge ? <ContentTypeBadge label={authInheritedBadge} /> : undefined}
-                  >
+                  <Section label="Auth" testId="request-section-auth" badge={authBadge}>
                     <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
                   </Section>
                 )}
@@ -231,6 +248,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
               scriptChain={scriptChain}
               preVars={preVars}
               postVars={postVars}
+              inheritedPreVars={inheritedPreVars}
+              inheritedPostVars={inheritedPostVars}
               assertions={assertions}
               tests={tests}
               testScripts={testScripts}

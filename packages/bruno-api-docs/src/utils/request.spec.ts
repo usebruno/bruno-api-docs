@@ -11,10 +11,15 @@ import {
   actionsToPostResponseVars,
   postResponseVarsToActions,
   getCollectionVariables,
+  getInheritedHeaders,
+  getInheritedPreRequestVars,
+  getInheritedPostResponseVars,
+  inheritedCountLabel,
   getShortMethod,
   getVariableType
 } from './request';
 import { AUTH_MODE_LABELS } from '../constants';
+import { COLLECTION_ROOT_CRUMB } from './common';
 
 describe('requestAuth', () => {
   it('humanizes auth modes with fallbacks', () => {
@@ -33,7 +38,7 @@ describe('requestAuth', () => {
     const folder: any = { info: { type: 'folder', name: 'F' }, request: { auth: { type: 'apikey', key: 'k' } } };
     const resolved = resolveInheritedAuth({ info: { name: 'C' } } as any, [folder], item);
     expect(resolved.auth).toMatchObject({ type: 'apikey' });
-    expect(resolved.source).toEqual({ level: 'folder', name: 'F' });
+    expect(resolved.source).toEqual({ level: 'folder', name: 'F', uuid: '' });
   });
 
   it('falls back to collection auth when no ancestor defines one', () => {
@@ -41,7 +46,7 @@ describe('requestAuth', () => {
     const collection: any = { info: { name: 'C' }, request: { auth: { type: 'bearer', token: 't' } } };
     const resolved = resolveInheritedAuth(collection, [], item);
     expect(resolved.auth).toMatchObject({ type: 'bearer' });
-    expect(resolved.source).toEqual({ level: 'collection', name: 'C' });
+    expect(resolved.source).toEqual({ level: 'collection', name: 'C', uuid: COLLECTION_ROOT_CRUMB });
   });
 
   it('lets an explicit No-Auth folder block a parent folder auth (closest choice wins)', () => {
@@ -50,7 +55,7 @@ describe('requestAuth', () => {
     const inner: any = { info: { type: 'folder', name: 'inner' }, request: { auth: undefined } }; // No Auth
     const resolved = resolveInheritedAuth({ info: { name: 'C' } } as any, [outer, inner], item);
     expect(resolved.auth).toBeUndefined();
-    expect(resolved.source).toEqual({ level: 'folder', name: 'inner' });
+    expect(resolved.source).toEqual({ level: 'folder', name: 'inner', uuid: '' });
   });
 
   it('is transparent through an inherit folder to a shallower concrete folder', () => {
@@ -59,7 +64,7 @@ describe('requestAuth', () => {
     const inner: any = { info: { type: 'folder', name: 'inner' }, request: { auth: 'inherit' } };
     const resolved = resolveInheritedAuth({ info: { name: 'C' } } as any, [outer, inner], item);
     expect(resolved.auth).toMatchObject({ type: 'bearer' });
-    expect(resolved.source).toEqual({ level: 'folder', name: 'outer' });
+    expect(resolved.source).toEqual({ level: 'folder', name: 'outer', uuid: '' });
   });
 
   it('resolves to No Auth (never the literal "inherit") when nothing up the chain configures auth', () => {
@@ -77,6 +82,93 @@ describe('requestAuth', () => {
     expect(resolved.auth).toMatchObject(future); // resolved through untouched, whatever the type
     // The label falls back to the raw type when no friendly label exists yet, so it never breaks.
     expect(humanizeAuthMode(future, AUTH_MODE_LABELS)).toBe('future-scheme-v9');
+  });
+});
+
+describe('inherited request config', () => {
+  const collection: any = {
+    info: { name: 'My Collection' },
+    request: {
+      headers: [
+        { name: 'X-Collection', value: 'c' },
+        { name: 'Authorization', value: 'from-collection' }
+      ],
+      variables: [{ name: 'colVar', value: 'cv' }],
+      actions: [
+        { type: 'set-variable', phase: 'after-response', variable: { name: 'colPost', scope: 'runtime' }, selector: { expression: 'body.a' } }
+      ]
+    }
+  };
+  const folder: any = {
+    uuid: 'folder-uid',
+    info: { type: 'folder', name: 'Folder A' },
+    request: {
+      headers: [
+        { name: 'X-Folder', value: 'f' },
+        { name: 'authorization', value: 'from-folder' } // overrides collection's Authorization (case-insensitive)
+      ],
+      variables: [{ name: 'folderVar', value: 'fv' }],
+      actions: [
+        { type: 'set-variable', phase: 'after-response', variable: { name: 'folderPost', scope: 'runtime' }, selector: { expression: 'body.b' } }
+      ]
+    }
+  };
+
+  it('collects headers from collection + folders, nearest parent wins on case-insensitive name', () => {
+    const item: any = { http: { headers: [] } };
+    const rows = getInheritedHeaders(collection, [folder], item);
+    const byName = Object.fromEntries(rows.map((r) => [r.name, r]));
+    // Authorization is defined by both; the nearer folder wins and is the only one kept.
+    expect(rows.filter((r) => r.name.toLowerCase() === 'authorization')).toHaveLength(1);
+    expect(byName['authorization'].value).toBe('from-folder');
+    expect(byName['authorization'].source).toEqual({ level: 'folder', name: 'Folder A', uuid: 'folder-uid' });
+    // Distinct headers from each level are all present.
+    expect(byName['X-Collection'].source).toEqual({ level: 'collection', name: 'My Collection', uuid: COLLECTION_ROOT_CRUMB });
+    expect(byName['X-Folder'].source).toEqual({ level: 'folder', name: 'Folder A', uuid: 'folder-uid' });
+    expect(rows).toHaveLength(3); // X-Collection, X-Folder, Authorization(folder)
+  });
+
+  it('excludes headers the request defines itself (own value wins, no inherited row)', () => {
+    const item: any = { http: { headers: [{ name: 'x-collection', value: 'own' }] } };
+    const rows = getInheritedHeaders(collection, [folder], item);
+    expect(rows.map((r) => r.name.toLowerCase())).not.toContain('x-collection');
+    expect(rows).toHaveLength(2); // X-Folder + Authorization(folder)
+  });
+
+  it('collects pre-request and post-response variables with their source', () => {
+    const item: any = { runtime: { variables: [], actions: [] } };
+    const pre = getInheritedPreRequestVars(collection, [folder], item);
+    const post = getInheritedPostResponseVars(collection, [folder], item);
+    expect(pre.map((v) => v.name)).toEqual(['colVar', 'folderVar']);
+    expect(pre.find((v) => v.name === 'colVar')!.source.level).toBe('collection');
+    expect(pre.find((v) => v.name === 'folderVar')!.source).toEqual({ level: 'folder', name: 'Folder A', uuid: 'folder-uid' });
+    expect(post.map((v) => v.name)).toEqual(['colPost', 'folderPost']);
+    expect(post.find((v) => v.name === 'folderPost')!.source.level).toBe('folder');
+  });
+
+  it('excludes variables the request redefines, and a folder var overrides the collection var', () => {
+    const item: any = { runtime: { variables: [{ name: 'colVar', value: 'own' }], actions: [] } };
+    const rows = getInheritedPreRequestVars(collection, [folder], item);
+    expect(rows.map((v) => v.name)).toEqual(['folderVar']); // colVar hidden by own, folderVar remains
+
+    const shadowing: any = { ...folder, request: { ...folder.request, variables: [{ name: 'colVar', value: 'fv' }] } };
+    const rows2 = getInheritedPreRequestVars(collection, [shadowing], { runtime: { variables: [], actions: [] } } as any);
+    expect(rows2).toHaveLength(1);
+    expect(rows2[0]).toMatchObject({ name: 'colVar', value: 'fv', source: { level: 'folder' } });
+  });
+
+  it('returns [] when there is no collection or ancestry', () => {
+    const item: any = { http: { headers: [] }, runtime: { variables: [], actions: [] } };
+    expect(getInheritedHeaders(null, [], item)).toEqual([]);
+    expect(getInheritedPreRequestVars(null, [], item)).toEqual([]);
+    expect(getInheritedPostResponseVars(null, [], item)).toEqual([]);
+  });
+
+  it('builds a pluralized count-chip label', () => {
+    expect(inheritedCountLabel(7, 'header')).toBe('7 headers inherited');
+    expect(inheritedCountLabel(1, 'header')).toBe('1 header inherited');
+    expect(inheritedCountLabel(8, 'var')).toBe('8 vars inherited');
+    expect(inheritedCountLabel(1, 'var')).toBe('1 var inherited');
   });
 });
 

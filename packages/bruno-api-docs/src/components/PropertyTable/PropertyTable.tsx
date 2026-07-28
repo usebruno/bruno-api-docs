@@ -4,6 +4,7 @@ import { VariableText } from '../VariableText/VariableText';
 import { TruncatedText } from '../TruncatedText/TruncatedText';
 import { Description } from '../Description/Description';
 import { DisabledBadge } from '../DisabledBadge/DisabledBadge';
+import { cx } from '../../utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface PropertyRow {
@@ -15,6 +16,7 @@ export interface PropertyRow {
   disabled?: boolean;
   description?: string;
   testId?: string;
+  action?: React.ReactNode;
 }
 
 interface PropertyTableProps {
@@ -38,7 +40,14 @@ const ValueCell: React.FC<{ row: PropertyRow; testId?: string }> = ({ row, testI
 
 export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage, className, testId = 'property-table', hideRowBorders = false }) => (
   <StyledWrapper
-    className={['property-table', hideRowBorders ? 'property-table--no-row-borders' : '', className].filter(Boolean).join(' ')}
+    className={cx(
+      'property-table',
+      {
+        'property-table--no-row-borders': hideRowBorders,
+        'property-table--framed': rows.length > 0 && !hideRowBorders
+      },
+      className
+    )}
     data-testid={testId}
   >
     {rows.length === 0 ? (
@@ -55,6 +64,7 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
                 <div className="property-value-main" data-testid="property-value"><ValueCell row={row} testId={testId} /></div>
                 {row.type ? <span className="property-type">{row.type}</span> : null}
                 {row.disabled ? <DisabledBadge /> : null}
+                {row.action ?? null}
               </div>
             </dd>
             <Description text={row.description} />

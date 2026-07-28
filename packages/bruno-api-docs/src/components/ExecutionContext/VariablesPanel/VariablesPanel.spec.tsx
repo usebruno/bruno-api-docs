@@ -52,6 +52,56 @@ describe('VariablesPanel', () => {
     expect(html).toContain('disabled-badge');
   });
 
+  describe('inherited variables', () => {
+    const folderSource = { level: 'folder' as const, name: 'Folder A', uuid: 'folder-uid' };
+
+    it('appends inherited pre-request vars to the SAME table (no separate table) with a goto per row', () => {
+      const html = renderToStaticMarkup(
+        <VariablesPanel
+          preVars={[{ name: 'own', value: 'v' }]}
+          postVars={[]}
+          inheritedPreVars={[{ name: 'baseUrl', value: '{{host}}', source: folderSource }]}
+          inheritedPostVars={[]}
+        />
+      );
+      expect(html).toContain('own'); // own var still shown
+      expect(html).toContain('baseUrl'); // inherited var appended below
+      expect(html).not.toContain('Inherited (');
+      expect(html).toContain('Inherited from folder: Folder A');
+      const preTable = html.split('Post-Response')[0];
+      expect(preTable).toContain('own');
+      expect(preTable).toContain('baseUrl');
+    });
+
+    it('appends inherited post-response captures to the Post-Response table with their source', () => {
+      const html = renderToStaticMarkup(
+        <VariablesPanel
+          preVars={[]}
+          postVars={[{ name: 'own', expression: 'res.body.own' }]}
+          inheritedPreVars={[]}
+          inheritedPostVars={[{ name: 'sessionId', expression: 'res.body.id', source: folderSource }]}
+        />
+      );
+      expect(html).toContain('own');
+      expect(html).toContain('sessionId');
+      expect(html).not.toContain('Inherited (');
+      expect(html).toContain('Inherited from folder: Folder A');
+    });
+
+    it('renders when a side has only inherited variables (no own)', () => {
+      const html = renderToStaticMarkup(
+        <VariablesPanel
+          preVars={[]}
+          postVars={[]}
+          inheritedPreVars={[{ name: 'baseUrl', value: 'x', source: folderSource }]}
+          inheritedPostVars={[]}
+        />
+      );
+      expect(html).not.toBe('');
+      expect(html).toContain('baseUrl');
+    });
+  });
+
   describe('stacked variant (overview)', () => {
     it('applies the vars-stacked class', () => {
       const html = renderToStaticMarkup(

@@ -90,7 +90,7 @@ const XmlArrayNode: React.FC<XmlArrayNodeProps> = ({ arrayKey, items, depth, def
   };
 
   return (
-    <div style={{ paddingLeft: `${(depth + 1) * 20}px` }}>
+    <div style={{ paddingLeft: `${(depth + 1) * 1.25}rem` }}>
       <div className="flex items-center mb-1">
         <button onClick={toggle} className="xml-array-toggle-button" tabIndex={-1} aria-expanded={expanded}>
           {expanded ? '▼' : '▶'}
@@ -151,7 +151,7 @@ const XmlNode: React.FC<XmlNodeProps> = ({ node, nodeName = '', defaultExpanded 
   if (isLeaf && isTextNode(node)) {
     const value = String(node);
     return (
-      <div className="flex items-start mb-1" style={{ paddingLeft: `${depth * 20}px` }}>
+      <div className="flex items-start mb-1" style={{ paddingLeft: `${depth * 1.25}rem` }}>
         {displayNodeName && (
           <>
             <span className="xml-node-name">{displayNodeName}</span>
@@ -168,7 +168,7 @@ const XmlNode: React.FC<XmlNodeProps> = ({ node, nodeName = '', defaultExpanded 
     // A node with both attributes and text falls through to expandable rendering.
     if (!(typeof node === 'object' && node !== null && '_text' in node)) {
       return (
-        <div className="flex items-center mb-1" style={{ paddingLeft: `${depth * 20}px` }}>
+        <div className="flex items-center mb-1" style={{ paddingLeft: `${depth * 1.25}rem` }}>
           {displayNodeName && (
             <>
               <span className="xml-node-name">{displayNodeName}</span>
@@ -202,7 +202,7 @@ const XmlNode: React.FC<XmlNodeProps> = ({ node, nodeName = '', defaultExpanded 
   }
 
   return (
-    <div style={{ paddingLeft: `${depth * 20}px` }}>
+    <div style={{ paddingLeft: `${depth * 1.25}rem` }}>
       <div className="flex items-center mb-1">
         <button onClick={toggle} className="xml-toggle-button" tabIndex={-1} aria-expanded={expanded}>
           {expanded ? '▼' : '▶'}
@@ -225,7 +225,7 @@ const XmlNode: React.FC<XmlNodeProps> = ({ node, nodeName = '', defaultExpanded 
                 <div
                   key={key + idx}
                   className="flex items-start mb-1"
-                  style={{ paddingLeft: `${(depth + 1) * 20}px` }}
+                  style={{ paddingLeft: `${(depth + 1) * 1.25}rem` }}
                 >
                   <span className="xml-node-name">{key}</span>
                   <span className="xml-separator">:</span>

@@ -1,14 +1,29 @@
 import { Buffer } from 'buffer';
 import { useMemo } from 'react';
 import { RunRequestResponse } from '../runner';
+import {
+  type ResponseBodyFormat,
+  type ResponseBodyFormatViewData,
+  BYTE_FORMAT_OPTIONS,
+  ALL_FORMAT_OPTIONS,
+  JSON_PATTERN,
+  SVG_PATTERN,
+  XML_PATTERN,
+  JAVASCRIPT_PATTERN,
+  SVG_CONTENT_TYPE_PATTERN,
+  IMAGE_VIDEO_AUDIO_PATTERN,
+  PDF_CONTENT_TYPE_PATTERN,
+  ZIP_CONTENT_TYPE_PATTERN,
+  MIME_TYPE_PATTERN,
+  DATA_URL_PREFIX_PATTERN,
+  NON_BASE64_CHARS_PATTERN,
+  FORMAT_LABELS,
+  RESPONSE_FORMAT_RULES,
+} from '../constants';
 
-const JSON_PATTERN = /^[\w-]+\/([\w-]+\+)?json/;
-const SVG_PATTERN = /^image\/svg/i;
-const XML_PATTERN = /^[\w-]+\/([\w-]+\+)?xml/;
-const JAVASCRIPT_PATTERN = /^(application|text)\/(javascript|ecmascript)/i;
 
 // Normalize a response's content-type header into a canonical MIME type, or '' when absent.
-export const getContentType = (headers: RunRequestResponse['headers']): string => {
+export function getContentType(headers: RunRequestResponse['headers']): string {
   if (!headers || typeof headers !== 'object' || Object.keys(headers).length === 0) {
     return '';
   }
@@ -27,43 +42,16 @@ export const getContentType = (headers: RunRequestResponse['headers']): string =
   return contentType;
 };
 
-export function useInitialResponseFormat(detectedContentType: string | null, headerContentType: string): ResponseBodyFormatViewData {
-  return useMemo<ResponseBodyFormatViewData>(() => {
-    if (detectedContentType === null) {
-      return { format: 'raw', view: 'editor' };
-    }
-
-    return getDefaultResponseFormat(headerContentType || detectedContentType);
-  }, [detectedContentType, headerContentType]);
-}
-
-// Everything up to the first ";" — strips parameters like "; charset=utf-8".
-const MIME_TYPE_PATTERN = /^[^;]+/;
-
-const extractMimeType = (contentType = '') => {
+function extractMimeType(contentType = '') {
   const cleaned = String(contentType).trim().toLowerCase();
   const match = cleaned.match(MIME_TYPE_PATTERN);
   return match ? match[0] : cleaned;
 };
 
-export type ResponseBodyFormat = 'html' | 'json' | 'xml' | 'javascript' | 'base64' | 'raw' | 'hex';
 
-// Structured decoders only make sense for text-ish bodies; prepend them for those.
-export const STRUCTURED_FORMAT_OPTIONS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
-
-// Encodings that always apply to any body, structured or not.
-export const BYTE_FORMAT_OPTIONS: ResponseBodyFormat[] = ['raw', 'hex', 'base64'];
-
-// Every format in dropdown order: structured group first, then the byte-encoding group.
-export const ALL_FORMAT_OPTIONS: ResponseBodyFormat[] = [...STRUCTURED_FORMAT_OPTIONS, ...BYTE_FORMAT_OPTIONS];
-
-const SVG_CONTENT_TYPE_PATTERN = /svg/i;
-const IMAGE_VIDEO_AUDIO_PATTERN = /^(image|video|audio)\//i;
-const PDF_CONTENT_TYPE_PATTERN = /pdf/i;
-const ZIP_CONTENT_TYPE_PATTERN = /zip/i;
 
 // SVG is XML text and stays selectable as a structured format, unlike other image/*.
-const isByteFormatContentType = (contentType: string): boolean => {
+function isByteFormatContentType(contentType: string): boolean {
   if (SVG_CONTENT_TYPE_PATTERN.test(contentType)) return false;
   return IMAGE_VIDEO_AUDIO_PATTERN.test(contentType)
     || PDF_CONTENT_TYPE_PATTERN.test(contentType)
@@ -75,10 +63,10 @@ const isByteFormatContentType = (contentType: string): boolean => {
  * binary content, otherwise the structured decoders too. Content type is the body-sniffed
  * value when present, otherwise the declared header. Pure — safe under SSR/node.
  */
-export const getResponseFormatOptions = (
+export function getResponseFormatOptions(
   detectedContentType: string | null,
   headerContentType: string
-): ResponseBodyFormat[] => {
+): ResponseBodyFormat[] {
   const contentType = detectedContentType ?? headerContentType;
 
   if (isByteFormatContentType(contentType)) {
@@ -87,52 +75,6 @@ export const getResponseFormatOptions = (
 
   return [...ALL_FORMAT_OPTIONS];
 };
-
-export type ResponseBodyView = 'preview' | 'editor';
-
-export interface ResponseBodyFormatViewData {
-  format: ResponseBodyFormat;
-  view: ResponseBodyView;
-}
-
-// Ordered content-type → format/view rules; first match wins. Order is significant:
-// the specific application/pdf etc. rules must precede the catch-all text/* rule.
-const RESPONSE_FORMAT_RULES: { test: RegExp; result: ResponseBodyFormatViewData }[] = [
-  { test: /^text\/html$/, result: { format: 'html', view: 'preview' } },
-
-  {
-    test: /^application\/(json|.+\+json)$/,
-    result: { format: 'json', view: 'editor' }
-  },
-  {
-    test: /^text\/(json|.+\+json)$/,
-    result: { format: 'json', view: 'editor' }
-  },
-
-  {
-    test: /^application\/(xml|.+\+xml)$/,
-    result: { format: 'xml', view: 'editor' }
-  },
-  {
-    test: /^text\/(xml|.+\+xml)$/,
-    result: { format: 'xml', view: 'editor' }
-  },
-
-  {
-    test: /^(application|text)\/javascript$/,
-    result: { format: 'javascript', view: 'editor' }
-  },
-
-  { test: /^image\//, result: { format: 'base64', view: 'preview' } },
-  { test: /^audio\//, result: { format: 'base64', view: 'preview' } },
-  { test: /^video\//, result: { format: 'base64', view: 'preview' } },
-  {
-    test: /^application\/pdf$/,
-    result: { format: 'base64', view: 'preview' }
-  },
-
-  { test: /^text\//, result: { format: 'raw', view: 'editor' } }
-];
 
 // Mirrors bruno-app's packages/bruno-app/src/utils/response/index.js getDefaultResponseFormat; keep in sync.
 export function getDefaultResponseFormat(contentType: string): ResponseBodyFormatViewData {
@@ -147,16 +89,11 @@ export function getDefaultResponseFormat(contentType: string): ResponseBodyForma
   return { format: 'raw', view: 'editor' };
 }
 
-// Data URL prefix, e.g. "data:image/png;base64,". Used only with String.match.
-const DATA_URL_PREFIX_PATTERN = /^data:[^;]*;base64,/;
-// Characters that are not valid base64. Used only with String.replace (no lastIndex state).
-const NON_BASE64_CHARS_PATTERN = /[^A-Za-z0-9+/=]/g;
-
 /**
  * Decode only the first N bytes from a Base64 string.
  * Returns an empty buffer for invalid/missing input.
  */
-const decodeBase64Head = (base64: RunRequestResponse['base64Data'], byteCount: number): Buffer => {
+function decodeBase64Head(base64: RunRequestResponse['base64Data'], byteCount: number): Buffer {
   if (!base64 || typeof base64 !== 'string') {
     return Buffer.alloc(0);
   }
@@ -187,7 +124,7 @@ const decodeBase64Head = (base64: RunRequestResponse['base64Data'], byteCount: n
 };
 
 // Mirrors bruno-app's packages/bruno-app/src/utils/response/index.js detectContentTypeFromBuffer; keep in sync.
-export const detectContentTypeFromBuffer = (buffer: Buffer) => {
+export function detectContentTypeFromBuffer(buffer: Buffer) {
   if (!buffer || buffer.length < 4) {
     return null;
   }
@@ -302,7 +239,7 @@ const isSvgContent = (buffer: Buffer) => {
 /**
  * Helper to detect if buffer contains text data
  */
-const isLikelyText = (buffer: Buffer) => {
+function isLikelyText(buffer: Buffer) {
   if (!buffer || buffer.length === 0) return false;
   let textChars = 0;
   const sampleSize = Math.min(buffer.length, 512);
@@ -323,7 +260,7 @@ const isLikelyText = (buffer: Buffer) => {
 /**
  * Sniff a content type from a base64-encoded body: magic numbers first, then SVG, then plain text.
  */
-export const detectContentTypeFromBase64 = (base64: RunRequestResponse['base64Data']) => {
+export function detectContentTypeFromBase64(base64: RunRequestResponse['base64Data']) {
   if (!base64) return null;
 
   // Magic numbers live in the first 12 bytes.

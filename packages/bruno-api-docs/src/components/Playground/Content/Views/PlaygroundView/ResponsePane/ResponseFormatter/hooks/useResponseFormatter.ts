@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ResponseBodyFormat, useInitialResponseFormat } from '../../../../../../../../utils/response';
+import { ResponseBodyFormat } from '../../../../../../../../constants';
+import { useInitialResponseFormat } from './useInitialResponseFormat';
 
 export function useResponseFormatter(
   detectedContentType: string | null,

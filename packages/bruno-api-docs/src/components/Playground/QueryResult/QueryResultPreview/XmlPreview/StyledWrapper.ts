@@ -6,9 +6,9 @@ import styled from '@emotion/styled';
  */
 export const StyledWrapper = styled.div`
   font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 20px;
-  padding: 16px;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  padding: 1rem;
   overflow: auto;
   color: var(--oc-text);
 
@@ -23,7 +23,7 @@ export const StyledWrapper = styled.div`
 
   .xml-separator {
     color: var(--oc-codemirror-tokens-operator);
-    margin: 0 8px;
+    margin: 0 0.5rem;
   }
 
   .xml-value {
@@ -38,21 +38,21 @@ export const StyledWrapper = styled.div`
 
   .xml-count {
     color: var(--oc-codemirror-tokens-comment);
-    margin-left: 8px;
+    margin-left: 0.5rem;
   }
 
   .xml-toggle-button,
   .xml-array-toggle-button {
-    margin-right: 8px;
+    margin-right: 0.5rem;
     cursor: pointer;
-    width: 16px;
-    height: 16px;
+    width: 1rem;
+    height: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--oc-codemirror-tokens-atom);
     flex-shrink: 0;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     background: transparent;
     border: 0;
     transition: background-color 0.2s;

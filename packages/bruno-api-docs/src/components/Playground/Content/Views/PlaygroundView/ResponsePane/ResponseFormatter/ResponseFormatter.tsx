@@ -4,8 +4,10 @@ import {
   ResponseBodyFormat,
   STRUCTURED_FORMAT_OPTIONS,
   BYTE_FORMAT_OPTIONS,
-  ALL_FORMAT_OPTIONS
-} from '../../../../../../../utils/response';
+  ALL_FORMAT_OPTIONS,
+  FORMAT_LABELS,
+} from '../../../../../../../constants';
+import { StyledWrapper } from './StyledWrapper';
 
 interface ResponseFormatSelectorProps {
   handleSelection?: (value: ResponseBodyFormat) => void;
@@ -23,52 +25,20 @@ const PreviewToggleHeader: FC<{ checked: boolean; onChange: (next: boolean) => v
   checked,
   onChange
 }) => (
-  <div className="flex items-center justify-between" style={{ padding: '4px 4px', gap: 24, minWidth: 190 }}>
-    <span style={{ fontSize: 13, color: 'var(--oc-text)' }}>Preview</span>
+  <StyledWrapper>
+    <span className="preview-toggle-label">Preview</span>
     <button
       type="button"
       role="switch"
+      className="preview-toggle"
       aria-checked={checked}
       aria-label="Toggle preview"
       onClick={() => onChange(!checked)}
-      style={{
-        position: 'relative',
-        width: 34,
-        height: 18,
-        flexShrink: 0,
-        padding: 0,
-        border: 'none',
-        borderRadius: 9,
-        cursor: 'pointer',
-        background: checked ? 'var(--oc-accents-primary)' : 'var(--oc-background-surface2)',
-        transition: 'background 0.15s ease'
-      }}
     >
-      <span
-        style={{
-          position: 'absolute',
-          top: 2,
-          left: checked ? 18 : 2,
-          width: 14,
-          height: 14,
-          borderRadius: '50%',
-          background: 'var(--oc-background-base)',
-          transition: 'left 0.15s ease'
-        }}
-      />
+      <span className="preview-toggle-knob" />
     </button>
-  </div>
+  </StyledWrapper>
 );
-
-const FORMAT_LABELS: Record<ResponseBodyFormat, string> = {
-  json: 'JSON',
-  html: 'HTML',
-  xml: 'XML',
-  javascript: 'Javascript',
-  raw: 'Raw',
-  hex: 'Hex',
-  base64: 'Base64'
-};
 
 const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
   handleSelection,

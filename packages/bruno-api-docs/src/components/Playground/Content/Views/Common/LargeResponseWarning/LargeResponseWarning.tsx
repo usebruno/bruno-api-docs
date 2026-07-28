@@ -12,8 +12,6 @@ interface LargeResponseWarningProps {
 }
 
 export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal, data }) => {
-  const copyText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-
   return (
     <StyledWrapper data-testid="large-response-warning">
       <div className="large-response-title">Large Response Warning</div>
@@ -34,7 +32,6 @@ export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ resp
         >
           View
         </button>
-        <CopyButton text={copyText} label="Copy response" testId="large-response-copy" />
       </div>
     </StyledWrapper>
   );

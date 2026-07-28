@@ -9,7 +9,9 @@ import { SendIcon } from '../../../../../../assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
 import { RunRequestResponse } from '../../../../../../runner';
-import { detectContentTypeFromBase64, getContentType, getResponseFormatOptions, type ResponseBodyFormat } from '../../../../../../utils/response';
+import { detectContentTypeFromBase64, getContentType, getResponseFormatOptions } from '../../../../../../utils/response';
+import { ResponseBodyFormat } from '../../../../../../constants';
+
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
@@ -45,23 +47,23 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <StyledWrapper className="flex items-center justify-center">
         <div className="flex items-center gap-3">
           <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span style={{ color: 'var(--text-secondary)' }}>Sending request...</span>
+          <span className="loading-text">Sending request...</span>
         </div>
-      </div>
+      </StyledWrapper>
     );
   }
 
   if (!response) {
     return (
-      <div className="h-full flex flex-col items-center justify-center" style={{ backgroundColor: 'var(--bg-primary)' }}>
+      <StyledWrapper className="flex flex-col items-center justify-center">
         <SendIconWrapper className="mb-4 send-icon">
           <SendIcon width={26} height={24} />
         </SendIconWrapper>
-        <p style={{ color: 'var(--oc-tabs-secondary-inactive-color)' }}>Click Send to make a request</p>
-      </div>
+        <p className="empty-hint">Click Send to make a request</p>
+      </StyledWrapper>
     );
   }
 
@@ -125,30 +127,28 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
         />
       )}
       <div className="flex items-center gap-2">
-        <span style={{ color: 'var(--text-secondary)' }}>Status:</span>
-        <span 
+        <span className="status-meta-label">Status:</span>
+        <span
           className="font-mono font-medium"
-          style={{
-            color: getStatusColor(response.status),
-          }}
+          style={{ color: getStatusColor(response.status) }}
         >
           {response.status} {response.statusText}
         </span>
       </div>
-      
+
       {response.duration && (
         <div className="flex items-center gap-1">
-          <span style={{ color: 'var(--text-secondary)' }}>Time:</span>
-          <span className="font-mono" style={{ color: 'var(--text-primary)' }}>
+          <span className="status-meta-label">Time:</span>
+          <span className="font-mono status-meta-value">
             {response.duration}ms
           </span>
         </div>
       )}
-      
+
       {response.size && (
         <div className="flex items-center gap-1">
-          <span style={{ color: 'var(--text-secondary)' }}>Size:</span>
-          <span className="font-mono" style={{ color: 'var(--text-primary)' }}>
+          <span className="status-meta-label">Size:</span>
+          <span className="font-mono status-meta-value">
             {(response.size / 1024).toFixed(2)} KB
           </span>
         </div>

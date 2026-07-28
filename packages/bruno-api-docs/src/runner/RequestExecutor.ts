@@ -29,14 +29,9 @@ export class RequestExecutor {
       getRequestAuth(request)
     );
 
-    // In dev, route through the Vite dev proxy (see vite.config.ts) so requests to non-CORS
-    // APIs succeed; a direct browser fetch would be blocked by CORS. Prod calls the API directly.
-    const useDevProxy = import.meta.env.DEV && typeof window !== 'undefined';
-    const fetchUrl = useDevProxy ? `/__proxy?url=${encodeURIComponent(requestUrl)}` : requestUrl;
-
     try {
       const fetchOptions = await this.buildFetchOptions(request, timeoutMs);
-      const response = await fetch(fetchUrl, fetchOptions);
+      const response = await fetch(requestUrl, fetchOptions);
       const endTime = Date.now();
 
       const responseData = await this.parseResponse(response);
@@ -50,7 +45,7 @@ export class RequestExecutor {
         base64Data: responseData.base64Data,
         size: responseData.size,
         duration: endTime - startTime,
-        url: useDevProxy ? requestUrl : response.url
+        url: response.url
       };
     } catch (error) {
       const endTime = Date.now();

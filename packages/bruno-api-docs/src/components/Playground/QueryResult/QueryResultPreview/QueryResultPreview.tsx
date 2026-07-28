@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import HtmlPreview from './HtmlPreview';
+import HtmlPreview from './HtmlPreview/HtmlPreview';
 import JsonPreview from './JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
-import { ResponseBodyFormat } from 'src/utils/response';
-import { RunRequestResponse } from 'src/runner';
-import { formatToPreviewMode } from './previewMode';
+import { RunRequestResponse } from '../../../../runner';
+import { StyledWrapper } from './StyledWrapper';
+import { formatToPreviewMode, ResponseBodyFormat } from '../../../../constants';
 
 // react-pdf (pdfjs) and react-player are large and only needed for binary previews,
 // so load them on demand to keep them out of the initial bundle.
@@ -47,13 +47,13 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentTy
     case 'preview-pdf': {
       return (
         <React.Suspense fallback={<div className="p-4 text-center">Loading PDF…</div>}>
-          <div className="preview-pdf" style={{ height: '100%', overflow: 'auto', maxHeight: 'calc(100vh - 220px)' }}>
+          <StyledWrapper className="preview-pdf">
             <PdfDocument file={`data:application/pdf;base64,${dataBuffer}`} onLoadSuccess={handleDocumentLoad}>
               {Array.from(new Array(pdfPagesNum), (el, index) => (
                 <PdfPage key={`page_${index + 1}`} pageNumber={index + 1} renderAnnotationLayer={false} />
               ))}
             </PdfDocument>
-          </div>
+          </StyledWrapper>
         </React.Suspense>
       );
     }

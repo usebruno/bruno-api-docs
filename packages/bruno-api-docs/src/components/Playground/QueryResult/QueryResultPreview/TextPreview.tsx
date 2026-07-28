@@ -21,7 +21,7 @@ const TextPreview = memo(({ data }: TextPreviewProps) => {
   }, [data]);
 
   return (
-    <div className="p-4 font-mono text-[13px] whitespace-pre-wrap break-words overflow-auto overflow-x-hidden w-full max-w-full h-full">
+    <div className="p-4 font-mono text-[0.8125rem] whitespace-pre-wrap break-words overflow-auto overflow-x-hidden w-full max-w-full h-full">
       {displayData}
     </div>
   );

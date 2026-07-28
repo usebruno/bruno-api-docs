@@ -15,6 +15,22 @@ export const StyledWrapper = styled.div`
     border-radius: 50%;
     background: var(--oc-background-mantle);
   }
+
+  .loading-text {
+    color: var(--text-secondary);
+  }
+
+  .empty-hint {
+    color: var(--oc-tabs-secondary-inactive-color);
+  }
+
+  .status-meta-label {
+    color: var(--text-secondary);
+  }
+
+  .status-meta-value {
+    color: var(--text-primary);
+  }
 `;
 
 export const SendIconWrapper = styled.div`

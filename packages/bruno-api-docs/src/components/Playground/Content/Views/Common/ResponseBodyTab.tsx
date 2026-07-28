@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ResponseBodyFormat } from '../../../../../utils/response';
+import { ResponseBodyFormat, FORMAT_TO_MONACO } from '../../../../../constants';
 import { formatResponse } from '../../../../../utils/dataFormatter';
 import { RunRequestResponse } from '../../../../../runner';
 import { QueryResultPreview } from '../../../QueryResult/QueryResult';
@@ -14,16 +14,6 @@ interface ResponseBodyTabProps {
   showPreview: boolean;
   contentType: string;
 }
-
-const FORMAT_TO_MONACO: Record<ResponseBodyFormat, string> = {
-  json: 'json',
-  xml: 'xml',
-  html: 'html',
-  javascript: 'javascript',
-  raw: 'plaintext',
-  hex: 'plaintext',
-  base64: 'plaintext'
-};
 
 const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFormat, showPreview, contentType }) => {
   const { hideForLargeResponse, responseSize, setRevealed } = useLargeResponse(response);

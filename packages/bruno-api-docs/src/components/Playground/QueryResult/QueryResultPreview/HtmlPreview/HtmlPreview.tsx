@@ -1,4 +1,5 @@
 import { memo, useMemo } from 'react';
+import { StyledWrapper } from './StyledWrapper';
 
 export interface HtmlPreviewProps {
   data: unknown;
@@ -42,15 +43,14 @@ const HtmlPreview = memo(({ data, baseUrl = '' }: HtmlPreviewProps) => {
   }, [data, baseUrl]);
 
   return (
-    <div className="h-full bg-white webview-container">
+    <StyledWrapper className="h-full bg-white webview-container">
       <iframe
         title="HTML preview"
         className="w-full h-full bg-white"
-        style={{ border: 'none' }}
         sandbox="allow-same-origin"
         srcDoc={srcDoc}
       />
-    </div>
+    </StyledWrapper>
   );
 });
 

@@ -5,7 +5,7 @@ export interface TextPreviewProps {
 }
 
 /** Renders arbitrary response data as plain, wrapped monospace text. */
-const TextPreview = memo(({ data }: TextPreviewProps) => {
+const TextPreview : React.FC<TextPreviewProps> = ({ data }) => {
   const displayData = useMemo(() => {
     if (data === null || data === undefined) {
       return String(data);
@@ -25,8 +25,6 @@ const TextPreview = memo(({ data }: TextPreviewProps) => {
       {displayData}
     </div>
   );
-});
+};
 
-TextPreview.displayName = 'TextPreview';
-
-export default TextPreview;
+export default memo(TextPreview);

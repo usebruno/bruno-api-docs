@@ -22,11 +22,6 @@ export interface QueryResultPreviewProps {
   contentType: string;
 }
 
-/**
- * Renders a response body preview. Ported from bruno-app's QueryResultPreview,
- * scoped to the modes feasible in a browser (HTML via sandboxed iframe, JSON,
- * XML, and plain text). Editor rendering stays in ResponseBodyTab's CodeEditor.
- */
 const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentType, dataBuffer, selectedFormat, baseUrl }) => {
   const previewMode = formatToPreviewMode(selectedFormat, contentType);
   const [pdfPagesNum, setPdfPagesNum] = useState<number | null>(null)

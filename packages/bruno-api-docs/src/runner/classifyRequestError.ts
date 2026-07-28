@@ -137,7 +137,6 @@ export const classifyRequestError = (
   const rawMessage =
     error instanceof Error && error.message ? error.message : 'The request could not be completed.';
 
-  console.error(error)
   return {
     type: 'unknown',
     title: "Couldn't complete the request",

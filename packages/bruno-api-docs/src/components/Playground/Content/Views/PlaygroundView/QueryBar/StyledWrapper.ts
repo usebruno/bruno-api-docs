@@ -9,23 +9,28 @@ export const StyledWrapper = styled.div`
   border-radius: var(--oc-radius);
   background-color: var(--bg-primary);
 
-  input {
-    flex: 1;
+  /* The URL field is a HighlightedInput (wrapper div + painted mirror), not a bare input.
+     Stretch the wrapper across the row and give it the compact mono look of the query bar.
+     !important is required: HighlightedInput's own StyledWrapper is inserted after this one
+     (child renders after parent) and would otherwise win at equal specificity, leaving the
+     URL bar too tall with the cell font size. */
+  .highlight-input {
+    flex: 1 !important;
     min-width: 0;
-    outline: none;
-    border: none;
-    border-radius: 0;
-    background-color: transparent;
+    padding: 0 !important;
     font-family: var(--font-mono);
-    font-weight: 400;
-    font-size: 0.75rem;
-    line-height: 1.125rem;
-    color: var(--text-primary);
+  }
 
-    &::placeholder {
-      color: var(--text-secondary);
-      opacity: 0.6;
-    }
+  .highlight-input .text-input,
+  .highlight-input .highlight-input-mirror {
+    padding: 0 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.125rem !important;
+  }
+
+  .highlight-input .highlight-input-mirror {
+    left: 0 !important;
+    right: 0 !important;
   }
 
   .method-select {

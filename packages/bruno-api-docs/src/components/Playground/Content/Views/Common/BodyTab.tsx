@@ -84,6 +84,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
                     : 'text'
             }
             height={fillHeight ? '100%' : '300px'}
+            variableAware
             testId="body-editor"
           />
         </div>

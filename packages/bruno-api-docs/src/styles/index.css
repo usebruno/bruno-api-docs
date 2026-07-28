@@ -1134,3 +1134,12 @@ tr.themed-row:nth-child(even) {
   transform: translateY(-50%);
   opacity: 0;
 }
+
+/* Monaco variable hover card host. The card (VariableInfoCard) is self-styled;
+   this only floats the widget above the editor with a drop shadow. Rendered in
+   Monaco's overflow container, so it lives outside the CodeEditor style scope. */
+.variable-hover-widget {
+  z-index: 40;
+  border-radius: var(--oc-radius);
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.18);
+}

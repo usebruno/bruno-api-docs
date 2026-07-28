@@ -121,3 +121,47 @@ describe('VariableInfoCard', () => {
     expect(part(root, 'note').text).toBe('Variable is not defined');
   });
 });
+
+const editableCardTree = (name: string) => {
+  const store = createOpenCollectionStore();
+  store.dispatch(setDocsCollection(collection));
+  store.dispatch(setActiveEnv('Dev'));
+  return (
+    <Provider store={store}>
+      <VariableResolverProvider>
+        <VariableInfoCard name={name} editable />
+      </VariableResolverProvider>
+    </Provider>
+  );
+};
+
+describe('VariableInfoCard (editable)', () => {
+  it('renders an editable value for an environment variable', () => {
+    const value = part(useRenderToDom(editableCardTree('host')), 'value');
+    expect(value.getAttribute('role')).toBe('button');
+    expect(value.classList.contains('var-value-editable')).toBe(true);
+  });
+
+  it('renders an editable value for a collection variable', () => {
+    const value = part(useRenderToDom(editableCardTree('apiVersion')), 'value');
+    expect(value.classList.contains('var-value-editable')).toBe(true);
+  });
+
+  it('stays read-only by default (docs surfaces do not pass editable)', () => {
+    const value = part(useRenderToDom(cardTree('host')), 'value');
+    expect(value.classList.contains('var-value-editable')).toBe(false);
+    expect(value.getAttribute('role')).toBeFalsy();
+  });
+
+  it('never makes a secret variable editable', () => {
+    const value = part(useRenderToDom(editableCardTree('bearer_token')), 'value');
+    expect(value.text).toBe('(Secret)');
+    expect(value.classList.contains('var-value-editable')).toBe(false);
+  });
+
+  it('never makes a read-only scope (process.env) editable', () => {
+    const root = useRenderToDom(editableCardTree('process.env.HOME'));
+    expect(part(root, 'note').text).toBe('read-only');
+    expect(part(root, 'value').classList.contains('var-value-editable')).toBe(false);
+  });
+});

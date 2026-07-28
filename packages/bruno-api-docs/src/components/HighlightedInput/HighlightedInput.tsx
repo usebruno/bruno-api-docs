@@ -25,6 +25,9 @@ interface HighlightedInputProps {
   title?: string;
   testId?: string;
   multiline?: boolean;
+  /** Forwarded key handler, invoked only when the autocomplete dropdown is not open (so it
+   *  can drive e.g. Enter-to-send without stealing Enter from suggestion selection). */
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
 interface HoveredToken {
@@ -75,7 +78,8 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
   variablesAutocomplete = true,
   title,
   testId,
-  multiline = false
+  multiline = false,
+  onKeyDown
 }) => {
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const mirrorRef = useRef<HTMLDivElement | null>(null);
@@ -253,7 +257,10 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    if (!autocomplete) return;
+    if (!autocomplete) {
+      onKeyDown?.(event);
+      return;
+    }
     const { items, active } = autocomplete;
     switch (event.key) {
       case 'ArrowDown':
@@ -378,7 +385,7 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
               visibility: hoverPos ? 'visible' : 'hidden'
             }}
           >
-            <VariableInfoCard name={hovered.name} />
+            <VariableInfoCard name={hovered.name} editable />
           </HoverCard>
         </Portal>
       )}

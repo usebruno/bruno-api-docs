@@ -22,4 +22,16 @@ export const StyledWrapper = styled.div`
   .code-editor-copy:focus-visible {
     opacity: 1;
   }
+
+  /* Variable token colours. Scoped under .monaco-editor + !important so they win
+     over Monaco's own syntax-token colours (.mtkN), which load after our styles. */
+  .monaco-editor .variable-valid {
+    color: var(--oc-codemirror-variable-valid) !important;
+  }
+  .monaco-editor .variable-invalid {
+    color: var(--oc-codemirror-variable-invalid) !important;
+  }
+  .monaco-editor .variable-prompt {
+    color: var(--oc-codemirror-variable-prompt) !important;
+  }
 `;

@@ -10,7 +10,8 @@ import reducer, {
   setSelectedExampleIndex,
   clearPlaygroundCollection,
   toggleFolderCollapse,
-  expandFolders
+  expandFolders,
+  setPlaygroundVariable
 } from './playground';
 import { createOpenCollectionStore } from '../store';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
@@ -93,6 +94,59 @@ describe('updatePlaygroundItem', () => {
     expect(firstItem(store, selectHydratedCollection).http.url).toBe('new');
     expect(firstItem(store, selectHydratedCollection).uuid).toBe('r1');
     expect(firstItem(store, selectPlaygroundCollection).http.url).toBe('new');
+  });
+});
+
+describe('setPlaygroundVariable', () => {
+  it('edits an environment variable in both the hydrated and base collections', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(makeCollection()));
+
+    store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'a', value: '99', envName: 'Dev' }));
+
+    expect(envVariables(store).find((v: any) => v.name === 'a').value).toBe('99');
+    const base = selectPlaygroundCollection(store.getState())!.config!.environments![0].variables!;
+    expect(base.find((v: any) => v.name === 'a').value).toBe('99');
+  });
+
+  it('edits a collection variable', () => {
+    const collection = makeCollection();
+    collection.request = { variables: [{ name: 'cv', value: 'x' }] };
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(collection));
+
+    store.dispatch(setPlaygroundVariable({ scope: 'collection', name: 'cv', value: 'y' }));
+
+    const vars = selectHydratedCollection(store.getState())!.request!.variables!;
+    expect((vars as any).find((v: any) => v.name === 'cv').value).toBe('y');
+  });
+
+  it('edits a request variable located by item uuid', () => {
+    const collection = {
+      info: { name: 'Test', version: '1.0.0' },
+      items: [
+        { type: 'http', uuid: 'r1', name: 'Req', http: { url: 'u', method: 'GET' }, variables: [{ name: 'rv', value: '1' }] }
+      ]
+    } as unknown as OpenCollectionCollection;
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(collection));
+
+    store.dispatch(setPlaygroundVariable({ scope: 'request', name: 'rv', value: '2', itemUuid: 'r1' }));
+
+    const item = selectHydratedCollection(store.getState())!.items![0] as unknown as { variables: any[] };
+    expect(item.variables.find((v) => v.name === 'rv').value).toBe('2');
+  });
+
+  it('never writes to a secret variable', () => {
+    const collection = makeCollection();
+    collection.config.environments[0].variables.push({ name: 'sec', secret: true });
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(collection));
+
+    store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'sec', value: 'leak', envName: 'Dev' }));
+
+    const sec = envVariables(store).find((v: any) => v.name === 'sec');
+    expect((sec as any).value).toBeUndefined();
   });
 });
 

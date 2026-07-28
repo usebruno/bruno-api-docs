@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { StyledWrapper } from './StyledWrapper';
 import MenuDropdown from '../../../../../../ui/MenuDropdown';
+import HighlightedInput from '../../../../../HighlightedInput/HighlightedInput';
+import { useResolvedVariables } from '../../../../../../hooks/useVariableResolver';
 import { getHttpMethod, getRequestUrl, getHttpParams } from '../../../../../../utils/schemaHelpers';
 import { syncPathParams, syncQueryParams } from '../../../../../../utils/pathParams';
 import { availableMethods } from '../../../../../../theme/methodColors';
@@ -17,6 +19,7 @@ interface QueryBarProps {
 }
 
 const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onItemChange }) => {
+  const { isFound, names } = useResolvedVariables();
   const [url, setUrl] = useState(getRequestUrl(item));
   const [method, setMethod] = useState(getHttpMethod(item));
 
@@ -74,12 +77,14 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
         </button>
       </MenuDropdown>
 
-      <input
-        type="text"
+      <HighlightedInput
         value={url}
-        onChange={(e) => handleUrlChange(e.target.value)}
+        onValueChange={handleUrlChange}
+        isFound={isFound}
+        names={names}
         placeholder="Enter request URL"
-        onKeyPress={(e) => {
+        testId="query-bar-url"
+        onKeyDown={(e) => {
           if (e.key === 'Enter' && url.trim() && !isLoading) {
             onSendRequest();
           }

@@ -172,11 +172,17 @@ describe('Request page', () => {
     expect(headers.querySelectorAll('[data-testid="property-table"]')).toHaveLength(1);
     expect(headers.querySelectorAll('[data-testid="inherited-source"]')).toHaveLength(2);
 
-    // Inherited auth keeps the existing chip, labelled by level, and is clickable (role=button).
-    expect(getByTestId(root, 'request-section-auth').text).toContain('Inherited from collection');
+    // Inherited auth keeps the existing chip, labelled by level and parent name, and is clickable (role=button).
+    expect(getByTestId(root, 'request-section-auth').text).toContain('Inherited from collection: Billing API');
     const authChip = getByTestId(root, 'request-auth-inherited');
     expect(authChip.getAttribute('role')).toBe('button');
     expect(authChip.getAttribute('title')).toContain('Billing API'); // tooltip still names the parent
+
+    const codeSnippet = getByTestId(root, 'request-section-code-snippet');
+    expect(codeSnippet.text).toContain('Accept'); // own header
+    expect(codeSnippet.text).toContain('X-Api-Version'); // inherited from collection
+    expect(codeSnippet.text).toContain('X-Folder'); // inherited from folder
+    expect(codeSnippet.text).toContain('Authorization'); // resolved inherited bearer auth
 
     // Inherited pre/post variables surface in the execution context, with a count chip.
     const exec = getByTestId(root, 'execution-context');

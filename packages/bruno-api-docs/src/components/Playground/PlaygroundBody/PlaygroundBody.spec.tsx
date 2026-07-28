@@ -41,6 +41,7 @@ describe('PlaygroundBody example view', () => {
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}
+            exampleSlug={null}
             sidebarOpen={false}
             dock="modal"
             onCloseSidebar={() => {}}

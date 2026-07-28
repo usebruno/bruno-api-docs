@@ -48,7 +48,7 @@ describe('FolderConfiguration', () => {
     const root = useRenderToDom(<FolderConfiguration config={config} authModeLabels={{ bearer: 'Bearer Token' }} />);
 
     const authGroup = getByTestId(root, 'folder-config-auth');
-    expect(query(authGroup, '.config-group-head').text).toContain('Inherited from collection');
+    expect(query(authGroup, '.config-group-head').text).toContain('Inherited from collection: API');
   });
 
   it('makes the inherited-auth chip a clickable button when a navigate handler is provided', () => {
@@ -59,7 +59,7 @@ describe('FolderConfiguration', () => {
     };
     const root = useRenderToDom(<FolderConfiguration config={config} onNavigate={() => {}} />);
     const chip = getByTestId(root, 'folder-config-auth-inherited');
-    expect(chip.text).toContain('Inherited from folder');
+    expect(chip.text).toContain('Inherited from folder: Parent');
     expect(chip.getAttribute('role')).toBe('button');
     expect(chip.getAttribute('title')).toContain('Parent');
   });

@@ -31,7 +31,7 @@ export const exampleSlugs = (names: (string | null | undefined)[]): string[] =>
   );
 
 /** A request's example names in array (render) order; the basis for its slugs. */
-export const exampleNames = (request: HttpRequest | null | undefined): string[] =>
+export const exampleNames = (request: HttpRequest | null | undefined): (string | undefined)[] =>
   (request?.examples ?? []).map((example) => example.name);
 
 /**

@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import type { HttpRequest, HttpRequestParam } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestParam, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
@@ -151,7 +151,15 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
   const bodyContentType = bodyView.render !== 'none' ? bodyView.contentTypeLabel : undefined;
 
-  const codeSnippet = <CodeSnippetTabs method={method} url={url} headers={headers} body={body} auth={effectiveAuth} />;
+  const effectiveHeaders = useMemo<HttpRequestHeader[]>(
+    () => [
+      ...headers,
+      ...inheritedHeaders.map((h) => ({ name: h.name, value: h.value ?? '', disabled: h.disabled }))
+    ],
+    [headers, inheritedHeaders]
+  );
+
+  const codeSnippet = <CodeSnippetTabs method={method} url={url} headers={effectiveHeaders} body={body} auth={effectiveAuth} />;
 
   return (
     <PageWrapper>

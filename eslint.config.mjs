@@ -107,14 +107,13 @@ export default [
           '**/*.{test,spec}.{ts,tsx}',
           '**/e2e/**',
           '**/test-utils/**',
-          '**/*.config.{ts,mts,js,mjs,cjs}',
-          '**/scripts/**'
+          '**/*.config.{ts,mts,js,mjs,cjs}'
         ]
       }],
       'no-restricted-imports': ['error', {
         patterns: [{
-          group: ['**/store/slices/*'],
-          message: 'Import slices through the @slices/* alias.'
+          group: ['**/store/slices/*', '!@/store/slices/*', '@slices/*'],
+          message: 'Import slices through the @/store/slices/* alias.'
         }]
       }],
 

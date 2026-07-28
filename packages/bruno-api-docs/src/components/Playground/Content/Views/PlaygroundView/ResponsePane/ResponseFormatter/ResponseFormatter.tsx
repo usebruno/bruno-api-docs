@@ -16,11 +16,9 @@ interface ResponseFormatSelectorProps {
   allowedFormats?: ResponseBodyFormat[];
   /** Whether the response is shown as a rendered preview vs the raw editor. */
   showPreview?: boolean;
-  /** Called when the preview toggle is flipped. */
   onPreviewToggle?: (next: boolean) => void;
 }
 
-/** "Preview" label + switch rendered as the dropdown header (above the formats). */
 const PreviewToggleHeader: FC<{ checked: boolean; onChange: (next: boolean) => void }> = ({
   checked,
   onChange

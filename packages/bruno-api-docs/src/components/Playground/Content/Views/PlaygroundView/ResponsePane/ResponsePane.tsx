@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import Tabs from '../../../../../../ui/Tabs/Tabs';
 import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
@@ -9,7 +9,6 @@ import { SendIcon } from '../../../../../../assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
 import { RunRequestResponse } from '../../../../../../runner';
-import { detectContentTypeFromBase64, getContentType, getResponseFormatOptions } from '../../../../../../utils/response';
 import { ResponseBodyFormat } from '../../../../../../constants';
 
 
@@ -20,21 +19,14 @@ interface ResponsePaneProps {
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
   const [activeTab, setActiveTab] = useState('response');
-  const detectedContentType = useMemo(
-    () => detectContentTypeFromBase64(response?.base64Data),
-    [response?.base64Data]
-  );
-  const headerContentType = useMemo(() => getContentType(response?.headers), [response?.headers]);
-  const contentType = detectedContentType ?? headerContentType;
-  const allowedFormats = useMemo(
-    () => getResponseFormatOptions(detectedContentType, headerContentType),
-    [detectedContentType, headerContentType]
-  );
-  const { selectedFormat, showPreview, handleFormatChange, handleViewChange } = useResponseFormatter(
-    detectedContentType,
-    headerContentType,
-    allowedFormats
-  );
+  const { 
+    selectedFormat,
+    showPreview,
+    handleFormatChange,
+    handleViewChange,
+    contentType,
+    allowedFormats 
+  } = useResponseFormatter(response);
 
   const getStatusColor = (status?: number) => {
     if (!status) return 'var(--oc-request-tab-panel-response-status)';

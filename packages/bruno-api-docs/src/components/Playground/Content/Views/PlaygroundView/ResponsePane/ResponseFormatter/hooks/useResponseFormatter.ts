@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ResponseBodyFormat } from '../../../../../../../../constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
+import { RunRequestResponse } from '../../../../../../../../runner';
+import { getResponseFormatOptions } from '../../../../../../../../utils/response';
 
 export function useResponseFormatter(
-  detectedContentType: string | null,
-  headerContentType: string,
-  allowedFormats: ResponseBodyFormat[]
+  response: RunRequestResponse,
 ) {
-  const { format, view } = useInitialResponseFormat(detectedContentType, headerContentType);
+  const { format, view, detectedContentType, headerContentType, contentType } = useInitialResponseFormat(response);
+  const allowedFormats = useMemo(
+    () => getResponseFormatOptions(detectedContentType, headerContentType),
+    [detectedContentType, headerContentType]
+  );
   const [userSelectedFormat, setUserSelectedFormat] = useState<ResponseBodyFormat>();
   const [showPreview, setShowPreview] = useState(view === 'preview');
 
-  // Re-derive the preview toggle only when the detected view actually changes (a new
-  // content-type), so a manual toggle survives same-response re-renders.
   const previousViewRef = useRef(view);
   useEffect(() => {
     if (previousViewRef.current !== view) {
@@ -39,7 +41,9 @@ export function useResponseFormatter(
       selectedFormat,
       showPreview,
       handleFormatChange,
-      handleViewChange
+      handleViewChange,
+      contentType,
+      allowedFormats
     };
-  }, [handleFormatChange, handleViewChange, format, userSelectedFormat, allowedFormats, showPreview]);
+  }, [handleFormatChange, handleViewChange, format, userSelectedFormat, allowedFormats, showPreview, contentType, allowedFormats]);
 }

@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer';
-import { useMemo } from 'react';
 import { RunRequestResponse } from '../runner';
 import {
   type ResponseBodyFormat,
@@ -278,4 +277,13 @@ export function detectContentTypeFromBase64(base64: RunRequestResponse['base64Da
   if (isLikelyText(textHead)) return 'text/plain';
 
   return null;
-} 
+}
+
+export function getStatusColor(status?: number) {
+  if (!status) return 'var(--oc-request-tab-panel-response-status)';
+  if (status >= 200 && status < 300) return 'var(--oc-request-tab-panel-response-ok)';
+  if (status >= 300 && status < 400) return 'var(--oc-colors-text-warning)';
+  if (status >= 400 && status < 500) return 'var(--oc-request-tab-panel-response-error)';
+  if (status >= 500) return 'var(--oc-request-tab-panel-response-error)';
+  return 'var(--oc-request-tab-panel-response-status)';
+};

@@ -27,4 +27,10 @@ declare module '@tabler/icons' {
   export const IconDatabase: TablerIcon;
   export const IconFile: TablerIcon;
   export const IconX: TablerIcon;
+  export const IconCheck: TablerIcon;
+  export const IconCopy: TablerIcon;
+  export const IconDownload: TablerIcon;
+  export const IconEraser: TablerIcon;
+  export const IconLayoutColumns: TablerIcon;
+  export const IconLayoutRows: TablerIcon;
 }

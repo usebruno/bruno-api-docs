@@ -8,16 +8,20 @@ import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
 import { SendIcon } from '../../../../../../assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
-import { RunRequestResponse } from '../../../../../../runner';
 import { ResponseBodyFormat } from '../../../../../../constants';
-
+import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
+import { RunRequestResponse } from '../../../../../../runner';
+import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseDuration';
+import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
+import ResponseActions from './ResponseActions/ResponseActions';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
   isLoading: boolean;
+  orientation: 'vertical' | 'horizontal';
 }
 
-const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
+const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation }) => {
   const [activeTab, setActiveTab] = useState('response');
   const { 
     selectedFormat,
@@ -28,15 +32,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     allowedFormats 
   } = useResponseFormatter(response);
 
-  const getStatusColor = (status?: number) => {
-    if (!status) return 'var(--oc-request-tab-panel-response-status)';
-    if (status >= 200 && status < 300) return 'var(--oc-request-tab-panel-response-ok)';
-    if (status >= 300 && status < 400) return 'var(--oc-colors-text-warning)';
-    if (status >= 400 && status < 500) return 'var(--oc-request-tab-panel-response-error)';
-    if (status >= 500) return 'var(--oc-request-tab-panel-response-error)';
-    return 'var(--oc-request-tab-panel-response-status)';
-  };
-
+  // Handle loading, empty, and error states
   if (isLoading) {
     return (
       <StyledWrapper className="flex items-center justify-center">
@@ -118,33 +114,10 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
           onPreviewToggle={handleViewChange}
         />
       )}
-      <div className="flex items-center gap-2">
-        <span className="status-meta-label">Status:</span>
-        <span
-          className="font-mono font-medium"
-          style={{ color: getStatusColor(response.status) }}
-        >
-          {response.status} {response.statusText}
-        </span>
-      </div>
-
-      {response.duration && (
-        <div className="flex items-center gap-1">
-          <span className="status-meta-label">Time:</span>
-          <span className="font-mono status-meta-value">
-            {response.duration}ms
-          </span>
-        </div>
-      )}
-
-      {response.size && (
-        <div className="flex items-center gap-1">
-          <span className="status-meta-label">Size:</span>
-          <span className="font-mono status-meta-value">
-            {(response.size / 1024).toFixed(2)} KB
-          </span>
-        </div>
-      )}
+      <ResponseStatus status={response.status} statusText={response.statusText} />
+      <ResponseDuration duration={response.duration} />
+      <ResponseSize size={response.size} />
+      <ResponseActions orientation={orientation} />
     </div>
   );
 

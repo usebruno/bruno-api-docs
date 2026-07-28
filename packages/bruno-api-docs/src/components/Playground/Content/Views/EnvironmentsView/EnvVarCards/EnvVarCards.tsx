@@ -42,7 +42,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
           <div
             key={row.id}
             className={cx('env-card', { disabled: !row.enabled })}
-            data-testid={testId ? `${testId}-card` : undefined}
+            data-testid={testId ? `${testId}-card-${index}` : undefined}
           >
             {!isBlankRow && (
               <Checkbox
@@ -56,7 +56,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
               <div className="name-row">
                 <input
                   className="name"
-                  data-testid={testId ? `${testId}-name-input` : undefined}
+                  data-testid={testId ? `${testId}-name-input-${index}` : undefined}
                   placeholder="Name"
                   value={row.name}
                   onChange={(e) => updateRow(index, { name: e.target.value })}
@@ -86,7 +86,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
                 ) : (
                   <textarea
                     className="value-input"
-                    data-testid={testId ? `${testId}-value-input` : undefined}
+                    data-testid={testId ? `${testId}-value-input-${index}` : undefined}
                     placeholder="Value"
                     rows={1}
                     value={row.value}
@@ -105,7 +105,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
               {showDescription && (
                 <textarea
                   className="description-input"
-                  data-testid={testId ? `${testId}-description-input` : undefined}
+                  data-testid={testId ? `${testId}-description-input-${index}` : undefined}
                   placeholder="Description"
                   rows={1}
                   value={typeof row.description === 'string' ? row.description : ''}

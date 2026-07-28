@@ -3,9 +3,9 @@ import HtmlPreview from './HtmlPreview/HtmlPreview';
 import JsonPreview from './JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
-import { RunRequestResponse } from '../../../../runner';
+import { RunRequestResponse } from '../../../runner';
 import { StyledWrapper } from './StyledWrapper';
-import { formatToPreviewMode, ResponseBodyFormat } from '../../../../constants';
+import { formatToPreviewMode, ResponseBodyFormat } from '../../../constants';
 
 // react-pdf (pdfjs) and react-player are large and only needed for binary previews,
 // so load them on demand to keep them out of the initial bundle.
@@ -14,9 +14,7 @@ const PdfDocument = React.lazy(() => import('react-pdf').then((module) => ({ def
 const PdfPage = React.lazy(() => import('react-pdf').then((module) => ({ default: module.Page })));
 
 export interface QueryResultPreviewProps {
-  /** The response body to preview. */
-  data: unknown;
-  /** How to render the data. */
+  data: RunRequestResponse['data'];
   selectedFormat: ResponseBodyFormat;
   /** Base URL used to resolve relative links/resources in the HTML preview. */
   baseUrl?: string;

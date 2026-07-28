@@ -19,8 +19,7 @@ vi.mock('../../../../../../ui/MenuDropdown', () => ({
 import QueryBar from './QueryBar';
 
 const httpItem: HttpRequest = {
-  name: 'Example',
-  type: 'http',
+  info: { name: 'Example', type: 'http' },
   http: { method: 'GET', url: 'https://example.com' }
 };
 

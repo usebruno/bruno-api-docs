@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Folder } from '@opencollection/types/collection/item';
 import type { OpenCollection } from '@opencollection/types';
 import Tabs from '../../../../../ui/Tabs/Tabs';
@@ -19,6 +19,9 @@ import {
   scriptsArrayToObject,
   scriptsObjectToArray
 } from '../../../../../utils/schemaHelpers';
+import { getAncestorsByUuid } from '../../../../../utils/fileUtils';
+import { getItemUuid } from '../../../../../utils/itemUtils';
+import { getInheritedAuthSummary } from '../../../../../utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
 
@@ -28,9 +31,18 @@ interface FolderSettingsProps {
   onFolderChange: (updatedFolder: Folder) => void;
 }
 
-const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, onFolderChange }) => {
+const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onFolderChange }) => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState('overview');
+
+  // The folder's own auth may itself be `inherit` — resolve the nearest configured parent so the
+  // Auth tab can show "Auth inherited from {name}: {mode}" (matches the request Auth tab).
+  const inheritedAuth = useMemo(() => {
+    if (folder.request?.auth !== 'inherit') return null;
+    const uuid = getItemUuid(folder);
+    const ancestry = uuid ? getAncestorsByUuid(collection, uuid) : [];
+    return getInheritedAuthSummary(collection, ancestry, folder);
+  }, [folder, collection]);
 
   // Every edit rebuilds the folder and persists it the same way: push it into the collection (by the
   // hydrated uuid) and bubble it up. Centralised so the handlers below stay one-liners.

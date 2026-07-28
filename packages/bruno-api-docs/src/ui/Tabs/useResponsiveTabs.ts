@@ -12,9 +12,9 @@ const sameOrder = (a: string[], b: string[]): boolean =>
 export interface ResponsiveTabsLayout {
   /** Attach to a width-constrained ancestor (the tabs wrapper), not the tab row
    *  itself — the row grows to its content, so measuring it would be circular. */
-  containerRef: React.RefObject<HTMLDivElement>;
+  containerRef: React.RefObject<HTMLDivElement | null>;
   /** Attach to the trailing right-content slot so its width is excluded. */
-  rightRef: React.RefObject<HTMLDivElement>;
+  rightRef: React.RefObject<HTMLDivElement | null>;
   /** Ref callback for each hidden measurement tab, keyed by tab id. */
   setMeasureRef: (id: string) => (el: HTMLElement | null) => void;
   visibleIds: string[];

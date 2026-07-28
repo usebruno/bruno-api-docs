@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { Folder } from '@opencollection/types/collection/item';
 import type { OpenCollection } from '@opencollection/types';
 import Tabs from '../../../../../ui/Tabs/Tabs';
@@ -18,6 +18,9 @@ import {
   scriptsArrayToObject,
   scriptsObjectToArray
 } from '../../../../../utils/schemaHelpers';
+import { getAncestorsByUuid } from '../../../../../utils/fileUtils';
+import { getItemUuid } from '../../../../../utils/itemUtils';
+import { getInheritedAuthSummary } from '../../../../../utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
 
@@ -27,9 +30,16 @@ interface FolderSettingsProps {
   onFolderChange: (updatedFolder: Folder) => void;
 }
 
-const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, onFolderChange }) => {
+const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onFolderChange }) => {
   const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState('overview');
+
+  const inheritedAuth = useMemo(() => {
+    if (folder.request?.auth !== 'inherit') return null;
+    const uuid = getItemUuid(folder);
+    const ancestry = uuid ? getAncestorsByUuid(collection, uuid) : [];
+    return getInheritedAuthSummary(collection, ancestry, folder);
+  }, [folder, collection]);
 
   const handleHeadersChange = (headers: KeyValueRow[]) => {
     const originals = folder.request?.headers ?? [];
@@ -160,6 +170,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, onFolderChange 
       description="Configures authentication for this folder. This applies to all requests using the Inherit option in the Auth tab."
       showInherit={true}
       showFullAuth={true}
+      inheritedAuth={inheritedAuth}
     />
   );
 

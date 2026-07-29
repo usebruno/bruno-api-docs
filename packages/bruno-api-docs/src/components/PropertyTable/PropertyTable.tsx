@@ -4,6 +4,8 @@ import { VariableText } from '../VariableText/VariableText';
 import { TruncatedText } from '../TruncatedText/TruncatedText';
 import { Description } from '../Description/Description';
 import { DisabledBadge } from '../DisabledBadge/DisabledBadge';
+import { InheritedSourceLink } from '../InheritedSourceLink/InheritedSourceLink';
+import type { InheritedSource } from '../../utils/request';
 import { cx } from '../../utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -16,7 +18,7 @@ export interface PropertyRow {
   disabled?: boolean;
   description?: string;
   testId?: string;
-  action?: React.ReactNode;
+  inheritedSource?: InheritedSource;
 }
 
 interface PropertyTableProps {
@@ -25,6 +27,7 @@ interface PropertyTableProps {
   className?: string;
   testId?: string;
   hideRowBorders?: boolean;
+  onNavigate?: (uuid: string) => void;
 }
 
 const ValueCell: React.FC<{ row: PropertyRow; testId?: string }> = ({ row, testId }) => {
@@ -38,7 +41,7 @@ const ValueCell: React.FC<{ row: PropertyRow; testId?: string }> = ({ row, testI
   );
 };
 
-export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage, className, testId = 'property-table', hideRowBorders = false }) => (
+export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage, className, testId = 'property-table', hideRowBorders = false, onNavigate }) => (
   <StyledWrapper
     className={cx(
       'property-table',
@@ -64,7 +67,9 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
                 <div className="property-value-main" data-testid="property-value"><ValueCell row={row} testId={testId} /></div>
                 {row.type ? <span className="property-type">{row.type}</span> : null}
                 {row.disabled ? <DisabledBadge /> : null}
-                {row.action ?? null}
+                {row.inheritedSource ? (
+                  <InheritedSourceLink source={row.inheritedSource} itemName={row.label} onNavigate={onNavigate} />
+                ) : null}
               </div>
             </dd>
             <Description text={row.description} />

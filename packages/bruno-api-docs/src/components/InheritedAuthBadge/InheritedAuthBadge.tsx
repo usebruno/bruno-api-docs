@@ -8,12 +8,6 @@ interface InheritedAuthBadgeProps {
   testId?: string;
 }
 
-/**
- * The inherited-auth chip: "Inherited from {collection|folder}: {name}", naming the nearest
- * configured parent and clickable to navigate to it. The title mirrors the label so the full
- * name still surfaces on hover if the chip is clipped. Shared by the request Auth section and
- * the folder Auth group so they stay identical.
- */
 export const InheritedAuthBadge: React.FC<InheritedAuthBadgeProps> = ({ source, onNavigate, testId }) => {
   const canNavigate = canNavigateToSource(source, onNavigate);
   const label = inheritedSourceLabel(source);

@@ -6,8 +6,8 @@ import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
 import { AuthDetails } from '../AuthDetails/AuthDetails';
 import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
-import { InheritedAuthBadge } from '../InheritedSourceLink/InheritedAuthBadge';
-import { inheritedHeaderRows, preVarRows, postVarRows } from '../../utils/inheritedRows';
+import { InheritedAuthBadge } from '../InheritedAuthBadge/InheritedAuthBadge';
+import { inheritedHeaderRows, preVarRows, postVarRows } from '../PropertyTable/inheritedRows';
 import { StyledWrapper } from './StyledWrapper';
 
 interface FolderConfigurationProps {
@@ -43,11 +43,11 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
   // Own rows first, then inherited rows (each carrying a goto-source link) in the SAME table.
   const headerTableRows: PropertyRow[] = [
     ...headerRows(config.headers),
-    ...inheritedHeaderRows(config.inheritedHeaders, onNavigate)
+    ...inheritedHeaderRows(config.inheritedHeaders)
   ];
 
-  const preRows = preVarRows(config.variables, inheritedPreVars, onNavigate);
-  const postRows = postVarRows(config.postVariables, inheritedPostVars, onNavigate);
+  const preRows = preVarRows(config.variables, inheritedPreVars);
+  const postRows = postVarRows(config.postVariables, inheritedPostVars);
 
   return (
     <StyledWrapper className="folder-configuration" data-testid={testId}>
@@ -59,7 +59,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
               <ContentTypeBadge label={inheritedCountLabel(config.inheritedHeaders.length, 'header')} />
             )}
           </div>
-          <PropertyTable rows={headerTableRows} />
+          <PropertyTable rows={headerTableRows} onNavigate={onNavigate} />
         </div>
       )}
 
@@ -83,13 +83,13 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
             {showPreVars && (
               <div className="config-column">
                 <p className="config-phase-label">Pre-Request</p>
-                <PropertyTable rows={preRows} />
+                <PropertyTable rows={preRows} onNavigate={onNavigate} />
               </div>
             )}
             {showPostVars && (
               <div className="config-column">
                 <p className="config-phase-label">Post-Response</p>
-                <PropertyTable rows={postRows} />
+                <PropertyTable rows={postRows} onNavigate={onNavigate} />
               </div>
             )}
           </div>

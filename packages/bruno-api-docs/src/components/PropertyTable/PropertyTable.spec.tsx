@@ -51,18 +51,21 @@ describe('PropertyTable', () => {
     expect(root.querySelector('.property-type')).toBeNull();
   });
 
-  it('renders a trailing action pinned at the end of the value line, after the disabled badge', () => {
+  it('renders the inherited-source link pinned at the end of the value line, after the disabled badge', () => {
     const root = useRenderToDom(
-      <PropertyTable rows={[{ label: 'X-Trace', value: 'abc', disabled: true, action: <em data-testid="goto">→</em> }]} />
+      <PropertyTable
+        rows={[{ label: 'X-Trace', value: 'abc', disabled: true, inheritedSource: { level: 'folder', name: 'Parent', uuid: 'p1' } }]}
+        onNavigate={() => {}}
+      />
     );
     const line = query(root, '.property-value-line');
-    expect(line.querySelector('[data-testid="goto"]')).not.toBeNull();
+    expect(line.querySelector('[data-testid="inherited-source"]')).not.toBeNull();
     const html = line.innerHTML;
-    expect(html.indexOf('disabled-badge')).toBeLessThan(html.indexOf('data-testid="goto"'));
+    expect(html.indexOf('disabled-badge')).toBeLessThan(html.indexOf('data-testid="inherited-source"'));
   });
 
-  it('omits the action slot when a row has none', () => {
+  it('omits the inherited-source link when a row is not inherited', () => {
     const root = useRenderToDom(<PropertyTable rows={[{ label: 'Accept', value: 'application/json' }]} />);
-    expect(query(root, '.property-value-line').querySelector('[data-testid="goto"]')).toBeNull();
+    expect(query(root, '.property-value-line').querySelector('[data-testid="inherited-source"]')).toBeNull();
   });
 });

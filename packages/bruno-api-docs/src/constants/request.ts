@@ -45,3 +45,15 @@ export const REQUEST_TYPE_LABELS: Record<string, { shortName: string; fullName: 
     fullName: 'gRPC'
   }
 };
+
+export const BODY_LANGUAGE: Record<string, string> = { json: 'json', xml: 'markup', text: 'text', sparql: 'text' };
+
+export const BODY_CONTENT_TYPE: Record<string, string> = {
+  json: 'application/json',
+  xml: 'application/xml',
+  text: 'text/plain',
+  sparql: 'application/sparql-query',
+  'form-urlencoded': 'application/x-www-form-urlencoded',
+  'multipart-form': 'multipart/form-data',
+  file: 'application/octet-stream'
+};

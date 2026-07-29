@@ -49,8 +49,8 @@ import { RequestParams } from '../../components/Request/RequestParams/RequestPar
 import { RequestBody } from '../../components/Request/RequestBody/RequestBody';
 import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeBadge';
 import { PropertyTable } from '../../components/PropertyTable/PropertyTable';
-import { InheritedAuthBadge } from '../../components/InheritedSourceLink/InheritedAuthBadge';
-import { inheritedHeaderRows } from '../../utils/inheritedRows';
+import { InheritedAuthBadge } from '../../components/InheritedAuthBadge/InheritedAuthBadge';
+import { inheritedHeaderRows } from '../../components/PropertyTable/inheritedRows';
 import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTabs';
 import { Examples } from '../../components/Examples/Examples';
 import { ExecutionContext } from '../../components/ExecutionContext/ExecutionContext';
@@ -160,8 +160,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
   // Own + inherited header rows for the single Headers table (memoized: the pane re-renders often).
   const headerTableRows = useMemo(
-    () => [...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders, onBreadcrumbClick)],
-    [headers, inheritedHeaders, onBreadcrumbClick]
+    () => [...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders)],
+    [headers, inheritedHeaders]
   );
 
   const codeSnippet = <CodeSnippetTabs method={method} url={url} headers={effectiveHeaders} body={body} auth={effectiveAuth} />;
@@ -211,7 +211,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
                       ) : undefined
                     }
                   >
-                    <PropertyTable rows={headerTableRows} />
+                    <PropertyTable rows={headerTableRows} onNavigate={onBreadcrumbClick} />
                   </Section>
                 )}
 

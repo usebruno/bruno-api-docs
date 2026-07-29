@@ -12,8 +12,7 @@ import type { PropertyRow } from '../components/PropertyTable/PropertyTable';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { Scripts } from '@opencollection/types/common/scripts';
 import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';
-import type { Action, ActionSetVariable, ActionVariableScope } from '@opencollection/types/common/actions';
-import type { Description } from '@opencollection/types/common/description';
+import type { Action, ActionSetVariable } from '@opencollection/types/common/actions';
 import {
   getRequestAuth,
   getItemName,
@@ -25,24 +24,37 @@ import {
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 import { COLLECTION_ROOT_CRUMB } from './common';
-import { AUTH_MODE_LABELS } from '../constants';
+import { AUTH_MODE_LABELS, BODY_CONTENT_TYPE, BODY_LANGUAGE } from '../constants';
+import type {
+  InheritedSource,
+  ResolvedAuth,
+  InheritedAuthSummary,
+  BodyTableRow,
+  FileBodyRow,
+  BodyView,
+  SelectedBody,
+  ScriptLevel,
+  ScriptPhase,
+  ScriptFlow,
+  ScriptChainStep,
+  PreRequestVarRow,
+  PostResponseVarRow,
+  PostResponseVar,
+  PostResponseRowInput,
+  InheritedHeaderRow,
+  InheritedPreRequestVarRow,
+  InheritedPostResponseVarRow,
+  InheritedConfig,
+  OwnConfigKeys
+} from './request.types';
+
+export type * from './request.types';
 
 export const humanizeAuthMode = (auth: Auth | undefined, labels: Record<string, string>): string => {
   if (!auth) return 'No Auth';
   if (auth === 'inherit') return 'Inherit';
   return labels[auth.type] || auth.type;
 };
-
-export interface InheritedSource {
-  level: 'collection' | 'folder';
-  name: string;
-  uuid: string;
-}
-
-export interface ResolvedAuth {
-  auth?: Auth;
-  source?: InheritedSource;
-}
 
 /** Identity of an inherited-config source — the single source of truth shared by the auth resolvers
  *  and the header/variable collectors, so an inherited row and the auth chip link to the same node. */
@@ -105,12 +117,6 @@ export const resolveInheritedAuth = (
   return { auth: undefined };
 };
 
-/** Display summary for an inheriting item: the parent it resolves from and that parent's mode. */
-export interface InheritedAuthSummary {
-  sourceName: string;
-  modeLabel: string;
-}
-
 /**
  * Resolve the inherited-auth summary an Auth tab shows ("Auth inherited from {name}: {mode}"),
  * or null when the item doesn't inherit. Names the nearest configured parent (falling back
@@ -170,129 +176,7 @@ export const getVariableType = (variable?: Variable | SecretVariable): VariableV
 export const getVariableTypeLabel = (variable?: Variable | SecretVariable): string =>
   getVariableType(variable) ?? 'string';
 
-export interface BodyTableRow {
-  name: string;
-  value: string;
-  partType?: 'text' | 'file';
-  contentType?: string;
-  disabled?: boolean;
-  description?: string;
-}
-
-export interface FileBodyRow {
-  filePath: string;
-  contentType?: string;
-  selected?: boolean;
-  description?: string;
-}
-
-export type BodyView =
-  | { render: 'code'; language: string; contentTypeLabel: string; code: string }
-  | { render: 'table'; variant: 'urlencoded' | 'multipart'; contentTypeLabel: string; rows: BodyTableRow[] }
-  | { render: 'file'; contentTypeLabel: string; files: FileBodyRow[] }
-  | { render: 'none' };
-
-const RAW_LANGUAGE: Record<string, string> = { json: 'json', xml: 'markup', text: 'text', sparql: 'text' };
-
-const BODY_CONTENT_TYPE: Record<string, string> = {
-  json: 'application/json',
-  xml: 'application/xml',
-  text: 'text/plain',
-  sparql: 'application/sparql-query',
-  'form-urlencoded': 'application/x-www-form-urlencoded',
-  'multipart-form': 'multipart/form-data',
-  file: 'application/octet-stream'
-};
-
 export const bodyContentTypeLabel = (type: string): string => BODY_CONTENT_TYPE[type] || type;
-
-/** Example response body `type` -> Prism language. */
-export const RESPONSE_LANGUAGE: Record<string, string> = {
-  json: 'json',
-  xml: 'markup',
-  html: 'markup',
-  text: 'text',
-  binary: 'text'
-};
-
-/** Example response body `type` -> full MIME content type. */
-export const RESPONSE_CONTENT_TYPE: Record<string, string> = {
-  json: 'application/json',
-  xml: 'application/xml',
-  html: 'text/html',
-  binary: 'application/octet-stream'
-};
-
-/** HTTP status code -> reason phrase (e.g. 404 -> "Not Found"). */
-export const STATUS_CODE_PHRASES: Record<number, string> = {
-  100: 'Continue',
-  101: 'Switching Protocols',
-  102: 'Processing',
-  103: 'Early Hints',
-  200: 'OK',
-  201: 'Created',
-  202: 'Accepted',
-  203: 'Non-Authoritative Information',
-  204: 'No Content',
-  205: 'Reset Content',
-  206: 'Partial Content',
-  207: 'Multi-Status',
-  208: 'Already Reported',
-  226: 'IM Used',
-  300: 'Multiple Choice',
-  301: 'Moved Permanently',
-  302: 'Found',
-  303: 'See Other',
-  304: 'Not Modified',
-  305: 'Use Proxy',
-  307: 'Temporary Redirect',
-  308: 'Permanent Redirect',
-  400: 'Bad Request',
-  401: 'Unauthorized',
-  402: 'Payment Required',
-  403: 'Forbidden',
-  404: 'Not Found',
-  405: 'Method Not Allowed',
-  406: 'Not Acceptable',
-  407: 'Proxy Authentication Required',
-  408: 'Request Timeout',
-  409: 'Conflict',
-  410: 'Gone',
-  411: 'Length Required',
-  412: 'Precondition Failed',
-  413: 'Payload Too Large',
-  414: 'URI Too Long',
-  415: 'Unsupported Media Type',
-  416: 'Range Not Satisfiable',
-  417: 'Expectation Failed',
-  418: "I'm a teapot",
-  421: 'Misdirected Request',
-  422: 'Unprocessable Entity',
-  423: 'Locked',
-  424: 'Failed Dependency',
-  425: 'Too Early',
-  426: 'Upgrade Required',
-  428: 'Precondition Required',
-  429: 'Too Many Requests',
-  431: 'Request Header Fields Too Large',
-  451: 'Unavailable For Legal Reasons',
-  500: 'Internal Server Error',
-  501: 'Not Implemented',
-  502: 'Bad Gateway',
-  503: 'Service Unavailable',
-  504: 'Gateway Timeout',
-  505: 'HTTP Version Not Supported',
-  506: 'Variant Also Negotiates',
-  507: 'Insufficient Storage',
-  508: 'Loop Detected',
-  510: 'Not Extended',
-  511: 'Network Authentication Required'
-};
-
-export interface SelectedBody {
-  body?: HttpRequestBody;
-  variants?: { title: string; selected: boolean }[];
-}
 
 export const selectBodyVariant = (
   body: HttpRequestBody | HttpRequestBodyVariant[] | undefined
@@ -322,7 +206,7 @@ export const getBodyView = (
       if (!data.trim()) return { render: 'none' };
       return {
         render: 'code',
-        language: RAW_LANGUAGE[body.type] || 'text',
+        language: BODY_LANGUAGE[body.type] || 'text',
         contentTypeLabel: bodyContentTypeLabel(body.type),
         code: data
       };
@@ -366,11 +250,6 @@ export const getBodyView = (
   }
 };
 
-export type ScriptLevel = 'collection' | 'folder' | 'request';
-export type ScriptPhase = 'before-request' | 'after-response';
-
-export type ScriptFlow = 'sandwich' | 'sequential';
-
 interface ConfigExtension {
   scripts?: { flow?: unknown };
 }
@@ -380,16 +259,6 @@ export const getScriptFlow = (collection: OpenCollection | null | undefined): Sc
   const flow = ext?.scripts?.flow ?? (collection?.config as ConfigExtension | undefined)?.scripts?.flow;
   return flow === 'sequential' ? 'sequential' : 'sandwich';
 };
-
-export interface ScriptChainStep {
-  level: ScriptLevel;
-  phase: ScriptPhase;
-  label: string;
-  sourceName?: string;
-  sourceUuid?: string;
-  code: string;
-  order: number;
-}
 
 interface ScriptSource {
   level: ScriptLevel;
@@ -456,39 +325,6 @@ export const buildScriptChain = (
 
   return steps;
 };
-
-export interface PreRequestVarRow {
-  name: string;
-  value: string;
-  type?: string;
-  description?: string;
-  disabled?: boolean;
-}
-
-export interface PostResponseVarRow {
-  name: string;
-  expression: string;
-  scope?: string;
-  description?: string;
-  disabled?: boolean;
-}
-
-// Editable post-response variable used by VariablesTab (expr = capture expression).
-export interface PostResponseVar {
-  name?: string;
-  expr?: string;
-  disabled?: boolean;
-  scope?: ActionVariableScope;
-  description?: Description;
-}
-
-export interface PostResponseRowInput {
-  name?: string;
-  value?: string;
-  enabled?: boolean;
-  scope?: ActionVariableScope;
-  description?: Description;
-}
 
 // Shared row-builders. Request items keep vars/actions under `runtime`; collection
 // and folder defaults keep them under `request` — but both map to the same rows.
@@ -568,17 +404,6 @@ export const getCollectionVariables = (
 export const inheritedCountLabel = (count: number, noun: string): string =>
   `${count} ${noun}${count === 1 ? '' : 's'} inherited`;
 
-export interface InheritedHeaderRow {
-  name: string;
-  value?: string;
-  disabled?: boolean;
-  description?: string;
-  source: InheritedSource;
-}
-
-export type InheritedPreRequestVarRow = PreRequestVarRow & { source: InheritedSource };
-export type InheritedPostResponseVarRow = PostResponseVarRow & { source: InheritedSource };
-
 type InheritanceNode = { request?: { headers?: HttpRequestHeader[]; variables?: Variable[]; actions?: Action[] } };
 
 const inheritanceLevels = (
@@ -592,21 +417,6 @@ const inheritanceLevels = (
   );
   return levels;
 };
-
-export interface InheritedConfig {
-  headers: InheritedHeaderRow[];
-  preVars: InheritedPreRequestVarRow[];
-  postVars: InheritedPostResponseVarRow[];
-}
-
-/** The item's own config keys that override inheritance. Only ENABLED entries override — a disabled
- *  own header/var is not sent, so it must not hide an enabled inherited one. Header keys are
- *  lower-cased (case-insensitive), variable keys are exact, matching the send-path merge. */
-export interface OwnConfigKeys {
-  headers: Set<string>;
-  preVars: Set<string>;
-  postVars: Set<string>;
-}
 
 export const enabledHeaderKeys = (headers: { name?: string; disabled?: boolean }[]): Set<string> =>
   new Set(headers.filter((h) => h.name && !h.disabled).map((h) => (h.name as string).toLowerCase()));

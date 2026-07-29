@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { PropertyTable, type PropertyRow } from '../../PropertyTable/PropertyTable';
 import { SubHeading } from '../../SubHeading/SubHeading';
 import { preVarRows, postVarRows } from '../../../utils/inheritedRows';
@@ -34,8 +34,14 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   onNavigate,
   variant = 'grid'
 }) => {
-  const preTableRows = preVarRows(preVars, inheritedPreVars, onNavigate);
-  const postTableRows = postVarRows(postVars, inheritedPostVars, onNavigate);
+  const preTableRows = useMemo(
+    () => preVarRows(preVars, inheritedPreVars, onNavigate),
+    [preVars, inheritedPreVars, onNavigate]
+  );
+  const postTableRows = useMemo(
+    () => postVarRows(postVars, inheritedPostVars, onNavigate),
+    [postVars, inheritedPostVars, onNavigate]
+  );
 
   if (preTableRows.length === 0 && postTableRows.length === 0) return null;
 

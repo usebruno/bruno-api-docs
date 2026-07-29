@@ -2,6 +2,8 @@ import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.div`
   overflow-x: auto;
+  container-type: inline-size;
+  container-name: proptable;
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) transparent;
   &::-webkit-scrollbar {
@@ -40,7 +42,7 @@ export const StyledWrapper = styled.div`
 
   .property-row {
     display: grid;
-    grid-template-columns: 8.75rem minmax(0, 1fr);
+    grid-template-columns: minmax(8.75rem, max-content) minmax(0, 1fr);
     align-items: center;
     column-gap: 1.5rem;
     row-gap: 0;
@@ -49,6 +51,7 @@ export const StyledWrapper = styled.div`
   }
   .property-row .description {
     grid-column: 1 / -1;
+    max-width: calc(100cqi - 1.75rem);
   }
   .property-row + .property-row {
     border-top: 1px solid var(--border-color);
@@ -120,6 +123,9 @@ export const StyledWrapper = styled.div`
   @container docs (max-width: 900px) {
     .property-box {
       width: auto;
+    }
+    .property-row {
+      grid-template-columns: 8.75rem minmax(0, 1fr);
     }
     .property-value-main .oc-truncate {
       overflow: hidden;

@@ -25,9 +25,7 @@ import {
   resolveInheritedAuth,
   getPreRequestVars,
   getPostResponseVars,
-  getInheritedHeaders,
-  getInheritedPreRequestVars,
-  getInheritedPostResponseVars,
+  getInheritedConfig,
   inheritedCountLabel,
   buildScriptChain,
   getScriptFlow,
@@ -119,9 +117,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
   const preVars = useMemo(() => getPreRequestVars(item), [item]);
   const postVars = useMemo(() => getPostResponseVars(item), [item]);
-  const inheritedHeaders = useMemo(() => getInheritedHeaders(collection, ancestry, item), [collection, ancestry, item]);
-  const inheritedPreVars = useMemo(() => getInheritedPreRequestVars(collection, ancestry, item), [collection, ancestry, item]);
-  const inheritedPostVars = useMemo(() => getInheritedPostResponseVars(collection, ancestry, item), [collection, ancestry, item]);
+  const inherited = useMemo(() => getInheritedConfig(collection, ancestry, item), [collection, ancestry, item]);
+  const { headers: inheritedHeaders, preVars: inheritedPreVars, postVars: inheritedPostVars } = inherited;
 
   const scriptChain = useMemo(() => buildScriptChain(collection, ancestry, item), [collection, ancestry, item]);
   const scriptFlow = useMemo(() => getScriptFlow(collection), [collection]);
@@ -151,12 +148,20 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
   const bodyContentType = bodyView.render !== 'none' ? bodyView.contentTypeLabel : undefined;
 
-  const effectiveHeaders = useMemo<HttpRequestHeader[]>(
-    () => [
-      ...headers,
-      ...inheritedHeaders.map((h) => ({ name: h.name, value: h.value ?? '', disabled: h.disabled }))
-    ],
-    [headers, inheritedHeaders]
+  const effectiveHeaders = useMemo<HttpRequestHeader[]>(() => {
+    const authIsConcrete = Boolean(effectiveAuth) && effectiveAuth !== 'inherit';
+    const inheritedRows = inheritedHeaders
+      // The resolved auth already emits its own Authorization header, so drop an inherited raw one —
+      // otherwise a farther ancestor's header would mask the nearer effective auth in the snippet.
+      .filter((h) => !(authIsConcrete && (h.name || '').toLowerCase() === 'authorization'))
+      .map((h) => ({ name: h.name, value: h.value ?? '', disabled: h.disabled }));
+    return [...headers, ...inheritedRows];
+  }, [headers, inheritedHeaders, effectiveAuth]);
+
+  // Own + inherited header rows for the single Headers table (memoized: the pane re-renders often).
+  const headerTableRows = useMemo(
+    () => [...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders, onBreadcrumbClick)],
+    [headers, inheritedHeaders, onBreadcrumbClick]
   );
 
   const codeSnippet = <CodeSnippetTabs method={method} url={url} headers={effectiveHeaders} body={body} auth={effectiveAuth} />;
@@ -206,9 +211,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
                       ) : undefined
                     }
                   >
-                    <PropertyTable
-                      rows={[...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders, onBreadcrumbClick)]}
-                    />
+                    <PropertyTable rows={headerTableRows} />
                   </Section>
                 )}
 
@@ -218,7 +221,9 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   </Section>
                 )}
               </>
-            ) : (
+            ) : hasExecutionContext ? null : (
+              // Only a truly empty request (no own config AND nothing inherited — including inherited
+              // variables, which surface in the Execution Context below) shows this empty state.
               <EmptyState
                 testId="request-config-empty"
                 icon={<FileIcon />}

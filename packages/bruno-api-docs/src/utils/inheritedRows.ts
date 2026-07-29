@@ -12,9 +12,10 @@ import type {
 
 type OnNavigate = ((uuid: string) => void) | undefined;
 
-// The "go to source" affordance placed in a PropertyTable row's trailing slot.
-const gotoLink = (source: InheritedSource, onNavigate: OnNavigate): ReactNode =>
-  createElement(InheritedSourceLink, { source, onNavigate });
+// The "go to source" affordance placed in a PropertyTable row's trailing slot. `itemName` (the
+// header / variable name) gives each link in a table a distinct accessible name.
+const gotoLink = (source: InheritedSource, itemName: string, onNavigate: OnNavigate): ReactNode =>
+  createElement(InheritedSourceLink, { source, itemName, onNavigate });
 
 /** Inherited header rows for a PropertyTable — each carries a "go to source" link. */
 export const inheritedHeaderRows = (headers: InheritedHeaderRow[], onNavigate?: OnNavigate): PropertyRow[] =>
@@ -23,7 +24,7 @@ export const inheritedHeaderRows = (headers: InheritedHeaderRow[], onNavigate?: 
     value: header.value,
     disabled: header.disabled,
     description: header.description,
-    action: gotoLink(header.source, onNavigate)
+    action: gotoLink(header.source, header.name, onNavigate)
   }));
 
 /** Pre-request variable rows: the item's own vars first, then inherited ones (each with a link).
@@ -40,7 +41,7 @@ export const preVarRows = (
     type: v.type,
     description: v.description,
     disabled: v.disabled,
-    action: gotoLink(v.source, onNavigate)
+    action: gotoLink(v.source, v.name, onNavigate)
   }))
 ];
 
@@ -56,6 +57,6 @@ export const postVarRows = (
     value: v.expression,
     description: v.description,
     disabled: v.disabled,
-    action: gotoLink(v.source, onNavigate)
+    action: gotoLink(v.source, v.name, onNavigate)
   }))
 ];

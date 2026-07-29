@@ -1,5 +1,5 @@
 import React from 'react';
-import type { InheritedSource } from '../../utils/request';
+import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '../../utils/request';
 import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
 
 interface InheritedAuthBadgeProps {
@@ -15,8 +15,8 @@ interface InheritedAuthBadgeProps {
  * the folder Auth group so they stay identical.
  */
 export const InheritedAuthBadge: React.FC<InheritedAuthBadgeProps> = ({ source, onNavigate, testId }) => {
-  const canNavigate = Boolean(onNavigate && source.uuid);
-  const label = `Inherited from ${source.level}: ${source.name}`;
+  const canNavigate = canNavigateToSource(source, onNavigate);
+  const label = inheritedSourceLabel(source);
   return (
     <ContentTypeBadge
       label={label}

@@ -38,4 +38,13 @@ describe('InheritedSourceLink', () => {
     const root = useRenderToDom(<InheritedSourceLink source={folderSource} onNavigate={() => {}} testId="my-goto" />);
     expect(getByTestId(root, 'my-goto').getAttribute('aria-label')).toBe('Inherited from folder: Folder A');
   });
+
+  it('qualifies the accessible name with the row it belongs to when given an itemName', () => {
+    const root = useRenderToDom(
+      <InheritedSourceLink source={folderSource} itemName="X-Api-Version" onNavigate={() => {}} />
+    );
+    expect(getByTestId(root, 'inherited-source').getAttribute('aria-label')).toBe(
+      'X-Api-Version: Inherited from folder: Folder A'
+    );
+  });
 });

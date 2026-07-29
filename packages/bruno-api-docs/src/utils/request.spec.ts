@@ -14,6 +14,11 @@ import {
   getInheritedHeaders,
   getInheritedPreRequestVars,
   getInheritedPostResponseVars,
+  getInheritedConfig,
+  folderSource,
+  collectionSource,
+  inheritedSourceLabel,
+  canNavigateToSource,
   inheritedCountLabel,
   getShortMethod,
   getVariableType
@@ -531,5 +536,107 @@ describe('getShortMethod', () => {
     expect(getShortMethod('get')).toBe('GET');
     expect(getShortMethod('PATCH')).toBe('PATCH');
     expect(getShortMethod('purge')).toBe('PURGE');
+  });
+});
+
+describe('inherited source helpers', () => {
+  it('builds a folder source from an item name and uuid, with generic fallbacks', () => {
+    expect(folderSource({ uuid: 'f-1', info: { name: 'Invoices' } } as any)).toEqual({
+      level: 'folder',
+      name: 'Invoices',
+      uuid: 'f-1'
+    });
+    expect(folderSource({} as any)).toEqual({ level: 'folder', name: 'Folder', uuid: '' });
+  });
+
+  it('builds a collection source pinned to the collection-root crumb', () => {
+    expect(collectionSource({ info: { name: 'Billing API' } } as any)).toEqual({
+      level: 'collection',
+      name: 'Billing API',
+      uuid: COLLECTION_ROOT_CRUMB
+    });
+    expect(collectionSource(null)).toEqual({ level: 'collection', name: 'Collection', uuid: COLLECTION_ROOT_CRUMB });
+  });
+
+  it('formats the provenance label and computes navigability', () => {
+    const source = { level: 'folder', name: 'Invoices', uuid: 'f-1' } as const;
+    expect(inheritedSourceLabel(source)).toBe('Inherited from folder: Invoices');
+    expect(canNavigateToSource(source, () => {})).toBe(true);
+    expect(canNavigateToSource(source, undefined)).toBe(false);
+    expect(canNavigateToSource({ ...source, uuid: '' }, () => {})).toBe(false);
+  });
+});
+
+describe('getInheritedConfig', () => {
+  const collection: any = {
+    info: { name: 'Billing API' },
+    request: {
+      headers: [{ name: 'X-Api-Version', value: 'v2' }],
+      variables: [{ name: 'colVar', value: 'cv' }],
+      actions: [
+        {
+          type: 'set-variable',
+          phase: 'after-response',
+          selector: { expression: 'res.body.x' },
+          variable: { name: 'colPost', scope: 'runtime' }
+        }
+      ]
+    }
+  };
+  const folder: any = {
+    uuid: 'folder-9',
+    info: { name: 'Invoices' },
+    request: { headers: [{ name: 'X-Folder', value: 'f' }] }
+  };
+
+  it('collects headers and vars across collection + ancestors, tagging each with its source', () => {
+    const item: any = { http: { headers: [{ name: 'Accept', value: 'application/json' }] } };
+    const { headers, preVars, postVars } = getInheritedConfig(collection, [folder], item);
+
+    expect(headers.map((h) => h.name)).toEqual(['X-Api-Version', 'X-Folder']);
+    expect(headers.find((h) => h.name === 'X-Api-Version')!.source).toMatchObject({ level: 'collection', name: 'Billing API' });
+    expect(headers.find((h) => h.name === 'X-Folder')!.source).toMatchObject({ level: 'folder', name: 'Invoices', uuid: 'folder-9' });
+    expect(preVars.map((v) => v.name)).toEqual(['colVar']);
+    expect(postVars.map((v) => v.name)).toEqual(['colPost']);
+  });
+
+  it('lets the nearest ancestor win a same-named header (case-insensitive)', () => {
+    const near: any = { uuid: 'near', info: { name: 'Near' }, request: { headers: [{ name: 'x-api-version', value: 'near' }] } };
+    const headers = getInheritedConfig(collection, [near], { http: {} } as any).headers;
+    expect(headers).toHaveLength(1);
+    expect(headers[0].value).toBe('near');
+    expect(headers[0].source).toMatchObject({ name: 'Near' });
+  });
+
+  it('excludes a header the request overrides with its own ENABLED header', () => {
+    const item: any = { http: { headers: [{ name: 'X-Api-Version', value: 'own' }] } };
+    expect(getInheritedConfig(collection, [], item).headers).toEqual([]);
+  });
+
+  it('does NOT let a DISABLED own header hide an enabled inherited one (matches the send path)', () => {
+    const item: any = { http: { headers: [{ name: 'X-Api-Version', value: 'own', disabled: true }] } };
+    const headers = getInheritedConfig(collection, [], item).headers;
+    expect(headers.map((h) => h.name)).toEqual(['X-Api-Version']);
+    expect(headers[0].value).toBe('v2');
+  });
+
+  it('drops disabled INHERITED headers entirely (never sent, so not part of the effective request)', () => {
+    const col: any = { info: { name: 'C' }, request: { headers: [{ name: 'X-Off', value: 'x', disabled: true }] } };
+    expect(getInheritedConfig(col, [], { http: {} } as any).headers).toEqual([]);
+  });
+
+  it('a disabled nearer header does not mask an enabled farther one', () => {
+    const col: any = { info: { name: 'C' }, request: { headers: [{ name: 'X-H', value: 'col' }] } };
+    const near: any = { uuid: 'n', info: { name: 'N' }, request: { headers: [{ name: 'X-H', value: 'near', disabled: true }] } };
+    const headers = getInheritedConfig(col, [near], { http: {} } as any).headers;
+    expect(headers).toHaveLength(1);
+    expect(headers[0].value).toBe('col');
+  });
+
+  it('the thin accessors return the matching slice', () => {
+    const item: any = { http: {} };
+    expect(getInheritedHeaders(collection, [folder], item).map((h) => h.name)).toEqual(['X-Api-Version', 'X-Folder']);
+    expect(getInheritedPreRequestVars(collection, [], item).map((v) => v.name)).toEqual(['colVar']);
+    expect(getInheritedPostResponseVars(collection, [], item).map((v) => v.name)).toEqual(['colPost']);
   });
 });

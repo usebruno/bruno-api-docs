@@ -1,6 +1,6 @@
 import React from 'react';
 import type { FolderConfig } from '../../utils/folder';
-import { inheritedCountLabel } from '../../utils/request';
+import { headerRows, inheritedCountLabel } from '../../utils/request';
 import { Code } from '../Code/Code';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
@@ -41,13 +41,8 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
   ) : undefined;
 
   // Own rows first, then inherited rows (each carrying a goto-source link) in the SAME table.
-  const headerRows: PropertyRow[] = [
-    ...config.headers.map((header) => ({
-      label: header.name,
-      value: header.value,
-      disabled: header.disabled,
-      description: header.description
-    })),
+  const headerTableRows: PropertyRow[] = [
+    ...headerRows(config.headers),
     ...inheritedHeaderRows(config.inheritedHeaders, onNavigate)
   ];
 
@@ -64,7 +59,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
               <ContentTypeBadge label={inheritedCountLabel(config.inheritedHeaders.length, 'header')} />
             )}
           </div>
-          <PropertyTable rows={headerRows} />
+          <PropertyTable rows={headerTableRows} />
         </div>
       )}
 

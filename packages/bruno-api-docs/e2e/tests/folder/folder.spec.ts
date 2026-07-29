@@ -19,10 +19,11 @@ test.describe('Folder page', () => {
       await expect(folderPage.configuration.headers.getByTestId('inherited-source').first()).toBeVisible();
     });
 
-    await test.step('inherited variables are shown', async () => {
+    await test.step('inherited variables are shown, excluding disabled ones', async () => {
       await expect(folderPage.configuration.vars).toBeVisible();
       await expect(folderPage.configuration.vars).toContainText('collection_pre_var');
-      await expect(folderPage.configuration.vars).toContainText('vars inherited');
+      await expect(folderPage.configuration.vars).toContainText('1 var inherited');
+      await expect(folderPage.configuration.vars).not.toContainText('collection-var-value');
     });
   });
 

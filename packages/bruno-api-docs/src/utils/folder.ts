@@ -1,15 +1,15 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { Auth } from '@opencollection/types/common/auth';
-import { getItemName, isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
-import { getItemUuid } from './itemUtils';
-import { COLLECTION_ROOT_CRUMB } from './common';
+import { isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
 import {
   getDescription,
   getRequestDefaultsVars,
-  collectInheritedHeaders,
-  collectInheritedPreVars,
-  collectInheritedPostVars,
+  collectInheritedConfig,
+  collectionSource,
+  enabledHeaderKeys,
+  enabledVarKeys,
+  folderSource,
   type PreRequestVarRow,
   type PostResponseVarRow,
   type InheritedSource,
@@ -58,19 +58,13 @@ export const resolveFolderAuth = (
   for (let i = ancestors.length - 1; i >= 0; i -= 1) {
     const auth = folderAuthOf(ancestors[i]);
     if (isConcrete(auth)) {
-      return {
-        auth,
-        source: { level: 'folder', name: getItemName(ancestors[i]) || 'Folder', uuid: getItemUuid(ancestors[i]) || '' }
-      };
+      return { auth, source: folderSource(ancestors[i]) };
     }
   }
 
   const collectionAuth = collection?.request?.auth as Auth | undefined;
   if (isConcrete(collectionAuth)) {
-    return {
-      auth: collectionAuth,
-      source: { level: 'collection', name: collection?.info?.name || 'Collection', uuid: COLLECTION_ROOT_CRUMB }
-    };
+    return { auth: collectionAuth, source: collectionSource(collection) };
   }
 
   return { auth: 'inherit' };
@@ -95,14 +89,17 @@ export const getFolderConfig = (
 
   const { preVars, postVars } = getRequestDefaultsVars(folder);
 
-  // Own names to exclude from the inherited set (the folder's own config overrides its parents').
-  const ownHeaderNames = new Set(headers.map((header) => header.name.toLowerCase()));
-  const ownPreNames = new Set(preVars.map((v) => v.name).filter(Boolean));
-  const ownPostNames = new Set(postVars.map((v) => v.name).filter(Boolean));
-
-  const inheritedHeaders = collectInheritedHeaders(collection, ancestors, ownHeaderNames);
-  const inheritedPreVariables = collectInheritedPreVars(collection, ancestors, ownPreNames);
-  const inheritedPostVariables = collectInheritedPostVars(collection, ancestors, ownPostNames);
+  // Own ENABLED keys to exclude from the inherited set (a disabled own entry is not sent, so it must
+  // not hide an enabled inherited one). One ancestry walk covers all three config kinds.
+  const {
+    headers: inheritedHeaders,
+    preVars: inheritedPreVariables,
+    postVars: inheritedPostVariables
+  } = collectInheritedConfig(collection, ancestors, {
+    headers: enabledHeaderKeys(headers),
+    preVars: enabledVarKeys(preVars),
+    postVars: enabledVarKeys(postVars)
+  });
 
   return {
     headers,

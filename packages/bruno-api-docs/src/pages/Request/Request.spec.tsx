@@ -212,6 +212,46 @@ describe('Request page', () => {
     expect(queryByTestId(root, 'request-config-empty')).toBeNull();
   });
 
+  it('suppresses the "No request configuration" empty state when a request inherits only variables', () => {
+    const parentCollection: OpenCollection = {
+      info: { name: 'C', version: '1.0.0' },
+      request: { variables: [{ name: 'colVar', value: 'cv' }] }
+    } as unknown as OpenCollection;
+    const varsOnly: HttpRequest = {
+      info: { name: 'Ping', type: 'http' },
+      http: { method: 'GET', url: '/ping' } // no own config and no auth field
+    };
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <Request item={varsOnly} collection={parentCollection} />
+      </MemoryRouter>
+    );
+    expect(queryByTestId(root, 'request-config-empty')).toBeNull();
+    expect(getByTestId(root, 'execution-context').text).toContain('colVar');
+  });
+
+  it('shows the resolved inherited auth in the code snippet, not an inherited raw Authorization header', () => {
+    const parentCollection: OpenCollection = {
+      info: { name: 'C', version: '1.0.0' },
+      request: {
+        auth: { type: 'bearer', token: '{{tok}}' },
+        headers: [{ name: 'Authorization', value: 'Basic legacy' }]
+      }
+    } as unknown as OpenCollection;
+    const inheritsBoth: HttpRequest = {
+      info: { name: 'R', type: 'http' },
+      http: { method: 'GET', url: '/x', auth: 'inherit' }
+    };
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <Request item={inheritsBoth} collection={parentCollection} />
+      </MemoryRouter>
+    );
+    const snippet = getByTestId(root, 'request-section-code-snippet');
+    expect(snippet.text).toContain('Bearer'); // the nearer resolved effective auth wins
+    expect(snippet.text).not.toContain('Basic legacy'); // the inherited raw Authorization is not emitted
+  });
+
   it('does not apply smart typography to docs prose', () => {
     const docsItem: HttpRequest = {
       info: { name: 'Doc test', type: 'http' },

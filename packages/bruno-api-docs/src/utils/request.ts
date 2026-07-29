@@ -44,6 +44,28 @@ export interface ResolvedAuth {
   source?: InheritedSource;
 }
 
+/** Identity of an inherited-config source — the single source of truth shared by the auth resolvers
+ *  and the header/variable collectors, so an inherited row and the auth chip link to the same node. */
+export const folderSource = (folder: Item): InheritedSource => ({
+  level: 'folder',
+  name: getItemName(folder) || 'Folder',
+  uuid: getItemUuid(folder) || ''
+});
+
+export const collectionSource = (collection: OpenCollection | null | undefined): InheritedSource => ({
+  level: 'collection',
+  name: collection?.info?.name || 'Collection',
+  uuid: COLLECTION_ROOT_CRUMB
+});
+
+/** Provenance label shown on inherited-config affordances (the auth chip and per-row goto links). */
+export const inheritedSourceLabel = (source: InheritedSource): string =>
+  `Inherited from ${source.level}: ${source.name}`;
+
+/** Whether an inherited-source affordance can navigate: a handler exists and the source has a uuid. */
+export const canNavigateToSource = (source: InheritedSource, onNavigate?: (uuid: string) => void): boolean =>
+  Boolean(onNavigate && source.uuid);
+
 const folderAuth = (folder: Item): Auth | undefined =>
   (folder as { request?: { auth?: Auth } }).request?.auth;
 
@@ -67,7 +89,7 @@ export const resolveInheritedAuth = (
     if (auth === 'inherit') continue;
     return {
       auth: isConcrete(auth) ? auth : undefined,
-      source: { level: 'folder', name: getItemName(ancestors[i]) || 'Folder', uuid: getItemUuid(ancestors[i]) || '' }
+      source: folderSource(ancestors[i])
     };
   }
 
@@ -75,7 +97,7 @@ export const resolveInheritedAuth = (
   if (isConcrete(collectionAuth)) {
     return {
       auth: collectionAuth,
-      source: { level: 'collection', name: collection?.info?.name || 'Collection', uuid: COLLECTION_ROOT_CRUMB }
+      source: collectionSource(collection)
     };
   }
 
@@ -564,106 +586,109 @@ const inheritanceLevels = (
   ancestry: Item[]
 ): { source: InheritedSource; node: InheritanceNode }[] => {
   const levels: { source: InheritedSource; node: InheritanceNode }[] = [];
-  if (collection) {
-    levels.push({
-      source: { level: 'collection', name: collection.info?.name || 'Collection', uuid: COLLECTION_ROOT_CRUMB },
-      node: collection as InheritanceNode
-    });
-  }
-  ancestry.forEach((folder) => {
-    levels.push({
-      source: { level: 'folder', name: getItemName(folder) || 'Folder', uuid: getItemUuid(folder) || '' },
-      node: folder as unknown as InheritanceNode
-    });
-  });
+  if (collection) levels.push({ source: collectionSource(collection), node: collection as InheritanceNode });
+  ancestry.forEach((folder) =>
+    levels.push({ source: folderSource(folder), node: folder as unknown as InheritanceNode })
+  );
   return levels;
 };
 
-// Collect the inherited rows of one config kind for an item (request OR folder): walk the
-// collection->folders levels, de-dupe by key keeping the nearest source (Map last-write-wins), and
-// drop any key the item defines itself (`ownKeys` — its own value overrides the inherited one, so
-// the inherited row is hidden) — matching the effective-request merge in the desktop app and the
-// send path.
-const collectInherited = <T>(
+export interface InheritedConfig {
+  headers: InheritedHeaderRow[];
+  preVars: InheritedPreRequestVarRow[];
+  postVars: InheritedPostResponseVarRow[];
+}
+
+/** The item's own config keys that override inheritance. Only ENABLED entries override — a disabled
+ *  own header/var is not sent, so it must not hide an enabled inherited one. Header keys are
+ *  lower-cased (case-insensitive), variable keys are exact, matching the send-path merge. */
+export interface OwnConfigKeys {
+  headers: Set<string>;
+  preVars: Set<string>;
+  postVars: Set<string>;
+}
+
+export const enabledHeaderKeys = (headers: { name?: string; disabled?: boolean }[]): Set<string> =>
+  new Set(headers.filter((h) => h.name && !h.disabled).map((h) => (h.name as string).toLowerCase()));
+
+export const enabledVarKeys = (vars: { name?: string; disabled?: boolean }[]): Set<string> =>
+  new Set(vars.filter((v) => v.name && !v.disabled).map((v) => v.name as string));
+
+/**
+ * Walk collection -> ancestor folders ONCE and collect everything an item inherits: headers,
+ * pre-request vars and post-response captures. Nearest source wins (Map last-write over the
+ * shallowest-first level order), the item's own ENABLED keys are excluded, and disabled entries are
+ * dropped on both sides — so the result is exactly the effective request the send path produces, and
+ * the headers table, variables panel and code snippet all agree on it.
+ */
+export const collectInheritedConfig = (
   collection: OpenCollection | null | undefined,
   ancestry: Item[],
-  rowsOf: (node: InheritanceNode) => T[],
-  keyOf: (row: T) => string,
-  ownKeys: Set<string>
-): (T & { source: InheritedSource })[] => {
-  const byKey = new Map<string, T & { source: InheritedSource }>();
+  own: OwnConfigKeys
+): InheritedConfig => {
+  const headers = new Map<string, InheritedHeaderRow>();
+  const preVars = new Map<string, InheritedPreRequestVarRow>();
+  const postVars = new Map<string, InheritedPostResponseVarRow>();
+
   inheritanceLevels(collection, ancestry).forEach(({ source, node }) => {
-    rowsOf(node).forEach((row) => {
-      const key = keyOf(row);
-      if (!key || ownKeys.has(key)) return;
-      byKey.set(key, { ...row, source });
+    (node?.request?.headers ?? []).forEach((h) => {
+      const key = (h.name || '').toLowerCase();
+      if (!key || h.disabled || own.headers.has(key)) return;
+      headers.set(key, { name: h.name, value: h.value, disabled: h.disabled, description: getDescription(h), source });
+    });
+
+    const { preVars: nodePre, postVars: nodePost } = getRequestDefaultsVars(node);
+    nodePre.forEach((v) => {
+      if (!v.name || v.disabled || own.preVars.has(v.name)) return;
+      preVars.set(v.name, { ...v, source });
+    });
+    nodePost.forEach((v) => {
+      if (!v.name || v.disabled || own.postVars.has(v.name)) return;
+      postVars.set(v.name, { ...v, source });
     });
   });
-  return Array.from(byKey.values());
+
+  return {
+    headers: Array.from(headers.values()),
+    preVars: Array.from(preVars.values()),
+    postVars: Array.from(postVars.values())
+  };
 };
 
-// The collectors below take the item's own keys to exclude, so both requests and folders reuse the
-// same inheritance logic — only how they derive their own keys differs.
-
-/** Inherited headers (collection + ancestor folders, nearest wins, case-insensitive de-dup),
- *  excluding the case-insensitive header names in `ownNames`. */
-export const collectInheritedHeaders = (
+/** The full config a request inherits from its collection/folder ancestry — one ancestry walk shared
+ *  by the headers table, the variables panel and the code snippet (nearest parent wins; the request's
+ *  own enabled config overrides it; disabled entries are dropped). */
+export const getInheritedConfig = (
   collection: OpenCollection | null | undefined,
   ancestry: Item[],
-  ownNames: Set<string>
-): InheritedHeaderRow[] =>
-  collectInherited<HttpRequestHeader>(
-    collection,
-    ancestry,
-    (node) => node?.request?.headers ?? [],
-    (h) => (h.name || '').toLowerCase(),
-    ownNames
-  ).map((h) => ({ name: h.name, value: h.value, disabled: h.disabled, description: getDescription(h), source: h.source }));
+  item: HttpRequest
+): InheritedConfig =>
+  collectInheritedConfig(collection, ancestry, {
+    headers: enabledHeaderKeys(getHttpHeaders(item)),
+    preVars: enabledVarKeys(getPreRequestVars(item)),
+    postVars: enabledVarKeys(getPostResponseVars(item))
+  });
 
-/** Inherited pre-request variables (nearest wins), excluding the variable names in `ownNames`. */
-export const collectInheritedPreVars = (
-  collection: OpenCollection | null | undefined,
-  ancestry: Item[],
-  ownNames: Set<string>
-): InheritedPreRequestVarRow[] =>
-  collectInherited<PreRequestVarRow>(collection, ancestry, (node) => getRequestDefaultsVars(node).preVars, (v) => v.name, ownNames);
-
-/** Inherited post-response variables (nearest wins), excluding the variable names in `ownNames`. */
-export const collectInheritedPostVars = (
-  collection: OpenCollection | null | undefined,
-  ancestry: Item[],
-  ownNames: Set<string>
-): InheritedPostResponseVarRow[] =>
-  collectInherited<PostResponseVarRow>(collection, ancestry, (node) => getRequestDefaultsVars(node).postVars, (v) => v.name, ownNames);
-
-const nameSet = (names: (string | undefined)[]): Set<string> => new Set(names.filter((n): n is string => Boolean(n)));
-
-/** Headers the request inherits from its collection/folder ancestry (nearest parent wins), excluding
- *  any it overrides by name. Case-insensitive de-dup, matching the send-path header merge. */
+/** Headers the request inherits (nearest parent wins, case-insensitive, disabled dropped). */
 export const getInheritedHeaders = (
   collection: OpenCollection | null | undefined,
   ancestry: Item[],
   item: HttpRequest
-): InheritedHeaderRow[] =>
-  collectInheritedHeaders(collection, ancestry, nameSet(getHttpHeaders(item).map((h) => (h.name || '').toLowerCase())));
+): InheritedHeaderRow[] => getInheritedConfig(collection, ancestry, item).headers;
 
-/** Pre-request variables the request inherits from its collection/folder ancestry (nearest parent
- *  wins), excluding any it defines itself. */
+/** Pre-request variables the request inherits (nearest parent wins), excluding any it defines. */
 export const getInheritedPreRequestVars = (
   collection: OpenCollection | null | undefined,
   ancestry: Item[],
   item: HttpRequest
-): InheritedPreRequestVarRow[] =>
-  collectInheritedPreVars(collection, ancestry, nameSet(getPreRequestVars(item).map((v) => v.name)));
+): InheritedPreRequestVarRow[] => getInheritedConfig(collection, ancestry, item).preVars;
 
-/** Post-response variables the request inherits from its collection/folder ancestry (nearest parent
- *  wins), excluding any it defines itself. */
+/** Post-response captures the request inherits (nearest parent wins), excluding any it defines. */
 export const getInheritedPostResponseVars = (
   collection: OpenCollection | null | undefined,
   ancestry: Item[],
   item: HttpRequest
-): InheritedPostResponseVarRow[] =>
-  collectInheritedPostVars(collection, ancestry, nameSet(getPostResponseVars(item).map((v) => v.name)));
+): InheritedPostResponseVarRow[] => getInheritedConfig(collection, ancestry, item).postVars;
 
 /**
  * Short, uppercased method name matching the design (DELETE -> DEL, OPTIONS ->

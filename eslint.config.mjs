@@ -20,7 +20,8 @@ export default [
       '**/dist-standalone/**',
       '**/dist-server/**',
       '**/playwright-report/**',
-      '**/bundled-libraries.iife.js'
+      '**/bundled-libraries.iife.js',
+      '**/.claude/**'
     ]
   },
   {

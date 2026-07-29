@@ -247,4 +247,30 @@ describe('envVariableToRow / envRowToVariable round-trip', () => {
     row.description = '';
     expect('description' in (envRowToVariable(row) as any)).toBe(false);
   });
+
+  it('preserves a { content, type } description verbatim when another field is edited', () => {
+    const source = { name: 'host', value: 'localhost', description: { content: 'The **API** host', type: 'text/markdown' } };
+    const row = envVariableToRow(source as any, 0);
+    expect(row.description).toBe('The **API** host'); // flattened to text for the editor
+
+    // Editing the value (not the description) must not flatten the typed description to a bare string.
+    row.value = 'example.com';
+    expect((envRowToVariable(row) as any).description).toEqual({ content: 'The **API** host', type: 'text/markdown' });
+  });
+
+  it('flattens a { content, type } description to a plain string only when its text is actually edited', () => {
+    const source = { name: 'host', value: 'localhost', description: { content: 'Original', type: 'text/markdown' } };
+    const row = envVariableToRow(source as any, 0);
+    row.description = 'Rewritten as plain text';
+    expect((envRowToVariable(row) as any).description).toBe('Rewritten as plain text');
+  });
+
+  it("preserves a secret's { content, type } description when another field is edited", () => {
+    const source = { name: 'token', secret: true, type: 'string', description: { content: 'Bearer *token*', type: 'text/markdown' } };
+    const row = envVariableToRow(source as any, 0);
+    row.value = 'new-token';
+    const out = envRowToVariable(row) as any;
+    expect(out.description).toEqual({ content: 'Bearer *token*', type: 'text/markdown' });
+    expect(out.value).toBe('new-token');
+  });
 });

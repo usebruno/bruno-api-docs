@@ -2,7 +2,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable, VariableValueType } from '@opencollection/types/common/variables';
 import { MANAGER_LABELS } from '../constants';
 import { getDescription, getVariableTypeLabel } from './request';
-import { resolveDescription } from './description';
+import { descriptionText, resolveDescription } from './description';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
 
@@ -40,8 +40,16 @@ export const envVariableToRow = (variable: Variable, index: number): EnvVarRow =
   source: variable
 });
 
+const rowDescription = (row: EnvVarRow): Variable['description'] | undefined => {
+  const text = resolveDescription(row.description);
+  if (text === undefined) return undefined;
+  const original = row.source?.description;
+  return descriptionText(original) === text ? original : text;
+};
+
 export const envRowToVariable = (row: EnvVarRow): Variable => {
   const source = row.source ?? ({} as Variable);
+  const description = rowDescription(row);
   if (row.secret) {
     const secret = { ...source, name: row.name, disabled: !row.enabled, secret: true } as Variable & { value?: string; type?: VariableValueType };
     const dataType = toDataType(row.dataType);
@@ -49,19 +57,18 @@ export const envRowToVariable = (row: EnvVarRow): Variable => {
     else delete secret.type;
     if (row.value) secret.value = row.value;
     else delete secret.value;
-    const description = resolveDescription(row.description);
     if (description !== undefined) secret.description = description;
     else delete secret.description;
     return secret;
   }
-  return rowToVariable({
+  const variable = rowToVariable({
     name: row.name,
     value: row.value,
     enabled: row.enabled,
     dataType: row.dataType,
-    description: row.description,
     originalValue: source.value
   });
+  return description === undefined ? variable : { ...variable, description };
 };
 
 interface ExternalSecretsConfig {

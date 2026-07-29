@@ -9,8 +9,15 @@ import { formatToPreviewMode, ResponseBodyFormat } from '../../../constants';
 
 // react-pdf (pdfjs) and react-player are large and only needed for binary previews,
 // so load them on demand to keep them out of the initial bundle.
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 const VideoPreview = React.lazy(() => import('./VideoPreview/VideoPreview'));
-const PdfDocument = React.lazy(() => import('react-pdf').then((module) => ({ default: module.Document })));
+const PdfDocument = React.lazy(() =>
+  import('react-pdf').then((module) => {
+    // Point pdf.js at its bundled worker; without this it falls back to a fake worker.
+    module.pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    return { default: module.Document };
+  })
+);
 const PdfPage = React.lazy(() => import('react-pdf').then((module) => ({ default: module.Page })));
 
 export interface QueryResultPreviewProps {
@@ -43,7 +50,12 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentTy
           <StyledWrapper className="preview-pdf">
             <PdfDocument file={`data:application/pdf;base64,${dataBuffer}`} onLoadSuccess={handleDocumentLoad}>
               {Array.from(new Array(pdfPagesNum), (el, index) => (
-                <PdfPage key={`page_${index + 1}`} pageNumber={index + 1} renderAnnotationLayer={false} />
+                <PdfPage
+                  key={`page_${index + 1}`}
+                  pageNumber={index + 1}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                />
               ))}
             </PdfDocument>
           </StyledWrapper>

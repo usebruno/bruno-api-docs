@@ -3,10 +3,15 @@ name: Changeset
 on:
   pull_request:
     types: [labeled]
+    branches: [main]
 
 jobs:
   changeset:
-    if: startsWith(github.event.label.name, 'changeset:')
+    # A fork PR gets a read-only token, so the push would 403. Skip cleanly instead of
+    # failing. fork contributors are covered by the changeset status check.
+    if: >
+      startsWith(github.event.label.name, 'changeset:') &&
+      github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: write

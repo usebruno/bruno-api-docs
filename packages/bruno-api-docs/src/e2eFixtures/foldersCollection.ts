@@ -6,8 +6,8 @@ export const foldersFixtureCollection = {
   config: {
     environments: [
       { name: 'Dev', variables: [{ name: 'host', value: 'https://api.hotel.dev' }, { name: 'api_key', value: 'dev-key-123' }] },
-      { name: 'Prod', variables: [{ name: 'host', value: 'https://api.hotel.com' }, { name: 'api_key', value: 'prod-key-abc' }] },
-    ],
+      { name: 'Prod', variables: [{ name: 'host', value: 'https://api.hotel.com' }, { name: 'api_key', value: 'prod-key-abc' }] }
+    ]
   },
   items: [
     {
@@ -18,8 +18,8 @@ export const foldersFixtureCollection = {
         { name: 'Login', type: 'http', seq: 1, method: 'POST', url: '{{host}}/auth/login' },
         { name: 'Refresh Token', type: 'http', seq: 2, method: 'POST', url: '{{host}}/auth/refresh' },
         { name: 'Logout', type: 'http', seq: 3, method: 'POST', url: '{{host}}/auth/logout' },
-        { name: 'Get Current User', type: 'http', seq: 4, method: 'GET', url: '{{host}}/auth/me' },
-      ],
+        { name: 'Get Current User', type: 'http', seq: 4, method: 'GET', url: '{{host}}/auth/me' }
+      ]
     },
     {
       name: 'Rooms',
@@ -42,10 +42,10 @@ export const foldersFixtureCollection = {
           items: [
             { name: 'Check Availability', type: 'http', seq: 1, method: 'GET', url: '{{host}}/rooms/:id/availability' },
             { name: 'Block Dates', type: 'http', seq: 2, method: 'POST', url: '{{host}}/rooms/:id/block' },
-            { name: 'Unblock Dates', type: 'http', seq: 3, method: 'DELETE', url: '{{host}}/rooms/:id/block' },
-          ],
-        },
-      ],
+            { name: 'Unblock Dates', type: 'http', seq: 3, method: 'DELETE', url: '{{host}}/rooms/:id/block' }
+          ]
+        }
+      ]
     },
     {
       name: 'Bookings',
@@ -61,8 +61,8 @@ export const foldersFixtureCollection = {
           items: [
             { name: 'Create Booking', type: 'http', seq: 1, method: 'POST', url: '{{host}}/bookings' },
             { name: 'Confirm Booking', type: 'http', seq: 2, method: 'PATCH', url: '{{host}}/bookings/:id/confirm' },
-            { name: 'Cancel Booking', type: 'http', seq: 3, method: 'DELETE', url: '{{host}}/bookings/:id' },
-          ],
+            { name: 'Cancel Booking', type: 'http', seq: 3, method: 'DELETE', url: '{{host}}/bookings/:id' }
+          ]
         },
         {
           name: 'Payments',
@@ -71,10 +71,10 @@ export const foldersFixtureCollection = {
           items: [
             { name: 'Get Payment', type: 'http', seq: 1, method: 'GET', url: '{{host}}/bookings/:id/payment' },
             { name: 'Charge Payment', type: 'http', seq: 2, method: 'POST', url: '{{host}}/bookings/:id/payment/charge' },
-            { name: 'Refund Payment', type: 'http', seq: 3, method: 'POST', url: '{{host}}/bookings/:id/payment/refund' },
-          ],
-        },
-      ],
+            { name: 'Refund Payment', type: 'http', seq: 3, method: 'POST', url: '{{host}}/bookings/:id/payment/refund' }
+          ]
+        }
+      ]
     },
     {
       name: 'Guests',
@@ -85,15 +85,15 @@ export const foldersFixtureCollection = {
         { name: 'Get Guest', type: 'http', seq: 2, method: 'GET', url: '{{host}}/guests/:id' },
         { name: 'Create Guest', type: 'http', seq: 3, method: 'POST', url: '{{host}}/guests' },
         { name: 'Update Guest', type: 'http', seq: 4, method: 'PUT', url: '{{host}}/guests/:id' },
-        { name: 'Delete Guest', type: 'http', seq: 5, method: 'DELETE', url: '{{host}}/guests/:id' },
-      ],
+        { name: 'Delete Guest', type: 'http', seq: 5, method: 'DELETE', url: '{{host}}/guests/:id' }
+      ]
     },
     { name: 'Health Check', type: 'http', seq: 5, method: 'GET', url: '{{host}}/ping' },
     {
       name: 'Setup Script',
       type: 'script',
       seq: 6,
-      script: "bru.setVar('requestedAt', Date.now());\nconsole.log('Hotel API docs loaded');",
+      script: 'bru.setVar(\'requestedAt\', Date.now());\nconsole.log(\'Hotel API docs loaded\');'
     },
     {
       name: 'Customers/%$',
@@ -102,16 +102,16 @@ export const foldersFixtureCollection = {
       items: [
         { name: 'List customers', type: 'http', seq: 1, method: 'GET', url: '{{host}}/customers' },
         { name: 'Create customer', type: 'http', seq: 2, method: 'POST', url: '{{host}}/customers' },
-        { name: 'Retrieve customer', type: 'http', seq: 3, method: 'GET', url: '{{host}}/customers/:id' },
-      ],
+        { name: 'Retrieve customer', type: 'http', seq: 3, method: 'GET', url: '{{host}}/customers/:id' }
+      ]
     },
     {
       name: 'Café & Résumés',
       type: 'folder',
       seq: 8,
       items: [
-        { name: 'List entrées', type: 'http', seq: 1, method: 'GET', url: '{{host}}/entrees' },
-      ],
-    },
-  ],
+        { name: 'List entrées', type: 'http', seq: 1, method: 'GET', url: '{{host}}/entrees' }
+      ]
+    }
+  ]
 } as unknown as OpenCollection;

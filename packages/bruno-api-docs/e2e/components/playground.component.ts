@@ -31,9 +31,11 @@ export class PlaygroundComponent extends BaseComponent {
   readonly collectionCollapseToggle = this.collectionNode.getByRole('button', {
     name: /Collapse collection|Expand collection/
   });
+
   readonly collectionRootLink = this.collectionNode.getByRole('button', {
     name: /Bruno Testbench|Collection/
   });
+
   readonly gear = this.page.getByTestId('playground-env-settings');
   readonly view = this.page.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');

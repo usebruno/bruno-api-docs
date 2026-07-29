@@ -153,7 +153,7 @@ export const Environments: React.FC<EnvironmentsProps> = ({ collection }) => {
   return (
     <PageWrapper>
       <StyledWrapper className="environments" data-testid="environments-page">
-        <Heading size='md' testId="environments-title">Environments</Heading>
+        <Heading size="md" testId="environments-title">Environments</Heading>
 
         {environments.length ? (
           <>
@@ -208,7 +208,7 @@ export const Environments: React.FC<EnvironmentsProps> = ({ collection }) => {
           <EmptyState
             testId="environments-empty"
             icon={<GlobeIcon />}
-            className='environment-empty'
+            className="environment-empty"
             heading="No environments configured"
             subheading="This collection has no environments yet. Add an environment in Bruno to define base URLs, tokens, and other variables that requests can reference."
           />

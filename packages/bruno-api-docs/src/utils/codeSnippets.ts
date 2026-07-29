@@ -19,12 +19,12 @@ export interface SnippetInput {
 }
 
 /** The request body reduced to the shapes a code snippet needs to render. */
-type NormalizedBody =
-  | { kind: 'none' }
-  | { kind: 'raw'; contentType: string; text: string }
-  | { kind: 'urlencoded'; params: SnippetHeader[] }
-  | { kind: 'multipart'; parts: { name: string; isFile: boolean; value: string }[] }
-  | { kind: 'file'; contentType: string; filePath: string };
+type NormalizedBody
+  = | { kind: 'none' }
+    | { kind: 'raw'; contentType: string; text: string }
+    | { kind: 'urlencoded'; params: SnippetHeader[] }
+    | { kind: 'multipart'; parts: { name: string; isFile: boolean; value: string }[] }
+    | { kind: 'file'; contentType: string; filePath: string };
 
 /** MIME type emitted for each raw (single-blob) body type. */
 const RAW_BODY_MIME: Record<string, string> = {

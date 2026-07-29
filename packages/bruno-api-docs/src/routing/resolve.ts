@@ -28,7 +28,7 @@ const toNeighbor = (entry: NavEntry): SeqNeighbor => ({
   slug: entry.slug,
   name: entry.name,
   type: entry.type,
-  ...(entry.method ? { method: entry.method } : {}),
+  ...(entry.method ? { method: entry.method } : {})
 });
 
 /** Resolve a slug to its entry + prev/next neighbours; null for unknown slugs. */
@@ -60,6 +60,6 @@ export const resolveSlug = (model: NavModel, raw: string): Resolution | null => 
     entry,
     ...(prev ? { prev: toNeighbor(prev) } : {}),
     ...(next ? { next: toNeighbor(next) } : {}),
-    ...(example ? { example } : {}),
+    ...(example ? { example } : {})
   };
 };

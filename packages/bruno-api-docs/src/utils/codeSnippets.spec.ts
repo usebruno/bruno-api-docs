@@ -11,14 +11,14 @@ describe('codeSnippets', () => {
     });
     expect(curl).toContain('curl --request POST');
     expect(curl).toContain('{{baseUrl}}/login');
-    expect(curl).toContain("--header 'Accept: application/json'");
-    expect(curl).toContain("--header 'Content-Type: application/json'");
-    expect(curl).toContain("--data '{\"a\":1}'");
+    expect(curl).toContain('--header \'Accept: application/json\'');
+    expect(curl).toContain('--header \'Content-Type: application/json\'');
+    expect(curl).toContain('--data \'{"a":1}\'');
   });
 
   it('injects a bearer Authorization header', () => {
     const curl = generateCurlCommand({ method: 'get', url: '/x', auth: { type: 'bearer', token: 'tkn' } as any });
-    expect(curl).toContain("--header 'Authorization: Bearer tkn'");
+    expect(curl).toContain('--header \'Authorization: Bearer tkn\'');
   });
 
   it('comments non-derivable auth instead of emitting a wrong header', () => {
@@ -39,7 +39,7 @@ describe('codeSnippets', () => {
       url: '/x',
       body: { type: 'multipart-form', data: [{ name: 'f', type: 'file', value: '/x.pdf' }] } as any
     });
-    expect(multipart).toContain("--form f='@/x.pdf'");
+    expect(multipart).toContain('--form f=\'@/x.pdf\'');
   });
 
   it('generates JavaScript (fetch) and Python (requests) with the body', () => {

@@ -227,8 +227,8 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
           <colgroup>
             <col className="col-key" style={{ width: columnWidths.key }} />
             <col className="col-value" style={{ width: columnWidths.value }} />
-            {!inlineActions &&
-              additionalColumns.map((col) => (
+            {!inlineActions
+              && additionalColumns.map((col) => (
                 <col key={col.key} className={`col-${col.key}`} style={{ width: columnWidths[col.key] }} />
               ))}
             {showDescription && <col className="col-description" style={{ width: columnWidths.description }} />}
@@ -244,8 +244,8 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                 {valueHeader ?? valuePlaceholder}
                 {resizeHandle('value')}
               </th>
-              {!inlineActions &&
-                additionalColumns.map((col) => (
+              {!inlineActions
+                && additionalColumns.map((col) => (
                   <th key={col.key} className={`col-${col.key}`}>
                     {col.label}
                     {resizeHandle(col.key)}
@@ -369,8 +369,8 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                       valueField
                     )}
                   </td>
-                  {!inlineActions &&
-                    additionalColumns.map((col) => (
+                  {!inlineActions
+                    && additionalColumns.map((col) => (
                       <td key={col.key} className={`col-${col.key}`}>
                         {!isLastEmptyRow && col.render(row, index, updateCell)}
                       </td>

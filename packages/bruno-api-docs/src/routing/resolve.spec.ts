@@ -5,18 +5,18 @@ import { normalizeSlug, resolveSlug } from './resolve';
 
 const req = (name: string, seq: number, method = 'GET') => ({
   info: { name, type: 'http', seq },
-  http: { method, url: `https://x/${name}` },
+  http: { method, url: `https://x/${name}` }
 });
 const folder = (name: string, seq: number, items: unknown[] = []) => ({
   info: { name, type: 'folder', seq },
-  items,
+  items
 });
 const model = () =>
   buildNavModel({
     opencollection: '1.0.0',
     info: { name: 'Hotel API' },
     config: { environments: [{ name: 'Dev', variables: [] }] },
-    items: [folder('Authentication', 1, [req('Login', 1, 'POST'), req('Register', 2)])],
+    items: [folder('Authentication', 1, [req('Login', 1, 'POST'), req('Register', 2)])]
   } as unknown as OpenCollection);
 
 describe('normalizeSlug', () => {
@@ -63,9 +63,9 @@ const withExamples = () =>
       {
         info: { name: 'Login', type: 'http', seq: 1 },
         http: { method: 'POST', url: 'https://x/login' },
-        examples: [{ name: 'Successful login' }, { name: 'Invalid credentials' }],
-      },
-    ],
+        examples: [{ name: 'Successful login' }, { name: 'Invalid credentials' }]
+      }
+    ]
   } as unknown as OpenCollection);
 
 describe('resolveSlug - examples', () => {

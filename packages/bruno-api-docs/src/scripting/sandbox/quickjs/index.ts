@@ -18,19 +18,19 @@ const toNumber = (value: string) => {
 };
 
 const removeQuotes = (str: string) => {
-  if ((str.startsWith('"') && str.endsWith('"')) || (str.startsWith("'") && str.endsWith("'"))) {
+  if ((str.startsWith('"') && str.endsWith('"')) || (str.startsWith('\'') && str.endsWith('\''))) {
     return str.slice(1, -1);
   }
   return str;
 };
 
-const executeQuickJsVm = ({ script: externalScript, context: externalContext, scriptType = 'template-literal' }: { script: any, context: any, scriptType?: string }) => {
+const executeQuickJsVm = ({ script: externalScript, context: externalContext, scriptType = 'template-literal' }: { script: any; context: any; scriptType?: string }) => {
   if (!externalScript?.length || typeof externalScript !== 'string') {
     return externalScript;
   }
   externalScript = externalScript?.trim();
 
-  if(scriptType === 'template-literal') {
+  if (scriptType === 'template-literal') {
     if (!isNaN(Number(externalScript))) {
       const number = Number(externalScript);
 
@@ -84,7 +84,11 @@ const executeQuickJsVm = ({ script: externalScript, context: externalContext, sc
   }
 };
 
-const executeQuickJsVmAsync = async ({ script: externalScript, context: externalContext, collectionPath: _collectionPath }: { script: any, context: any, collectionPath: any }) => {
+const executeQuickJsVmAsync = async ({
+  script: externalScript,
+  context: externalContext,
+  collectionPath: _collectionPath
+}: { script: any; context: any; collectionPath: any }) => {
   if (!externalScript?.length || typeof externalScript !== 'string') {
     return externalScript;
   }

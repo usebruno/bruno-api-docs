@@ -280,8 +280,8 @@ describe('RequestRunner', () => {
       expect(sentBody).toBeInstanceOf(FormData);
       expect(sentBody!.get('description')).toBe('Quarterly report');
       expect(sentBody!.get('tags')).toBe('report,quarterly');
-      expect(sentBody!.has('file')).toBe(false);   // file field omitted
-      expect(sentBody!.has('debug')).toBe(false);   // disabled field excluded
+      expect(sentBody!.has('file')).toBe(false); // file field omitted
+      expect(sentBody!.has('debug')).toBe(false); // disabled field excluded
 
       global.fetch = originalFetch;
     });
@@ -317,12 +317,12 @@ describe('RequestRunner', () => {
 
       await executor.executeRequest(fileRequest, { timeout: 5000 });
 
-      expect(sentBody == null).toBe(true);   // no body sent
+      expect(sentBody == null).toBe(true); // no body sent
 
       global.fetch = originalFetch;
     });
 
-    describe("inherited auth reaches the wire", () => {
+    describe('inherited auth reaches the wire', () => {
       const run = async (yaml: string, path: number[]) => {
         let captured: { url?: string; headers?: Record<string, string> } = {};
         global.fetch = vi
@@ -332,10 +332,10 @@ describe('RequestRunner', () => {
             return Promise.resolve({
               ok: true,
               status: 200,
-              statusText: "OK",
+              statusText: 'OK',
               url,
-              headers: new Headers({ "content-type": "application/json" }),
-              text: async () => JSON.stringify({ ok: true }),
+              headers: new Headers({ 'content-type': 'application/json' }),
+              text: async () => JSON.stringify({ ok: true })
             });
           });
         const collection = parseYaml(yaml);
@@ -345,13 +345,13 @@ describe('RequestRunner', () => {
           item,
           collection,
           runtimeVariables: {},
-          timeout: 5000,
+          timeout: 5000
         });
         global.fetch = originalFetch;
         return captured;
       };
 
-      it("applies a collection-level bearer to an inheriting request, interpolating the token var", async () => {
+      it('applies a collection-level bearer to an inheriting request, interpolating the token var', async () => {
         const captured = await run(
           `
 opencollection: "1.0.0"
@@ -371,12 +371,12 @@ items:
     url: "https://api.example.com/me"
     auth: inherit
 `,
-          [0],
+          [0]
         );
-        expect(captured.headers?.["Authorization"]).toBe("Bearer secret-abc");
+        expect(captured.headers?.['Authorization']).toBe('Bearer secret-abc');
       });
 
-      it("applies a folder-level api key (query placement) to an inheriting request", async () => {
+      it('applies a folder-level api key (query placement) to an inheriting request', async () => {
         const captured = await run(
           `
 opencollection: "1.0.0"
@@ -398,12 +398,12 @@ items:
         url: "https://api.example.com/data"
         auth: inherit
 `,
-          [0, 0],
+          [0, 0]
         );
-        expect(captured.url).toContain("api_key=k-123");
+        expect(captured.url).toContain('api_key=k-123');
       });
 
-      it("prefers the closest folder auth over the collection for an inheriting request", async () => {
+      it('prefers the closest folder auth over the collection for an inheriting request', async () => {
         const captured = await run(
           `
 opencollection: "1.0.0"
@@ -427,12 +427,12 @@ items:
         url: "https://api.example.com/me"
         auth: inherit
 `,
-          [0, 0],
+          [0, 0]
         );
-        expect(captured.headers?.["Authorization"]).toBe("Bearer folder-token");
+        expect(captured.headers?.['Authorization']).toBe('Bearer folder-token');
       });
 
-      it("sends No Auth when a No-Auth folder blocks the collection auth", async () => {
+      it('sends No Auth when a No-Auth folder blocks the collection auth', async () => {
         // A folder that configured No Auth is represented by an absent `auth` field (canonical
         // OpenCollection has no 'none' string); it blocks the parent's auth for an inheriting child.
         const captured = await run(
@@ -458,13 +458,12 @@ items:
         url: "https://api.example.com/me"
         auth: inherit
 `,
-          [0, 0],
+          [0, 0]
         );
-        expect(captured.headers?.["Authorization"]).toBeUndefined();
-        expect(captured.headers?.["X-From-Folder"]).toBe("1"); // folder headers still merge
+        expect(captured.headers?.['Authorization']).toBeUndefined();
+        expect(captured.headers?.['X-From-Folder']).toBe('1'); // folder headers still merge
       });
     });
-
   });
 });
 

@@ -243,7 +243,7 @@ const closingParen = (code: string, open: number): number => {
     const ch = code[i];
     const next = code[i + 1];
 
-    if (ch === "'" || ch === '"' || ch === '`') {
+    if (ch === '\'' || ch === '"' || ch === '`') {
       i += 1;
       while (i < code.length && code[i] !== ch) i += code[i] === '\\' ? 2 : 1;
       continue;

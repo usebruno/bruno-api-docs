@@ -6,7 +6,7 @@ import {
   exampleSlugs,
   exampleNames,
   exampleIndexForSlug,
-  exampleSlugForIndex,
+  exampleSlugForIndex
 } from './slug';
 
 const request = (...names: string[]): HttpRequest =>
@@ -52,7 +52,7 @@ describe('dedupeSiblingSlugs', () => {
     expect(dedupeSiblingSlugs(['login', 'register', 'refresh'])).toEqual([
       'login',
       'register',
-      'refresh',
+      'refresh'
     ]);
   });
 
@@ -60,7 +60,7 @@ describe('dedupeSiblingSlugs', () => {
     expect(dedupeSiblingSlugs(['login', 'login', 'login'])).toEqual([
       'login',
       'login-2',
-      'login-3',
+      'login-3'
     ]);
   });
 
@@ -70,7 +70,7 @@ describe('dedupeSiblingSlugs', () => {
     expect(dedupeSiblingSlugs(['login', 'login-2', 'login'])).toEqual([
       'login',
       'login-2',
-      'login-3',
+      'login-3'
     ]);
   });
 });
@@ -79,7 +79,7 @@ describe('exampleSlugs', () => {
   it('slugifies example names in array order', () => {
     expect(exampleSlugs(['Successful login', 'Invalid credentials'])).toEqual([
       'successful-login',
-      'invalid-credentials',
+      'invalid-credentials'
     ]);
   });
 

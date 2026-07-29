@@ -31,7 +31,7 @@ const initialState: PlaygroundState = {
   // UI State
   viewMode: 'playground',
   selectedItemId: null,
-  selectedExampleIndex: null,
+  selectedExampleIndex: null
 };
 
 const readEnvironments = (collection: OpenCollectionCollection): Environment[] | null =>
@@ -49,17 +49,17 @@ const findAndUpdateItemInCollection = (
   updatedItem: HttpRequest
 ): boolean => {
   if (!items) return false;
-  
+
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
     const itemUuid = (item as any).uuid;
-    
+
     if (itemUuid === uuid) {
       // Preserve UUID when updating
       items[i] = { ...updatedItem, uuid: itemUuid } as any;
       return true;
     }
-    
+
     if (isFolder(item)) {
       const folder = item as Folder;
       if (folder.items && findAndUpdateItemInCollection(folder.items, uuid, updatedItem)) {
@@ -67,13 +67,13 @@ const findAndUpdateItemInCollection = (
       }
     }
   }
-  
+
   return false;
 };
 
 const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void => {
   if (!items) return;
-  
+
   for (const item of items) {
     if (isFolder(item)) {
       // Initialize isCollapsed to true (collapsed) if not already set
@@ -94,13 +94,13 @@ const preserveCollapsedState = (
 ): void => {
   for (const newItem of newItems) {
     const newUuid = (newItem as any).uuid;
-    
+
     const oldItem = oldItems.find((old: any) => old.uuid === newUuid);
-    
+
     if (isFolder(newItem)) {
       if (oldItem && isFolder(oldItem)) {
         (newItem as any).isCollapsed = (oldItem as any).isCollapsed;
-        
+
         const newFolder = newItem as Folder;
         const oldFolder = oldItem as Folder;
         if (newFolder.items && oldFolder.items) {
@@ -132,14 +132,14 @@ const playgroundSlice = createSlice({
       state.pristineEnvironments = envs ? cloneDeep(envs) : null;
 
       const hydrated = hydrateWithUUIDs(action.payload);
-      
+
       // Preserve existing collapsed states from previous hydrated collection
       if (state.hydratedCollection?.items && hydrated.items) {
         preserveCollapsedState(hydrated.items, state.hydratedCollection.items);
       } else if (hydrated.items) {
         initializeCollapsedState(hydrated.items);
       }
-      
+
       state.hydratedCollection = hydrated;
     },
     clearPlaygroundCollection: (state: PlaygroundState) => {
@@ -205,12 +205,12 @@ const playgroundSlice = createSlice({
     },
     updateFolderInCollection: (state: PlaygroundState, action: PayloadAction<{ uuid: string; folder: Folder }>) => {
       if (!state.hydratedCollection?.items) return;
-      
+
       const { uuid, folder } = action.payload;
       findAndUpdateItem(state.hydratedCollection.items, uuid, (item) => {
         Object.assign(item, folder);
       });
-      
+
       // Also update the base collection
       if (state.collection?.items) {
         findAndUpdateItem(state.collection.items, uuid, (item) => {

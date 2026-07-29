@@ -181,7 +181,7 @@ describe('ExampleCard', () => {
     expect(html).toContain('role="tabpanel"');
   });
 
-  it("uses the example's own method (and url) in the header, not the parent request's", () => {
+  it('uses the example\'s own method (and url) in the header, not the parent request\'s', () => {
     const html = renderToStaticMarkup(
       <ExampleCard
         example={{
@@ -200,7 +200,7 @@ describe('ExampleCard', () => {
     expect(html).not.toContain('/parent');
   });
 
-  it("falls back to the parent method when the example request omits one", () => {
+  it('falls back to the parent method when the example request omits one', () => {
     const html = renderToStaticMarkup(
       <ExampleCard
         example={{ name: 'No method', request: { url: '{{host}}/x' }, response: { status: 200 } }}

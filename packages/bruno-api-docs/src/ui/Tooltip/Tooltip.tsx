@@ -28,17 +28,17 @@ interface Position {
 }
 
 const isEmptyContent = (content: ReactNode): boolean =>
-  content === undefined ||
-  content === null ||
-  content === '' ||
-  (typeof content === 'string' && content.trim() === '');
+  content === undefined
+  || content === null
+  || content === ''
+  || (typeof content === 'string' && content.trim() === '');
 
-const chain =
-  <E,>(own: ((event: E) => void) | undefined, next: (event: E) => void) =>
-  (event: E): void => {
-    own?.(event);
-    next(event);
-  };
+const chain
+  = <E,>(own: ((event: E) => void) | undefined, next: (event: E) => void) =>
+    (event: E): void => {
+      own?.(event);
+      next(event);
+    };
 
 interface AnchorProps {
   onMouseEnter?: React.MouseEventHandler<HTMLElement>;

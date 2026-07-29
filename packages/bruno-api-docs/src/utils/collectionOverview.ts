@@ -56,7 +56,7 @@ export const hasCollectionConfiguration = (
   scripts: CollectionScripts = {},
   hasVars = false
 ): boolean =>
-  headers.some((header) => header && header.name) ||
-  hasConfiguredAuth(auth) ||
-  hasVars ||
-  Boolean(scripts.preRequest || scripts.postResponse || scripts.tests);
+  headers.some((header) => header && header.name)
+  || hasConfiguredAuth(auth)
+  || hasVars
+  || Boolean(scripts.preRequest || scripts.postResponse || scripts.tests);

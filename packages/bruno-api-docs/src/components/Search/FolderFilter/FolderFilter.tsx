@@ -17,7 +17,7 @@ export const FolderFilter: React.FC<FolderFilterProps> = ({
   folders,
   value,
   onChange,
-  testId = 'search-folder-filter',
+  testId = 'search-folder-filter'
 }) => {
   if (folders.length === 0) return null;
 
@@ -40,8 +40,7 @@ export const FolderFilter: React.FC<FolderFilterProps> = ({
               <span className="dropdown-label">{folder.name}</span>
             </button>
           </li>
-        ))
-      }
+        ))}
     </Dropdown>
   );
 };

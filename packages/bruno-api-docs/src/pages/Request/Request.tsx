@@ -106,8 +106,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
   const effectiveAuth = ownAuth === 'inherit' ? resolved.auth : ownAuth;
   const showAuth = ownAuth !== undefined;
   const authSource = ownAuth === 'inherit' ? resolved.source : undefined;
-  const authBadge =
-    ownAuth === 'inherit' ? (
+  const authBadge
+    = ownAuth === 'inherit' ? (
       authSource ? (
         <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
       ) : (
@@ -140,8 +140,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
   const hasInheritedHeaders = inheritedHeaders.length > 0;
   const hasParams = pathParams.length > 0 || queryParams.length > 0;
   const hasBody = bodyView.render !== 'none';
-  const hasVars =
-    preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
+  const hasVars
+    = preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
   const hasExamples = examples.length > 0;
   const hasExecutionContext = scriptChain.length > 0 || hasVars || assertions.length > 0 || tests.length > 0;
   const hasLeftColumn = showAuth || hasParams || hasBody || hasHeaders || hasInheritedHeaders;
@@ -307,7 +307,7 @@ export const Request: React.FC<RequestProps> = ({
           emptyStateProps={{
             icon: <EyeOffIcon />,
             heading: 'Preview not available',
-            subheadingSuffix: "documentation isn't supported in this viewer."
+            subheadingSuffix: 'documentation isn\'t supported in this viewer.'
           }}
         />
       </PageWrapper>

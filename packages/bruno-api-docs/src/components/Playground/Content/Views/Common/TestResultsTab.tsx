@@ -10,13 +10,13 @@ interface TestResultsTabProps {
 const TestResultsTab: React.FC<TestResultsTabProps> = ({ testResults, assertionResults }) => {
   const [testsExpanded, setTestsExpanded] = useState(true);
   const [assertionsExpanded, setAssertionsExpanded] = useState(true);
-  
+
   const hasTests = testResults && testResults.results.length > 0;
   const hasAssertions = assertionResults && assertionResults.results.length > 0;
 
   if (!hasTests && !hasAssertions) {
     return (
-      <NoContentText text='No tests or assertions were run' />
+      <NoContentText text="No tests or assertions were run" />
     );
   }
 
@@ -109,7 +109,7 @@ const TestResultsTab: React.FC<TestResultsTabProps> = ({ testResults, assertionR
                     key={index}
                     className="flex items-start gap-3 px-3 py-2"
                     style={{
-                      backgroundColor: 'var(--bg-primary)',
+                      backgroundColor: 'var(--bg-primary)'
                     }}
                   >
                     <div style={{ color: getStatusColor(result.status), flexShrink: 0, marginTop: '2px' }}>
@@ -120,9 +120,12 @@ const TestResultsTab: React.FC<TestResultsTabProps> = ({ testResults, assertionR
                         {result.description}
                       </div>
                       {result.error && (
-                        <div className="text-xs mt-1 font-mono" style={{ 
-                          color: 'var(--oc-colors-text-danger)',
-                        }}>
+                        <div
+                          className="text-xs mt-1 font-mono"
+                          style={{
+                            color: 'var(--oc-colors-text-danger)'
+                          }}
+                        >
                           {result.error}
                         </div>
                       )}
@@ -161,7 +164,7 @@ const TestResultsTab: React.FC<TestResultsTabProps> = ({ testResults, assertionR
                     key={index}
                     className="flex items-start gap-3 px-3 py-2"
                     style={{
-                      backgroundColor: 'var(--bg-primary)',
+                      backgroundColor: 'var(--bg-primary)'
                     }}
                   >
                     <div style={{ color: getStatusColor(result.status), flexShrink: 0, marginTop: '2px' }}>
@@ -203,4 +206,3 @@ const TestResultsTab: React.FC<TestResultsTabProps> = ({ testResults, assertionR
 };
 
 export default TestResultsTab;
-

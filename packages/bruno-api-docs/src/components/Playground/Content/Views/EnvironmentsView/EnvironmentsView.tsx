@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable } from '@opencollection/types/common/variables';
-import KeyValueTable, { KeyValueRow } from '../../../../../components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../../../../../components/KeyValueTable/KeyValueTable';
+import KeyValueTable from '../../../../../components/KeyValueTable/KeyValueTable';
 import Tabs from '../../../../../ui/Tabs/Tabs';
 import TitleLabel from '../../../../TitleLabel/TitleLabel';
 import { EmptyState } from '../../../../../ui/EmptyState/EmptyState';
@@ -55,8 +56,8 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
   const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
 
   const environments = (collection as any)?.environments || collection?.config?.environments || [];
-  const selectedEnvironment =
-    selectedEnvironmentIndex !== null ? environments[selectedEnvironmentIndex] ?? null : null;
+  const selectedEnvironment
+    = selectedEnvironmentIndex !== null ? environments[selectedEnvironmentIndex] ?? null : null;
 
   const allVariables: Variable[] = selectedEnvironment?.variables ?? [];
   const plainRows = allVariables.filter((v) => !isSecretVariable(v)).map(envVariableToRow);

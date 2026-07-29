@@ -5,7 +5,7 @@ import {
   collectMethods,
   createSearchIndex,
   searchHits,
-  type SearchRecord,
+  type SearchRecord
 } from './searchIndex';
 import type { NavEntry } from '../../routing/types';
 
@@ -21,9 +21,9 @@ const requestEntry = (over: Partial<NavEntry> & { uuid: string }): NavEntry => {
     item: {
       uuid,
       info: { name: 'Get All Hotels', type: 'http', description: 'List hotels' },
-      http: { method: 'GET', url: '{{baseUrl}}/api/v1/hotels', params: [{ name: 'page', value: '1' }] },
+      http: { method: 'GET', url: '{{baseUrl}}/api/v1/hotels', params: [{ name: 'page', value: '1' }] }
     } as never,
-    ...rest,
+    ...rest
   };
 };
 
@@ -49,8 +49,8 @@ describe('buildSearchRecords', () => {
       uuid: 'u1',
       ancestors: [
         { name: 'Billing', slug: 'billing' },
-        { name: 'Lookups', slug: 'billing/lookups' },
-      ],
+        { name: 'Lookups', slug: 'billing/lookups' }
+      ]
     });
     expect(buildSearchRecords([entry])[0].breadcrumb).toBe('Billing / Lookups');
     expect(buildSearchRecords([entry])[0].ancestorSlugs).toEqual(['billing', 'billing/lookups']);
@@ -59,10 +59,10 @@ describe('buildSearchRecords', () => {
   it('excludes folders and built-in pages from records', () => {
     const folder: NavEntry = {
       slug: 'hotels', type: 'folder', name: 'Hotels', item: { uuid: 'f1' } as never,
-      ancestors: [], depth: 0,
+      ancestors: [], depth: 0
     };
     const overview: NavEntry = {
-      slug: '', type: 'overview', name: 'Overview', item: null, ancestors: [], depth: -1,
+      slug: '', type: 'overview', name: 'Overview', item: null, ancestors: [], depth: -1
     };
     expect(buildSearchRecords([folder, overview])).toHaveLength(0);
   });
@@ -79,7 +79,7 @@ describe('collectTopLevelFolders', () => {
     const top: NavEntry = { slug: 'hotels', type: 'folder', name: 'Hotels', item: {} as never, ancestors: [], depth: 0 };
     const nested: NavEntry = { slug: 'hotels/x', type: 'folder', name: 'X', item: {} as never, ancestors: [], depth: 1 };
     expect(collectTopLevelFolders([top, nested, requestEntry({ uuid: 'u1' })])).toEqual([
-      { slug: 'hotels', name: 'Hotels' },
+      { slug: 'hotels', name: 'Hotels' }
     ]);
   });
 });
@@ -93,14 +93,14 @@ describe('collectMethods', () => {
       requestEntry({ uuid: 'c', method: 'GET' }),
       requestEntry({ uuid: 'd', method: 'PURGE' }),
       requestEntry({ uuid: 'e', method: 'HEAD' }),
-      folder,
+      folder
     ];
     expect(collectMethods(entries)).toEqual(['GET', 'PATCH', 'HEAD', 'PURGE']);
   });
 });
 
 const rec = (over: Partial<SearchRecord>): SearchRecord => ({
-  id: 'id', slug: 's', name: '', method: 'GET', breadcrumb: '', ancestorSlugs: [], url: '', ...over,
+  id: 'id', slug: 's', name: '', method: 'GET', breadcrumb: '', ancestorSlugs: [], url: '', ...over
 });
 
 /** Substrings the reported ranges actually cover, for match-locality assertions. */
@@ -115,7 +115,7 @@ const BILLING: SearchRecord[] = [
   rec({ id: 'invoices', name: 'Get All Invoices', breadcrumb: 'Billing', url: '{{baseUrl}}/billing/invoices' }),
   rec({ id: 'customers', name: 'Get All Customers', breadcrumb: 'Billing', url: '{{baseUrl}}/billing/customers' }),
   rec({ id: 'subs', name: 'Get All Subscriptions', breadcrumb: 'Billing', url: '{{baseUrl}}/billing/subscriptions' }),
-  rec({ id: 'currencies', name: 'Get Currencies', breadcrumb: 'Billing / Lookups', url: '{{baseUrl}}/billing/lookups/currencies' }),
+  rec({ id: 'currencies', name: 'Get Currencies', breadcrumb: 'Billing / Lookups', url: '{{baseUrl}}/billing/lookups/currencies' })
 ];
 
 describe('searchHits - empty & degenerate queries', () => {

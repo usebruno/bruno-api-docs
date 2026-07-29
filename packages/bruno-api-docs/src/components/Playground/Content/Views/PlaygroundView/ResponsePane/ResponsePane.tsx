@@ -11,7 +11,6 @@ import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseForma
 import type { RunRequestResponse } from '../../../../../../runner';
 import type { ResponseBodyFormat } from '../../../../../../constants';
 
-
 interface ResponsePaneProps {
   response: RunRequestResponse;
   isLoading: boolean;
@@ -81,9 +80,9 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (
-    <TestResultsTab 
-      testResults={response.testResults} 
-      assertionResults={response.assertionResults} 
+    <TestResultsTab
+      testResults={response.testResults}
+      assertionResults={response.assertionResults}
     />
   );
 
@@ -93,22 +92,22 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
   const testsCount = hasTestResults || hasAssertionResults ? '•' : undefined;
 
   const tabs = [
-    { 
-      id: 'response', 
-      label: 'Response', 
-      content: renderResponseBody() 
+    {
+      id: 'response',
+      label: 'Response',
+      content: renderResponseBody()
     },
-    { 
-      id: 'headers', 
-      label: 'Headers', 
+    {
+      id: 'headers',
+      label: 'Headers',
       contentIndicator: headersCount || undefined,
-      content: renderHeaders() 
+      content: renderHeaders()
     },
-    { 
-      id: 'tests', 
-      label: 'Tests', 
+    {
+      id: 'tests',
+      label: 'Tests',
       contentIndicator: testsCount,
-      content: renderTestResults() 
+      content: renderTestResults()
     }
   ];
 
@@ -158,7 +157,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
       <Tabs
         variant="responsive"
         testId="response-tabs"
-        className='h-full'
+        className="h-full"
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}

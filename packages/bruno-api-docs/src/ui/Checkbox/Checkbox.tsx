@@ -1,6 +1,7 @@
-import React, { ChangeEvent } from "react";
-import { StyledWrapper } from "./StyledWrapper";
-import { CheckIcon } from "../../assets/icons";
+import type { ChangeEvent } from 'react';
+import React from 'react';
+import { StyledWrapper } from './StyledWrapper';
+import { CheckIcon } from '../../assets/icons';
 
 interface CheckboxProps {
   className?: string;
@@ -26,9 +27,9 @@ const Checkbox: React.FC<CheckboxProps> = ({
         onChange={onChange}
         data-testid={testId && `${testId}-input`}
       />
-      <CheckIcon className='checkbox-check' width={12} height={12} />
+      <CheckIcon className="checkbox-check" width={12} height={12} />
     </StyledWrapper>
   );
-}
+};
 
 export default Checkbox;

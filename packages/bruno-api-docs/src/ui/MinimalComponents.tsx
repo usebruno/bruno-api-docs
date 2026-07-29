@@ -17,7 +17,7 @@ interface MinimalDataTableProps {
 export const MinimalDataTable: React.FC<MinimalDataTableProps> = ({
   data,
   title,
-  columns,
+  columns
 }) => {
   if (!data || data.length === 0) return null;
 
@@ -28,7 +28,7 @@ export const MinimalDataTable: React.FC<MinimalDataTableProps> = ({
         <table>
           <thead>
             <tr>
-              {columns.map(col => (
+              {columns.map((col) => (
                 <th key={col.key} style={{ width: col.width }}>
                   {col.label}
                 </th>
@@ -38,7 +38,7 @@ export const MinimalDataTable: React.FC<MinimalDataTableProps> = ({
           <tbody>
             {data.map((row, idx) => (
               <tr key={idx}>
-                {columns.map(col => (
+                {columns.map((col) => (
                   <td key={col.key}>
                     {col.render ? col.render(row[col.key], row) : (
                       <span className="table-value">{row[col.key] || '-'}</span>
@@ -90,9 +90,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, text }) => {
   const config = statusConfig[status];
 
   return (
-    <span 
-      className="status-badge" 
-      style={{ 
+    <span
+      className="status-badge"
+      style={{
         backgroundColor: config.bg,
         color: config.color,
         border: `1px solid ${config.border}`
@@ -119,7 +119,7 @@ export const TabGroup: React.FC<TabGroupProps> = ({
   return (
     <div className="tab-group">
       <div className="tab-header">
-        {tabs.map(tab => (
+        {tabs.map((tab) => (
           <button
             key={tab.id}
             className={`tab-button ${activeTab === tab.id ? 'active' : ''}`}

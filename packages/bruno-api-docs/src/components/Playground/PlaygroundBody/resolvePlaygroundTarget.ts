@@ -13,11 +13,11 @@ import { getItemUuid } from '../../../utils/itemUtils';
 export const PLAYGROUND_ENVIRONMENTS_SLUG = ENVIRONMENTS_SLUG; // '~environments'
 export const PLAYGROUND_COLLECTION_SLUG = '~collection';
 
-export type PlaygroundViewMode =
-  | 'playground'
-  | 'folder-settings'
-  | 'environments'
-  | 'collection-settings';
+export type PlaygroundViewMode
+  = | 'playground'
+    | 'folder-settings'
+    | 'environments'
+    | 'collection-settings';
 
 export interface PlaygroundTarget {
   view: PlaygroundViewMode;

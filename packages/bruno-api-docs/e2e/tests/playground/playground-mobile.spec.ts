@@ -2,8 +2,8 @@ import { test, expect } from '../../playwright';
 
 // A phone user agent flips useIsMobilePhone to true (it reads navigator.userAgent,
 // not the viewport). The viewport is set to a phone size for realism.
-const IPHONE_UA =
-  'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+const IPHONE_UA
+  = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 
 // The dock param is ignored on a phone (MobileDock renders regardless); a
 // non-default dock is used here to prove it is overridden.

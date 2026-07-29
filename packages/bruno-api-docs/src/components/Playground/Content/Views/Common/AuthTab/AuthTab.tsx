@@ -139,7 +139,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
 
   const renderBody = () => {
     if (!auth) {
-      return <NoContentText text='No authentication configured.' />
+      return <NoContentText text="No authentication configured." />;
     }
     if (auth === 'inherit') {
       return (
@@ -160,7 +160,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
     if (showFullAuth) {
       return <div className="auth-form">{renderForm()}</div>;
     }
-    return <NoContentText text='{title} auth is configured elsewhere.' />
+    return <NoContentText text="{title} auth is configured elsewhere." />;
   };
 
   return (

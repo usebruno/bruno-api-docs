@@ -3,7 +3,8 @@ import Bru from '../utils/bru';
 import BrunoRequest from '../utils/bruno-request';
 import BrunoResponse from '../utils/bruno-response';
 import { executeQuickJsVmAsync } from '../sandbox/quickjs';
-import { AssertionResult, createBruTestResultMethods, type BruTestResultMethods } from '../utils/test';
+import type { AssertionResult } from '../utils/test';
+import { createBruTestResultMethods, type BruTestResultMethods } from '../utils/test';
 
 interface RunScriptOptions {
   script: string;

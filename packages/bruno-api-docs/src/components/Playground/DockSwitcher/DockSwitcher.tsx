@@ -7,7 +7,7 @@ import { StyledWrapper } from './StyledWrapper';
 const DOCKS: { mode: DockMode; label: string; Icon: React.FC }[] = [
   { mode: 'inline', label: 'Dock to the right', Icon: DockInlineIcon },
   { mode: 'bottom', label: 'Dock to the bottom', Icon: DockBottomIcon },
-  { mode: 'modal', label: 'Open as window', Icon: DockModalIcon },
+  { mode: 'modal', label: 'Open as window', Icon: DockModalIcon }
 ];
 
 interface DockSwitcherProps {
@@ -19,7 +19,7 @@ interface DockSwitcherProps {
 const DockSwitcher: React.FC<DockSwitcherProps> = ({
   dock,
   onDockChange,
-  testId = 'playground-dock-switcher',
+  testId = 'playground-dock-switcher'
 }) => (
   <StyledWrapper data-testid={testId}>
     {DOCKS.map(({ mode, label, Icon }) => (

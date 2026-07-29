@@ -16,7 +16,7 @@ const record: SearchRecord = {
   method: 'GET',
   breadcrumb: 'Hotels / Browse & search',
   ancestorSlugs: ['hotels'],
-  url: '{{baseUrl}}/api/v1/hotels',
+  url: '{{baseUrl}}/api/v1/hotels'
 };
 
 describe('SearchResultItem', () => {
@@ -36,7 +36,7 @@ describe('SearchResultItem', () => {
   it('wraps the matched ranges of a field in a bold element', () => {
     // "Hotels" sits at indices 8-13 of "Get All Hotels".
     const html = renderToStaticMarkup(
-      <SearchResultItem record={record} matches={{ name: [[8, 13]] }} onSelect={() => {}} />,
+      <SearchResultItem record={record} matches={{ name: [[8, 13]] }} onSelect={() => {}} />
     );
     expect(boldedText(html)).toContain('Hotels');
   });

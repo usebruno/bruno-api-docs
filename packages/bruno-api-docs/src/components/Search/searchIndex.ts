@@ -49,7 +49,7 @@ export const buildSearchRecords = (entries: NavEntry[]): SearchRecord[] => {
       method: entry.method,
       breadcrumb: entry.ancestors.map((a) => a.name).join(' / '),
       ancestorSlugs: entry.ancestors.map((a) => a.slug),
-      url: getRequestUrl(entry.item as never),
+      url: getRequestUrl(entry.item as never)
     });
   }
   return records;

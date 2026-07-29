@@ -13,7 +13,7 @@ export interface InitialsAvatarProps {
  */
 const InitialsAvatar: React.FC<InitialsAvatarProps> = ({
   collectionName,
-  testId = 'brand-initials',
+  testId = 'brand-initials'
 }) => (
   <StyledWrapper aria-hidden="true" data-testid={testId}>
     {getInitials(collectionName)}

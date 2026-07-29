@@ -7,7 +7,7 @@ import {
   PARAM_REQUEST,
   PARAM_EXAMPLE,
   readPlaygroundParams,
-  writePlaygroundParams,
+  writePlaygroundParams
 } from './playgroundDock';
 
 describe('isDockMode', () => {
@@ -31,7 +31,7 @@ describe('readPlaygroundParams', () => {
       open: false,
       dock: DEFAULT_DOCK,
       requestSlug: null,
-      exampleSlug: null,
+      exampleSlug: null
     });
   });
 
@@ -40,14 +40,14 @@ describe('readPlaygroundParams', () => {
       open: true,
       dock: 'inline',
       requestSlug: 'users/get',
-      exampleSlug: null,
+      exampleSlug: null
     });
   });
 
   it('reads the example slug when a request slug is present', () => {
     expect(readPlaygroundParams(new URLSearchParams('pg=1&pgReq=users/get&pgEx=list-users'))).toMatchObject({
       requestSlug: 'users/get',
-      exampleSlug: 'list-users',
+      exampleSlug: 'list-users'
     });
   });
 
@@ -70,7 +70,7 @@ describe('writePlaygroundParams', () => {
     const next = writePlaygroundParams(new URLSearchParams(), {
       open: true,
       dock: 'modal',
-      requestSlug: 'auth/login',
+      requestSlug: 'auth/login'
     });
     expect(next.get(PARAM_OPEN)).toBe('1');
     expect(next.get(PARAM_DOCK)).toBe('modal');
@@ -95,13 +95,13 @@ describe('writePlaygroundParams', () => {
     const next = writePlaygroundParams(new URLSearchParams(), {
       open: true,
       dock: 'inline',
-      requestSlug: 'x',
+      requestSlug: 'x'
     });
     expect(readPlaygroundParams(next)).toEqual({
       open: true,
       dock: 'inline',
       requestSlug: 'x',
-      exampleSlug: null,
+      exampleSlug: null
     });
   });
 
@@ -110,7 +110,7 @@ describe('writePlaygroundParams', () => {
       open: true,
       dock: 'bottom',
       requestSlug: 'users/get',
-      exampleSlug: 'list-users',
+      exampleSlug: 'list-users'
     });
     expect(next.get(PARAM_EXAMPLE)).toBe('list-users');
     expect(readPlaygroundParams(next)).toMatchObject({ requestSlug: 'users/get', exampleSlug: 'list-users' });

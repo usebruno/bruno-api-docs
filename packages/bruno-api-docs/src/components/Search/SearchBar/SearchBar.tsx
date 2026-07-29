@@ -8,7 +8,7 @@ import {
   createSearchIndex,
   searchHits,
   type SearchHit,
-  type SearchRecord,
+  type SearchRecord
 } from '../searchIndex';
 import { SearchIcon, CloseIcon } from '../../../assets/icons';
 import MethodChips from '../MethodChips/MethodChips';
@@ -82,8 +82,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
         : [];
     return base.filter(
       ({ record: r }) =>
-        (methods.size === 0 || (r.method ? methods.has(r.method.toUpperCase()) : false)) &&
-        (folder === null || r.ancestorSlugs.includes(folder)),
+        (methods.size === 0 || (r.method ? methods.has(r.method.toUpperCase()) : false))
+        && (folder === null || r.ancestorSlugs.includes(folder))
     );
   }, [query, methods, folder, records, fuse, hasQuery, hasFilter]);
 
@@ -114,7 +114,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
       });
       refocusInput();
     },
-    [refocusInput],
+    [refocusInput]
   );
 
   const setFolderFilter = useCallback(
@@ -122,7 +122,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
       setFolder(slug);
       refocusInput();
     },
-    [refocusInput],
+    [refocusInput]
   );
 
   const clearFilters = useCallback(() => {
@@ -145,7 +145,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
       resetAndClose();
       inputRef.current?.blur(); // navigating away, so drop focus from the palette
     },
-    [docsNavigate, resetAndClose],
+    [docsNavigate, resetAndClose]
   );
 
   // Move the highlight and keep it in view. All option rows are already

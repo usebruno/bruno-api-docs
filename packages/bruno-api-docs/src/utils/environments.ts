@@ -9,8 +9,8 @@ import { rowToVariable, toDataType } from './variableDataType';
 const humanizeManager = (type: string | undefined): string => {
   if (!type) return 'External';
   return (
-    MANAGER_LABELS[type] ||
-    type
+    MANAGER_LABELS[type]
+    || type
       .split(/[-_\s]+/)
       .filter(Boolean)
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

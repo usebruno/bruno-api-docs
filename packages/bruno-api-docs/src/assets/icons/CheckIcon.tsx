@@ -7,7 +7,7 @@ interface CheckIconProps {
   height?: number;
 }
 
-export const CheckIcon: React.FC<CheckIconProps> = ({ className, width=24, height=24 }) => (
+export const CheckIcon: React.FC<CheckIconProps> = ({ className, width = 24, height = 24 }) => (
   <svg {...baseIconProps} className={className} width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
     <path
       fill="none"

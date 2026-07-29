@@ -18,7 +18,7 @@ const OpenInBrunoButton: React.FC<OpenInBrunoButtonProps> = ({
   onClick,
   iconOnly = false,
   label = 'Open in Bruno',
-  testId = 'open-in-bruno',
+  testId = 'open-in-bruno'
 }) => {
   const className = iconOnly ? 'is-icon' : 'is-full';
   // With an href it renders an anchor opening the Fetch-in-Bruno page in a new

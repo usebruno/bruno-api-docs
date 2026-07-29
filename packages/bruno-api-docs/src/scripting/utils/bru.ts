@@ -40,7 +40,7 @@ class Bru {
   environmentVariables: any;
   runtimeVariables: any;
   globalEnvironmentVariables: any;
-  
+
   collectionPath: any;
   collectionName: any;
 
@@ -138,8 +138,8 @@ class Bru {
 
     if (VARIABLE_NAME_REGEX.test(key) === false) {
       throw new Error(
-        `Variable name: "${key}" contains invalid characters!` +
-          ' Names must only contain alpha-numeric characters, "-", "_", "."'
+        `Variable name: "${key}" contains invalid characters!`
+        + ' Names must only contain alpha-numeric characters, "-", "_", "."'
       );
     }
 
@@ -149,8 +149,8 @@ class Bru {
   getVar(key: string) {
     if (VARIABLE_NAME_REGEX.test(key) === false) {
       throw new Error(
-        `Variable name: "${key}" contains invalid characters!` +
-          ' Names must only contain alpha-numeric characters, "-", "_", "."'
+        `Variable name: "${key}" contains invalid characters!`
+        + ' Names must only contain alpha-numeric characters, "-", "_", "."'
       );
     }
 

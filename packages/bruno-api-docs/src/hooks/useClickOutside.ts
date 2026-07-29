@@ -14,7 +14,7 @@ export const useClickOutside = (
   ref: RefObject<HTMLElement | null>,
   onClose: () => void,
   enabled = true,
-  ignoreSelector?: string,
+  ignoreSelector?: string
 ): void => {
   useEffect(() => {
     if (!enabled) return;

@@ -80,7 +80,7 @@ export const UnsupportedRequest: React.FC<UnsupportedRequestProps> = ({
       <BreadcrumbWrapper showBreadcrumbs={Boolean(breadcrumbs)} name={name} {...(breadcrumbs ?? {})} />
 
       {titleVariant === 'label' ? (
-        <TitleLabel className='mt-5' testId="unsupported-request-title">{name}</TitleLabel>
+        <TitleLabel className="mt-5" testId="unsupported-request-title">{name}</TitleLabel>
       ) : (
         <Heading size="md" style={{ marginTop: '0.25rem' }} testId="unsupported-request-title">
           {name}
@@ -90,7 +90,7 @@ export const UnsupportedRequest: React.FC<UnsupportedRequestProps> = ({
       <RequestUrlBar className={showRequestDocs ? 'mt-3' : 'mt-2'} method={shortName} url={getRequestUrl(item)} />
 
       {showRequestDocs && (
-        <ViewMore collapsedHeight='4.5rem' testId="overview-markdown-view-more">
+        <ViewMore collapsedHeight="4.5rem" testId="overview-markdown-view-more">
           <div
             className="overview-markdown markdown-documentation mt-5"
             data-testid="overview-markdown-documentation"

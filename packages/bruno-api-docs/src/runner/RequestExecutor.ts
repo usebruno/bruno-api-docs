@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { RunRequestResponse } from './index';
+import type { RunRequestResponse } from './index';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams } from '../utils/schemaHelpers';
 import { buildRequestUrl } from '../utils/pathParams';
 import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
@@ -90,7 +90,7 @@ export class RequestExecutor {
     const auth = getRequestAuth(request);
 
     if (requestHeaders) {
-      requestHeaders.forEach(header => {
+      requestHeaders.forEach((header) => {
         if (!header.disabled && header.name && header.value) {
           headers[header.name] = header.value;
         }
@@ -99,7 +99,7 @@ export class RequestExecutor {
 
     // Auto-set Content-Type for JSON bodies if not already set
     if (body && 'type' in body && body.type === 'json') {
-      const hasContentType = requestHeaders?.some(h =>
+      const hasContentType = requestHeaders?.some((h) =>
         !h.disabled && h.name.toLowerCase() === 'content-type'
       );
       if (!hasContentType) {
@@ -109,7 +109,7 @@ export class RequestExecutor {
 
     // Let the browser set multipart/form-data with its boundary — drop any manual one.
     if (body && 'type' in body && body.type === 'multipart-form') {
-      Object.keys(headers).forEach(key => {
+      Object.keys(headers).forEach((key) => {
         if (key.toLowerCase() === 'content-type') delete headers[key];
       });
     }
@@ -175,7 +175,7 @@ export class RequestExecutor {
           return null;
       }
     } else if (Array.isArray(body)) {
-      if (headers?.some(h => h.name.toLowerCase() === 'content-type' && h.value === 'application/x-www-form-urlencoded')) {
+      if (headers?.some((h) => h.name.toLowerCase() === 'content-type' && h.value === 'application/x-www-form-urlencoded')) {
         return this.buildUrlEncodedBody(body);
       } else {
         return this.buildFormDataBody(body);
@@ -187,7 +187,7 @@ export class RequestExecutor {
 
   private buildUrlEncodedBody(data: any[]): string {
     const params = new URLSearchParams();
-    data.forEach(item => {
+    data.forEach((item) => {
       if (item.disabled !== true && item.name) {
         params.append(item.name, item.value || '');
       }
@@ -197,7 +197,7 @@ export class RequestExecutor {
 
   private buildFormDataBody(data: any[]): FormData {
     const formData = new FormData();
-    data.forEach(item => {
+    data.forEach((item) => {
       if (item.disabled !== true && item.name) {
         if (item.type === 'file' && item.value instanceof File) {
           formData.append(item.name, item.value);
@@ -211,7 +211,7 @@ export class RequestExecutor {
 
   private buildMultipartBody(entries: any[]): FormData {
     const formData = new FormData();
-    entries.forEach(entry => {
+    entries.forEach((entry) => {
       // File fields only carry a local path the browser can't read — omit them.
       if (entry.disabled === true || !entry.name || entry.type === 'file') return;
       const values = Array.isArray(entry.value) ? entry.value : [entry.value];

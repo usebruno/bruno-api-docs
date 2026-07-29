@@ -95,8 +95,8 @@ export const rowToVariable = (row: VariableRowInput): Variable => {
 
   if (row.originalValue !== undefined) {
     const original = unwrapVariableTyped(row.originalValue);
-    const originalType =
-      original.dataType && original.dataType !== 'string' && (VARIABLE_DATA_TYPES as string[]).includes(original.dataType)
+    const originalType
+      = original.dataType && original.dataType !== 'string' && (VARIABLE_DATA_TYPES as string[]).includes(original.dataType)
         ? original.dataType
         : undefined;
     if (original.value === row.value && originalType === dataType) {

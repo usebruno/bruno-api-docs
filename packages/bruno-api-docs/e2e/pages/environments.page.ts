@@ -4,7 +4,6 @@ import { SidebarComponent } from '../components/sidebar.component';
 import { EnvironmentTableComponent } from '../components/environments/environment-table.component';
 
 export class EnvironmentsPage extends BasePage {
-
   readonly root = this.page.getByTestId('environments-page');
   readonly title = this.page.getByTestId('environments-title');
   readonly tabs = this.page.getByTestId('environment-tab');

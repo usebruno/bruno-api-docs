@@ -415,16 +415,16 @@ const MenuDropdown = forwardRef<MenuDropdownHandle, MenuDropdownProps>(
       const { className: extraClassName, ...restExtraProps } = extraProps;
 
       return {
-        className: `dropdown-item ${item.disabled ? 'disabled' : ''} ${selectIndentClass} ${activeClass} ${
+        'className': `dropdown-item ${item.disabled ? 'disabled' : ''} ${selectIndentClass} ${activeClass} ${
           extraClassName ?? ''
         } ${item.className ?? ''}`.trim(),
-        role: itemRole,
+        'role': itemRole,
         'data-item-id': item.id,
-        tabIndex: item.disabled ? -1 : role === 'listbox' ? (isActive ? 0 : -1) : 0,
+        'tabIndex': item.disabled ? -1 : role === 'listbox' ? (isActive ? 0 : -1) : 0,
         'aria-label': item.ariaLabel,
         'aria-disabled': item.disabled,
         ...(role === 'listbox' ? { 'aria-selected': isActive } : { 'aria-current': isActive ? 'true' : undefined }),
-        title: item.title,
+        'title': item.title,
         'data-testid': testId && `${testId}-${String(item.id).toLowerCase()}`,
         ...restExtraProps
       };
@@ -523,7 +523,7 @@ const MenuDropdown = forwardRef<MenuDropdownHandle, MenuDropdownProps>(
     if (React.isValidElement(children)) {
       const child = children as React.ReactElement<React.HTMLAttributes<HTMLElement>>;
       const triggerProps: React.HTMLAttributes<HTMLElement> & { 'data-testid'?: string } = {
-        onClick: (e: React.MouseEvent<HTMLElement>) => {
+        'onClick': (e: React.MouseEvent<HTMLElement>) => {
           child.props.onClick?.(e);
           handleTriggerClick();
         },
@@ -560,7 +560,7 @@ const MenuDropdown = forwardRef<MenuDropdownHandle, MenuDropdownProps>(
         onCreate={onDropdownCreate}
         icon={triggerElement}
         placement={placement}
-        className={cx(className,  { 'menu-dropdown-sm': size === 'sm' })}
+        className={cx(className, { 'menu-dropdown-sm': size === 'sm' })}
         visible={isOpen}
         onClickOutside={handleClickOutside}
         {...dropdownProps}

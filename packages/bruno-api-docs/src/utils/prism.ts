@@ -7,14 +7,13 @@ import 'prismjs/components/prism-xml-doc';
 import 'prismjs/components/prism-http';
 import 'prismjs/components/prism-graphql';
 
-
 Prism.languages.insertBefore('javascript', 'keyword', {
   'variable-declaration': {
     pattern: /\b(?:const|let|var)\s+(?:\{[^}]*\}|\[[^\]]*\]|[A-Za-z_$][\w$]*(?:\s*,\s*[A-Za-z_$][\w$]*)*)/,
     inside: {
-      keyword: /^(?:const|let|var)/,
+      'keyword': /^(?:const|let|var)/,
       'var-name': /[A-Za-z_$][\w$]*/,
-      punctuation: /[{}[\],]/
+      'punctuation': /[{}[\],]/
     }
   }
 });

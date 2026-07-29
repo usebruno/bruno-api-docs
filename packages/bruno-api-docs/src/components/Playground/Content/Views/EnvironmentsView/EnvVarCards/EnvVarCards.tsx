@@ -1,5 +1,5 @@
 import React from 'react';
-import { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
 import { SecretValue } from '../../../../../../ui/SecretValue/SecretValue';
 import { TrashIcon } from '../../../../../../assets/icons';
 import { useEditableRows } from '../../../../../../hooks/useEditableRows';
@@ -75,13 +75,13 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
               </div>
               <div className="value">
                 {row.secret ? (
-                  <SecretValue 
-                    value={row.value} 
-                    placeholder="Value" 
-                    editByDefault={secretEditByDefault} 
-                    multiline={editableDataType} 
-                    onChange={(v) => updateRow(index, { value: v })} 
-                    className="value-secret" 
+                  <SecretValue
+                    value={row.value}
+                    placeholder="Value"
+                    editByDefault={secretEditByDefault}
+                    multiline={editableDataType}
+                    onChange={(v) => updateRow(index, { value: v })}
+                    className="value-secret"
                   />
                 ) : (
                   <textarea

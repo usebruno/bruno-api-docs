@@ -374,10 +374,10 @@ export const postResponseVarsToActions = (rows: PostResponseRowInput[], actions:
   return [...others, ...postActions];
 };
 
-type RequestDefaultsHolder =
-  | { request?: { variables?: Variable[]; actions?: Action[] } }
-  | null
-  | undefined;
+type RequestDefaultsHolder
+  = | { request?: { variables?: Variable[]; actions?: Action[] } }
+    | null
+    | undefined;
 
 export const getRequestDefaultsVars = (
   node: RequestDefaultsHolder

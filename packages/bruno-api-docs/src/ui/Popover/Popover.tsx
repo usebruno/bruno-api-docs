@@ -33,12 +33,12 @@ interface AnchorHandlers {
 const OFFSCREEN = -9999;
 
 /** Runs the anchor's own handler (if any) and then ours. */
-const chain =
-  <E,>(own: ((event: E) => void) | undefined, next: (event: E) => void) =>
-  (event: E): void => {
-    own?.(event);
-    next(event);
-  };
+const chain
+  = <E,>(own: ((event: E) => void) | undefined, next: (event: E) => void) =>
+    (event: E): void => {
+      own?.(event);
+      next(event);
+    };
 
 export const Popover: React.FC<PopoverProps> = ({
   content,

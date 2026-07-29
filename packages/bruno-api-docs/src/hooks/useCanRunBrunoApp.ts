@@ -16,8 +16,8 @@ export interface DeviceEnv {
  * shrunk next to the inline playground) is never treated as mobile.
  */
 export const computeIsMobileOS = ({ userAgent, platform, maxTouchPoints }: DeviceEnv): boolean =>
-  /Android|iPhone|iPad|iPod/.test(userAgent) ||
-  (platform === 'MacIntel' && maxTouchPoints > 1);
+  /Android|iPhone|iPad|iPod/.test(userAgent)
+  || (platform === 'MacIntel' && maxTouchPoints > 1);
 
 /**
  * True only on a phone OS, deliberately narrower than computeIsMobileOS: an
@@ -27,9 +27,9 @@ export const computeIsMobileOS = ({ userAgent, platform, maxTouchPoints }: Devic
  * docks. Pure so it can be unit tested against a device matrix without a DOM.
  */
 export const computeIsMobilePhone = ({ userAgent }: DeviceEnv): boolean =>
-  /iPhone|iPod/.test(userAgent) ||
-  (/Android/.test(userAgent) && /Mobile/.test(userAgent)) ||
-  /Windows Phone/.test(userAgent);
+  /iPhone|iPod/.test(userAgent)
+  || (/Android/.test(userAgent) && /Mobile/.test(userAgent))
+  || /Windows Phone/.test(userAgent);
 
 /**
  * Whether this device can plausibly run the Bruno desktop app, the gate for
@@ -49,7 +49,7 @@ const readDeviceEnv = (): DeviceEnv => ({
   anyHoverFine: window.matchMedia(POINTER_QUERY).matches,
   userAgent: navigator.userAgent,
   platform: navigator.platform,
-  maxTouchPoints: navigator.maxTouchPoints,
+  maxTouchPoints: navigator.maxTouchPoints
 });
 
 /**

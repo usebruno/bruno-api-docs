@@ -4,19 +4,19 @@ import { StyledWrapper } from './StyledWrapper';
 interface NoContentTextProps {
   className?: string;
   text: string;
-  testId?: string
+  testId?: string;
 }
 
-const NoContentText : React.FC<NoContentTextProps> = ({ 
+const NoContentText: React.FC<NoContentTextProps> = ({
   className,
   text,
-  testId = 'no-content-text' 
+  testId = 'no-content-text'
 }) => {
   return (
     <StyledWrapper className={className} data-testid={testId}>
       {text}
     </StyledWrapper>
-  )
-}
+  );
+};
 
-export default NoContentText
+export default NoContentText;

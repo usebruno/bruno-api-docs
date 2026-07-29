@@ -139,7 +139,6 @@ const addBruShimToContext = (vm: any, bru: any) => {
   });
   getAssertionResults.consume((handle: any) => vm.setProp(bruObject, 'getAssertionResults', handle));
 
-
   const sleep = vm.newFunction('sleep', (timer: any) => {
     const t = vm.getString(timer);
     const promise = vm.newPromise();

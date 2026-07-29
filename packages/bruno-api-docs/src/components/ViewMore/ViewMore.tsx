@@ -12,9 +12,9 @@ interface ViewMoreProps {
 const ANIMATION_MS = 260;
 
 const prefersReducedMotion = (): boolean =>
-  typeof window !== 'undefined' &&
-  typeof window.matchMedia === 'function' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  typeof window !== 'undefined'
+  && typeof window.matchMedia === 'function'
+  && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export const ViewMore: React.FC<ViewMoreProps> = ({
   children,

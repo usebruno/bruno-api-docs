@@ -6,9 +6,9 @@ export const THEME_STORAGE_KEY = 'oc-docs.theme';
 const systemPrefersDark = (): boolean => {
   try {
     return (
-      typeof window !== 'undefined' &&
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      typeof window !== 'undefined'
+      && typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-color-scheme: dark)').matches
     );
   } catch {
     return false;

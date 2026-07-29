@@ -110,7 +110,7 @@ describe('lookup (variable hover card)', () => {
     );
   };
 
-  it("resolves a variable's value and scope even when show-variables is off", () => {
+  it('resolves a variable\'s value and scope even when show-variables is off', () => {
     const html = renderLookup('baseUrl');
     expect(html).toContain('<span data-testid="scope">environment</span>');
     expect(html).toContain('<span data-testid="value">https://dev.test</span>');

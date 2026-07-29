@@ -26,7 +26,7 @@ describe('classifyRequestError', () => {
       const result = classifyRequestError(timeoutError());
       expect(result.type).toBe('timeout');
       expect(result.title).toBe('Request timed out');
-      expect(result.message).toBe("Request timed out. The server didn't respond in time.");
+      expect(result.message).toBe('Request timed out. The server didn\'t respond in time.');
     });
 
     it('classifies a manual AbortError', () => {
@@ -82,7 +82,7 @@ describe('classifyRequestError', () => {
         requestUrl: 'https://app.example.com/api/users'
       });
       expect(result.type).toBe('unreachable');
-      expect(result.message).toBe("Couldn't reach the server. It may be down, or the URL may be wrong.");
+      expect(result.message).toBe('Couldn\'t reach the server. It may be down, or the URL may be wrong.');
     });
   });
 

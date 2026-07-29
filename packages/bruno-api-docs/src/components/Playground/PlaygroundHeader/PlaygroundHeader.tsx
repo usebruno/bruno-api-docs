@@ -26,7 +26,7 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
   onClose,
   collapsed,
   onToggleCollapse,
-  testId = 'playground-header',
+  testId = 'playground-header'
 }) => (
   <StyledWrapper data-testid={testId}>
     <div className="header-left">

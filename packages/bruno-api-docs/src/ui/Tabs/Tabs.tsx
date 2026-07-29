@@ -211,17 +211,17 @@ export const Tabs: React.FC<TabsProps> = ({
             </div>
           ))
         : activeTabData && (
-            <div
-              key={activeTabData.id}
-              id={panelId(activeTabData.id)}
-              role="tabpanel"
-              aria-labelledby={tabButtonId(activeTabData.id)}
-              className="tab-panel"
-              tabIndex={0}
-            >
-              {activeTabData.content}
-            </div>
-          )}
+          <div
+            key={activeTabData.id}
+            id={panelId(activeTabData.id)}
+            role="tabpanel"
+            aria-labelledby={tabButtonId(activeTabData.id)}
+            className="tab-panel"
+            tabIndex={0}
+          >
+            {activeTabData.content}
+          </div>
+        )}
     </StyledWrapper>
   );
 };

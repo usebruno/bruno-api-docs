@@ -35,9 +35,9 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ testId = 'env-switcher' }) =>
 
   // The active env, resolving a null or stale (no longer present) selection to
   // the first environment. Single source for both the render and the effect.
-  const activeEnv =
-    environments.find((environment) => environment.name === activeEnvName) ??
-    (hasEnvironments ? environments[0] : undefined);
+  const activeEnv
+    = environments.find((environment) => environment.name === activeEnvName)
+      ?? (hasEnvironments ? environments[0] : undefined);
 
   // Sync the store when the stored name isn't the resolved one (null or stale),
   // so the persisted selection self-heals to a real environment.

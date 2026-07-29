@@ -5,17 +5,17 @@ import { buildNavModel, OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from './navModel';
 // --- factories (new-schema info-block shape) -------------------------------
 const req = (name: string, seq?: number, method = 'GET') => ({
   info: { name, type: 'http', seq },
-  http: { method, url: `https://x/${name}` },
+  http: { method, url: `https://x/${name}` }
 });
 
 const folder = (name: string, seq?: number, items: unknown[] = []) => ({
   info: { name, type: 'folder', seq },
-  items,
+  items
 });
 
 const script = (name: string, seq: number) => ({
   info: { name, type: 'script', seq },
-  script: '// noop',
+  script: '// noop'
 });
 
 const collection = (items: unknown[], withEnvs = true): OpenCollection =>
@@ -25,14 +25,14 @@ const collection = (items: unknown[], withEnvs = true): OpenCollection =>
     ...(withEnvs
       ? { config: { environments: [{ name: 'Dev', variables: [] }] } }
       : {}),
-    items,
+    items
   }) as unknown as OpenCollection;
 
 const sample = () =>
   collection([
     folder('Authentication', 1, [req('Login', 1, 'GET'), req('Register', 2, 'POST')]),
     folder('Hotels', 2, [folder('Browse & Search', 1)]),
-    req('Ping', 3, 'GET'),
+    req('Ping', 3, 'GET')
   ]);
 
 const slugs = (c: OpenCollection) => buildNavModel(c).ordered.map((e) => e.slug);
@@ -47,7 +47,7 @@ describe('buildNavModel — ordered sequence', () => {
       'authentication/register',
       'hotels',
       'hotels/browse-%26-search',
-      'ping',
+      'ping'
     ]);
   });
 
@@ -97,7 +97,7 @@ describe('buildNavModel — slugs & metadata', () => {
   it('exposes ancestors (folder chain above the node)', () => {
     const model = buildNavModel(sample());
     expect(model.bySlug.get('authentication/login')!.ancestors).toEqual([
-      { name: 'Authentication', slug: 'authentication' },
+      { name: 'Authentication', slug: 'authentication' }
     ]);
     expect(model.bySlug.get('authentication')!.ancestors).toEqual([]);
   });

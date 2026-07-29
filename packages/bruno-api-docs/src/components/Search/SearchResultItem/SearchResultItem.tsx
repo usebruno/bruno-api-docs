@@ -50,7 +50,7 @@ export const SearchResultItem: React.FC<SearchResultItemProps> = ({
   matches,
   active = false,
   onSelect,
-  testId = 'search-result',
+  testId = 'search-result'
 }) => (
   <StyledWrapper type="button" data-active={active} data-testid={testId} onClick={() => onSelect(record)}>
     {record.method && (

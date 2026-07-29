@@ -2,9 +2,9 @@ import type { ComponentType, ReactElement, ReactNode } from 'react';
 
 /** Props an icon component receives when a section is rendered from a component reference. */
 export interface MenuItemIconProps {
-  size?: number | string;
-  stroke?: number | string;
-  className?: string;
+  'size'?: number | string;
+  'stroke'?: number | string;
+  'className'?: string;
   'aria-hidden'?: boolean;
 }
 

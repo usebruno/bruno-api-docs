@@ -186,7 +186,7 @@ export const STATUS_CODE_PHRASES: Record<number, string> = {
   415: 'Unsupported Media Type',
   416: 'Range Not Satisfiable',
   417: 'Expectation Failed',
-  418: "I'm a teapot",
+  418: 'I\'m a teapot',
   421: 'Misdirected Request',
   422: 'Unprocessable Entity',
   423: 'Locked',

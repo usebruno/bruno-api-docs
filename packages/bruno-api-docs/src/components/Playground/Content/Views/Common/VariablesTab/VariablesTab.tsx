@@ -104,12 +104,12 @@ export const VariablesTab: React.FC<VariablesTabProps> = ({
             onChange={onPostResponseVarsChange}
             keyPlaceholder="Name"
             valuePlaceholder="Expr"
-            valueHeader={
+            valueHeader={(
               <span className="expr-header">
                 Expr
                 <InfoTip content={exprHelp} testId="post-response-expr-help" />
               </span>
-            }
+            )}
             showEnabled={true}
             inlineActions={true}
             getRowError={getVariableError}

@@ -22,7 +22,7 @@ const playgroundLoadError = (
       padding: 16,
       textAlign: 'center',
       color: 'var(--text-secondary)',
-      fontSize: 13,
+      fontSize: 13
     }}
   >
     The playground failed to load in this environment.
@@ -69,7 +69,7 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
     onDockChange: setDock,
     sidebarOpen,
     onToggleSidebar: () => setSidebarOpen((value) => !value),
-    onClose: closePlayground,
+    onClose: closePlayground
   };
 
   const body = (

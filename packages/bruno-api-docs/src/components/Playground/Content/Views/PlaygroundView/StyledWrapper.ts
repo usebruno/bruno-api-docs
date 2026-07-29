@@ -46,4 +46,3 @@ export const StyledDragBar = styled.div`
     background-color: var(--bg-primary);
   }
 `;
-

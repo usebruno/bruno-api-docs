@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
 import Tabs from '../../../../../../ui/Tabs/Tabs';
-import { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
 import { rowToVariable } from '../../../../../../utils/variableDataType';
 import HeadersTab from '../../Common/HeadersTab/HeadersTab';
 import ParamsTab from '../../Common/ParamsTab/ParamsTab';
@@ -70,20 +70,20 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
     const updatedScriptsObj = { ...scriptsObj, [scriptType]: value };
     onItemChange({
       ...item,
-      runtime: { 
-        ...item.runtime, 
-        scripts: scriptsObjectToArray(updatedScriptsObj) 
+      runtime: {
+        ...item.runtime,
+        scripts: scriptsObjectToArray(updatedScriptsObj)
       }
     });
   };
 
   const handleAssertionsChange = (assertions: Assertion[]) => {
-    onItemChange({ 
-      ...item, 
-      runtime: { 
-        ...item.runtime, 
-        assertions 
-      } 
+    onItemChange({
+      ...item,
+      runtime: {
+        ...item.runtime,
+        assertions
+      }
     });
   };
 
@@ -189,12 +189,12 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
 
   // Calculate content indicators
   const hasBody = body && (
-    (body as any).data || 
-    (Array.isArray(body) && body.length > 0)
+    (body as any).data
+    || (Array.isArray(body) && body.length > 0)
   );
   const hasScripts = scriptsObj && (
-    scriptsObj.preRequest || 
-    scriptsObj.postResponse
+    scriptsObj.preRequest
+    || scriptsObj.postResponse
   );
   const hasTests = scriptsObj?.tests;
 
@@ -213,19 +213,19 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
     {
       id: 'params',
       label: 'Params',
-      contentIndicator: params?.length || undefined, 
+      contentIndicator: params?.length || undefined,
       content: renderParams()
     },
-    { 
-      id: 'variables', 
-      label: 'Variables', 
+    {
+      id: 'variables',
+      label: 'Variables',
       contentIndicator: variables?.length || undefined,
       content: renderVariables()
     },
-    { 
-      id: 'headers', 
-      label: 'Headers', 
-      contentIndicator: headers?.length || undefined, 
+    {
+      id: 'headers',
+      label: 'Headers',
+      contentIndicator: headers?.length || undefined,
       content: renderHeaders()
     },
     {
@@ -235,26 +235,26 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
       rightElement: <BodyModeSelector body={body} onItemChange={onItemChange} item={item} />,
       content: renderBody()
     },
-    { 
-      id: 'auth', 
+    {
+      id: 'auth',
       label: 'Auth',
       contentIndicator: auth ? '•' : undefined,
       content: renderAuth()
     },
-    { 
-      id: 'scripts', 
+    {
+      id: 'scripts',
       label: 'Scripts',
       contentIndicator: hasScripts ? '•' : undefined,
       content: renderScripts()
     },
-    { 
-      id: 'assertions', 
-      label: 'Assertions', 
-      contentIndicator: assertions?.length || undefined, 
+    {
+      id: 'assertions',
+      label: 'Assertions',
+      contentIndicator: assertions?.length || undefined,
       content: renderAssertions()
     },
-    { 
-      id: 'tests', 
+    {
+      id: 'tests',
       label: 'Tests',
       contentIndicator: hasTests ? '•' : undefined,
       content: renderTests()
@@ -273,4 +273,4 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
   );
 };
 
-export default RequestPane; 
+export default RequestPane;

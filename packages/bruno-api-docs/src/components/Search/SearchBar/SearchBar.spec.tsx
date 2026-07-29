@@ -12,7 +12,7 @@ const renderBar = () =>
       <MemoryRouter>
         <SearchBar open={false} onOpenChange={() => {}} />
       </MemoryRouter>
-    </Provider>,
+    </Provider>
   );
 
 describe('SearchBar', () => {

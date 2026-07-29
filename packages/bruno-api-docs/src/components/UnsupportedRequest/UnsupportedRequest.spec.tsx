@@ -18,7 +18,7 @@ const unnamedItem = {
 const emptyStateProps = {
   icon: <span>icon</span>,
   heading: 'Preview not available',
-  subheadingSuffix: "documentation isn't supported in this viewer."
+  subheadingSuffix: 'documentation isn\'t supported in this viewer.'
 };
 
 describe('UnsupportedRequest', () => {

@@ -8,7 +8,7 @@ describe('Dropdown', () => {
     const html = renderToStaticMarkup(
       <Dropdown label="Folder" menuLabel="Filter by folder">
         {() => <li>option</li>}
-      </Dropdown>,
+      </Dropdown>
     );
     expect(html).toContain('Folder');
     expect(html).toContain('aria-expanded="false"');
@@ -20,7 +20,7 @@ describe('Dropdown', () => {
     const html = renderToStaticMarkup(
       <Dropdown label="Rooms" active menuLabel="Filter by folder">
         {() => null}
-      </Dropdown>,
+      </Dropdown>
     );
     expect(html).toContain('dropdown-button is-active');
   });

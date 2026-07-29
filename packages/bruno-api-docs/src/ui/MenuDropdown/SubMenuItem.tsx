@@ -45,7 +45,7 @@ const SubMenuItem: React.FC<SubMenuItemProps> = ({
   const hasSelectedChild = selectedItemId != null && submenu.some((subItem) => subItem.id === selectedItemId);
 
   const itemProps = getMenuItemProps(item, {
-    className: `has-submenu ${hasSelectedChild ? 'dropdown-item-active' : ''}`,
+    'className': `has-submenu ${hasSelectedChild ? 'dropdown-item-active' : ''}`,
     'aria-haspopup': 'true',
     'aria-expanded': submenuOpen,
     'aria-current': hasSelectedChild ? 'true' : undefined

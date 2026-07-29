@@ -73,8 +73,8 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
   onNavigate
 }) => {
   const hasScripts = scriptChain.length > 0;
-  const hasVars =
-    preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
+  const hasVars
+    = preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
   const hasAsserts = assertions.length > 0;
   const hasTests = tests.length > 0;
 
@@ -86,8 +86,8 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
 
   const varCount = preVars.length + postVars.length + inheritedPreVars.length + inheritedPostVars.length;
   const inheritedVarCount = inheritedPreVars.length + inheritedPostVars.length;
-  const inheritedVarsBadge =
-    inheritedVarCount > 0 ? <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} /> : undefined;
+  const inheritedVarsBadge
+    = inheritedVarCount > 0 ? <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} /> : undefined;
   const scripts = <ScriptChain steps={scriptChain} flow={flow} method={method} url={url} onNavigate={onNavigate} />;
   const variables = (
     <VariablesPanel

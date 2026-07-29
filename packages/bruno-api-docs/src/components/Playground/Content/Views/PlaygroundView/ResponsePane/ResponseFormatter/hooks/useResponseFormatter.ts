@@ -45,5 +45,5 @@ export function useResponseFormatter(
       contentType,
       allowedFormats
     };
-  }, [handleFormatChange, handleViewChange, format, userSelectedFormat, allowedFormats, showPreview, contentType, allowedFormats]);
+  }, [handleFormatChange, handleViewChange, format, userSelectedFormat, allowedFormats, showPreview, contentType]);
 }

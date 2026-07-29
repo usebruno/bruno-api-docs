@@ -132,6 +132,10 @@ export const formatResponse = (
     return '';
   }
 
+  if (mode.includes('base64')) {
+    return dataBufferString;
+  }
+
   // Cheapest safe stringification for a large body: keep strings as-is, coerce
   // null/undefined via String, and JSON-encode objects without indentation.
   const stringifyLargeBody = (body: RunRequestResponse['data']): string => {
@@ -148,17 +152,18 @@ export const formatResponse = (
     return String(body);
   };
 
-  let bufferSize = 0, rawData = '', isVeryLargeResponse = false;
+  let bufferSize = 0, isVeryLargeResponse = false;
+  let dataBuffer: Buffer | null = null;
   try {
-    const dataBuffer = Buffer.from(dataBufferString, 'base64');
+    dataBuffer = Buffer.from(dataBufferString, 'base64');
     bufferSize = dataBuffer.length;
     isVeryLargeResponse = bufferSize > bufferThreshold;
-    if (!isVeryLargeResponse) {
-      rawData = dataBuffer.toString();
-    }
   } catch (error) {
     console.warn('Failed to calculate buffer size:', error);
   }
+  // Full UTF-8 decode is only needed by the text-oriented modes below and is skipped for very large
+  // bodies, so decode on demand rather than up front.
+  const getRawData = (): string => (dataBuffer && !isVeryLargeResponse ? dataBuffer.toString() : '');
 
   if (mode.includes('json')) {
     try {
@@ -175,7 +180,7 @@ export const formatResponse = (
     }
 
     try {
-      return fastJsonFormat(rawData);
+      return fastJsonFormat(getRawData());
     } catch {
       // fall through to safeStringifyJSON below
     }
@@ -205,10 +210,11 @@ export const formatResponse = (
       return stringifyLargeBody(data);
     }
 
+    const raw = getRawData();
     try {
-      return prettifyHtmlString(rawData);
+      return prettifyHtmlString(raw);
     } catch {
-      return rawData;
+      return raw;
     }
   }
 
@@ -217,10 +223,11 @@ export const formatResponse = (
       return stringifyLargeBody(data);
     }
 
+    const raw = getRawData();
     try {
-      return prettifyJavaScriptString(rawData);
+      return prettifyJavaScriptString(raw);
     } catch {
-      return rawData;
+      return raw;
     }
   }
 
@@ -230,9 +237,8 @@ export const formatResponse = (
     }
 
     try {
-      const dataBuffer = Buffer.from(dataBufferString, 'base64');
-      const hexView = formatHexView(dataBuffer);
-      return hexView;
+      const hexBuffer = dataBuffer ?? Buffer.from(dataBufferString, 'base64');
+      return formatHexView(hexBuffer);
     } catch {
       if (typeof data === 'string') {
         try {
@@ -246,15 +252,11 @@ export const formatResponse = (
     }
   }
 
-  if (mode.includes('base64')) {
-    return dataBufferString;
-  }
-
   if (mode.includes('text') || mode.includes('raw')) {
     if (isVeryLargeResponse) {
       return stringifyLargeBody(data);
     }
-    return rawData;
+    return getRawData();
   }
 
   if (typeof data === 'string') {

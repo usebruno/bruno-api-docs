@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { formatBytes } from '../../../../../../utils/exampleResponse';
 import CopyButton from '../../../../../../ui/CopyButton/CopyButton';
 import { RunRequestResponse } from '../../../../../../runner';
@@ -14,11 +14,6 @@ interface LargeResponseWarningProps {
 }
 
 export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal, response }) => {
-  const copyText = useMemo(() => {
-    const data = response?.data;
-    return typeof data === 'string' ? data : JSON.stringify(data ?? '', null, 2);
-  }, [response?.data]);
-
   return (
     <StyledWrapper data-testid="large-response-warning">
       <div className="large-response-title">Large Response Warning</div>
@@ -39,7 +34,15 @@ export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ resp
         >
           View
         </button>
-        <CopyButton text={copyText} label="Copy" copiedLabel="Copied" testId="large-response-copy" />
+        <CopyButton
+          getText={() => {
+            const data = response?.data;
+            return typeof data === 'string' ? data : JSON.stringify(data ?? '', null, 2);
+          }}
+          label="Copy"
+          copiedLabel="Copied"
+          testId="large-response-copy"
+        />
         <button
           type="button"
           className="large-response-download"

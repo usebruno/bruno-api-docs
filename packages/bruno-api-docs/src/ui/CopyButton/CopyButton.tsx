@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StyledWrapper } from './StyledWrapper';
 
 interface CopyButtonProps {
-  text: string;
+  text?: string;
+  getText?: () => string;
   label?: string;
   copiedLabel?: string;
   resetAfterMs?: number;
@@ -26,6 +27,7 @@ const CheckGlyph: React.FC = () => (
 
 export const CopyButton: React.FC<CopyButtonProps> = ({
   text,
+  getText,
   label = 'Copy',
   copiedLabel = 'Copied',
   resetAfterMs = 2000,
@@ -44,16 +46,18 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
   );
 
   const handleCopy = useCallback(async () => {
-    if (!text || !navigator.clipboard) return;
+    if (!navigator.clipboard) return;
+    const value = getText ? getText() : text;
+    if (!value) return;
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(value);
       setCopied(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setCopied(false), resetAfterMs);
     } catch {
       // Clipboard unavailable (e.g. insecure context) — fail silently.
     }
-  }, [text, resetAfterMs]);
+  }, [text, getText, resetAfterMs]);
 
   return (
     <StyledWrapper

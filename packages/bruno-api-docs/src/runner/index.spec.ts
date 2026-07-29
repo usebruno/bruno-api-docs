@@ -324,3 +324,76 @@ describe('RequestRunner', () => {
 
   });
 });
+
+describe('RequestExecutor parseResponse — content-type handling', () => {
+  let originalFetch: typeof global.fetch;
+  beforeEach(() => { originalFetch = global.fetch; });
+
+  const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d]);
+
+  const mockFetch = (bytes: Buffer, contentType: string) => {
+    const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      url: 'https://example.com/data',
+      headers: new Headers(contentType ? { 'content-type': contentType } : {}),
+      arrayBuffer: async () => ab
+    });
+  };
+
+  const run = async () => {
+    const { RequestExecutor } = await import('./RequestExecutor');
+    return new RequestExecutor().executeRequest(
+      { http: { method: 'GET', url: 'https://example.com/data' } } as any,
+      { timeout: 5000 }
+    );
+  };
+
+  it('keeps base64 and drops the text copy for a binary (PNG) body', async () => {
+    mockFetch(PNG, 'image/png');
+    const res = await run();
+    expect(res.detectedContentType).toBe('image/png');
+    expect(typeof res.base64Data).toBe('string');       // previews need the base64 data URI
+    expect(res.base64Data).toBe(PNG.toString('base64'));
+    expect(res.data).toBeUndefined();                    // binary bytes aren't meaningful text
+    expect(res.size).toBe(PNG.length);                   // size from byteLength, not a copy
+    global.fetch = originalFetch;
+  });
+
+  it('sniffs binary from the bytes even when the header lies (text/plain)', async () => {
+    mockFetch(PNG, 'text/plain');
+    const res = await run();
+    expect(res.detectedContentType).toBe('image/png');
+    expect(typeof res.base64Data).toBe('string');
+    global.fetch = originalFetch;
+  });
+
+  it('parses JSON and keeps base64 (source text needed for precise formatting)', async () => {
+    mockFetch(Buffer.from('{"a":1,"big":1736184243098437392}'), 'application/json');
+    const res = await run();
+    expect(res.data.a).toBe(1);
+    expect(res.detectedContentType).toBe('text/plain');
+    expect(typeof res.base64Data).toBe('string');
+    global.fetch = originalFetch;
+  });
+
+  it('skips base64 for a plain-text body (data carries the bytes)', async () => {
+    mockFetch(Buffer.from('hello world, this is plenty of plain text content'), 'text/plain');
+    const res = await run();
+    expect(res.data).toBe('hello world, this is plenty of plain text content');
+    expect(res.detectedContentType).toBe('text/plain');
+    expect(res.base64Data).toBeUndefined();
+    global.fetch = originalFetch;
+  });
+
+  it('treats SVG as text and skips base64', async () => {
+    mockFetch(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'), 'image/svg+xml');
+    const res = await run();
+    expect(res.detectedContentType).toBe('image/svg+xml');
+    expect(res.data).toContain('<svg');
+    expect(res.base64Data).toBeUndefined();
+    global.fetch = originalFetch;
+  });
+});

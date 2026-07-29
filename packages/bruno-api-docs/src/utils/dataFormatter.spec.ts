@@ -10,12 +10,12 @@ describe('formatResponse', () => {
   };
 
   describe('invalid inputs', () => {
-    it('should return empty string for invalid inputs', () => {
+    it('should return empty string when there is no mode, or neither data nor buffer', () => {
       const invalidCases: [unknown, string | null, string | null][] = [
-        [undefined, 'dGVzdA==', 'json'],
-        [{ test: 'data' }, null, 'json'],
-        [{ test: 'data' }, 'dGVzdA==', null],
-        [undefined, undefined as unknown as null, undefined as unknown as null]
+        [undefined, 'dGVzdA==', 'json'],               // a non-JSON buffer with no parsed data
+        [{ test: 'data' }, 'dGVzdA==', null],           // no mode
+        [undefined, undefined as unknown as null, undefined as unknown as null],
+        [undefined, '', 'json']                          // neither data nor buffer
       ];
 
       invalidCases.forEach(([data, buffer, mode]) => {
@@ -23,6 +23,37 @@ describe('formatResponse', () => {
         expect(result).toBe('');
         expect(typeof result).toBe('string');
       });
+    });
+  });
+
+  // Text responses skip the redundant base64 copy, so formatResponse must format from `data` alone.
+  describe('data-only (no base64 buffer)', () => {
+    it('formats object data as pretty JSON without a buffer', () => {
+      const result = formatResponse({ name: 'John', age: 30 }, '', 'application/json');
+      expect(result).toBe('{\n  "name": "John",\n  "age": 30\n}');
+    });
+
+    it('preserves bigint precision from a raw JSON string without a buffer', () => {
+      const result = formatResponse('{ "data": 1736184243098437392 }', '', 'application/json');
+      expect(result).toBe('{\n  "data": 1736184243098437392\n}');
+    });
+
+    it('formats XML from the data string without a buffer', () => {
+      const result = formatResponse('<root><item>value</item></root>', '', 'application/xml');
+      expect(result).toContain('root');
+      expect(result).toContain('item');
+    });
+
+    it('returns plain text verbatim without a buffer', () => {
+      expect(formatResponse('plain text content', '', 'text/plain')).toBe('plain text content');
+    });
+
+    it('derives a hex dump from the text body when no buffer is present', () => {
+      expect(formatResponse('Hi', '', 'hex')).toBe('00000000: 48 69                                            Hi\n');
+    });
+
+    it('derives base64 from the text body when no buffer is present', () => {
+      expect(formatResponse('hello world', '', 'base64')).toBe(Buffer.from('hello world').toString('base64'));
     });
   });
 

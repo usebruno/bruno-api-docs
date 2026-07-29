@@ -4,6 +4,8 @@ import { RunRequestResponse } from './index';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams } from '../utils/schemaHelpers';
 import { buildRequestUrl } from '../utils/pathParams';
 import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
+import { detectContentTypeFromBytes, isByteFormatContentType } from '../utils/response';
+import { RESPONSE_LARGE_THRESHOLD } from '../constants';
 import stripJsonComments from 'strip-json-comments';
 
 export const applyApiKeyToUrl = (url: string, auth: Record<string, unknown> | undefined): string => {
@@ -43,6 +45,7 @@ export class RequestExecutor {
         headers: responseHeaders,
         data: responseData.data,
         base64Data: responseData.base64Data,
+        detectedContentType: responseData.detectedContentType,
         size: responseData.size,
         duration: endTime - startTime,
         url: response.url
@@ -219,23 +222,41 @@ export class RequestExecutor {
 
   private async parseResponse(response: Response) {
     const contentType = response.headers.get('content-type') || '';
+    const arrayBuffer = await response.arrayBuffer();
+    // Read the size off the ArrayBuffer directly — no full Buffer copy needed just to measure.
+    const size = arrayBuffer.byteLength;
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Sniff the real type from the bytes (the header can be absent or wrong).
+    const detectedContentType = detectContentTypeFromBytes(buffer);
+    const isBinary = detectedContentType != null && isByteFormatContentType(detectedContentType);
+    const isLarge = size > RESPONSE_LARGE_THRESHOLD;
+
+    // Binary bytes don't decode to meaningful text — previews read `base64Data` instead.
     let data: any;
-
-    const buffer = Buffer.from(await response.arrayBuffer());
-    const size = buffer.length;
-
-    if (contentType.includes('application/json')) {
+    if (!isBinary) {
       const text = buffer.toString('utf-8');
-      try {
-        data = JSON.parse(text);
-      } catch {
+      if (contentType.includes('application/json')) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+      } else {
         data = text;
       }
-    } else {
-      data = buffer.toString('utf-8');
     }
 
-    return { data, size, base64Data: buffer.toString('base64') };
+    // base64 is only needed for binary previews/byte views, or when `data` can't faithfully
+    // reproduce the bytes (parsed JSON loses precision; non-ASCII bodies aren't round-trippable).
+    // A plain-text/SVG string body carries its own bytes, so skip the redundant copy. Oversized
+    // bodies are hidden behind a reveal warning, so don't eagerly encode them at all.
+    const isReconstructableText =
+      (detectedContentType === 'text/plain' || detectedContentType === 'image/svg+xml') &&
+      typeof data === 'string';
+    const base64Data = isReconstructableText || isLarge ? undefined : buffer.toString('base64');
+
+    return { data, size, base64Data, detectedContentType };
   }
 
   private parseHeaders(headers: Headers): Record<string, any> {

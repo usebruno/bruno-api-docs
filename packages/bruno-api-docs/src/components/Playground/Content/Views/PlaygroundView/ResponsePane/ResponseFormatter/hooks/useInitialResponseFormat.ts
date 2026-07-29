@@ -10,9 +10,11 @@ interface InitialResponseFormatData extends ResponseBodyFormatViewData {
 }
 
 export function useInitialResponseFormat(response: RunRequestResponse): InitialResponseFormatData {
+  // Prefer the type sniffed from the bytes at parse time; fall back to sniffing the base64
+  // (e.g. a binary body) when the response predates parse-time detection.
   const detectedContentType = useMemo(
-      () => detectContentTypeFromBase64(response?.base64Data),
-      [response?.base64Data]
+      () => response?.detectedContentType ?? detectContentTypeFromBase64(response?.base64Data),
+      [response?.detectedContentType, response?.base64Data]
     );
   const headerContentType = useMemo(() => getContentType(response?.headers), [response?.headers]);
   const contentType = detectedContentType ?? headerContentType;

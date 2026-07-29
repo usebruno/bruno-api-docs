@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer';
-import { useMemo } from 'react';
-import { RunRequestResponse } from '../runner';
+import type { RunRequestResponse } from '../runner';
 import {
   type ResponseBodyFormat,
   type ResponseBodyFormatViewData,
@@ -17,7 +16,6 @@ import {
   MIME_TYPE_PATTERN,
   DATA_URL_PREFIX_PATTERN,
   NON_BASE64_CHARS_PATTERN,
-  FORMAT_LABELS,
   RESPONSE_FORMAT_RULES,
 } from '../constants';
 
@@ -51,7 +49,7 @@ function extractMimeType(contentType = '') {
 
 
 // SVG is XML text and stays selectable as a structured format, unlike other image/*.
-function isByteFormatContentType(contentType: string): boolean {
+export function isByteFormatContentType(contentType: string): boolean {
   if (SVG_CONTENT_TYPE_PATTERN.test(contentType)) return false;
   return IMAGE_VIDEO_AUDIO_PATTERN.test(contentType)
     || PDF_CONTENT_TYPE_PATTERN.test(contentType)
@@ -258,18 +256,18 @@ function isLikelyText(buffer: Buffer) {
 };
 
 /**
- * Sniff a content type from a base64-encoded body: magic numbers first, then SVG, then plain text.
+ * Sniff a content type from raw bytes: magic numbers first, then SVG, then plain text.
+ * Reads only the head, so a small slice of a large body is enough.
  */
-export function detectContentTypeFromBase64(base64: RunRequestResponse['base64Data']) {
-  if (!base64) return null;
+export function detectContentTypeFromBytes(buffer: Buffer): string | null {
+  if (!buffer || buffer.length === 0) return null;
 
   // Magic numbers live in the first 12 bytes.
-  const magicHead = decodeBase64Head(base64, 12);
-  const magicType = detectContentTypeFromBuffer(magicHead);
+  const magicType = detectContentTypeFromBuffer(buffer.subarray(0, 12));
   if (magicType) return magicType;
 
-  // Not a known binary signature: decode a larger head for text/SVG heuristics.
-  const textHead = decodeBase64Head(base64, 512);
+  // Not a known binary signature: use a larger head for text/SVG heuristics.
+  const textHead = buffer.subarray(0, 512);
 
   if (isSvgContent(textHead)) {
     return 'image/svg+xml';
@@ -278,4 +276,12 @@ export function detectContentTypeFromBase64(base64: RunRequestResponse['base64Da
   if (isLikelyText(textHead)) return 'text/plain';
 
   return null;
-} 
+}
+
+/**
+ * Sniff a content type from a base64-encoded body: magic numbers first, then SVG, then plain text.
+ */
+export function detectContentTypeFromBase64(base64: RunRequestResponse['base64Data']) {
+  if (!base64) return null;
+  return detectContentTypeFromBytes(decodeBase64Head(base64, 512));
+}

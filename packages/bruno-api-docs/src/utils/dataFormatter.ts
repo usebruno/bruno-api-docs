@@ -128,7 +128,7 @@ export const formatResponse = (
   filter?: string,
   bufferThreshold = LARGE_BUFFER_THRESHOLD
 ): string => {
-  if (data === undefined || !dataBufferString || !mode) {
+  if (!mode || (data === undefined && !dataBufferString)) {
     return '';
   }
 
@@ -148,19 +148,42 @@ export const formatResponse = (
     return String(body);
   };
 
+  // Source the raw text from the base64 bytes when present, otherwise from `data` itself —
+  // text responses carry their bytes in `data` and skip the redundant base64 copy.
   let bufferSize = 0, rawData = '', isVeryLargeResponse = false;
   try {
-    const dataBuffer = Buffer.from(dataBufferString, 'base64');
-    bufferSize = dataBuffer.length;
-    isVeryLargeResponse = bufferSize > bufferThreshold;
-    if (!isVeryLargeResponse) {
-      rawData = dataBuffer.toString();
+    if (dataBufferString) {
+      const dataBuffer = Buffer.from(dataBufferString, 'base64');
+      bufferSize = dataBuffer.length;
+      isVeryLargeResponse = bufferSize > bufferThreshold;
+      if (!isVeryLargeResponse) {
+        rawData = dataBuffer.toString();
+      }
+    } else if (typeof data === 'string') {
+      bufferSize = Buffer.byteLength(data);
+      isVeryLargeResponse = bufferSize > bufferThreshold;
+      if (!isVeryLargeResponse) {
+        rawData = data;
+      }
+    } else if (data != null) {
+      const stringified = safeStringifyJSON(data, false);
+      rawData = typeof stringified === 'string' ? stringified : String(data);
+      bufferSize = Buffer.byteLength(rawData);
+      isVeryLargeResponse = bufferSize > bufferThreshold;
+      if (isVeryLargeResponse) {
+        rawData = '';
+      }
     }
   } catch (error) {
-    console.warn('Failed to calculate buffer size:', error);
+    console.warn('Failed to read response body:', error);
   }
 
   if (mode.includes('json')) {
+    // A binary/empty body requested as JSON has no parsed value to render.
+    if (data === undefined) {
+      return '';
+    }
+
     try {
       if (filter) {
         const filtered = safeStringifyJSON(applyJSONPathFilter(data, filter), true);
@@ -230,24 +253,23 @@ export const formatResponse = (
     }
 
     try {
-      const dataBuffer = Buffer.from(dataBufferString, 'base64');
-      const hexView = formatHexView(dataBuffer);
-      return hexView;
+      // Prefer the base64 bytes (faithful for binary); fall back to encoding the text body.
+      const dataBuffer = dataBufferString
+        ? Buffer.from(dataBufferString, 'base64')
+        : typeof data === 'string'
+          ? Buffer.from(data, 'utf8')
+          : Buffer.alloc(0);
+      return formatHexView(dataBuffer);
     } catch {
-      if (typeof data === 'string') {
-        try {
-          const stringBuffer = Buffer.from(data, 'utf8');
-          return formatHexView(stringBuffer);
-        } catch {
-          return '';
-        }
-      }
       return '';
     }
   }
 
   if (mode.includes('base64')) {
-    return dataBufferString;
+    if (dataBufferString) {
+      return dataBufferString;
+    }
+    return typeof data === 'string' ? Buffer.from(data, 'utf8').toString('base64') : '';
   }
 
   if (mode.includes('text') || mode.includes('raw')) {

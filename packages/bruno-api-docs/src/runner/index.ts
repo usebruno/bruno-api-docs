@@ -56,7 +56,10 @@ export interface RunRequestResponse {
   statusText?: string;
   headers?: Record<string, any>;
   data?: any;
+  /** Present only when needed downstream — binary previews, byte views, or an unreconstructable body. */
   base64Data?: string;
+  /** Content type sniffed from the response bytes at parse time (magic numbers → SVG → text), or null. */
+  detectedContentType?: string | null;
   size?: number;
   duration?: number;
   url?: string;

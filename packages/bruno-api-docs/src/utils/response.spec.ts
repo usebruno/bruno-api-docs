@@ -4,7 +4,9 @@ import {
   getContentType,
   getDefaultResponseFormat,
   detectContentTypeFromBuffer,
-  detectContentTypeFromBase64
+  detectContentTypeFromBytes,
+  detectContentTypeFromBase64,
+  isByteFormatContentType
 } from './response';
 
 const BYTE_ONLY = ['raw', 'hex', 'base64'];
@@ -184,6 +186,43 @@ describe('detectContentTypeFromBuffer', () => {
 
   it('returns null for an unknown signature', () => {
     expect(detectContentTypeFromBuffer(buf([0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08]))).toBeNull();
+  });
+});
+
+describe('detectContentTypeFromBytes', () => {
+  it('detects binary magic numbers from raw bytes (png, pdf, mp3-ID3, zip)', () => {
+    expect(detectContentTypeFromBytes(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))).toBe('image/png');
+    expect(detectContentTypeFromBytes(Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d]))).toBe('application/pdf');
+    expect(detectContentTypeFromBytes(Buffer.from([0x49, 0x44, 0x33, 0x03, 0, 0, 0, 0]))).toBe('audio/mpeg');
+    expect(detectContentTypeFromBytes(Buffer.from([0x50, 0x4b, 0x03, 0x04]))).toBe('application/zip');
+  });
+
+  it('detects SVG and plain text from raw bytes', () => {
+    expect(detectContentTypeFromBytes(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"></svg>'))).toBe('image/svg+xml');
+    expect(detectContentTypeFromBytes(Buffer.from('hello world, this is plenty of plain text content'))).toBe('text/plain');
+  });
+
+  it('sniffs only the head of a large body', () => {
+    const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(5000)]);
+    expect(detectContentTypeFromBytes(png)).toBe('image/png');
+  });
+
+  it('returns null for empty input', () => {
+    expect(detectContentTypeFromBytes(Buffer.alloc(0))).toBeNull();
+  });
+});
+
+describe('isByteFormatContentType', () => {
+  it('treats image/video/audio/pdf/zip as byte formats', () => {
+    for (const ct of ['image/png', 'video/mp4', 'audio/mpeg', 'application/pdf', 'application/zip']) {
+      expect(isByteFormatContentType(ct)).toBe(true);
+    }
+  });
+
+  it('treats SVG and text/structured types as non-byte (text) formats', () => {
+    for (const ct of ['image/svg+xml', 'text/plain', 'application/json', 'application/xml', '']) {
+      expect(isByteFormatContentType(ct)).toBe(false);
+    }
   });
 });
 

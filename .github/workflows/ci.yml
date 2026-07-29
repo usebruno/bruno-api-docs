@@ -1,16 +1,19 @@
 name: CI
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
-  pull_request:
+
+
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  checks:
+  lint_unit_tests_and_builds:
     runs-on: ubuntu-latest
     steps:
       # eslint-plugin-diff needs the base branch present to diff against.
@@ -39,7 +42,7 @@ jobs:
         run: npm run build:standalone -w packages/bruno-api-docs
 
   e2e:
-    needs: checks
+    needs: lint_unit_tests_and_builds
     if: github.event_name == 'push' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     defaults:

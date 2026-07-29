@@ -176,7 +176,10 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
   const panels: Record<EnvTabId, { contentIndicator: number; content: React.ReactNode }> = {
     variables: {
       contentIndicator: plainRows.length,
-      content: renderVars(plainRows, (rows) => commit(rows, secretRows), { editableDataType: true, showDescription: true })
+      content: renderVars(plainRows, (rows) => commit(rows, secretRows), {
+        editableDataType: true,
+        showDescription: true
+      })
     },
     secrets: {
       contentIndicator: secretRows.length,

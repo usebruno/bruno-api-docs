@@ -265,7 +265,7 @@ describe('envVariableToRow / envRowToVariable round-trip', () => {
     expect((envRowToVariable(row) as any).description).toBe('Rewritten as plain text');
   });
 
-  it("preserves a secret's { content, type } description when another field is edited", () => {
+  it('preserves a { content, type } description on a secret when another field is edited', () => {
     const source = { name: 'token', secret: true, type: 'string', description: { content: 'Bearer *token*', type: 'text/markdown' } };
     const row = envVariableToRow(source as any, 0);
     row.value = 'new-token';

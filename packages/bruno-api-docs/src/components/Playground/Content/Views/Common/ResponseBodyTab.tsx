@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { ResponseBodyFormat, FORMAT_TO_MONACO } from '../../../../../constants';
+import { type ResponseBodyFormat, FORMAT_TO_MONACO } from '../../../../../constants';
 import { formatResponse } from '../../../../../utils/dataFormatter';
-import { RunRequestResponse } from '../../../../../runner';
+import type { RunRequestResponse } from '../../../../../runner';
 import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
 import useLargeResponse from '../../../../../hooks/useLargeResponseWarning';
 import QueryResultPreview from '../../../QueryResultPreview/QueryResultPreview';
@@ -31,7 +31,6 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
       {hideForLargeResponse ? (
         <LargeResponseWarning
           responseSize={responseSize}
-          data={response?.data}
           onReveal={() => setRevealed(true)}
         />
       ) : showPreview ? (

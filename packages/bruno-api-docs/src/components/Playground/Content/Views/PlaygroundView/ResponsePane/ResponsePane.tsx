@@ -8,8 +8,8 @@ import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
 import { SendIcon } from '../../../../../../assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
-import { RunRequestResponse } from '../../../../../../runner';
-import { ResponseBodyFormat } from '../../../../../../constants';
+import type { RunRequestResponse } from '../../../../../../runner';
+import type { ResponseBodyFormat } from '../../../../../../constants';
 
 
 interface ResponsePaneProps {
@@ -19,13 +19,13 @@ interface ResponsePaneProps {
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
   const [activeTab, setActiveTab] = useState('response');
-  const { 
+  const {
     selectedFormat,
     showPreview,
     handleFormatChange,
     handleViewChange,
     contentType,
-    allowedFormats 
+    allowedFormats
   } = useResponseFormatter(response);
 
   const getStatusColor = (status?: number) => {
@@ -72,7 +72,12 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
 
   const renderResponseBody = () =>
     response.error ? renderErrorBanner() : (
-      <ResponseBodyTab response={response} selectedFormat={selectedFormat} showPreview={showPreview} contentType={contentType} />
+      <ResponseBodyTab
+        response={response}
+        selectedFormat={selectedFormat}
+        showPreview={showPreview}
+        contentType={contentType}
+      />
     );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (

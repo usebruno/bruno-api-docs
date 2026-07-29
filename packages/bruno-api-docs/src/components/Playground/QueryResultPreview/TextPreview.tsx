@@ -5,7 +5,7 @@ export interface TextPreviewProps {
 }
 
 /** Renders arbitrary response data as plain, wrapped monospace text. */
-const TextPreview : React.FC<TextPreviewProps> = ({ data }) => {
+const TextPreview: React.FC<TextPreviewProps> = ({ data }) => {
   const displayData = useMemo(() => {
     if (data === null || data === undefined) {
       return String(data);

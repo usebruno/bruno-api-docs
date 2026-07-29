@@ -1,11 +1,12 @@
 import type { FC } from 'react';
 import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '../../../../../../../ui/MenuDropdown';
+import type {
+  ResponseBodyFormat } from '../../../../../../../constants';
 import {
-  ResponseBodyFormat,
   STRUCTURED_FORMAT_OPTIONS,
   BYTE_FORMAT_OPTIONS,
   ALL_FORMAT_OPTIONS,
-  FORMAT_LABELS,
+  FORMAT_LABELS
 } from '../../../../../../../constants';
 import { StyledWrapper } from './StyledWrapper';
 

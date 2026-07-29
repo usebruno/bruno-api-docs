@@ -1,4 +1,4 @@
-import { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
 
 export type BulkKeyValueItem = Pick<KeyValueRow, 'name' | 'value' | 'enabled'>;
 

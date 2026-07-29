@@ -498,10 +498,10 @@ describe('RequestExecutor parseResponse — content-type handling', () => {
     mockFetch(PNG, 'image/png');
     const res = await run();
     expect(res.detectedContentType).toBe('image/png');
-    expect(typeof res.base64Data).toBe('string');       // previews need the base64 data URI
+    expect(typeof res.base64Data).toBe('string'); // previews need the base64 data URI
     expect(res.base64Data).toBe(PNG.toString('base64'));
-    expect(res.data).toBeUndefined();                    // binary bytes aren't meaningful text
-    expect(res.size).toBe(PNG.length);                   // size from byteLength, not a copy
+    expect(res.data).toBeUndefined(); // binary bytes aren't meaningful text
+    expect(res.size).toBe(PNG.length); // size from byteLength, not a copy
     global.fetch = originalFetch;
   });
 

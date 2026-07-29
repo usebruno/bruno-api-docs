@@ -5,7 +5,7 @@ import { Buffer } from 'buffer';
 
 interface VideoPreviewProps {
   contentType: string;
-  dataBuffer: string
+  dataBuffer: string;
 }
 
 const VideoPreview: React.FC<VideoPreviewProps> = ({ contentType, dataBuffer }) => {

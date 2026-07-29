@@ -74,7 +74,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
         style={{
           backgroundColor: 'transparent',
           fontSize: '0.75rem',
-          fontFamily: 'var(--font-mono)',
+          fontFamily: 'var(--font-mono)'
         }}
       />
     </Suspense>

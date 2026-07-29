@@ -12,10 +12,10 @@ describe('formatResponse', () => {
   describe('invalid inputs', () => {
     it('should return empty string when there is no mode, or neither data nor buffer', () => {
       const invalidCases: [unknown, string | null, string | null][] = [
-        [undefined, 'dGVzdA==', 'json'],               // a non-JSON buffer with no parsed data
-        [{ test: 'data' }, 'dGVzdA==', null],           // no mode
+        [undefined, 'dGVzdA==', 'json'], // a non-JSON buffer with no parsed data
+        [{ test: 'data' }, 'dGVzdA==', null], // no mode
         [undefined, undefined as unknown as null, undefined as unknown as null],
-        [undefined, '', 'json']                          // neither data nor buffer
+        [undefined, '', 'json'] // neither data nor buffer
       ];
 
       invalidCases.forEach(([data, buffer, mode]) => {

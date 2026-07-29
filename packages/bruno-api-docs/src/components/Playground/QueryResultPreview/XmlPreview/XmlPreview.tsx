@@ -310,8 +310,8 @@ function xmlToObject(node: Element): XmlValue {
       const childName = child.nodeName; // Preserve original casing
       const childValue = xmlToObject(child);
 
-      const isRepeated =
-        elementChildren.filter((c) => c.nodeName.toLowerCase() === childName.toLowerCase()).length > 1;
+      const isRepeated
+        = elementChildren.filter((c) => c.nodeName.toLowerCase() === childName.toLowerCase()).length > 1;
 
       if (childValue !== null || isRepeated) {
         const existing = childMap[childName];

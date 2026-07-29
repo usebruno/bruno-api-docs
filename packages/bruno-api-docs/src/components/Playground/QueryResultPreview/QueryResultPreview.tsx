@@ -3,9 +3,10 @@ import HtmlPreview from './HtmlPreview/HtmlPreview';
 import JsonPreview from './JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
-import { RunRequestResponse } from '../../../runner';
+import type { RunRequestResponse } from '../../../runner';
 import { StyledWrapper } from './StyledWrapper';
-import { formatToPreviewMode, ResponseBodyFormat } from '../../../constants';
+import type { ResponseBodyFormat } from '../../../constants';
+import { formatToPreviewMode } from '../../../constants';
 
 // react-pdf (pdfjs) and react-player are large and only needed for binary previews,
 // so load them on demand to keep them out of the initial bundle.
@@ -25,17 +26,23 @@ export interface QueryResultPreviewProps {
   selectedFormat: ResponseBodyFormat;
   /** Base URL used to resolve relative links/resources in the HTML preview. */
   baseUrl?: string;
-  dataBuffer?: RunRequestResponse['base64Data']
+  dataBuffer?: RunRequestResponse['base64Data'];
   contentType: string;
 }
 
-const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({ data, contentType, dataBuffer, selectedFormat, baseUrl }) => {
+const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({
+  data,
+  contentType,
+  dataBuffer,
+  selectedFormat,
+  baseUrl
+}) => {
   const previewMode = formatToPreviewMode(selectedFormat, contentType);
-  const [pdfPagesNum, setPdfPagesNum] = useState<number | null>(null)
-  
+  const [pdfPagesNum, setPdfPagesNum] = useState<number | null>(null);
+
   const handleDocumentLoad = ({ numPages }: { numPages: number }) => {
     setPdfPagesNum(numPages);
-  }
+  };
 
   switch (previewMode) {
     case 'preview-web': {

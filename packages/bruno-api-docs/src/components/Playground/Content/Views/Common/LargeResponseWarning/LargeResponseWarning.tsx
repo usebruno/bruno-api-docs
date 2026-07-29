@@ -1,6 +1,5 @@
 import React from 'react';
 import { formatBytes } from '../../../../../../utils/exampleResponse';
-import CopyButton from '../../../../../../ui/CopyButton/CopyButton';
 import { StyledWrapper } from './StyledWrapper';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
@@ -8,10 +7,9 @@ const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 interface LargeResponseWarningProps {
   responseSize: number;
   onReveal: () => void;
-  data?: unknown;
 }
 
-export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal, data }) => {
+export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal }) => {
   return (
     <StyledWrapper data-testid="large-response-warning">
       <div className="large-response-title">Large Response Warning</div>

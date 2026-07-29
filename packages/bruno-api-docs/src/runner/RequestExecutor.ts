@@ -251,9 +251,9 @@ export class RequestExecutor {
     // reproduce the bytes (parsed JSON loses precision; non-ASCII bodies aren't round-trippable).
     // A plain-text/SVG string body carries its own bytes, so skip the redundant copy. Oversized
     // bodies are hidden behind a reveal warning, so don't eagerly encode them at all.
-    const isReconstructableText =
-      (detectedContentType === 'text/plain' || detectedContentType === 'image/svg+xml') &&
-      typeof data === 'string';
+    const isReconstructableText
+      = (detectedContentType === 'text/plain' || detectedContentType === 'image/svg+xml')
+        && typeof data === 'string';
     const base64Data = isReconstructableText || isLarge ? undefined : buffer.toString('base64');
 
     return { data, size, base64Data, detectedContentType };

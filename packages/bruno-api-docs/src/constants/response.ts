@@ -1,4 +1,3 @@
-
 export type ResponseBodyView = 'preview' | 'editor';
 
 export type ResponseBodyFormat = 'html' | 'json' | 'xml' | 'javascript' | 'base64' | 'raw' | 'hex';
@@ -8,7 +7,7 @@ export interface ResponseBodyFormatViewData {
   view: ResponseBodyView;
 }
 
-export type ResponseBodyPreview = "preview-web" | "preview-json" | "preview-xml" | "preview-text" | "preview-image" | "preview-pdf" | "preview-audio" | "preview-video" | null;
+export type ResponseBodyPreview = 'preview-web' | 'preview-json' | 'preview-xml' | 'preview-text' | 'preview-image' | 'preview-pdf' | 'preview-audio' | 'preview-video' | null;
 
 // Structured decoders only make sense for text-ish bodies; prepend them for those.
 export const STRUCTURED_FORMAT_OPTIONS: ResponseBodyFormat[] = ['json', 'html', 'xml', 'javascript'];
@@ -38,7 +37,6 @@ export const NON_BASE64_CHARS_PATTERN = /[^A-Za-z0-9+/=]/g;
 // A response at or above this size is hidden behind a reveal warning, and its body is not
 // eagerly base64-encoded at parse time (avoids holding a ~4/3× copy of a body we won't show).
 export const RESPONSE_LARGE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
-
 
 export const FORMAT_LABELS: Record<ResponseBodyFormat, string> = {
   json: 'JSON',

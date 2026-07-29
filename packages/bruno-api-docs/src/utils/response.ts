@@ -16,9 +16,8 @@ import {
   MIME_TYPE_PATTERN,
   DATA_URL_PREFIX_PATTERN,
   NON_BASE64_CHARS_PATTERN,
-  RESPONSE_FORMAT_RULES,
+  RESPONSE_FORMAT_RULES
 } from '../constants';
-
 
 // Normalize a response's content-type header into a canonical MIME type, or '' when absent.
 export function getContentType(headers: RunRequestResponse['headers']): string {
@@ -45,8 +44,6 @@ function extractMimeType(contentType = '') {
   const match = cleaned.match(MIME_TYPE_PATTERN);
   return match ? match[0] : cleaned;
 };
-
-
 
 // SVG is XML text and stays selectable as a structured format, unlike other image/*.
 export function isByteFormatContentType(contentType: string): boolean {

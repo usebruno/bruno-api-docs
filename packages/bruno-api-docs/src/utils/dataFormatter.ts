@@ -1,10 +1,11 @@
 import { Buffer } from 'buffer';
 import { JSONPath } from 'jsonpath-plus';
-import xmlFormat, { XMLFormatterOptions } from 'xml-formatter';
+import type { XMLFormatterOptions } from 'xml-formatter';
+import xmlFormat from 'xml-formatter';
 import fastJsonFormat from 'fast-json-format';
 import prettierFormat from 'prettier/standalone';
 import parserBabel from 'prettier/parser-babel';
-import { RunRequestResponse } from '../runner';
+import type { RunRequestResponse } from '../runner';
 
 const applyJSONPathFilter = (data: RunRequestResponse['data'], filter: string): unknown => {
   try {

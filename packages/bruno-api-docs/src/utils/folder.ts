@@ -1,8 +1,22 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { Auth } from '@opencollection/types/common/auth';
-import { getItemName, isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
-import { getDescription, getRequestDefaultsVars, type PreRequestVarRow, type PostResponseVarRow } from './request';
+import { isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
+import {
+  getDescription,
+  getRequestDefaultsVars,
+  collectInheritedConfig,
+  collectionSource,
+  enabledHeaderKeys,
+  enabledVarKeys,
+  folderSource,
+  type PreRequestVarRow,
+  type PostResponseVarRow,
+  type InheritedSource,
+  type InheritedHeaderRow,
+  type InheritedPreRequestVarRow,
+  type InheritedPostResponseVarRow
+} from './request';
 
 export interface FolderHeaderRow {
   name: string;
@@ -13,10 +27,7 @@ export interface FolderHeaderRow {
 
 export type FolderVariableRow = PreRequestVarRow;
 
-export interface FolderAuthSource {
-  level: 'collection' | 'folder';
-  name: string;
-}
+export type FolderAuthSource = InheritedSource;
 
 export interface FolderConfig {
   headers: FolderHeaderRow[];
@@ -27,6 +38,9 @@ export interface FolderConfig {
   tests?: string;
   variables: FolderVariableRow[];
   postVariables: PostResponseVarRow[];
+  inheritedHeaders: InheritedHeaderRow[];
+  inheritedPreVariables: InheritedPreRequestVarRow[];
+  inheritedPostVariables: InheritedPostResponseVarRow[];
 }
 
 const isConcrete = (auth: Auth | undefined): boolean => !!auth && auth !== 'inherit';
@@ -44,13 +58,13 @@ export const resolveFolderAuth = (
   for (let i = ancestors.length - 1; i >= 0; i -= 1) {
     const auth = folderAuthOf(ancestors[i]);
     if (isConcrete(auth)) {
-      return { auth, source: { level: 'folder', name: getItemName(ancestors[i]) || 'Folder' } };
+      return { auth, source: folderSource(ancestors[i]) };
     }
   }
 
   const collectionAuth = collection?.request?.auth as Auth | undefined;
   if (isConcrete(collectionAuth)) {
-    return { auth: collectionAuth, source: { level: 'collection', name: collection?.info?.name || 'Collection' } };
+    return { auth: collectionAuth, source: collectionSource(collection) };
   }
 
   return { auth: 'inherit' };
@@ -75,6 +89,18 @@ export const getFolderConfig = (
 
   const { preVars, postVars } = getRequestDefaultsVars(folder);
 
+  // Own ENABLED keys to exclude from the inherited set (a disabled own entry is not sent, so it must
+  // not hide an enabled inherited one). One ancestry walk covers all three config kinds.
+  const {
+    headers: inheritedHeaders,
+    preVars: inheritedPreVariables,
+    postVars: inheritedPostVariables
+  } = collectInheritedConfig(collection, ancestors, {
+    headers: enabledHeaderKeys(headers),
+    preVars: enabledVarKeys(preVars),
+    postVars: enabledVarKeys(postVars)
+  });
+
   return {
     headers,
     auth: isConcrete(auth) ? auth : undefined,
@@ -83,7 +109,10 @@ export const getFolderConfig = (
     postResponse: scripts.postResponse,
     tests: scripts.tests,
     variables: preVars,
-    postVariables: postVars
+    postVariables: postVars,
+    inheritedHeaders,
+    inheritedPreVariables,
+    inheritedPostVariables
   };
 };
 
@@ -92,7 +121,10 @@ export const hasFolderConfig = (config: FolderConfig): boolean =>
   Boolean(config.auth) ||
   Boolean(config.preRequest || config.postResponse || config.tests) ||
   config.variables.length > 0 ||
-  config.postVariables.length > 0;
+  config.postVariables.length > 0 ||
+  config.inheritedHeaders.length > 0 ||
+  config.inheritedPreVariables.length > 0 ||
+  config.inheritedPostVariables.length > 0;
 
 export const countFolderRequests = (folder: Folder): number => {
   let count = 0;

@@ -8,21 +8,21 @@ test.describe('Scripts editor autocomplete', () => {
     await playground.selectTab('scripts');
   });
 
-  test('offers req/bru completions in the pre-request script editor', async ({ page, playground }) => {
+  test('offers req/bru completions in the pre-request script editor', async ({ playground }) => {
     const editor = playground.preRequestScriptEditor;
     await editor.focus();
-    await page.keyboard.type('bru.getEnvVar');
+    await editor.typeAndSuggest('bru.getEnvVar');
 
     await expect(editor.suggestions).toBeVisible();
     await expect(editor.suggestions).toContainText('getEnvVar(key)');
   });
 
-  test('offers res completions in the post-response script editor', async ({ page, playground }) => {
+  test('offers res completions in the post-response script editor', async ({ playground }) => {
     await playground.selectScriptTab('post-response');
 
     const editor = playground.postResponseScriptEditor;
     await editor.focus();
-    await page.keyboard.type('res.getBody');
+    await editor.typeAndSuggest('res.getBody');
 
     await expect(editor.suggestions).toBeVisible();
     await expect(editor.suggestions).toContainText('getBody()');

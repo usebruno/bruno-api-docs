@@ -30,6 +30,32 @@ test.describe('Request page — Examples', () => {
       await expect(examples.requestBody(OK_EXAMPLE)).toContainText('10');
     });
 
+    test('aligns the Query heading with its values, with padding consistent with the Headers tab', async ({
+      requestPage
+    }) => {
+      const { examples } = requestPage;
+      const card = examples.example(OK_EXAMPLE);
+
+      const params = await card.locator('.request-params-group').first().evaluate((el) => {
+        const heading = el.querySelector('.request-params-heading') as HTMLElement;
+        const key = el.querySelector('.property-key') as HTMLElement;
+        return {
+          heading: Math.round(heading.getBoundingClientRect().left),
+          key: Math.round(key.getBoundingClientRect().left)
+        };
+      });
+      // The Query heading lines up with its own values.
+      expect(params.key).toBe(params.heading);
+
+      // ...and the values keep the same left padding as the Headers tab (consistent across sections).
+      await examples.selectRequestTab(OK_EXAMPLE, 'headers');
+      const headerKey = await card
+        .locator('.property-row .property-key')
+        .first()
+        .evaluate((el) => Math.round(el.getBoundingClientRect().left));
+      expect(headerKey).toBe(params.key);
+    });
+
     test('switches to the Headers tab to reveal the request headers', async ({ requestPage }) => {
       const { examples } = requestPage;
       await examples.selectRequestTab(OK_EXAMPLE, 'headers');

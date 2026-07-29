@@ -1,6 +1,27 @@
 import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.div`
+  overflow-x: auto;
+  container-type: inline-size;
+  container-name: proptable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+  &::-webkit-scrollbar {
+    height: 0.5rem;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 999px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &.property-table--framed {
+    border: 1px solid var(--border-color);
+    border-radius: var(--oc-radius);
+  }
+
   .property-empty-message {
     margin: 0;
     font-family: var(--font-sans);
@@ -14,15 +35,14 @@ export const StyledWrapper = styled.div`
 
   .property-box {
     margin: 0;
-    border-radius: var(--oc-radius);
     background: var(--oc-background-base);
-    border: 1px solid var(--border-color);
-    overflow: hidden;
+    width: max-content;
+    min-width: 100%;
   }
 
   .property-row {
     display: grid;
-    grid-template-columns: 8.75rem minmax(0, 1fr);
+    grid-template-columns: minmax(8.75rem, max-content) minmax(0, 1fr);
     align-items: center;
     column-gap: 1.5rem;
     row-gap: 0;
@@ -31,15 +51,13 @@ export const StyledWrapper = styled.div`
   }
   .property-row .description {
     grid-column: 1 / -1;
+    max-width: calc(100cqi - 1.75rem);
   }
   .property-row + .property-row {
     border-top: 1px solid var(--border-color);
   }
   &.property-table--no-row-borders .property-row + .property-row {
     border-top: none;
-  }
-  &.property-table--no-row-borders .property-box {
-    border: none;
   }
 
   .property-key {
@@ -65,21 +83,31 @@ export const StyledWrapper = styled.div`
   }
   .property-value-line {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 0.5rem;
     min-width: 0;
   }
   .property-value-line .disabled-badge {
     margin-left: auto;
     align-self: center;
+    flex: none;
+  }
+  .property-value-line .property-value-main + .inherited-source,
+  .property-value-line .property-type + .inherited-source {
+    margin-left: auto;
+  }
+  .property-value-line .inherited-source {
+    flex: none;
   }
   .property-value-main {
     min-width: 0;
     flex: 0 1 auto;
     color: var(--oc-colors-text-subtext2);
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .property-value-main .oc-truncate {
+    overflow: visible;
+    text-overflow: clip;
   }
   .property-type {
     flex-shrink: 0;
@@ -90,5 +118,18 @@ export const StyledWrapper = styled.div`
   }
   .property-value-cell .secret-value-text {
     font-family: inherit;
+  }
+
+  @container docs (max-width: 900px) {
+    .property-box {
+      width: auto;
+    }
+    .property-row {
+      grid-template-columns: 8.75rem minmax(0, 1fr);
+    }
+    .property-value-main .oc-truncate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   }
 `;

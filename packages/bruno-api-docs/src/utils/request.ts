@@ -12,18 +12,43 @@ import type { PropertyRow } from '../components/PropertyTable/PropertyTable';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { Scripts } from '@opencollection/types/common/scripts';
 import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';
-import type { Action, ActionSetVariable, ActionVariableScope } from '@opencollection/types/common/actions';
-import type { Description } from '@opencollection/types/common/description';
+import type { Action, ActionSetVariable } from '@opencollection/types/common/actions';
 import {
   getRequestAuth,
   getItemName,
   getRequestScripts,
   scriptsArrayToObject,
-  getRequestVariables
+  getRequestVariables,
+  getHttpHeaders
 } from './schemaHelpers';
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 import { COLLECTION_ROOT_CRUMB } from './common';
+import { AUTH_MODE_LABELS, BODY_CONTENT_TYPE, BODY_LANGUAGE } from '../constants';
+import type {
+  InheritedSource,
+  ResolvedAuth,
+  InheritedAuthSummary,
+  BodyTableRow,
+  FileBodyRow,
+  BodyView,
+  SelectedBody,
+  ScriptLevel,
+  ScriptPhase,
+  ScriptFlow,
+  ScriptChainStep,
+  PreRequestVarRow,
+  PostResponseVarRow,
+  PostResponseVar,
+  PostResponseRowInput,
+  InheritedHeaderRow,
+  InheritedPreRequestVarRow,
+  InheritedPostResponseVarRow,
+  InheritedConfig,
+  OwnConfigKeys
+} from './request.types';
+
+export type * from './request.types';
 
 export const humanizeAuthMode = (auth: Auth | undefined, labels: Record<string, string>): string => {
   if (!auth) return 'No Auth';
@@ -31,10 +56,27 @@ export const humanizeAuthMode = (auth: Auth | undefined, labels: Record<string, 
   return labels[auth.type] || auth.type;
 };
 
-export interface ResolvedAuth {
-  auth?: Auth;
-  source?: { level: 'collection' | 'folder'; name: string };
-}
+/** Identity of an inherited-config source — the single source of truth shared by the auth resolvers
+ *  and the header/variable collectors, so an inherited row and the auth chip link to the same node. */
+export const folderSource = (folder: Item): InheritedSource => ({
+  level: 'folder',
+  name: getItemName(folder) || 'Folder',
+  uuid: getItemUuid(folder) || ''
+});
+
+export const collectionSource = (collection: OpenCollection | null | undefined): InheritedSource => ({
+  level: 'collection',
+  name: collection?.info?.name || 'Collection',
+  uuid: COLLECTION_ROOT_CRUMB
+});
+
+/** Provenance label shown on inherited-config affordances (the auth chip and per-row goto links). */
+export const inheritedSourceLabel = (source: InheritedSource): string =>
+  `Inherited from ${source.level}: ${source.name}`;
+
+/** Whether an inherited-source affordance can navigate: a handler exists and the source has a uuid. */
+export const canNavigateToSource = (source: InheritedSource, onNavigate?: (uuid: string) => void): boolean =>
+  Boolean(onNavigate && source.uuid);
 
 const folderAuth = (folder: Item): Auth | undefined =>
   (folder as { request?: { auth?: Auth } }).request?.auth;
@@ -44,24 +86,53 @@ const isConcrete = (auth: Auth | undefined): boolean => !!auth && auth !== 'inhe
 export const resolveInheritedAuth = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest
+  item: Item
 ): ResolvedAuth => {
-  const own = getRequestAuth(item) as Auth | undefined;
+  const own = getRequestAuth(item as HttpRequest) as Auth | undefined;
   if (own !== 'inherit') return { auth: own };
 
+  // Walk ancestors leaf->root. Only an `inherit` folder is transparent; the first folder that
+  // made an auth choice of its own — concrete OR an explicit No Auth (undefined) — is terminal
+  // and wins. A No-Auth folder therefore blocks a parent's auth rather than being skipped past.
+  // This mirrors the send path (`runner/utils/request-merger.ts` mergeAuth) and the app's
+  // inherited-auth resolver, so the docs show exactly what the playground puts on the wire.
   for (let i = ancestors.length - 1; i >= 0; i -= 1) {
     const auth = folderAuth(ancestors[i]);
-    if (isConcrete(auth)) {
-      return { auth, source: { level: 'folder', name: getItemName(ancestors[i]) || 'Folder' } };
-    }
+    if (auth === 'inherit') continue;
+    return {
+      auth: isConcrete(auth) ? auth : undefined,
+      source: folderSource(ancestors[i])
+    };
   }
 
   const collectionAuth = collection?.request?.auth as Auth | undefined;
   if (isConcrete(collectionAuth)) {
-    return { auth: collectionAuth, source: { level: 'collection', name: collection?.info?.name || 'Collection' } };
+    return {
+      auth: collectionAuth,
+      source: collectionSource(collection)
+    };
   }
 
-  return { auth: 'inherit' };
+  // Nothing concrete anywhere up the chain — the request effectively sends No Auth, not "Inherit".
+  return { auth: undefined };
+};
+
+/**
+ * Resolve the inherited-auth summary an Auth tab shows ("Auth inherited from {name}: {mode}"),
+ * or null when the item doesn't inherit. Names the nearest configured parent (falling back
+ * to the collection) and its effective mode, matching the desktop app.
+ */
+export const getInheritedAuthSummary = (
+  collection: OpenCollection | null | undefined,
+  ancestors: Item[],
+  item: Item
+): InheritedAuthSummary | null => {
+  if (getRequestAuth(item as HttpRequest) !== 'inherit') return null;
+  const resolved = resolveInheritedAuth(collection, ancestors, item);
+  return {
+    sourceName: resolved.source?.name || collection?.info?.name || 'Collection',
+    modeLabel: humanizeAuthMode(resolved.auth, AUTH_MODE_LABELS)
+  };
 };
 
 export const getDescription = (item: unknown): string | undefined => {
@@ -105,129 +176,7 @@ export const getVariableType = (variable?: Variable | SecretVariable): VariableV
 export const getVariableTypeLabel = (variable?: Variable | SecretVariable): string =>
   getVariableType(variable) ?? 'string';
 
-export interface BodyTableRow {
-  name: string;
-  value: string;
-  partType?: 'text' | 'file';
-  contentType?: string;
-  disabled?: boolean;
-  description?: string;
-}
-
-export interface FileBodyRow {
-  filePath: string;
-  contentType?: string;
-  selected?: boolean;
-  description?: string;
-}
-
-export type BodyView =
-  | { render: 'code'; language: string; contentTypeLabel: string; code: string }
-  | { render: 'table'; variant: 'urlencoded' | 'multipart'; contentTypeLabel: string; rows: BodyTableRow[] }
-  | { render: 'file'; contentTypeLabel: string; files: FileBodyRow[] }
-  | { render: 'none' };
-
-const RAW_LANGUAGE: Record<string, string> = { json: 'json', xml: 'markup', text: 'text', sparql: 'text' };
-
-const BODY_CONTENT_TYPE: Record<string, string> = {
-  json: 'application/json',
-  xml: 'application/xml',
-  text: 'text/plain',
-  sparql: 'application/sparql-query',
-  'form-urlencoded': 'application/x-www-form-urlencoded',
-  'multipart-form': 'multipart/form-data',
-  file: 'application/octet-stream'
-};
-
 export const bodyContentTypeLabel = (type: string): string => BODY_CONTENT_TYPE[type] || type;
-
-/** Example response body `type` -> Prism language. */
-export const RESPONSE_LANGUAGE: Record<string, string> = {
-  json: 'json',
-  xml: 'markup',
-  html: 'markup',
-  text: 'text',
-  binary: 'text'
-};
-
-/** Example response body `type` -> full MIME content type. */
-export const RESPONSE_CONTENT_TYPE: Record<string, string> = {
-  json: 'application/json',
-  xml: 'application/xml',
-  html: 'text/html',
-  binary: 'application/octet-stream'
-};
-
-/** HTTP status code -> reason phrase (e.g. 404 -> "Not Found"). */
-export const STATUS_CODE_PHRASES: Record<number, string> = {
-  100: 'Continue',
-  101: 'Switching Protocols',
-  102: 'Processing',
-  103: 'Early Hints',
-  200: 'OK',
-  201: 'Created',
-  202: 'Accepted',
-  203: 'Non-Authoritative Information',
-  204: 'No Content',
-  205: 'Reset Content',
-  206: 'Partial Content',
-  207: 'Multi-Status',
-  208: 'Already Reported',
-  226: 'IM Used',
-  300: 'Multiple Choice',
-  301: 'Moved Permanently',
-  302: 'Found',
-  303: 'See Other',
-  304: 'Not Modified',
-  305: 'Use Proxy',
-  307: 'Temporary Redirect',
-  308: 'Permanent Redirect',
-  400: 'Bad Request',
-  401: 'Unauthorized',
-  402: 'Payment Required',
-  403: 'Forbidden',
-  404: 'Not Found',
-  405: 'Method Not Allowed',
-  406: 'Not Acceptable',
-  407: 'Proxy Authentication Required',
-  408: 'Request Timeout',
-  409: 'Conflict',
-  410: 'Gone',
-  411: 'Length Required',
-  412: 'Precondition Failed',
-  413: 'Payload Too Large',
-  414: 'URI Too Long',
-  415: 'Unsupported Media Type',
-  416: 'Range Not Satisfiable',
-  417: 'Expectation Failed',
-  418: "I'm a teapot",
-  421: 'Misdirected Request',
-  422: 'Unprocessable Entity',
-  423: 'Locked',
-  424: 'Failed Dependency',
-  425: 'Too Early',
-  426: 'Upgrade Required',
-  428: 'Precondition Required',
-  429: 'Too Many Requests',
-  431: 'Request Header Fields Too Large',
-  451: 'Unavailable For Legal Reasons',
-  500: 'Internal Server Error',
-  501: 'Not Implemented',
-  502: 'Bad Gateway',
-  503: 'Service Unavailable',
-  504: 'Gateway Timeout',
-  505: 'HTTP Version Not Supported',
-  506: 'Variant Also Negotiates',
-  507: 'Insufficient Storage',
-  508: 'Loop Detected',
-  510: 'Not Extended',
-  511: 'Network Authentication Required'
-};
-
-export interface SelectedBody {
-  body?: HttpRequestBody;
-  variants?: { title: string; selected: boolean }[];
-}
 
 export const selectBodyVariant = (
   body: HttpRequestBody | HttpRequestBodyVariant[] | undefined
@@ -257,7 +206,7 @@ export const getBodyView = (
       if (!data.trim()) return { render: 'none' };
       return {
         render: 'code',
-        language: RAW_LANGUAGE[body.type] || 'text',
+        language: BODY_LANGUAGE[body.type] || 'text',
         contentTypeLabel: bodyContentTypeLabel(body.type),
         code: data
       };
@@ -301,11 +250,6 @@ export const getBodyView = (
   }
 };
 
-export type ScriptLevel = 'collection' | 'folder' | 'request';
-export type ScriptPhase = 'before-request' | 'after-response';
-
-export type ScriptFlow = 'sandwich' | 'sequential';
-
 interface ConfigExtension {
   scripts?: { flow?: unknown };
 }
@@ -315,16 +259,6 @@ export const getScriptFlow = (collection: OpenCollection | null | undefined): Sc
   const flow = ext?.scripts?.flow ?? (collection?.config as ConfigExtension | undefined)?.scripts?.flow;
   return flow === 'sequential' ? 'sequential' : 'sandwich';
 };
-
-export interface ScriptChainStep {
-  level: ScriptLevel;
-  phase: ScriptPhase;
-  label: string;
-  sourceName?: string;
-  sourceUuid?: string;
-  code: string;
-  order: number;
-}
 
 interface ScriptSource {
   level: ScriptLevel;
@@ -391,39 +325,6 @@ export const buildScriptChain = (
 
   return steps;
 };
-
-export interface PreRequestVarRow {
-  name: string;
-  value: string;
-  type?: string;
-  description?: string;
-  disabled?: boolean;
-}
-
-export interface PostResponseVarRow {
-  name: string;
-  expression: string;
-  scope?: string;
-  description?: string;
-  disabled?: boolean;
-}
-
-// Editable post-response variable used by VariablesTab (expr = capture expression).
-export interface PostResponseVar {
-  name?: string;
-  expr?: string;
-  disabled?: boolean;
-  scope?: ActionVariableScope;
-  description?: Description;
-}
-
-export interface PostResponseRowInput {
-  name?: string;
-  value?: string;
-  enabled?: boolean;
-  scope?: ActionVariableScope;
-  description?: Description;
-}
 
 // Shared row-builders. Request items keep vars/actions under `runtime`; collection
 // and folder defaults keep them under `request` — but both map to the same rows.
@@ -499,6 +400,105 @@ export const getRequestDefaultsVars = (
 export const getCollectionVariables = (
   collection: OpenCollection | null | undefined
 ): { preVars: PreRequestVarRow[]; postVars: PostResponseVarRow[] } => getRequestDefaultsVars(collection);
+
+export const inheritedCountLabel = (count: number, noun: string): string =>
+  `${count} ${noun}${count === 1 ? '' : 's'} inherited`;
+
+type InheritanceNode = { request?: { headers?: HttpRequestHeader[]; variables?: Variable[]; actions?: Action[] } };
+
+const inheritanceLevels = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[]
+): { source: InheritedSource; node: InheritanceNode }[] => {
+  const levels: { source: InheritedSource; node: InheritanceNode }[] = [];
+  if (collection) levels.push({ source: collectionSource(collection), node: collection as InheritanceNode });
+  ancestry.forEach((folder) =>
+    levels.push({ source: folderSource(folder), node: folder as unknown as InheritanceNode })
+  );
+  return levels;
+};
+
+export const enabledHeaderKeys = (headers: { name?: string; disabled?: boolean }[]): Set<string> =>
+  new Set(headers.filter((h) => h.name && !h.disabled).map((h) => (h.name as string).toLowerCase()));
+
+export const enabledVarKeys = (vars: { name?: string; disabled?: boolean }[]): Set<string> =>
+  new Set(vars.filter((v) => v.name && !v.disabled).map((v) => v.name as string));
+
+/**
+ * Walk collection -> ancestor folders ONCE and collect everything an item inherits: headers,
+ * pre-request vars and post-response captures. Nearest source wins (Map last-write over the
+ * shallowest-first level order), the item's own ENABLED keys are excluded, and disabled entries are
+ * dropped on both sides — so the result is exactly the effective request the send path produces, and
+ * the headers table, variables panel and code snippet all agree on it.
+ */
+export const collectInheritedConfig = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  own: OwnConfigKeys
+): InheritedConfig => {
+  const headers = new Map<string, InheritedHeaderRow>();
+  const preVars = new Map<string, InheritedPreRequestVarRow>();
+  const postVars = new Map<string, InheritedPostResponseVarRow>();
+
+  inheritanceLevels(collection, ancestry).forEach(({ source, node }) => {
+    (node?.request?.headers ?? []).forEach((h) => {
+      const key = (h.name || '').toLowerCase();
+      if (!key || h.disabled || own.headers.has(key)) return;
+      headers.set(key, { name: h.name, value: h.value, disabled: h.disabled, description: getDescription(h), source });
+    });
+
+    const { preVars: nodePre, postVars: nodePost } = getRequestDefaultsVars(node);
+    nodePre.forEach((v) => {
+      if (!v.name || v.disabled || own.preVars.has(v.name)) return;
+      preVars.set(v.name, { ...v, source });
+    });
+    nodePost.forEach((v) => {
+      if (!v.name || v.disabled || own.postVars.has(v.name)) return;
+      postVars.set(v.name, { ...v, source });
+    });
+  });
+
+  return {
+    headers: Array.from(headers.values()),
+    preVars: Array.from(preVars.values()),
+    postVars: Array.from(postVars.values())
+  };
+};
+
+/** The full config a request inherits from its collection/folder ancestry — one ancestry walk shared
+ *  by the headers table, the variables panel and the code snippet (nearest parent wins; the request's
+ *  own enabled config overrides it; disabled entries are dropped). */
+export const getInheritedConfig = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedConfig =>
+  collectInheritedConfig(collection, ancestry, {
+    headers: enabledHeaderKeys(getHttpHeaders(item)),
+    preVars: enabledVarKeys(getPreRequestVars(item)),
+    postVars: enabledVarKeys(getPostResponseVars(item))
+  });
+
+/** Headers the request inherits (nearest parent wins, case-insensitive, disabled dropped). */
+export const getInheritedHeaders = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedHeaderRow[] => getInheritedConfig(collection, ancestry, item).headers;
+
+/** Pre-request variables the request inherits (nearest parent wins), excluding any it defines. */
+export const getInheritedPreRequestVars = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedPreRequestVarRow[] => getInheritedConfig(collection, ancestry, item).preVars;
+
+/** Post-response captures the request inherits (nearest parent wins), excluding any it defines. */
+export const getInheritedPostResponseVars = (
+  collection: OpenCollection | null | undefined,
+  ancestry: Item[],
+  item: HttpRequest
+): InheritedPostResponseVarRow[] => getInheritedConfig(collection, ancestry, item).postVars;
 
 /**
  * Short, uppercased method name matching the design (DELETE -> DEL, OPTIONS ->

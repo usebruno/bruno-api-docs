@@ -16,15 +16,15 @@ describe('resolveFolderAuth', () => {
     const folder: any = { request: { auth: 'inherit' } };
     const resolved = resolveFolderAuth(collection, [], folder);
     expect(resolved.auth).toMatchObject({ type: 'bearer' });
-    expect(resolved.source).toEqual({ level: 'collection', name: 'Hotel Booking API' });
+    expect(resolved.source).toEqual({ level: 'collection', name: 'Hotel Booking API', uuid: '__collection_root__' });
   });
 
   it('resolves inherited auth from the nearest ancestor folder', () => {
-    const parent: any = { info: { name: 'Parent' }, request: { auth: { type: 'apikey', key: 'k' } } };
+    const parent: any = { uuid: 'parent-uid', info: { name: 'Parent' }, request: { auth: { type: 'apikey', key: 'k' } } };
     const folder: any = { request: { auth: 'inherit' } };
     const resolved = resolveFolderAuth(collection, [parent], folder);
     expect(resolved.auth).toMatchObject({ type: 'apikey' });
-    expect(resolved.source).toEqual({ level: 'folder', name: 'Parent' });
+    expect(resolved.source).toEqual({ level: 'folder', name: 'Parent', uuid: 'parent-uid' });
   });
 });
 
@@ -53,7 +53,7 @@ describe('getFolderConfig', () => {
       { name: 'X-Disabled', value: 'x', disabled: true, description: undefined }
     ]);
     expect(config.auth).toMatchObject({ type: 'bearer' });
-    expect(config.authSource).toEqual({ level: 'collection', name: 'Hotel Booking API' });
+    expect(config.authSource).toEqual({ level: 'collection', name: 'Hotel Booking API', uuid: '__collection_root__' });
     expect(config.preRequest).toBe('pre');
     expect(config.postResponse).toBe('post');
     expect(config.tests).toBe('test()');

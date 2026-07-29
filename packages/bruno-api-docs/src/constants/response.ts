@@ -1,3 +1,16 @@
+import type {
+  TablerIcon
+} from '@tabler/icons';
+import {
+  IconBraces,
+  IconCode,
+  IconFileCode,
+  IconBrandJavascript,
+  IconFileText,
+  IconHexagons,
+  IconBinaryTree
+} from '@tabler/icons';
+
 export type ResponseBodyView = 'preview' | 'editor';
 
 export type ResponseBodyFormat = 'html' | 'json' | 'xml' | 'javascript' | 'base64' | 'raw' | 'hex';
@@ -197,4 +210,14 @@ export const STATUS_CODE_PHRASES: Record<number, string> = {
   508: 'Loop Detected',
   510: 'Not Extended',
   511: 'Network Authentication Required'
+};
+
+export const FORMAT_ICONS: Record<ResponseBodyFormat, TablerIcon> = {
+  json: IconBraces,
+  html: IconCode,
+  xml: IconFileCode,
+  javascript: IconBrandJavascript,
+  raw: IconFileText,
+  hex: IconHexagons,
+  base64: IconBinaryTree
 };

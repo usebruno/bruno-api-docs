@@ -50,5 +50,6 @@ export {
   FORMAT_LABELS,
   RESPONSE_FORMAT_RULES,
   FORMAT_TO_MONACO,
+  FORMAT_ICONS,
   formatToPreviewMode
 } from './response';

@@ -1,13 +1,14 @@
 import type { FC } from 'react';
-import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '../../../../../../../ui/MenuDropdown';
+import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@/ui/MenuDropdown';
 import type {
-  ResponseBodyFormat } from '../../../../../../../constants';
+  ResponseBodyFormat } from '@/constants';
 import {
   STRUCTURED_FORMAT_OPTIONS,
   BYTE_FORMAT_OPTIONS,
   ALL_FORMAT_OPTIONS,
-  FORMAT_LABELS
-} from '../../../../../../../constants';
+  FORMAT_LABELS,
+  FORMAT_ICONS
+} from '@/constants';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ResponseFormatSelectorProps {
@@ -56,7 +57,8 @@ const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
     options: group.map((format) => ({
       id: format,
       label: FORMAT_LABELS[format],
-      onClick: () => handleSelection?.(format)
+      onClick: () => handleSelection?.(format),
+      leftSection: FORMAT_ICONS[format]
     }))
   }));
 

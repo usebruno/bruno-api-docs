@@ -67,6 +67,12 @@ describe('RequestRunner', () => {
   describe('runRequest', () => {
     it('should execute a POST request with JSON body and run assertions and tests', async () => {
       // Mock fetch to return a successful response
+      const responseBody = {
+        title: 'request-level-variable-value',
+        body: 'request-level-variable-value',
+        userId: 1,
+        id: 101
+      };
       global.fetch = vi.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -75,12 +81,8 @@ describe('RequestRunner', () => {
         headers: new Headers({
           'content-type': 'application/json; charset=utf-8'
         }),
-        text: async () => JSON.stringify({
-          title: 'request-level-variable-value',
-          body: 'request-level-variable-value',
-          userId: 1,
-          id: 101
-        })
+        text: async () => JSON.stringify(responseBody),
+        arrayBuffer: async () => new TextEncoder().encode(JSON.stringify(responseBody)).buffer
       });
 
       const runner = new RequestRunner();
@@ -157,7 +159,8 @@ describe('RequestRunner', () => {
           headers: new Headers({
             'content-type': 'application/json'
           }),
-          text: async () => JSON.stringify({ success: true })
+          text: async () => JSON.stringify({ success: true }),
+          arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ success: true })).buffer
         });
       });
 
@@ -207,7 +210,8 @@ describe('RequestRunner', () => {
           statusText: 'OK',
           url: 'https://example.com/api',
           headers: new Headers({ 'content-type': 'application/json' }),
-          text: async () => JSON.stringify({ success: true })
+          text: async () => JSON.stringify({ success: true }),
+          arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ success: true })).buffer
         });
       });
 
@@ -247,7 +251,8 @@ describe('RequestRunner', () => {
           statusText: 'OK',
           url: 'https://example.com/upload',
           headers: new Headers({ 'content-type': 'application/json' }),
-          text: async () => JSON.stringify({ success: true })
+          text: async () => JSON.stringify({ success: true }),
+          arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ success: true })).buffer
         });
       });
 
@@ -291,7 +296,8 @@ describe('RequestRunner', () => {
           statusText: 'OK',
           url: 'https://example.com/upload',
           headers: new Headers({ 'content-type': 'application/json' }),
-          text: async () => JSON.stringify({ success: true })
+          text: async () => JSON.stringify({ success: true }),
+          arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ success: true })).buffer
         });
       });
 

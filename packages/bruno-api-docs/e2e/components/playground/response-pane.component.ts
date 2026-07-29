@@ -45,8 +45,14 @@ export class ResponsePaneComponent extends BaseComponent {
     return (await this.previewToggle.getAttribute('aria-checked')) === 'true';
   }
 
-  /** The visible text of the response body editor (Monaco renders lines under `.view-lines`). */
+  /**
+   * The visible text of the response body editor (Monaco renders lines under `.view-lines`).
+   * Monaco's `innerText` emits indentation and inter-token spacing as non-breaking spaces, so
+   * normalise them back to regular spaces for stable assertions.
+   */
   async bodyText(): Promise<string> {
-    return (await this.bodyEditor.root.locator('.view-lines').innerText()).trim();
+    return (await this.bodyEditor.root.locator('.view-lines').innerText())
+      .replace(/\u00A0/g, ' ')
+      .trim();
   }
 }

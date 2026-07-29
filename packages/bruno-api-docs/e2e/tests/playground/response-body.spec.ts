@@ -9,9 +9,9 @@ test.describe('response body — editor formatting per format', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
   test.beforeEach(async ({ page }) => {
-    // The dev build routes the playground fetch through `/__proxy?url=…`; intercept it
-    // so the test is hermetic and doesn't depend on a live upstream.
-    await page.route('**/__proxy**', (route) =>
+    // 'get users' fetches `{{host}}/api/users?…` directly; intercept it so the test is
+    // hermetic and doesn't depend on a live upstream.
+    await page.route('**/api/users**', (route) =>
       route.fulfill({
         status: 200,
         headers: { 'content-type': 'application/json' },
@@ -61,7 +61,7 @@ test.describe('response body — binary responses', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
   test.beforeEach(async ({ page }) => {
-    await page.route('**/__proxy**', (route) =>
+    await page.route('**/api/users**', (route) =>
       route.fulfill({
         status: 200,
         headers: { 'content-type': 'image/png' },
@@ -96,7 +96,9 @@ test.describe('response body — binary responses', () => {
     expect(await responsePane.isPreviewOn()).toBe(false);
 
     // A benign re-render (tab switch and back) must not clobber the manual choice.
-    await page.getByTestId('response-tabs-tab-headers').click();
+    // At this viewport the Headers tab lives in the response-tab overflow menu.
+    await page.getByTestId('response-tabs-more').click();
+    await page.getByTestId('response-tabs-more-headers').click();
     await page.getByTestId('response-tabs-tab-response').click();
 
     await responsePane.openFormatSelector();

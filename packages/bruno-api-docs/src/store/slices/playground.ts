@@ -19,6 +19,7 @@ export interface PlaygroundState {
   viewMode: ViewMode;
   selectedItemId: string | null;
   selectedExampleIndex: number | null;
+  responsePaneOrientation: 'horizontal' | 'vertical' | null;
 }
 
 const initialState: PlaygroundState = {
@@ -30,6 +31,7 @@ const initialState: PlaygroundState = {
   viewMode: 'playground',
   selectedItemId: null,
   selectedExampleIndex: null,
+  responsePaneOrientation: null,
 };
 
 const readEnvironments = (collection: OpenCollectionCollection): Environment[] | null =>
@@ -171,6 +173,9 @@ const playgroundSlice = createSlice({
     setSelectedExampleIndex: (state: PlaygroundState, action: PayloadAction<number | null>) => {
       state.selectedExampleIndex = action.payload;
     },
+    setResponsePaneOrientation: (state: PlaygroundState, action: PayloadAction<'horizontal' | 'vertical' | null>) => {
+      state.responsePaneOrientation = action.payload;
+    },
     // Collection Mutation Actions
     toggleFolderCollapse: (state: PlaygroundState, action: PayloadAction<string>) => {
       if (!state.hydratedCollection?.items) return;
@@ -233,6 +238,7 @@ export const {
   setViewMode,
   setSelectedItemId,
   setSelectedExampleIndex,
+  setResponsePaneOrientation,
   toggleFolderCollapse,
   expandFolders,
   updateCollectionSettings,
@@ -249,5 +255,6 @@ export const selectPlaygroundResponses = (state: RootState) => state.playground.
 export const selectViewMode = (state: RootState) => state.playground.viewMode;
 export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
 export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;
+export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;
 
 export default playgroundSlice.reducer;

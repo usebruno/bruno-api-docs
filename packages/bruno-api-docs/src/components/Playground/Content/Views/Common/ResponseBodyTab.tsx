@@ -31,7 +31,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
       {hideForLargeResponse ? (
         <LargeResponseWarning
           responseSize={responseSize}
-          data={response?.data}
+          response={response}
           onReveal={() => setRevealed(true)}
         />
       ) : showPreview ? (

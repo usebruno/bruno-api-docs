@@ -13,8 +13,41 @@ export class ResponsePaneComponent extends BaseComponent {
   readonly sendButton = this.page.getByTestId('query-bar-send');
   readonly formatSelector = this.page.getByTestId('response-format-selector');
 
+  // The response-pane action buttons live in the status bar and only render once a
+  // response exists (and there is no request error). Each is an ActionIcon <button>
+  // whose `title` becomes its accessible name.
+  readonly actions = this.page.locator('.response-pane-actions-wrapper');
+  readonly copyButton = this.actions.getByRole('button', { name: 'Copy Response' });
+  readonly downloadButton = this.actions.getByRole('button', { name: 'Download Response' });
+  readonly clearButton = this.actions.getByRole('button', { name: 'Clear Response' });
+  readonly changeLayoutButton = this.actions.getByRole('button', { name: 'Change Layout' });
+
+  // The empty state shown before a response (and after Clear).
+  readonly emptyHint = this.page.getByText('Click Send to make a request');
+
+  // Large Response Warning banner (shown when the response exceeds 10MB) and its controls.
+  readonly largeResponseWarning = this.page.getByTestId('large-response-warning');
+  readonly largeResponseView = this.page.getByTestId('large-response-view');
+  readonly largeResponseCopy = this.page.getByTestId('large-response-copy');
+  readonly largeResponseDownload = this.page.getByTestId('large-response-download');
+
   constructor(page: Page, root?: Locator) {
     super(page, root);
+  }
+
+  /**
+   * Fulfil the `get users` request's real resolved URL (`{{host}}/api/users?…`,
+   * host = http://localhost:8081 in the Local env) with a canned JSON body so a send
+   * lands a response in the pane without any live network.
+   */
+  async mockUsersResponse(body: string): Promise<void> {
+    await this.page.route('**/api/users**', (route) =>
+      route.fulfill({
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+        body
+      })
+    );
   }
 
   readonly previewToggle = this.page.getByRole('switch', { name: 'Toggle preview' });

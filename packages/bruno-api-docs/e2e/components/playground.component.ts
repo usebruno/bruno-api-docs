@@ -37,6 +37,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly bottomPanel = this.page.getByTestId('playground-dock-bottom-panel');
   readonly modalPanel = this.page.getByTestId('playground-dock-modal-panel');
   readonly mobilePanel = this.page.getByTestId('playground-dock-mobile-panel');
+  readonly divider = this.page.getByTestId('playground-divider');
   readonly unsupported = this.view.getByTestId('unsupported-request');
   readonly unsupportedTitle = this.view.getByTestId('unsupported-request-title');
   readonly unsupportedMessage = this.view.getByTestId('unsupported-request-empty');

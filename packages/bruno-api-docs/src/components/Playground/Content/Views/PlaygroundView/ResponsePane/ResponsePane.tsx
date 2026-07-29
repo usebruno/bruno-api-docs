@@ -19,9 +19,10 @@ interface ResponsePaneProps {
   response: RunRequestResponse;
   isLoading: boolean;
   orientation: 'vertical' | 'horizontal';
+  itemUuid: string;
 }
 
-const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation }) => {
+const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
   const [activeTab, setActiveTab] = useState('response');
   const { 
     selectedFormat,
@@ -117,7 +118,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
       <ResponseStatus status={response.status} statusText={response.statusText} />
       <ResponseDuration duration={response.duration} />
       <ResponseSize size={response.size} />
-      <ResponseActions orientation={orientation} />
+      <ResponseActions orientation={orientation} itemUuid={itemUuid} response={response} selectedFormat={selectedFormat} showPreview={showPreview} />
     </div>
   );
 

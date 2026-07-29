@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { formatBytes } from '../../../../../../utils/exampleResponse';
 import CopyButton from '../../../../../../ui/CopyButton/CopyButton';
+import { RunRequestResponse } from '../../../../../../runner';
+import { downloadResponse } from '../../../../../../utils/downloadResponse';
 import { StyledWrapper } from './StyledWrapper';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
@@ -8,10 +10,15 @@ const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 interface LargeResponseWarningProps {
   responseSize: number;
   onReveal: () => void;
-  data?: unknown;
+  response: RunRequestResponse;
 }
 
-export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal, data }) => {
+export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal, response }) => {
+  const copyText = useMemo(() => {
+    const data = response?.data;
+    return typeof data === 'string' ? data : JSON.stringify(data ?? '', null, 2);
+  }, [response?.data]);
+
   return (
     <StyledWrapper data-testid="large-response-warning">
       <div className="large-response-title">Large Response Warning</div>
@@ -31,6 +38,17 @@ export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ resp
           data-testid="large-response-view"
         >
           View
+        </button>
+        <CopyButton text={copyText} label="Copy" copiedLabel="Copied" testId="large-response-copy" />
+        <button
+          type="button"
+          className="large-response-download"
+          onClick={() => downloadResponse(response)}
+          disabled={!response?.base64Data}
+          aria-label="Download response"
+          data-testid="large-response-download"
+        >
+          Download
         </button>
       </div>
     </StyledWrapper>

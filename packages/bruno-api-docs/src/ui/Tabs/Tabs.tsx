@@ -26,6 +26,7 @@ interface TabsProps {
   testId?: string;
   ariaLabel?: string;
   keepMounted?: boolean;
+  rightContentExpandedWidth?: number;
 }
 
 const renderIndicator = (tab: Tab): ReactNode => {
@@ -49,7 +50,8 @@ export const Tabs: React.FC<TabsProps> = ({
   className,
   testId = 'tabs',
   ariaLabel,
-  keepMounted = false
+  keepMounted = false,
+  rightContentExpandedWidth
 }) => {
   const [internalActive, setInternalActive] = useState(defaultActiveTab ?? tabs[0]?.id ?? '');
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -59,10 +61,11 @@ export const Tabs: React.FC<TabsProps> = ({
   const current = tabs.some((tab) => tab.id === requested) ? requested : (tabs[0]?.id ?? '');
 
   const isResponsive = variant === 'responsive';
-  const { containerRef, rightRef, setMeasureRef, visibleIds, overflowIds } = useResponsiveTabs(
+  const { containerRef, rightRef, setMeasureRef, visibleIds, overflowIds, rightSideExpandable } = useResponsiveTabs(
     tabs.map((tab) => tab.id),
     current,
-    isResponsive
+    isResponsive,
+    rightContentExpandedWidth
   );
 
   const visibleTabs = isResponsive ? tabs.filter((tab) => visibleIds.includes(tab.id)) : tabs;
@@ -190,7 +193,10 @@ export const Tabs: React.FC<TabsProps> = ({
           )}
         </div>
         {rightContent !== undefined && (
-          <div className="tabs-right" ref={isResponsive ? rightRef : undefined}>
+          <div
+            className={['tabs-right', rightSideExpandable ? 'expandable' : ''].filter(Boolean).join(' ')}
+            ref={isResponsive ? rightRef : undefined}
+          >
             {rightContent}
           </div>
         )}

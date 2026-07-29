@@ -15,6 +15,10 @@ import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseDuration';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
 import ResponseActions from './ResponseActions/ResponseActions';
 
+// Width the actions block occupies when shown as buttons; the responsive tab bar uses it to
+// decide whether to expand the actions inline or collapse them into a menu.
+const RESPONSE_ACTIONS_EXPANDED_WIDTH = 135;
+
 interface ResponsePaneProps {
   response: RunRequestResponse;
   isLoading: boolean;
@@ -104,22 +108,27 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     }
   ];
 
+  // The status metadata and the actions are separate direct children of the tab bar's right slot so
+  // the responsive tab bar can measure the actions block (the last child) to decide whether to show
+  // it as inline buttons or collapse it into a menu.
   const statusInfo = (
-    <div className="flex items-center gap-3 flex-wrap text-xs">
-      {activeTab === 'response' && (
-        <ResponseFormatSelector
-          selectedFormat={selectedFormat}
-          allowedFormats={allowedFormats}
-          handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
-          showPreview={showPreview}
-          onPreviewToggle={handleViewChange}
-        />
-      )}
-      <ResponseStatus status={response.status} statusText={response.statusText} />
-      <ResponseDuration duration={response.duration} />
-      <ResponseSize size={response.size} />
+    <>
+      <div className="flex items-center gap-3 flex-wrap text-xs">
+        {activeTab === 'response' && (
+          <ResponseFormatSelector
+            selectedFormat={selectedFormat}
+            allowedFormats={allowedFormats}
+            handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
+            showPreview={showPreview}
+            onPreviewToggle={handleViewChange}
+          />
+        )}
+        <ResponseStatus status={response.status} statusText={response.statusText} />
+        <ResponseDuration duration={response.duration} />
+        <ResponseSize size={response.size} />
+      </div>
       <ResponseActions orientation={orientation} itemUuid={itemUuid} response={response} selectedFormat={selectedFormat} showPreview={showPreview} />
-    </div>
+    </>
   );
 
   return (
@@ -132,6 +141,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
         activeTab={activeTab}
         onTabChange={setActiveTab}
         rightElement={response.error ? undefined : statusInfo}
+        rightContentExpandedWidth={RESPONSE_ACTIONS_EXPANDED_WIDTH}
       />
     </StyledWrapper>
   );

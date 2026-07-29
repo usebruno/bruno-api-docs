@@ -1,17 +1,15 @@
 import React from 'react';
 import ActionIcon from '../../../../../../../../ui/ActionIcon/ActionIcon';
 import { IconDownload } from '@tabler/icons';
-import { RunRequestResponse } from '../../../../../../../../runner';
-import { downloadResponse } from '../../../../../../../../utils/downloadResponse';
 
 interface DownloadResponseProps {
-  response: RunRequestResponse;
+  onClick: () => void;
+  disabled: boolean;
 }
 
-const DownloadResponse: React.FC<DownloadResponseProps> = ({ response }) => {
-  const disabled = !response?.base64Data;
+const DownloadResponse: React.FC<DownloadResponseProps> = ({ onClick, disabled }) => {
   return (
-    <ActionIcon label="Download Response" className="p-1" disabled={disabled} onClick={() => downloadResponse(response)}>
+    <ActionIcon label="Download Response" className="p-1" disabled={disabled} onClick={onClick}>
       <IconDownload size={16} stroke={2} />
     </ActionIcon>
   );

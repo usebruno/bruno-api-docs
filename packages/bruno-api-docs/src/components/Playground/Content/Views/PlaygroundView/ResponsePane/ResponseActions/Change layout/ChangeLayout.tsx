@@ -1,21 +1,15 @@
 import React from 'react';
 import ActionIcon from '../../../../../../../../ui/ActionIcon/ActionIcon';
 import { IconLayoutColumns, IconLayoutRows } from '@tabler/icons';
-import { useAppDispatch } from '../../../../../../../../store/hooks';
-import { setResponsePaneOrientation } from '../../../../../../../../store/slices/playground';
 
 interface ChangeLayoutProps {
   orientation: 'vertical' | 'horizontal';
+  onClick: () => void;
 }
 
-const ChangeLayout: React.FC<ChangeLayoutProps> = ({orientation}) => {
-  const dispatch = useAppDispatch();
-  const toggleLayout = () => {
-    dispatch(setResponsePaneOrientation(orientation === 'horizontal' ? 'vertical' : 'horizontal'));
-  };
-
+const ChangeLayout: React.FC<ChangeLayoutProps> = ({ orientation, onClick }) => {
   return (
-    <ActionIcon label="Change Layout" className="p-1" onClick={toggleLayout}>
+    <ActionIcon label="Change Layout" className="p-1" onClick={onClick}>
       {orientation === 'vertical' ? (
         <IconLayoutColumns size={16} strokeWidth={2} />
       ) : (

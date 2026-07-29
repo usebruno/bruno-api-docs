@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import StyledWrapper from './StyledWrapper';
 
 interface ActionIconProps {
@@ -17,7 +17,7 @@ interface ActionIconProps {
   [key: string]: any; // Allow additional props
 }
 
-const ActionIcon: React.FC<ActionIconProps> = ({
+const ActionIcon = forwardRef<HTMLElement, ActionIconProps>(({
   children,
   variant = 'subtle',
   size = 'md',
@@ -30,12 +30,13 @@ const ActionIcon: React.FC<ActionIconProps> = ({
   color,
   style,
   ...rest
-}) => {
+}, ref) => {
   // Build className array and filter out empty strings
   const classNames = ['action-icon', className].filter(Boolean).join(' ');
 
   return (
     <StyledWrapper
+      ref={ref}
       as={Component}
       $variant={variant}
       $size={size}
@@ -51,6 +52,8 @@ const ActionIcon: React.FC<ActionIconProps> = ({
       {children}
     </StyledWrapper>
   );
-};
+});
+
+ActionIcon.displayName = 'ActionIcon';
 
 export default ActionIcon;

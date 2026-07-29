@@ -1,17 +1,14 @@
 import React from 'react';
 import ActionIcon from '../../../../../../../../ui/ActionIcon/ActionIcon';
 import { IconEraser } from '@tabler/icons';
-import { useAppDispatch } from '../../../../../../../../store/hooks';
-import { clearPlaygroundResponse } from '../../../../../../../../store/slices/playground';
 
 interface ClearResponseProps {
-  itemUuid: string;
+  onClick: () => void;
 }
 
-const ClearResponse: React.FC<ClearResponseProps> = ({ itemUuid }) => {
-  const dispatch = useAppDispatch();
+const ClearResponse: React.FC<ClearResponseProps> = ({ onClick }) => {
   return (
-    <ActionIcon label="Clear Response" className="p-1" onClick={() => dispatch(clearPlaygroundResponse(itemUuid))}>
+    <ActionIcon label="Clear Response" className="p-1" onClick={onClick}>
       <IconEraser size={16} stroke={2} />
     </ActionIcon>
   );

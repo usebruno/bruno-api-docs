@@ -1,14 +1,14 @@
 import { test, expect } from '../../playwright';
 
-// The response-pane action buttons (Copy, Download, Clear, Change Layout) only render once a
-// response is present in the pane. `RequestExecutor` calls `fetch(resolvedUrl)` directly, so a
-// send is made hermetic by mocking the sample collection's `get users` resolved URL
-// (`{{host}}/api/users?…`, host = http://localhost:8081 in the Local env) rather than a proxy.
+// The response-pane actions (Copy, Download, Clear, Change Layout) only render once a response is
+// present in the pane. `RequestExecutor` calls `fetch(resolvedUrl)` directly, so a send is made
+// hermetic by mocking the sample collection's `get users` resolved URL (`{{host}}/api/users?…`,
+// host = http://localhost:8081 in the Local env) rather than a proxy.
 const USERS_BODY = '{"data":[{"id":1,"name":"Alice"}]}';
 
-// At >= 640px the layout defaults to horizontal; the ChangeLayout button toggles it to vertical.
-// The SplitDivider exposes the live orientation via its `data-orientation` attribute.
-test.describe('response pane actions', () => {
+// At the default (narrow) playground width the actions collapse into a kebab menu; each action is a
+// menu item.
+test.describe('response pane actions — collapsed', () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
   test.beforeEach(async ({ page, playground, responsePane }) => {
@@ -16,43 +16,29 @@ test.describe('response pane actions', () => {
     await page.goto('/#/?pg=1&dock=bottom');
     await playground.openSidebarItem('get users');
     await responsePane.send();
-    // The action buttons only mount after the response lands.
+    // The actions only mount after the response lands.
     await expect(responsePane.actions).toBeVisible();
   });
 
-  test('renders Copy, Download, Clear and Change Layout, all enabled and clickable', async ({
+  test('collapses into a kebab menu exposing Copy, Download, Clear and Change Layout', async ({
     responsePane
   }) => {
-    await expect(responsePane.copyButton).toBeVisible();
-    await expect(responsePane.copyButton).toBeEnabled();
-    await expect(responsePane.downloadButton).toBeVisible();
-    await expect(responsePane.downloadButton).toBeEnabled();
-    await expect(responsePane.clearButton).toBeVisible();
-    await expect(responsePane.changeLayoutButton).toBeVisible();
+    await expect(responsePane.actionsMenuTrigger).toBeVisible();
+
+    await responsePane.openActionsMenu();
+    await expect(responsePane.copyMenuItem).toBeVisible();
+    await expect(responsePane.downloadMenuItem).toBeVisible();
+    await expect(responsePane.clearMenuItem).toBeVisible();
+    await expect(responsePane.layoutMenuItem).toBeVisible();
 
     // Copy is clickable and the pane stays in its response state (no crash / no empty state).
-    await responsePane.copyButton.click();
+    await responsePane.copyMenuItem.click();
     await expect(responsePane.actions).toBeVisible();
-  });
-
-  test('Change Layout toggles the container orientation horizontal <-> vertical', async ({
-    playground,
-    responsePane
-  }) => {
-    // Wide viewport defaults to a horizontal split.
-    await expect(playground.divider).toHaveAttribute('data-orientation', 'horizontal');
-
-    await responsePane.changeLayoutButton.click();
-    await expect(playground.divider).toHaveAttribute('data-orientation', 'vertical');
-
-    await responsePane.changeLayoutButton.click();
-    await expect(playground.divider).toHaveAttribute('data-orientation', 'horizontal');
   });
 
   test('Clear returns the pane to the empty "Click Send" state', async ({ responsePane }) => {
-    await expect(responsePane.actions).toBeVisible();
-
-    await responsePane.clearButton.click();
+    await responsePane.openActionsMenu();
+    await responsePane.clearMenuItem.click();
 
     await expect(responsePane.emptyHint).toBeVisible();
     // The status-bar actions are gone once the response is cleared.
@@ -61,9 +47,43 @@ test.describe('response pane actions', () => {
 
   test('Download triggers a browser download of the response', async ({ page, responsePane }) => {
     const downloadPromise = page.waitForEvent('download');
-    await responsePane.downloadButton.click();
+    await responsePane.openActionsMenu();
+    await responsePane.downloadMenuItem.click();
     const download = await downloadPromise;
     expect(download.suggestedFilename().length).toBeGreaterThan(0);
+  });
+});
+
+// When the response pane is wide enough, the actions expand from the kebab into inline buttons. At
+// this width the pane stays wide in both orientations, so the inline Change-Layout button persists.
+test.describe('response pane actions — expanded', () => {
+  test.use({ viewport: { width: 1920, height: 900 } });
+
+  test.beforeEach(async ({ page, playground, responsePane }) => {
+    await responsePane.mockUsersResponse(USERS_BODY);
+    await page.goto('/#/?pg=1');
+    await playground.openSidebarItem('get users');
+    await responsePane.send();
+    await expect(responsePane.actions).toBeVisible();
+  });
+
+  test('shows the actions as inline buttons instead of the kebab menu', async ({ responsePane }) => {
+    await expect(responsePane.inlineButtons).toBeVisible();
+    await expect(responsePane.actionsMenuTrigger).toBeHidden();
+    await expect(responsePane.inlineButtons.getByRole('button', { name: 'Copy Response' })).toBeVisible();
+  });
+
+  test('Change Layout toggles the container orientation horizontal <-> vertical', async ({
+    playground,
+    responsePane
+  }) => {
+    await expect(playground.divider).toHaveAttribute('data-orientation', 'horizontal');
+
+    await responsePane.inlineChangeLayoutButton.click();
+    await expect(playground.divider).toHaveAttribute('data-orientation', 'vertical');
+
+    await responsePane.inlineChangeLayoutButton.click();
+    await expect(playground.divider).toHaveAttribute('data-orientation', 'horizontal');
   });
 });
 

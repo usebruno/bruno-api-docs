@@ -10,6 +10,11 @@ export const StyledWrapper = styled.div`
   padding: 1.5rem;
   text-align: center;
 
+  .warning-icon {
+    margin-bottom: 1rem;
+    color: var(--oc-status-warning-text);
+  }
+
   .large-response-title {
     color: var(--oc-status-warning-text);
     font-weight: 600;
@@ -22,8 +27,12 @@ export const StyledWrapper = styled.div`
     line-height: 1.5;
   }
 
+  .large-response-threshold {
+    color: var(--oc-status-warning-text);
+  }
+
   .large-response-size {
-    color: var(--text-primary);
+    color: var(--oc-status-danger-text);
     font-weight: 600;
   }
 

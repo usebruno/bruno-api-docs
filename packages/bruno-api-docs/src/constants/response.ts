@@ -1,6 +1,3 @@
-import type {
-  TablerIcon
-} from '@tabler/icons';
 import {
   IconBraces,
   IconCode,
@@ -8,7 +5,8 @@ import {
   IconBrandJavascript,
   IconFileText,
   IconHexagons,
-  IconBinaryTree
+  IconBinaryTree,
+  type TablerIcon
 } from '@tabler/icons';
 
 export type ResponseBodyView = 'preview' | 'editor';

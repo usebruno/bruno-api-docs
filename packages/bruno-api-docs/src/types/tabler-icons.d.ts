@@ -38,4 +38,5 @@ declare module '@tabler/icons' {
   export const IconBrandJavascript: TablerIcon;
   export const IconHexagons: TablerIcon;
   export const IconBinaryTree: TablerIcon;
+  export const IconAlertTriangle: TablerIcon;
 }

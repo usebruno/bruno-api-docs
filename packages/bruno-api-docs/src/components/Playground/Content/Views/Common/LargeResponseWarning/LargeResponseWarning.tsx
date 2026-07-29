@@ -1,6 +1,7 @@
 import React from 'react';
-import { formatBytes } from '../../../../../../utils/exampleResponse';
+import { formatBytes } from '@/utils/exampleResponse';
 import { StyledWrapper } from './StyledWrapper';
+import { IconAlertTriangle } from '@tabler/icons';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 
@@ -12,10 +13,13 @@ interface LargeResponseWarningProps {
 export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ responseSize, onReveal }) => {
   return (
     <StyledWrapper data-testid="large-response-warning">
+      <div className="warning-icon">
+        <IconAlertTriangle size={45} strokeWidth={2} />
+      </div>
       <div className="large-response-title">Large Response Warning</div>
       <div className="large-response-description">
         Handling responses over{' '}
-        <span className="large-response-size">{formatBytes(LARGE_RESPONSE_THRESHOLD)}</span> could degrade performance.
+        <span className="large-response-threshold">{formatBytes(LARGE_RESPONSE_THRESHOLD)}</span> could degrade performance.
         <br />
         Size of current response:{' '}
         <span className="large-response-size">{formatBytes(responseSize)}</span>

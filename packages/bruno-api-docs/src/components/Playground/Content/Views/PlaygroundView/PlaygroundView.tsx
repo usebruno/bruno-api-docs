@@ -114,39 +114,39 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
       item={editableItem as unknown as Item}
       writable
     >
-    <div className="request-runner-container h-full flex flex-col px-5" style={{ backgroundColor: 'var(--bg-primary)' }}>
-      <TitleLabel className="truncate mb-2 mt-5">{itemName}</TitleLabel>
-      
-      <QueryBar 
-        item={editableItem}
-        onSendRequest={handleSendRequest}
-        isLoading={isLoading}
-        onItemChange={handleItemChange}
-      />
-      
-      <div
-        ref={containerRef}
-        className={`flex flex-1 overflow-hidden pt-4 ${orientation === 'vertical' ? 'flex-col' : 'flex-row'}`}
-        style={{ userSelect: isResizing ? 'none' : undefined }}
-      >
+      <div className="request-runner-container h-full flex flex-col px-5" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        <TitleLabel className="truncate mb-2 mt-5">{itemName}</TitleLabel>
+
+        <QueryBar
+          item={editableItem}
+          onSendRequest={handleSendRequest}
+          isLoading={isLoading}
+          onItemChange={handleItemChange}
+        />
+
         <div
-          className={orientation === 'vertical' ? 'shrink-0 overflow-hidden min-h-0' : 'shrink-0 overflow-hidden'}
-          style={
-            orientation === 'vertical'
-              ? { height: `${paneSize}%` }
-              : { width: `${paneSize}%`, borderColor: 'var(--border-color)' }
-          }
+          ref={containerRef}
+          className={`flex flex-1 overflow-hidden pt-4 ${orientation === 'vertical' ? 'flex-col' : 'flex-row'}`}
+          style={{ userSelect: isResizing ? 'none' : undefined }}
         >
-          <RequestPane item={editableItem} onItemChange={handleItemChange} inheritedAuth={inheritedAuth} />
-        </div>
+          <div
+            className={orientation === 'vertical' ? 'shrink-0 overflow-hidden min-h-0' : 'shrink-0 overflow-hidden'}
+            style={
+              orientation === 'vertical'
+                ? { height: `${paneSize}%` }
+                : { width: `${paneSize}%`, borderColor: 'var(--border-color)' }
+            }
+          >
+            <RequestPane item={editableItem} onItemChange={handleItemChange} inheritedAuth={inheritedAuth} />
+          </div>
 
-        <SplitDivider orientation={orientation} onPointerDown={startResize} active={isResizing} testId="playground-divider" />
+          <SplitDivider orientation={orientation} onPointerDown={startResize} active={isResizing} testId="playground-divider" />
 
-        <div className="flex-1 overflow-hidden min-h-0">
-          <ResponsePane response={response} isLoading={isLoading} />
+          <div className="flex-1 overflow-hidden min-h-0">
+            <ResponsePane response={response} isLoading={isLoading} orientation={orientation} itemUuid={itemUuid} />
+          </div>
         </div>
       </div>
-    </div>
     </ItemVariableResolverProvider>
   );
 };

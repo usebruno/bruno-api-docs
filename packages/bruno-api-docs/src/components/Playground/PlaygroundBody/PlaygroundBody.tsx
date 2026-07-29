@@ -7,6 +7,7 @@ import {
   selectViewMode,
   selectSelectedItemId,
   selectSelectedExampleIndex,
+  selectResponsePaneOrientation,
   setViewMode,
   setSelectedItemId,
   setSelectedExampleIndex,
@@ -71,6 +72,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const selectedItemId = useAppSelector(selectSelectedItemId);
   const selectedExampleIndex = useAppSelector(selectSelectedExampleIndex);
   const activeEnvName = useAppSelector(selectActiveEnvName);
+  const orientationOverride = useAppSelector(selectResponsePaneOrientation);
 
   const uuidToSlug = useMemo<Map<string, string>>(() => {
     const map = new Map<string, string>();
@@ -103,7 +105,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const viewWidth = useElementWidth(viewRef);
   const { width: sidebarWidth, dragging: sidebarDragging, startDrag: startSidebarResize } =
     useResizableSidebar('oc-docs:playgroundSidebarWidth', onCloseSidebar, onOpenSidebar);
-  const orientation = viewWidth > 0 && viewWidth < ORIENTATION_BREAKPOINT ? 'vertical' : 'horizontal';
+  const orientation = orientationOverride ?? (viewWidth > 0 && viewWidth < ORIENTATION_BREAKPOINT ? 'vertical' : 'horizontal');
 
   // Close the inline-dock overlay when the pointer goes down anywhere outside
   // the sidebar, including outside the playground. The backdrop still handles

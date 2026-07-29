@@ -6,6 +6,7 @@ import fastJsonFormat from 'fast-json-format';
 import prettierFormat from 'prettier/standalone';
 import parserBabel from 'prettier/parser-babel';
 import type { RunRequestResponse } from '../runner';
+import { getResponseSize } from './response';
 
 const applyJSONPathFilter = (data: RunRequestResponse['data'], filter: string): unknown => {
   try {
@@ -126,11 +127,19 @@ export const formatResponse = (
   data: RunRequestResponse['data'],
   dataBufferString: string,
   mode: string,
+  size?: RunRequestResponse['size'],
   filter?: string,
   bufferThreshold = LARGE_BUFFER_THRESHOLD
 ): string => {
   if (!mode || (data === undefined && !dataBufferString)) {
     return '';
+  }
+
+  if (mode.includes('base64')) {
+    if (dataBufferString) {
+      return dataBufferString;
+    }
+    return typeof data === 'string' ? Buffer.from(data, 'utf8').toString('base64') : '';
   }
 
   // Cheapest safe stringification for a large body: keep strings as-is, coerce
@@ -149,35 +158,28 @@ export const formatResponse = (
     return String(body);
   };
 
-  // Source the raw text from the base64 bytes when present, otherwise from `data` itself —
-  // text responses carry their bytes in `data` and skip the redundant base64 copy.
-  let bufferSize = 0, rawData = '', isVeryLargeResponse = false;
-  try {
-    if (dataBufferString) {
-      const dataBuffer = Buffer.from(dataBufferString, 'base64');
-      bufferSize = dataBuffer.length;
-      isVeryLargeResponse = bufferSize > bufferThreshold;
-      if (!isVeryLargeResponse) {
-        rawData = dataBuffer.toString();
-      }
-    } else if (typeof data === 'string') {
-      bufferSize = Buffer.byteLength(data);
-      isVeryLargeResponse = bufferSize > bufferThreshold;
-      if (!isVeryLargeResponse) {
-        rawData = data;
-      }
-    } else if (data != null) {
-      const stringified = safeStringifyJSON(data, false);
-      rawData = typeof stringified === 'string' ? stringified : String(data);
-      bufferSize = Buffer.byteLength(rawData);
-      isVeryLargeResponse = bufferSize > bufferThreshold;
-      if (isVeryLargeResponse) {
-        rawData = '';
-      }
+  const responseSize = getResponseSize(size, dataBufferString);
+
+  const isVeryLargeResponse = responseSize > bufferThreshold;
+  // The text-oriented modes below need the decoded UTF-8 body. Source it from the base64 bytes when
+  // present, otherwise from `data` itself — text responses carry their bytes in `data` and skip the
+  // redundant base64 copy. Skipped for very large bodies, so decode on demand rather than up front.
+  const getRawData = (): string => {
+    if (isVeryLargeResponse) {
+      return '';
     }
-  } catch (error) {
-    console.warn('Failed to read response body:', error);
-  }
+    if (dataBufferString) {
+      return Buffer.from(dataBufferString, 'base64').toString();
+    }
+    if (typeof data === 'string') {
+      return data;
+    }
+    if (data == null) {
+      return '';
+    }
+    const stringified = safeStringifyJSON(data, false);
+    return typeof stringified === 'string' ? stringified : String(data);
+  };
 
   if (mode.includes('json')) {
     // A binary/empty body requested as JSON has no parsed value to render.
@@ -199,7 +201,7 @@ export const formatResponse = (
     }
 
     try {
-      return fastJsonFormat(rawData);
+      return fastJsonFormat(getRawData());
     } catch {
       // fall through to safeStringifyJSON below
     }
@@ -229,10 +231,11 @@ export const formatResponse = (
       return stringifyLargeBody(data);
     }
 
+    const raw = getRawData();
     try {
-      return prettifyHtmlString(rawData);
+      return prettifyHtmlString(raw);
     } catch {
-      return rawData;
+      return raw;
     }
   }
 
@@ -241,10 +244,11 @@ export const formatResponse = (
       return stringifyLargeBody(data);
     }
 
+    const raw = getRawData();
     try {
-      return prettifyJavaScriptString(rawData);
+      return prettifyJavaScriptString(raw);
     } catch {
-      return rawData;
+      return raw;
     }
   }
 
@@ -255,29 +259,22 @@ export const formatResponse = (
 
     try {
       // Prefer the base64 bytes (faithful for binary); fall back to encoding the text body.
-      const dataBuffer = dataBufferString
+      const hexBuffer = dataBufferString
         ? Buffer.from(dataBufferString, 'base64')
         : typeof data === 'string'
           ? Buffer.from(data, 'utf8')
           : Buffer.alloc(0);
-      return formatHexView(dataBuffer);
+      return formatHexView(hexBuffer);
     } catch {
       return '';
     }
-  }
-
-  if (mode.includes('base64')) {
-    if (dataBufferString) {
-      return dataBufferString;
-    }
-    return typeof data === 'string' ? Buffer.from(data, 'utf8').toString('base64') : '';
   }
 
   if (mode.includes('text') || mode.includes('raw')) {
     if (isVeryLargeResponse) {
       return stringifyLargeBody(data);
     }
-    return rawData;
+    return getRawData();
   }
 
   if (typeof data === 'string') {

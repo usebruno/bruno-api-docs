@@ -13,8 +13,44 @@ export class ResponsePaneComponent extends BaseComponent {
   readonly sendButton = this.page.getByTestId('query-bar-send');
   readonly formatSelector = this.page.getByTestId('response-format-selector');
 
+  // The response actions live in the tab bar's right slot and only render once a response exists
+  // (and there is no request error). They are responsive: collapsed into a kebab menu when the slot
+  // is narrow (the default e2e viewport), shown as inline buttons when wide.
+  readonly actions = this.page.locator('.response-pane-actions-wrapper');
+  readonly actionsMenuTrigger = this.page.getByTestId('response-actions-menu');
+  readonly inlineButtons = this.actions.locator('.actions-buttons');
+  // Menu items, visible once the kebab is opened.
+  readonly copyMenuItem = this.page.getByTestId('response-actions-menu-copy');
+  readonly downloadMenuItem = this.page.getByTestId('response-actions-menu-download');
+  readonly clearMenuItem = this.page.getByTestId('response-actions-menu-clear');
+  readonly layoutMenuItem = this.page.getByTestId('response-actions-menu-layout');
+
+  // The empty state shown before a response (and after Clear).
+  readonly emptyHint = this.page.getByText('Click Send to make a request');
+
+  // Large Response Warning banner (shown when the response exceeds 10MB) and its controls.
+  readonly largeResponseWarning = this.page.getByTestId('large-response-warning');
+  readonly largeResponseView = this.page.getByTestId('large-response-view');
+  readonly largeResponseCopy = this.page.getByTestId('large-response-copy');
+  readonly largeResponseDownload = this.page.getByTestId('large-response-download');
+
   constructor(page: Page, root?: Locator) {
     super(page, root);
+  }
+
+  /**
+   * Fulfil the `get users` request's real resolved URL (`{{host}}/api/users?…`,
+   * host = http://localhost:8081 in the Local env) with a canned JSON body so a send
+   * lands a response in the pane without any live network.
+   */
+  async mockUsersResponse(body: string): Promise<void> {
+    await this.page.route('**/api/users**', (route) =>
+      route.fulfill({
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+        body
+      })
+    );
   }
 
   readonly previewToggle = this.page.getByRole('switch', { name: 'Toggle preview' });
@@ -26,6 +62,15 @@ export class ResponsePaneComponent extends BaseComponent {
   async send(): Promise<void> {
     await this.sendButton.click();
   }
+
+  /** Open the collapsed response-actions kebab menu and wait for its items to render. */
+  async openActionsMenu(): Promise<void> {
+    await this.actionsMenuTrigger.click();
+    await this.copyMenuItem.waitFor({ state: 'visible' });
+  }
+
+  /** The inline Change-Layout button, shown when the actions are expanded (wide pane). */
+  readonly inlineChangeLayoutButton = this.inlineButtons.getByRole('button', { name: 'Change Layout' });
 
   async openFormatSelector(): Promise<void> {
     await this.formatSelector.click();

@@ -282,3 +282,25 @@ export function detectContentTypeFromBase64(base64: RunRequestResponse['base64Da
   if (!base64) return null;
   return detectContentTypeFromBytes(decodeBase64Head(base64, 512));
 }
+
+export function getStatusColor(status?: number) {
+  if (!status) return 'var(--oc-request-tab-panel-response-status)';
+  if (status >= 200 && status < 300) return 'var(--oc-request-tab-panel-response-ok)';
+  if (status >= 300 && status < 400) return 'var(--oc-colors-text-warning)';
+  if (status >= 400 && status < 500) return 'var(--oc-request-tab-panel-response-error)';
+  if (status >= 500) return 'var(--oc-request-tab-panel-response-error)';
+  return 'var(--oc-request-tab-panel-response-status)';
+};
+
+export function getResponseSize(
+  size: RunRequestResponse['size'],
+  base64Data: RunRequestResponse['base64Data']
+): number {
+  return (
+    typeof size === 'number'
+      ? size
+      : base64Data
+        ? Math.floor(base64Data.length * 0.75) // base64 is ~4/3 of the raw bytes
+        : 0
+  );
+}

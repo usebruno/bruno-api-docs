@@ -5,6 +5,10 @@ export const StyledWrapper = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 
+  .vars-field {
+    min-width: 0;
+  }
+
   .vars-field-label {
     text-transform: uppercase;
   }

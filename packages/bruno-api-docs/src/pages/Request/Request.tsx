@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import type { HttpRequest, HttpRequestParam } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestParam, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
@@ -25,10 +25,12 @@ import {
   resolveInheritedAuth,
   getPreRequestVars,
   getPostResponseVars,
+  getInheritedConfig,
+  inheritedCountLabel,
   buildScriptChain,
   getScriptFlow,
   getBodyView,
-  getDescription
+  headerRows
 } from '../../utils/request';
 import { collectAssertions } from '../../utils/assertions';
 import { collectTests, collectRawTestScripts } from '../../utils/fileUtils';
@@ -47,6 +49,8 @@ import { RequestParams } from '../../components/Request/RequestParams/RequestPar
 import { RequestBody } from '../../components/Request/RequestBody/RequestBody';
 import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeBadge';
 import { PropertyTable } from '../../components/PropertyTable/PropertyTable';
+import { InheritedAuthBadge } from '../../components/InheritedAuthBadge/InheritedAuthBadge';
+import { inheritedHeaderRows } from '../../components/PropertyTable/inheritedRows';
 import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTabs';
 import { Examples } from '../../components/Examples/Examples';
 import { ExecutionContext } from '../../components/ExecutionContext/ExecutionContext';
@@ -101,11 +105,20 @@ const RequestContent: React.FC<RequestContentProps> = ({
   const resolved = useMemo(() => resolveInheritedAuth(collection, ancestry, item), [collection, ancestry, item]);
   const effectiveAuth = ownAuth === 'inherit' ? resolved.auth : ownAuth;
   const showAuth = ownAuth !== undefined;
-  const authInheritedBadge =
-    ownAuth === 'inherit' ? (resolved.source ? `Inherited from ${resolved.source.level}` : 'Inherited') : undefined;
+  const authSource = ownAuth === 'inherit' ? resolved.source : undefined;
+  const authBadge =
+    ownAuth === 'inherit' ? (
+      authSource ? (
+        <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
+      ) : (
+        <ContentTypeBadge label="Inherited" />
+      )
+    ) : undefined;
 
   const preVars = useMemo(() => getPreRequestVars(item), [item]);
   const postVars = useMemo(() => getPostResponseVars(item), [item]);
+  const inherited = useMemo(() => getInheritedConfig(collection, ancestry, item), [collection, ancestry, item]);
+  const { headers: inheritedHeaders, preVars: inheritedPreVars, postVars: inheritedPostVars } = inherited;
 
   const scriptChain = useMemo(() => buildScriptChain(collection, ancestry, item), [collection, ancestry, item]);
   const scriptFlow = useMemo(() => getScriptFlow(collection), [collection]);
@@ -124,16 +137,34 @@ const RequestContent: React.FC<RequestContentProps> = ({
   // Resolve the body once — drives whether the section renders at all and its heading badge.
   const bodyView = useMemo(() => getBodyView(body), [body]);
   const hasHeaders = headers.length > 0;
+  const hasInheritedHeaders = inheritedHeaders.length > 0;
   const hasParams = pathParams.length > 0 || queryParams.length > 0;
   const hasBody = bodyView.render !== 'none';
-  const hasVars = preVars.length > 0 || postVars.length > 0;
+  const hasVars =
+    preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
   const hasExamples = examples.length > 0;
   const hasExecutionContext = scriptChain.length > 0 || hasVars || assertions.length > 0 || tests.length > 0;
-  const hasLeftColumn = showAuth || hasParams || hasBody || hasHeaders;
+  const hasLeftColumn = showAuth || hasParams || hasBody || hasHeaders || hasInheritedHeaders;
 
   const bodyContentType = bodyView.render !== 'none' ? bodyView.contentTypeLabel : undefined;
 
-  const codeSnippet = <CodeSnippetTabs method={method} url={url} headers={headers} body={body} auth={effectiveAuth} />;
+  const effectiveHeaders = useMemo<HttpRequestHeader[]>(() => {
+    const authIsConcrete = Boolean(effectiveAuth) && effectiveAuth !== 'inherit';
+    const inheritedRows = inheritedHeaders
+      // The resolved auth already emits its own Authorization header, so drop an inherited raw one —
+      // otherwise a farther ancestor's header would mask the nearer effective auth in the snippet.
+      .filter((h) => !(authIsConcrete && (h.name || '').toLowerCase() === 'authorization'))
+      .map((h) => ({ name: h.name, value: h.value ?? '', disabled: h.disabled }));
+    return [...headers, ...inheritedRows];
+  }, [headers, inheritedHeaders, effectiveAuth]);
+
+  // Own + inherited header rows for the single Headers table (memoized: the pane re-renders often).
+  const headerTableRows = useMemo(
+    () => [...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders)],
+    [headers, inheritedHeaders]
+  );
+
+  const codeSnippet = <CodeSnippetTabs method={method} url={url} headers={effectiveHeaders} body={body} auth={effectiveAuth} />;
 
   return (
     <PageWrapper>
@@ -170,30 +201,29 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   </Section>
                 )}
 
-                {hasHeaders && (
-                  <Section label="Headers" testId="request-section-headers">
-                    <PropertyTable
-                      rows={headers.map((h) => ({
-                        label: h.name,
-                        value: h.value,
-                        disabled: h.disabled,
-                        description: getDescription(h)
-                      }))}
-                    />
+                {(hasHeaders || hasInheritedHeaders) && (
+                  <Section
+                    label="Headers"
+                    testId="request-section-headers"
+                    badge={
+                      hasInheritedHeaders ? (
+                        <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
+                      ) : undefined
+                    }
+                  >
+                    <PropertyTable rows={headerTableRows} onNavigate={onBreadcrumbClick} />
                   </Section>
                 )}
 
                 {showAuth && (
-                  <Section
-                    label="Auth"
-                    testId="request-section-auth"
-                    badge={authInheritedBadge ? <ContentTypeBadge label={authInheritedBadge} /> : undefined}
-                  >
+                  <Section label="Auth" testId="request-section-auth" badge={authBadge}>
                     <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
                   </Section>
                 )}
               </>
-            ) : (
+            ) : hasExecutionContext ? null : (
+              // Only a truly empty request (no own config AND nothing inherited — including inherited
+              // variables, which surface in the Execution Context below) shows this empty state.
               <EmptyState
                 testId="request-config-empty"
                 icon={<FileIcon />}
@@ -231,6 +261,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
               scriptChain={scriptChain}
               preVars={preVars}
               postVars={postVars}
+              inheritedPreVars={inheritedPreVars}
+              inheritedPostVars={inheritedPostVars}
               assertions={assertions}
               tests={tests}
               testScripts={testScripts}

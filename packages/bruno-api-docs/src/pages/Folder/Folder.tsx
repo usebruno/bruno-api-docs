@@ -70,7 +70,12 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
 
         <Section label="Folder Configuration" testId="folder-section-configuration" className="folder-fullwidth">
           {showConfig ? (
-            <FolderConfiguration config={config} authModeLabels={AUTH_MODE_LABELS} testId="folder-config" />
+            <FolderConfiguration
+              config={config}
+              authModeLabels={AUTH_MODE_LABELS}
+              onNavigate={onBreadcrumbClick}
+              testId="folder-config"
+            />
           ) : (
             <EmptyState
               testId="folder-config-empty"

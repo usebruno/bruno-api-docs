@@ -7,11 +7,24 @@ test.describe('Folder page', () => {
     await expect(folderPage.requestCount).toHaveText('3 requests');
   });
 
-  test('shows the "No folder configuration" empty state when the folder has no config', async ({ folderPage }) => {
+  test('shows config inherited from the collection even when the folder has no own config', async ({ folderPage }) => {
     await folderPage.open(['Realtime']);
-    await expect(folderPage.emptyState).toBeVisible();
-    await expect(folderPage.emptyState).toContainText('No folder configuration');
-    await expect(folderPage.configuration.root).toBeHidden();
+    await expect(folderPage.configuration.root).toBeVisible();
+    await expect(folderPage.emptyState).toBeHidden();
+
+    await test.step('inherited headers are shown with a count chip and a goto-source link', async () => {
+      await expect(folderPage.configuration.headers).toBeVisible();
+      await expect(folderPage.configuration.headers).toContainText('collection-header');
+      await expect(folderPage.configuration.headers).toContainText('header inherited');
+      await expect(folderPage.configuration.headers.getByTestId('inherited-source').first()).toBeVisible();
+    });
+
+    await test.step('inherited variables are shown, excluding disabled ones', async () => {
+      await expect(folderPage.configuration.vars).toBeVisible();
+      await expect(folderPage.configuration.vars).toContainText('collection_pre_var');
+      await expect(folderPage.configuration.vars).toContainText('1 var inherited');
+      await expect(folderPage.configuration.vars).not.toContainText('collection-var-value');
+    });
   });
 
   test('renders the configuration with inherited auth and folder-level scripts', async ({ folderPage }) => {

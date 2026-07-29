@@ -11,4 +11,14 @@ export const StyledWrapper = styled.span`
   line-height: 1;
   color: var(--oc-colors-text-muted);
   background-color: var(--badge-bg);
+
+  &.content-type-badge--interactive {
+    cursor: pointer;
+    border: none;
+    transition: color 0.12s ease, background-color 0.12s ease;
+  }
+  &.content-type-badge--interactive:hover,
+  &.content-type-badge--interactive:focus-visible {
+    color: var(--primary-color);
+  }
 `;

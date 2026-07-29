@@ -10,6 +10,7 @@ export class CodeEditorComponent extends BaseComponent {
   readonly copyButton: Locator;
   readonly suggestions: Locator;
   private readonly surface: Locator;
+  private readonly focused: Locator;
   private readonly lines: Locator;
   private readonly ready: Locator;
 
@@ -17,6 +18,7 @@ export class CodeEditorComponent extends BaseComponent {
     super(page, page.getByTestId(testId));
     this.copyButton = this.root.getByTestId(`${testId}-copy`);
     this.surface = this.root.locator('.monaco-editor');
+    this.focused = this.root.locator('.monaco-editor.focused');
     this.lines = this.root.locator('.view-lines');
     this.suggestions = page.locator('.suggest-widget.visible');
     this.ready = page.locator(`[data-testid="${testId}"][data-editor-ready="true"]`);
@@ -29,5 +31,11 @@ export class CodeEditorComponent extends BaseComponent {
     // editor to report ready before typing — otherwise the trigger fires against an untagged model.
     await this.ready.waitFor({ state: 'attached', timeout: 20000 });
     await this.lines.click();
+    await this.focused.waitFor({ state: 'attached', timeout: 20000 });
+  }
+
+  async typeAndSuggest(text: string): Promise<void> {
+    await this.page.keyboard.type(text, { delay: 30 });
+    await this.page.keyboard.press('Control+Space');
   }
 }

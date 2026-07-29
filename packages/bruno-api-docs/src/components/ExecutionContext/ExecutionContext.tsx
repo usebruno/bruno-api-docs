@@ -5,8 +5,17 @@ import { VariablesPanel } from './VariablesPanel/VariablesPanel';
 import { AssertList } from './AssertList/AssertList';
 import { TestList } from './TestList/TestList';
 import { ViewAllTests } from './ViewAllTests/ViewAllTests';
+import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
 import { StyledWrapper } from './StyledWrapper';
-import type { ScriptChainStep, ScriptFlow, PreRequestVarRow, PostResponseVarRow } from '../../utils/request';
+import {
+  inheritedCountLabel,
+  type ScriptChainStep,
+  type ScriptFlow,
+  type PreRequestVarRow,
+  type PostResponseVarRow,
+  type InheritedPreRequestVarRow,
+  type InheritedPostResponseVarRow
+} from '../../utils/request';
 import type { AssertionRow } from '../../utils/assertions';
 import type { TestRow, RawTestScript } from '../../utils/fileUtils';
 
@@ -14,6 +23,8 @@ interface ExecutionContextProps {
   scriptChain: ScriptChainStep[];
   preVars: PreRequestVarRow[];
   postVars: PostResponseVarRow[];
+  inheritedPreVars?: InheritedPreRequestVarRow[];
+  inheritedPostVars?: InheritedPostResponseVarRow[];
   assertions: AssertionRow[];
   tests: TestRow[];
   testScripts?: RawTestScript[];
@@ -48,6 +59,8 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
   scriptChain,
   preVars,
   postVars,
+  inheritedPreVars = [],
+  inheritedPostVars = [],
   assertions,
   tests,
   testScripts = [],
@@ -60,7 +73,8 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
   onNavigate
 }) => {
   const hasScripts = scriptChain.length > 0;
-  const hasVars = preVars.length > 0 || postVars.length > 0;
+  const hasVars =
+    preVars.length > 0 || postVars.length > 0 || inheritedPreVars.length > 0 || inheritedPostVars.length > 0;
   const hasAsserts = assertions.length > 0;
   const hasTests = tests.length > 0;
 
@@ -70,8 +84,20 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
     <span className="exec-flow" data-testid="execution-context-flow">{FLOW_LABEL[flow]} execution flow</span>
   ) : undefined;
 
+  const varCount = preVars.length + postVars.length + inheritedPreVars.length + inheritedPostVars.length;
+  const inheritedVarCount = inheritedPreVars.length + inheritedPostVars.length;
+  const inheritedVarsBadge =
+    inheritedVarCount > 0 ? <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} /> : undefined;
   const scripts = <ScriptChain steps={scriptChain} flow={flow} method={method} url={url} onNavigate={onNavigate} />;
-  const variables = <VariablesPanel preVars={preVars} postVars={postVars} />;
+  const variables = (
+    <VariablesPanel
+      preVars={preVars}
+      postVars={postVars}
+      inheritedPreVars={inheritedPreVars}
+      inheritedPostVars={inheritedPostVars}
+      onNavigate={onNavigate}
+    />
+  );
   const asserts = <AssertList assertions={assertions} />;
   const testCases = <TestList tests={tests} />;
 
@@ -80,7 +106,9 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
       <StyledWrapper className={['execution-context', className].filter(Boolean).join(' ')} data-testid={testId}>
         {hasScripts && <Card title="Scripts" testId="execution-context-scripts" meta={flowIndicator}>{scripts}</Card>}
         {hasVars && (
-          <Card title="Variables" testId="execution-context-variables" boxClassName="exec-card-box--bare">{variables}</Card>
+          <Card title="Variables" testId="execution-context-variables" boxClassName="exec-card-box--bare" meta={inheritedVarsBadge}>
+            {variables}
+          </Card>
         )}
         {hasAsserts && <Card title="Asserts" testId="execution-context-asserts">{asserts}</Card>}
         {hasTests && (
@@ -101,7 +129,8 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
     tabs.push({
       id: 'variables',
       label: 'Variables',
-      count: preVars.length + postVars.length,
+      count: varCount,
+      rightElement: inheritedVarsBadge,
       content: <div data-testid="execution-context-variables">{variables}</div>
     });
   }

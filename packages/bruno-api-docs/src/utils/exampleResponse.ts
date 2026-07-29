@@ -1,4 +1,4 @@
-import { RESPONSE_LANGUAGE, RESPONSE_CONTENT_TYPE, STATUS_CODE_PHRASES } from './request';
+import { RESPONSE_LANGUAGE, RESPONSE_CONTENT_TYPE, STATUS_CODE_PHRASES } from '../constants';
 
 /** Byte length of a response body (UTF-8 aware). */
 export const computeBodySize = (data: string | undefined): number => {

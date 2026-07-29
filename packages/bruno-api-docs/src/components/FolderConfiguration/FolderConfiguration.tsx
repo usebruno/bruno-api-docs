@@ -1,27 +1,53 @@
 import React from 'react';
 import type { FolderConfig } from '../../utils/folder';
+import { headerRows, inheritedCountLabel } from '../../utils/request';
 import { Code } from '../Code/Code';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
-import { PropertyTable } from '../PropertyTable/PropertyTable';
+import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
 import { AuthDetails } from '../AuthDetails/AuthDetails';
 import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
+import { InheritedAuthBadge } from '../InheritedAuthBadge/InheritedAuthBadge';
+import { inheritedHeaderRows, preVarRows, postVarRows } from '../PropertyTable/inheritedRows';
 import { StyledWrapper } from './StyledWrapper';
 
 interface FolderConfigurationProps {
   config: FolderConfig;
   authModeLabels?: Record<string, string>;
+  onNavigate?: (uuid: string) => void;
   testId?: string;
 }
 
-export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({ config, authModeLabels = {}, testId }) => {
-  const hasHeaders = config.headers.length > 0;
+export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
+  config,
+  authModeLabels = {},
+  onNavigate,
+  testId
+}) => {
+  const hasInheritedHeaders = config.inheritedHeaders.length > 0;
+  const hasHeaders = config.headers.length > 0 || hasInheritedHeaders;
   const hasAuth = Boolean(config.auth);
   const hasScripts = Boolean(config.preRequest || config.postResponse);
-  const hasPreVars = config.variables.length > 0;
-  const hasPostVars = config.postVariables.length > 0;
-  const hasVariables = hasPreVars || hasPostVars;
+  const inheritedPreVars = config.inheritedPreVariables;
+  const inheritedPostVars = config.inheritedPostVariables;
+  const showPreVars = config.variables.length > 0 || inheritedPreVars.length > 0;
+  const showPostVars = config.postVariables.length > 0 || inheritedPostVars.length > 0;
+  const hasVariables = showPreVars || showPostVars;
+  const inheritedVarCount = inheritedPreVars.length + inheritedPostVars.length;
   const hasTests = Boolean(config.tests);
-  const inheritedBadge = config.authSource ? `Inherited from ${config.authSource.level}` : undefined;
+
+  const authSource = config.authSource;
+  const authBadge = authSource ? (
+    <InheritedAuthBadge source={authSource} onNavigate={onNavigate} testId="folder-config-auth-inherited" />
+  ) : undefined;
+
+  // Own rows first, then inherited rows (each carrying a goto-source link) in the SAME table.
+  const headerTableRows: PropertyRow[] = [
+    ...headerRows(config.headers),
+    ...inheritedHeaderRows(config.inheritedHeaders)
+  ];
+
+  const preRows = preVarRows(config.variables, inheritedPreVars);
+  const postRows = postVarRows(config.postVariables, inheritedPostVars);
 
   return (
     <StyledWrapper className="folder-configuration" data-testid={testId}>
@@ -29,15 +55,11 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({ config
         <div className="config-group" data-testid="folder-config-headers">
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Headers</SectionLabel>
+            {hasInheritedHeaders && (
+              <ContentTypeBadge label={inheritedCountLabel(config.inheritedHeaders.length, 'header')} />
+            )}
           </div>
-          <PropertyTable
-            rows={config.headers.map((header) => ({
-              label: header.name,
-              value: header.value,
-              disabled: header.disabled,
-              description: header.description
-            }))}
-          />
+          <PropertyTable rows={headerTableRows} onNavigate={onNavigate} />
         </div>
       )}
 
@@ -45,9 +67,32 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({ config
         <div className="config-group" data-testid="folder-config-auth">
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Auth</SectionLabel>
-            {inheritedBadge && <ContentTypeBadge label={inheritedBadge} />}
+            {authBadge}
           </div>
           <AuthDetails auth={config.auth} authModeLabels={authModeLabels} testId="folder-config-auth-details" />
+        </div>
+      )}
+
+      {hasVariables && (
+        <div className="config-group" data-testid="folder-config-vars">
+          <div className="config-group-head">
+            <SectionLabel className="config-group-label">Vars</SectionLabel>
+            {inheritedVarCount > 0 && <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} />}
+          </div>
+          <div className="config-columns">
+            {showPreVars && (
+              <div className="config-column">
+                <p className="config-phase-label">Pre-Request</p>
+                <PropertyTable rows={preRows} onNavigate={onNavigate} />
+              </div>
+            )}
+            {showPostVars && (
+              <div className="config-column">
+                <p className="config-phase-label">Post-Response</p>
+                <PropertyTable rows={postRows} onNavigate={onNavigate} />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
@@ -67,43 +112,6 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({ config
               <div className="config-column">
                 <p className="config-phase-label">Post-Response</p>
                 <Code code={config.postResponse} language="javascript" showLineNumbers />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {hasVariables && (
-        <div className="config-group" data-testid="folder-config-vars">
-          <div className="config-group-head">
-            <SectionLabel className="config-group-label">Vars</SectionLabel>
-          </div>
-          <div className="config-columns">
-            {hasPreVars && (
-              <div className="config-column">
-                <p className="config-phase-label">Pre-Request</p>
-                <PropertyTable
-                  rows={config.variables.map((variable) => ({
-                    label: variable.name,
-                    value: variable.value,
-                    type: variable.type,
-                    description: variable.description,
-                    disabled: variable.disabled
-                  }))}
-                />
-              </div>
-            )}
-            {hasPostVars && (
-              <div className="config-column">
-                <p className="config-phase-label">Post-Response</p>
-                <PropertyTable
-                  rows={config.postVariables.map((variable) => ({
-                    label: variable.name,
-                    value: variable.expression,
-                    description: variable.description,
-                    disabled: variable.disabled
-                  }))}
-                />
               </div>
             )}
           </div>

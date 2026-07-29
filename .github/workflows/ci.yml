@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint_unit_tests_and_builds:
+    runs-on: ubuntu-latest
+    steps:
+      # eslint-plugin-diff needs the base branch present to diff against.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm run test:run -w packages/bruno-api-docs
+
+      # `draft` is null on push events, so that arm is required.
+      - name: Build
+        if: github.event_name == 'push' || github.event.pull_request.draft == false
+        run: npm run build -w packages/bruno-api-docs
+
+      - name: Build standalone
+        if: github.event_name == 'push' || github.event.pull_request.draft == false
+        run: npm run build:standalone -w packages/bruno-api-docs
+
+  e2e:
+    needs: lint_unit_tests_and_builds
+    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/bruno-api-docs
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+        working-directory: .
+
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: packages/bruno-api-docs/playwright-report/
+          retention-days: 30

@@ -54,6 +54,21 @@ describe('ExecutionContext', () => {
       expect(query(query(root, tabSelector('tests')), '.tab-count').text).toBe('2');
     });
 
+    it('counts inherited vars in the tab count and shows an "N vars inherited" chip on the Variables line', () => {
+      const source = { level: 'folder' as const, name: 'Folder A', uuid: 'f1' };
+      const root = useRenderToDom(
+        full({
+          inheritedPreVars: [{ name: 'baseUrl', value: 'x', source }],
+          inheritedPostVars: [{ name: 'traceId', expression: 'res.headers.trace', source }]
+        })
+      );
+      expect(query(query(root, tabSelector('variables')), '.tab-count').text).toBe('4');
+      expect(query(root, '[data-testid="execution-context"]').text).toContain('2 vars inherited');
+      const panel = query(root, panelSelector('variables'));
+      expect(panel.text).toContain('baseUrl');
+      expect(panel.querySelector('[data-testid="inherited-source"]')).not.toBeNull();
+    });
+
     it('mounts only the active tab panel (Variables first)', () => {
       const root = useRenderToDom(full());
       expect(query(root, panelSelector('variables')).text).toContain('sessionId');

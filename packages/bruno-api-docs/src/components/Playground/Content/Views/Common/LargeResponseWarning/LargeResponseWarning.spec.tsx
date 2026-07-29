@@ -8,6 +8,11 @@ import { query, getByTestId } from '../../../../../../test-utils/dom';
 describe('LargeResponseWarning', () => {
   const responseSize = 11 * 1024 * 1024;
 
+  it('renders the warning icon', () => {
+    const root = useRenderToDom(<LargeResponseWarning responseSize={responseSize} onReveal={() => {}} />);
+    query(root, '.warning-icon');
+  });
+
   it('renders the warning title', () => {
     const root = useRenderToDom(<LargeResponseWarning responseSize={responseSize} onReveal={() => {}} />);
     expect(query(root, '.large-response-title').text).toContain('Large Response Warning');

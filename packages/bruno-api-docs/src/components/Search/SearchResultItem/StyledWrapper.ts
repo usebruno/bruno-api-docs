@@ -35,6 +35,32 @@ export const StyledWrapper = styled.button`
     color: var(--method-color);
   }
 
+  .search-result-icon {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    width: 26px;
+    margin-top: 1px;
+    color: var(--oc-colors-text-subtext1);
+
+    svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .search-result-kind {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
   .search-result-body {
     min-width: 0;
     flex: 1 1 auto;
@@ -47,9 +73,12 @@ export const StyledWrapper = styled.button`
     display: flex;
     align-items: baseline;
     gap: 8px;
+    min-width: 0;
   }
 
   .search-result-name {
+    flex: 0 1 auto;
+    min-width: 0;
     font-size: 13px;
     font-weight: 400;
     line-height: 1.3;
@@ -64,11 +93,20 @@ export const StyledWrapper = styled.button`
   }
 
   .search-result-breadcrumb {
+    flex: 0 100 auto;
+    min-width: 0;
     font-size: 11px;
     line-height: 1.3;
     color: var(--oc-colors-text-subtext1);
     white-space: nowrap;
-    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .search-result-count {
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--oc-colors-text-subtext1);
   }
 
   .search-result-url {

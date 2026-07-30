@@ -85,7 +85,37 @@ export const foldersFixtureCollection = {
         { name: 'Get Guest', type: 'http', seq: 2, method: 'GET', url: '{{host}}/guests/:id' },
         { name: 'Create Guest', type: 'http', seq: 3, method: 'POST', url: '{{host}}/guests' },
         { name: 'Update Guest', type: 'http', seq: 4, method: 'PUT', url: '{{host}}/guests/:id' },
-        { name: 'Delete Guest', type: 'http', seq: 5, method: 'DELETE', url: '{{host}}/guests/:id' }
+        { name: 'Delete Guest', type: 'http', seq: 5, method: 'DELETE', url: '{{host}}/guests/:id' },
+        {
+          name: 'Profiles',
+          type: 'folder',
+          seq: 6,
+          items: [
+            {
+              // Long enough that the name and the chain have to compete for the
+              // row's width, which is what used to overflow the results list.
+              name: 'Consolidated Retention and Deletion Policy Configuration',
+              type: 'folder',
+              seq: 2,
+              items: []
+            },
+            {
+              name: 'Archive',
+              type: 'folder',
+              seq: 1,
+              items: [
+                {
+                  // Deep enough that a descendant's breadcrumb elides, which is
+                  // the only case where the palette shows a breadcrumb tooltip.
+                  name: 'Legacy',
+                  type: 'folder',
+                  seq: 1,
+                  items: [{ name: 'Snapshots v2', type: 'folder', seq: 1, items: [] }]
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     { name: 'Health Check', type: 'http', seq: 5, method: 'GET', url: '{{host}}/ping' },

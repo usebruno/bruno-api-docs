@@ -18,6 +18,10 @@ interface TooltipProps {
   disabled?: boolean;
   shouldOpen?: (anchor: HTMLElement) => boolean;
   touch?: boolean;
+  /**
+   * Hover dwell before opening, in ms; defaults to opening immediately.
+   */
+  openDelay?: number;
   className?: string;
   testId?: string;
 }
@@ -54,6 +58,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   disabled = false,
   shouldOpen,
   touch = true,
+  openDelay = 0,
   className,
   testId = 'tooltip'
 }) => {
@@ -85,17 +90,40 @@ export const Tooltip: React.FC<TooltipProps> = ({
     setPos({ top, left });
   }, []);
 
+  const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cancelPendingOpen = useCallback(() => {
+    if (!openTimer.current) return;
+    clearTimeout(openTimer.current);
+    openTimer.current = null;
+  }, []);
+
   const show = useCallback(
-    (el: HTMLElement) => {
+    (el: HTMLElement, delay = 0) => {
       if (disabled) return;
       if (shouldOpen && !shouldOpen(el)) return;
       anchorRef.current = el;
-      setOpen(true);
+      cancelPendingOpen();
+      if (delay <= 0) {
+        setOpen(true);
+        return;
+      }
+      openTimer.current = setTimeout(() => {
+        openTimer.current = null;
+        setOpen(true);
+      }, delay);
     },
-    [disabled, shouldOpen]
+    [disabled, shouldOpen, cancelPendingOpen]
   );
 
-  const hide = useCallback(() => setOpen(false), []);
+  // Leaving before the dwell elapses must also drop the pending open, or the
+  // bubble appears over whatever the pointer moved on to.
+  const hide = useCallback(() => {
+    cancelPendingOpen();
+    setOpen(false);
+  }, [cancelPendingOpen]);
+
+  useEffect(() => cancelPendingOpen, [cancelPendingOpen]);
 
   useEffect(() => {
     if (!open) {
@@ -148,7 +176,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   const { props } = child;
 
   const handlers: AnchorProps = {
-    onMouseEnter: chain(props.onMouseEnter, (e) => show(e.currentTarget)),
+    onMouseEnter: chain(props.onMouseEnter, (e) => show(e.currentTarget, openDelay)),
     onMouseLeave: chain(props.onMouseLeave, hide),
     onFocus: chain(props.onFocus, (e) => show(e.currentTarget)),
     onBlur: chain(props.onBlur, hide)

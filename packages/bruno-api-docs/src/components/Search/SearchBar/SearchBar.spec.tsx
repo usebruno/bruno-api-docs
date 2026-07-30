@@ -18,7 +18,7 @@ const renderBar = () =>
 describe('SearchBar', () => {
   it('renders a collapsed combobox search field by default (no panel)', () => {
     const html = renderBar();
-    expect(html).toContain('placeholder="Search endpoints');
+    expect(html).toContain('placeholder="Search requests, folders');
     expect(html).toContain('role="combobox"');
     expect(html).toContain('aria-expanded="false"');
     // Closed: no filter row / results listbox rendered yet.

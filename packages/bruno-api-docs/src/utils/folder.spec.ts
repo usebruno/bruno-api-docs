@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { getFolderConfig, hasFolderConfig, countFolderRequests, resolveFolderAuth } from './folder';
+import {
+  getFolderConfig,
+  hasFolderConfig,
+  countFolderRequests,
+  requestCountLabel,
+  resolveFolderAuth
+} from './folder';
 
 const collection: any = {
   info: { name: 'Hotel Booking API' },
@@ -137,5 +143,14 @@ describe('countFolderRequests', () => {
   it('returns zero for an empty folder', () => {
     expect(countFolderRequests({ items: [] } as any)).toBe(0);
     expect(countFolderRequests({} as any)).toBe(0);
+  });
+});
+
+describe('requestCountLabel', () => {
+  it('singularises one request and pluralises the rest', () => {
+    expect(requestCountLabel(0)).toBe('0 requests');
+    expect(requestCountLabel(1)).toBe('1 request');
+    expect(requestCountLabel(2)).toBe('2 requests');
+    expect(requestCountLabel(12)).toBe('12 requests');
   });
 });

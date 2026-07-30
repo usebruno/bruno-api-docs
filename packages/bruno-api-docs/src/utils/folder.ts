@@ -140,3 +140,6 @@ export const countFolderRequests = (folder: Folder): number => {
   walk(folder.items);
   return count;
 };
+
+/** Shared by the folder page header and the folder's search result row. */
+export const requestCountLabel = (count: number): string => `${count} request${count === 1 ? '' : 's'}`;

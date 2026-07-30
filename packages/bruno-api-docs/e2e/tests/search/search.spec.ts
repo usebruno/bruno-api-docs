@@ -1,7 +1,7 @@
 import { test, expect } from '../../playwright';
 
 /**
- * The endpoint search palette: a header-anchored combobox whose listbox drops
+ * The collection search palette: a header-anchored combobox whose listbox drops
  * below the field. Inline on desktop; revealed by a Topbar icon below desktop.
  */
 test.use({ colorScheme: 'light' });
@@ -63,7 +63,7 @@ test.describe('Search palette', () => {
     await search.field.click();
 
     await expect(search.panel).toContainText('Search the collection');
-    await expect(search.panel).toContainText('Find any request by name, endpoint, or folder.');
+    await expect(search.panel).toContainText('Find by name or endpoint.');
   });
 
   test('typing fuzzy-matches over request names', async ({ page, search }) => {
@@ -86,14 +86,170 @@ test.describe('Search palette', () => {
     await expect(search.panel).toContainText('Login');
   });
 
-  test('matches on the folder chain typed as text (not only the filter dropdown)', async ({ page, search }) => {
+  test('a folder matches by name and renders as its own result', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('availability'); // a folder nested under Rooms
+
+    await expect(search.folderResults).toHaveCount(1);
+    await expect(search.folderResults.first()).toContainText('Availability');
+    await expect(search.folderResults.first()).toContainText('3 requests');
+    // The chain is what separates two folders sharing a name.
+    await expect(search.folderResults.first().getByTestId('search-result-breadcrumb')).toHaveText('Rooms');
+  });
+
+  test('hovering an elided breadcrumb reveals the chain it hides', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('snapshots'); // Guests / Profiles / Archive / Legacy
+
+    const crumb = search.folderResults.first().getByTestId('search-result-breadcrumb');
+    await expect(crumb).toHaveText('Guests / … / Legacy');
+    await crumb.hover();
+    await expect(search.breadcrumbTooltip).toHaveText('Guests / Profiles / Archive / Legacy');
+  });
+
+  test('leaving a breadcrumb before the dwell elapses cancels the tooltip', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('snapshots');
+
+    const crumb = search.folderResults.first().getByTestId('search-result-breadcrumb');
+    await expect(crumb).toHaveText('Guests / … / Legacy');
+    await crumb.hover();
+    await search.field.hover(); // away again well inside the 500ms dwell
+
+    // Past the dwell: an uncancelled timer would open a bubble with the pointer
+    // elsewhere, and nothing left to close it.
+    await page.waitForTimeout(900);
+    await expect(search.breadcrumbTooltip).toHaveCount(0);
+  });
+
+  test('a long name and a long chain never overflow the results list', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('retention'); // deep folder with a very long name
+
+    const row = search.results.first();
+    await expect(row).toBeVisible();
+
+    // Overflowing here used to scroll the list sideways, which stranded the
+    // row's hover background at the container edge.
+    const { scrollWidth, clientWidth } = await search.resultsScroll.evaluate((el) => ({
+      scrollWidth: el.scrollWidth,
+      clientWidth: el.clientWidth
+    }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth + 1);
+
+    // The name is the primary label, so the chain yields the width, not it.
+    const nameBox = await row.getByTestId('search-result-name').boundingBox();
+    const crumbBox = await row.getByTestId('search-result-breadcrumb').boundingBox();
+    expect(nameBox, 'name has no bounding box').not.toBeNull();
+    expect(crumbBox, 'breadcrumb has no bounding box').not.toBeNull();
+    expect(nameBox!.width).toBeGreaterThan(crumbBox!.width);
+  });
+
+  test('hovering a clipped result name reveals it in full', async ({ page, search }) => {
+    await page.setViewportSize(MOBILE); // narrow enough that the name cannot fit
+    await page.goto(FIXTURE);
+    await search.toggleIcon.click();
+    await search.field.fill('retention');
+
+    const name = search.results.first().getByTestId('search-result-name');
+    await expect(name).toBeVisible();
+    await name.hover();
+    await expect(search.nameTooltip).toHaveText('Consolidated Retention and Deletion Policy Configuration');
+  });
+
+  test('a result name shown whole gets no tooltip on hover', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('retention'); // same row, but the width is there for it
+
+    const name = search.results.first().getByTestId('search-result-name');
+    await expect(name).toBeVisible();
+    await name.hover();
+
+    // Past the dwell, or the assertion passes on the first poll simply because
+    // nothing has opened yet and a regression would ship uncaught.
+    await page.waitForTimeout(900);
+    await expect(search.nameTooltip).toHaveCount(0);
+  });
+
+  test('a breadcrumb shown whole gets no tooltip on hover', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('check availability'); // sits at Rooms / Availability
+
+    const crumb = search.results.first().getByTestId('search-result-breadcrumb');
+    await expect(crumb).toHaveText('Rooms / Availability');
+    await crumb.hover();
+
+    // Nothing is hidden, so a bubble would only repeat the visible text. Wait
+    // past the dwell first: asserting straight after hover passes trivially.
+    await page.waitForTimeout(900);
+    await expect(search.breadcrumbTooltip).toHaveCount(0);
+  });
+
+  test('a top-level folder shows no breadcrumb (it has no chain)', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('guests');
+
+    await expect(search.folderResults.first()).toContainText('Guests');
+    await expect(search.folderResults.first().getByTestId('search-result-breadcrumb')).toHaveCount(0);
+  });
+
+  test('a folder name no longer surfaces the requests inside it', async ({ page, search }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto(FIXTURE);
     await search.field.click();
     await search.field.fill('authentication'); // the folder Login lives under
 
+    await expect(search.folderResults.first()).toContainText('Authentication');
+    await expect(search.panel).not.toContainText('Login');
+  });
+
+  test('folders rank above requests that match the same query', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('bookings');
+
     await expect(search.results.first()).toBeVisible();
-    await expect(search.panel).toContainText('Login');
+    await expect(search.results.first()).toContainText('Bookings');
+    await expect(search.results.first()).toContainText('8 requests');
+  });
+
+  test('selecting a folder result opens that folder page', async ({ page, search, folderPage }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('availability');
+    await search.folderResults.first().click();
+
+    await expect(search.openPanel).toHaveCount(0);
+    await expect(folderPage.title).toHaveText('Availability');
+    await expect(folderPage.requestCount).toHaveText('3 requests');
+  });
+
+  test('an active method chip hides folders (a folder has no method)', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+    await search.field.fill('bookings');
+    await expect(search.folderResults.first()).toBeVisible();
+
+    await search.methodChip('GET').click();
+    await expect(search.results.first()).toBeVisible();
+    await expect(search.folderResults).toHaveCount(0);
   });
 
   test('a single character keeps the initial prompt (below the match threshold)', async ({ page, search }) => {
@@ -137,7 +293,7 @@ test.describe('Search palette', () => {
     await search.field.click();
     await search.field.fill('zzzqqq-nomatch');
 
-    await expect(search.panel).toContainText('No matching requests');
+    await expect(search.panel).toContainText('No matches');
     await expect(search.resultsList).toHaveCount(0);
   });
 
@@ -237,6 +393,19 @@ test.describe('Search palette', () => {
 
     await expect(search.panel).toContainText('Login');
     await expect(search.panel).not.toContainText('Create Booking');
+  });
+
+  test('the filtered folder appears as its own result, ahead of its contents', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+
+    await search.folderButton.click();
+    await search.folderOption('Bookings').click();
+
+    await expect(search.folderResults).toHaveCount(3);
+    await expect(search.folderResults.nth(0)).toContainText('Bookings');
+    await expect(search.results.first()).toContainText('Bookings');
   });
 
   test('tablet: the toggle reveals a panel that stays within the viewport', async ({ page, search }) => {

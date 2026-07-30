@@ -7,6 +7,7 @@ import {
   collectMethods,
   createSearchIndex,
   searchHits,
+  orderFoldersFirst,
   type SearchHit,
   type SearchRecord
 } from '../searchIndex';
@@ -40,9 +41,10 @@ interface SearchBarProps {
 }
 
 /**
- * Header-anchored endpoint search. Typo-tolerant (Fuse/Bitap) search over name,
- * URL and folder chain plus palette-local method + folder filters. Results
- * render in the palette itself and selecting one navigates via the slug route.
+ * Header-anchored collection search. Typo-tolerant (Fuse/Bitap) search over
+ * request names and URLs and over folder names, plus palette-local method +
+ * folder filters. Results render in the palette itself and selecting one
+ * navigates via the slug route, to a request or a folder page.
  *
  * Expands in place (a combobox whose listbox drops directly below the field)
  * rather than opening a centered modal. Open state is controlled so the Topbar
@@ -80,11 +82,17 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
       : hasFilter
         ? records.map((record) => ({ record, matches: {} }))
         : [];
-    return base.filter(
-      ({ record: r }) =>
-        (methods.size === 0 || (r.method ? methods.has(r.method.toUpperCase()) : false))
-        && (folder === null || r.ancestorSlugs.includes(folder))
-    );
+    const filtered = base.filter(({ record: r }) => {
+      // A folder carries no method, so any active method chip excludes them all.
+      const passesMethod
+        = methods.size === 0 || (r.type === 'request' && !!r.method && methods.has(r.method.toUpperCase()));
+      // The filtered folder matches itself, not only the items beneath it.
+      const passesFolder = folder === null || r.ancestorSlugs.includes(folder) || r.slug === folder;
+      return passesMethod && passesFolder;
+    });
+    // `searchHits` already groups folders first; the filter-only list is raw nav
+    // order, so it needs the same grouping to rank consistently.
+    return hasQuery ? filtered : orderFoldersFirst(filtered);
   }, [query, methods, folder, records, fuse, hasQuery, hasFilter]);
 
   useEffect(() => setActiveIdx(-1), [results]);
@@ -198,14 +206,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
             ref={inputRef}
             className="search-input"
             type="text"
-            placeholder="Search endpoints…"
+            placeholder="Search requests, folders…"
             value={query}
             role="combobox"
             aria-expanded={open}
             aria-controls={RESULTS_ID}
             aria-activedescendant={activeIdx >= 0 ? optionId(activeIdx) : undefined}
             aria-autocomplete="list"
-            aria-label="Search endpoints"
+            aria-label="Search requests and folders"
             autoComplete="off"
             spellCheck={false}
             onFocus={() => onOpenChange(true)}
@@ -242,14 +250,14 @@ export const SearchBar: React.FC<SearchBarProps> = ({ open, onOpenChange, focusN
                     <SearchIcon />
                   </span>
                   <p className="search-empty-title">Search the collection</p>
-                  <p className="search-empty-text">Find any request by name, endpoint, or folder.</p>
+                  <p className="search-empty-text">Find by name or endpoint.</p>
                 </div>
               ) : results.length === 0 ? (
                 <div className="search-empty">
                   <span className="search-empty-icon" data-tone="muted" aria-hidden="true">
                     <SearchIcon />
                   </span>
-                  <p className="search-empty-title">No matching requests</p>
+                  <p className="search-empty-title">No matches</p>
                   <p className="search-empty-text">
                     Nothing matches {hasQuery ? <>“<b>{query}</b>”</> : 'these filters'}. Try a different
                     term or clear the filters.

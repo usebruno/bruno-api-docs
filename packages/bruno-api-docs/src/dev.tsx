@@ -11,8 +11,10 @@ import { sampleCollectionYaml } from './sampleCollection';
 import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
 import { descriptionsFixtureCollection } from './e2eFixtures/descriptionsCollection';
+import { qaFixtureCollection } from './e2eFixtures/qaCollection';
 
 // `?fixture=folders` mounts a nested-folder collection for routing e2e tests;
+// `?fixture=qa` mounts the deep, deliberately awkward collection for manual QA.
 const fixture = new URLSearchParams(window.location.search).get('fixture');
 const devCollection
   = fixture === 'folders'
@@ -21,7 +23,9 @@ const devCollection
       ? variablesFixtureCollection
       : fixture === 'descriptions'
         ? descriptionsFixtureCollection
-        : sampleCollectionYaml;
+        : fixture === 'qa'
+          ? qaFixtureCollection
+          : sampleCollectionYaml;
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {

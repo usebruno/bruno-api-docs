@@ -5,7 +5,7 @@ import { useMarkdownRenderer } from '../../hooks';
 import { AUTH_MODE_LABELS } from '../../constants';
 import { getItemName, getItemDocs, getItemDescription } from '../../utils/schemaHelpers';
 import { buildBreadcrumbSegments } from '../../utils/common';
-import { getFolderConfig, hasFolderConfig, countFolderRequests } from '../../utils/folder';
+import { getFolderConfig, hasFolderConfig, countFolderRequests, requestCountLabel } from '../../utils/folder';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
 import { Heading } from '../../components/Heading/Heading';
 import { Section } from '../../components/Section/Section';
@@ -22,8 +22,6 @@ interface FolderProps {
   collection?: OpenCollection | null;
   onBreadcrumbClick?: (uuid: string) => void;
 }
-
-const requestCountLabel = (count: number): string => `${count} request${count === 1 ? '' : 's'}`;
 
 export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection, onBreadcrumbClick }) => {
   const md = useMarkdownRenderer();

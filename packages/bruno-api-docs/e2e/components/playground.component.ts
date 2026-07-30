@@ -3,6 +3,7 @@ import { BaseComponent } from './base.component';
 import { KeyValueTableComponent } from './key-value-table/key-value-table.component';
 import { CodeEditorComponent } from './code-editor/code-editor.component';
 import { RequestAuthComponent } from './playground/auth.component';
+import { MethodSelectorComponent } from './playground/method-selector.component';
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import type { DockMode } from '../../src/utils/playgroundDock';
@@ -12,6 +13,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly preRequestVars = new KeyValueTableComponent(this.page, 'variables-pre-request');
   // The Auth tab lives inside the playground request pane; open it with selectTab('auth').
   readonly auth = new RequestAuthComponent(this.page);
+  readonly methodSelector = new MethodSelectorComponent(this.page);
   readonly preRequestScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-pre-request');
   readonly postResponseScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-post-response');
   readonly bodyEditor = new CodeEditorComponent(this.page, 'body-editor');
@@ -46,6 +48,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly bottomPanel = this.page.getByTestId('playground-dock-bottom-panel');
   readonly modalPanel = this.page.getByTestId('playground-dock-modal-panel');
   readonly mobilePanel = this.page.getByTestId('playground-dock-mobile-panel');
+  readonly divider = this.page.getByTestId('playground-divider');
   readonly unsupported = this.view.getByTestId('unsupported-request');
   readonly unsupportedTitle = this.view.getByTestId('unsupported-request-title');
   readonly unsupportedMessage = this.view.getByTestId('unsupported-request-empty');

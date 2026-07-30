@@ -498,14 +498,19 @@ export const getInheritedPostResponseVars = (
   item: HttpRequest
 ): InheritedPostResponseVarRow[] => getInheritedConfig(collection, ancestry, item).postVars;
 
+/** Longest method the badge shows in full; anything longer is cut to three letters. */
+const FULL_METHOD_MAX_LENGTH = 5;
+const SHORT_METHOD_LENGTH = 3;
+
 /**
- * Short, uppercased method name matching the design (DELETE -> DEL, OPTIONS ->
- * OPT); every other method is shown as-is. Single source for the method badges
- * and filter chips so the abbreviations can't drift between components.
+ * Short, uppercased method name for the narrow badges (sidebar tree, search
+ * results, filter chips). Methods of up to five characters show in full, so GET,
+ * PATCH, TRACE and a custom PURGE are untouched. Longer ones keep their first
+ * three letters, which is what the design asks for (DELETE to DEL, OPTIONS to
+ * OPT, CONNECT to CON) and what a custom PROPFIND to PRO needs too. Single
+ * source for every badge so the abbreviations can't drift between components.
  */
 export const getShortMethod = (method: string): string => {
-  const m = method.toUpperCase();
-  if (m === 'DELETE') return 'DEL';
-  if (m === 'OPTIONS') return 'OPT';
-  return m;
+  const m = method.trim().toUpperCase();
+  return m.length > FULL_METHOD_MAX_LENGTH ? m.slice(0, SHORT_METHOD_LENGTH) : m;
 };

@@ -59,4 +59,58 @@ describe('RequestExecutor', () => {
 
     expect(fetchMock.mock.calls[0][0]).toBe('https://api.example.com/data?api_key=secret123');
   });
+
+  describe('request body', () => {
+    const sendWithBody = async (method: string) => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        text: async () => '{}'
+      });
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const request = {
+        name: `${method} with body`,
+        type: 'http',
+        http: {
+          method,
+          url: 'https://api.example.com/data',
+          body: { type: 'json', data: '{"hello":"world"}' }
+        }
+      } as unknown as Parameters<RequestExecutor['executeRequest']>[0];
+
+      await new RequestExecutor().executeRequest(request);
+
+      return fetchMock.mock.calls[0][1];
+    };
+
+    it.each(['POST', 'PUT', 'PATCH'])('sends the body for the standard method %s', async (method) => {
+      expect((await sendWithBody(method)).body).toBe('{"hello":"world"}');
+    });
+
+    it.each(['PURGE', 'REPORT', 'DELETE', 'OPTIONS'])(
+      'sends the body for %s, which the old allowlist dropped',
+      async (method) => {
+        expect((await sendWithBody(method)).body).toBe('{"hello":"world"}');
+      }
+    );
+
+    // fetch throws if a body is attached to these.
+    it.each([['purge', 'PURGE'], ['  purge  ', 'PURGE'], ['DeLeTe', 'DELETE']])(
+      'sends %s as %s',
+      async (stored, expected) => {
+        expect((await sendWithBody(stored)).method).toBe(expected);
+      }
+    );
+
+    it('still omits the body for a lower-cased get', async () => {
+      expect((await sendWithBody('get')).body).toBeUndefined();
+    });
+
+    it.each(['GET', 'HEAD'])('omits the body for %s', async (method) => {
+      expect((await sendWithBody(method)).body).toBeUndefined();
+    });
+  });
 });

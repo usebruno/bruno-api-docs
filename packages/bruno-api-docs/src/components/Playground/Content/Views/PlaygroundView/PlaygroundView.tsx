@@ -143,7 +143,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
           <SplitDivider orientation={orientation} onPointerDown={startResize} active={isResizing} testId="playground-divider" />
 
           <div className="flex-1 overflow-hidden min-h-0">
-            <ResponsePane response={response} isLoading={isLoading} />
+            <ResponsePane response={response} isLoading={isLoading} orientation={orientation} itemUuid={itemUuid} />
           </div>
         </div>
       </div>

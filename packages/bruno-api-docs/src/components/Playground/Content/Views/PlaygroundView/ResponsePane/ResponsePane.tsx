@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import Tabs from '../../../../../../ui/Tabs/Tabs';
+import Tabs from '@/ui/Tabs/Tabs';
 import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
 import TestResultsTab from '../../Common/TestResultsTab';
-import ErrorBanner from '../../../../../../ui/ErrorBanner/ErrorBanner';
+import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
-import { SendIcon } from '../../../../../../assets/icons';
+import { SendIcon } from '@/assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
-import type { RunRequestResponse } from '../../../../../../runner';
-import type { ResponseBodyFormat } from '../../../../../../constants';
+import type { ResponseBodyFormat } from '@/constants';
+import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
+import type { RunRequestResponse } from '@/runner';
+import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
+import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
+import ResponseActions from './ResponseActions/ResponseActions';
+import { RESPONSE_ACTIONS_EXPANDED_WIDTH } from '@/constants/response';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
   isLoading: boolean;
+  orientation: 'vertical' | 'horizontal';
+  itemUuid: string;
 }
 
-const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
+const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
   const [activeTab, setActiveTab] = useState('response');
   const {
     selectedFormat,
@@ -27,15 +34,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     allowedFormats
   } = useResponseFormatter(response);
 
-  const getStatusColor = (status?: number) => {
-    if (!status) return 'var(--oc-request-tab-panel-response-status)';
-    if (status >= 200 && status < 300) return 'var(--oc-request-tab-panel-response-ok)';
-    if (status >= 300 && status < 400) return 'var(--oc-colors-text-warning)';
-    if (status >= 400 && status < 500) return 'var(--oc-request-tab-panel-response-error)';
-    if (status >= 500) return 'var(--oc-request-tab-panel-response-error)';
-    return 'var(--oc-request-tab-panel-response-status)';
-  };
-
+  // Handle loading, empty, and error states
   if (isLoading) {
     return (
       <StyledWrapper className="flex items-center justify-center">
@@ -111,45 +110,33 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
     }
   ];
 
+  // The status metadata and the actions are separate direct children of the tab bar's right slot so
+  // the responsive tab bar can measure the actions block (the last child) to decide whether to show
+  // it as inline buttons or collapse it into a menu.
   const statusInfo = (
-    <div className="flex items-center gap-3 flex-wrap text-xs">
-      {activeTab === 'response' && (
-        <ResponseFormatSelector
-          selectedFormat={selectedFormat}
-          allowedFormats={allowedFormats}
-          handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
-          showPreview={showPreview}
-          onPreviewToggle={handleViewChange}
-        />
-      )}
-      <div className="flex items-center gap-2">
-        <span className="status-meta-label">Status:</span>
-        <span
-          className="font-mono font-medium"
-          style={{ color: getStatusColor(response.status) }}
-        >
-          {response.status} {response.statusText}
-        </span>
+    <>
+      <div className="flex items-center gap-3 flex-wrap text-xs">
+        {activeTab === 'response' && (
+          <ResponseFormatSelector
+            selectedFormat={selectedFormat}
+            allowedFormats={allowedFormats}
+            handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
+            showPreview={showPreview}
+            onPreviewToggle={handleViewChange}
+          />
+        )}
+        <ResponseStatus status={response.status} statusText={response.statusText} />
+        <ResponseDuration duration={response.duration} />
+        <ResponseSize size={response.size} />
       </div>
-
-      {response.duration && (
-        <div className="flex items-center gap-1">
-          <span className="status-meta-label">Time:</span>
-          <span className="font-mono status-meta-value">
-            {response.duration}ms
-          </span>
-        </div>
-      )}
-
-      {response.size && (
-        <div className="flex items-center gap-1">
-          <span className="status-meta-label">Size:</span>
-          <span className="font-mono status-meta-value">
-            {(response.size / 1024).toFixed(2)} KB
-          </span>
-        </div>
-      )}
-    </div>
+      <ResponseActions
+        orientation={orientation}
+        itemUuid={itemUuid}
+        response={response}
+        selectedFormat={selectedFormat}
+        showPreview={showPreview}
+      />
+    </>
   );
 
   return (
@@ -162,6 +149,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading }) => {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         rightElement={response.error ? undefined : statusInfo}
+        rightContentExpandedWidth={RESPONSE_ACTIONS_EXPANDED_WIDTH}
       />
     </StyledWrapper>
   );

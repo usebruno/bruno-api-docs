@@ -33,6 +33,9 @@ export const StyledWrapper = styled.button`
     font-size: 10.5px;
     letter-spacing: 0.42px;
     color: var(--method-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .search-result-icon {

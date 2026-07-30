@@ -18,11 +18,7 @@ describe('MethodBadge', () => {
     expect(renderToStaticMarkup(<MethodBadge method="" />)).toContain('GET');
   });
 
-  it('renders the abbreviated method when short is set', () => {
-    expect(badgeText(<MethodBadge method="DELETE" short />)).toBe('DEL');
-  });
-
-  it('keeps short methods intact when short is set', () => {
-    expect(badgeText(<MethodBadge method="GET" short />)).toBe('GET');
+  it.each(['DELETE', 'OPTIONS', 'TRACE', 'CONNECT', 'PURGE'])('spells %s out in full', (method) => {
+    expect(badgeText(<MethodBadge method={method} />)).toBe(method);
   });
 });

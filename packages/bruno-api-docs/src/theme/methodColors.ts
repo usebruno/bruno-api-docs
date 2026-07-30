@@ -19,10 +19,9 @@ export const methodColorVars: Record<string, string> = {
   WS: 'var(--oc-request-ws)'
 };
 
-const notSupportedMethods = ['GRAPHQL', 'GQL', 'GRPC', 'WEBSOCKET', 'WS'];
-
-export const availableMethods = Object.keys(methodColorVars).filter((option) => !notSupportedMethods.includes(option));
-
-/** Method colour var, case-insensitive, with a muted fallback for unknown methods. */
+/**
+ * Method colour var, case-insensitive, with a muted fallback for methods that
+ * carry no token of their own (TRACE, CONNECT and custom methods).
+ */
 export const getMethodColorVar = (method?: string): string =>
   (method && methodColorVars[method.toUpperCase()]) || 'var(--oc-colors-text-muted)';

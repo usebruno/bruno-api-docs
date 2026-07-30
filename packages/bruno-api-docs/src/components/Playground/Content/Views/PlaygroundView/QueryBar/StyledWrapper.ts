@@ -30,28 +30,6 @@ export const StyledWrapper = styled.div`
     right: 0;
   }
 
-  .method-select {
-    appearance: none;
-    display: inline-flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-    background-color: transparent;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    padding-left: 0.5rem;
-    margin-left: -0.5rem;
-  }
-
-  .method-select .method-badge {
-    font-size: 0.75rem;
-    line-height: 1.125rem;
-    letter-spacing: 0.04em;
-    min-width: unset;
-    padding: 0;
-  }
-
   .actions {
     display: inline-flex;
     align-items: center;

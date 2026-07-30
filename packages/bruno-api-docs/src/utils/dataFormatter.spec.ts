@@ -61,7 +61,7 @@ describe('formatResponse', () => {
     it('should format JSON data with JSONPath filter', () => {
       const data = { users: [{ name: 'John' }, { name: 'Jane' }] };
       const dataBuffer = createBase64Buffer(JSON.stringify(data));
-      const result = formatResponse(data, dataBuffer, 'application/json', '$.users[0].name');
+      const result = formatResponse(data, dataBuffer, 'application/json', undefined, '$.users[0].name');
 
       expect(result).toBe('[\n  "John"\n]');
       expect(typeof result).toBe('string');
@@ -101,7 +101,7 @@ describe('formatResponse', () => {
         content: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat'
       };
       const buffer = createLargeBase64Buffer(data);
-      const result = formatResponse(data, buffer, 'application/json', undefined, 100);
+      const result = formatResponse(data, buffer, 'application/json', undefined, undefined, 100);
 
       expect(result).toBe('{"test":"value","description":"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua","content":"Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat"}');
       expect(typeof result).toBe('string');
@@ -122,7 +122,7 @@ describe('formatResponse', () => {
     it('should handle large XML responses', () => {
       const xmlData = '<root><item>value</item><description>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore</description><content>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo</content></root>';
       const largeBuffer = createLargeBase64Buffer(xmlData);
-      const result = formatResponse(xmlData, largeBuffer, 'application/xml', undefined, 100);
+      const result = formatResponse(xmlData, largeBuffer, 'application/xml', undefined, undefined, 100);
 
       expect(typeof result).toBe('string');
       expect(result).toContain('Lorem ipsum');
@@ -146,7 +146,7 @@ describe('formatResponse', () => {
         content: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat'
       };
       const largeBuffer = createLargeBase64Buffer(data);
-      const result = formatResponse(data, largeBuffer, 'text/plain', undefined, 100);
+      const result = formatResponse(data, largeBuffer, 'text/plain', undefined, undefined, 100);
 
       expect(typeof result).toBe('string');
       expect(result).toContain('Lorem ipsum');

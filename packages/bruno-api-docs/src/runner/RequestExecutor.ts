@@ -8,6 +8,9 @@ import { detectContentTypeFromBytes, isByteFormatContentType } from '../utils/re
 import { RESPONSE_LARGE_THRESHOLD } from '../constants';
 import stripJsonComments from 'strip-json-comments';
 
+/** Methods `fetch` refuses to attach a request body to. */
+const BODYLESS_METHODS = ['GET', 'HEAD'];
+
 export const applyApiKeyToUrl = (url: string, auth: Record<string, unknown> | undefined): string => {
   if (auth?.type !== 'apikey' || auth.placement !== 'query' || !auth.key) {
     return url;
@@ -68,7 +71,9 @@ export class RequestExecutor {
   }
 
   private async buildFetchOptions(request: HttpRequest, timeout = DEFAULT_TIMEOUT_MS): Promise<RequestInit> {
-    const method = getHttpMethod(request);
+    // `fetch` upper-cases only the methods it knows, so a collection storing
+    // `purge` would go out lower-cased while the badge shows PURGE.
+    const method = getHttpMethod(request).trim().toUpperCase();
     const options: RequestInit = {
       method,
       headers: this.buildHeaders(request),
@@ -76,7 +81,7 @@ export class RequestExecutor {
     };
 
     const body = getHttpBody(request);
-    if (body && ['POST', 'PUT', 'PATCH'].includes(method)) {
+    if (body && !BODYLESS_METHODS.includes(method)) {
       options.body = await this.buildBody(request);
     }
 
@@ -247,14 +252,15 @@ export class RequestExecutor {
       }
     }
 
-    // base64 is only needed for binary previews/byte views, or when `data` can't faithfully
-    // reproduce the bytes (parsed JSON loses precision; non-ASCII bodies aren't round-trippable).
-    // A plain-text/SVG string body carries its own bytes, so skip the redundant copy. Oversized
-    // bodies are hidden behind a reveal warning, so don't eagerly encode them at all.
+    // base64 backs binary previews/byte views and the download/copy actions, and is the faithful
+    // source when `data` can't reproduce the bytes (parsed JSON loses precision; non-ASCII bodies
+    // aren't round-trippable). A small plain-text/SVG string body carries its own bytes, so skip the
+    // redundant copy — but oversized bodies are still encoded here, since they're actioned
+    // (download/copy) from the reveal warning; only their formatting is deferred.
     const isReconstructableText
       = (detectedContentType === 'text/plain' || detectedContentType === 'image/svg+xml')
         && typeof data === 'string';
-    const base64Data = isReconstructableText || isLarge ? undefined : buffer.toString('base64');
+    const base64Data = isReconstructableText && !isLarge ? undefined : buffer.toString('base64');
 
     return { data, size, base64Data, detectedContentType };
   }

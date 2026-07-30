@@ -53,15 +53,29 @@ const isTimeoutError = (error: unknown): boolean => {
 };
 
 /**
- * The browser's opaque network failure. `fetch` throws a `TypeError` whose
- * message is "Failed to fetch" (Chrome) / "NetworkError when attempting to
- * fetch resource" (Firefox) / "Load failed" (Safari).
+ * The opaque network failure, one phrase per engine (plus undici's `fetch
+ * failed`, for a non-DOM runtime).
+ *
+ * Matched as whole phrases rather than by sniffing for "fetch", because not
+ * every `TypeError` mentioning fetch is a network failure. A forbidden method
+ * (TRACE/CONNECT/TRACK) is rejected before any connection is made, and the
+ * browser says exactly why: "Failed to execute 'fetch' on 'Window': 'TRACE'
+ * HTTP method is unsupported." (Chrome), "Window.fetch: Invalid request method
+ * TRACE." (Firefox), "Method is forbidden." (Safari). Those must reach the
+ * reader rather than be replaced by a guess about CORS.
  */
+const OPAQUE_FETCH_FAILURE_MESSAGES = [
+  'failed to fetch',
+  'networkerror when attempting to fetch resource',
+  'load failed',
+  'fetch failed'
+];
+
 const isOpaqueFetchFailure = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
   if (error.name !== 'TypeError') return false;
   const msg = error.message.toLowerCase();
-  return msg.includes('fetch') || msg.includes('load failed') || msg.includes('networkerror');
+  return OPAQUE_FETCH_FAILURE_MESSAGES.some((opaqueMessage) => msg.includes(opaqueMessage));
 };
 
 const safeParseUrl = (url?: string): URL | null => {

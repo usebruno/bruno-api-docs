@@ -1,6 +1,6 @@
 import React from 'react';
 import { IconCheck, IconCopy } from '@tabler/icons';
-import ActionIcon from '@/ui/ActionIcon/ActionIcon';
+import IconButton from '@/ui/IconButton/IconButton';
 
 interface CopyResponseProps {
   copied: boolean;
@@ -10,9 +10,9 @@ interface CopyResponseProps {
 
 const CopyResponse: React.FC<CopyResponseProps> = ({ copied, onClick, disabled }) => {
   return (
-    <ActionIcon label="Copy Response" className="p-1" disabled={disabled} onClick={onClick}>
+    <IconButton label="Copy Response" className="p-1" disabled={disabled} onClick={onClick}>
       {copied ? <IconCheck size={16} stroke={2} /> : <IconCopy size={16} stroke={2} />}
-    </ActionIcon>
+    </IconButton>
   );
 };
 

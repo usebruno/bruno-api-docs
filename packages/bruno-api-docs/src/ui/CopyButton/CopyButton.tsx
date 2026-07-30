@@ -40,7 +40,7 @@ export const CopyButton: React.FC<CopyButtonProps> = ({
       data-testid={testId}
       style={style}
     >
-      {copied ? <IconCheck size={13} /> : <IconCopy size={13} />}
+      {copied ? <IconCheck size={16} strokeWidth={1} /> : <IconCopy size={16} strokeWidth={1} />}
     </StyledWrapper>
   );
 };

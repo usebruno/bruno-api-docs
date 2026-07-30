@@ -16,9 +16,9 @@ function useCopy({
   useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
 
   const copyResponse = useCallback(async () => {
-    if (disabled || !navigator.clipboard || !getText) return;
+    if (disabled || !navigator.clipboard || !(text || getText)) return;
     try {
-      await navigator.clipboard.writeText(text ? text : getText());
+      await navigator.clipboard.writeText(text ? text : getText ? getText() : '');
       setCopied(true);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => setCopied(false), resetAfterMs);

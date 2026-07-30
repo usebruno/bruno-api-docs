@@ -1,5 +1,5 @@
 import React from 'react';
-import ActionIcon from '@/ui/ActionIcon/ActionIcon';
+import IconButton from '@/ui/IconButton/IconButton';
 import { IconEraser } from '@tabler/icons';
 
 interface ClearResponseProps {
@@ -8,9 +8,9 @@ interface ClearResponseProps {
 
 const ClearResponse: React.FC<ClearResponseProps> = ({ onClick }) => {
   return (
-    <ActionIcon label="Clear Response" className="p-1" onClick={onClick}>
+    <IconButton label="Clear Response" className="p-1" onClick={onClick}>
       <IconEraser size={16} stroke={2} />
-    </ActionIcon>
+    </IconButton>
   );
 };
 

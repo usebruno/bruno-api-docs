@@ -4,8 +4,8 @@ export const StyledWrapper = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
   flex: none;
   background: transparent;

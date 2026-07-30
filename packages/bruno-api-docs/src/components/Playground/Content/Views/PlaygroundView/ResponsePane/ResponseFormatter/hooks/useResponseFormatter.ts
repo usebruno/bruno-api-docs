@@ -21,18 +21,6 @@ export function useResponseFormatter(
   const dispatch = useAppDispatch();
   const { format, view, detectedContentType, headerContentType, contentType } = useInitialResponseFormat(response);
 
-  // useEffect(() => {
-  //   dispatch(setResponseFormat({
-  //     uuid: selectedItemId,
-  //     format
-  //   }))
-
-  //   dispatch(setShowResponsePreview({
-  //     uuid: selectedItemId,
-  //     showResponsePreview: view === 'preview'
-  //   }))
-  // }, [selectedItemId, format, view])
-
   const allowedFormats = useMemo(
     () => getResponseFormatOptions(detectedContentType, headerContentType),
     [detectedContentType, headerContentType]
@@ -59,7 +47,11 @@ export function useResponseFormatter(
       = selectedResponseFormat && allowedFormats.includes(selectedResponseFormat) ? selectedResponseFormat : format;
     return {
       selectedFormat,
-      showPreview: showResponsePreview,
+      showPreview: (
+        showResponsePreview != null
+          ? showResponsePreview
+          : view === 'preview'
+      ),
       handleFormatChange,
       toggleView,
       contentType,

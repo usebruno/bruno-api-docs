@@ -13,7 +13,12 @@ function useCopy({
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  useEffect(() => () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }, []);
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current)
+        clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const copyResponse = useCallback(async () => {
     if (disabled || !navigator.clipboard || !(text || getText)) return;

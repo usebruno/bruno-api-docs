@@ -59,15 +59,15 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   ];
 
   return (
-    <StyledWrapper className="response-pane-actions-wrapper">
-      <div className="actions-dropdown">
+    <StyledWrapper className="response-pane-actions-wrapper" data-testid="response-pane-actions-wrapper">
+      <div className="actions-dropdown" data-testid="actions-dropdown">
         <MenuDropdown items={menuItems} placement="bottom-end" testId="response-actions-menu">
           <ActionIcon label="More actions" className="p-1">
             <IconDots size={16} stroke={2} />
           </ActionIcon>
         </MenuDropdown>
       </div>
-      <div className="actions-buttons">
+      <div className="actions-buttons" data-testid="actions-buttons">
         <CopyResponse copied={copied} onClick={copyResponse} disabled={copyDisabled} />
         <DownloadResponse onClick={onDownload} disabled={downloadDisabled} />
         <ClearResponse onClick={onClear} />

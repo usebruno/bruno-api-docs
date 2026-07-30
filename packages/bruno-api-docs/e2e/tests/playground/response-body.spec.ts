@@ -96,13 +96,11 @@ test.describe('response body — binary responses', () => {
     await responsePane.togglePreview();
     expect(await responsePane.isPreviewOn()).toBe(false);
 
-    // A benign re-render (tab switch and back) must not clobber the manual choice.
-    // At this narrow viewport only the active tab shows directly; the rest live in the response-tab
-    // overflow menu, so both the switch to Headers and the switch back to Response go through it.
-    await page.getByTestId('response-tabs-more').click();
-    await page.getByTestId('response-tabs-more-headers').click();
-    await page.getByTestId('response-tabs-more').click();
-    await page.getByTestId('response-tabs-more-response').click();
+    // A benign re-render (tab switch and back) must not clobber the manual choice. Switch through a
+    // layout-agnostic helper so the assertion doesn't hinge on whether the tabs render inline or
+    // collapse into the overflow menu at this width.
+    await responsePane.switchToTab('headers');
+    await responsePane.switchToTab('response');
 
     await responsePane.openFormatSelector();
     expect(await responsePane.isPreviewOn()).toBe(false);

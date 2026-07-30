@@ -65,20 +65,36 @@ export const useResponsiveTabs = (
     const currentIds = idsRef.current;
     if (!container || currentIds.length === 0) return;
 
-    const rightWidth = rightRef.current?.offsetWidth ?? 0;
     // Not laid out yet (SSR / first paint) — keep everything visible rather than hiding all.
     if (container.offsetWidth === 0) {
       setVisibleIds((prev) => (sameOrder(prev, currentIds) ? prev : currentIds));
       setOverflowIds((prev) => (prev.length === 0 ? prev : []));
       return;
     }
+
+    const rightEl = rightRef.current;
+    let rightWidth = rightEl?.offsetWidth ?? 0;
+    let rightModeled = false;
+    if (rightContentExpandedWidth != null && rightEl != null && rightEl.children.length > 0) {
+      const children = rightEl.children;
+      const expandableIndex = children.length - 1;
+      let modeled = 0;
+      for (let i = 0; i < children.length; i += 1) {
+        modeled += i === expandableIndex ? rightContentExpandedWidth : (children[i] as HTMLElement).offsetWidth;
+      }
+      rightWidth = modeled;
+      rightModeled = true;
+    }
+
     const available = container.offsetWidth - rightWidth - MORE_TRIGGER_RESERVE;
 
     const visible: string[] = [];
     const overflow: string[] = [];
     let used = 0;
+    let allTabsWidth = 0;
     for (const id of currentIds) {
       const width = (measureRefs.current[id]?.offsetWidth ?? 80) + PER_TAB_ALLOWANCE;
+      allTabsWidth += width;
       if (overflow.length === 0 && used + width <= available) {
         visible.push(id);
         used += width;
@@ -99,22 +115,15 @@ export const useResponsiveTabs = (
     setVisibleIds((prev) => (sameOrder(prev, visible) ? prev : visible));
     setOverflowIds((prev) => (sameOrder(prev, overflow) ? prev : overflow));
 
-    if (rightContentExpandedWidth && rightRef.current) {
-      const leftUsed = used + (overflow.length ? MORE_TRIGGER_RESERVE : 0);
-      const children = rightRef.current.children;
-      if (children.length > 0) {
-        // The expandable element (the actions block) is the last child; when collapsed it renders a
-        // compact menu, so substitute its known expanded (buttons) width to test whether it WOULD fit.
-        const expandableIndex = children.length - 1;
-        let totalExpanded = 0;
-        for (let i = 0; i < children.length; i += 1) {
-          totalExpanded += i === expandableIndex ? rightContentExpandedWidth : (children[i] as HTMLElement).offsetWidth;
-        }
-        const spaceForRight = container.offsetWidth - leftUsed - RIGHT_CONTENT_GAP;
-        setRightSideExpandable((prev) =>
-          prev ? spaceForRight > totalExpanded - EXPANDABLE_HYSTERESIS : spaceForRight > totalExpanded
-        );
-      }
+    // Expand the actions inline only when the ENTIRE tab row fits beside the expanded right slot.
+    // Keyed to the container width and intrinsic tab widths — never the split's own visible/overflow
+    // result — so the decision is fixed per width instead of chasing the overflow it would itself
+    // cause. (rightWidth already models the right slot with the actions expanded.)
+    if (rightModeled) {
+      const needed = allTabsWidth + rightWidth + RIGHT_CONTENT_GAP;
+      setRightSideExpandable((prev) =>
+        prev ? container.offsetWidth >= needed - EXPANDABLE_HYSTERESIS : container.offsetWidth >= needed
+      );
     }
   };
 
@@ -134,10 +143,13 @@ export const useResponsiveTabs = (
     return () => cancelAnimationFrame(frame);
   }, [enabled, idsKey, activeId]);
 
-  // Observe the container and the right slot once per enable so a width change on
-  // either — the available space or the trailing content's footprint — re-runs the
-  // split. The right slot matters because its width is subtracted from the budget,
-  // and it can grow (icons/dropdowns laying out) after the container has settled.
+  // Observe only the container — the source of the available-width budget. Deliberately NOT the
+  // right slot: its width is subtracted from that budget, but the trailing actions block collapses
+  // to a compact menu when space is tight, so observing it turns "collapse changed the width" into a
+  // recalc, which can re-decide the collapse, which changes the width again — a feedback loop that
+  // thrashes at a boundary. The split still reads the right slot's live width when it runs; it just
+  // doesn't re-run because of it. (Mirrors bruno-app's ResponsiveTabs, which observes the container
+  // alone.) A container resize or a tab/active change still triggers a fresh measurement.
   useEffect(() => {
     if (!enabled || typeof ResizeObserver === 'undefined') return;
     const container = containerRef.current;
@@ -148,7 +160,6 @@ export const useResponsiveTabs = (
       frame = requestAnimationFrame(() => recalcRef.current());
     });
     observer.observe(container);
-    if (rightRef.current) observer.observe(rightRef.current);
     return () => {
       if (frame) cancelAnimationFrame(frame);
       observer.disconnect();

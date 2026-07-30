@@ -1,4 +1,4 @@
-import type { Locator, Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import type { ResponseBodyFormat } from '../../../src/utils/response';
@@ -16,9 +16,9 @@ export class ResponsePaneComponent extends BaseComponent {
   // The response actions live in the tab bar's right slot and only render once a response exists
   // (and there is no request error). They are responsive: collapsed into a kebab menu when the slot
   // is narrow (the default e2e viewport), shown as inline buttons when wide.
-  readonly actions = this.page.locator('.response-pane-actions-wrapper');
+  readonly actions = this.page.getByTestId('response-pane-actions-wrapper');
   readonly actionsMenuTrigger = this.page.getByTestId('response-actions-menu');
-  readonly inlineButtons = this.actions.locator('.actions-buttons');
+  readonly inlineButtons = this.actions.getByTestId('actions-buttons');
   // Menu items, visible once the kebab is opened.
   readonly copyMenuItem = this.page.getByTestId('response-actions-menu-copy');
   readonly downloadMenuItem = this.page.getByTestId('response-actions-menu-download');
@@ -67,6 +67,24 @@ export class ResponsePaneComponent extends BaseComponent {
   async openActionsMenu(): Promise<void> {
     await this.actionsMenuTrigger.click();
     await this.copyMenuItem.waitFor({ state: 'visible' });
+  }
+
+  /**
+   * Switch the response tab bar to a tab by id, regardless of whether the responsive tab bar renders
+   * it inline or collapses it into the "⋯ more" overflow menu at the current width. Waits for the
+   * switch to settle (the target becomes the selected tab) so a following switch never races the
+   * layout mid-transition.
+   */
+  async switchToTab(id: string): Promise<void> {
+    const inlineTab = this.page.getByTestId(`response-tabs-tab-${id}`);
+    if (await inlineTab.isVisible()) {
+      await inlineTab.click();
+    } else {
+      await this.page.getByTestId('response-tabs-more').click();
+      await this.page.getByTestId(`response-tabs-more-${id}`).click();
+    }
+    // The active tab is always promoted to an inline, selected button — wait for that before returning.
+    await expect(inlineTab).toHaveAttribute('aria-selected', 'true');
   }
 
   /** The inline Change-Layout button, shown when the actions are expanded (wide pane). */

@@ -11,7 +11,7 @@ import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseForma
 import type { ResponseBodyFormat } from '@/constants';
 import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
 import type { RunRequestResponse } from '@/runner';
-import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseDuration';
+import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
 import ResponseActions from './ResponseActions/ResponseActions';
 import { RESPONSE_ACTIONS_EXPANDED_WIDTH } from '@/constants/response';

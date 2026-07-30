@@ -11,7 +11,6 @@ const ResponseDuration: React.FC<ResponseDurationProps> = ({ duration }) => {
 
   return (
     <div className="flex items-center gap-1">
-      <span style={{ color: 'var(--text-secondary)' }}>Time:</span>
       <span className="font-mono" style={{ color: 'var(--text-primary)' }}>
         {duration}ms
       </span>

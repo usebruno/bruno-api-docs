@@ -13,7 +13,6 @@ const ResponseStatus: React.FC<ResponseStatusProps> = ({ status, statusText }) =
 
   return (
     <div className="flex items-center gap-2">
-      <span style={{ color: 'var(--text-secondary)' }}>Status:</span>
       <span
         className="font-mono font-medium"
         style={{

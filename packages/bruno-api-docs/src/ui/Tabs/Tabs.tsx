@@ -4,6 +4,7 @@ import type { MenuDropdownHandle } from '../MenuDropdown/types';
 import { ChevronsRightIcon, DotIcon } from '../../assets/icons';
 import { useResponsiveTabs } from './useResponsiveTabs';
 import { StyledWrapper } from './StyledWrapper';
+import cx from '@/utils/cx';
 
 export interface Tab {
   id: string;
@@ -194,7 +195,12 @@ export const Tabs: React.FC<TabsProps> = ({
         </div>
         {rightContent !== undefined && (
           <div
-            className={['tabs-right', rightSideExpandable ? 'expandable' : ''].filter(Boolean).join(' ')}
+            className={cx(
+              'tabs-right',
+              {
+                expandable: rightSideExpandable
+              }
+            )}
             ref={isResponsive ? rightRef : undefined}
           >
             {rightContent}

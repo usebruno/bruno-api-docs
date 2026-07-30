@@ -10,7 +10,6 @@ const ResponseSize: React.FC<ResponseSizeProps> = ({ size }) => {
 
   return (
     <div className="flex items-center gap-1">
-      <span style={{ color: 'var(--text-secondary)' }}>Size:</span>
       <span className="font-mono" style={{ color: 'var(--text-primary)' }}>
         {(size / 1024).toFixed(2)} KB
       </span>

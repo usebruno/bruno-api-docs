@@ -26,16 +26,20 @@ export const StyledWrapper = styled.div`
 
   &.menu-dropdown-sm {
     min-width: 6.875rem;
-    max-width: 9.375rem !important;
-    padding: 0.125rem;
+    padding: 0.25rem;
     background-color: var(--oc-background-base);
     border-color: var(--border-color);
     margin-top: 2px;
 
     .dropdown-item {
-      padding: 0.25rem 0.6rem 0.25rem 0.25rem;
+      padding: 0.375rem 0.6rem;
       margin: 1px 0;
       line-height: 1;
+    }
+
+    .dropdown-icon {
+      width: 0.8125rem;
+      height: 0.8125rem;
     }
   }
 

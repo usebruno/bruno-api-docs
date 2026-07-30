@@ -27,8 +27,8 @@ export function useResponseFormatter(
     setUserSelectedFormat(format);
   }, []);
 
-  const handleViewChange = useCallback((showPreview: boolean) => {
-    setShowPreview(showPreview);
+  const toggleView = useCallback(() => {
+    setShowPreview((prev) => !prev);
   }, []);
 
   return useMemo(() => {
@@ -41,9 +41,9 @@ export function useResponseFormatter(
       selectedFormat,
       showPreview,
       handleFormatChange,
-      handleViewChange,
+      toggleView,
       contentType,
       allowedFormats
     };
-  }, [handleFormatChange, handleViewChange, format, userSelectedFormat, allowedFormats, showPreview, contentType]);
+  }, [handleFormatChange, toggleView, format, userSelectedFormat, allowedFormats, showPreview, contentType]);
 }

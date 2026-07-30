@@ -29,7 +29,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     selectedFormat,
     showPreview,
     handleFormatChange,
-    handleViewChange,
+    toggleView,
     contentType,
     allowedFormats
   } = useResponseFormatter(response);
@@ -122,7 +122,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
             allowedFormats={allowedFormats}
             handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
             showPreview={showPreview}
-            onPreviewToggle={handleViewChange}
+            toggleView={toggleView}
           />
         )}
         <ResponseStatus status={response.status} statusText={response.statusText} />

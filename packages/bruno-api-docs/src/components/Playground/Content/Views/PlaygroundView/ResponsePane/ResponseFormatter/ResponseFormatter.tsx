@@ -1,4 +1,3 @@
-import type { FC } from 'react';
 import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@/ui/MenuDropdown';
 import type {
   ResponseBodyFormat } from '@/constants';
@@ -9,7 +8,7 @@ import {
   FORMAT_LABELS,
   FORMAT_ICONS
 } from '@/constants';
-import { StyledWrapper } from './StyledWrapper';
+import PreviewToggleHeader from './PreviewToggleHeader/PreviewToggleHeader';
 
 interface ResponseFormatSelectorProps {
   handleSelection?: (value: ResponseBodyFormat) => void;
@@ -18,34 +17,15 @@ interface ResponseFormatSelectorProps {
   allowedFormats?: ResponseBodyFormat[];
   /** Whether the response is shown as a rendered preview vs the raw editor. */
   showPreview?: boolean;
-  onPreviewToggle?: (next: boolean) => void;
+  toggleView: () => void;
 }
 
-const PreviewToggleHeader: FC<{ checked: boolean; onChange: (next: boolean) => void }> = ({
-  checked,
-  onChange
-}) => (
-  <StyledWrapper>
-    <span className="preview-toggle-label">Preview</span>
-    <button
-      type="button"
-      role="switch"
-      className="preview-toggle"
-      aria-checked={checked}
-      aria-label="Toggle preview"
-      onClick={() => onChange(!checked)}
-    >
-      <span className="preview-toggle-knob" />
-    </button>
-  </StyledWrapper>
-);
-
-const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
+const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
   handleSelection,
   selectedFormat,
   allowedFormats = ALL_FORMAT_OPTIONS,
   showPreview = false,
-  onPreviewToggle
+  toggleView
 }) => {
   // Preserve the two-group visual layout, but drop a group entirely when none of its
   // formats are allowed (binary responses collapse to the byte-format group only).
@@ -68,7 +48,7 @@ const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
       selectedItemId={selectedFormat}
       itemToText={(item: MenuDropdownItem) => item.label}
       placement="bottom-start"
-      header={<PreviewToggleHeader checked={showPreview} onChange={(next) => onPreviewToggle?.(next)} />}
+      header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
       testId="response-format-selector"
       size="sm"
     />

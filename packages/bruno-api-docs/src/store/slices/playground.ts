@@ -9,6 +9,7 @@ import type { RootState } from '../store';
 import { hydrateWithUUIDs, findAndUpdateItem } from '../../utils/fileUtils';
 import { isFolder, getRequestVariables } from '../../utils/schemaHelpers';
 import { isSecretVariable } from '../../utils/variableResolution';
+import type { ResponseBodyFormat } from '@/constants';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 
@@ -22,6 +23,8 @@ export interface PlaygroundState {
   selectedItemId: string | null;
   selectedExampleIndex: number | null;
   responsePaneOrientation: 'horizontal' | 'vertical' | null;
+  selectedResponseFormat: Record<string, ResponseBodyFormat>;
+  showResponsePreview: Record<string, boolean>;
 }
 
 const initialState: PlaygroundState = {
@@ -33,7 +36,9 @@ const initialState: PlaygroundState = {
   viewMode: 'playground',
   selectedItemId: null,
   selectedExampleIndex: null,
-  responsePaneOrientation: null
+  responsePaneOrientation: null,
+  selectedResponseFormat: {},
+  showResponsePreview: {}
 };
 
 const readEnvironments = (collection: OpenCollectionCollection): Environment[] | null =>
@@ -262,6 +267,31 @@ const playgroundSlice = createSlice({
       };
       apply(state.hydratedCollection);
       apply(state.collection);
+    },
+    setResponseFormat: (state: PlaygroundState, action: PayloadAction<{
+      uuid: PlaygroundState['selectedItemId'];
+      format: ResponseBodyFormat;
+    }>) => {
+      if (action.payload.uuid != null)
+        state.selectedResponseFormat[action.payload.uuid] = action.payload.format;
+    },
+    setShowResponsePreview: (
+      state: PlaygroundState,
+      action: PayloadAction<{
+        uuid: PlaygroundState['selectedItemId'];
+        showResponsePreview: boolean;
+      }>
+    ) => {
+      const { uuid, showResponsePreview } = action.payload;
+      if (uuid != null)
+        state.showResponsePreview[uuid] = showResponsePreview;
+    },
+    toggleShowResponsePreview: (
+      state: PlaygroundState,
+      action: PayloadAction<PlaygroundState['selectedItemId']>
+    ) => {
+      if (action.payload != null)
+        state.showResponsePreview[action.payload] = !state.showResponsePreview[action.payload];
     }
   }
 });
@@ -282,17 +312,26 @@ export const {
   updateCollectionEnvironments,
   updateFolderInCollection,
   resetPlaygroundEnvironments,
-  setPlaygroundVariable
+  setPlaygroundVariable,
+  setResponseFormat,
+  setShowResponsePreview,
+  toggleShowResponsePreview
 } = playgroundSlice.actions;
 
 // Selectors
 export const selectPlaygroundCollection = (state: RootState) => state.playground.collection;
 export const selectHydratedCollection = (state: RootState) => state.playground.hydratedCollection;
-export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
 export const selectPlaygroundResponses = (state: RootState) => state.playground.responses;
+export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
 export const selectViewMode = (state: RootState) => state.playground.viewMode;
 export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
 export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;
 export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;
+export const selectResponseFormat
+  = (uuid: PlaygroundState['selectedItemId']) =>
+    (state: RootState) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
+export const selectShowResponsePreview
+  = (uuid: PlaygroundState['selectedItemId']) =>
+    (state: RootState) => uuid ? state.playground.showResponsePreview[uuid] : null;
 
 export default playgroundSlice.reducer;

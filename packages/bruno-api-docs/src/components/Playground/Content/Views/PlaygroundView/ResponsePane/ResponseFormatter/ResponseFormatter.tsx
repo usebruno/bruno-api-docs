@@ -50,7 +50,6 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
       placement="bottom-start"
       header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
       testId="response-format-selector"
-      size="sm"
     />
   );
 };

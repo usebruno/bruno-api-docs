@@ -16,7 +16,6 @@ export const StyledWrapper = styled.div`
   }
 
   .large-response-title {
-    color: var(--oc-status-warning-text);
     font-weight: 600;
     font-size: var(--oc-font-size-lg);
   }
@@ -43,6 +42,7 @@ export const StyledWrapper = styled.div`
   }
 
   .large-response-view,
+  .large-response-copy,
   .large-response-download {
     display: inline-flex;
     align-items: center;
@@ -55,6 +55,7 @@ export const StyledWrapper = styled.div`
     font-size: var(--oc-font-size-base);
     cursor: pointer;
     transition: color 0.15s ease, background-color 0.15s ease;
+    gap: 0.5rem;
 
     &:hover {
       background-color: var(--badge-bg);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   IconCopy,
   IconDownload,
@@ -11,7 +11,6 @@ import CopyResponse from './CopyResponse/CopyResponse';
 import ClearResponse from './ClearResponse/ClearResponse';
 import DownloadResponse from './DownloadResponse/DownloadResponse';
 import ChangeLayout from './ChangeLayout/ChangeLayout';
-import { useCopyResponse } from './CopyResponse/hooks/useCopyResponse';
 import { StyledWrapper } from './StyledWrapper';
 import MenuDropdown from '@/ui/MenuDropdown';
 import type { MenuDropdownItem } from '@/ui/MenuDropdown';
@@ -21,6 +20,8 @@ import type { ResponseBodyFormat } from '@/constants';
 import { useAppDispatch } from '@/store/hooks';
 import { clearPlaygroundResponse, setResponsePaneOrientation } from '@/store/slices/playground';
 import { downloadResponse } from '@/utils/downloadResponse';
+import useCopy from '@/hooks/useCopy';
+import { formatResponse } from '@/utils/dataFormatter';
 
 interface ResponseActionsProps {
   orientation: 'vertical' | 'horizontal';
@@ -37,7 +38,28 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   selectedFormat,
   showPreview
 }) => {
-  const { copied, copyResponse, disabled: copyDisabled } = useCopyResponse(response, selectedFormat, showPreview);
+  const getCopyText = useCallback((
+  ): string => {
+    const data = response?.data;
+    const dataBuffer = response?.base64Data;
+    // Preview shows the raw data, so copy that as-is.
+    if (showPreview) {
+      return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    }
+    if (selectedFormat && data && dataBuffer) {
+      return formatResponse(data, dataBuffer, selectedFormat);
+    }
+    return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  }, [
+    response?.data,
+    response?.base64Data,
+    selectedFormat
+  ]);
+  const copyDisabled = !response.data;
+  const { copied, copyResponse } = useCopy({
+    getText: getCopyText,
+    disabled: copyDisabled
+  });
   const dispatch = useAppDispatch();
 
   const downloadDisabled = !response?.base64Data;

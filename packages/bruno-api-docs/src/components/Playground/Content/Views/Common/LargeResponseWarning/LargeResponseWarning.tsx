@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
 import { formatBytes } from '@/utils/exampleResponse';
-import CopyButton from '@/ui/CopyButton/CopyButton';
 import type { RunRequestResponse } from '@/runner';
 import { downloadResponse } from '@/utils/downloadResponse';
 import { StyledWrapper } from './StyledWrapper';
-import { IconAlertTriangle } from '@tabler/icons';
+import { IconAlertTriangle, IconCheck, IconCopy, IconDownload, IconEye } from '@tabler/icons';
+import useCopy from '@/hooks/useCopy';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 
@@ -19,6 +19,10 @@ export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ resp
     const data = response?.data;
     return typeof data === 'string' ? data : JSON.stringify(data ?? '', null, 2);
   }, [response?.data]);
+
+  const { copied, copyResponse } = useCopy({
+    getText: dataToCopy
+  });
 
   return (
     <StyledWrapper data-testid="large-response-warning">
@@ -41,14 +45,23 @@ export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ resp
           aria-label="View response"
           data-testid="large-response-view"
         >
-          View
+          <span className="button-icon">
+            <IconEye size={13} strokeWidth={1} />
+          </span>
+          <span>View</span>
         </button>
-        <CopyButton
-          getText={dataToCopy}
-          label="Copy"
-          copiedLabel="Copied"
-          testId="large-response-copy"
-        />
+        <button
+          type="button"
+          className="large-response-copy"
+          onClick={copyResponse}
+          aria-label={copied ? 'Copied response' : 'Copy response'}
+          data-testid="large-response-copy"
+        >
+          <span className="button-icon">
+            {copied ? <IconCheck size={13} strokeWidth={1} /> : <IconCopy size={13} strokeWidth={1} />}
+          </span>
+          <span>{copied ? 'Copied' : 'Copy'}</span>
+        </button>
         <button
           type="button"
           className="large-response-download"
@@ -57,7 +70,10 @@ export const LargeResponseWarning: React.FC<LargeResponseWarningProps> = ({ resp
           aria-label="Download response"
           data-testid="large-response-download"
         >
-          Download
+          <span className="button-icon">
+            <IconDownload size={13} strokeWidth={1} />
+          </span>
+          <span>Download</span>
         </button>
       </div>
     </StyledWrapper>

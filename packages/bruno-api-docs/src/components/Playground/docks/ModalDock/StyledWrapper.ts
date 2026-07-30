@@ -7,6 +7,7 @@ export const StyledWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--text-primary);
 
   .modal-backdrop {
     position: absolute;

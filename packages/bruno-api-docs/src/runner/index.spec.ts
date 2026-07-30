@@ -539,4 +539,14 @@ describe('RequestExecutor parseResponse — content-type handling', () => {
     expect(res.base64Data).toBeUndefined();
     global.fetch = originalFetch;
   });
+
+  it('extracts base64 for a large response (only formatting is deferred, not extraction)', async () => {
+    // Over the 10MB threshold, and plain text — so it would be skipped as reconstructable were it
+    // not large. base64 is still extracted here because the reveal warning's download/copy read it.
+    mockFetch(Buffer.from('x'.repeat(11 * 1024 * 1024)), 'text/plain');
+    const res = await run();
+    expect(res.detectedContentType).toBe('text/plain');
+    expect(typeof res.base64Data).toBe('string');
+    global.fetch = originalFetch;
+  });
 });

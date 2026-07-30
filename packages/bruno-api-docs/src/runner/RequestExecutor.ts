@@ -247,14 +247,15 @@ export class RequestExecutor {
       }
     }
 
-    // base64 is only needed for binary previews/byte views, or when `data` can't faithfully
-    // reproduce the bytes (parsed JSON loses precision; non-ASCII bodies aren't round-trippable).
-    // A plain-text/SVG string body carries its own bytes, so skip the redundant copy. Oversized
-    // bodies are hidden behind a reveal warning, so don't eagerly encode them at all.
+    // base64 backs binary previews/byte views and the download/copy actions, and is the faithful
+    // source when `data` can't reproduce the bytes (parsed JSON loses precision; non-ASCII bodies
+    // aren't round-trippable). A small plain-text/SVG string body carries its own bytes, so skip the
+    // redundant copy — but oversized bodies are still encoded here, since they're actioned
+    // (download/copy) from the reveal warning; only their formatting is deferred.
     const isReconstructableText
       = (detectedContentType === 'text/plain' || detectedContentType === 'image/svg+xml')
         && typeof data === 'string';
-    const base64Data = isReconstructableText || isLarge ? undefined : buffer.toString('base64');
+    const base64Data = isReconstructableText && !isLarge ? undefined : buffer.toString('base64');
 
     return { data, size, base64Data, detectedContentType };
   }

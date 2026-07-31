@@ -11,7 +11,8 @@ export const StyledWrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.125rem;
+    gap: 0.5rem;
+    margin-right: 0.5rem;
     padding: 0.25rem 0.5rem;
     overflow: hidden;
     border: 1px solid transparent;
@@ -41,11 +42,12 @@ export const StyledWrapper = styled.div`
 
   .section-nav-item-text {
     max-width: 0;
+    max-height: 0;
     opacity: 0;
     overflow: hidden;
     text-align: left;
     white-space: nowrap;
-    transition: max-width 0.18s ease, opacity 0.18s ease;
+    transition: max-width 0.18s ease, max-height 0.18s ease, opacity 0.18s ease;
   }
 
   .section-nav-tick-slot {
@@ -74,6 +76,7 @@ export const StyledWrapper = styled.div`
 
   &.section-nav--open .section-nav-map {
     align-items: stretch;
+    gap: 0.125rem;
     min-width: 11rem;
     max-width: 17rem;
     padding: 0.5rem;
@@ -88,6 +91,7 @@ export const StyledWrapper = styled.div`
   }
   &.section-nav--open .section-nav-item-text {
     max-width: 16rem;
+    max-height: 6rem;
     opacity: 1;
     white-space: normal;
     overflow-wrap: break-word;

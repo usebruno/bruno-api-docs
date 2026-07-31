@@ -49,6 +49,35 @@ test.describe('response body — editor formatting per format', () => {
     await responsePane.selectFormat('base64');
     await expect.poll(() => responsePane.bodyText()).toBe(BASE64_BODY);
   });
+
+  test('the selector trigger shows the format icon, swapping to the eye icon in preview', async ({
+    page,
+    playground,
+    responsePane
+  }) => {
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+    await responsePane.send();
+
+    // JSON default (preview off): the trigger carries the format's own icon (braces).
+    await expect(responsePane.formatSelectorIcon).toHaveClass(/icon-tabler-braces/);
+
+    // Turning preview on swaps the trigger icon to the eye.
+    await responsePane.openFormatSelector();
+    await responsePane.togglePreview();
+    expect(await responsePane.isPreviewOn()).toBe(true);
+    await expect(responsePane.formatSelectorIcon).toHaveClass(/icon-tabler-eye/);
+
+    // Turning it back off restores the format icon.
+    await responsePane.togglePreview();
+    expect(await responsePane.isPreviewOn()).toBe(false);
+    await expect(responsePane.formatSelectorIcon).toHaveClass(/icon-tabler-braces/);
+
+    // Changing the format updates the trigger icon accordingly (raw -> file-text). The dropdown is
+    // still open from toggling preview, so pick the option directly.
+    await responsePane.formatOption('raw').click();
+    await expect(responsePane.formatSelectorIcon).toHaveClass(/icon-tabler-file-text/);
+  });
 });
 
 // A minimal 1x1 PNG — the magic-number sniffer classifies it as a byte format, so the

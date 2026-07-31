@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import { test, expect } from '../../playwright';
 
 // The response-pane actions (Copy, Download, Clear, Change Layout) only render once a response is
@@ -5,6 +6,17 @@ import { test, expect } from '../../playwright';
 // hermetic by mocking the sample collection's `get users` resolved URL (`{{host}}/api/users?…`,
 // host = http://localhost:8081 in the Local env) rather than a proxy.
 const USERS_BODY = '{"data":[{"id":1,"name":"Alice"}]}';
+
+// Read and parse the clipboard, returning null while it is still empty/unparseable so `expect.poll`
+// can retry until the async copy lands.
+const readClipboardJson = (page: Page): Promise<unknown> =>
+  page.evaluate(async () => {
+    try {
+      return JSON.parse(await navigator.clipboard.readText());
+    } catch {
+      return null;
+    }
+  });
 
 // At the default (narrow) playground width the actions collapse into a kebab menu; each action is a
 // menu item.
@@ -36,6 +48,16 @@ test.describe('response pane actions — collapsed', () => {
     await expect(responsePane.actions).toBeVisible();
   });
 
+  test('Copy writes the response body to the clipboard', async ({ page, responsePane }) => {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    await responsePane.openActionsMenu();
+    await responsePane.copyMenuItem.click();
+
+    // The copied text is pretty-printed JSON, so compare the parsed value rather than the raw string.
+    await expect.poll(() => readClipboardJson(page)).toEqual(JSON.parse(USERS_BODY));
+  });
+
   test('Clear returns the pane to the empty "Click Send" state', async ({ responsePane }) => {
     await responsePane.openActionsMenu();
     await responsePane.clearMenuItem.click();
@@ -50,7 +72,8 @@ test.describe('response pane actions — collapsed', () => {
     await responsePane.openActionsMenu();
     await responsePane.downloadMenuItem.click();
     const download = await downloadPromise;
-    expect(download.suggestedFilename().length).toBeGreaterThan(0);
+    // JSON body with no Content-Disposition and a `/api/users` path → the content-type extension.
+    expect(download.suggestedFilename()).toBe('response.json');
   });
 });
 
@@ -70,7 +93,32 @@ test.describe('response pane actions — expanded', () => {
   test('shows the actions as inline buttons instead of the kebab menu', async ({ responsePane }) => {
     await expect(responsePane.inlineButtons).toBeVisible();
     await expect(responsePane.actionsMenuTrigger).toBeHidden();
-    await expect(responsePane.inlineButtons.getByRole('button', { name: 'Copy Response' })).toBeVisible();
+    await expect(responsePane.inlineCopyButton).toBeVisible();
+  });
+
+  test('Copy writes the response body to the clipboard from the inline button', async ({
+    page,
+    responsePane
+  }) => {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+
+    await responsePane.inlineCopyButton.click();
+
+    await expect.poll(() => readClipboardJson(page)).toEqual(JSON.parse(USERS_BODY));
+  });
+
+  test('Download triggers a browser download from the inline button', async ({ page, responsePane }) => {
+    const downloadPromise = page.waitForEvent('download');
+    await responsePane.inlineDownloadButton.click();
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toBe('response.json');
+  });
+
+  test('Clear returns the pane to the empty state from the inline button', async ({ responsePane }) => {
+    await responsePane.inlineClearButton.click();
+
+    await expect(responsePane.emptyHint).toBeVisible();
+    await expect(responsePane.actions).toHaveCount(0);
   });
 
   test('Change Layout toggles the container orientation horizontal <-> vertical', async ({

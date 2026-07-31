@@ -12,6 +12,8 @@ export class ResponsePaneComponent extends BaseComponent {
   readonly bodyEditor = new CodeEditorComponent(this.page, 'response-body-editor');
   readonly sendButton = this.page.getByTestId('query-bar-send');
   readonly formatSelector = this.page.getByTestId('response-format-selector');
+  // The leading icon in the selector trigger (the eye when preview is on, else the format's icon).
+  readonly formatSelectorIcon = this.page.getByTestId('response-format-selector-trigger-icon');
 
   // The response actions live in the tab bar's right slot and only render once a response exists
   // (and there is no request error). They are responsive: collapsed into a kebab menu when the slot
@@ -87,7 +89,9 @@ export class ResponsePaneComponent extends BaseComponent {
     await expect(inlineTab).toHaveAttribute('aria-selected', 'true');
   }
 
-  /** The inline Change-Layout button, shown when the actions are expanded (wide pane). */
+  readonly inlineCopyButton = this.inlineButtons.getByRole('button', { name: 'Copy Response' });
+  readonly inlineDownloadButton = this.inlineButtons.getByRole('button', { name: 'Download Response' });
+  readonly inlineClearButton = this.inlineButtons.getByRole('button', { name: 'Clear Response' });
   readonly inlineChangeLayoutButton = this.inlineButtons.getByRole('button', { name: 'Change Layout' });
 
   async openFormatSelector(): Promise<void> {

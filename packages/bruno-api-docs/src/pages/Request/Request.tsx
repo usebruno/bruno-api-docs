@@ -72,6 +72,9 @@ type RequestContentProps = Omit<RequestProps, 'item'> & { item: HttpRequest };
 
 const descriptionContent = (item: HttpRequest): string => getItemDocs(item) || getItemDescription(item);
 
+const NAV_GROUP = { configuration: 'Configuration' } as const;
+const NAV_LEVEL = { section: 1, configItem: 2 } as const;
+
 const RequestContent: React.FC<RequestContentProps> = ({
   item,
   ancestry = [],
@@ -180,7 +183,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
             <div
               className="markdown-documentation"
               data-nav-headings
-              data-nav-level={1}
+              data-nav-level={NAV_LEVEL.section}
               dangerouslySetInnerHTML={{ __html: descHtml }}
             />
           </ViewMore>
@@ -191,7 +194,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
             {hasLeftColumn ? (
               <>
                 {hasParams && (
-                  <Section label="Params" testId="request-section-params" navGroup="Configuration" navLevel={2}>
+                  <Section label="Params" testId="request-section-params" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem}>
                     <RequestParams path={pathParams} query={queryParams} />
                   </Section>
                 )}
@@ -200,8 +203,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   <Section
                     label="Body"
                     testId="request-section-body"
-                    navGroup="Configuration"
-                    navLevel={2}
+                    navGroup={NAV_GROUP.configuration}
+                    navLevel={NAV_LEVEL.configItem}
                     badge={bodyContentType ? <ContentTypeBadge label={bodyContentType} /> : undefined}
                   >
                     <RequestBody body={body} showContentType={false} />
@@ -212,8 +215,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   <Section
                     label="Headers"
                     testId="request-section-headers"
-                    navGroup="Configuration"
-                    navLevel={2}
+                    navGroup={NAV_GROUP.configuration}
+                    navLevel={NAV_LEVEL.configItem}
                     badge={
                       hasInheritedHeaders ? (
                         <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
@@ -225,7 +228,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
                 )}
 
                 {showAuth && (
-                  <Section label="Auth" testId="request-section-auth" navGroup="Configuration" navLevel={2} badge={authBadge}>
+                  <Section label="Auth" testId="request-section-auth" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} badge={authBadge}>
                     <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
                   </Section>
                 )}

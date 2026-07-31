@@ -3,6 +3,7 @@ import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { ChevronArrow } from '../ChevronArrow/ChevronArrow';
 import { Collapse } from '../../ui/Collapse/Collapse';
 import { useSessionStorage } from '../../hooks';
+import { cx } from '../../utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4';
@@ -46,7 +47,7 @@ export const Section: React.FC<SectionProps> = ({
   if (collapsible) {
     return (
       <StyledWrapper
-        className={['section--collapsible', className].filter(Boolean).join(' ')}
+        className={cx('section--collapsible', className)}
         data-testid={testId}
         data-nav-section={navLabel}
         data-nav-level={navLevel}

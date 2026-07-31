@@ -38,6 +38,8 @@ const DOCS_MIN_WIDTH = 768;
 // The rail's fixed top (`top: 5rem`) plus a small gap; its height is capped at the docs area's
 // bottom minus this so it clips at, rather than draws over, a bottom-docked playground.
 const RAIL_TOP_PX = 88;
+// Below this remaining height the rail hides entirely rather than show a cramped/overlapping sliver.
+const MIN_RAIL_HEIGHT = 24;
 
 // Keep a mouse press from focusing a button (so clicking a tick jumps without leaving the popup open).
 const preventFocusSteal = (event: React.MouseEvent): void => event.preventDefault();
@@ -76,22 +78,20 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
   const [tooNarrow, setTooNarrow] = useState(false);
   const [mapMaxHeight, setMapMaxHeight] = useState<number | undefined>(undefined);
   useEffect(() => {
-    const scroller = getScrollParent(rootRef.current);
     const docsColumn = rootRef.current?.closest<HTMLElement>('.appshell-body');
     const measure = () => {
       const { innerWidth, innerHeight } = window;
-      const rect = scroller?.getBoundingClientRect();
+      const rect = docsColumn?.getBoundingClientRect();
       setRightOffset(Math.max(0, Math.round(innerWidth - (rect?.right ?? innerWidth))));
-      const docsWidth = docsColumn?.getBoundingClientRect().width ?? rect?.width ?? innerWidth;
-      setTooNarrow(docsWidth <= DOCS_MIN_WIDTH);
+      setTooNarrow((rect?.width ?? innerWidth) <= DOCS_MIN_WIDTH);
       setMapMaxHeight(Math.max(0, Math.round((rect?.bottom ?? innerHeight) - RAIL_TOP_PX)));
     };
     measure();
     window.addEventListener('resize', measure);
     let observer: ResizeObserver | undefined;
-    if (scroller && typeof ResizeObserver !== 'undefined') {
+    if (docsColumn && typeof ResizeObserver !== 'undefined') {
       observer = new ResizeObserver(measure);
-      observer.observe(scroller);
+      observer.observe(docsColumn);
     }
     return () => {
       window.removeEventListener('resize', measure);
@@ -195,8 +195,15 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
     event.preventDefault();
   };
 
-  // No gutter left in the docs column — hide rather than overlap the content.
-  if (tooNarrow) return null;
+  // Nothing to navigate but the page title, no side gutter in the docs column, or too little height
+  // above a bottom-docked playground — don't show the rail at all.
+  if (
+    sections.length === 0
+    || tooNarrow
+    || (mapMaxHeight !== undefined && mapMaxHeight < MIN_RAIL_HEIGHT)
+  ) {
+    return null;
+  }
 
   const tabStop = Math.min(rovingIndex, Math.max(0, entries.length - 1));
 

@@ -1,7 +1,18 @@
 import { test, expect } from '../../playwright';
+import type { Page } from '@playwright/test';
 
 const REQUEST_WITH_CONFIG = ['billing', 'customers', 'Get Customers - Filter by Date Range'];
 const REQUEST_WITH_EXEC = ['billing', 'customers', 'Get All Customers'];
+
+const openPopup = async (page: Page): Promise<void> => {
+  await page.getByTestId('section-nav-rail').getByRole('button').first().focus();
+  await expect(page.getByTestId('section-nav-panel')).toBeVisible();
+};
+const popupRow = (page: Page, label: string) =>
+  page.getByTestId('section-nav-panel').getByTestId('section-nav-item').filter({ hasText: new RegExp(`^${label}$`) });
+
+const railTick = (page: Page, label: string) =>
+  page.getByTestId('section-nav-rail').getByRole('button', { name: label, exact: true });
 
 test.describe('Section navigator (the "on this page" outline)', () => {
   test('opening it lists the sections on the page', async ({ folderPage, page }) => {
@@ -25,8 +36,8 @@ test.describe('Section navigator (the "on this page" outline)', () => {
   test('clicking a section scrolls to it and marks it as current', async ({ folderPage, page }) => {
     await folderPage.open(['Realtime']);
 
-    const headersTick = page.getByTestId('section-nav-rail').getByRole('button', { name: 'Headers', exact: true });
-    await headersTick.click();
+    await openPopup(page);
+    await popupRow(page, 'Headers').click();
 
     await expect
       .poll(async () => {
@@ -34,7 +45,20 @@ test.describe('Section navigator (the "on this page" outline)', () => {
         return box ? Math.round(box.y) : Number.MAX_SAFE_INTEGER;
       })
       .toBeLessThan(240);
-    await expect(headersTick).toHaveAttribute('aria-current', 'location');
+    await expect(railTick(page, 'Headers')).toHaveAttribute('aria-current', 'location');
+  });
+
+  test('the popup opens over the rail, hiding the ticks behind it', async ({ folderPage, page }) => {
+    await folderPage.open(['Realtime']);
+
+    const railBox = await page.getByTestId('section-nav-rail').boundingBox();
+    await openPopup(page);
+    const panelBox = await page.getByTestId('section-nav-panel').boundingBox();
+    if (!railBox || !panelBox) throw new Error('expected the rail and panel to be laid out');
+    // The panel sits over the rail (overlapping it) and extends far left to show the labels.
+    expect(panelBox.x).toBeLessThan(railBox.x);
+    expect(panelBox.x + panelBox.width).toBeGreaterThan(railBox.x);
+    await expect(page.getByTestId('section-nav-rail')).toHaveCSS('opacity', '0');
   });
 
   test('pressing Escape closes the popup', async ({ folderPage, page }) => {
@@ -71,8 +95,8 @@ test.describe('Section navigator (the "on this page" outline)', () => {
   test('clicking the "Configuration" group jumps to its first section', async ({ requestPage, page }) => {
     await requestPage.open(REQUEST_WITH_CONFIG);
 
-    const configTick = page.getByTestId('section-nav-rail').getByRole('button', { name: 'Configuration', exact: true });
-    await configTick.click();
+    await openPopup(page);
+    await popupRow(page, 'Configuration').click();
 
     await expect
       .poll(async () => {
@@ -84,14 +108,12 @@ test.describe('Section navigator (the "on this page" outline)', () => {
 
   test('highlighting a section never also highlights its "Configuration" group', async ({ requestPage, page }) => {
     await requestPage.open(REQUEST_WITH_CONFIG);
-    const rail = page.getByTestId('section-nav-rail');
-    const paramsTick = rail.getByRole('button', { name: 'Params', exact: true });
-    const configTick = rail.getByRole('button', { name: 'Configuration', exact: true });
 
     // Clicking a member marks only that member current — never the group as well.
-    await paramsTick.click();
-    await expect(paramsTick).toHaveAttribute('aria-current', 'location');
-    await expect(configTick).not.toHaveAttribute('aria-current');
+    await openPopup(page);
+    await popupRow(page, 'Params').click();
+    await expect(railTick(page, 'Params')).toHaveAttribute('aria-current', 'location');
+    await expect(railTick(page, 'Configuration')).not.toHaveAttribute('aria-current');
   });
 
   test('shows the Execution Context tabs as entries nested under it', async ({ requestPage, page }) => {
@@ -121,7 +143,8 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'false');
 
     // Clicking the Asserts entry should re-open the section and select the Asserts tab.
-    await page.getByTestId('section-nav-rail').getByRole('button', { name: 'Asserts', exact: true }).click();
+    await openPopup(page);
+    await popupRow(page, 'Asserts').click();
 
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'true');
     await expect(requestPage.executionContext.tab('asserts')).toHaveAttribute('aria-selected', 'true');
@@ -136,23 +159,24 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await ecToggle.click();
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'false');
 
-    await page.getByTestId('section-nav-rail').getByRole('button', { name: 'Execution Context', exact: true }).click();
+    await openPopup(page);
+    await popupRow(page, 'Execution Context').click();
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'true');
   });
 
-  test('still appears on a script page (with just the page title)', async ({ scriptPage, page }) => {
+  test('is not shown when there is nothing to navigate but the title (a script page)', async ({
+    scriptPage,
+    page
+  }) => {
     await scriptPage.open(['billing', 'Script.js']);
-
-    const rail = page.getByTestId('section-nav-rail');
-    await expect(rail).toBeVisible();
-    // A script page has no sub-sections, so the rail carries just the page-title entry.
-    await expect(page.getByTestId('section-nav-tick')).toHaveCount(1);
-
-    await rail.getByRole('button').first().focus();
-    await expect(page.getByTestId('section-nav-panel')).toBeVisible();
+    // A script page has no sub-sections or headings, so the rail stays hidden.
+    await expect(page.getByTestId('section-nav-rail')).toBeHidden();
   });
 
-  test('still appears on an unsupported-request page', async ({ unsupportedRequestPage, page }) => {
+  test('appears on an unsupported-request page that has documentation headings', async ({
+    unsupportedRequestPage,
+    page
+  }) => {
     await unsupportedRequestPage.open(['Realtime', 'Live Updates']);
     await expect(page.getByTestId('section-nav-rail')).toBeVisible();
   });
@@ -174,12 +198,8 @@ test.describe('Section navigator (the "on this page" outline)', () => {
   test('clicking a documentation heading opens its "view more" block and scrolls to it', async ({ requestPage, page }) => {
     await requestPage.open(REQUEST_WITH_EXEC);
 
-    const headingTick = page
-      .getByTestId('section-nav-rail')
-      .getByRole('button', { name: 'Query Parameters', exact: true });
-    await expect(headingTick).toBeVisible();
-
-    await headingTick.click();
+    await openPopup(page);
+    await popupRow(page, 'Query Parameters').click();
 
     // The description's own heading (revealed if the "view more" block was collapsed) lands near the top.
     await expect
@@ -207,6 +227,17 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     expect(railBox).not.toBeNull();
     expect(playgroundBox).not.toBeNull();
     expect(railBox!.y + railBox!.height).toBeLessThanOrEqual(playgroundBox!.y);
+  });
+
+  test('hides entirely when a bottom-docked playground leaves too little height', async ({ requestPage, page }) => {
+    await page.setViewportSize({ width: 1280, height: 250 });
+    await requestPage.open(REQUEST_WITH_EXEC);
+    await expect(page.getByTestId('section-nav-rail')).toBeVisible();
+
+    // The bottom dock opens to 60% of the viewport, leaving the docs column too short for the rail.
+    await page.getByTestId('request-try-button').click();
+    await expect(page.getByTestId('playground-content')).toBeVisible();
+    await expect(page.getByTestId('section-nav-rail')).toBeHidden();
   });
 
   test('sits at the docs column edge when the playground is docked to the side, with room', async ({

@@ -4,9 +4,6 @@ export const StyledWrapper = styled.div`
   position: fixed;
   top: 5rem;
   right: 0;
-  /* Floats above the page content, but deliberately below overlays, popovers, tooltips, the
-     variable hover card (all --z-popover) and the playground backdrop (z 9998) so it never
-     stands out over them. */
   z-index: calc(var(--z-overlay, 50) - 1);
   font-family: var(--font-sans);
 
@@ -15,9 +12,9 @@ export const StyledWrapper = styled.div`
     flex-direction: column;
     align-items: flex-end;
     gap: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    /* Height is capped (inline) to the docs area; clip so ticks never spill over the playground. */
+    padding: 0.25rem 0.75rem 0.5rem 0.5rem;
     overflow: hidden;
+    transition: opacity 0.15s ease;
   }
   .section-nav-tick-btn {
     display: flex;
@@ -45,20 +42,20 @@ export const StyledWrapper = styled.div`
     opacity: 0.85;
   }
   .section-nav-tick.is-active {
-    background: var(--oc-colors-text-yellow);
+    background: var(--oc-colors-accent);
     opacity: 1;
   }
 
   .section-nav-panel {
     position: absolute;
     top: 0;
-    right: calc(100% + 0.35rem);
+    right: 0.5rem;
     transform: translateX(0.5rem);
     min-width: 11rem;
     max-width: 17rem;
     max-height: calc(100vh - 7rem);
     overflow-y: auto;
-    padding: 0.375rem;
+    padding: 0.5rem;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--oc-radius);
@@ -71,11 +68,17 @@ export const StyledWrapper = styled.div`
     visibility: visible;
     transform: translateX(0);
   }
+  &.section-nav--open .section-nav-map {
+    opacity: 0;
+  }
 
   .section-nav-list {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
   }
 
   .section-nav-item {
@@ -95,30 +98,32 @@ export const StyledWrapper = styled.div`
   }
   .section-nav-item-text {
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
   }
   .section-nav-item:hover,
   .section-nav-item.is-focused {
-    background: color-mix(in srgb, var(--oc-colors-text-yellow) 15%, transparent);
+    background: color-mix(in srgb, var(--oc-text) 4%, transparent);
     color: var(--text-primary);
   }
   .section-nav-item:focus-visible {
     outline: 2px solid var(--oc-status-info-text);
     outline-offset: -2px;
   }
-  .section-nav-item.is-active,
+  .section-nav-item.is-active {
+    background: color-mix(in srgb, var(--oc-colors-accent) 8%, transparent);
+    color: var(--oc-colors-accent);
+  }
   .section-nav-item.is-active:hover {
-    color: var(--oc-colors-text-yellow);
+    background: color-mix(in srgb, var(--oc-colors-accent) 12%, transparent);
+    color: var(--oc-colors-accent);
   }
 
-  /* The page-title row uses the primary golden accent and stays bold in every state (so activating
-     it never changes its width). Other rows use the secondary text colour (see .section-nav-item),
-     lifting to golden only when active. */
   .section-nav-item--title {
-    color: var(--oc-colors-text-yellow);
+    color: var(--text-primary);
     font-weight: 600;
+  }
+  .section-nav-item--title.is-active {
+    color: var(--oc-colors-accent);
   }
 
   @media (max-width: 48rem) {

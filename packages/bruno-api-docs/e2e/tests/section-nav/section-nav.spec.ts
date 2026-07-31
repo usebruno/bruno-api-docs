@@ -4,14 +4,15 @@ import type { Page } from '@playwright/test';
 const REQUEST_WITH_CONFIG = ['billing', 'customers', 'Get Customers - Filter by Date Range'];
 const REQUEST_WITH_EXEC = ['billing', 'customers', 'Get All Customers'];
 
-const openPopup = async (page: Page): Promise<void> => {
-  await page.getByTestId('section-nav-rail').getByRole('button').first().focus();
-  await expect(page.getByTestId('section-nav-panel')).toBeVisible();
-};
-const popupRow = (page: Page, label: string) =>
-  page.getByTestId('section-nav-panel').getByTestId('section-nav-item').filter({ hasText: new RegExp(`^${label}$`) });
+const firstLabel = (page: Page) =>
+  page.getByTestId('section-nav-rail').locator('.section-nav-item-text').first();
 
-const railTick = (page: Page, label: string) =>
+const openOutline = async (page: Page): Promise<void> => {
+  await page.getByTestId('section-nav-rail').getByRole('button').first().focus();
+  await expect(firstLabel(page)).toBeVisible();
+};
+
+const outlineRow = (page: Page, label: string) =>
   page.getByTestId('section-nav-rail').getByRole('button', { name: label, exact: true });
 
 test.describe('Section navigator (the "on this page" outline)', () => {
@@ -19,25 +20,24 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await folderPage.open(['Realtime']);
 
     const rail = page.getByTestId('section-nav-rail');
-    const panel = page.getByTestId('section-nav-panel');
     await expect(rail).toBeVisible();
-    await expect(panel).toBeHidden();
+    // Collapsed: the labels are hidden (zero width), only the ticks show.
+    await expect(firstLabel(page)).toBeHidden();
 
-    // Focusing a rail marker reveals the labelled popup (the keyboard path; deterministic in tests).
-    await rail.getByRole('button').first().focus();
-    await expect(panel).toBeVisible();
+    // Focusing a rail marker opens the labelled outline (the keyboard path; deterministic in tests).
+    await openOutline(page);
 
     // The page title is always the first entry; the rest are the rendered sections.
-    await expect(page.getByTestId('section-nav-item').first()).toHaveText('Realtime');
-    await expect(panel).toContainText('Folder Configuration');
-    await expect(panel).toContainText('Headers');
+    await expect(rail.getByRole('button').first()).toHaveText('Realtime');
+    await expect(rail).toContainText('Folder Configuration');
+    await expect(rail).toContainText('Headers');
   });
 
   test('clicking a section scrolls to it and marks it as current', async ({ folderPage, page }) => {
     await folderPage.open(['Realtime']);
 
-    await openPopup(page);
-    await popupRow(page, 'Headers').click();
+    await openOutline(page);
+    await outlineRow(page, 'Headers').click();
 
     await expect
       .poll(async () => {
@@ -45,32 +45,33 @@ test.describe('Section navigator (the "on this page" outline)', () => {
         return box ? Math.round(box.y) : Number.MAX_SAFE_INTEGER;
       })
       .toBeLessThan(240);
-    await expect(railTick(page, 'Headers')).toHaveAttribute('aria-current', 'location');
+    await expect(outlineRow(page, 'Headers')).toHaveAttribute('aria-current', 'location');
   });
 
-  test('the popup opens over the rail, hiding the ticks behind it', async ({ folderPage, page }) => {
+  test('opening expands the rail leftward into a labelled card, keeping its right edge', async ({
+    folderPage,
+    page
+  }) => {
     await folderPage.open(['Realtime']);
 
-    const railBox = await page.getByTestId('section-nav-rail').boundingBox();
-    await openPopup(page);
-    const panelBox = await page.getByTestId('section-nav-panel').boundingBox();
-    if (!railBox || !panelBox) throw new Error('expected the rail and panel to be laid out');
-    // The panel sits over the rail (overlapping it) and extends far left to show the labels.
-    expect(panelBox.x).toBeLessThan(railBox.x);
-    expect(panelBox.x + panelBox.width).toBeGreaterThan(railBox.x);
-    await expect(page.getByTestId('section-nav-rail')).toHaveCSS('opacity', '0');
-  });
-
-  test('pressing Escape closes the popup', async ({ folderPage, page }) => {
-    await folderPage.open(['Realtime']);
     const rail = page.getByTestId('section-nav-rail');
-    const panel = page.getByTestId('section-nav-panel');
+    const collapsed = await rail.boundingBox();
+    await openOutline(page);
+    const opened = await rail.boundingBox();
+    if (!collapsed || !opened) throw new Error('expected the rail to be laid out');
 
-    await rail.getByRole('button').first().focus();
-    await expect(panel).toBeVisible();
+    expect(opened.width).toBeGreaterThan(collapsed.width);
+    expect(opened.x).toBeLessThan(collapsed.x);
+    expect(Math.abs(opened.x + opened.width - (collapsed.x + collapsed.width))).toBeLessThan(24);
+  });
 
+  test('pressing Escape closes the outline', async ({ folderPage, page }) => {
+    await folderPage.open(['Realtime']);
+
+    await openOutline(page);
     await page.keyboard.press('Escape');
-    await expect(panel).toBeHidden();
+    // The labels collapse back to zero width.
+    await expect(firstLabel(page)).toBeHidden();
   });
 
   test('on a request, groups Params/Auth under a "Configuration" heading and leaves out the code snippet', async ({
@@ -81,22 +82,20 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     // Code Snippet is on the page but opts out of the navigator.
     await expect(page.getByTestId('request-section-code-snippet')).toBeVisible();
 
-    const rail = page.getByTestId('section-nav-rail');
-    const panel = page.getByTestId('section-nav-panel');
-    await rail.getByRole('button').first().focus();
-    await expect(panel).toBeVisible();
+    await openOutline(page);
 
-    await expect(panel).toContainText('Configuration');
-    await expect(panel.getByTestId('section-nav-item').filter({ hasText: /^Params$/ })).toBeVisible();
-    await expect(panel.getByTestId('section-nav-item').filter({ hasText: /^Auth$/ })).toBeVisible();
-    await expect(panel).not.toContainText('Code Snippet');
+    const rail = page.getByTestId('section-nav-rail');
+    await expect(rail).toContainText('Configuration');
+    await expect(outlineRow(page, 'Params')).toBeVisible();
+    await expect(outlineRow(page, 'Auth')).toBeVisible();
+    await expect(rail).not.toContainText('Code Snippet');
   });
 
   test('clicking the "Configuration" group jumps to its first section', async ({ requestPage, page }) => {
     await requestPage.open(REQUEST_WITH_CONFIG);
 
-    await openPopup(page);
-    await popupRow(page, 'Configuration').click();
+    await openOutline(page);
+    await outlineRow(page, 'Configuration').click();
 
     await expect
       .poll(async () => {
@@ -110,23 +109,21 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await requestPage.open(REQUEST_WITH_CONFIG);
 
     // Clicking a member marks only that member current — never the group as well.
-    await openPopup(page);
-    await popupRow(page, 'Params').click();
-    await expect(railTick(page, 'Params')).toHaveAttribute('aria-current', 'location');
-    await expect(railTick(page, 'Configuration')).not.toHaveAttribute('aria-current');
+    await openOutline(page);
+    await outlineRow(page, 'Params').click();
+    await expect(outlineRow(page, 'Params')).toHaveAttribute('aria-current', 'location');
+    await expect(outlineRow(page, 'Configuration')).not.toHaveAttribute('aria-current');
   });
 
   test('shows the Execution Context tabs as entries nested under it', async ({ requestPage, page }) => {
     await requestPage.open(REQUEST_WITH_EXEC);
 
-    const rail = page.getByTestId('section-nav-rail');
-    const panel = page.getByTestId('section-nav-panel');
-    await rail.getByRole('button').first().focus();
-    await expect(panel).toBeVisible();
+    await openOutline(page);
 
-    await expect(panel).toContainText('Execution Context');
+    const rail = page.getByTestId('section-nav-rail');
+    await expect(rail).toContainText('Execution Context');
     for (const tab of ['Variables', 'Scripts', 'Asserts', 'Tests']) {
-      await expect(panel.getByTestId('section-nav-item').filter({ hasText: new RegExp(`^${tab}$`) })).toBeVisible();
+      await expect(outlineRow(page, tab)).toBeVisible();
     }
   });
 
@@ -143,8 +140,8 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'false');
 
     // Clicking the Asserts entry should re-open the section and select the Asserts tab.
-    await openPopup(page);
-    await popupRow(page, 'Asserts').click();
+    await openOutline(page);
+    await outlineRow(page, 'Asserts').click();
 
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'true');
     await expect(requestPage.executionContext.tab('asserts')).toHaveAttribute('aria-selected', 'true');
@@ -159,8 +156,8 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await ecToggle.click();
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'false');
 
-    await openPopup(page);
-    await popupRow(page, 'Execution Context').click();
+    await openOutline(page);
+    await outlineRow(page, 'Execution Context').click();
     await expect(ecToggle).toHaveAttribute('aria-expanded', 'true');
   });
 
@@ -184,22 +181,20 @@ test.describe('Section navigator (the "on this page" outline)', () => {
   test('lists the headings written in the overview\'s documentation', async ({ overviewPage, page }) => {
     await overviewPage.goto('/');
 
-    const rail = page.getByTestId('section-nav-rail');
-    const panel = page.getByTestId('section-nav-panel');
-    await rail.getByRole('button').first().focus();
-    await expect(panel).toBeVisible();
+    await openOutline(page);
 
     // The collection docs' `## Getting Started / ## Authentication / ## Rate Limits` become entries.
-    await expect(panel).toContainText('Getting Started');
-    await expect(panel).toContainText('Authentication');
-    await expect(panel).toContainText('Rate Limits');
+    const rail = page.getByTestId('section-nav-rail');
+    await expect(rail).toContainText('Getting Started');
+    await expect(rail).toContainText('Authentication');
+    await expect(rail).toContainText('Rate Limits');
   });
 
   test('clicking a documentation heading opens its "view more" block and scrolls to it', async ({ requestPage, page }) => {
     await requestPage.open(REQUEST_WITH_EXEC);
 
-    await openPopup(page);
-    await popupRow(page, 'Query Parameters').click();
+    await openOutline(page);
+    await outlineRow(page, 'Query Parameters').click();
 
     // The description's own heading (revealed if the "view more" block was collapsed) lands near the top.
     await expect

@@ -12,18 +12,8 @@ export interface DocSection {
 
 export const SECTION_SCROLL_OFFSET = 88;
 
-/** The nearest scrollable ancestor, or null when the page scrolls on the window itself. */
-export const getScrollParent = (el: HTMLElement | null): HTMLElement | null => {
-  let node = el?.parentElement ?? null;
-  while (node) {
-    const overflowY = getComputedStyle(node).overflowY;
-    if ((overflowY === 'auto' || overflowY === 'scroll') && node.scrollHeight > node.clientHeight) {
-      return node;
-    }
-    node = node.parentElement;
-  }
-  return null;
-};
+/** The docs scroll container. Fixed and known (the AppShell `<main>`), so no ancestor walk. */
+export const getScroller = (): HTMLElement | null => document.querySelector<HTMLElement>('.appshell-content');
 
 const slugify = (text: string): string =>
   text
@@ -83,13 +73,15 @@ export const useDocSections = (
 ): { sections: DocSection[]; activeId: string | null; selectSection: (id: string | null) => void } => {
   const [sections, setSections] = useState<DocSection[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
-  // A click sets the active section directly and briefly locks the scroll-spy, so the smooth
-  // scroll to it doesn't flicker the highlight through the sections it passes on the way.
+  // A click sets the active section directly and locks the scroll-spy until the smooth scroll
+  // settles (a `scrollend`), so the highlight doesn't flicker through the sections it passes on
+  // the way. The timestamp is only a safety cap, for when no scroll happens (the target is
+  // already in view) or the browser doesn't fire `scrollend`.
   const spyLockUntil = useRef(0);
 
   const selectSection = useCallback((id: string | null) => {
     setActiveId(id);
-    spyLockUntil.current = Date.now() + 600;
+    spyLockUntil.current = Date.now() + 1500;
   }, []);
 
   useEffect(() => {
@@ -127,7 +119,7 @@ export const useDocSections = (
     // scroll-margin-top). Measuring the trigger line from that same edge — not the window's — keeps
     // the jumped-to section active regardless of a sticky topbar's height. `active` is the last
     // section whose heading has crossed it.
-    const scroller = getScrollParent(sections[0].el);
+    const scroller = getScroller();
     let frame = 0;
     const recompute = () => {
       frame = 0;
@@ -167,10 +159,15 @@ export const useDocSections = (
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(recompute);
     };
+    const onScrollEnd = () => {
+      spyLockUntil.current = 0;
+      onScroll();
+    };
 
     recompute();
     // Capture phase so a scroll inside a nested overflow container is still seen.
     document.addEventListener('scroll', onScroll, true);
+    document.addEventListener('scrollend', onScrollEnd, true);
     window.addEventListener('resize', onScroll);
     // Re-run when a hosted tab is switched via the page's own tab UI (an aria-selected flip),
     // so the reflected tab highlight doesn't go stale until the next scroll.
@@ -182,6 +179,7 @@ export const useDocSections = (
     }
     return () => {
       document.removeEventListener('scroll', onScroll, true);
+      document.removeEventListener('scrollend', onScrollEnd, true);
       window.removeEventListener('resize', onScroll);
       tabObserver?.disconnect();
       if (frame) cancelAnimationFrame(frame);

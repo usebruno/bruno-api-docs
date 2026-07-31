@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { RefObject } from 'react';
 import { Portal } from '../../ui/Portal/Portal';
 import { useEscapeKey } from '../../hooks';
-import { useDocSections, getScrollParent } from '../../hooks/useDocSections';
+import { useDocSections, getScroller } from '../../hooks/useDocSections';
 import { scrollBehavior } from '../../utils/motion';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -113,9 +113,8 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
   }, []);
 
   const scrollToTop = useCallback(() => {
-    const scroller = getScrollParent(rootRef.current);
-    (scroller ?? window).scrollTo({ top: 0, behavior: scrollBehavior() });
-  }, [rootRef]);
+    (getScroller() ?? window).scrollTo({ top: 0, behavior: scrollBehavior() });
+  }, []);
 
   const scrollTo = useCallback((el: HTMLElement) => {
     el.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
@@ -175,7 +174,7 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
   );
 
   const focusTick = useCallback((index: number) => {
-    const ticks = wrapperRef.current?.querySelectorAll<HTMLButtonElement>('.section-nav-tick-btn');
+    const ticks = wrapperRef.current?.querySelectorAll<HTMLButtonElement>('.section-nav-item');
     const count = ticks?.length ?? 0;
     if (!count) return;
     const clamped = Math.max(0, Math.min(index, count - 1));
@@ -222,40 +221,6 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
           }
         }}
       >
-        {/* Labelled popup: a visual mirror of the rail. Hidden from assistive tech, whose users get
-            the rail's labelled buttons instead, so the two don't duplicate the navigation. */}
-        <div className="section-nav-panel" aria-hidden="true" data-testid={`${testId}-panel`}>
-          <ul className="section-nav-list">
-            {entries.map((entry) => (
-              <li
-                key={entry.id || 'top'}
-                className={`section-nav-row${entry.kind === 'group' ? ' section-nav-row--group' : ''}`}
-              >
-                <button
-                  type="button"
-                  className={[
-                    'section-nav-item',
-                    entry.kind === 'title' ? 'section-nav-item--title' : '',
-                    isActiveEntry(entry) ? 'is-active' : '',
-                    entry.id === focusedId ? 'is-focused' : ''
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  style={{ paddingLeft: rowIndent(entry.level), fontSize: entry.level >= 2 ? '0.75rem' : undefined }}
-                  tabIndex={-1}
-                  onMouseDown={preventFocusSteal}
-                  onClick={entry.select}
-                  data-testid={`${testId}-item`}
-                >
-                  <span className="section-nav-item-text">{entry.label}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Rail: the always-visible mini-map, and the accessible navigation for keyboard / AT users.
-            Roving tab index keeps it a single tab stop; arrows move between ticks. */}
         <div
           className="section-nav-map"
           style={{ maxHeight: mapMaxHeight != null ? `${mapMaxHeight}px` : undefined }}
@@ -265,8 +230,19 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
             <button
               key={entry.id || 'top'}
               type="button"
-              className="section-nav-tick-btn"
-              aria-label={entry.label}
+              className={[
+                'section-nav-item',
+                entry.kind === 'title' ? 'section-nav-item--title' : '',
+                entry.kind === 'group' ? 'section-nav-item--group' : '',
+                isActiveEntry(entry) ? 'is-active' : '',
+                entry.id === focusedId ? 'is-focused' : ''
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={{
+                '--nav-indent': rowIndent(entry.level),
+                'fontSize': entry.level >= 2 ? '0.75rem' : undefined
+              } as React.CSSProperties}
               aria-current={isActiveEntry(entry) ? 'location' : undefined}
               tabIndex={index === tabStop ? 0 : -1}
               onMouseDown={preventFocusSteal}
@@ -278,12 +254,12 @@ export const SectionNav: React.FC<SectionNavProps> = ({ rootRef, title, navKey, 
                 setEscDismissed(false);
               }}
               onKeyDown={(event) => onTickKeyDown(event, index)}
-              data-testid={`${testId}-tick`}
+              data-testid={`${testId}-item`}
             >
-              <span
-                className={`section-nav-tick${isActiveEntry(entry) ? ' is-active' : ''}`}
-                style={{ width: tickWidth(entry.level) }}
-              />
+              <span className="section-nav-item-text">{entry.label}</span>
+              <span className="section-nav-tick-slot" aria-hidden="true">
+                <span className="section-nav-tick" style={{ width: tickWidth(entry.level) }} />
+              </span>
             </button>
           ))}
         </div>

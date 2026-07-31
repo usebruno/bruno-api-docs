@@ -83,6 +83,8 @@ export const Overview: React.FC<OverviewProps> = ({ collection, testId = 'overvi
                   <div
                     className="overview-markdown markdown-documentation"
                     data-testid="overview-markdown-documentation"
+                    data-nav-headings
+                    data-nav-level={2}
                     dangerouslySetInnerHTML={{ __html: docsHtml }}
                   />
                 </ViewMore>

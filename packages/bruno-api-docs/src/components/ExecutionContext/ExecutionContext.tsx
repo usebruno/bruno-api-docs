@@ -129,6 +129,7 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
     tabs.push({
       id: 'variables',
       label: 'Variables',
+      navLabel: 'Variables',
       count: varCount,
       rightElement: inheritedVarsBadge,
       content: <div data-testid="execution-context-variables">{variables}</div>
@@ -138,6 +139,7 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
     tabs.push({
       id: 'scripts',
       label: 'Scripts',
+      navLabel: 'Scripts',
       count: scriptChain.length,
       rightElement: flowIndicator,
       content: <div className="exec-card-box" data-testid="execution-context-scripts">{scripts}</div>
@@ -147,6 +149,7 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
     tabs.push({
       id: 'asserts',
       label: 'Asserts',
+      navLabel: 'Asserts',
       count: assertions.length,
       content: <div className="exec-card-box" data-testid="execution-context-asserts">{asserts}</div>
     });
@@ -155,6 +158,7 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
     tabs.push({
       id: 'tests',
       label: 'Tests',
+      navLabel: 'Tests',
       count: tests.length,
       rightElement: <ViewAllTests scripts={testScripts} testId="execution-context-view-complete-code" />,
       content: <div className="exec-card-box" data-testid="execution-context-tests">{testCases}</div>

@@ -94,6 +94,8 @@ export const UnsupportedRequest: React.FC<UnsupportedRequestProps> = ({
           <div
             className="overview-markdown markdown-documentation mt-5"
             data-testid="overview-markdown-documentation"
+            data-nav-headings
+            data-nav-level={1}
             dangerouslySetInnerHTML={{ __html: docs }}
           />
         </ViewMore>

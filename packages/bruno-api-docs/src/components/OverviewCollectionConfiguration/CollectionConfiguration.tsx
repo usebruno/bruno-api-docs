@@ -58,28 +58,28 @@ export const CollectionConfiguration: React.FC<CollectionConfigurationProps> = (
   return (
     <StyledWrapper className="collection-configuration" data-testid={testId}>
       {hasHeaders && (
-        <div className="config-group">
+        <div className="config-group" data-nav-section="Headers" data-nav-level={2}>
           <SubHeading className='script-label' testId={`${testId}-subheading`}>Headers</SubHeading>
           <PropertyTable rows={headerRows} testId={`${testId}-headers`} />
         </div>
       )}
 
       {hasAuth && (
-        <div className="config-group">
+        <div className="config-group" data-nav-section="Auth" data-nav-level={2}>
           <SubHeading className='script-label' testId={`${testId}-subheading`}>Auth</SubHeading>
           <AuthDetails auth={auth} authModeLabels={authModeLabels} testId={`${testId}-auth`} />
         </div>
       )}
 
       {hasVars && (
-        <div className="config-group">
+        <div className="config-group" data-nav-section="Variables" data-nav-level={2}>
           <SubHeading className='script-label' testId={`${testId}-subheading`}>Variables</SubHeading>
           <VariablesPanel preVars={preVars} postVars={postVars} variant="stacked" />
         </div>
       )}
 
       {hasScripts && (
-        <div className="config-group">
+        <div className="config-group" data-nav-section="Script" data-nav-level={2}>
           <SubHeading className='script-label' testId={`${testId}-subheading`}>Script</SubHeading>
           {scripts.preRequest && (
             <div className="script-block">
@@ -97,7 +97,7 @@ export const CollectionConfiguration: React.FC<CollectionConfigurationProps> = (
       )}
 
       {hasTests && (
-        <div className="config-group">
+        <div className="config-group" data-nav-section="Tests" data-nav-level={2}>
           <SubHeading className='script-label' testId={`${testId}-subheading`}>Tests</SubHeading>
           <Code code={scripts.tests as string} language="javascript" showLineNumbers testId={`${testId}-tests`} />
         </div>

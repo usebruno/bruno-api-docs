@@ -177,7 +177,12 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
         {descHtml && (
           <ViewMore collapsedHeight="4.5rem" style={{ marginTop: '1.5rem' }} testId="request-description">
-            <div className="markdown-documentation" dangerouslySetInnerHTML={{ __html: descHtml }} />
+            <div
+              className="markdown-documentation"
+              data-nav-headings
+              data-nav-level={1}
+              dangerouslySetInnerHTML={{ __html: descHtml }}
+            />
           </ViewMore>
         )}
 
@@ -186,7 +191,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
             {hasLeftColumn ? (
               <>
                 {hasParams && (
-                  <Section label="Params" testId="request-section-params">
+                  <Section label="Params" testId="request-section-params" navGroup="Configuration" navLevel={2}>
                     <RequestParams path={pathParams} query={queryParams} />
                   </Section>
                 )}
@@ -195,6 +200,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   <Section
                     label="Body"
                     testId="request-section-body"
+                    navGroup="Configuration"
+                    navLevel={2}
                     badge={bodyContentType ? <ContentTypeBadge label={bodyContentType} /> : undefined}
                   >
                     <RequestBody body={body} showContentType={false} />
@@ -205,6 +212,8 @@ const RequestContent: React.FC<RequestContentProps> = ({
                   <Section
                     label="Headers"
                     testId="request-section-headers"
+                    navGroup="Configuration"
+                    navLevel={2}
                     badge={
                       hasInheritedHeaders ? (
                         <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
@@ -216,7 +225,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
                 )}
 
                 {showAuth && (
-                  <Section label="Auth" testId="request-section-auth" badge={authBadge}>
+                  <Section label="Auth" testId="request-section-auth" navGroup="Configuration" navLevel={2} badge={authBadge}>
                     <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
                   </Section>
                 )}
@@ -234,7 +243,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
           </div>
 
           <div className="request-col-right">
-            <Section label="Code Snippet" testId="request-section-code-snippet">{codeSnippet}</Section>
+            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>{codeSnippet}</Section>
           </div>
         </div>
 

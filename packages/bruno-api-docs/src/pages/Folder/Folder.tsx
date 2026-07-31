@@ -63,7 +63,12 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
         {docsHtml && (
           <Section label="Documentation" testId="folder-section-documentation" className="folder-fullwidth">
             <ViewMore collapsedHeight="4.5rem" testId="folder-docs">
-              <div className="markdown-documentation" dangerouslySetInnerHTML={{ __html: docsHtml }} />
+              <div
+                className="markdown-documentation"
+                data-nav-headings
+                data-nav-level={2}
+                dangerouslySetInnerHTML={{ __html: docsHtml }}
+              />
             </ViewMore>
           </Section>
         )}

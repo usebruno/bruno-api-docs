@@ -37,3 +37,4 @@ export {
   SIDEBAR_MAX_WIDTH,
   SIDEBAR_DEFAULT_WIDTH
 } from './useResizableSidebar';
+export { useDocSections, collectSections, SECTION_SCROLL_OFFSET, type DocSection } from './useDocSections';

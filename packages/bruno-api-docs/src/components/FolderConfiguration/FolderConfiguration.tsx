@@ -52,7 +52,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
   return (
     <StyledWrapper className="folder-configuration" data-testid={testId}>
       {hasHeaders && (
-        <div className="config-group" data-testid="folder-config-headers">
+        <div className="config-group" data-testid="folder-config-headers" data-nav-section="Headers" data-nav-level={2}>
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Headers</SectionLabel>
             {hasInheritedHeaders && (
@@ -64,7 +64,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       )}
 
       {hasAuth && (
-        <div className="config-group" data-testid="folder-config-auth">
+        <div className="config-group" data-testid="folder-config-auth" data-nav-section="Auth" data-nav-level={2}>
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Auth</SectionLabel>
             {authBadge}
@@ -74,7 +74,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       )}
 
       {hasVariables && (
-        <div className="config-group" data-testid="folder-config-vars">
+        <div className="config-group" data-testid="folder-config-vars" data-nav-section="Vars" data-nav-level={2}>
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Vars</SectionLabel>
             {inheritedVarCount > 0 && <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} />}
@@ -97,7 +97,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       )}
 
       {hasScripts && (
-        <div className="config-group" data-testid="folder-config-script">
+        <div className="config-group" data-testid="folder-config-script" data-nav-section="Script" data-nav-level={2}>
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Script</SectionLabel>
           </div>
@@ -119,7 +119,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       )}
 
       {hasTests && (
-        <div className="config-group" data-testid="folder-config-tests">
+        <div className="config-group" data-testid="folder-config-tests" data-nav-section="Tests" data-nav-level={2}>
           <div className="config-group-head">
             <SectionLabel className="config-group-label">Tests</SectionLabel>
           </div>

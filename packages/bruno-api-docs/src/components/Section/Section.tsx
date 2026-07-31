@@ -17,6 +17,9 @@ interface SectionProps {
   defaultOpen?: boolean;
   storageKey?: string;
   as?: HeadingLevel;
+  hideFromNav?: boolean;
+  navLevel?: number;
+  navGroup?: string;
 }
 
 export const Section: React.FC<SectionProps> = ({
@@ -28,15 +31,27 @@ export const Section: React.FC<SectionProps> = ({
   collapsible = false,
   defaultOpen = true,
   storageKey,
-  as = 'h2'
+  as = 'h2',
+  hideFromNav = false,
+  navLevel: navLevelProp,
+  navGroup
 }) => {
   const [open, setOpen] = useSessionStorage(storageKey ? `section-${storageKey}` : '', defaultOpen);
   const panelId = useId();
   const labelId = useId();
 
+  const navLabel = hideFromNav || typeof label !== 'string' ? undefined : label;
+  const navLevel = navLevelProp ?? (as === 'h4' ? 3 : as === 'h3' ? 2 : 1);
+
   if (collapsible) {
     return (
-      <StyledWrapper className={['section--collapsible', className].filter(Boolean).join(' ')} data-testid={testId}>
+      <StyledWrapper
+        className={['section--collapsible', className].filter(Boolean).join(' ')}
+        data-testid={testId}
+        data-nav-section={navLabel}
+        data-nav-level={navLevel}
+        data-nav-group={navGroup}
+      >
         <div className="section-head">
           <SectionLabel as={as} className="section-head-label">
             <button
@@ -61,7 +76,13 @@ export const Section: React.FC<SectionProps> = ({
   }
 
   return (
-    <StyledWrapper className={className} data-testid={testId}>
+    <StyledWrapper
+      className={className}
+      data-testid={testId}
+      data-nav-section={navLabel}
+      data-nav-level={navLevel}
+      data-nav-group={navGroup}
+    >
       {badge ? (
         <div className="section-head">
           <SectionLabel as={as} className="section-head-label">{label}</SectionLabel>

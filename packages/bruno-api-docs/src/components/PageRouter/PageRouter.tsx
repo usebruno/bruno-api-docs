@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { ScriptFile, Folder as FolderItem } from '@opencollection/types/collection/item';
@@ -6,10 +6,12 @@ import { useActiveResolution, useNavModel } from '../../routing/hooks';
 import { useAppSelector } from '../../store/hooks';
 import { selectDocsCollection } from '../../store/slices/docs';
 import { getItemUuid } from '../../utils/itemUtils';
+import { getItemName } from '../../utils/schemaHelpers';
 import { getAncestorsByUuid } from '../../utils/fileUtils';
 import { ItemVariableResolverProvider } from '../../hooks';
 import type { Item } from '@opencollection/types/collection/item';
 import PrevNext from '../PrevNext/PrevNext';
+import SectionNav from '../SectionNav/SectionNav';
 import PoweredByFooter from '../PoweredByFooter/PoweredByFooter';
 import { PageWrapper } from '../PageWrapper/PageWrapper';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
@@ -32,6 +34,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const model = useNavModel();
   const collection = useAppSelector(selectDocsCollection);
   const docsNavigate = useDocsNavigate();
+  const pageBodyRef = useRef<HTMLDivElement>(null);
 
   // Map each item's runtime uuid -> its stable slug so breadcrumb clicks
   // navigate by URL (the same mapping the sidebar uses).
@@ -55,6 +58,18 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
 
   const { entry, prev, next } = resolution;
   const pageProps: PageProps = { node: entry, prev, next, collection, onOpenPlayground };
+
+  const showSectionNav
+    = entry.type === 'overview'
+      || entry.type === 'folder'
+      || entry.type === 'request'
+      || entry.type === 'script';
+  const sectionNavTitle
+    = entry.type === 'overview'
+      ? collection.info?.name || 'Overview'
+      : item
+        ? getItemName(item) || 'Untitled'
+        : 'Overview';
 
   const goToUuid = (uuid: string) => {
     const slug = uuidToSlug.get(uuid);
@@ -101,7 +116,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   return (
     <StyledWrapper data-testid={testId} data-page-type={entry.type} data-page-slug={entry.slug}>
       <div className="page-fill">
-        <div className="page-body">
+        <div className="page-body" ref={pageBodyRef}>
           <ErrorBoundary key={entry.slug}>{renderBody()}</ErrorBoundary>
         </div>
         <div className="page-footer">
@@ -111,6 +126,10 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         </div>
       </div>
       <PoweredByFooter />
+      {/* The rail manages its own layering and narrow-column visibility — see SectionNav. */}
+      {showSectionNav && (
+        <SectionNav rootRef={pageBodyRef} title={sectionNavTitle} navKey={entry.slug} />
+      )}
     </StyledWrapper>
   );
 };

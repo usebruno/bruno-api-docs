@@ -17,9 +17,6 @@ export const StyledWrapper = styled.div`
     background-color: transparent;
   }
 
-  /* Render each page at its natural width but never wider than the pane, keeping the aspect ratio
-     (react-pdf sets an explicit inline height that must yield to the scaled width). Centered by the
-     flex column above. */
   .react-pdf__Page__canvas {
     display: block;
     max-width: 100%;

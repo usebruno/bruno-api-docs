@@ -1,3 +1,4 @@
+import { IconEye } from '@tabler/icons';
 import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@/ui/MenuDropdown';
 import type {
   ResponseBodyFormat } from '@/constants';
@@ -42,11 +43,20 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
     }))
   }));
 
+  const TriggerIcon = showPreview ? IconEye : selectedFormat ? FORMAT_ICONS[selectedFormat] : undefined;
+
   return (
     <MenuDropdown
       items={items}
       selectedItemId={selectedFormat}
-      itemToText={(item: MenuDropdownItem) => item.label}
+      itemToText={(item: MenuDropdownItem) => (
+        <span className="inline-flex items-center gap-1.5">
+          {TriggerIcon && (
+            <TriggerIcon size={14} stroke={1.5} aria-hidden data-testid="response-format-selector-trigger-icon" />
+          )}
+          {item.label}
+        </span>
+      )}
       placement="bottom-start"
       header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
       testId="response-format-selector"

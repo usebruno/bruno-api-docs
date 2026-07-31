@@ -11,10 +11,14 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
  * app — used for the Topbar hamburger, search toggle, overflow ⋯, etc. Extra
  * ARIA / button props (aria-expanded, aria-haspopup, onClick…) pass through.
  */
-const IconButton: React.FC<IconButtonProps> = ({ label, children, type = 'button', ...rest }) => (
-  <StyledWrapper type={type} aria-label={label} {...rest}>
-    {children}
-  </StyledWrapper>
+const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
+  ({ label, children, type = 'button', ...rest }, ref) => (
+    <StyledWrapper ref={ref} type={type} aria-label={label} {...rest}>
+      {children}
+    </StyledWrapper>
+  )
 );
+
+IconButton.displayName = 'IconButton';
 
 export default IconButton;

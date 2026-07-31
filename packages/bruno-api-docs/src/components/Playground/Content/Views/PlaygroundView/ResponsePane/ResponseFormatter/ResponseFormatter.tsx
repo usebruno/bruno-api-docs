@@ -9,7 +9,6 @@ import {
   FORMAT_ICONS
 } from '@/constants';
 import PreviewToggleHeader from './PreviewToggleHeader/PreviewToggleHeader';
-import { IconEye } from '@tabler/icons';
 
 interface ResponseFormatSelectorProps {
   handleSelection?: (value: ResponseBodyFormat) => void;
@@ -43,29 +42,11 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
     }))
   }));
 
-  const SelectedFormatIcon = FORMAT_ICONS[selectedFormat as ResponseBodyFormat];
-
-  // Determine the prefix icon - eye icon when in preview mode, format icon otherwise
-  const getFormatIcon = () => {
-    if (showPreview) {
-      return <IconEye size={14} strokeWidth={2} />;
-    }
-    if (SelectedFormatIcon) {
-      return <SelectedFormatIcon size={14} strokeWidth={1.5} />;
-    }
-    return null;
-  };
-
   return (
     <MenuDropdown
       items={items}
       selectedItemId={selectedFormat}
-      itemToText={(item: MenuDropdownItem) => (
-        <div>
-          <span>{getFormatIcon()}</span>
-          <span>{item.label}</span>
-        </div>
-      )}
+      itemToText={(item: MenuDropdownItem) => item.label}
       placement="bottom-start"
       header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
       testId="response-format-selector"

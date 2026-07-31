@@ -52,6 +52,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
             height="100%"
             readOnly={true}
             testId="response-body-editor"
+            showCopy={false}
           />
         </React.Suspense>
       )}

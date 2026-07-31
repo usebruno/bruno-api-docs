@@ -17,7 +17,6 @@ export const StyledWrapper = styled.div`
     overflow: hidden;
     border: 1px solid transparent;
     border-radius: var(--oc-radius);
-    transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
   }
 
   .section-nav-item {
@@ -47,7 +46,6 @@ export const StyledWrapper = styled.div`
     overflow: hidden;
     text-align: left;
     white-space: nowrap;
-    transition: max-width 0.18s ease, max-height 0.18s ease, opacity 0.18s ease;
   }
 
   .section-nav-tick-slot {
@@ -84,6 +82,7 @@ export const StyledWrapper = styled.div`
     border-color: var(--border-color);
     box-shadow: var(--shadow-md);
     overflow-y: auto;
+    transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
   }
   &.section-nav--open .section-nav-item {
     justify-content: flex-start;
@@ -95,6 +94,7 @@ export const StyledWrapper = styled.div`
     opacity: 1;
     white-space: normal;
     overflow-wrap: break-word;
+    transition: max-width 0.18s ease, max-height 0.18s ease, opacity 0.18s ease;
   }
   &.section-nav--open .section-nav-tick-slot {
     display: none;

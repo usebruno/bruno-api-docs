@@ -161,7 +161,10 @@ export const useDocSections = (
     };
     const onScrollEnd = () => {
       spyLockUntil.current = 0;
-      onScroll();
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
     };
 
     recompute();

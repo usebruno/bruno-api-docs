@@ -10,7 +10,7 @@ test.describe('Monaco editor copy button', () => {
 
     const editor = playground.preRequestScriptEditor;
     await editor.focus();
-    await page.keyboard.type('const answer = 42;');
+    await page.keyboard.insertText('const answer = 42;');
     await page.keyboard.press('Escape');
 
     const copyBtn = editor.copyButton;

@@ -7,11 +7,8 @@ import { scrollBehavior } from '../../utils/motion';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SectionNavProps {
-  // The page content root whose `[data-nav-section]` elements are the jump targets.
   rootRef: RefObject<HTMLElement | null>;
-  // Shown as the top "back to the top" entry and used as the accessible name.
   title: string;
-  // Changes per page so the section list is re-scanned on navigation.
   navKey?: string;
   testId?: string;
 }

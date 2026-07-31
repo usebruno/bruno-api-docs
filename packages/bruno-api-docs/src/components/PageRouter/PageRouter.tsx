@@ -6,7 +6,6 @@ import { useActiveResolution, useNavModel } from '../../routing/hooks';
 import { useAppSelector } from '../../store/hooks';
 import { selectDocsCollection } from '../../store/slices/docs';
 import { getItemUuid } from '../../utils/itemUtils';
-import { getItemName } from '../../utils/schemaHelpers';
 import { getAncestorsByUuid } from '../../utils/fileUtils';
 import { ItemVariableResolverProvider } from '../../hooks';
 import type { Item } from '@opencollection/types/collection/item';
@@ -21,13 +20,15 @@ import Request from '../../pages/Request/Request';
 import Script from '../../pages/Script/Script';
 import Folder from '../../pages/Folder/Folder';
 import Environments from '../../pages/Environments/Environments';
-import type { PageProps } from '../../routing/types';
+import type { PageProps, PageType } from '../../routing/types';
 import { useDocsNavigate } from '../../hooks';
 
 interface PageRouterProps {
   onOpenPlayground?: () => void;
   testId?: string;
 }
+
+const PAGES_WITHOUT_SECTION_NAV = new Set<PageType>(['environments']);
 
 const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'page' }) => {
   const resolution = useActiveResolution();
@@ -59,17 +60,8 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const { entry, prev, next } = resolution;
   const pageProps: PageProps = { node: entry, prev, next, collection, onOpenPlayground };
 
-  const showSectionNav
-    = entry.type === 'overview'
-      || entry.type === 'folder'
-      || entry.type === 'request'
-      || entry.type === 'script';
-  const sectionNavTitle
-    = entry.type === 'overview'
-      ? collection.info?.name || 'Overview'
-      : item
-        ? getItemName(item) || 'Untitled'
-        : 'Overview';
+  const showSectionNav = !PAGES_WITHOUT_SECTION_NAV.has(entry.type);
+  const sectionNavTitle = entry.name;
 
   const goToUuid = (uuid: string) => {
     const slug = uuidToSlug.get(uuid);

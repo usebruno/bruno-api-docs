@@ -11,9 +11,9 @@ const ChangeLayout: React.FC<ChangeLayoutProps> = ({ orientation, handleChangeLa
   return (
     <IconButton label="Change Layout" className="p-1" onClick={handleChangeLayout}>
       {orientation === 'vertical' ? (
-        <IconLayoutColumns size={13} strokeWidth={1} />
+        <IconLayoutColumns size={13} stroke={1.5} style={{ color: 'var(--text-muted)' }} />
       ) : (
-        <IconLayoutRows size={13} strokeWidth={1} />
+        <IconLayoutRows size={13} stroke={1.5} style={{ color: 'var(--text-muted)' }} />
       )}
     </IconButton>
   );

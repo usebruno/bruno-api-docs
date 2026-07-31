@@ -9,7 +9,7 @@ import {
   selectShowResponsePreview,
   selectSelectedItemId,
   setResponseFormat,
-  toggleShowResponsePreview
+  setShowResponsePreview
 } from '@/store/slices/playground';
 
 export function useResponseFormatter(
@@ -34,10 +34,12 @@ export function useResponseFormatter(
   }, [dispatch, selectedItemId]);
 
   const toggleView = useCallback(() => {
-    dispatch(
-      toggleShowResponsePreview(selectedItemId)
-    );
-  }, [dispatch, selectedItemId, view]);
+    const currentlyPreview = showResponsePreview != null ? showResponsePreview : view === 'preview';
+    dispatch(setShowResponsePreview({
+      uuid: selectedItemId,
+      showResponsePreview: !currentlyPreview
+    }));
+  }, [dispatch, selectedItemId, view, showResponsePreview]);
 
   return useMemo(() => {
     // A user's chosen format wins, but a stale choice that no longer applies to the current

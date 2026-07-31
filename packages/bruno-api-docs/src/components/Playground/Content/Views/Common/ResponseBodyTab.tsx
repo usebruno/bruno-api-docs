@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
-import { type ResponseBodyFormat, FORMAT_TO_MONACO } from '../../../../../constants';
-import { formatResponse } from '../../../../../utils/dataFormatter';
-import type { RunRequestResponse } from '../../../../../runner';
+import type { ResponseBodyFormat } from '@/constants';
+import { FORMAT_TO_MONACO } from '@/constants';
+import { formatResponse } from '@/utils/dataFormatter';
+import type { RunRequestResponse } from '@/runner';
 import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
-import useLargeResponse from '../../../../../hooks/useLargeResponseWarning';
+import useLargeResponse from '@/hooks/useLargeResponseWarning';
 import QueryResultPreview from '../../../QueryResultPreview/QueryResultPreview';
 
-const CodeEditor = React.lazy(() => import('../../../../../ui/CodeEditor/CodeEditor'));
+const CodeEditor = React.lazy(() => import('@/ui/CodeEditor/CodeEditor'));
 
 interface ResponseBodyTabProps {
   response: RunRequestResponse;
@@ -22,8 +23,8 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
     () =>
       showPreview || hideForLargeResponse
         ? ''
-        : formatResponse(response?.data, response?.base64Data ?? '', selectedFormat),
-    [response?.data, response?.base64Data, selectedFormat, showPreview, hideForLargeResponse]
+        : formatResponse(response?.data, response?.base64Data ?? '', selectedFormat, responseSize),
+    [response?.data, response?.base64Data, selectedFormat, showPreview, hideForLargeResponse, responseSize]
   );
 
   return (
@@ -31,6 +32,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
       {hideForLargeResponse ? (
         <LargeResponseWarning
           responseSize={responseSize}
+          response={response}
           onReveal={() => setRevealed(true)}
         />
       ) : showPreview ? (

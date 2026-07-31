@@ -10,17 +10,24 @@ import { coerceVariableValue } from '../../utils/variableDataType';
  * native, data-type-coerced form (object/number/boolean/string) — the interpolator inserts an
  * object as raw JSON and a number/boolean bare, so a typed variable stays valid inside a JSON body.
  */
-export const getCollectionFolderRequestVariables = (collection: OpenCollection, request: HttpRequest): { collectionVariables: Record<string, unknown>, folderVariables: Record<string, unknown>, requestVariables: Record<string, unknown> } => {
+export const getCollectionFolderRequestVariables = (
+  collection: OpenCollection,
+  request: HttpRequest
+): {
+  collectionVariables: Record<string, unknown>;
+  folderVariables: Record<string, unknown>;
+  requestVariables: Record<string, unknown>;
+} => {
   // Get the tree path from collection to this item
   const requestTreePath = getTreePathFromCollectionToItem(collection, request);
 
   const variables = new Map<string, Variable>();
-  
+
   // Track variables by scope for debugging/inspection
   const collectionVariables: Record<string, unknown> = {};
   const folderVariables: Record<string, unknown> = {};
   const requestVariablesResult: Record<string, unknown> = {};
-  
+
   // Start with collection-level variables
   const collectionVars = collection.request?.variables || [];
   collectionVars.forEach((variable: any) => {
@@ -30,7 +37,7 @@ export const getCollectionFolderRequestVariables = (collection: OpenCollection, 
       collectionVariables[variable.name] = value;
     }
   });
-  
+
   // Apply folder-level variables in order (parent to child)
   for (const item of requestTreePath) {
     if (isFolder(item)) {
@@ -44,10 +51,10 @@ export const getCollectionFolderRequestVariables = (collection: OpenCollection, 
       });
     }
   }
-  
+
   // Get request variables using helper
   const requestVars = getRequestVariables(request);
-  
+
   // Process request-level variables
   requestVars.forEach((variable: any) => {
     if (!variable.disabled) {
@@ -55,9 +62,9 @@ export const getCollectionFolderRequestVariables = (collection: OpenCollection, 
       requestVariablesResult[variable.name] = value;
     }
   });
-  
+
   // Add variable scope tracking to the request object for debugging/inspection
-  return { 
+  return {
     collectionVariables,
     folderVariables,
     requestVariables: requestVariablesResult

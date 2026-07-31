@@ -100,7 +100,7 @@ const walk = (
       item,
       ancestors,
       depth,
-      ...(badge ? { method: badge } : {}),
+      ...(badge ? { method: badge } : {})
     };
     out.push(entry);
 
@@ -125,7 +125,7 @@ export const buildNavModel = (collection: OpenCollection | null | undefined): Na
     name: collection?.info?.name || 'Overview',
     item: null,
     ancestors: [],
-    depth: -1,
+    depth: -1
   });
 
   // Environments always gets a nav entry, even when the collection has none:
@@ -137,7 +137,7 @@ export const buildNavModel = (collection: OpenCollection | null | undefined): Na
     name: 'Environments',
     item: null,
     ancestors: [],
-    depth: -1,
+    depth: -1
   });
 
   walk(collection?.items, '', [], 0, ordered);

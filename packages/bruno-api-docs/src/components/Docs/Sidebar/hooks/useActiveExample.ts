@@ -11,8 +11,8 @@ export function useActiveExample(model: NavModel, uuidToSlug: Map<string, string
   const resolution = useActiveResolution();
   const docsNavigate = useDocsNavigate();
   const activeRequestUuid = resolution?.example ? getItemUuid(resolution.entry.item) : undefined;
-  const activeExample =
-    resolution?.example && activeRequestUuid !== undefined
+  const activeExample
+    = resolution?.example && activeRequestUuid !== undefined
       ? { requestUuid: activeRequestUuid, index: resolution.example.index }
       : null;
 

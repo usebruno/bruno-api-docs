@@ -157,8 +157,8 @@ export const AssertsTab: React.FC<AssertsTabProps> = ({
             key: 'operator',
             label: 'Operator',
             render: (row, index) => {
-              const currentOperator =
-                ASSERTION_OPERATORS.find((op) => op.value === row.operator) ?? ASSERTION_OPERATORS[0];
+              const currentOperator
+                = ASSERTION_OPERATORS.find((op) => op.value === row.operator) ?? ASSERTION_OPERATORS[0];
               return (
                 <MenuDropdown
                   selectedItemId={currentOperator.value}

@@ -4,7 +4,7 @@ import reducer, {
   toggleTheme,
   readPersistedMode,
   persistThemeMode,
-  THEME_STORAGE_KEY,
+  THEME_STORAGE_KEY
 } from './theme';
 
 beforeAll(() => {
@@ -13,7 +13,7 @@ beforeAll(() => {
     getItem: (k: string) => (k in store ? store[k] : null),
     setItem: (k: string, v: string) => { store[k] = String(v); },
     removeItem: (k: string) => { delete store[k]; },
-    clear: () => { store = {}; },
+    clear: () => { store = {}; }
   });
 });
 

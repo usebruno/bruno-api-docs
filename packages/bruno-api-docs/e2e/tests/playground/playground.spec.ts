@@ -71,7 +71,7 @@ test.describe('playground docks (desktop)', () => {
   // stale Environments/empty view. The applied-slug guard has to reset on close.
   test('reopening a request after leaving it for Environments shows the request again', async ({
     requestPage,
-    playground,
+    playground
   }) => {
     await requestPage.open(['billing', 'customers', 'Get Customers - Filter by Date Range']);
 
@@ -175,8 +175,8 @@ test.describe('playground docks (desktop)', () => {
 
   test('inline dock: sidebar is closed by default and overlays the view when opened', async ({ page, playground }) => {
     await page.goto(openAt('inline'));
-    await expect(playground.sidebarPanel).toHaveCount(0);   // closed by default in inline
-    await playground.sidebarToggle.click();                 // open it as an overlay
+    await expect(playground.sidebarPanel).toHaveCount(0); // closed by default in inline
+    await playground.sidebarToggle.click(); // open it as an overlay
     await expect(playground.sidebarPanel).toBeVisible();
     await expect(playground.view).toBeVisible();
     const viewBox = await playground.view.boundingBox();
@@ -216,7 +216,7 @@ test.describe('playground docks (desktop)', () => {
     await playground.sidebarToggle.click();
     await expect(playground.sidebarPanel).toBeVisible();
     await playground.treeItems.filter({ hasText: 'get users' }).first().click();
-    await expect(playground.sidebarPanel).toHaveCount(0);   // auto-closed on select
+    await expect(playground.sidebarPanel).toHaveCount(0); // auto-closed on select
     await expect(playground.view).toContainText('get users');
   });
 
@@ -242,8 +242,8 @@ test.describe('playground docks (desktop)', () => {
     await expect(playground.header).toBeVisible();
     // click a docs sidebar item (the docs sidebar, not the playground one)
     await page.getByTestId('sidebar').getByTestId('sidebar-item').first().click();
-    await expect(playground.header).toBeVisible();      // playground did NOT close
-    await expect(page).toHaveURL(/pg=1/);               // playground params preserved
+    await expect(playground.header).toBeVisible(); // playground did NOT close
+    await expect(page).toHaveURL(/pg=1/); // playground params preserved
   });
 
   test('deep-link / reload to a nested request reveals its ancestor folders', async ({ page, playground }) => {

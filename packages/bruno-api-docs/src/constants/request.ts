@@ -25,6 +25,18 @@ export const CONTENT_TYPES = {
 
 export type ContentType = (typeof CONTENT_TYPES)[keyof typeof CONTENT_TYPES];
 
+export const STANDARD_HTTP_METHODS = [
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'OPTIONS',
+  'HEAD',
+  'TRACE',
+  'CONNECT'
+] as const;
+
 export const PROTOCOL_BADGE_LABELS: Record<string, string> = {
   GRAPHQL: 'GQL',
   GRPC: 'GRPC',
@@ -49,11 +61,11 @@ export const REQUEST_TYPE_LABELS: Record<string, { shortName: string; fullName: 
 export const BODY_LANGUAGE: Record<string, string> = { json: 'json', xml: 'markup', text: 'text', sparql: 'text' };
 
 export const BODY_CONTENT_TYPE: Record<string, string> = {
-  json: 'application/json',
-  xml: 'application/xml',
-  text: 'text/plain',
-  sparql: 'application/sparql-query',
+  'json': 'application/json',
+  'xml': 'application/xml',
+  'text': 'text/plain',
+  'sparql': 'application/sparql-query',
   'form-urlencoded': 'application/x-www-form-urlencoded',
   'multipart-form': 'multipart/form-data',
-  file: 'application/octet-stream'
+  'file': 'application/octet-stream'
 };

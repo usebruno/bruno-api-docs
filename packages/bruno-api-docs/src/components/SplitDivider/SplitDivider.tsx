@@ -13,7 +13,7 @@ export const SplitDivider: React.FC<SplitDividerProps> = ({
   orientation = 'horizontal',
   onPointerDown,
   active = false,
-  testId,
+  testId
 }) => (
   <StyledWrapper
     className="split-divider"

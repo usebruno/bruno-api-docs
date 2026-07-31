@@ -3,7 +3,7 @@ import {
   layoutModeForWidth,
   showsHamburger,
   TOPBAR_TABLET_MIN,
-  TOPBAR_DESKTOP_MIN,
+  TOPBAR_DESKTOP_MIN
 } from './useTopbarLayout';
 
 describe('layoutModeForWidth', () => {

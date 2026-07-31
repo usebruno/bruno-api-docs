@@ -4,6 +4,7 @@ import type { MenuDropdownHandle } from '../MenuDropdown/types';
 import { ChevronsRightIcon, DotIcon } from '../../assets/icons';
 import { useResponsiveTabs } from './useResponsiveTabs';
 import { StyledWrapper } from './StyledWrapper';
+import cx from '@/utils/cx';
 
 export interface Tab {
   id: string;
@@ -27,6 +28,7 @@ interface TabsProps {
   testId?: string;
   ariaLabel?: string;
   keepMounted?: boolean;
+  rightContentExpandedWidth?: number;
 }
 
 const renderIndicator = (tab: Tab): ReactNode => {
@@ -50,7 +52,8 @@ export const Tabs: React.FC<TabsProps> = ({
   className,
   testId = 'tabs',
   ariaLabel,
-  keepMounted = false
+  keepMounted = false,
+  rightContentExpandedWidth
 }) => {
   const [internalActive, setInternalActive] = useState(defaultActiveTab ?? tabs[0]?.id ?? '');
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -60,10 +63,11 @@ export const Tabs: React.FC<TabsProps> = ({
   const current = tabs.some((tab) => tab.id === requested) ? requested : (tabs[0]?.id ?? '');
 
   const isResponsive = variant === 'responsive';
-  const { containerRef, rightRef, setMeasureRef, visibleIds, overflowIds } = useResponsiveTabs(
+  const { containerRef, rightRef, setMeasureRef, visibleIds, overflowIds, rightSideExpandable } = useResponsiveTabs(
     tabs.map((tab) => tab.id),
     current,
-    isResponsive
+    isResponsive,
+    rightContentExpandedWidth
   );
 
   const visibleTabs = isResponsive ? tabs.filter((tab) => visibleIds.includes(tab.id)) : tabs;
@@ -194,7 +198,15 @@ export const Tabs: React.FC<TabsProps> = ({
           )}
         </div>
         {rightContent !== undefined && (
-          <div className="tabs-right" ref={isResponsive ? rightRef : undefined}>
+          <div
+            className={cx(
+              'tabs-right',
+              {
+                expandable: rightSideExpandable
+              }
+            )}
+            ref={isResponsive ? rightRef : undefined}
+          >
             {rightContent}
           </div>
         )}
@@ -215,17 +227,17 @@ export const Tabs: React.FC<TabsProps> = ({
             </div>
           ))
         : activeTabData && (
-            <div
-              key={activeTabData.id}
-              id={panelId(activeTabData.id)}
-              role="tabpanel"
-              aria-labelledby={tabButtonId(activeTabData.id)}
-              className="tab-panel"
-              tabIndex={0}
-            >
-              {activeTabData.content}
-            </div>
-          )}
+          <div
+            key={activeTabData.id}
+            id={panelId(activeTabData.id)}
+            role="tabpanel"
+            aria-labelledby={tabButtonId(activeTabData.id)}
+            className="tab-panel"
+            tabIndex={0}
+          >
+            {activeTabData.content}
+          </div>
+        )}
     </StyledWrapper>
   );
 };

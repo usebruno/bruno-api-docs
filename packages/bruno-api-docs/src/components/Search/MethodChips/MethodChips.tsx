@@ -20,7 +20,7 @@ export const MethodChips: React.FC<MethodChipsProps> = ({
   methods,
   active,
   onToggle,
-  testId = 'search-method-chips',
+  testId = 'search-method-chips'
 }) => (
   <StyledWrapper data-testid={testId}>
     {methods.map((method) => (

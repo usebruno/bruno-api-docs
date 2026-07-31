@@ -1,12 +1,12 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 
-export type PageType =
-  | 'overview'
-  | 'environments'
-  | 'folder'
-  | 'script'
-  | 'request';
+export type PageType
+  = | 'overview'
+    | 'environments'
+    | 'folder'
+    | 'script'
+    | 'request';
 
 /** A single breadcrumb hop: a folder above the current node. */
 export interface BreadcrumbSegment {

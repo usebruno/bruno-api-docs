@@ -5,6 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 // than getting clipped. Mirrors the spacing used by Bruno's ResponsiveTabs.
 const MORE_TRIGGER_RESERVE = 40;
 const PER_TAB_ALLOWANCE = 16;
+const RIGHT_CONTENT_GAP = 16;
+const EXPANDABLE_HYSTERESIS = 20;
 
 const sameOrder = (a: string[], b: string[]): boolean =>
   a.length === b.length && a.every((id, index) => id === b[index]);
@@ -19,6 +21,8 @@ export interface ResponsiveTabsLayout {
   setMeasureRef: (id: string) => (el: HTMLElement | null) => void;
   visibleIds: string[];
   overflowIds: string[];
+  /** True when the right-content slot has room to render its expanded (inline) form. */
+  rightSideExpandable: boolean;
 }
 
 /**
@@ -29,7 +33,12 @@ export interface ResponsiveTabsLayout {
  * yet (server render / first paint) every tab is reported visible, so markup and
  * unit tests still see the full set until the client measures.
  */
-export const useResponsiveTabs = (ids: string[], activeId: string, enabled: boolean): ResponsiveTabsLayout => {
+export const useResponsiveTabs = (
+  ids: string[],
+  activeId: string,
+  enabled: boolean,
+  rightContentExpandedWidth?: number
+): ResponsiveTabsLayout => {
   const containerRef = useRef<HTMLDivElement>(null);
   const rightRef = useRef<HTMLDivElement>(null);
   const measureRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -38,6 +47,7 @@ export const useResponsiveTabs = (ids: string[], activeId: string, enabled: bool
 
   const [visibleIds, setVisibleIds] = useState<string[]>(ids);
   const [overflowIds, setOverflowIds] = useState<string[]>([]);
+  const [rightSideExpandable, setRightSideExpandable] = useState(false);
 
   const setMeasureRef = useCallback(
     (id: string) => (el: HTMLElement | null) => {
@@ -55,20 +65,36 @@ export const useResponsiveTabs = (ids: string[], activeId: string, enabled: bool
     const currentIds = idsRef.current;
     if (!container || currentIds.length === 0) return;
 
-    const rightWidth = rightRef.current?.offsetWidth ?? 0;
-    const available = container.offsetWidth - rightWidth - MORE_TRIGGER_RESERVE;
-    // Container not laid out yet — keep everything visible rather than hiding all.
-    if (available <= 0) {
+    // Not laid out yet (SSR / first paint) — keep everything visible rather than hiding all.
+    if (container.offsetWidth === 0) {
       setVisibleIds((prev) => (sameOrder(prev, currentIds) ? prev : currentIds));
       setOverflowIds((prev) => (prev.length === 0 ? prev : []));
       return;
     }
 
+    const rightEl = rightRef.current;
+    let rightWidth = rightEl?.offsetWidth ?? 0;
+    let rightModeled = false;
+    if (rightContentExpandedWidth != null && rightEl != null && rightEl.children.length > 0) {
+      const children = rightEl.children;
+      const expandableIndex = children.length - 1;
+      let modeled = 0;
+      for (let i = 0; i < children.length; i += 1) {
+        modeled += i === expandableIndex ? rightContentExpandedWidth : (children[i] as HTMLElement).offsetWidth;
+      }
+      rightWidth = modeled;
+      rightModeled = true;
+    }
+
+    const available = container.offsetWidth - rightWidth - MORE_TRIGGER_RESERVE;
+
     const visible: string[] = [];
     const overflow: string[] = [];
     let used = 0;
+    let allTabsWidth = 0;
     for (const id of currentIds) {
       const width = (measureRefs.current[id]?.offsetWidth ?? 80) + PER_TAB_ALLOWANCE;
+      allTabsWidth += width;
       if (overflow.length === 0 && used + width <= available) {
         visible.push(id);
         used += width;
@@ -88,6 +114,17 @@ export const useResponsiveTabs = (ids: string[], activeId: string, enabled: bool
 
     setVisibleIds((prev) => (sameOrder(prev, visible) ? prev : visible));
     setOverflowIds((prev) => (sameOrder(prev, overflow) ? prev : overflow));
+
+    // Expand the actions inline only when the ENTIRE tab row fits beside the expanded right slot.
+    // Keyed to the container width and intrinsic tab widths — never the split's own visible/overflow
+    // result — so the decision is fixed per width instead of chasing the overflow it would itself
+    // cause. (rightWidth already models the right slot with the actions expanded.)
+    if (rightModeled) {
+      const needed = allTabsWidth + rightWidth + RIGHT_CONTENT_GAP;
+      setRightSideExpandable((prev) =>
+        prev ? container.offsetWidth >= needed - EXPANDABLE_HYSTERESIS : container.offsetWidth >= needed
+      );
+    }
   };
 
   const idsKey = ids.join(',');
@@ -99,13 +136,20 @@ export const useResponsiveTabs = (ids: string[], activeId: string, enabled: bool
     if (!enabled) {
       setVisibleIds((prev) => (sameOrder(prev, idsRef.current) ? prev : idsRef.current));
       setOverflowIds((prev) => (prev.length === 0 ? prev : []));
+      setRightSideExpandable((prev) => (prev ? false : prev));
       return;
     }
     const frame = requestAnimationFrame(() => recalcRef.current());
     return () => cancelAnimationFrame(frame);
   }, [enabled, idsKey, activeId]);
 
-  // Observe the container once per enable so a width change re-runs the split.
+  // Observe only the container — the source of the available-width budget. Deliberately NOT the
+  // right slot: its width is subtracted from that budget, but the trailing actions block collapses
+  // to a compact menu when space is tight, so observing it turns "collapse changed the width" into a
+  // recalc, which can re-decide the collapse, which changes the width again — a feedback loop that
+  // thrashes at a boundary. The split still reads the right slot's live width when it runs; it just
+  // doesn't re-run because of it. (Mirrors bruno-app's ResponsiveTabs, which observes the container
+  // alone.) A container resize or a tab/active change still triggers a fresh measurement.
   useEffect(() => {
     if (!enabled || typeof ResizeObserver === 'undefined') return;
     const container = containerRef.current;
@@ -127,6 +171,7 @@ export const useResponsiveTabs = (ids: string[], activeId: string, enabled: bool
     rightRef,
     setMeasureRef,
     visibleIds: enabled ? visibleIds : ids,
-    overflowIds: enabled ? overflowIds : []
+    overflowIds: enabled ? overflowIds : [],
+    rightSideExpandable: enabled ? rightSideExpandable : false
   };
 };

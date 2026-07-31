@@ -2,7 +2,6 @@ import type { Locator } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 
 export class EnvironmentsSection extends BaseComponent {
-
   readonly items = this.page.getByTestId('overview-environment-item');
 
   item(name: string): Locator {

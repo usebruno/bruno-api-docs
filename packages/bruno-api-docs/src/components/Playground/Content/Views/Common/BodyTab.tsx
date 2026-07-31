@@ -37,7 +37,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
   const handleMultipartChange = (rows: KeyValueRow[]) => {
     // Rebuild the text fields from the table; preserve any file fields untouched.
     const textEntries = rows.map((r) => ({ ...keyValueRowToEntry(r), type: 'text' as const }));
-    const fileEntries = (((body as { data?: any[] })?.data as any[]) || []).filter(e => e?.type === 'file');
+    const fileEntries = (((body as { data?: any[] })?.data as any[]) || []).filter((e) => e?.type === 'file');
     onItemChange({
       ...item,
       http: {
@@ -112,11 +112,11 @@ export const BodyTab: React.FC<BodyTabProps> = ({
             </div>
           );
         })()
-        ) : body?.type === 'multipart-form' && Array.isArray(body?.data) ? (
+      ) : body?.type === 'multipart-form' && Array.isArray(body?.data) ? (
         (() => {
           const entries = body.data as any[];
           const textRows: KeyValueRow[] = entries
-            .filter(e => e?.type !== 'file')
+            .filter((e) => e?.type !== 'file')
             .map((e, index) => ({
               id: `mp-${index}`,
               name: e.name || '',
@@ -124,7 +124,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
               enabled: e.disabled !== true,
               description: getDescription(e)
             }));
-          const fileEntries = entries.filter(e => e?.type === 'file');
+          const fileEntries = entries.filter((e) => e?.type === 'file');
 
           return (
             <div data-testid="body-multipart">
@@ -156,10 +156,10 @@ export const BodyTab: React.FC<BodyTabProps> = ({
             </div>
           );
         })()
-        ) : body?.type === 'file' && Array.isArray(body?.data) ? (
+      ) : body?.type === 'file' && Array.isArray(body?.data) ? (
         (() => {
           const variants = body.data as any[];
-          const selected = variants.find(v => v?.selected) || variants[0];
+          const selected = variants.find((v) => v?.selected) || variants[0];
 
           return (
             <div data-testid="body-file" className="text-sm" style={{ color: 'var(--text-secondary)' }}>
@@ -169,7 +169,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
             </div>
           );
         })()
-        ) : (
+      ) : (
         <div className="text-center py-6" style={{ color: 'var(--text-secondary)' }}>
           Unsupported body type
         </div>

@@ -12,8 +12,8 @@ export const createOpenCollectionStore = () => {
       docs: docsReducer,
       env: envReducer,
       playground: playgroundReducer,
-      theme: themeReducer,
-    },
+      theme: themeReducer
+    }
   });
 
   // Persist theme changes (localStorage + root data-theme) outside the reducer.
@@ -39,4 +39,3 @@ export const createOpenCollectionStore = () => {
 export type AppStore = ReturnType<typeof createOpenCollectionStore>;
 export type AppDispatch = AppStore['dispatch'];
 export type RootState = ReturnType<AppStore['getState']>;
-

@@ -85,7 +85,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
                 label={name}
                 level={itemLevel}
                 active={active}
-                chevron={
+                chevron={(
                   <ChevronButton
                     expanded={expanded}
                     ariaLabel={expanded ? 'Collapse folder' : 'Expand folder'}
@@ -93,7 +93,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
                       if (uuid) onToggleFolder(uuid);
                     }}
                   />
-                }
+                )}
                 testId="sidebar-item"
                 slug={slug}
                 // Name click navigates and reveals the folder. Expand-only (not
@@ -119,8 +119,8 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
         const displayName = script && !/\.[jt]s$/i.test(name) ? `${name}.js` : name;
         const method = getRequestBadgeLabel(item);
 
-        const examples: HttpRequestExample[] =
-          !script && uuid !== undefined ? ((item as HttpRequest).examples ?? []) : [];
+        const examples: HttpRequestExample[]
+          = !script && uuid !== undefined ? ((item as HttpRequest).examples ?? []) : [];
 
         if (examples.length > 0 && uuid !== undefined) {
           // Auto-expand when this request owns the active example, so navigating
@@ -135,14 +135,14 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
                 active={active}
                 method={method}
                 muted
-                chevron={
+                chevron={(
                   <ChevronButton
                     expanded={expanded}
                     ariaLabel={expanded ? 'Collapse examples' : 'Expand examples'}
                     testId="sidebar-example-toggle"
                     onClick={() => toggleRequest(uuid)}
                   />
-                }
+                )}
                 testId="sidebar-item"
                 slug={slug}
                 onClick={() => slug !== undefined && onNavigate(slug)}
@@ -201,13 +201,13 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
           level={0}
           active={collectionRoot.active}
           icon={collectionRoot.icon}
-          chevron={
+          chevron={(
             <ChevronButton
               expanded={!collectionRoot.collapsed}
               ariaLabel={collectionRoot.collapsed ? 'Expand collection' : 'Collapse collection'}
               onClick={collectionRoot.onToggle}
             />
-          }
+          )}
           testId={collectionRoot.testId ?? 'sidebar-collection-root'}
           onClick={collectionRoot.onClick}
         />

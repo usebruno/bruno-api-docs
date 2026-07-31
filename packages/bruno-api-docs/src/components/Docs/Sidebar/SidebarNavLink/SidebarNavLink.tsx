@@ -31,7 +31,7 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
   onClick,
   title,
   slug,
-  testId,
+  testId
 }) => {
   const classes = [active ? 'active' : '', muted ? 'muted' : ''].filter(Boolean).join(' ');
 

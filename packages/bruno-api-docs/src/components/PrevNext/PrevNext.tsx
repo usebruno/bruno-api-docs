@@ -8,14 +8,14 @@ import { StyledWrapper } from './StyledWrapper';
 
 const toPath = (slug: string) => `/${slug}`;
 
-const MethodTag: React.FC<{ method?: string, type: PageType }> = ({ method, type }) =>
+const MethodTag: React.FC<{ method?: string; type: PageType }> = ({ method, type }) =>
   method ? (
     <span className="prevnext-method" style={{ color: getMethodColorVar(method) }}>
       {getShortMethod(method)}
     </span>
   ) : type === 'script' ? (
     <span className="prevnext-method" style={{ color: 'var(--oc-primary-text)' }}>JS</span>
-  ): null;
+  ) : null;
 
 const Card: React.FC<{ dir: 'prev' | 'next'; neighbor: SeqNeighbor; search: string }> = ({ dir, neighbor, search }) => (
   <Link

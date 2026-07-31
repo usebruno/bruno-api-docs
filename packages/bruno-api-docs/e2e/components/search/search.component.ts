@@ -2,7 +2,7 @@ import type { Page, Locator } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 
 /**
- * The endpoint search palette. A page-wide control (its panel is a fixed
+ * The collection search palette. A page-wide control (its panel is a fixed
  * overlay), so it omits a container root. Parts are found by accessible role or
  * test id, never by class.
  */
@@ -12,7 +12,7 @@ export class SearchComponent extends BaseComponent {
   }
 
   /** Inline combobox field (desktop / once revealed below desktop). */
-  readonly field = this.root.getByRole('combobox', { name: 'Search endpoints' });
+  readonly field = this.root.getByRole('combobox', { name: 'Search requests and folders' });
   /** The panel element (open state is reflected by its `data-open` attribute). */
   readonly panel = this.root.getByTestId('search-panel');
   readonly openPanel = this.root.locator('[data-testid="search-panel"][data-open="true"]');
@@ -22,6 +22,12 @@ export class SearchComponent extends BaseComponent {
   readonly resultsScroll = this.root.getByTestId('search-scroll');
   readonly results = this.root.getByTestId('search-result');
   readonly resultMethods = this.root.getByTestId('search-result-method');
+  readonly resultNames = this.root.getByTestId('search-result-name');
+  readonly resultBreadcrumbs = this.root.getByTestId('search-result-breadcrumb');
+  /** Portalled bubble showing a clipped result name in full. */
+  readonly nameTooltip = this.root.getByTestId('search-result-name-tooltip');
+  readonly breadcrumbTooltip = this.root.getByTestId('search-result-breadcrumb-tooltip');
+  readonly folderResults = this.results.filter({ has: this.page.getByTestId('search-result-folder-icon') });
   /** The keyboard-highlighted result option. */
   readonly activeOption = this.root.locator('[role="option"][aria-selected="true"]');
   readonly clearButton = this.root.getByRole('button', { name: 'Clear search' });

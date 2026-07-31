@@ -89,6 +89,9 @@ export const StyledWrapper = styled.div`
     letter-spacing: 0.04em;
     text-transform: uppercase;
     text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .navlink-spacer {

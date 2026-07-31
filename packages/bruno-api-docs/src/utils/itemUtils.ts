@@ -12,7 +12,7 @@ import { getItemName, isFolder } from './schemaHelpers';
  */
 export const generateSafeId = (input: string): string => {
   if (!input) return 'unnamed-item';
-  
+
   return input
     .toLowerCase()
     .replace(/[^a-z0-9\-_]/g, '-')
@@ -66,12 +66,12 @@ export const findItemByUuid = (
 export const generateSectionId = (item: any, parentPath?: string): string => {
   const itemId = getItemId(item);
   const safeItemId = generateSafeId(itemId);
-  
+
   if (parentPath) {
     const safeParentPath = generateSafeId(parentPath);
     return `${safeParentPath}-${safeItemId}`;
   }
-  
+
   return safeItemId;
 };
 
@@ -84,19 +84,19 @@ export const sortItemsWithFoldersFirst = (items: OpenCollectionItem[]): OpenColl
   if (!items || !Array.isArray(items)) {
     return [];
   }
-  
-  return [...items].filter(item => item != null).sort((a, b) => {
+
+  return [...items].filter((item) => item != null).sort((a, b) => {
     // Folders come first
     const aIsFolder = isFolder(a);
     const bIsFolder = isFolder(b);
-    
+
     if (aIsFolder && !bIsFolder) return -1;
     if (!aIsFolder && bIsFolder) return 1;
-    
+
     // Within the same type, sort alphabetically by name
     const nameA = getItemId(a).toLowerCase();
     const nameB = getItemId(b).toLowerCase();
-    
+
     return nameA.localeCompare(nameB);
   });
-}; 
+};

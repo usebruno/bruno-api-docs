@@ -18,7 +18,7 @@ const initialState: DocsState = {
 // Helper function to initialize isCollapsed for folders
 const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void => {
   if (!items) return;
-  
+
   for (const item of items) {
     if (isFolder(item)) {
       // Initialize isCollapsed to true (collapsed) if not already set
@@ -76,7 +76,7 @@ const docsSlice = createSlice({
           (item as { isCollapsed?: boolean }).isCollapsed = false;
         });
       }
-    },
+    }
   }
 });
 
@@ -85,5 +85,3 @@ export default docsSlice.reducer;
 
 export const selectDocsCollection = (state: RootState) => state.docs.collection;
 export const selectSelectedItemId = (state: RootState) => state.docs.selectedItemId;
-
-

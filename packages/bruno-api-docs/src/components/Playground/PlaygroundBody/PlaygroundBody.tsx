@@ -7,11 +7,12 @@ import {
   selectViewMode,
   selectSelectedItemId,
   selectSelectedExampleIndex,
+  selectResponsePaneOrientation,
   setViewMode,
   setSelectedItemId,
   setSelectedExampleIndex,
   toggleFolderCollapse,
-  expandFolders,
+  expandFolders
 } from '@slices/playground';
 import { selectActiveEnvName } from '../../../store/slices/env';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
@@ -30,7 +31,7 @@ import type { DockMode } from '../../../utils/playgroundDock';
 import {
   resolvePlaygroundTarget,
   PLAYGROUND_ENVIRONMENTS_SLUG,
-  PLAYGROUND_COLLECTION_SLUG,
+  PLAYGROUND_COLLECTION_SLUG
 } from './resolvePlaygroundTarget';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -61,7 +62,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   dock,
   onCloseSidebar,
   onOpenSidebar,
-  appliedSlugRef,
+  appliedSlugRef
 }) => {
   const dispatch = useAppDispatch();
   const model = useNavModel();
@@ -71,6 +72,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const selectedItemId = useAppSelector(selectSelectedItemId);
   const selectedExampleIndex = useAppSelector(selectSelectedExampleIndex);
   const activeEnvName = useAppSelector(selectActiveEnvName);
+  const orientationOverride = useAppSelector(selectResponsePaneOrientation);
 
   const uuidToSlug = useMemo<Map<string, string>>(() => {
     const map = new Map<string, string>();
@@ -89,21 +91,21 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   // parent request row (selectedItemId still points at the parent request).
   const activeSlug = viewMode !== 'example' && selectedItemId ? uuidToSlug.get(selectedItemId) ?? '' : '';
 
-  const exampleCount =
-    selectedItem && !isFolder(selectedItem) ? ((selectedItem as HttpRequest).examples?.length ?? 0) : 0;
-  const activeExample: ExampleHighlight | null =
-    viewMode === 'example' &&
-    selectedItemId != null &&
-    selectedExampleIndex != null &&
-    selectedExampleIndex < exampleCount
+  const exampleCount
+    = selectedItem && !isFolder(selectedItem) ? ((selectedItem as HttpRequest).examples?.length ?? 0) : 0;
+  const activeExample: ExampleHighlight | null
+    = viewMode === 'example'
+      && selectedItemId != null
+      && selectedExampleIndex != null
+      && selectedExampleIndex < exampleCount
       ? { requestUuid: selectedItemId, index: selectedExampleIndex }
       : null;
 
   const viewRef = useRef<HTMLDivElement>(null);
   const viewWidth = useElementWidth(viewRef);
-  const { width: sidebarWidth, dragging: sidebarDragging, startDrag: startSidebarResize } =
-    useResizableSidebar('oc-docs:playgroundSidebarWidth', onCloseSidebar, onOpenSidebar);
-  const orientation = viewWidth > 0 && viewWidth < ORIENTATION_BREAKPOINT ? 'vertical' : 'horizontal';
+  const { width: sidebarWidth, dragging: sidebarDragging, startDrag: startSidebarResize }
+    = useResizableSidebar('oc-docs:playgroundSidebarWidth', onCloseSidebar, onOpenSidebar);
+  const orientation = orientationOverride ?? (viewWidth > 0 && viewWidth < ORIENTATION_BREAKPOINT ? 'vertical' : 'horizontal');
 
   // Close the inline-dock overlay when the pointer goes down anywhere outside
   // the sidebar, including outside the playground. The backdrop still handles
@@ -136,8 +138,8 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     // Resolve the URL's example against the request; an unmatched slug (renamed/
     // removed) leaves the example unset so we open the live request instead.
     const item = target.uuid ? findItemByUuid(collection?.items, target.uuid) : undefined;
-    const exampleIndex =
-      exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
+    const exampleIndex
+      = exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
     appliedSlugRef.current = key;
     dispatch(setSelectedItemId(target.uuid));
     dispatch(setSelectedExampleIndex(exampleIndex));
@@ -216,10 +218,10 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
       );
     }
     if (
-      viewMode === 'example' &&
-      selectedItem &&
-      !isFolder(selectedItem) &&
-      selectedExampleIndex != null
+      viewMode === 'example'
+      && selectedItem
+      && !isFolder(selectedItem)
+      && selectedExampleIndex != null
     ) {
       const example = ((selectedItem as HttpRequest).examples ?? [])[selectedExampleIndex];
       if (example) {

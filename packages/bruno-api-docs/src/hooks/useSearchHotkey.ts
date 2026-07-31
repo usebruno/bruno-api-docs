@@ -9,7 +9,7 @@ import { isMacPlatform } from '../utils/platform';
 /** Whether a keydown event is the platform's search shortcut. */
 export const matchesSearchHotkey = (
   e: Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey'>,
-  isMac: boolean,
+  isMac: boolean
 ): boolean => {
   if ((e.key || '').toLowerCase() !== 'k') return false;
   // Require the platform modifier and reject the other, so ⌘K on Windows or

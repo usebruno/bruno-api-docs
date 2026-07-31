@@ -147,6 +147,7 @@ export const StyledWrapper = styled.div`
   .search-results {
     max-height: calc(var(--search-panel-max) - 5rem);
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 0.25rem;
     scroll-padding: 0.25rem;
   }

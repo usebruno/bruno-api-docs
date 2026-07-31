@@ -11,7 +11,7 @@ import Topbar from './Topbar';
 vi.mock('../../hooks/useCanRunBrunoApp', () => ({ useCanRunBrunoApp: () => true }));
 vi.mock('../../hooks/useTopbarLayout', () => ({
   useTopbarLayout: () => 'desktop',
-  showsHamburger: () => false,
+  showsHamburger: () => false
 }));
 
 describe('Topbar', () => {
@@ -67,7 +67,7 @@ describe('Topbar', () => {
     const html = renderToStaticMarkup(
       <Topbar collectionName="Docs" layoutMode="mobile" openInBrunoHref="https://fetch.usebruno.com?url=x" />
     );
-    expect(html).toContain('data-testid="open-in-bruno"');   // still shown on a Bruno-capable device
+    expect(html).toContain('data-testid="open-in-bruno"'); // still shown on a Bruno-capable device
     expect(html).not.toContain('<span>Open in Bruno</span>'); // label hidden, glyph only
   });
 });

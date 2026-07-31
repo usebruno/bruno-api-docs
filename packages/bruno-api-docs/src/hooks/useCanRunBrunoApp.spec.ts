@@ -5,7 +5,7 @@ const base: DeviceEnv = {
   anyHoverFine: true,
   userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605',
   platform: 'MacIntel',
-  maxTouchPoints: 0,
+  maxTouchPoints: 0
 };
 
 describe('computeCanRunBrunoApp', () => {
@@ -19,7 +19,7 @@ describe('computeCanRunBrunoApp', () => {
         anyHoverFine: true,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120',
         platform: 'Win32',
-        maxTouchPoints: 10,
+        maxTouchPoints: 10
       })
     ).toBe(true);
   });
@@ -30,7 +30,7 @@ describe('computeCanRunBrunoApp', () => {
         anyHoverFine: true, // iPad + trackpad folio can report this
         userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/605',
         platform: 'MacIntel',
-        maxTouchPoints: 5,
+        maxTouchPoints: 5
       })
     ).toBe(false);
   });
@@ -41,7 +41,7 @@ describe('computeCanRunBrunoApp', () => {
         anyHoverFine: true,
         userAgent: 'Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) Safari/604',
         platform: 'iPad',
-        maxTouchPoints: 5,
+        maxTouchPoints: 5
       })
     ).toBe(false);
   });
@@ -57,7 +57,7 @@ describe('computeCanRunBrunoApp', () => {
         anyHoverFine: false,
         userAgent: 'Mozilla/5.0 (Linux; Android 13; Tab)',
         platform: 'Linux armv8l',
-        maxTouchPoints: 10,
+        maxTouchPoints: 10
       })
     ).toBe(false);
   });
@@ -78,7 +78,7 @@ describe('computeIsMobileOS', () => {
         anyHoverFine: true,
         userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120',
         platform: 'Win32',
-        maxTouchPoints: 10,
+        maxTouchPoints: 10
       })
     ).toBe(false);
   });

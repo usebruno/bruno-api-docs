@@ -1,33 +1,48 @@
 /**
- * Search index for the endpoint palette.
+ * Search index for the collection palette.
  *
- * Turns the routing NavModel's ordered entries into flat, scoreable records,
- * one per HTTP/request node (folders are excluded from results; they surface in
- * the sidebar only as ancestors of a matched request). Each record's `id` is
- * the item UUID, the exact identifier the search slice + sidebar key on.
+ * Turns the routing NavModel's ordered entries into flat, scoreable records:
+ * one per request node and one per folder node, at any depth. Each record's
+ * `id` is the item UUID, the exact identifier the sidebar keys on.
+ *
+ * Requests match on name and url; folders match on name alone, since a folder
+ * is not an endpoint and has no url to match or display.
  *
  * Pure + React-free so it can be unit tested and memoized by the caller.
  */
 
 import Fuse from 'fuse.js';
 import type { IFuseOptions, FuseResultMatch } from 'fuse.js';
+import type { Folder } from '@opencollection/types/collection/item';
 import type { NavEntry } from '../../routing/types';
 import { getRequestUrl } from '../../utils/schemaHelpers';
 import { getItemUuid } from '../../utils/itemUtils';
+import { countFolderRequests } from '../../utils/folder';
 
-export interface SearchRecord {
-  /** Item UUID (the matchingItemIds contract + sidebar key). */
+interface SearchRecordBase {
+  /** Item UUID (the sidebar key). */
   id: string;
   /** Route target slug. */
   slug: string;
   name: string;
-  method?: string;
-  /** Folder chain, searchable + displayed, e.g. "Hotels / Browse & search". */
-  breadcrumb: string;
+  /** Ancestor folder names, outermost first; joined for display, never searched. */
+  ancestorNames: string[];
   /** Ancestor folder slugs, for the folder filter chip. */
   ancestorSlugs: string[];
+}
+
+export interface RequestSearchRecord extends SearchRecordBase {
+  type: 'request';
+  method?: string;
   url: string;
 }
+
+export interface FolderSearchRecord extends SearchRecordBase {
+  type: 'folder';
+  requestCount: number;
+}
+
+export type SearchRecord = RequestSearchRecord | FolderSearchRecord;
 
 /** A folder offered in the palette's folder filter dropdown. */
 export interface FolderOption {
@@ -35,24 +50,61 @@ export interface FolderOption {
   name: string;
 }
 
-/** Build the searchable records (request nodes only) from the nav model. */
+const BREADCRUMB_SEPARATOR = ' / ';
+
+/** Build the searchable records (requests + folders) from the nav model. */
 export const buildSearchRecords = (entries: NavEntry[]): SearchRecord[] => {
   const records: SearchRecord[] = [];
   for (const entry of entries) {
-    if (entry.type !== 'request' || !entry.item) continue;
+    if (!entry.item) continue;
     const id = getItemUuid(entry.item);
     if (!id) continue; // unhydrated, cannot key to the sidebar; skip
-    records.push({
+    const common = {
       id,
       slug: entry.slug,
       name: entry.name,
-      method: entry.method,
-      breadcrumb: entry.ancestors.map((a) => a.name).join(' / '),
-      ancestorSlugs: entry.ancestors.map((a) => a.slug),
-      url: getRequestUrl(entry.item as never),
-    });
+      ancestorNames: entry.ancestors.map((a) => a.name),
+      ancestorSlugs: entry.ancestors.map((a) => a.slug)
+    };
+
+    if (entry.type === 'folder') {
+      records.push({
+        type: 'folder',
+        ...common,
+        requestCount: countFolderRequests(entry.item as Folder)
+      });
+    } else if (entry.type === 'request') {
+      records.push({
+        type: 'request',
+        ...common,
+        method: entry.method,
+        url: getRequestUrl(entry.item as never)
+      });
+    }
   }
   return records;
+};
+
+const MAX_BREADCRUMB_SEGMENTS = 3;
+
+export interface BreadcrumbText {
+  /** Every ancestor, for the accessible name and the tooltip. */
+  full: string;
+  /** What the row paints; equals `full` until the chain is too long. */
+  display: string;
+}
+
+/**
+ * Render the ancestor chain, collapsing the middle of a long one:
+ * ["A","B","C","D"] → "A / … / D". Folder names are free text and may contain
+ * the separator themselves, so the chain is only ever joined here — never
+ * split back apart.
+ */
+export const formatBreadcrumb = (ancestorNames: string[]): BreadcrumbText => {
+  const full = ancestorNames.join(BREADCRUMB_SEPARATOR);
+  if (ancestorNames.length <= MAX_BREADCRUMB_SEGMENTS) return { full, display: full };
+  const ends = [ancestorNames[0], '…', ancestorNames[ancestorNames.length - 1]];
+  return { full, display: ends.join(BREADCRUMB_SEPARATOR) };
 };
 
 /** Top-level folders, for the folder filter dropdown. */
@@ -87,7 +139,7 @@ export const collectMethods = (entries: NavEntry[]): string[] => {
 };
 
 /** Searchable + highlightable fields, in weight order (name dominates). */
-type SearchField = 'name' | 'url' | 'breadcrumb';
+type SearchField = 'name' | 'url';
 
 /** Matched character ranges per field, as inclusive [start, end] pairs. */
 export type FieldMatches = Partial<Record<SearchField, Array<[number, number]>>>;
@@ -104,6 +156,8 @@ export interface SearchHit {
  * never stitches characters across separate words the way a subsequence would.
  * `ignoreLocation` is required because URLs are long and the match can sit
  * anywhere in them; `threshold` trades typo tolerance against noise.
+ *
+ * Folder records carry no `url`, so they are matched on name alone.
  */
 const FUSE_OPTIONS: IFuseOptions<SearchRecord> = {
   includeMatches: true,
@@ -113,8 +167,7 @@ const FUSE_OPTIONS: IFuseOptions<SearchRecord> = {
   minMatchCharLength: 2,
   keys: [
     { name: 'name', weight: 3 },
-    { name: 'url', weight: 2 },
-    { name: 'breadcrumb', weight: 1 }
+    { name: 'url', weight: 2 }
   ]
 };
 
@@ -163,6 +216,21 @@ const adjacentSwaps = (query: string): string[] => {
 const TRANSPOSITION_MAX_SCORE = 0.1;
 
 /**
+ * Folders form a block above requests, matching how the sidebar orders a level.
+ * The grouping is unconditional, so a fuzzy folder hit outranks an exact request
+ * hit; score only decides the order within a block.
+ */
+const groupRank = (record: SearchRecord): number => (record.type === 'folder' ? 0 : 1);
+
+/**
+ * Apply that same grouping to an already-ordered list, for the filter-only
+ * results the palette builds without running a query. The sort is stable, so
+ * each group keeps its incoming (nav) order.
+ */
+export const orderFoldersFirst = (hits: SearchHit[]): SearchHit[] =>
+  [...hits].sort((a, b) => groupRank(a.record) - groupRank(b.record));
+
+/**
  * Rank records against a query (text only; filters are applied separately by
  * the caller). Empty query → [] (the palette shows its initial empty state,
  * not the whole collection). The original query runs at the normal threshold;
@@ -191,6 +259,6 @@ export const searchHits = (fuse: Fuse<SearchRecord>, query: string): SearchHit[]
   for (const variant of adjacentSwaps(q)) ingest(fuse.search(variant), false);
 
   return [...bestById.values()]
-    .sort((a, b) => a.score - b.score)
+    .sort((a, b) => groupRank(a.record) - groupRank(b.record) || a.score - b.score)
     .map(({ record, matches }) => ({ record, matches }));
 };

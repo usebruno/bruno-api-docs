@@ -5,7 +5,7 @@ import { TestList } from './TestList';
 import type { TestRow } from '../../../utils/fileUtils';
 
 const tests: TestRow[] = [
-  { level: 'collection', name: 'is authenticated', sourceName: 'API', code: "test('is authenticated', () => { expect(ok).to.equal(true); })" },
+  { level: 'collection', name: 'is authenticated', sourceName: 'API', code: 'test(\'is authenticated\', () => { expect(ok).to.equal(true); })' },
   { level: 'request', name: 'returns a token', code: '' }
 ];
 

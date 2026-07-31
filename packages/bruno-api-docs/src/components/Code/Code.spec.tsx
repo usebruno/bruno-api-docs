@@ -5,7 +5,7 @@ import { Code } from './Code';
 
 describe('Code (read-only viewer)', () => {
   it('renders the code content', () => {
-    const html = renderToStaticMarkup(<Code code={'const a = 1;'} language="javascript" />);
+    const html = renderToStaticMarkup(<Code code="const a = 1;" language="javascript" />);
     expect(html).toContain('const a = 1;');
   });
 
@@ -25,7 +25,7 @@ describe('Code (read-only viewer)', () => {
   });
 
   it('shows a copy button by default and hides it when showCopy is false', () => {
-    expect(renderToStaticMarkup(<Code code={'x'} />)).toContain('<button');
-    expect(renderToStaticMarkup(<Code code={'x'} showCopy={false} />)).not.toContain('<button');
+    expect(renderToStaticMarkup(<Code code="x" />)).toContain('<button');
+    expect(renderToStaticMarkup(<Code code="x" showCopy={false} />)).not.toContain('<button');
   });
 });

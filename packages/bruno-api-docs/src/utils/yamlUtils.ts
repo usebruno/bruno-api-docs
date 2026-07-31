@@ -37,9 +37,9 @@ export const parseCollectionContent = (content: string, filePath?: string): any 
   if (filePath && isYamlFile(filePath)) {
     return parseYaml(content);
   }
-  
+
   const trimmedContent = content.trim();
-  
+
   if (trimmedContent.startsWith('{') || trimmedContent.startsWith('[')) {
     try {
       return JSON.parse(content);
@@ -47,7 +47,7 @@ export const parseCollectionContent = (content: string, filePath?: string): any 
       throw new Error(`Failed to parse JSON: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
-  
+
   return parseYaml(content);
 };
 
@@ -60,7 +60,7 @@ export const isValidCollection = (data: any): boolean => {
   if (!data || typeof data !== 'object') {
     return false;
   }
-  
+
   // Basic validation - should have a name and items array
   return typeof data.name === 'string' && Array.isArray(data.items);
-}; 
+};

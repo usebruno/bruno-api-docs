@@ -3,7 +3,7 @@ export {
   useTopbarLayout,
   layoutModeForWidth,
   showsHamburger,
-  type TopbarLayoutMode,
+  type TopbarLayoutMode
 } from './useTopbarLayout';
 export {
   useCanRunBrunoApp,
@@ -12,7 +12,7 @@ export {
   computeIsMobilePhone,
   useIsMobileDevice,
   useIsMobilePhone,
-  type DeviceEnv,
+  type DeviceEnv
 } from './useCanRunBrunoApp';
 export { useSearchHotkey } from './useSearchHotkey';
 export { useClickOutside } from './useClickOutside';

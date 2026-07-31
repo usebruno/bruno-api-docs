@@ -27,7 +27,7 @@ const BottomSheetDock: React.FC<BottomSheetDockProps> = ({
   onToggleSidebar,
   onClose,
   openNonce,
-  children,
+  children
 }) => {
   // Opens to 60% of the viewport by default (and re-expands to it from collapsed),
   // and can be dragged up to full screen or down to collapse.
@@ -36,7 +36,7 @@ const BottomSheetDock: React.FC<BottomSheetDockProps> = ({
     axis: 'y',
     initial: defaultHeight,
     min: HEADER_HEIGHT,
-    max: () => window.innerHeight,
+    max: () => window.innerHeight
   });
   // Height drives everything: dragging down to the header collapses it, and the
   // collapse button just snaps between the header height and the last size.

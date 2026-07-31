@@ -83,5 +83,4 @@ test.describe('Sidebar - Examples (docs)', () => {
     await expect(page.getByTestId('page')).toHaveAttribute('data-page-type', 'request');
     await expect(requestPage.examples.activeCard).toHaveCount(0);
   });
-
 });

@@ -77,9 +77,9 @@ export const syncPathParams = (
   );
 
   // Reference-stable when the path set is identical (same entries, same order).
-  const unchanged =
-    existingPath.length === nextPath.length &&
-    existingPath.every((p, i) => p === nextPath[i]);
+  const unchanged
+    = existingPath.length === nextPath.length
+      && existingPath.every((p, i) => p === nextPath[i]);
   if (unchanged) {
     return existing;
   }
@@ -154,7 +154,6 @@ export const buildRequestUrl = (
   const queryParams = (params ?? []).filter((p) => p?.type === 'query' && !p.disabled && p.name);
   if (queryParams.length === 0) return withPath;
 
-
   const hashIndex = withPath.indexOf('#');
   const fragment = hashIndex === -1 ? '' : withPath.slice(hashIndex);
   const beforeHash = hashIndex === -1 ? withPath : withPath.slice(0, hashIndex);
@@ -205,7 +204,6 @@ const parseUrlQueryParams = (url: string | undefined | null): { name: string; va
   return pairs;
 };
 
-
 export const syncQueryParams = (
   params: HttpRequestParam[] | undefined,
   url: string
@@ -232,9 +230,9 @@ export const syncQueryParams = (
   const keptDisabled = existingQuery.filter((p) => p?.disabled);
   const nextQuery = [...fromUrl, ...keptDisabled];
 
-  const unchanged =
-    existingQuery.length === nextQuery.length &&
-    existingQuery.every((p, i) => p === nextQuery[i]);
+  const unchanged
+    = existingQuery.length === nextQuery.length
+      && existingQuery.every((p, i) => p === nextQuery[i]);
   if (unchanged) {
     return existing;
   }
@@ -242,7 +240,6 @@ export const syncQueryParams = (
   const pathParams = existing.filter((p) => p?.type === 'path');
   return [...nextQuery, ...pathParams];
 };
-
 
 export const setUrlQueryParams = (
   url: string | undefined | null,

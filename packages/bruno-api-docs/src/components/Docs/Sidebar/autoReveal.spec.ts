@@ -12,7 +12,7 @@ const folderEntry: NavEntry = {
   name: 'billing',
   item: item('folder-billing'),
   ancestors: [],
-  depth: 0,
+  depth: 0
 };
 const requestEntry: NavEntry = {
   slug: 'billing/get-customers',
@@ -21,15 +21,15 @@ const requestEntry: NavEntry = {
   item: item('req-get-customers'),
   ancestors: [{ name: 'billing', slug: 'billing' }],
   depth: 1,
-  method: 'GET',
+  method: 'GET'
 };
 
 const loadedModel: NavModel = {
   ordered: [folderEntry, requestEntry],
   bySlug: new Map([
     [folderEntry.slug, folderEntry],
-    [requestEntry.slug, requestEntry],
-  ]),
+    [requestEntry.slug, requestEntry]
+  ])
 };
 
 // The model before the collection has hydrated (reload): nothing resolves yet.
@@ -40,14 +40,14 @@ describe('computeAutoReveal', () => {
     // Reload: first run, collection still loading.
     expect(computeAutoReveal(null, 'billing/get-customers', emptyModel)).toEqual({
       claim: false,
-      uuids: [],
+      uuids: []
     });
   });
 
   it('claims and expands the ancestor folders once the model resolves the slug', () => {
     expect(computeAutoReveal(null, 'billing/get-customers', loadedModel)).toEqual({
       claim: true,
-      uuids: ['folder-billing'],
+      uuids: ['folder-billing']
     });
   });
 
@@ -60,7 +60,7 @@ describe('computeAutoReveal', () => {
   it('opens the folder itself when a folder is the active item (here top-level, so just itself)', () => {
     expect(computeAutoReveal(null, 'billing', loadedModel)).toEqual({
       claim: true,
-      uuids: ['folder-billing'],
+      uuids: ['folder-billing']
     });
   });
 });

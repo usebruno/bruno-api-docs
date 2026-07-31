@@ -18,7 +18,7 @@ const InlineDock: React.FC<InlineDockProps> = ({ dock, onDockChange, sidebarOpen
     axis: 'x',
     initial: Math.round(window.innerWidth * 0.4),
     min: 360,
-    max: () => Math.round(window.innerWidth * 0.7),
+    max: () => Math.round(window.innerWidth * 0.7)
   });
 
   return (

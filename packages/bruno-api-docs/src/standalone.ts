@@ -1,5 +1,6 @@
 import React from 'react';
-import { createRoot, Root } from 'react-dom/client';
+import type { Root } from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import './styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
 import Prism from './utils/prism';
@@ -40,7 +41,7 @@ export class OpenCollectionRenderer {
         }
       ];
 
-      links.forEach(linkProps => {
+      links.forEach((linkProps) => {
         const link = document.createElement('link');
         Object.entries(linkProps).forEach(([key, value]) => {
           link.setAttribute(key, value);
@@ -75,7 +76,7 @@ export class OpenCollectionRenderer {
 
   private createLogoElement(): React.ReactNode {
     if (!this.options.logo) return undefined;
-    
+
     return React.createElement('img', {
       src: this.options.logo,
       alt: 'Logo',
@@ -87,7 +88,7 @@ export class OpenCollectionRenderer {
     if (!this.root) return;
 
     const collection = this.convertCollection(this.options.opencollection);
-    
+
     this.root.render(React.createElement(OpenCollection, {
       collection,
       logo: this.createLogoElement(),
@@ -99,7 +100,6 @@ export class OpenCollectionRenderer {
     this.options.opencollection = opencollection;
     this.render();
   }
-
 
   public destroy() {
     if (this.root) {
@@ -113,4 +113,4 @@ export default OpenCollectionRenderer;
 
 if (typeof window !== 'undefined') {
   (window as any).OpenCollection = OpenCollectionRenderer;
-} 
+}

@@ -6,7 +6,7 @@ export { mergeHeaders, mergeAuth, mergeScripts } from './request-merger';
 
 // Variable utilities
 export { getCollectionFolderRequestVariables } from './variable-merger';
-export { 
+export {
   interpolateVars,
-  createInterpolationVariables 
+  createInterpolationVariables
 } from './variable-interpolator';

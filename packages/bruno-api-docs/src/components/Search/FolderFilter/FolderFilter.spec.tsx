@@ -6,7 +6,7 @@ import type { FolderOption } from '../searchIndex';
 
 const folders: FolderOption[] = [
   { slug: 'hotels', name: 'Hotels' },
-  { slug: 'bookings', name: 'Bookings' },
+  { slug: 'bookings', name: 'Bookings' }
 ];
 
 describe('FolderFilter', () => {

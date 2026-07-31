@@ -36,11 +36,11 @@ export interface FileBodyRow {
   description?: string;
 }
 
-export type BodyView =
-  | { render: 'code'; language: string; contentTypeLabel: string; code: string }
-  | { render: 'table'; variant: 'urlencoded' | 'multipart'; contentTypeLabel: string; rows: BodyTableRow[] }
-  | { render: 'file'; contentTypeLabel: string; files: FileBodyRow[] }
-  | { render: 'none' };
+export type BodyView
+  = | { render: 'code'; language: string; contentTypeLabel: string; code: string }
+    | { render: 'table'; variant: 'urlencoded' | 'multipart'; contentTypeLabel: string; rows: BodyTableRow[] }
+    | { render: 'file'; contentTypeLabel: string; files: FileBodyRow[] }
+    | { render: 'none' };
 
 export interface SelectedBody {
   body?: HttpRequestBody;

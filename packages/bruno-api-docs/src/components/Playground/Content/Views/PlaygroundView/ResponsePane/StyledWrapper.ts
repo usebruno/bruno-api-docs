@@ -41,4 +41,4 @@ export const SendIconWrapper = styled.div`
   svg {
     color: var(--text-muted);
   }
-`
+`;

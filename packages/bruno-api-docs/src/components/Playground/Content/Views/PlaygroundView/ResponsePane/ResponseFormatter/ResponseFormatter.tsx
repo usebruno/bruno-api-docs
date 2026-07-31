@@ -70,6 +70,7 @@ const ResponseFormatSelector: FC<ResponseFormatSelectorProps> = ({
       placement="bottom-start"
       header={<PreviewToggleHeader checked={showPreview} onChange={(next) => onPreviewToggle?.(next)} />}
       testId="response-format-selector"
+      size="sm"
     />
   );
 };

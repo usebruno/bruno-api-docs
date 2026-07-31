@@ -5,14 +5,14 @@ describe('ScriptRuntime', () => {
   it('should handle script execution', async () => {
     const runtime = new ScriptRuntime();
 
-    let environmentVariables = {
-        "env_var": "env_var_value"
+    const environmentVariables = {
+      env_var: 'env_var_value'
     };
 
-    let runtimeVariables = {
-      "runtime_var": "runtime_var_value"
+    const runtimeVariables = {
+      runtime_var: 'runtime_var_value'
     };
-    
+
     const mockRequest = {
       url: 'https://echo.usebruno.com',
       method: 'GET',
@@ -80,10 +80,10 @@ describe('ScriptRuntime', () => {
     const bru = await runtime.runScript(options);
     expect(bru).toBeDefined();
 
-    expect(environmentVariables).to.eql({ "env_var": "env_var_updated" });
-    expect(runtimeVariables).to.eql({ 
-      "runtime_var": "runtime_var_updated",
-      "test_results": {
+    expect(environmentVariables).to.eql({ env_var: 'env_var_updated' });
+    expect(runtimeVariables).to.eql({
+      runtime_var: 'runtime_var_updated',
+      test_results: {
         summary: { total: 6, passed: 6, failed: 0, skipped: 0 },
         results: [
           { status: 'pass', description: 'req.getUrl()' },

@@ -6,7 +6,7 @@ describe('flattenTheme', () => {
     const out = flattenTheme({
       bg: '#fff',
       sidebar: { bg: '#fafafa', focusBorder: '#ccc' },
-      request: { methods: { get: '#2563eb' } },
+      request: { methods: { get: '#2563eb' } }
     });
     expect(out['--oc-bg']).toBe('#fff');
     expect(out['--oc-sidebar-bg']).toBe('#fafafa');

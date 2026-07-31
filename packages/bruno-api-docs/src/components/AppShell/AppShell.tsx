@@ -108,23 +108,23 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
           collectionName={collection?.info?.name || 'API Collection'}
           version={collection?.info?.version}
           logo={logo}
-          searchSlot={
+          searchSlot={(
             <SearchBar
               open={searchOpen}
               onOpenChange={setSearchOpen}
               focusNonce={searchFocusNonce}
               collapsed={!isDesktop}
             />
-          }
+          )}
           searchOpen={searchOpen}
           onSearchOpenChange={setSearchOpen}
           onToggleSidebar={toggleSidebar}
-          envSwitcherSlot={
+          envSwitcherSlot={(
             <>
               <ShowVarsToggle />
               <EnvSwitcher />
             </>
-          }
+          )}
           openInBrunoHref={buildFetchInBrunoUrl(gitCollectionUrl)}
           themeToggleSlot={<ThemeToggle />}
         />

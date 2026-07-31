@@ -38,7 +38,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   collectionActive,
   testId = 'playground-sidebar',
   activeExample,
-  onExampleClick,
+  onExampleClick
 }) => {
   const [collectionCollapsed, setCollectionCollapsed] = useState(false);
   const name = collection?.info?.name || 'Collection';
@@ -55,17 +55,17 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
       <div className="controls">
         <EnvSwitcher testId="playground-env-switcher" />
         <Tooltip
-          content='Configure Environments'
+          content="Configure Environments"
         >
-        <IconButton
-          className={`env-settings${environmentsActive ? ' active' : ''}`}
-          label="Environment settings"
-          aria-label='Environment settings'
-          data-testid="playground-env-settings"
-          onClick={onOpenEnvironments}
-        >
-          <SettingsIcon />
-        </IconButton>
+          <IconButton
+            className={`env-settings${environmentsActive ? ' active' : ''}`}
+            label="Environment settings"
+            aria-label="Environment settings"
+            data-testid="playground-env-settings"
+            onClick={onOpenEnvironments}
+          >
+            <SettingsIcon />
+          </IconButton>
         </Tooltip>
       </div>
 
@@ -91,7 +91,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
                 setCollectionCollapsed(false);
                 onOpenCollection();
               },
-              testId: 'sidebar-collection-root',
+              testId: 'sidebar-collection-root'
             }}
           />
         ) : null}

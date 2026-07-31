@@ -26,7 +26,7 @@ describe('classifyRequestError', () => {
       const result = classifyRequestError(timeoutError());
       expect(result.type).toBe('timeout');
       expect(result.title).toBe('Request timed out');
-      expect(result.message).toBe("Request timed out. The server didn't respond in time.");
+      expect(result.message).toBe('Request timed out. The server didn\'t respond in time.');
     });
 
     it('classifies a manual AbortError', () => {
@@ -43,6 +43,23 @@ describe('classifyRequestError', () => {
       expect(result.type).toBe('mixed-content');
       expect(result.message).toContain('secure (https)');
       expect(result.message).toContain('insecure (http)');
+    });
+  });
+
+  // One phrase per engine, plus undici's, so a non-DOM runtime still gets the
+  // scheme/origin guidance rather than a bare message.
+  describe('every engine wording counts as the opaque failure', () => {
+    it.each([
+      ['Failed to fetch', 'Chromium'],
+      ['NetworkError when attempting to fetch resource.', 'Firefox'],
+      ['Load failed', 'WebKit'],
+      ['fetch failed', 'undici']
+    ])('classifies %s (%s)', (message) => {
+      const result = classifyRequestError(failedToFetch(message), {
+        pageUrl: 'https://docs.example.com/',
+        requestUrl: 'https://api.example.com/users'
+      });
+      expect(result.type).toBe('browser-blocked');
     });
   });
 
@@ -82,7 +99,7 @@ describe('classifyRequestError', () => {
         requestUrl: 'https://app.example.com/api/users'
       });
       expect(result.type).toBe('unreachable');
-      expect(result.message).toBe("Couldn't reach the server. It may be down, or the URL may be wrong.");
+      expect(result.message).toBe('Couldn\'t reach the server. It may be down, or the URL may be wrong.');
     });
   });
 
@@ -107,6 +124,29 @@ describe('classifyRequestError', () => {
       const result = classifyRequestError('boom');
       expect(result.type).toBe('unknown');
       expect(result.message).toBe('The request could not be completed.');
+    });
+  });
+
+  // A forbidden method (TRACE/CONNECT/TRACK) is rejected before any connection,
+  // and the browser explains why, so its own message must survive rather than
+  // being relabelled as CORS. The messages below are the real ones each engine
+  // throws, captured from Chromium, Firefox and WebKit.
+  describe('forbidden method -> the browser explanation, not a CORS guess', () => {
+    const crossOrigin = { pageUrl: 'https://docs.example.com/', requestUrl: 'https://api.example.com/users' };
+
+    const chromium = (method: string) =>
+      `Failed to execute 'fetch' on 'Window': '${method}' HTTP method is unsupported.`;
+
+    it.each([
+      [chromium('TRACE'), 'Chromium TRACE'],
+      [chromium('CONNECT'), 'Chromium CONNECT'],
+      ['Window.fetch: Invalid request method TRACE.', 'Firefox TRACE'],
+      ['Window.fetch: Invalid request method CONNECT.', 'Firefox CONNECT'],
+      ['Method is forbidden.', 'WebKit TRACE/CONNECT']
+    ])('surfaces %s (%s)', (message) => {
+      const result = classifyRequestError(failedToFetch(message), crossOrigin);
+      expect(result.type).toBe('unknown');
+      expect(result.message).toBe(message);
     });
   });
 });

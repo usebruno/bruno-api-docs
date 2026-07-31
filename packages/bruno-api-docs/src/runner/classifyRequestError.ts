@@ -16,12 +16,12 @@
  * NOTE: 4xx/5xx responses are NOT failures — they never reach this function.
  */
 
-export type RequestErrorType =
-  | 'timeout'
-  | 'mixed-content'
-  | 'browser-blocked'
-  | 'unreachable'
-  | 'unknown';
+export type RequestErrorType
+  = | 'timeout'
+    | 'mixed-content'
+    | 'browser-blocked'
+    | 'unreachable'
+    | 'unknown';
 
 export interface ClassifiedRequestError {
   type: RequestErrorType;
@@ -53,15 +53,29 @@ const isTimeoutError = (error: unknown): boolean => {
 };
 
 /**
- * The browser's opaque network failure. `fetch` throws a `TypeError` whose
- * message is "Failed to fetch" (Chrome) / "NetworkError when attempting to
- * fetch resource" (Firefox) / "Load failed" (Safari).
+ * The opaque network failure, one phrase per engine (plus undici's `fetch
+ * failed`, for a non-DOM runtime).
+ *
+ * Matched as whole phrases rather than by sniffing for "fetch", because not
+ * every `TypeError` mentioning fetch is a network failure. A forbidden method
+ * (TRACE/CONNECT/TRACK) is rejected before any connection is made, and the
+ * browser says exactly why: "Failed to execute 'fetch' on 'Window': 'TRACE'
+ * HTTP method is unsupported." (Chrome), "Window.fetch: Invalid request method
+ * TRACE." (Firefox), "Method is forbidden." (Safari). Those must reach the
+ * reader rather than be replaced by a guess about CORS.
  */
+const OPAQUE_FETCH_FAILURE_MESSAGES = [
+  'failed to fetch',
+  'networkerror when attempting to fetch resource',
+  'load failed',
+  'fetch failed'
+];
+
 const isOpaqueFetchFailure = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
   if (error.name !== 'TypeError') return false;
   const msg = error.message.toLowerCase();
-  return msg.includes('fetch') || msg.includes('load failed') || msg.includes('networkerror');
+  return OPAQUE_FETCH_FAILURE_MESSAGES.some((opaqueMessage) => msg.includes(opaqueMessage));
 };
 
 const safeParseUrl = (url?: string): URL | null => {
@@ -76,29 +90,29 @@ const safeParseUrl = (url?: string): URL | null => {
 const TIMEOUT: ClassifiedRequestError = {
   type: 'timeout',
   title: 'Request timed out',
-  message: "Request timed out. The server didn't respond in time."
+  message: 'Request timed out. The server didn\'t respond in time.'
 };
 
 const MIXED_CONTENT: ClassifiedRequestError = {
   type: 'mixed-content',
   title: 'Request blocked',
   message:
-    'Request blocked: this page is secure (https) but the URL is insecure (http). ' +
-    'Use an https URL, or run it from the Bruno desktop app.'
+    'Request blocked: this page is secure (https) but the URL is insecure (http). '
+    + 'Use an https URL, or run it from the Bruno desktop app.'
 };
 
 const BROWSER_BLOCKED: ClassifiedRequestError = {
   type: 'browser-blocked',
   title: 'Request blocked',
   message:
-    "Request blocked by your browser, usually CORS: the API didn't allow requests " +
-    'from this page. Try it in the Bruno desktop app.'
+    'Request blocked by your browser, usually CORS: the API didn\'t allow requests '
+    + 'from this page. Try it in the Bruno desktop app.'
 };
 
 const UNREACHABLE: ClassifiedRequestError = {
   type: 'unreachable',
-  title: "Couldn't reach the server",
-  message: "Couldn't reach the server. It may be down, or the URL may be wrong."
+  title: 'Couldn\'t reach the server',
+  message: 'Couldn\'t reach the server. It may be down, or the URL may be wrong.'
 };
 
 export const classifyRequestError = (
@@ -134,12 +148,12 @@ export const classifyRequestError = (
   }
 
   // Anything else (or an unparseable URL): surface the underlying error message.
-  const rawMessage =
-    error instanceof Error && error.message ? error.message : 'The request could not be completed.';
+  const rawMessage
+    = error instanceof Error && error.message ? error.message : 'The request could not be completed.';
 
   return {
     type: 'unknown',
-    title: "Couldn't complete the request",
+    title: 'Couldn\'t complete the request',
     message: rawMessage
   };
 };

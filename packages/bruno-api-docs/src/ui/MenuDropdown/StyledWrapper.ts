@@ -120,6 +120,17 @@ export const StyledWrapper = styled.div`
       padding-left: 1.5rem;
     }
 
+    &.dropdown-item-link {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--oc-text-link);
+
+      .dropdown-label {
+        padding-left: 0.45rem;
+      }
+    }
+
     /* Focused state - applied during keyboard navigation */
     &.dropdown-item-focused {
       background-color: var(--oc-dropdown-hover-bg);

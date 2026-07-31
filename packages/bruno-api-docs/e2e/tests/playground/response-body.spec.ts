@@ -1,3 +1,4 @@
+import { Buffer } from 'buffer';
 import { test, expect } from '../../playwright';
 
 // A compact JSON body whose encodings are easy to assert on: the raw bytes are
@@ -95,12 +96,11 @@ test.describe('response body — binary responses', () => {
     await responsePane.togglePreview();
     expect(await responsePane.isPreviewOn()).toBe(false);
 
-    // A benign re-render with an unchanged content type must not clobber the manual choice:
-    // re-fetch the identical image response and confirm Preview is still off. (Re-fetching is a
-    // stable, always-available trigger — the response tab bar overflows unpredictably across
-    // viewports, so a tab switch would be flaky here.)
-    await page.keyboard.press('Escape'); // close the format dropdown before re-sending
-    await responsePane.send();
+    // A benign re-render (tab switch and back) must not clobber the manual choice. Switch through a
+    // layout-agnostic helper so the assertion doesn't hinge on whether the tabs render inline or
+    // collapse into the overflow menu at this width.
+    await responsePane.switchToTab('headers');
+    await responsePane.switchToTab('response');
 
     await responsePane.openFormatSelector();
     expect(await responsePane.isPreviewOn()).toBe(false);

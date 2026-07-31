@@ -38,8 +38,8 @@ export const Dropdown: React.FC<DropdownProps> = ({
   const resolvedAppendTo = appendTo ?? (() => document.body);
 
   // When controlled (visible provided) Tippy must not also manage a trigger.
-  const tippyProps: Partial<TippyProps> =
-    visible !== undefined
+  const tippyProps: Partial<TippyProps>
+    = visible !== undefined
       ? { ...props, visible, interactive: true, appendTo: resolvedAppendTo }
       : { ...props, trigger: 'click', interactive: true, appendTo: resolvedAppendTo };
 

@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { StyledWrapper } from './StyledWrapper';
-import MenuDropdown from '../../../../../../ui/MenuDropdown';
 import HighlightedInput from '../../../../../HighlightedInput/HighlightedInput';
 import { useResolvedVariables } from '../../../../../../hooks/useVariableResolver';
 import { getHttpMethod, getRequestUrl, getHttpParams } from '../../../../../../utils/schemaHelpers';
 import { syncPathParams, syncQueryParams } from '../../../../../../utils/pathParams';
-import { availableMethods } from '../../../../../../theme/methodColors';
-import { MethodBadge } from '../../../../../MethodBadge/MethodBadge';
+import { HttpMethodSelector } from '../../../../../HttpMethodSelector/HttpMethodSelector';
 import { CopyButton } from '../../../../../../ui/CopyButton/CopyButton';
 import { SendIcon } from '../../../../../../assets/icons';
 
@@ -59,23 +57,7 @@ const QueryBar: React.FC<QueryBarProps> = ({ item, onSendRequest, isLoading, onI
 
   return (
     <StyledWrapper>
-      <MenuDropdown
-        selectedItemId={method}
-        placement="bottom-start"
-        testId="method-select"
-        role="listbox"
-        size="sm"
-        items={availableMethods.map((m) => ({
-          id: m,
-          label: <MethodBadge method={m} />,
-          ariaLabel: m,
-          onClick: () => handleMethodChange(m)
-        }))}
-      >
-        <button type="button" className="method-select" aria-label="HTTP method">
-          <MethodBadge method={method} short />
-        </button>
-      </MenuDropdown>
+      <HttpMethodSelector method={method} onMethodChange={handleMethodChange} testId="method-select" />
 
       <HighlightedInput
         value={url}

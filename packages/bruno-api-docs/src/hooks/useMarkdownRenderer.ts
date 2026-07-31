@@ -25,14 +25,14 @@ const createRenderer = (): MarkdownIt => {
         }
       }
       return '';
-    },
+    }
   });
 
-  const defaultRender =
-    markdownIt.renderer.rules.heading_open ||
-    function (tokens, idx, options, env, self) {
-      return self.renderToken(tokens, idx, options);
-    };
+  const defaultRender
+    = markdownIt.renderer.rules.heading_open
+      || function (tokens, idx, options, env, self) {
+        return self.renderToken(tokens, idx, options);
+      };
 
   markdownIt.renderer.rules.heading_open = function (
     tokens,

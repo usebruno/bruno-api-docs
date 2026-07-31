@@ -28,15 +28,15 @@ export const getTreePathFromCollectionToItem = (
 
   const findItemPath = (items: Item[] | undefined, currentPath: Item[] = []): boolean => {
     if (!items) return false;
-    
+
     for (const item of items) {
       const newPath = [...currentPath, item];
-      
+
       if (isHttpRequest(item) && isSameHttpRequest(item as HttpRequest, targetItem)) {
         path.push(...newPath);
         return true;
       }
-      
+
       if (isFolder(item)) {
         const folder = item as Folder;
         if (findItemPath(folder.items, newPath)) {
@@ -44,12 +44,12 @@ export const getTreePathFromCollectionToItem = (
         }
       }
     }
-    
+
     return false;
   };
-  
+
   findItemPath(collection.items);
-  
+
   // Remove the target item itself from the path (we only want the path TO the item)
   return path.slice(0, -1);
 };
@@ -59,8 +59,8 @@ export const getTreePathFromCollectionToItem = (
  */
 const isSameHttpRequest = (item1: HttpRequest, item2: HttpRequest): boolean => {
   return (
-    getItemName(item1) === getItemName(item2) &&
-    getHttpMethod(item1) === getHttpMethod(item2) &&
-    getRequestUrl(item1) === getRequestUrl(item2)
+    getItemName(item1) === getItemName(item2)
+    && getHttpMethod(item1) === getHttpMethod(item2)
+    && getRequestUrl(item1) === getRequestUrl(item2)
   );
 };

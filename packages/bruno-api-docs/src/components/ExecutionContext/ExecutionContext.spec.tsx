@@ -19,13 +19,13 @@ const assertions: AssertionRow[] = [
 ];
 
 const tests: TestRow[] = [
-  { level: 'collection', name: 'is authenticated', sourceName: 'API', code: "test('is authenticated', () => {})" },
-  { level: 'request', name: 'returns a token', code: "test('returns a token', () => {})" }
+  { level: 'collection', name: 'is authenticated', sourceName: 'API', code: 'test(\'is authenticated\', () => {})' },
+  { level: 'request', name: 'returns a token', code: 'test(\'returns a token\', () => {})' }
 ];
 
 const testScripts: RawTestScript[] = [
-  { level: 'collection', sourceName: 'API', code: "test('is authenticated', () => {})" },
-  { level: 'request', code: "test('returns a token', () => {})" }
+  { level: 'collection', sourceName: 'API', code: 'test(\'is authenticated\', () => {})' },
+  { level: 'request', code: 'test(\'returns a token\', () => {})' }
 ];
 
 const full = (props: Partial<React.ComponentProps<typeof ExecutionContext>> = {}) => (

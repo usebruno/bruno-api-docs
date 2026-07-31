@@ -10,11 +10,11 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   selectDocsCollection,
   setDocsCollection,
-  clearDocsCollection,
+  clearDocsCollection
 } from '@slices/docs';
 import {
   setPlaygroundCollection,
-  clearPlaygroundCollection,
+  clearPlaygroundCollection
 } from '@slices/playground';
 import {
   selectCollectionStatus,
@@ -80,7 +80,7 @@ export interface OpenCollectionProps {
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
-  gitCollectionUrl,
+  gitCollectionUrl
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);

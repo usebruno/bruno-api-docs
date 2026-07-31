@@ -5,7 +5,7 @@ import {
   type PlaygroundUrlState,
   DEFAULT_DOCK,
   readPlaygroundParams,
-  writePlaygroundParams,
+  writePlaygroundParams
 } from '../utils/playgroundDock';
 
 export interface PlaygroundUrlApi extends PlaygroundUrlState {
@@ -30,7 +30,7 @@ export const usePlaygroundUrlState = (): PlaygroundUrlApi => {
         return writePlaygroundParams(prev, {
           open: true,
           dock: current.open ? current.dock : DEFAULT_DOCK,
-          requestSlug,
+          requestSlug
         });
       });
     },

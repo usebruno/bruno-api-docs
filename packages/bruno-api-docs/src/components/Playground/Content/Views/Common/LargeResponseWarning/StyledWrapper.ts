@@ -42,7 +42,8 @@ export const StyledWrapper = styled.div`
     gap: 0.5rem;
   }
 
-  .large-response-view {
+  .large-response-view,
+  .large-response-download {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -62,6 +63,15 @@ export const StyledWrapper = styled.div`
     &:focus-visible {
       outline: 2px solid var(--primary-color);
       outline-offset: 1px;
+    }
+  }
+
+  .large-response-download:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      background-color: var(--oc-bg);
     }
   }
 `;

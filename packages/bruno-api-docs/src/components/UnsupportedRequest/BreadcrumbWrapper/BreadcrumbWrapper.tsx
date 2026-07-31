@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Breadcrumb, type BreadcrumbSegment } from '../../../ui/Breadcrumb/Breadcrumb';
-import { Item } from '@opencollection/types/collection/item';
-import { OpenCollection } from '@opencollection/types';
+import type { Item } from '@opencollection/types/collection/item';
+import type { OpenCollection } from '@opencollection/types';
 import { buildBreadcrumbSegments } from '../../../utils/common';
 
 export interface BreadcrumbWrapperProps {

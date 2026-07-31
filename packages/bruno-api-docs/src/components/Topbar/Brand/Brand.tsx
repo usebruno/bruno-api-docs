@@ -37,7 +37,7 @@ const Brand: React.FC<BrandProps> = ({
   version,
   logo,
   compact = false,
-  testId = 'brand',
+  testId = 'brand'
 }) => {
   const hasLogo = logo != null && logo !== '';
   return (

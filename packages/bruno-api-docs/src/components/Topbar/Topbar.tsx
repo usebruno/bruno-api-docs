@@ -73,7 +73,7 @@ const Topbar: React.FC<TopbarProps> = ({
   openInBrunoHref,
   onToggleSidebar,
   layoutMode,
-  testId = 'topbar',
+  testId = 'topbar'
 }) => {
   const autoMode = useTopbarLayout();
   const mode = layoutMode ?? autoMode;
@@ -86,7 +86,7 @@ const Topbar: React.FC<TopbarProps> = ({
       if (onSearchOpenChange) onSearchOpenChange(next);
       if (!isControlled) setInternalSearchOpen(next);
     },
-    [onSearchOpenChange, isControlled],
+    [onSearchOpenChange, isControlled]
   );
 
   const isMobile = mode === 'mobile';

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   resolvePlaygroundTarget,
   PLAYGROUND_ENVIRONMENTS_SLUG,
-  PLAYGROUND_COLLECTION_SLUG,
+  PLAYGROUND_COLLECTION_SLUG
 } from './resolvePlaygroundTarget';
 import type { NavModel, NavEntry } from '../../../routing/types';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
@@ -15,7 +15,7 @@ const folderEntry: NavEntry = {
   name: 'billing',
   item: item('folder-billing'),
   ancestors: [],
-  depth: 0,
+  depth: 0
 };
 const requestEntry: NavEntry = {
   slug: 'billing/get-customers',
@@ -24,14 +24,14 @@ const requestEntry: NavEntry = {
   item: item('req-get-customers'),
   ancestors: [{ name: 'billing', slug: 'billing' }],
   depth: 1,
-  method: 'GET',
+  method: 'GET'
 };
 const model: NavModel = {
   ordered: [folderEntry, requestEntry],
   bySlug: new Map([
     [folderEntry.slug, folderEntry],
-    [requestEntry.slug, requestEntry],
-  ]),
+    [requestEntry.slug, requestEntry]
+  ])
 };
 const emptyModel: NavModel = { ordered: [], bySlug: new Map() };
 
@@ -40,7 +40,7 @@ describe('resolvePlaygroundTarget', () => {
     expect(resolvePlaygroundTarget(PLAYGROUND_ENVIRONMENTS_SLUG, model)).toEqual({
       view: 'environments',
       uuid: null,
-      expandUuids: [],
+      expandUuids: []
     });
   });
 
@@ -48,7 +48,7 @@ describe('resolvePlaygroundTarget', () => {
     expect(resolvePlaygroundTarget(PLAYGROUND_COLLECTION_SLUG, model)).toEqual({
       view: 'collection-settings',
       uuid: null,
-      expandUuids: [],
+      expandUuids: []
     });
   });
 
@@ -56,7 +56,7 @@ describe('resolvePlaygroundTarget', () => {
     expect(resolvePlaygroundTarget('billing/get-customers', model)).toEqual({
       view: 'playground',
       uuid: 'req-get-customers',
-      expandUuids: ['folder-billing'],
+      expandUuids: ['folder-billing']
     });
   });
 
@@ -65,7 +65,7 @@ describe('resolvePlaygroundTarget', () => {
     expect(resolvePlaygroundTarget('billing', model)).toEqual({
       view: 'folder-settings',
       uuid: 'folder-billing',
-      expandUuids: ['folder-billing'],
+      expandUuids: ['folder-billing']
     });
   });
 

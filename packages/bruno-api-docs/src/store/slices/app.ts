@@ -53,5 +53,3 @@ export default appSlice.reducer;
 export const selectCollectionStatus = (state: RootState) => state.app.collectionStatus;
 export const selectCollectionError = (state: RootState) => state.app.collectionError;
 export const selectGitCollectionUrl = (state: RootState) => state.app.gitCollectionUrl;
-
-

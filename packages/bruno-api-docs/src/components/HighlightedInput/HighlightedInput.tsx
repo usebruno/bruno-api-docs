@@ -354,21 +354,21 @@ export const HighlightedInput: React.FC<HighlightedInputProps> = ({
   };
 
   const fieldProps = {
-    ref: setFieldRef,
-    className: 'text-input',
+    'ref': setFieldRef,
+    'className': 'text-input',
     'data-testid': testId,
     value,
     title,
     placeholder,
-    onChange: handleChange,
-    onKeyDown: handleKeyDown,
-    onClick: closeAutocomplete,
-    onBlur: closeAutocomplete,
-    onScroll: syncMirrorScroll,
-    autoComplete: 'off',
-    autoCorrect: 'off',
-    autoCapitalize: 'off',
-    spellCheck: false
+    'onChange': handleChange,
+    'onKeyDown': handleKeyDown,
+    'onClick': closeAutocomplete,
+    'onBlur': closeAutocomplete,
+    'onScroll': syncMirrorScroll,
+    'autoComplete': 'off',
+    'autoCorrect': 'off',
+    'autoCapitalize': 'off',
+    'spellCheck': false
   };
 
   return (

@@ -36,8 +36,8 @@ export const ScriptStep: React.FC<ScriptStepProps> = ({ step, position, onNaviga
         <ChevronArrow open={open} className="script-chevron" />
         <span className="script-step-main">
           <TruncatedText className="script-step-label" text={step.label} touch={false} />
-          {step.sourceName &&
-            (step.sourceUuid && onNavigate ? (
+          {step.sourceName
+            && (step.sourceUuid && onNavigate ? (
               <button
                 type="button"
                 className="script-step-source"

@@ -11,7 +11,7 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ label, children, type = 'button', showTooltip = true, ...rest }, ref) => (
-    <Tooltip content={label} disabled={!label || !showTooltip} openDelay={500}>
+    <Tooltip content={label} disabled={!label || !showTooltip}>
       <StyledWrapper ref={ref} type={type} aria-label={label} {...rest}>
         {children}
       </StyledWrapper>

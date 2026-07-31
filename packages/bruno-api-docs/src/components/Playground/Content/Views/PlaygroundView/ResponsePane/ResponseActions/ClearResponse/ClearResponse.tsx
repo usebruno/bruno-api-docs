@@ -9,7 +9,7 @@ interface ClearResponseProps {
 const ClearResponse: React.FC<ClearResponseProps> = ({ onClick }) => {
   return (
     <IconButton label="Clear Response" className="p-1" onClick={onClick}>
-      <IconEraser size={16} stroke={2} />
+      <IconEraser size={13} strokeWidth={1} />
     </IconButton>
   );
 };

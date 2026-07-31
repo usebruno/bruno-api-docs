@@ -86,7 +86,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
       <div className="actions-dropdown" data-testid="actions-dropdown">
         <MenuDropdown items={menuItems} placement="bottom-end" testId="response-actions-menu">
           <IconButton label="More actions" className="p-1">
-            <IconDots size={16} stroke={2} />
+            <IconDots size={13} strokeWidth={1} />
           </IconButton>
         </MenuDropdown>
       </div>

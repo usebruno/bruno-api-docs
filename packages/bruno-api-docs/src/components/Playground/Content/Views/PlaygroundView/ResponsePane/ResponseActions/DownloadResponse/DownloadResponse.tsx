@@ -10,7 +10,7 @@ interface DownloadResponseProps {
 const DownloadResponse: React.FC<DownloadResponseProps> = ({ onClick, disabled }) => {
   return (
     <IconButton label="Download Response" className="p-1" disabled={disabled} onClick={onClick}>
-      <IconDownload size={16} stroke={2} />
+      <IconDownload size={13} strokeWidth={1} />
     </IconButton>
   );
 };

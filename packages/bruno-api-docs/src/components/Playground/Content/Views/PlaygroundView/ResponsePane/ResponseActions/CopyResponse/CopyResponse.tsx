@@ -11,7 +11,7 @@ interface CopyResponseProps {
 const CopyResponse: React.FC<CopyResponseProps> = ({ copied, onClick, disabled }) => {
   return (
     <IconButton label="Copy Response" className="p-1" disabled={disabled} onClick={onClick}>
-      {copied ? <IconCheck size={16} stroke={2} /> : <IconCopy size={16} stroke={2} />}
+      {copied ? <IconCheck size={13} strokeWidth={1} /> : <IconCopy size={13} strokeWidth={1} />}
     </IconButton>
   );
 };

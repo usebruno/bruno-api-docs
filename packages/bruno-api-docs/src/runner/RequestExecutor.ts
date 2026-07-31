@@ -7,6 +7,7 @@ import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError
 import { detectContentTypeFromBytes, isByteFormatContentType } from '../utils/response';
 import { RESPONSE_LARGE_THRESHOLD } from '../constants';
 import stripJsonComments from 'strip-json-comments';
+import { statusCodePhrase } from '@/utils/exampleResponse';
 
 /** Methods `fetch` refuses to attach a request body to. */
 const BODYLESS_METHODS = ['GET', 'HEAD'];
@@ -44,7 +45,7 @@ export class RequestExecutor {
 
       return {
         status: response.status,
-        statusText: response.statusText,
+        statusText: response.statusText ? response.statusText : statusCodePhrase(response.status),
         headers: responseHeaders,
         data: responseData.data,
         base64Data: responseData.base64Data,

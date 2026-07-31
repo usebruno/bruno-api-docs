@@ -12,15 +12,13 @@ const ResponseStatus: React.FC<ResponseStatusProps> = ({ status, statusText }) =
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <span
-        className="font-mono font-medium"
-        style={{
-          color: getStatusColor(status)
-        }}
-      >
-        {status} {statusText}
-      </span>
+    <div
+      className="font-mono font-medium"
+      style={{
+        color: getStatusColor(status)
+      }}
+    >
+      {status} {statusText}
     </div>
   );
 };

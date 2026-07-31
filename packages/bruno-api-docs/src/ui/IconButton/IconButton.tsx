@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyledWrapper } from './StyledWrapper';
+import Tooltip from '../Tooltip/Tooltip';
 
 export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Accessible label — icon buttons have no visible text. */
@@ -13,9 +14,11 @@ export interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonEl
  */
 const IconButton = React.forwardRef<HTMLButtonElement, IconButtonProps>(
   ({ label, children, type = 'button', ...rest }, ref) => (
-    <StyledWrapper ref={ref} type={type} aria-label={label} {...rest}>
-      {children}
-    </StyledWrapper>
+    <Tooltip content={label} disabled={!label} openDelay={500}>
+      <StyledWrapper ref={ref} type={type} aria-label={label} {...rest}>
+        {children}
+      </StyledWrapper>
+    </Tooltip>
   )
 );
 

@@ -53,7 +53,8 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   }, [
     response?.data,
     response?.base64Data,
-    selectedFormat
+    selectedFormat,
+    showPreview
   ]);
   const copyDisabled = !response.data;
   const { copied, copyResponse } = useCopy({

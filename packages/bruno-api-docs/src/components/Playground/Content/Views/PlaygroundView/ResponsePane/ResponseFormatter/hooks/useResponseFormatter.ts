@@ -66,6 +66,7 @@ export function useResponseFormatter(
     selectedResponseFormat,
     allowedFormats,
     showResponsePreview,
-    contentType
+    contentType,
+    view
   ]);
 }

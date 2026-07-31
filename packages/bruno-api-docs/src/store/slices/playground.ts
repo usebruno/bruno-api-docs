@@ -285,13 +285,6 @@ const playgroundSlice = createSlice({
       const { uuid, showResponsePreview } = action.payload;
       if (uuid != null)
         state.showResponsePreview[uuid] = showResponsePreview;
-    },
-    toggleShowResponsePreview: (
-      state: PlaygroundState,
-      action: PayloadAction<PlaygroundState['selectedItemId']>
-    ) => {
-      if (action.payload != null)
-        state.showResponsePreview[action.payload] = !state.showResponsePreview[action.payload];
     }
   }
 });
@@ -314,8 +307,7 @@ export const {
   resetPlaygroundEnvironments,
   setPlaygroundVariable,
   setResponseFormat,
-  setShowResponsePreview,
-  toggleShowResponsePreview
+  setShowResponsePreview
 } = playgroundSlice.actions;
 
 // Selectors

@@ -4,7 +4,7 @@ import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import { UnsupportedRequest } from './UnsupportedRequest';
-import { getByTestId, queryByTestId } from '../../test-utils/dom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 
 const websocketItem = {
   info: { name: 'WS', type: 'websocket' },

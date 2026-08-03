@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronRightIcon } from '../../../../../assets/icons';
+import { ChevronRightIcon } from '@/assets/icons';
 
 interface ChevronButtonProps {
   expanded: boolean;

@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo } from 'react';
 import type { Environment } from '@opencollection/types/config/environments';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { selectDocsCollection } from '../../store/slices/docs';
-import { selectActiveEnvName, setActiveEnv } from '../../store/slices/env';
-import { ChevronDownIcon } from '../../assets/icons';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectDocsCollection } from '@/store/slices/docs';
+import { selectActiveEnvName, setActiveEnv } from '@/store/slices/env';
+import { ChevronDownIcon } from '@/assets/icons';
 import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
-import MenuDropdown, { type MenuDropdownItem } from '../../ui/MenuDropdown';
+import MenuDropdown, { type MenuDropdownItem } from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface EnvSwitcherProps {

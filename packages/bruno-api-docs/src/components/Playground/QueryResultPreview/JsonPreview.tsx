@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import ErrorBanner from '../../../ui/ErrorBanner/ErrorBanner';
-import { useAppSelector } from '../../../store/hooks';
+import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
+import { useAppSelector } from '@/store/hooks';
 
 // react-json-view touches browser globals at module load, so a static import
 // crashes under SSR (the server bundle and the renderToStaticMarkup unit tests).

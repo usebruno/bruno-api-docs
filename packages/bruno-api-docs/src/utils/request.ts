@@ -8,7 +8,7 @@ import type {
   HttpRequestHeader,
   HttpResponseHeader
 } from '@opencollection/types/requests/http';
-import type { PropertyRow } from '../components/PropertyTable/PropertyTable';
+import type { PropertyRow } from '@/components/PropertyTable/PropertyTable';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { Scripts } from '@opencollection/types/common/scripts';
 import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';
@@ -25,7 +25,7 @@ import {
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 import { COLLECTION_ROOT_CRUMB } from './common';
-import { AUTH_MODE_LABELS, BODY_CONTENT_TYPE, BODY_LANGUAGE } from '../constants';
+import { AUTH_MODE_LABELS, BODY_CONTENT_TYPE, BODY_LANGUAGE } from '@/constants';
 import type {
   InheritedSource,
   ResolvedAuth,

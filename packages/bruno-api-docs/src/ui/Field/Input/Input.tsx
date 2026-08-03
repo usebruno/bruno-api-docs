@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EyeIcon, EyeOffIcon } from '../../../assets/icons';
+import { EyeIcon, EyeOffIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 interface InputProps {

@@ -6,18 +6,18 @@ import ShowVarsToggle from '../ShowVarsToggle/ShowVarsToggle';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import Sidebar from '../Docs/Sidebar/Sidebar';
 import SidebarDrawer from '../SidebarDrawer/SidebarDrawer';
-import IconButton from '../../ui/IconButton/IconButton';
-import { ChevronLeftIcon, ChevronRightIcon } from '../../assets/icons';
+import IconButton from '@/ui/IconButton/IconButton';
+import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
 import PageRouter from '../PageRouter/PageRouter';
 import Playground from '../Playground/Playground';
 import SearchBar from '../Search/SearchBar/SearchBar';
-import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '../../hooks';
-import { useAppSelector } from '../../store/hooks';
-import { selectDocsCollection } from '../../store/slices/docs';
-import { selectGitCollectionUrl } from '../../store/slices/app';
-import { useActiveResolution } from '../../routing/hooks';
-import { layoutModeForWidth } from '../../hooks/useTopbarLayout';
-import { buildFetchInBrunoUrl } from '../../utils/buildFetchInBrunoUrl';
+import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
+import { useAppSelector } from '@/store/hooks';
+import { selectDocsCollection } from '@/store/slices/docs';
+import { selectGitCollectionUrl } from '@/store/slices/app';
+import { useActiveResolution } from '@/routing/hooks';
+import { layoutModeForWidth } from '@/hooks/useTopbarLayout';
+import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
 import { StyledWrapper } from './StyledWrapper';
 
 interface AppShellProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, type Tab } from '../../ui/Tabs/Tabs';
+import { Tabs, type Tab } from '@/ui/Tabs/Tabs';
 import { ScriptChain } from './ScriptChain/ScriptChain';
 import { VariablesPanel } from './VariablesPanel/VariablesPanel';
 import { AssertList } from './AssertList/AssertList';
@@ -15,9 +15,9 @@ import {
   type PostResponseVarRow,
   type InheritedPreRequestVarRow,
   type InheritedPostResponseVarRow
-} from '../../utils/request';
-import type { AssertionRow } from '../../utils/assertions';
-import type { TestRow, RawTestScript } from '../../utils/fileUtils';
+} from '@/utils/request';
+import type { AssertionRow } from '@/utils/assertions';
+import type { TestRow, RawTestScript } from '@/utils/fileUtils';
 
 interface ExecutionContextProps {
   scriptChain: ScriptChainStep[];

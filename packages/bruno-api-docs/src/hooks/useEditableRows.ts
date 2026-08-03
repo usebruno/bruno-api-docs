@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 
 type NewRow = () => Partial<KeyValueRow>;
 

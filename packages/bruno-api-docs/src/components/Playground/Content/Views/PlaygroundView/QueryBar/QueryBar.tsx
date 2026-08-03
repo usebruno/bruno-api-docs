@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { StyledWrapper } from './StyledWrapper';
-import HighlightedInput from '../../../../../HighlightedInput/HighlightedInput';
-import { useResolvedVariables } from '../../../../../../hooks/useVariableResolver';
-import { getHttpMethod, getRequestUrl, getHttpParams } from '../../../../../../utils/schemaHelpers';
-import { syncPathParams, syncQueryParams } from '../../../../../../utils/pathParams';
-import { HttpMethodSelector } from '../../../../../HttpMethodSelector/HttpMethodSelector';
-import { CopyButton } from '../../../../../../ui/CopyButton/CopyButton';
-import { SendIcon } from '../../../../../../assets/icons';
+import HighlightedInput from '@/components/HighlightedInput/HighlightedInput';
+import { useResolvedVariables } from '@/hooks/useVariableResolver';
+import { getHttpMethod, getRequestUrl, getHttpParams } from '@/utils/schemaHelpers';
+import { syncPathParams, syncQueryParams } from '@/utils/pathParams';
+import { HttpMethodSelector } from '@/components/HttpMethodSelector/HttpMethodSelector';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
+import { SendIcon } from '@/assets/icons';
 
 interface QueryBarProps {
   item: HttpRequest;

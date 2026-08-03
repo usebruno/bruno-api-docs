@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
-import { useDockResize } from '../../../../hooks/useDockResize';
-import type { DockMode } from '../../../../utils/playgroundDock';
+import { useDockResize } from '@/hooks/useDockResize';
+import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 const HEADER_HEIGHT = 52;

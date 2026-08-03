@@ -1,8 +1,8 @@
 import React from 'react';
-import Portal from '../../../../ui/Portal/Portal';
+import Portal from '@/ui/Portal/Portal';
 import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
-import { useLockBodyScroll } from '../../../../hooks';
-import type { DockMode } from '../../../../utils/playgroundDock';
+import { useLockBodyScroll } from '@/hooks';
+import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 interface MobileDockProps {

@@ -2,16 +2,16 @@ import React, { useMemo } from 'react';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
-import { getItemDocs, getItemName, getItemType, getRequestUrl } from '../../utils/schemaHelpers';
-import cx from '../../utils/cx';
+import { getItemDocs, getItemName, getItemType, getRequestUrl } from '@/utils/schemaHelpers';
+import cx from '@/utils/cx';
 import { Heading } from '../Heading/Heading';
-import { EmptyState } from '../../ui/EmptyState/EmptyState';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
 import RequestUrlBar from '../Request/RequestUrlBar/RequestUrlBar';
 import BreadcrumbWrapper, { type BreadcrumbWrapperProps } from './BreadcrumbWrapper/BreadcrumbWrapper';
-import { REQUEST_TYPE_LABELS } from '../../constants';
+import { REQUEST_TYPE_LABELS } from '@/constants';
 import ViewMore from '../ViewMore/ViewMore';
 import { TitleLabel } from '../TitleLabel/TitleLabel';
-import { useMarkdownRenderer } from '../../hooks';
+import { useMarkdownRenderer } from '@/hooks';
 
 function getRequestTypeLabel(label: string | undefined) {
   const fallback = {

@@ -3,13 +3,13 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { selectDocsCollection } from '../store/slices/docs';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectDocsCollection } from '@/store/slices/docs';
 import { setPlaygroundVariable } from '@/store/slices/playground';
-import { selectActiveEnvName, selectShowVars } from '../store/slices/env';
-import { getRequestVariables, isFolder } from '../utils/schemaHelpers';
-import { getItemUuid } from '../utils/itemUtils';
-import { mockDataFunctions, timeBasedDynamicVars } from '../runner/utils/faker-functions';
+import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
+import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
+import { getItemUuid } from '@/utils/itemUtils';
+import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
 import {
   buildScopedVariableModel,
   resolveVariables,
@@ -23,7 +23,7 @@ import {
   type ScopedVariableModel,
   type VariableScope,
   type VariableSource
-} from '../utils/variableResolution';
+} from '@/utils/variableResolution';
 
 export type DynamicVariableKind = 'random' | 'time' | 'unknown';
 

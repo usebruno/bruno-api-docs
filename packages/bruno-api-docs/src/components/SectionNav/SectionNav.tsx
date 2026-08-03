@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { RefObject } from 'react';
-import { Portal } from '../../ui/Portal/Portal';
-import { useEscapeKey } from '../../hooks';
-import { useDocSections, getScroller } from '../../hooks/useDocSections';
-import { scrollBehavior } from '../../utils/motion';
+import { Portal } from '@/ui/Portal/Portal';
+import { useEscapeKey } from '@/hooks';
+import { useDocSections, getScroller } from '@/hooks/useDocSections';
+import { scrollBehavior } from '@/utils/motion';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SectionNavProps {

@@ -4,7 +4,7 @@ import { DisabledBadge } from '../../DisabledBadge/DisabledBadge';
 import { VariableText } from '../../VariableText/VariableText';
 import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import { Description } from '../../Description/Description';
-import type { AssertionRow } from '../../../utils/assertions';
+import type { AssertionRow } from '@/utils/assertions';
 import { StyledWrapper } from './StyledWrapper';
 
 interface AssertListProps {

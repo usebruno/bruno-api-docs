@@ -7,7 +7,7 @@ import type {
   PostResponseVarRow,
   InheritedPreRequestVarRow,
   InheritedPostResponseVarRow
-} from '../../../utils/request';
+} from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface VariablesPanelProps {

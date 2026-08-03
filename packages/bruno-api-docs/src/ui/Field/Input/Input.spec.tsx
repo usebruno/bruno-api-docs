@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import { Input } from './Input';
-import { query } from '../../../test-utils/dom';
+import { query } from '@/test-utils/dom';
 
 const noop = () => {};
 

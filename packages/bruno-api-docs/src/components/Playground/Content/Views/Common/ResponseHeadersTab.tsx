@@ -1,5 +1,5 @@
 import React from 'react';
-import NoContentText from '../../../../../ui/NoContentText/NoContentText';
+import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface ResponseHeadersTabProps {
   headers?: Record<string, any>;

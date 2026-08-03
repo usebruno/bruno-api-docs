@@ -1,7 +1,7 @@
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { classifyVariableToken } from '../../utils/variableHighlight';
-import { templateVariableGlobalRegex } from '../../utils/common';
+import { classifyVariableToken } from '@/utils/variableHighlight';
+import { templateVariableGlobalRegex } from '@/utils/common';
 
 export interface VariableDecorator {
   refresh: () => void;

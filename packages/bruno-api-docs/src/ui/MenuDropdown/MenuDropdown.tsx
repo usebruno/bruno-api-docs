@@ -15,7 +15,7 @@ import type {
   MenuGroupStyle,
   MenuItemExtraProps
 } from './types';
-import cx from '../../utils/cx';
+import cx from '@/utils/cx';
 
 const NAVIGATION_KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End', 'Escape'];
 const ACTION_KEYS = ['Enter', ' '];

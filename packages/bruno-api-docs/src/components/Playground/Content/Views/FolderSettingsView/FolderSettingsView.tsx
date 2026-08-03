@@ -1,16 +1,16 @@
 import React, { useMemo, useState } from 'react';
 import type { Folder } from '@opencollection/types/collection/item';
 import type { OpenCollection } from '@opencollection/types';
-import Tabs from '../../../../../ui/Tabs/Tabs';
+import Tabs from '@/ui/Tabs/Tabs';
 import TitleLabel from '../../../../TitleLabel/TitleLabel';
-import { type KeyValueRow } from '../../../../../components/KeyValueTable/KeyValueTable';
-import { rowToVariable } from '../../../../../utils/variableDataType';
-import { keyValueRowToEntry } from '../../../../../utils/keyValueRow';
+import { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import { rowToVariable } from '@/utils/variableDataType';
+import { keyValueRowToEntry } from '@/utils/keyValueRow';
 import HeadersTab from '../Common/HeadersTab/HeadersTab';
 import VariablesTab from '../Common/VariablesTab/VariablesTab';
 import AuthTab from '../Common/AuthTab/AuthTab';
 import ScriptsTab from '../Common/ScriptsTab/ScriptsTab';
-import { useAppDispatch } from '../../../../../store/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import { updateFolderInCollection } from '@slices/playground';
 import {
   countEnabled,
@@ -18,10 +18,10 @@ import {
   getItemName,
   scriptsArrayToObject,
   scriptsObjectToArray
-} from '../../../../../utils/schemaHelpers';
-import { getAncestorsByUuid } from '../../../../../utils/fileUtils';
-import { getItemUuid } from '../../../../../utils/itemUtils';
-import { getInheritedAuthSummary } from '../../../../../utils/request';
+} from '@/utils/schemaHelpers';
+import { getAncestorsByUuid } from '@/utils/fileUtils';
+import { getItemUuid } from '@/utils/itemUtils';
+import { getInheritedAuthSummary } from '@/utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
 

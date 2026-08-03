@@ -1,13 +1,13 @@
 import React from 'react';
-import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import { SecretValue } from '../../../../../../ui/SecretValue/SecretValue';
-import { TrashIcon } from '../../../../../../assets/icons';
-import { useEditableRows } from '../../../../../../hooks/useEditableRows';
-import { cx } from '../../../../../../utils/cx';
-import { toDataType } from '../../../../../../utils/variableDataType';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import { SecretValue } from '@/ui/SecretValue/SecretValue';
+import { TrashIcon } from '@/assets/icons';
+import { useEditableRows } from '@/hooks/useEditableRows';
+import { cx } from '@/utils/cx';
+import { toDataType } from '@/utils/variableDataType';
 import { VariableTypeControl } from '../../Common/VariableTypeControl/VariableTypeControl';
 import { StyledWrapper } from './StyledWrapper';
-import Checkbox from '../../../../../../ui/Checkbox/Checkbox';
+import Checkbox from '@/ui/Checkbox/Checkbox';
 
 interface EnvVarCardsProps {
   rows: KeyValueRow[];

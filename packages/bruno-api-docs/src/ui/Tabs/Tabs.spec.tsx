@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { Tabs, type Tab } from './Tabs';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query, getByTestId, queryByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query, getByTestId, queryByTestId } from '@/test-utils/dom';
 
 const tabs: Tab[] = [
   { id: 'a', label: 'Alpha', count: 2, content: <p data-testid="alpha">alpha content</p> },

@@ -1,10 +1,10 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef } from 'react';
-import { CopyButton } from '../../ui/CopyButton/CopyButton';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { StyledWrapper } from './CodeViewer/StyledWrapper';
 import { HighlightedCode } from './HighlightedCode';
-import Prism from '../../utils/prism';
+import Prism from '@/utils/prism';
 
-const LazyCodeEditor = lazy(() => import('../../ui/CodeEditor/CodeEditor'));
+const LazyCodeEditor = lazy(() => import('@/ui/CodeEditor/CodeEditor'));
 
 interface CodeProps {
   code?: string;

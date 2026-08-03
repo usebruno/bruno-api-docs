@@ -23,7 +23,7 @@ import {
   getShortMethod,
   getVariableType
 } from './request';
-import { AUTH_MODE_LABELS } from '../constants';
+import { AUTH_MODE_LABELS } from '@/constants';
 import { COLLECTION_ROOT_CRUMB } from './common';
 
 describe('requestAuth', () => {

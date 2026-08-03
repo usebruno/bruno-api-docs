@@ -1,6 +1,6 @@
 import React from 'react';
-import { CaretIcon } from '../../../assets/icons';
-import MenuDropdown from '../../MenuDropdown';
+import { CaretIcon } from '@/assets/icons';
+import MenuDropdown from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface SelectOption {

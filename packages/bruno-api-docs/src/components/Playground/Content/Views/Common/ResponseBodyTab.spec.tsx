@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import ResponseBodyTab from './ResponseBodyTab';
-import { useRenderToDom } from '../../../../../hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '../../../../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 
 describe('ResponseBodyTab', () => {
   it('renders the large-response warning instead of the body when over the threshold', () => {

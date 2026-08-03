@@ -11,7 +11,7 @@ import {
   type RequestSearchRecord,
   type FolderSearchRecord
 } from './searchIndex';
-import type { NavEntry } from '../../routing/types';
+import type { NavEntry } from '@/routing/types';
 
 const requestEntry = (over: Partial<NavEntry> & { uuid: string }): NavEntry => {
   const { uuid, ...rest } = over;

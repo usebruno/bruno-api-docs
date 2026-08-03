@@ -1,8 +1,8 @@
 import React from 'react';
-import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '../../utils/request';
-import { Tooltip } from '../../ui/Tooltip/Tooltip';
-import { GoToIcon } from '../../assets/icons';
-import { cx } from '../../utils/cx';
+import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '@/utils/request';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
+import { GoToIcon } from '@/assets/icons';
+import { cx } from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 interface InheritedSourceLinkProps {

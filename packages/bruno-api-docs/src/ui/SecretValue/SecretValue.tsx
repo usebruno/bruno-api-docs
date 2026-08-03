@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { SECRET_MASK } from '../../constants';
-import { EyeIcon, EyeOffIcon } from '../../assets/icons';
-import { cx } from '../../utils/cx';
+import { SECRET_MASK } from '@/constants';
+import { EyeIcon, EyeOffIcon } from '@/assets/icons';
+import { cx } from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SecretValueProps {

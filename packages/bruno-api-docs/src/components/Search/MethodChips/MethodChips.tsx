@@ -1,6 +1,6 @@
 import React from 'react';
-import { getMethodColorVar } from '../../../theme/methodColors';
-import { getShortMethod } from '../../../utils/request';
+import { getMethodColorVar } from '@/theme/methodColors';
+import { getShortMethod } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface MethodChipsProps {

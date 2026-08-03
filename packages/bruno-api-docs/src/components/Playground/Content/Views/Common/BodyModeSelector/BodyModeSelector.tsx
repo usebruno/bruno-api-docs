@@ -10,9 +10,9 @@ import {
   IconFile,
   IconX
 } from '@tabler/icons';
-import MenuDropdown from '../../../../../../ui/MenuDropdown';
-import type { MenuDropdownGroup } from '../../../../../../ui/MenuDropdown';
-import type { RequestBody } from '../../../../../../utils/schemaHelpers';
+import MenuDropdown from '@/ui/MenuDropdown';
+import type { MenuDropdownGroup } from '@/ui/MenuDropdown';
+import type { RequestBody } from '@/utils/schemaHelpers';
 import { TriggerButton } from './StyledWrapper';
 
 interface BodyModeSelectorProps {

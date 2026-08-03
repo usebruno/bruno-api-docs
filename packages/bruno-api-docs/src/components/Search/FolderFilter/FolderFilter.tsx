@@ -1,6 +1,6 @@
 import React from 'react';
-import { FolderIcon } from '../../../assets/icons';
-import Dropdown from '../../../ui/Dropdown/Dropdown';
+import { FolderIcon } from '@/assets/icons';
+import Dropdown from '@/ui/Dropdown/Dropdown';
 import type { FolderOption } from '../searchIndex';
 
 interface FolderFilterProps {

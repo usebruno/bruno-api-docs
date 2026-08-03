@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getTreePathFromCollectionToItem } from './tree-utils';
-import { getItemName } from '../../utils/schemaHelpers';
+import { getItemName } from '@/utils/schemaHelpers';
 
 // Two requests that are byte-identical in name+method+url but live in different folders. Only the
 // hydrated uuid tells them apart, so the ancestor walk must key on uuid — content matching would

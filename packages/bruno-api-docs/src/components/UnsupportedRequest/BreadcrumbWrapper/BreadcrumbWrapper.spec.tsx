@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
 import BreadcrumbWrapper from './BreadcrumbWrapper';
-import { getByTestId, queryByTestId } from '../../../test-utils/dom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 
 const collection = { info: { name: 'My collection' } } as unknown as OpenCollection;
 

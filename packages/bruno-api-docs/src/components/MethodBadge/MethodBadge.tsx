@@ -1,6 +1,6 @@
 import React from 'react';
-import cx from '@/utils/cx';
 import { getMethodColorVar } from '@/theme/methodColors';
+import cx from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 interface MethodBadgeProps {

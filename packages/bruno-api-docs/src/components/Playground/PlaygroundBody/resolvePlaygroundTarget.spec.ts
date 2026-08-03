@@ -1,11 +1,11 @@
+import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 import { describe, it, expect } from 'vitest';
+import type { NavModel, NavEntry } from '@/routing/types';
 import {
   resolvePlaygroundTarget,
   PLAYGROUND_ENVIRONMENTS_SLUG,
   PLAYGROUND_COLLECTION_SLUG
 } from './resolvePlaygroundTarget';
-import type { NavModel, NavEntry } from '@/routing/types';
-import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 
 const item = (uuid: string): OpenCollectionItem => ({ uuid } as unknown as OpenCollectionItem);
 

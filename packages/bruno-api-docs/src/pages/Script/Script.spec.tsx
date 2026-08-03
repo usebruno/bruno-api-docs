@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { Item, ScriptFile } from '@opencollection/types/collection/item';
 import { describe, it, expect } from 'vitest';
 import { Script } from './Script';
-import type { Item, ScriptFile } from '@opencollection/types/collection/item';
 
 const scriptItem = {
   info: { name: 'Script', type: 'script' },

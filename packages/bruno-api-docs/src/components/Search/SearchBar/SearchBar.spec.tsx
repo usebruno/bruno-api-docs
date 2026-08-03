@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
-import { SearchBar } from './SearchBar';
 import { createOpenCollectionStore } from '@/store/store';
+import { SearchBar } from './SearchBar';
 
 const renderBar = () =>
   renderToStaticMarkup(

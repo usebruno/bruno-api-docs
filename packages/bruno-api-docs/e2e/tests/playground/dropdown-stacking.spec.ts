@@ -1,6 +1,6 @@
-import { test, expect } from '../../playwright';
-import { EnvSwitcherComponent } from '../../components/layout/env-switcher.component';
 import type { Locator } from '@playwright/test';
+import { EnvSwitcherComponent } from '../../components/layout/env-switcher.component';
+import { test, expect } from '../../playwright';
 
 /**
  * Regression: the environment selector dropdown must stack above the playground

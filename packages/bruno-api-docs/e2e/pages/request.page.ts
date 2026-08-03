@@ -1,11 +1,11 @@
 import type { Locator } from '@playwright/test';
 import { BasePage } from './base.page';
-import { SidebarComponent } from '../components/sidebar.component';
 import { BreadcrumbComponent } from '../components/breadcrumb.component';
-import { RequestUrlBarComponent } from '../components/request/url-bar.component';
 import { CodeSnippetComponent } from '../components/request/code-snippet.component';
 import { ExamplesComponent } from '../components/request/examples.component';
 import { ExecutionContextComponent } from '../components/request/execution-context.component';
+import { RequestUrlBarComponent } from '../components/request/url-bar.component';
+import { SidebarComponent } from '../components/sidebar.component';
 import { VariableCardComponent } from '../components/variable-card/variable-card.component';
 
 export class RequestPage extends BasePage {

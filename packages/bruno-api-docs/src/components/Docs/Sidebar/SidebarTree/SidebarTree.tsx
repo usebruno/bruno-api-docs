@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest, HttpRequestExample } from '@opencollection/types/requests/http';
-import SidebarNavLink from '../SidebarNavLink/SidebarNavLink';
 import { ExampleIcon } from '@/assets/icons';
-import { StyledWrapper } from './StyledWrapper';
-import { getItemName, isFolder, isScriptFile, getRequestBadgeLabel } from '@/utils/schemaHelpers';
-import { getItemUuid } from '@/utils/itemUtils';
 import { orderSiblings } from '@/routing/navModel';
+import { getItemUuid } from '@/utils/itemUtils';
+import { getItemName, isFolder, isScriptFile, getRequestBadgeLabel } from '@/utils/schemaHelpers';
+import SidebarNavLink from '../SidebarNavLink/SidebarNavLink';
 import { ChevronButton } from './ChevronButton/ChevronButton';
+import { StyledWrapper } from './StyledWrapper';
 
 // The example a user jumped to from the sidebar: which request, and which of its
 // examples. Held transiently (navigation state), never persisted or routed.

@@ -1,5 +1,5 @@
-import { test, expect } from '../../playwright';
 import type { ExecutionContextTab } from '../../components/request/execution-context.component';
+import { test, expect } from '../../playwright';
 
 const GET_ALL_CUSTOMERS = ['billing', 'customers', 'Get All Customers'];
 const TABS: ExecutionContextTab[] = ['variables', 'scripts', 'asserts', 'tests'];

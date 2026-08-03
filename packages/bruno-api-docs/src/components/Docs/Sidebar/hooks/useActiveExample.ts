@@ -1,9 +1,9 @@
-import { getItemUuid } from '@/utils/itemUtils';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { useDocsNavigate } from '@/hooks';
+import type { NavModel } from '@/routing';
 import { useActiveResolution } from '@/routing/hooks';
 import { exampleSlugForIndex } from '@/routing/slug';
-import type { NavModel } from '@/routing';
-import type { HttpRequest } from '@opencollection/types/requests/http';
+import { getItemUuid } from '@/utils/itemUtils';
 
 export function useActiveExample(model: NavModel, uuidToSlug: Map<string, string>, onNavigate?: () => void) {
   // The active example is read from the route (<request-slug>/<example-slug>),

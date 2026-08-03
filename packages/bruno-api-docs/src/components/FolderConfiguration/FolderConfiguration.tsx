@@ -1,14 +1,14 @@
 import React from 'react';
 import type { FolderConfig } from '@/utils/folder';
 import { headerRows, inheritedCountLabel } from '@/utils/request';
-import { Code } from '../Code/Code';
-import { SectionLabel } from '../SectionLabel/SectionLabel';
-import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
+import { StyledWrapper } from './StyledWrapper';
 import { AuthDetails } from '../AuthDetails/AuthDetails';
+import { Code } from '../Code/Code';
 import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
 import { InheritedAuthBadge } from '../InheritedAuthBadge/InheritedAuthBadge';
 import { inheritedHeaderRows, preVarRows, postVarRows } from '../PropertyTable/inheritedRows';
-import { StyledWrapper } from './StyledWrapper';
+import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
+import { SectionLabel } from '../SectionLabel/SectionLabel';
 
 interface FolderConfigurationProps {
   config: FolderConfig;

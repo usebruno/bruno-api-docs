@@ -1,10 +1,10 @@
 import type { Locator } from '@playwright/test';
 import { BasePage } from './base.page';
 import { MarkdownComponent } from '../components/markdown.component';
-import { HeaderSection } from '../components/overview/header.component';
+import { ConfigurationSection } from '../components/overview/collection-configuration.component';
 import { StatsSection } from '../components/overview/collection-stats.component';
 import { EnvironmentsSection } from '../components/overview/environments.component';
-import { ConfigurationSection } from '../components/overview/collection-configuration.component';
+import { HeaderSection } from '../components/overview/header.component';
 import { VariableCardComponent } from '../components/variable-card/variable-card.component';
 
 export class OverviewPage extends BasePage {

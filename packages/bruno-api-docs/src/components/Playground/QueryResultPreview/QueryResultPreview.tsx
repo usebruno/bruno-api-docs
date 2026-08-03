@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import HtmlPreview from './HtmlPreview/HtmlPreview';
-import JsonPreview from './JsonPreview';
-import TextPreview from './TextPreview';
-import XmlPreview from './XmlPreview/XmlPreview';
-import type { RunRequestResponse } from '@/runner';
-import { StyledWrapper } from './StyledWrapper';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import type { ResponseBodyFormat } from '@/constants';
 import { formatToPreviewMode } from '@/constants';
+import type { RunRequestResponse } from '@/runner';
+import HtmlPreview from './HtmlPreview/HtmlPreview';
+import JsonPreview from './JsonPreview';
+import { StyledWrapper } from './StyledWrapper';
+import TextPreview from './TextPreview';
+import XmlPreview from './XmlPreview/XmlPreview';
 
 // react-pdf (pdfjs) and react-player are large and only needed for binary previews,
 // so load them on demand to keep them out of the initial bundle.
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 const VideoPreview = React.lazy(() => import('./VideoPreview/VideoPreview'));
 const PdfDocument = React.lazy(() =>
   import('react-pdf').then((module) => {

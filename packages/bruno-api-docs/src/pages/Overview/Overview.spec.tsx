@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
+import { describe, it, expect } from 'vitest';
 import { Overview } from './Overview';
 
 describe('Overview', () => {

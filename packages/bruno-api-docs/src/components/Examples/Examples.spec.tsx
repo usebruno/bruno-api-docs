@@ -1,10 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it, expect } from 'vitest';
-import { Examples } from './Examples';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
+import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
+import { Examples } from './Examples';
 
 const examples: HttpRequestExample[] = [
   { name: 'Happy path', response: { status: 200, body: { type: 'json', data: '{}' } } },

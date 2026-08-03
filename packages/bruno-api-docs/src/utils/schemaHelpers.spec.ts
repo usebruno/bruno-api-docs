@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import { describe, it, expect } from 'vitest';
 import {
   getItemDescription,
   getRequestBadgeLabel,

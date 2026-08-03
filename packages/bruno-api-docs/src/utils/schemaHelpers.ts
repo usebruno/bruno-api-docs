@@ -14,10 +14,10 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollection/types/collection/item';
 import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
-import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
-import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
+import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
+import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
 export type SupportedRequestItem = HttpRequest | GraphQLRequest | GrpcRequest;

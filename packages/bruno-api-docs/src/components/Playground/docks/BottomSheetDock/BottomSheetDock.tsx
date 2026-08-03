@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
 import { useDockResize } from '@/hooks/useDockResize';
 import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
+import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
 
 const HEADER_HEIGHT = 52;
 // Treat a drag-down to (roughly) the header height as collapsed, so dragging the

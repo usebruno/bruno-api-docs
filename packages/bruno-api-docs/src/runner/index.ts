@@ -1,13 +1,21 @@
-import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Environment } from '@opencollection/types/config/environments';
-import { RequestExecutor } from './RequestExecutor';
-import type { RunRequestCallback } from '@/scripting/utils/bru';
-import type { Variables, JsonValue } from './utils/variable-interpolator';
 import {
   isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl, type InternalHttpRequest
 } from '@/utils/schemaHelpers';
+import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
+import type { Environment } from '@opencollection/types/config/environments';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
+import ScriptRuntime from '@/scripting/runtime/script-runtime';
+import type { RunRequestCallback } from '@/scripting/utils/bru';
 import { getItemUuid } from '@/utils/itemUtils';
+import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '@/utils/schemaHelpers';
+import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
+import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
+import { RequestExecutor } from './RequestExecutor';
+import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
+import type { Variables, JsonValue } from './utils/variable-interpolator';
+import { getCollectionFolderRequestVariables } from './utils/variable-merger';
 
 const MAX_RUN_REQUEST_DEPTH = 25;
 
@@ -20,17 +28,8 @@ interface RunContext {
   timeout: number;
   warnings: string[];
 }
-
 const requestKey = (item: HttpRequest): string =>
   getItemUuid(item) || `${getItemName(item) ?? ''}|${getHttpMethod(item)}|${getRequestUrl(item)}`;
-import ScriptRuntime from '@/scripting/runtime/script-runtime';
-import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
-import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
-import { getCollectionFolderRequestVariables } from './utils/variable-merger';
-import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
-import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
-import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
-import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '@/utils/schemaHelpers';
 
 interface DeclaredEnvironmentVariable {
   name?: string;

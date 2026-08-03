@@ -11,13 +11,13 @@
  * Pure + React-free so it can be unit tested and memoized by the caller.
  */
 
+import type { Folder } from '@opencollection/types/collection/item';
 import Fuse from 'fuse.js';
 import type { IFuseOptions, FuseResultMatch } from 'fuse.js';
-import type { Folder } from '@opencollection/types/collection/item';
 import type { NavEntry } from '@/routing/types';
-import { getRequestUrl } from '@/utils/schemaHelpers';
-import { getItemUuid } from '@/utils/itemUtils';
 import { countFolderRequests } from '@/utils/folder';
+import { getItemUuid } from '@/utils/itemUtils';
+import { getRequestUrl } from '@/utils/schemaHelpers';
 
 interface SearchRecordBase {
   /** Item UUID (the sidebar key). */

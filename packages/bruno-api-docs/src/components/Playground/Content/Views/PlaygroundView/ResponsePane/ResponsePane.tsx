@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Tabs from '@/ui/Tabs/Tabs';
+import ResponseActions from './ResponseActions/ResponseActions';
 import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
 import TestResultsTab from '../../Common/TestResultsTab';
@@ -8,14 +9,13 @@ import WarningBanner from '@/ui/WarningBanner/WarningBanner';
 import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
 import { SendIcon } from '@/assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
-import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
 import type { ResponseBodyFormat } from '@/constants';
-import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
 import type { RunRequestResponse } from '@/runner';
-import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
-import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
-import ResponseActions from './ResponseActions/ResponseActions';
 import useResponseActions from './ResponseActions/hooks/useResponseActions';
+import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
+import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
+import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
+import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;

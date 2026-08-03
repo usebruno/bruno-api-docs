@@ -1,8 +1,8 @@
 import * as chai from 'chai';
+import { executeQuickJsVmAsync } from '../sandbox/quickjs';
 import Bru, { type RunRequestCallback } from '../utils/bru';
 import BrunoRequest from '../utils/bruno-request';
 import BrunoResponse from '../utils/bruno-response';
-import { executeQuickJsVmAsync } from '../sandbox/quickjs';
 import type { AssertionResult } from '../utils/test';
 import { createBruTestResultMethods, type BruTestResultMethods } from '../utils/test';
 

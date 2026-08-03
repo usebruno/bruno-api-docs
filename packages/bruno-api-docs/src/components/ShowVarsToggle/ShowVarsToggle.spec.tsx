@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
-import { setShowVars } from '@/store/slices/env';
+import { setShowVars } from '@slices/env';
 import ShowVarsToggle from './ShowVarsToggle';
 
 const render = (configure?: (s: ReturnType<typeof createOpenCollectionStore>) => void): string => {

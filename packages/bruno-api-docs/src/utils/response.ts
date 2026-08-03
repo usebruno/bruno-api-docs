@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer';
-import type { RunRequestResponse } from '@/runner';
 import {
   type ResponseBodyFormat,
   type ResponseBodyFormatViewData,
@@ -18,6 +17,7 @@ import {
   NON_BASE64_CHARS_PATTERN,
   RESPONSE_FORMAT_RULES
 } from '@/constants';
+import type { RunRequestResponse } from '@/runner';
 
 export type { ResponseBodyFormat } from '../constants';
 

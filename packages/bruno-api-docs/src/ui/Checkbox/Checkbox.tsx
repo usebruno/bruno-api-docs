@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import { StyledWrapper } from './StyledWrapper';
 import { CheckIcon } from '@/assets/icons';
+import { StyledWrapper } from './StyledWrapper';
 
 interface CheckboxProps {
   className?: string;

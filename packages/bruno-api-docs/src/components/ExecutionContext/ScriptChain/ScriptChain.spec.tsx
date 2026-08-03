@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import { ScriptChain } from './ScriptChain';
 import type { ScriptChainStep } from '@/utils/request';
+import { ScriptChain } from './ScriptChain';
 
 const postChain: ScriptChainStep[] = [
   { level: 'collection', phase: 'after-response', label: 'Collection Post-Response', code: 'a', order: 0 },

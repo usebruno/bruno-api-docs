@@ -1,22 +1,22 @@
 import React, { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
+import type { Auth } from '@opencollection/types/common/auth';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '../../MethodBadge/MethodBadge';
-import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { PropertyTable } from '../../PropertyTable/PropertyTable';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import { VariableText } from '../../VariableText/VariableText';
-import { Description } from '../../Description/Description';
-import { RequestParams } from '../../Request/RequestParams/RequestParams';
-import { RequestBody } from '../../Request/RequestBody/RequestBody';
-import { Code } from '../../Code/Code';
+import { statusToneColor } from '@/utils/common';
+import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '@/utils/exampleResponse';
 import { resolvePathAndQueryParams } from '@/utils/pathParams';
 import { getBodyView, getDescription, headerRows } from '@/utils/request';
-import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '@/utils/exampleResponse';
-import { statusToneColor } from '@/utils/common';
 import { StyledWrapper } from './StyledWrapper';
-import type { Auth } from '@opencollection/types/common/auth';
+import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
+import { Code } from '../../Code/Code';
 import { CodeSnippetTabs } from '../../CodeSnippetTabs/CodeSnippetTabs';
+import { Description } from '../../Description/Description';
+import { MethodBadge } from '../../MethodBadge/MethodBadge';
+import { PropertyTable } from '../../PropertyTable/PropertyTable';
+import { RequestBody } from '../../Request/RequestBody/RequestBody';
+import { RequestParams } from '../../Request/RequestParams/RequestParams';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
+import { VariableText } from '../../VariableText/VariableText';
 
 interface ExampleCardProps {
   example: HttpRequestExample;

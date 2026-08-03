@@ -1,10 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
-import { UnsupportedRequest } from './UnsupportedRequest';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
+import { UnsupportedRequest } from './UnsupportedRequest';
 
 const websocketItem = {
   info: { name: 'WS', type: 'websocket' },

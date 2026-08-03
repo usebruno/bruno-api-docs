@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import type { OpenCollection } from '@opencollection/types';
-import Tabs from '@/ui/Tabs/Tabs';
-import TitleLabel from '../../../../TitleLabel/TitleLabel';
 import { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import HeadersTab from '../Common/HeadersTab/HeadersTab';
-import VariablesTab from '../Common/VariablesTab/VariablesTab';
-import AuthTab from '../Common/AuthTab/AuthTab';
-import ScriptsTab from '../Common/ScriptsTab/ScriptsTab';
-import TestsTab from '../Common/TestsTab/TestsTab';
-import OverviewTab from '../Common/OverviewTab/OverviewTab';
 import { useAppDispatch } from '@/store/hooks';
-import { updateCollectionSettings } from '@slices/playground';
-import { countEnabled, getItemDocs, scriptsArrayToObject, scriptsObjectToArray } from '@/utils/schemaHelpers';
-import { rowToVariable } from '@/utils/variableDataType';
+import Tabs from '@/ui/Tabs/Tabs';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
 import { actionsToPostResponseVars, postResponseVarsToActions } from '@/utils/request';
+import { countEnabled, getItemDocs, scriptsArrayToObject, scriptsObjectToArray } from '@/utils/schemaHelpers';
+import { rowToVariable } from '@/utils/variableDataType';
+import { updateCollectionSettings } from '@slices/playground';
 import { StyledWrapper } from './StyledWrapper';
+import TitleLabel from '../../../../TitleLabel/TitleLabel';
+import AuthTab from '../Common/AuthTab/AuthTab';
+import HeadersTab from '../Common/HeadersTab/HeadersTab';
+import OverviewTab from '../Common/OverviewTab/OverviewTab';
+import ScriptsTab from '../Common/ScriptsTab/ScriptsTab';
+import TestsTab from '../Common/TestsTab/TestsTab';
+import VariablesTab from '../Common/VariablesTab/VariablesTab';
 
 interface CollectionSettingsProps {
   collection: OpenCollection;

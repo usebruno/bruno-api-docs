@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { SECRET_MASK } from '@/constants';
 import { EyeIcon, EyeOffIcon } from '@/assets/icons';
+import { SECRET_MASK } from '@/constants';
 import { cx } from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 

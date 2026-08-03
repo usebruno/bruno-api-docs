@@ -1,16 +1,16 @@
 import { useCallback, useMemo } from 'react';
 import type { ResponseBodyFormat } from '@/constants';
-import { useInitialResponseFormat } from './useInitialResponseFormat';
 import type { RunRequestResponse } from '@/runner';
-import { getResponseFormatOptions } from '@/utils/response';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { getResponseFormatOptions } from '@/utils/response';
 import {
   selectResponseFormat,
   selectShowResponsePreview,
   selectSelectedItemId,
   setResponseFormat,
   setShowResponsePreview
-} from '@/store/slices/playground';
+} from '@slices/playground';
+import { useInitialResponseFormat } from './useInitialResponseFormat';
 
 export function useResponseFormatter(
   response: RunRequestResponse

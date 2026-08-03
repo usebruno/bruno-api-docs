@@ -1,10 +1,10 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import type { RunRequestResponse } from '@/runner';
+import { query, getByTestId } from '@/test-utils/dom';
 import { formatBytes } from '@/utils/exampleResponse';
 import { LargeResponseWarning } from './LargeResponseWarning';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query, getByTestId } from '@/test-utils/dom';
-import type { RunRequestResponse } from '@/runner';
 
 describe('LargeResponseWarning', () => {
   const responseSize = 11 * 1024 * 1024;

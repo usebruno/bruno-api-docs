@@ -1,6 +1,6 @@
 import React from 'react';
-import ActionIconButton from '../ActionIconButton/ActionIconButton';
 import { IconLayoutColumns, IconLayoutRows } from '@tabler/icons';
+import ActionIconButton from '../ActionIconButton/ActionIconButton';
 
 interface ChangeLayoutProps {
   orientation: 'vertical' | 'horizontal';

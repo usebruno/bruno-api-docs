@@ -112,9 +112,13 @@ export default [
         ]
       }],
       'no-restricted-imports': ['error', {
+        paths: [{
+          name: 'lodash-es',
+          message: 'Import the specific lodash-es module instead (e.g. lodash-es/cloneDeep), not the barrel.'
+        }],
         patterns: [{
-          group: ['**/store/slices/*', '!@/store/slices/*', '@slices/*'],
-          message: 'Import slices through the @/store/slices/* alias.'
+          group: ['**/store/slices/*'],
+          message: 'Import slices through the @slices/* alias.'
         }]
       }],
 
@@ -128,6 +132,20 @@ export default [
           message: 'Use a theme CSS variable (var(--…)) instead of a hardcoded colour.'
         }
       ],
+
+      'import/order': ['error', {
+        'groups': ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+        'pathGroups': [
+          { pattern: 'react', group: 'external', position: 'before' },
+          { pattern: 'react-dom', group: 'external', position: 'before' },
+          { pattern: 'react-dom/**', group: 'external', position: 'before' },
+          { pattern: '@/**', group: 'internal' },
+          { pattern: '@slices/**', group: 'internal' }
+        ],
+        'pathGroupsExcludedImportTypes': [],
+        'alphabetize': { order: 'asc', caseInsensitive: true },
+        'newlines-between': 'never'
+      }],
 
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn'

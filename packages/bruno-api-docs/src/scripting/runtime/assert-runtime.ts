@@ -1,9 +1,9 @@
-import * as chai from 'chai';
 import type { Assertion } from '@opencollection/types/common/assertions';
+import * as chai from 'chai';
+import { executeQuickJsVm } from '../sandbox/quickjs';
 import Bru from '../utils/bru';
 import BrunoRequest from '../utils/bruno-request';
 import BrunoResponse from '../utils/bruno-response';
-import { executeQuickJsVm } from '../sandbox/quickjs';
 
 const { expect } = chai;
 

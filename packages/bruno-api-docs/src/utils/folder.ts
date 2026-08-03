@@ -1,7 +1,6 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { Auth } from '@opencollection/types/common/auth';
-import { isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
 import {
   getDescription,
   getRequestDefaultsVars,
@@ -17,6 +16,7 @@ import {
   type InheritedPreRequestVarRow,
   type InheritedPostResponseVarRow
 } from './request';
+import { isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
 
 export interface FolderHeaderRow {
   name: string;

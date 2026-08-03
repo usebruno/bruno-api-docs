@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseYaml } from './utils/yamlUtils';
 import { sampleCollectionYaml } from './sampleCollection';
+import { parseYaml } from './utils/yamlUtils';
 
 describe('dev.tsx sample collection YAML', () => {
   const collection = parseYaml(sampleCollectionYaml);

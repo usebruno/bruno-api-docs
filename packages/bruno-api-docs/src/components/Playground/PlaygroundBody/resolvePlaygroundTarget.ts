@@ -1,5 +1,5 @@
-import type { NavModel } from '@/routing/types';
 import { ENVIRONMENTS_SLUG } from '@/routing/navModel';
+import type { NavModel } from '@/routing/types';
 import { getItemUuid } from '@/utils/itemUtils';
 
 /**

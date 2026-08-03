@@ -1,9 +1,9 @@
 import { HTTPSnippet, type HarRequest } from '@mintlify/httpsnippet';
-import type { HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { selectBodyVariant } from './request';
+import type { HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import { AUTH_TYPES, BODY_TYPES, CONTENT_TYPES } from '@/constants';
 import { templateVariableGlobalRegex } from './common';
+import { selectBodyVariant } from './request';
 
 export interface SnippetHeader {
   name: string;

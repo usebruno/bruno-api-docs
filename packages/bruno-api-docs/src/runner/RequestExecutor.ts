@@ -1,13 +1,13 @@
 import { Buffer } from 'buffer';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { RunRequestResponse } from './index';
-import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
-import { buildRequestUrl } from '@/utils/pathParams';
-import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
-import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/response';
-import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
 import stripJsonComments from 'strip-json-comments';
+import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
 import { statusCodePhrase } from '@/utils/exampleResponse';
+import { buildRequestUrl } from '@/utils/pathParams';
+import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/response';
+import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
+import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
+import type { RunRequestResponse } from './index';
 
 /** Methods `fetch` refuses to attach a request body to. */
 const BODYLESS_METHODS = ['GET', 'HEAD'];

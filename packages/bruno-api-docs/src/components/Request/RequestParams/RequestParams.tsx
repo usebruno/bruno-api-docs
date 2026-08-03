@@ -1,10 +1,10 @@
 import React from 'react';
 import type { HttpRequestParam } from '@opencollection/types/requests/http';
-import { SubHeading } from '../../SubHeading/SubHeading';
-import { PropertyTable, type PropertyRow } from '../../PropertyTable/PropertyTable';
-import { getDescription } from '@/utils/request';
 import { cx } from '@/utils/cx';
+import { getDescription } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
+import { PropertyTable, type PropertyRow } from '../../PropertyTable/PropertyTable';
+import { SubHeading } from '../../SubHeading/SubHeading';
 
 const toRows = (params: HttpRequestParam[]): PropertyRow[] =>
   params.map((param) => ({

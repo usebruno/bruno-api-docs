@@ -1,8 +1,8 @@
 import xmlFormat from 'xml-formatter';
-import { interpolate as interpolateString } from '../../runner/utils/variable-interpolator';
-import { addUnsupportedWarning } from './unsupported-warning';
-import type { JsonValue } from './bruno-response';
 import { VARIABLE_NAME_REGEX } from '@/constants/regex';
+import type { JsonValue } from './bruno-response';
+import { addUnsupportedWarning } from './unsupported-warning';
+import { interpolate as interpolateString } from '../../runner/utils/variable-interpolator';
 
 type VariableStore = Record<string, JsonValue>;
 type WarningStub = () => void;

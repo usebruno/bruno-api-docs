@@ -1,8 +1,8 @@
 import React from 'react';
-import { StyledWrapper } from './StyledWrapper';
 import { IconCheck, IconCopy } from '@tabler/icons';
 import useCopy from '@/hooks/useCopy';
 import cx from '@/utils/cx';
+import { StyledWrapper } from './StyledWrapper';
 
 interface CopyButtonProps {
   text?: string;

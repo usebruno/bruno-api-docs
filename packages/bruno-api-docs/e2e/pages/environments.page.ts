@@ -1,7 +1,7 @@
 import type { Locator } from '@playwright/test';
 import { BasePage } from './base.page';
-import { SidebarComponent } from '../components/sidebar.component';
 import { EnvironmentTableComponent } from '../components/environments/environment-table.component';
+import { SidebarComponent } from '../components/sidebar.component';
 
 export class EnvironmentsPage extends BasePage {
   readonly root = this.page.getByTestId('environments-page');

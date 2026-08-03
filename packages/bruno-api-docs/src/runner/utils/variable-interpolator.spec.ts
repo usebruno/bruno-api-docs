@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
+import { describe, it, expect } from 'vitest';
 import { interpolateVars } from './variable-interpolator';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

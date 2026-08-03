@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { NavEntry } from '@/routing/types';
 import {
   buildSearchRecords,
   collectTopLevelFolders,
@@ -11,7 +12,6 @@ import {
   type RequestSearchRecord,
   type FolderSearchRecord
 } from './searchIndex';
-import type { NavEntry } from '@/routing/types';
 
 const requestEntry = (over: Partial<NavEntry> & { uuid: string }): NavEntry => {
   const { uuid, ...rest } = over;

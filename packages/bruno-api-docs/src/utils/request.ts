@@ -1,5 +1,9 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
+import type { Action, ActionSetVariable } from '@opencollection/types/common/actions';
+import type { Auth } from '@opencollection/types/common/auth';
+import type { Scripts } from '@opencollection/types/common/scripts';
+import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';
 import type {
   HttpRequest,
   HttpRequestBody,
@@ -9,26 +13,16 @@ import type {
   HttpResponseHeader
 } from '@opencollection/types/requests/http';
 import type { PropertyRow } from '@/components/PropertyTable/PropertyTable';
-import type { Auth } from '@opencollection/types/common/auth';
-import type { Scripts } from '@opencollection/types/common/scripts';
-import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';
-import type { Action, ActionSetVariable } from '@opencollection/types/common/actions';
-import { descriptionText, resolveDescription } from './description';
 import {
-  getRequestAuth,
-  getItemName,
-  getRequestScripts,
-  scriptsArrayToObject,
-  getRequestVariables,
   getRequestHeaders,
   pickSelectedVariant,
   type SupportedRequestItem,
   type RequestItem
 } from './schemaHelpers';
-import { getItemUuid } from './itemUtils';
-import { isSecretVariable, unwrapVariableValue } from './variableResolution';
-import { COLLECTION_ROOT_CRUMB } from './common';
 import { AUTH_MODE_LABELS, BODY_CONTENT_TYPE, BODY_LANGUAGE } from '@/constants';
+import { COLLECTION_ROOT_CRUMB } from './common';
+import { descriptionText, resolveDescription } from './description';
+import { getItemUuid } from './itemUtils';
 import type {
   InheritedSource,
   ResolvedAuth,
@@ -51,6 +45,14 @@ import type {
   InheritedConfig,
   OwnConfigKeys
 } from './request.types';
+import {
+  getRequestAuth,
+  getItemName,
+  getRequestScripts,
+  scriptsArrayToObject,
+  getRequestVariables
+} from './schemaHelpers';
+import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 
 export type * from './request.types';
 

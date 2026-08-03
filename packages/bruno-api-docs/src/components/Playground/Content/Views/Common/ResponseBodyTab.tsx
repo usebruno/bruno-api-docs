@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import type { ResponseBodyFormat } from '@/constants';
 import { FORMAT_TO_MONACO } from '@/constants';
-import { formatResponse } from '@/utils/dataFormatter';
-import type { RunRequestResponse } from '@/runner';
-import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
 import useLargeResponse from '@/hooks/useLargeResponseWarning';
+import type { RunRequestResponse } from '@/runner';
+import { formatResponse } from '@/utils/dataFormatter';
+import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
 import QueryResultPreview from '../../../QueryResultPreview/QueryResultPreview';
 
 const CodeEditor = React.lazy(() => import('@/ui/CodeEditor/CodeEditor'));

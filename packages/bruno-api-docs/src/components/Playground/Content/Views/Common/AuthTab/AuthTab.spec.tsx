@@ -76,7 +76,7 @@ describe('AuthTab', () => {
   it('masks the bearer token and exposes a reveal toggle', () => {
     const { getByTestId } = renderAuth({ type: 'bearer', token: 'abc' });
     expect(getByTestId('auth-token').getAttribute('type')).toBe('password');
-    expect(getByTestId('auth-token-toggle')).toBeTruthy();
+    getByTestId('auth-token-toggle');
   });
 
   it('renders apikey with an unmasked value and a header/query placement select', () => {
@@ -96,7 +96,7 @@ describe('AuthTab', () => {
     const { getByTestId } = renderAuth({ type: 'digest', username: 'u', password: 'p' });
     expect(getByTestId('auth-username').getAttribute('type')).toBe('text');
     expect(getByTestId('auth-password').getAttribute('type')).toBe('password');
-    expect(getByTestId('auth-password-toggle')).toBeTruthy();
+    getByTestId('auth-password-toggle');
   });
 
   it('renders all six AWS Signature v4 fields, masking only the secret access key', () => {
@@ -104,7 +104,7 @@ describe('AuthTab', () => {
     const labels = ['accessKeyId', 'secretAccessKey', 'sessionToken', 'service', 'region', 'profileName'];
     labels.forEach((field) => expect(byTestId(`auth-${field}`)).toBeTruthy());
     expect(getByTestId('auth-secretAccessKey').getAttribute('type')).toBe('password');
-    expect(getByTestId('auth-secretAccessKey-toggle')).toBeTruthy();
+    getByTestId('auth-secretAccessKey-toggle');
     ['accessKeyId', 'sessionToken', 'service', 'region', 'profileName'].forEach((field) => {
       expect(getByTestId(`auth-${field}`).getAttribute('type')).toBe('text');
       expect(byTestId(`auth-${field}-toggle`)).toBeNull();

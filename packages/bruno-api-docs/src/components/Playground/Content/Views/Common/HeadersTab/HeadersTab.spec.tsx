@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../../../../../hooks/useRenderToDom';
-import { query } from '../../../../../../test-utils/dom';
+import { query, getByTestId } from '../../../../../../test-utils/dom';
 import { HeadersTab } from './HeadersTab';
 
 const noop = () => {};
@@ -35,7 +35,7 @@ describe('HeadersTab', () => {
     // With no title prop, the tab shows only the description — no separate title heading.
     expect(root.querySelector('.title')).toBeNull();
     expect(query(root, '.description').text.trim()).toBe('Request headers sent with the call');
-    expect(root.querySelector('[data-testid="bulk-edit-toggle"]')).toBeTruthy();
+    getByTestId(root, 'bulk-edit-toggle');
   });
 
   it('exposes the Bulk edit toggle button', () => {
@@ -47,8 +47,8 @@ describe('HeadersTab', () => {
     const root = useRenderToDom(
       <HeadersTab headers={[{ name: 'Bad Name', value: 'line1\nline2' }]} onHeadersChange={noop} />
     );
-    expect(root.querySelector('[aria-label="Header name cannot contain spaces or newlines"]')).toBeTruthy();
-    expect(root.querySelector('[aria-label="Header value cannot contain newlines"]')).toBeTruthy();
+    query(root, '[aria-label="Header name cannot contain spaces or newlines"]');
+    query(root, '[aria-label="Header value cannot contain newlines"]');
   });
 
   it('shows no error for a valid header', () => {

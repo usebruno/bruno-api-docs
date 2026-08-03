@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
+import { queryByTestId } from '../../test-utils/dom';
 import { Popover } from './Popover';
 
 describe('Popover', () => {
@@ -10,8 +11,8 @@ describe('Popover', () => {
         <button data-testid="anchor">anchor</button>
       </Popover>
     );
-    expect(root.querySelector('[data-testid="anchor"]')).not.toBeNull();
-    expect(root.querySelector('[data-testid="panel"]')).toBeNull();
+    expect(queryByTestId(root, 'anchor')).not.toBeNull();
+    expect(queryByTestId(root, 'panel')).toBeNull();
     expect(root.querySelector('[role="dialog"]')).toBeNull();
   });
 

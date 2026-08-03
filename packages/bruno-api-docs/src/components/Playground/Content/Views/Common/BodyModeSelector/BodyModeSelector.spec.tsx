@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { BodyModeSelector, resolveBodyMode } from './BodyModeSelector';
 import type { RequestBody } from '../../../../../../utils/schemaHelpers';
-import { getByTestId } from '../../../../../../test-utils/dom';
+import { query, getByTestId } from '../../../../../../test-utils/dom';
 
 const noop = () => {};
 
@@ -68,6 +68,6 @@ describe('BodyModeSelector', () => {
 
   it('renders a caret icon on the trigger', () => {
     const root = renderSelector(undefined);
-    expect(getByTestId(root, 'body-type-select').querySelector('svg')).toBeTruthy();
+    query(getByTestId(root, 'body-type-select'), 'svg');
   });
 });

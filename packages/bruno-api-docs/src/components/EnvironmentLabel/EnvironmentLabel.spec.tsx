@@ -1,13 +1,14 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
+import { query } from '../../test-utils/dom';
 import { EnvironmentLabel } from './EnvironmentLabel';
 
 describe('EnvironmentLabel', () => {
   it('renders the environment name and a color dot', () => {
     const root = useRenderToDom(<EnvironmentLabel name="Development" />);
     expect(root.querySelector('.environment-label-name')?.text.trim()).toBe('Development');
-    expect(root.querySelector('.environment-label-dot')).toBeTruthy();
+    query(root, '.environment-label-dot');
   });
 
   it('applies the environment color to the dot', () => {
@@ -19,7 +20,7 @@ describe('EnvironmentLabel', () => {
     const root = useRenderToDom(
       <EnvironmentLabel name="Staging" className="env-tab" nameClassName="env-tab-name" />
     );
-    expect(root.querySelector('.environment-label.env-tab')).toBeTruthy();
-    expect(root.querySelector('.environment-label-name.env-tab-name')).toBeTruthy();
+    query(root, '.environment-label.env-tab');
+    query(root, '.environment-label-name.env-tab-name');
   });
 });

@@ -17,7 +17,7 @@ const rowWithDescription: KeyValueRow[] = [
 describe('EnvVarCards', () => {
   it('derives per-card indexed child test ids from the testId prop and labels the Name and Value fields', () => {
     const root = useRenderToDom(<EnvVarCards rows={rows} onChange={() => undefined} testId="env-var-cards" />);
-    expect(getByTestId(root, 'env-var-cards')).toBeTruthy();
+    getByTestId(root, 'env-var-cards');
     expect(getByTestId(root, 'env-var-cards-name-input-0').getAttribute('placeholder')).toBe('Name');
     expect(getByTestId(root, 'env-var-cards-value-input-0').getAttribute('placeholder')).toBe('Value');
   });
@@ -25,8 +25,8 @@ describe('EnvVarCards', () => {
   it('gives each card a unique indexed test id so multiple cards are individually addressable', () => {
     const root = useRenderToDom(<EnvVarCards rows={rows} onChange={() => undefined} testId="env-var-cards" />);
     // Two rows -> two distinct cards, each with its own -card-<index> / -name-input-<index> ids.
-    expect(getByTestId(root, 'env-var-cards-card-0')).toBeTruthy();
-    expect(getByTestId(root, 'env-var-cards-card-1')).toBeTruthy();
+    getByTestId(root, 'env-var-cards-card-0');
+    getByTestId(root, 'env-var-cards-card-1');
     expect(getByTestId(root, 'env-var-cards-name-input-0').getAttribute('value')).toBe('host');
     expect(getByTestId(root, 'env-var-cards-name-input-1').getAttribute('value')).toBe('token');
   });

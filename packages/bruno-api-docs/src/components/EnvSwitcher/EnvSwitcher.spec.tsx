@@ -98,7 +98,7 @@ describe('EnvSwitcher', () => {
 
   it('derives the root and trigger test ids from a custom testId', () => {
     const root = render(withEnvs, (s) => s.dispatch(setActiveEnv('Dev')), { testId: 'playground-env-switcher' });
-    expect(getByTestId(root, 'playground-env-switcher-root')).toBeTruthy();
-    expect(getByTestId(root, 'playground-env-switcher')).toBeTruthy();
+    getByTestId(root, 'playground-env-switcher-root');
+    getByTestId(root, 'playground-env-switcher');
   });
 });

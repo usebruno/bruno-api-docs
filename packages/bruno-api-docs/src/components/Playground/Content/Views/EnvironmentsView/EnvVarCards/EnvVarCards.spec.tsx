@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../../../../../hooks/useRenderToDom';
-import { query, getByTestId, queryByTestId } from '../../../../../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query, getByTestId, queryByTestId } from '@/test-utils/dom';
 import EnvVarCards from './EnvVarCards';
-import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 
 const rows: KeyValueRow[] = [
   { id: '1', name: 'host', value: '', enabled: true },

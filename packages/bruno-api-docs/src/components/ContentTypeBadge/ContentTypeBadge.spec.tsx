@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { getByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId } from '@/test-utils/dom';
 import { ContentTypeBadge } from './ContentTypeBadge';
 
 describe('ContentTypeBadge', () => {

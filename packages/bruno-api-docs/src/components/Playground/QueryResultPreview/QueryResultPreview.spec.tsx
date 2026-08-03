@@ -2,9 +2,9 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import TextPreview from './TextPreview';
 import HtmlPreview from './HtmlPreview/HtmlPreview';
-import { useRenderToDom } from '../../../hooks/useRenderToDom';
-import { query } from '../../../test-utils/dom';
-import { formatToPreviewMode } from '../../../constants';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query } from '@/test-utils/dom';
+import { formatToPreviewMode } from '@/constants';
 
 describe('formatToPreviewMode', () => {
   it('maps formats to preview modes', () => {

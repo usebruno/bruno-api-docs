@@ -4,7 +4,7 @@ import { Code } from '../../Code/Code';
 import { ContentTypeBadge } from '../../ContentTypeBadge/ContentTypeBadge';
 import { PropertyTable, type PropertyRow } from '../../PropertyTable/PropertyTable';
 import { VariableText } from '../../VariableText/VariableText';
-import { getBodyView, type BodyTableRow } from '../../../utils/request';
+import { getBodyView, type BodyTableRow } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface RequestBodyProps {

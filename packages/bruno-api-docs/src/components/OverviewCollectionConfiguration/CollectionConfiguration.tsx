@@ -6,8 +6,8 @@ import { SubHeading } from '../SubHeading/SubHeading';
 import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
 import { AuthDetails } from '../AuthDetails/AuthDetails';
 import { VariablesPanel } from '../ExecutionContext/VariablesPanel/VariablesPanel';
-import { getDescription, type PreRequestVarRow, type PostResponseVarRow } from '../../utils/request';
-import { hasConfiguredAuth } from '../../utils/collectionOverview';
+import { getDescription, type PreRequestVarRow, type PostResponseVarRow } from '@/utils/request';
+import { hasConfiguredAuth } from '@/utils/collectionOverview';
 import { StyledWrapper } from './StyledWrapper';
 
 interface CollectionScripts {

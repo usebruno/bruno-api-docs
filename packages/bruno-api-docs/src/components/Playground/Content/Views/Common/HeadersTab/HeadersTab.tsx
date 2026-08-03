@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import KeyValueTable, { type KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import { STANDARD_HTTP_HEADERS, MIME_TYPES } from '../../../../../../constants/httpHeaders';
-import { HEADER_NAME_REGEX, HEADER_VALUE_REGEX } from '../../../../../../constants/regex';
-import { getDescription } from '../../../../../../utils/request';
+import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import { STANDARD_HTTP_HEADERS, MIME_TYPES } from '@/constants/httpHeaders';
+import { HEADER_NAME_REGEX, HEADER_VALUE_REGEX } from '@/constants/regex';
+import { getDescription } from '@/utils/request';
 import BulkEdit from '../BulkEdit/BulkEdit';
 import { StyledWrapper } from './StyledWrapper';
 

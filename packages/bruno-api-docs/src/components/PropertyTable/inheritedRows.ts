@@ -5,7 +5,7 @@ import type {
   InheritedHeaderRow,
   InheritedPreRequestVarRow,
   InheritedPostResponseVarRow
-} from '../../utils/request';
+} from '@/utils/request';
 
 // Plain-data row builders (no React dependency): each inherited row carries its `inheritedSource`,
 // and PropertyTable renders the "go to source" link from it. Shared by the request page, the folder

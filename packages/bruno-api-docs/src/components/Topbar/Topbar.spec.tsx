@@ -8,8 +8,8 @@ import Topbar from './Topbar';
 // doesn't have, so they'd come back false and hide the button. We force them to
 // "yes" here so the test can focus on the one thing it checks: the button shows
 // only when it's given a link.
-vi.mock('../../hooks/useCanRunBrunoApp', () => ({ useCanRunBrunoApp: () => true }));
-vi.mock('../../hooks/useTopbarLayout', () => ({
+vi.mock('@/hooks/useCanRunBrunoApp', () => ({ useCanRunBrunoApp: () => true }));
+vi.mock('@/hooks/useTopbarLayout', () => ({
   useTopbarLayout: () => 'desktop',
   showsHamburger: () => false
 }));

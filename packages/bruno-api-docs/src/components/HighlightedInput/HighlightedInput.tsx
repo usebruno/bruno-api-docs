@@ -1,17 +1,17 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Portal } from '../../ui/Portal/Portal';
+import { Portal } from '@/ui/Portal/Portal';
 import { VariableInfoCard } from '../VariableInfoCard/VariableInfoCard';
-import { isTemplateVariable, templateVariableSplitRegex } from '../../utils/common';
-import { classifyVariableToken } from '../../utils/variableHighlight';
+import { isTemplateVariable, templateVariableSplitRegex } from '@/utils/common';
+import { classifyVariableToken } from '@/utils/variableHighlight';
 import {
   buildAnywordSuggestions,
   buildVariableSuggestions,
   getVariableContext,
   getWordContext,
   type AutocompleteContext
-} from '../../utils/variableAutocomplete';
-import { HOVER_CLOSE_MS, HOVER_OPEN_MS } from '../../constants/ui';
-import { computeAnchoredPosition, type AnchoredPosition } from '../../utils/anchoredPosition';
+} from '@/utils/variableAutocomplete';
+import { HOVER_CLOSE_MS, HOVER_OPEN_MS } from '@/constants/ui';
+import { computeAnchoredPosition, type AnchoredPosition } from '@/utils/anchoredPosition';
 import { StyledWrapper, HoverCard, Suggestions } from './StyledWrapper';
 
 interface HighlightedInputProps {

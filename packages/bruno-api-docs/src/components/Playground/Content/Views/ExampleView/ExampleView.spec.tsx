@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { ExampleView } from './ExampleView';
-import { useRenderToDom } from '../../../../../hooks/useRenderToDom';
-import { query } from '../../../../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query } from '@/test-utils/dom';
 
 const request = { type: 'http', method: 'POST', url: '{{baseUrl}}/api/v1/auth/login' } as any;
 const example = {

@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import { usePlaygroundUrlState, useIsMobilePhone } from '../../hooks';
-import { useAppDispatch } from '../../store/hooks';
+import { usePlaygroundUrlState, useIsMobilePhone } from '@/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import { resetPlaygroundEnvironments } from '@slices/playground';
 import InlineDock from './docks/InlineDock/InlineDock';
 import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';

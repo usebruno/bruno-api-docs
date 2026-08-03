@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import ErrorBanner from '../../../../ui/ErrorBanner/ErrorBanner';
+import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import { StyledWrapper } from './StyledWrapper';
 
 /** Recursive shape produced by parsing an XML string into a JS object. */

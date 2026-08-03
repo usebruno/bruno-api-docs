@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { mergeAuth } from './request-merger';
-import { getRequestAuth } from '../../utils/schemaHelpers';
+import { getRequestAuth } from '@/utils/schemaHelpers';
 
 // A playground request keeps its auth on the http protocol block; folders/collection nest
 // it under `request.auth`. Auth is either a concrete object, the string 'inherit', or

@@ -1,9 +1,9 @@
-import { useMarkdownRenderer } from '../../../../../../hooks';
+import { useMarkdownRenderer } from '@/hooks';
 import { useMemo } from 'react';
 import { StyledWrapper } from './StyledWrapper';
-import { EmptyState } from '../../../../../../ui/EmptyState/EmptyState';
-import { BookIcon } from '../../../../../../assets/icons';
-import NoContentText from '../../../../../../ui/NoContentText/NoContentText';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { BookIcon } from '@/assets/icons';
+import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface OverviewTabProps {
   docs?: string;

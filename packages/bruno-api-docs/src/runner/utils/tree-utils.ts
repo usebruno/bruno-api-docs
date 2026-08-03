@@ -1,9 +1,9 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item, Folder } from '@opencollection/types/collection/item';
-import { getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest } from '../../utils/schemaHelpers';
-import { getAncestorsByUuid } from '../../utils/fileUtils';
-import { getItemUuid } from '../../utils/itemUtils';
+import { getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest } from '@/utils/schemaHelpers';
+import { getAncestorsByUuid } from '@/utils/fileUtils';
+import { getItemUuid } from '@/utils/itemUtils';
 
 /**
  * Find the folder ancestors from the collection root to a specific item (the item excluded).

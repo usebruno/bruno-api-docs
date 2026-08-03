@@ -10,17 +10,18 @@ import {
   isGrpcRequest,
   type RequestItem
 } from '../../utils/schemaHelpers';
-import { getBodyView } from '@/utils/request';
-import { EyeOffIcon } from '@/assets/icons';
-import { Section } from '../../components/Section/Section';
-import { RequestBody } from '../../components/Request/RequestBody/RequestBody';
-import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeBadge';
-import { Examples } from '../../components/Examples/Examples';
-import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
-import { UnsupportedRequest } from '../../components/UnsupportedRequest/UnsupportedRequest';
 import { useRequestPageData } from '@/hooks/useRequestPageData';
 import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from '@/components/RequestPageLayout/RequestPageLayout';
 import { GrpcRequest } from '../GrpcRequest/GrpcRequest';
+import {
+  getBodyView} from '@/utils/request';
+import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
+import { Section } from '@/components/Section/Section';
+import { EyeOffIcon } from '@/assets/icons';
+import { RequestBody } from '@/components/Request/RequestBody/RequestBody';
+import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
+import { Examples } from '@/components/Examples/Examples';
+import { UnsupportedRequest } from '@/components/UnsupportedRequest/UnsupportedRequest';
 
 interface RequestProps {
   item: RequestItem;

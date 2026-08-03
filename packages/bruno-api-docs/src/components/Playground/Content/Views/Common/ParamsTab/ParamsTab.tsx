@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
-import KeyValueTable, { type KeyValueRow } from '../../../../../KeyValueTable/KeyValueTable';
-import { getDescription } from '../../../../../../utils/request';
+import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import { getDescription } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ParamsTabProps {

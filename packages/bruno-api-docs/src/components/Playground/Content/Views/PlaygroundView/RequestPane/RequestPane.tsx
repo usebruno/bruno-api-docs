@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
-import Tabs from '../../../../../../ui/Tabs/Tabs';
-import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import { rowToVariable } from '../../../../../../utils/variableDataType';
+import Tabs from '@/ui/Tabs/Tabs';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import { rowToVariable } from '@/utils/variableDataType';
 import HeadersTab from '../../Common/HeadersTab/HeadersTab';
 import ParamsTab from '../../Common/ParamsTab/ParamsTab';
 import BodyTab from '../../Common/BodyTab';
@@ -27,10 +27,10 @@ import {
   scriptsObjectToArray,
   getRequestUrl,
   getItemDocs
-} from '../../../../../../utils/schemaHelpers';
-import { setUrlQueryParams } from '../../../../../../utils/pathParams';
-import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '../../../../../../utils/request';
-import { keyValueRowToEntry } from '../../../../../../utils/keyValueRow';
+} from '@/utils/schemaHelpers';
+import { setUrlQueryParams } from '@/utils/pathParams';
+import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
+import { keyValueRowToEntry } from '@/utils/keyValueRow';
 
 interface RequestPaneProps {
   item: HttpRequest;

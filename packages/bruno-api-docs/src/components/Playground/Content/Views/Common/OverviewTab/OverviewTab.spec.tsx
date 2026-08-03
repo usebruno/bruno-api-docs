@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../../../../../hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '../../../../../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import OverviewTab from './OverviewTab';
 
 describe('OverviewTab', () => {

@@ -2,8 +2,8 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import { getByTestId, query } from '../../../../../../test-utils/dom';
-import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '../../../../../../constants';
+import { getByTestId, query } from '@/test-utils/dom';
+import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
 import { AuthTab } from './AuthTab';
 
 const render = (ui: React.ReactElement) => {

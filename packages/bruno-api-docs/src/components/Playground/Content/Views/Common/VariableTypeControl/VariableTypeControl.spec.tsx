@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../../../../../hooks/useRenderToDom';
-import { query, queryByTestId } from '../../../../../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query, queryByTestId } from '@/test-utils/dom';
 import { VariableTypeControl } from './VariableTypeControl';
 
 const noop = () => {};

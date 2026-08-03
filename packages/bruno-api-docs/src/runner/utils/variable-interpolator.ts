@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpRequestHeader, HttpRequestParam } from '@opencollection/types/requests/http';
 import { isPlainObject } from 'lodash-es';
-import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '../../utils/schemaHelpers';
-import { templateVariableGlobalRegex } from '../../utils/common';
+import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@/utils/schemaHelpers';
+import { templateVariableGlobalRegex } from '@/utils/common';
 import { mockDataFunctions } from './faker-functions';
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };

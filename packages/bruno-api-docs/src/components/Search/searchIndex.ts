@@ -14,10 +14,10 @@
 import Fuse from 'fuse.js';
 import type { IFuseOptions, FuseResultMatch } from 'fuse.js';
 import type { Folder } from '@opencollection/types/collection/item';
-import type { NavEntry } from '../../routing/types';
-import { getRequestUrl } from '../../utils/schemaHelpers';
-import { getItemUuid } from '../../utils/itemUtils';
-import { countFolderRequests } from '../../utils/folder';
+import type { NavEntry } from '@/routing/types';
+import { getRequestUrl } from '@/utils/schemaHelpers';
+import { getItemUuid } from '@/utils/itemUtils';
+import { countFolderRequests } from '@/utils/folder';
 
 interface SearchRecordBase {
   /** Item UUID (the sidebar key). */

@@ -1,6 +1,6 @@
 import React from 'react';
-import type { FolderConfig } from '../../utils/folder';
-import { headerRows, inheritedCountLabel } from '../../utils/request';
+import type { FolderConfig } from '@/utils/folder';
+import { headerRows, inheritedCountLabel } from '@/utils/request';
 import { Code } from '../Code/Code';
 import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';

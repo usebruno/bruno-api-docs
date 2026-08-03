@@ -5,10 +5,10 @@ import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import { createOpenCollectionStore } from '../../store/store';
-import { setDocsCollection } from '../../store/slices/docs';
-import { setActiveEnv } from '../../store/slices/env';
-import { getByTestId } from '../../test-utils/dom';
+import { createOpenCollectionStore } from '@/store/store';
+import { setDocsCollection } from '@/store/slices/docs';
+import { setActiveEnv } from '@/store/slices/env';
+import { getByTestId } from '@/test-utils/dom';
 import EnvSwitcher from './EnvSwitcher';
 
 const collectionWith = (environments: Environment[]): OpenCollection => ({ config: { environments } });

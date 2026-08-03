@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
 import SidebarDrawer from './SidebarDrawer';
 
-vi.mock('../../ui/Portal/Portal', () => ({
+vi.mock('@/ui/Portal/Portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children
 }));
 

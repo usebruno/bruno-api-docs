@@ -9,7 +9,7 @@ import React, {
   type ReactNode
 } from 'react';
 import { Portal } from '../Portal/Portal';
-import { GAP, VIEWPORT_MARGIN } from '../../constants/ui';
+import { GAP, VIEWPORT_MARGIN } from '@/constants/ui';
 import { StyledWrapper } from './StyledWrapper';
 
 interface TooltipProps {

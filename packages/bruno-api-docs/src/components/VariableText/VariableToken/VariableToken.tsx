@@ -1,6 +1,6 @@
 import React from 'react';
-import { useResolvedVariables } from '../../../hooks';
-import { Popover } from '../../../ui/Popover/Popover';
+import { useResolvedVariables } from '@/hooks';
+import { Popover } from '@/ui/Popover/Popover';
 import { VariableInfoCard } from '../../VariableInfoCard/VariableInfoCard';
 import { StyledWrapper } from './StyledWrapper';
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import { query } from '../../test-utils/dom';
+import { query } from '@/test-utils/dom';
 import { InfoTip } from './InfoTip';
 
 const render = (ui: React.ReactElement) => {

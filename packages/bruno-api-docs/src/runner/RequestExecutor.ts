@@ -1,11 +1,11 @@
 import { Buffer } from 'buffer';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { RunRequestResponse } from './index';
-import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '../utils/schemaHelpers';
-import { buildRequestUrl } from '../utils/pathParams';
+import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
+import { buildRequestUrl } from '@/utils/pathParams';
 import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
-import { detectContentTypeFromBytes, isByteFormatContentType } from '../utils/response';
-import { RESPONSE_LARGE_THRESHOLD } from '../constants';
+import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/response';
+import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
 import stripJsonComments from 'strip-json-comments';
 import { statusCodePhrase } from '@/utils/exampleResponse';
 

@@ -80,7 +80,6 @@ export const StyledWrapper = styled.div`
     padding: 0.5rem;
     background: var(--bg-primary);
     border-color: var(--border-color);
-    box-shadow: var(--shadow-md);
     overflow-y: auto;
     transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
   }

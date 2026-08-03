@@ -1,9 +1,9 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
-import type { RootState } from '../store';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import { hydrateWithUUIDs, findAndUpdateItem } from '@/utils/fileUtils';
 import { isFolder } from '@/utils/schemaHelpers';
+import type { RootState } from '../store';
 
 export interface DocsState {
   collection: OpenCollectionCollection | null;

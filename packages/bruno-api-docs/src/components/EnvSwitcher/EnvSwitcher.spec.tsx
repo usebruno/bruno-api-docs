@@ -1,14 +1,14 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { OpenCollection } from '@opencollection/types';
+import type { Environment } from '@opencollection/types/config/environments';
 import { parse } from 'node-html-parser';
 import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
-import type { OpenCollection } from '@opencollection/types';
-import type { Environment } from '@opencollection/types/config/environments';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
-import { setActiveEnv } from '@/store/slices/env';
 import { getByTestId } from '@/test-utils/dom';
+import { setDocsCollection } from '@slices/docs';
+import { setActiveEnv } from '@slices/env';
 import EnvSwitcher from './EnvSwitcher';
 
 const collectionWith = (environments: Environment[]): OpenCollection => ({ config: { environments } });

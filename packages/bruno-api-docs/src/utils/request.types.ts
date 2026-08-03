@@ -1,7 +1,7 @@
-import type { Auth } from '@opencollection/types/common/auth';
-import type { HttpRequestBody } from '@opencollection/types/requests/http';
 import type { ActionVariableScope } from '@opencollection/types/common/actions';
+import type { Auth } from '@opencollection/types/common/auth';
 import type { Description } from '@opencollection/types/common/description';
+import type { HttpRequestBody } from '@opencollection/types/requests/http';
 
 export interface InheritedSource {
   level: 'collection' | 'folder';

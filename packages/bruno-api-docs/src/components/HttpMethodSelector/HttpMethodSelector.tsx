@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import MenuDropdown from '@/ui/MenuDropdown';
-import type { MenuDropdownItem } from '@/ui/MenuDropdown';
 import { STANDARD_HTTP_METHODS } from '@/constants/request';
 import { getMethodColorVar } from '@/theme/methodColors';
-import { MethodBadge } from '../MethodBadge/MethodBadge';
+import MenuDropdown from '@/ui/MenuDropdown';
+import type { MenuDropdownItem } from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
+import { MethodBadge } from '../MethodBadge/MethodBadge';
 
 const ADD_CUSTOM_ITEM_ID = 'add-custom';
 

@@ -1,6 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavModel } from '@/routing/hooks';
+import { SearchIcon, CloseIcon } from '@/assets/icons';
 import { useClickOutside, useDocsNavigate } from '@/hooks';
+import { useNavModel } from '@/routing/hooks';
+import FolderFilter from '../FolderFilter/FolderFilter';
+import MethodChips from '../MethodChips/MethodChips';
 import {
   buildSearchRecords,
   collectTopLevelFolders,
@@ -11,11 +14,8 @@ import {
   type SearchHit,
   type SearchRecord
 } from '../searchIndex';
-import { SearchIcon, CloseIcon } from '@/assets/icons';
-import MethodChips from '../MethodChips/MethodChips';
-import FolderFilter from '../FolderFilter/FolderFilter';
-import SearchResultItem from '../SearchResultItem/SearchResultItem';
 import { StyledWrapper } from './StyledWrapper';
+import SearchResultItem from '../SearchResultItem/SearchResultItem';
 
 const RESULTS_ID = 'search-listbox';
 

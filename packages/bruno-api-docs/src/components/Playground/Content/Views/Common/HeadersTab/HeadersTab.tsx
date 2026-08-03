@@ -3,8 +3,8 @@ import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyV
 import { STANDARD_HTTP_HEADERS, MIME_TYPES } from '@/constants/httpHeaders';
 import { HEADER_NAME_REGEX, HEADER_VALUE_REGEX } from '@/constants/regex';
 import { getDescription } from '@/utils/request';
-import BulkEdit from '../BulkEdit/BulkEdit';
 import { StyledWrapper } from './StyledWrapper';
+import BulkEdit from '../BulkEdit/BulkEdit';
 
 interface HeadersTabProps {
   headers: Array<{ name?: string; value?: string; disabled?: boolean; description?: unknown }>;

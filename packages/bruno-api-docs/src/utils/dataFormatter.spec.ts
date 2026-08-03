@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { Buffer } from 'buffer';
+import { describe, it, expect } from 'vitest';
 import { formatResponse } from './dataFormatter';
 
 describe('formatResponse', () => {

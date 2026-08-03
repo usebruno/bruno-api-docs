@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import type { Variable } from '@opencollection/types/common/variables';
-import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { InfoTip } from '@/components/InfoTip/InfoTip';
-import { unwrapVariableTyped } from '@/utils/variableResolution';
-import { toDataType } from '@/utils/variableDataType';
+import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { VARIABLE_NAME_REGEX } from '@/constants/regex';
-import { variableTypeColumn } from '../VariableTypeControl/variableTypeColumn';
 import { getDescription, type PostResponseVar } from '@/utils/request';
+import { toDataType } from '@/utils/variableDataType';
+import { unwrapVariableTyped } from '@/utils/variableResolution';
 import { StyledWrapper } from './StyledWrapper';
+import { variableTypeColumn } from '../VariableTypeControl/variableTypeColumn';
 
 interface VariablesTabProps {
   variables: Array<Variable | { name?: string; value?: unknown; disabled?: boolean }>;

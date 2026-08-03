@@ -1,7 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as CollectionItem } from '@opencollection/types/collection/item';
-import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
+import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import { isFolder } from './schemaHelpers';
 
 export interface CollectionStats {

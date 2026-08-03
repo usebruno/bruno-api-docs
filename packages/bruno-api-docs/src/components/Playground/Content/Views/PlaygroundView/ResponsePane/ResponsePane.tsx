@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
+import { SendIcon } from '@/assets/icons';
+import type { ResponseBodyFormat } from '@/constants';
+import { RESPONSE_ACTIONS_EXPANDED_WIDTH } from '@/constants/response';
+import type { RunRequestResponse } from '@/runner';
+import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import Tabs from '@/ui/Tabs/Tabs';
+import ResponseActions from './ResponseActions/ResponseActions';
+import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
+import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
 import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
 import TestResultsTab from '../../Common/TestResultsTab';
-import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
-import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
-import { SendIcon } from '@/assets/icons';
-import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
-import type { ResponseBodyFormat } from '@/constants';
 import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
-import type { RunRequestResponse } from '@/runner';
-import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
-import ResponseActions from './ResponseActions/ResponseActions';
-import { RESPONSE_ACTIONS_EXPANDED_WIDTH } from '@/constants/response';
+import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;

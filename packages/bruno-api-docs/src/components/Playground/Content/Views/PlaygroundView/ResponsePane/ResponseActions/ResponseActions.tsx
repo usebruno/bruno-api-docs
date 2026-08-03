@@ -7,21 +7,21 @@ import {
   IconLayoutRows,
   IconDots
 } from '@tabler/icons';
-import CopyResponse from './CopyResponse/CopyResponse';
-import ClearResponse from './ClearResponse/ClearResponse';
-import DownloadResponse from './DownloadResponse/DownloadResponse';
-import ChangeLayout from './ChangeLayout/ChangeLayout';
-import { StyledWrapper } from './StyledWrapper';
+import type { ResponseBodyFormat } from '@/constants';
+import useCopy from '@/hooks/useCopy';
+import type { RunRequestResponse } from '@/runner';
+import { useAppDispatch } from '@/store/hooks';
+import IconButton from '@/ui/IconButton/IconButton';
 import MenuDropdown from '@/ui/MenuDropdown';
 import type { MenuDropdownItem } from '@/ui/MenuDropdown';
-import IconButton from '@/ui/IconButton/IconButton';
-import type { RunRequestResponse } from '@/runner';
-import type { ResponseBodyFormat } from '@/constants';
-import { useAppDispatch } from '@/store/hooks';
-import { clearPlaygroundResponse, setResponsePaneOrientation } from '@/store/slices/playground';
-import { downloadResponse } from '@/utils/downloadResponse';
-import useCopy from '@/hooks/useCopy';
 import { formatResponse } from '@/utils/dataFormatter';
+import { downloadResponse } from '@/utils/downloadResponse';
+import { clearPlaygroundResponse, setResponsePaneOrientation } from '@slices/playground';
+import ChangeLayout from './ChangeLayout/ChangeLayout';
+import ClearResponse from './ClearResponse/ClearResponse';
+import CopyResponse from './CopyResponse/CopyResponse';
+import DownloadResponse from './DownloadResponse/DownloadResponse';
+import { StyledWrapper } from './StyledWrapper';
 
 interface ResponseActionsProps {
   orientation: 'vertical' | 'horizontal';

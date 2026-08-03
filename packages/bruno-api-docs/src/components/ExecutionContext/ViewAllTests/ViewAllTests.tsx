@@ -1,9 +1,9 @@
 import React, { Fragment, useMemo, useState } from 'react';
-import { Code } from '../../Code/Code';
 import { Modal } from '@/ui/Modal/Modal';
-import { SectionLabel } from '../../SectionLabel/SectionLabel';
 import type { RawTestScript } from '@/utils/fileUtils';
 import { StyledWrapper } from './StyledWrapper';
+import { Code } from '../../Code/Code';
+import { SectionLabel } from '../../SectionLabel/SectionLabel';
 
 interface ViewAllTestsProps {
   scripts: RawTestScript[];

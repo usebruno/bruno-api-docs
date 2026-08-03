@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { IconChevronRight, IconChevronLeft } from '@tabler/icons';
-import type { MenuDropdownItem, MenuItemId, GetMenuItemProps, RenderMenuItemContent } from './types';
 import type { MenuDropdownComponentType } from './MenuDropdown';
+import type { MenuDropdownItem, MenuItemId, GetMenuItemProps, RenderMenuItemContent } from './types';
 
 export interface SubMenuItemProps {
   item: MenuDropdownItem;

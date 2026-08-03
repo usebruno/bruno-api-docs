@@ -1,9 +1,9 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it, expect } from 'vitest';
 import type { HttpRequestHeader } from '@opencollection/types/requests/http';
-import { CollectionConfiguration } from './CollectionConfiguration';
+import { describe, it, expect } from 'vitest';
 import { AUTH_MODE_LABELS } from '@/constants';
+import { CollectionConfiguration } from './CollectionConfiguration';
 
 describe('CollectionConfiguration', () => {
   it('renders nothing when there is no configuration', () => {

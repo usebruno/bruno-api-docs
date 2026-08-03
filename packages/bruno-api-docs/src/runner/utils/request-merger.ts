@@ -1,7 +1,8 @@
 import type { OpenCollection } from '@opencollection/types';
-import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Scripts } from '@opencollection/types/common/scripts';
+import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
+import { resolveInheritedAuth } from '@/utils/request';
 import {
   isFolder,
   getHttpHeaders,
@@ -13,7 +14,6 @@ import {
   scriptsObjectToArray,
   type ScriptsObject
 } from '@/utils/schemaHelpers';
-import { resolveInheritedAuth } from '@/utils/request';
 
 /**
  * Merge headers from collection and folder hierarchy into the request

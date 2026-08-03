@@ -1,14 +1,14 @@
 import React from 'react';
-import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { Code } from '../Code/Code';
-import { SubHeading } from '../SubHeading/SubHeading';
-import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
-import { AuthDetails } from '../AuthDetails/AuthDetails';
-import { VariablesPanel } from '../ExecutionContext/VariablesPanel/VariablesPanel';
-import { getDescription, type PreRequestVarRow, type PostResponseVarRow } from '@/utils/request';
+import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import { hasConfiguredAuth } from '@/utils/collectionOverview';
+import { getDescription, type PreRequestVarRow, type PostResponseVarRow } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
+import { AuthDetails } from '../AuthDetails/AuthDetails';
+import { Code } from '../Code/Code';
+import { VariablesPanel } from '../ExecutionContext/VariablesPanel/VariablesPanel';
+import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
+import { SubHeading } from '../SubHeading/SubHeading';
 
 interface CollectionScripts {
   preRequest?: string;

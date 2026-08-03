@@ -1,7 +1,7 @@
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
-import { getRequestAssertions } from './schemaHelpers';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { getDescription } from './request';
+import { getRequestAssertions } from './schemaHelpers';
 
 const OPERATOR_LABELS: Record<string, string> = {
   eq: 'equals',

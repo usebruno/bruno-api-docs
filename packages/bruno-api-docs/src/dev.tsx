@@ -4,14 +4,14 @@ import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import './styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
-import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import { createOpenCollectionStore } from './store/store';
-import { sampleCollectionYaml } from './sampleCollection';
-import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
-import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
 import { descriptionsFixtureCollection } from './e2eFixtures/descriptionsCollection';
+import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { qaFixtureCollection } from './e2eFixtures/qaCollection';
+import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
+import { sampleCollectionYaml } from './sampleCollection';
+import { createOpenCollectionStore } from './store/store';
+import Prism from './utils/prism';
 
 // `?fixture=folders` mounts a nested-folder collection for routing e2e tests;
 // `?fixture=qa` mounts the deep, deliberately awkward collection for manual QA.

@@ -1,8 +1,8 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
-import { useResolvedVariables } from '@/hooks';
-import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { EyeIcon, EyeOffIcon } from '@/assets/icons';
 import { SCOPE_LABELS, INVALID_NAME_WARNING } from '@/constants';
+import { useResolvedVariables } from '@/hooks';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import type { VariableScope } from '@/utils/variableResolution';
 import { StyledWrapper } from './StyledWrapper';
 

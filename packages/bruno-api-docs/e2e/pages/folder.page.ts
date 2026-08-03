@@ -1,7 +1,7 @@
 import { BasePage } from './base.page';
-import { SidebarComponent } from '../components/sidebar.component';
 import { BreadcrumbComponent } from '../components/breadcrumb.component';
 import { FolderConfigurationComponent } from '../components/folder/folder-configuration.component';
+import { SidebarComponent } from '../components/sidebar.component';
 import { VariableCardComponent } from '../components/variable-card/variable-card.component';
 
 export class FolderPage extends BasePage {

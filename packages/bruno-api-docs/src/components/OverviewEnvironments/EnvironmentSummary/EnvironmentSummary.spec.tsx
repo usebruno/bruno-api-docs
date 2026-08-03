@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it, expect } from 'vitest';
 import type { Environment } from '@opencollection/types/config/environments';
+import { describe, it, expect } from 'vitest';
 import { EnvironmentSummary } from './EnvironmentSummary';
 
 const env = (name: string): Environment => ({ name, variables: [] });

@@ -1,12 +1,7 @@
 import React from 'react';
 import { Tabs, type Tab } from '@/ui/Tabs/Tabs';
-import { ScriptChain } from './ScriptChain/ScriptChain';
-import { VariablesPanel } from './VariablesPanel/VariablesPanel';
-import { AssertList } from './AssertList/AssertList';
-import { TestList } from './TestList/TestList';
-import { ViewAllTests } from './ViewAllTests/ViewAllTests';
-import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
-import { StyledWrapper } from './StyledWrapper';
+import type { AssertionRow } from '@/utils/assertions';
+import type { TestRow, RawTestScript } from '@/utils/fileUtils';
 import {
   inheritedCountLabel,
   type ScriptChainStep,
@@ -16,8 +11,13 @@ import {
   type InheritedPreRequestVarRow,
   type InheritedPostResponseVarRow
 } from '@/utils/request';
-import type { AssertionRow } from '@/utils/assertions';
-import type { TestRow, RawTestScript } from '@/utils/fileUtils';
+import { AssertList } from './AssertList/AssertList';
+import { ScriptChain } from './ScriptChain/ScriptChain';
+import { StyledWrapper } from './StyledWrapper';
+import { TestList } from './TestList/TestList';
+import { VariablesPanel } from './VariablesPanel/VariablesPanel';
+import { ViewAllTests } from './ViewAllTests/ViewAllTests';
+import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
 
 interface ExecutionContextProps {
   scriptChain: ScriptChainStep[];

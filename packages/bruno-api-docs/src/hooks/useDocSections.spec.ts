@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { parse } from 'node-html-parser';
+import { describe, it, expect } from 'vitest';
 import { collectSections } from './useDocSections';
 
 const dom = (html: string) => parse(html) as unknown as HTMLElement;

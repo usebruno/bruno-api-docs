@@ -1,7 +1,7 @@
 import React from 'react';
+import { StyledWrapper } from './StyledWrapper';
 import InitialsAvatar from '../../InitialsAvatar/InitialsAvatar';
 import TruncatedText from '../../TruncatedText/TruncatedText';
-import { StyledWrapper } from './StyledWrapper';
 
 export interface BrandProps {
   collectionName: string;

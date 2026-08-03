@@ -1,5 +1,5 @@
-import { test, expect } from '../../playwright';
 import type { Locator } from '@playwright/test';
+import { test, expect } from '../../playwright';
 
 const boundingBoxOf = async (locator: Locator) => {
   const box = await locator.boundingBox();

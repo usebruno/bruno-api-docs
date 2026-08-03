@@ -1,14 +1,14 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { cloneDeep } from 'lodash-es';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { Environment } from '@opencollection/types/config/environments';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import type { RootState } from '../store';
+import type { Environment } from '@opencollection/types/config/environments';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import cloneDeep from 'lodash-es/cloneDeep';
+import type { ResponseBodyFormat } from '@/constants';
 import { hydrateWithUUIDs, findAndUpdateItem } from '@/utils/fileUtils';
 import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
-import type { ResponseBodyFormat } from '@/constants';
+import type { RootState } from '../store';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 

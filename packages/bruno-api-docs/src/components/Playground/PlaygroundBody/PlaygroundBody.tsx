@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder } from '@opencollection/types/collection/item';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
+import { useNavModel } from '@/routing/hooks';
+import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
+import type { DockMode } from '@/utils/playgroundDock';
+import { isFolder } from '@/utils/schemaHelpers';
+import { selectActiveEnvName } from '@slices/env';
 import {
   selectHydratedCollection,
   selectViewMode,
@@ -14,26 +21,19 @@ import {
   toggleFolderCollapse,
   expandFolders
 } from '@slices/playground';
-import { selectActiveEnvName } from '@/store/slices/env';
-import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import { useNavModel } from '@/routing/hooks';
-import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
-import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
-import { isFolder } from '@/utils/schemaHelpers';
-import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
-import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
-import FolderSettingsView from '../Content/Views/FolderSettingsView/FolderSettingsView';
-import EnvironmentsView from '../Content/Views/EnvironmentsView/EnvironmentsView';
-import CollectionSettingsView from '../Content/Views/CollectionSettingsView/CollectionSettingsView';
-import ExampleView from '../Content/Views/ExampleView/ExampleView';
-import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
-import type { DockMode } from '@/utils/playgroundDock';
 import {
   resolvePlaygroundTarget,
   PLAYGROUND_ENVIRONMENTS_SLUG,
   PLAYGROUND_COLLECTION_SLUG
 } from './resolvePlaygroundTarget';
 import { StyledWrapper } from './StyledWrapper';
+import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
+import CollectionSettingsView from '../Content/Views/CollectionSettingsView/CollectionSettingsView';
+import EnvironmentsView from '../Content/Views/EnvironmentsView/EnvironmentsView';
+import ExampleView from '../Content/Views/ExampleView/ExampleView';
+import FolderSettingsView from '../Content/Views/FolderSettingsView/FolderSettingsView';
+import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
+import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 
 const ORIENTATION_BREAKPOINT = 640;
 

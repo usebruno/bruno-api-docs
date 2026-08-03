@@ -1,6 +1,6 @@
 import React from 'react';
-import IconButton from '@/ui/IconButton/IconButton';
 import { IconDownload } from '@tabler/icons';
+import IconButton from '@/ui/IconButton/IconButton';
 
 interface DownloadResponseProps {
   onClick: () => void;

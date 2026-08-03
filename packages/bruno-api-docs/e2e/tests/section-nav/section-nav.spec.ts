@@ -1,5 +1,5 @@
-import { test, expect } from '../../playwright';
 import type { Page } from '@playwright/test';
+import { test, expect } from '../../playwright';
 
 const REQUEST_WITH_CONFIG = ['billing', 'customers', 'Get Customers - Filter by Date Range'];
 const REQUEST_WITH_EXEC = ['billing', 'customers', 'Get All Customers'];

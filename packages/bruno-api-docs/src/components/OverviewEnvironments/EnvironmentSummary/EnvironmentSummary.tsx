@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Environment } from '@opencollection/types/config/environments';
-import { EnvironmentSummaryItem } from '../EnvironmentSummaryItem/EnvironmentSummaryItem';
 import { StyledWrapper } from './StyledWrapper';
+import { EnvironmentSummaryItem } from '../EnvironmentSummaryItem/EnvironmentSummaryItem';
 
 interface EnvironmentSummaryProps {
   environments: Environment[];

@@ -1,22 +1,22 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import { requestRunner } from '@/runner';
-import { getAncestorsByUuid } from '@/utils/fileUtils';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import { FileNotFoundIcon } from '@/assets/icons';
 import { ItemVariableResolverProvider } from '@/hooks';
-import TitleLabel from '../../../../TitleLabel/TitleLabel';
+import { useSplitPane } from '@/hooks/useSplitPane';
+import { requestRunner } from '@/runner';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { getAncestorsByUuid } from '@/utils/fileUtils';
+import { getInheritedAuthSummary } from '@/utils/request';
+import { getItemName, isUnsupportedRequest } from '@/utils/schemaHelpers';
+import { updatePlaygroundItem, setPlaygroundResponse, selectPlaygroundResponse } from '@slices/playground';
 import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updatePlaygroundItem, setPlaygroundResponse, selectPlaygroundResponse } from '@/store/slices/playground';
-import { getItemName, isUnsupportedRequest } from '@/utils/schemaHelpers';
-import { getInheritedAuthSummary } from '@/utils/request';
-import UnsupportedRequest from '../../../../UnsupportedRequest/UnsupportedRequest';
-import { FileNotFoundIcon } from '@/assets/icons';
-import { useSplitPane } from '@/hooks/useSplitPane';
 import { SplitDivider } from '../../../../SplitDivider/SplitDivider';
+import TitleLabel from '../../../../TitleLabel/TitleLabel';
+import UnsupportedRequest from '../../../../UnsupportedRequest/UnsupportedRequest';
 
 interface PlaygroundViewProps {
   item: HttpRequest;

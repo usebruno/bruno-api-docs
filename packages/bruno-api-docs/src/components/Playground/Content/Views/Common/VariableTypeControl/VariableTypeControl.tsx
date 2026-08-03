@@ -1,7 +1,7 @@
 import React from 'react';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { CaretIcon, WarningIcon } from '@/assets/icons';
 import MenuDropdown from '@/ui/MenuDropdown';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import {
   VARIABLE_DATA_TYPES,
   parseValueByDataType,

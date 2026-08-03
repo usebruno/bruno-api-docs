@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
+import { describe, it, expect } from 'vitest';
 import { buildNavModel, OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from './navModel';
 import { normalizeSlug, resolveSlug } from './resolve';
 

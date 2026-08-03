@@ -1,10 +1,10 @@
 import { Buffer } from 'buffer';
+import fastJsonFormat from 'fast-json-format';
 import { JSONPath } from 'jsonpath-plus';
+import parserBabel from 'prettier/parser-babel';
+import prettierFormat from 'prettier/standalone';
 import type { XMLFormatterOptions } from 'xml-formatter';
 import xmlFormat from 'xml-formatter';
-import fastJsonFormat from 'fast-json-format';
-import prettierFormat from 'prettier/standalone';
-import parserBabel from 'prettier/parser-babel';
 import type { RunRequestResponse } from '@/runner';
 import { getResponseSize } from './response';
 

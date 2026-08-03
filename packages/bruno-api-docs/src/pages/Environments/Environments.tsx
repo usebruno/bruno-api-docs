@@ -1,19 +1,19 @@
 import React, { useMemo, useRef, useState } from 'react';
 import type { OpenCollection } from '@opencollection/types';
-import { getEnvironmentVariables } from '@/utils/environments';
-import { getDescription } from '@/utils/request';
-import { useMarkdownRenderer } from '@/hooks';
-import { Table, type TableColumn, type TableGroup } from '@/ui/Table/Table';
-import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel';
-import { VariableText } from '@/components/VariableText/VariableText';
-import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
+import { GlobeIcon } from '@/assets/icons';
 import { Description } from '@/components/Description/Description';
 import { DisabledBadge } from '@/components/DisabledBadge/DisabledBadge';
-import { ViewMore } from '@/components/ViewMore/ViewMore';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
-import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
+import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel';
 import { Heading } from '@/components/Heading/Heading';
-import { GlobeIcon } from '@/assets/icons';
+import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
+import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
+import { VariableText } from '@/components/VariableText/VariableText';
+import { ViewMore } from '@/components/ViewMore/ViewMore';
+import { useMarkdownRenderer } from '@/hooks';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { Table, type TableColumn, type TableGroup } from '@/ui/Table/Table';
+import { getEnvironmentVariables } from '@/utils/environments';
+import { getDescription } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 const COLUMNS: TableColumn[] = [

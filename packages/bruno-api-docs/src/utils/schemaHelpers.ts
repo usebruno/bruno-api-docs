@@ -13,11 +13,11 @@
 
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollection/types/collection/item';
-import type { HttpRequest, HttpRequestHeader, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
+import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
+import type { HttpRequest, HttpRequestHeader, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
-import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
 import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
 type RequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;

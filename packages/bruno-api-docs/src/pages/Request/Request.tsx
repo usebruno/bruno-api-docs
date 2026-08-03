@@ -1,13 +1,47 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import type { HttpRequest, HttpRequestParam, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
+import type { HttpRequest, HttpRequestParam, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
-import { useMarkdownRenderer } from '@/hooks';
+import { EyeOffIcon, FileIcon, RefreshIcon } from '@/assets/icons';
+import { AuthDetails } from '@/components/AuthDetails/AuthDetails';
+import { CodeSnippetTabs } from '@/components/CodeSnippetTabs/CodeSnippetTabs';
+import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
+import { Examples } from '@/components/Examples/Examples';
+import { ExecutionContext } from '@/components/ExecutionContext/ExecutionContext';
+import { Heading } from '@/components/Heading/Heading';
+import { InheritedAuthBadge } from '@/components/InheritedAuthBadge/InheritedAuthBadge';
+import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
+import { inheritedHeaderRows } from '@/components/PropertyTable/inheritedRows';
+import { PropertyTable } from '@/components/PropertyTable/PropertyTable';
+import { RequestBody } from '@/components/Request/RequestBody/RequestBody';
+import { RequestParams } from '@/components/Request/RequestParams/RequestParams';
+import { RequestUrlBar } from '@/components/Request/RequestUrlBar/RequestUrlBar';
+import { Section } from '@/components/Section/Section';
+import { UnsupportedRequest } from '@/components/UnsupportedRequest/UnsupportedRequest';
+import { ViewMore } from '@/components/ViewMore/ViewMore';
 import { AUTH_MODE_LABELS } from '@/constants';
+import { useMarkdownRenderer } from '@/hooks';
+import { Breadcrumb, type BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { collectAssertions } from '@/utils/assertions';
+import { buildBreadcrumbSegments } from '@/utils/common';
+import { collectTests, collectRawTestScripts } from '@/utils/fileUtils';
+import { resolvePathAndQueryParams } from '@/utils/pathParams';
+import {
+  resolveInheritedAuth,
+  getPreRequestVars,
+  getPostResponseVars,
+  getInheritedConfig,
+  inheritedCountLabel,
+  buildScriptChain,
+  getScriptFlow,
+  getBodyView,
+  headerRows
+} from '@/utils/request';
 import {
   getItemName,
   getHttpMethod,
@@ -21,40 +55,6 @@ import {
   getRequestExamples,
   isUnsupportedRequest
 } from '@/utils/schemaHelpers';
-import {
-  resolveInheritedAuth,
-  getPreRequestVars,
-  getPostResponseVars,
-  getInheritedConfig,
-  inheritedCountLabel,
-  buildScriptChain,
-  getScriptFlow,
-  getBodyView,
-  headerRows
-} from '@/utils/request';
-import { collectAssertions } from '@/utils/assertions';
-import { collectTests, collectRawTestScripts } from '@/utils/fileUtils';
-import { resolvePathAndQueryParams } from '@/utils/pathParams';
-import { buildBreadcrumbSegments } from '@/utils/common';
-import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
-import { Heading } from '@/components/Heading/Heading';
-import { Section } from '@/components/Section/Section';
-import { Breadcrumb, type BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
-import { EyeOffIcon, FileIcon, RefreshIcon } from '@/assets/icons';
-import { RequestUrlBar } from '@/components/Request/RequestUrlBar/RequestUrlBar';
-import { ViewMore } from '@/components/ViewMore/ViewMore';
-import { AuthDetails } from '@/components/AuthDetails/AuthDetails';
-import { RequestParams } from '@/components/Request/RequestParams/RequestParams';
-import { RequestBody } from '@/components/Request/RequestBody/RequestBody';
-import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
-import { PropertyTable } from '@/components/PropertyTable/PropertyTable';
-import { InheritedAuthBadge } from '@/components/InheritedAuthBadge/InheritedAuthBadge';
-import { inheritedHeaderRows } from '@/components/PropertyTable/inheritedRows';
-import { CodeSnippetTabs } from '@/components/CodeSnippetTabs/CodeSnippetTabs';
-import { Examples } from '@/components/Examples/Examples';
-import { ExecutionContext } from '@/components/ExecutionContext/ExecutionContext';
-import { UnsupportedRequest } from '@/components/UnsupportedRequest/UnsupportedRequest';
 import { StyledWrapper } from './StyledWrapper';
 
 interface RequestProps {

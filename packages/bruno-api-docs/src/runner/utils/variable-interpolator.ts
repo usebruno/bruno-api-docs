@@ -1,7 +1,7 @@
 import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
-import { isPlainObject } from 'lodash-es';
-import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@/utils/schemaHelpers';
+import isPlainObject from 'lodash-es/isPlainObject';
 import { templateVariableGlobalRegex } from '@/utils/common';
+import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@/utils/schemaHelpers';
 import { mockDataFunctions } from './faker-functions';
 
 // for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.

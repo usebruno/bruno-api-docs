@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
-import Tabs from '@/ui/Tabs/Tabs';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import { rowToVariable } from '@/utils/variableDataType';
-import HeadersTab from '../../Common/HeadersTab/HeadersTab';
-import ParamsTab from '../../Common/ParamsTab/ParamsTab';
-import BodyTab from '../../Common/BodyTab';
-import BodyModeSelector from '../../Common/BodyModeSelector/BodyModeSelector';
-import AuthTab from '../../Common/AuthTab/AuthTab';
-import ScriptsTab from '../../Common/ScriptsTab/ScriptsTab';
-import TestsTab from '../../Common/TestsTab/TestsTab';
-import AssertsTab from '../../Common/AssertsTab/AssertsTab';
-import VariablesTab from '../../Common/VariablesTab/VariablesTab';
-import OverviewTab from '../../Common/OverviewTab/OverviewTab';
-import { StyledWrapper } from './StyledWrapper';
+import Tabs from '@/ui/Tabs/Tabs';
+import { keyValueRowToEntry } from '@/utils/keyValueRow';
+import { setUrlQueryParams } from '@/utils/pathParams';
+import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
 import {
   getHttpParams,
   getHttpHeaders,
@@ -28,9 +19,18 @@ import {
   getRequestUrl,
   getItemDocs
 } from '@/utils/schemaHelpers';
-import { setUrlQueryParams } from '@/utils/pathParams';
-import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
-import { keyValueRowToEntry } from '@/utils/keyValueRow';
+import { rowToVariable } from '@/utils/variableDataType';
+import { StyledWrapper } from './StyledWrapper';
+import AssertsTab from '../../Common/AssertsTab/AssertsTab';
+import AuthTab from '../../Common/AuthTab/AuthTab';
+import BodyModeSelector from '../../Common/BodyModeSelector/BodyModeSelector';
+import BodyTab from '../../Common/BodyTab';
+import HeadersTab from '../../Common/HeadersTab/HeadersTab';
+import OverviewTab from '../../Common/OverviewTab/OverviewTab';
+import ParamsTab from '../../Common/ParamsTab/ParamsTab';
+import ScriptsTab from '../../Common/ScriptsTab/ScriptsTab';
+import TestsTab from '../../Common/TestsTab/TestsTab';
+import VariablesTab from '../../Common/VariablesTab/VariablesTab';
 
 interface RequestPaneProps {
   item: HttpRequest;

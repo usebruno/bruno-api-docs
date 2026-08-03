@@ -1,11 +1,11 @@
 import React from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import CodeEditor from '@/ui/CodeEditor/CodeEditor';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import { VariableInfoCard } from '../../../../VariableInfoCard/VariableInfoCard';
-import { getDescription } from '@/utils/request';
+import CodeEditor from '@/ui/CodeEditor/CodeEditor';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
+import { getDescription } from '@/utils/request';
 import type { RequestBody } from '@/utils/schemaHelpers';
+import { VariableInfoCard } from '../../../../VariableInfoCard/VariableInfoCard';
 
 interface BodyTabProps {
   body: RequestBody;

@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useResolvedVariables } from '@/hooks/useVariableResolver';
-import { useEditableRows } from '@/hooks/useEditableRows';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { WarningIcon } from '@/assets/icons';
-import HighlightedInput from '../HighlightedInput/HighlightedInput';
-import { SecretValue } from '@/ui/SecretValue/SecretValue';
-import './KeyValueTable.css';
+import { useEditableRows } from '@/hooks/useEditableRows';
+import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import Checkbox from '@/ui/Checkbox/Checkbox';
+import { SecretValue } from '@/ui/SecretValue/SecretValue';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
+import HighlightedInput from '../HighlightedInput/HighlightedInput';
+
+import './KeyValueTable.css';
 
 // Smallest a column may be dragged to; the neighbour it trades width with is held to the same floor.
 const MIN_COLUMN_WIDTH = 60;

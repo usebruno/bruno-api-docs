@@ -124,11 +124,17 @@ describe('ScriptRuntime', () => {
         expect(res.headerList.has('x-token')).to.eql(true);
         expect(res.headerList.indexOf('X-Token')).to.be.at.least(0);
       });
-      await test('res.headerList iterators bind the optional thisArg inside the callback', () => {
+      await test('res.headerList iterators (each, filter, find, map, reduce) run callbacks across the sandbox and bind thisArg', () => {
+        const keys = [];
+        res.headerList.each(function (h) { keys.push(h.key); });
+        expect(keys).to.include('x-token');
+        expect(res.headerList.filter(function (h) { return h.key === 'x-token'; })).to.have.lengthOf(1);
         const found = res.headerList.find(function (h) { return h.key === 'x-token'; });
         expect(found.value).to.eql('abc');
         const tagged = res.headerList.map(function (h) { return this.p + h.key; }, { p: '#' });
         expect(tagged).to.include('#x-token');
+        const joined = res.headerList.reduce(function (acc, h) { return acc + h.key + ';'; }, '');
+        expect(joined).to.match(/x-token;/);
       });
       await test('res.headerList write methods throw because response headers are read-only', () => {
         let threw = false;

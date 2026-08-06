@@ -26,7 +26,7 @@ describe('createResponseHeaderList (read-only response headers)', () => {
   it('exposes the array-style reads (all, find, filter, each, map, reduce) and the transforms (toObject, toString, toJSON)', () => {
     const h = make({ 'content-type': 'application/json', 'x-count': '2' });
     expect(h.all()).toHaveLength(2);
-    expect(h.find((x) => x.key === 'x-count')?.value).toBe('2');
+    expect(h.find((x) => x.key === 'x-count')).toMatchObject({ value: '2' });
     expect(h.filter((x) => x.key.startsWith('x-'))).toHaveLength(1);
     expect(h.map((x) => x.key)).toEqual(['content-type', 'x-count']);
     const keys: string[] = [];
@@ -61,6 +61,6 @@ describe('createResponseHeaderList (read-only response headers)', () => {
     expect(h.count()).toBe(1);
     hs = { a: '1', b: ['2', '3'] };
     expect(h.count()).toBe(2);
-    expect(h.one('b')?.value).toEqual(['2', '3']);
+    expect(h.one('b')).toMatchObject({ value: ['2', '3'] });
   });
 });

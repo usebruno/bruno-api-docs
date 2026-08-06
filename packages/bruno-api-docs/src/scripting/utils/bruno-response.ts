@@ -1,4 +1,7 @@
+import { Buffer } from 'buffer';
+import { cloneDeep } from 'lodash-es';
 import { get } from './query-get';
+import { createResponseHeaderList, type ResponseHeaderList } from './header-list';
 
 class BrunoResponse {
   res: any;
@@ -8,6 +11,7 @@ class BrunoResponse {
   body: any;
   responseTime: number | null;
   url: string | null;
+  headerList: ResponseHeaderList;
 
   constructor(res: any) {
     this.res = res;
@@ -15,8 +19,12 @@ class BrunoResponse {
     this.statusText = res ? res.statusText : null;
     this.headers = res ? res.headers : null;
     this.body = res ? res.data : null;
-    this.responseTime = res ? res.responseTime : null;
-    this.url = res?.request ? res.request.protocol + '//' + res.request.host + res.request.path : null;
+    this.responseTime = res ? (res.responseTime ?? res.duration ?? null) : null;
+    this.url = res
+      ? (res.url ?? (res.request ? res.request.protocol + '//' + res.request.host + res.request.path : null))
+      : null;
+
+    this.headerList = createResponseHeaderList(() => this.res?.headers);
 
     // Make the instance callable
     const callable = (...args: any[]) => get(this.body, args[0], ...args.slice(1));
@@ -35,7 +43,13 @@ class BrunoResponse {
   }
 
   getHeader(name: string) {
-    return this.res && this.res.headers ? this.res.headers[name] : null;
+    if (typeof name !== 'string' || !this.res?.headers) {
+      return null;
+    }
+    const headers = this.res.headers;
+    if (name.toLowerCase() in headers) return headers[name.toLowerCase()];
+    const match = Object.keys(headers).find((k) => k.toLowerCase() === name.toLowerCase());
+    return match ? headers[match] : undefined;
   }
 
   getHeaders() {
@@ -47,7 +61,7 @@ class BrunoResponse {
   }
 
   getResponseTime() {
-    return this.res ? this.res.responseTime : null;
+    return this.res ? (this.res.responseTime ?? this.res.duration ?? null) : null;
   }
 
   getUrl() {
@@ -59,9 +73,21 @@ class BrunoResponse {
       return;
     }
 
-    const clonedData = JSON.parse(JSON.stringify(data));
+    const clonedData = cloneDeep(data);
     this.res.data = clonedData;
     this.body = clonedData;
+
+    if (clonedData === null || clonedData === undefined) {
+      this.res.dataBuffer = Buffer.from('');
+    } else if (typeof clonedData === 'string') {
+      this.res.dataBuffer = Buffer.from(clonedData);
+    } else {
+      try {
+        this.res.dataBuffer = Buffer.from(JSON.stringify(clonedData));
+      } catch {
+        this.res.dataBuffer = Buffer.from('');
+      }
+    }
   }
 
   // TODO: Refactor: dataBuffer size calculation should be handled in a shared utility so it can be passed and reused across the application

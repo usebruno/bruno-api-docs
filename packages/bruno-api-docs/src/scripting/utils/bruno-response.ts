@@ -3,6 +3,14 @@ import { cloneDeep } from 'lodash-es';
 import { get } from './query-get';
 import { createResponseHeaderList, type ResponseHeaderList } from './header-list';
 
+const resolveResponseUrl = (res: any): string | null => {
+  if (!res) return null;
+  if (res.url != null) return res.url;
+  if (!res.request) return null;
+  const { protocol, host, path } = res.request;
+  return `${protocol}//${host}${path}`;
+};
+
 class BrunoResponse {
   res: any;
   status: number | null;
@@ -20,9 +28,7 @@ class BrunoResponse {
     this.headers = res ? res.headers : null;
     this.body = res ? res.data : null;
     this.responseTime = res ? (res.responseTime ?? res.duration ?? null) : null;
-    this.url = res
-      ? (res.url ?? (res.request ? res.request.protocol + '//' + res.request.host + res.request.path : null))
-      : null;
+    this.url = resolveResponseUrl(res);
 
     this.headerList = createResponseHeaderList(() => this.res?.headers);
 

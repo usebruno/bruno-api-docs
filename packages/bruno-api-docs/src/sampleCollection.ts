@@ -11,6 +11,8 @@ config:
       variables:
         - name: "host"
           value: "http://localhost:8081"
+        - name: "grpcUrl"
+          value: "grpc://127.0.0.1:50051"
         - name: "retryCount"
           value:
             type: "number"
@@ -31,6 +33,8 @@ config:
       variables:
         - name: "host"
           value: "https://echo.usebruno.com"
+        - name: "grpcUrl"
+          value: "grpc://echo.usebruno.com:443"
         - name: "bearer_auth_token"
           secret: true
           type: "string"
@@ -145,9 +149,340 @@ items:
       - name: "GraphQL API"
         type: "graphql"
         url: "{{host}}/graphql"
-      - name: "Order Service"
+      - info:
+          name: "Order Service"
+          type: "grpc"
+        grpc:
+          url: "{{grpcUrl}}"
+          method: "/orders.OrderService/GetOrder"
+          methodType: "unary"
+          metadata:
+            - name: "authorization"
+              value: "Bearer {{bearer_auth_token}}"
+              description: "Auth token forwarded to the service"
+            - name: "x-request-id"
+              value: "req-001"
+            - name: "x-legacy-flag"
+              value: "off"
+              description: "Kept for the old gateway"
+              disabled: true
+          message: |-
+            {
+              "orderId": "12345",
+              "includeItems" : true
+            }
+          auth: inherit
+        docs: |
+          # Order Service
+
+          Fetches a single order by id over gRPC.
+
+          - Uses **server reflection**, so no proto file is attached.
+          - Auth is inherited from the collection.
+      - info:
+          name: "Get Book"
+          type: "grpc"
+        grpc:
+          url: "grpc://localhost:9000"
+          method: "/com.book.BookService/GetBook"
+          methodType: "unary"
+          protoFilePath: "../../Downloads/book.proto"
+          message: |-
+            {
+              "isbn": 9780134685991
+            }
+          auth:
+            type: "basic"
+            username: "reader"
+            password: "s3cret"
+      - info:
+          name: "Stream Replies"
+          type: "grpc"
+        grpc:
+          url: "{{grpcUrl}}"
+          method: "/hello.HelloService/LotsOfReplies"
+          methodType: "server-streaming"
+          message:
+            - title: "message 1"
+              message: |-
+                {
+                  "greeting": "suadeo"
+                }
+          auth: inherit
+      - info:
+          name: "Send Greetings"
+          type: "grpc"
+        grpc:
+          url: "{{grpcUrl}}"
+          method: "/hello.HelloService/LotsOfGreetings"
+          methodType: "client-streaming"
+          message:
+            - title: "message 1"
+              message: |-
+                {
+                  "greeting": "sortitus"
+                }
+            - title: "message 2"
+              message: |-
+                {
+                  "greeting": "porro"
+                }
+          auth: inherit
+      - info:
+          name: "Chat"
+          type: "grpc"
+        grpc:
+          url: "{{grpcUrl}}"
+          method: "/hello.HelloService/BidiHello"
+          methodType: "bidi-streaming"
+          metadata:
+            - name: "x-client"
+              value: "Bruno"
+          message:
+            - title: "message 1"
+              message: '{ "greeting": "cuius" }'
+            - title: "message 2"
+              message: '{ "greeting": "adfectus" }'
+      - info:
+          name: "Bulk Upload"
+          type: "grpc"
+        grpc:
+          url: "{{grpcUrl}}"
+          method: "/inventory.InventoryService/BulkUpload"
+          methodType: "client-streaming"
+          protoFilePath: "protos/inventory.proto"
+          metadata:
+            - name: "x-batch-id"
+              value: "batch-2026-08"
+              description: "Groups the uploaded rows into one batch"
+          message:
+            - title: "message 1"
+              message: |-
+                {
+                  "sku": "SKU-1001",
+                  "quantity": 12
+                }
+            - title: "message 2"
+              message: |-
+                {
+                  "sku": "SKU-1002",
+                  "quantity": 40
+                }
+            - title: "message 3"
+              message: |-
+                {
+                  "sku": "SKU-1003",
+                  "quantity": 7
+                }
+            - title: "message 4"
+              message: |-
+                {
+                  "sku": "SKU-1004",
+                  "quantity": 250
+                }
+            - title: "message 5"
+              message: |-
+                {
+                  "sku": "SKU-1005",
+                  "quantity": 3
+                }
+            - title: "message 6"
+              message: |-
+                {
+                  "sku": "SKU-1006",
+                  "quantity": 88
+                }
+          auth: inherit
+      - info:
+          name: "Ingest Events"
+          type: "grpc"
+        grpc:
+          url: "{{grpcUrl}}"
+          method: "/telemetry.v1.TelemetryService/IngestEvents"
+          methodType: "bidi-streaming"
+          protoFilePath: "protos/telemetry/v1/telemetry.proto"
+          metadata:
+            - name: "authorization"
+              value: "Bearer {{bearer_auth_token}}"
+              description: "Service account token for the ingest pipeline"
+            - name: "x-tenant-id"
+              value: "acme-eu-west"
+              description: "Tenant the events belong to"
+            - name: "x-schema-version"
+              value: "2026-05-01"
+              description: "Event envelope version the client is emitting"
+            - name: "x-compression"
+              value: "gzip"
+              description: "Superseded by the transport-level setting"
+              disabled: true
+          message:
+            - title: "message 1"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QK3M4N5P6Q7R8S9T0",
+                  "occurredAt": "2026-05-01T09:14:22.481Z",
+                  "source": { "service": "checkout", "region": "eu-west-1", "version": "4.12.0" },
+                  "actor": { "type": "user", "id": "usr_8412", "sessionId": "sess_a91f3c" },
+                  "payload": {
+                    "kind": "cart.item_added",
+                    "cartId": "cart_55210",
+                    "sku": "SKU-1001",
+                    "quantity": 2,
+                    "unitPriceMinor": 4999,
+                    "currency": "EUR"
+                  },
+                  "tags": ["checkout", "experiment:pricing-v3"]
+                }
+            - title: "message 2"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QK5A1B2C3D4E5F6G7",
+                  "occurredAt": "2026-05-01T09:14:23.902Z",
+                  "source": { "service": "checkout", "region": "eu-west-1", "version": "4.12.0" },
+                  "actor": { "type": "user", "id": "usr_8412", "sessionId": "sess_a91f3c" },
+                  "payload": {
+                    "kind": "cart.item_removed",
+                    "cartId": "cart_55210",
+                    "sku": "SKU-1003",
+                    "quantity": 1,
+                    "reason": "changed_mind"
+                  },
+                  "tags": ["checkout"]
+                }
+            - title: "message 3"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QK7H8J9K0L1M2N3P4",
+                  "occurredAt": "2026-05-01T09:14:31.117Z",
+                  "source": { "service": "payments", "region": "eu-west-1", "version": "2.8.3" },
+                  "actor": { "type": "user", "id": "usr_8412", "sessionId": "sess_a91f3c" },
+                  "payload": {
+                    "kind": "payment.authorized",
+                    "paymentId": "pay_77031",
+                    "amountMinor": 9998,
+                    "currency": "EUR",
+                    "method": "card",
+                    "processor": "stripe"
+                  },
+                  "tags": ["payments", "3ds:frictionless"]
+                }
+            - title: "message 4"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKA5B6C7D8E9F0G1H",
+                  "occurredAt": "2026-05-01T09:14:33.640Z",
+                  "source": { "service": "orders", "region": "eu-west-1", "version": "6.1.0" },
+                  "actor": { "type": "system", "id": "svc_order_worker" },
+                  "payload": {
+                    "kind": "order.created",
+                    "orderId": "ord_1042",
+                    "cartId": "cart_55210",
+                    "totalMinor": 9998,
+                    "currency": "EUR",
+                    "lineItemCount": 2
+                  },
+                  "tags": ["orders"]
+                }
+            - title: "message 5"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKC2D3E4F5G6H7J8K",
+                  "occurredAt": "2026-05-01T09:15:02.008Z",
+                  "source": { "service": "fulfilment", "region": "eu-west-1", "version": "3.4.1" },
+                  "actor": { "type": "system", "id": "svc_warehouse_sync" },
+                  "payload": {
+                    "kind": "shipment.allocated",
+                    "orderId": "ord_1042",
+                    "warehouse": "WH-AMS-02",
+                    "carrier": "dhl",
+                    "estimatedDispatch": "2026-05-02T06:00:00Z"
+                  },
+                  "tags": ["fulfilment"]
+                }
+            - title: "message 6"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKE9F0G1H2J3K4L5M",
+                  "occurredAt": "2026-05-01T09:15:44.213Z",
+                  "source": { "service": "notifications", "region": "eu-west-1", "version": "1.9.7" },
+                  "actor": { "type": "system", "id": "svc_notifier" },
+                  "payload": {
+                    "kind": "email.queued",
+                    "template": "order_confirmation",
+                    "orderId": "ord_1042",
+                    "recipientHash": "sha256:9f2b7c1e",
+                    "locale": "en-GB"
+                  },
+                  "tags": ["notifications"]
+                }
+            - title: "message 7"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKG6H7J8K9L0M1N2P",
+                  "occurredAt": "2026-05-01T09:16:10.774Z",
+                  "source": { "service": "inventory", "region": "eu-west-1", "version": "5.0.2" },
+                  "actor": { "type": "system", "id": "svc_stock_ledger" },
+                  "payload": {
+                    "kind": "stock.decremented",
+                    "sku": "SKU-1001",
+                    "warehouse": "WH-AMS-02",
+                    "delta": -2,
+                    "remaining": 118
+                  },
+                  "tags": ["inventory"]
+                }
+            - title: "message 8"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKJ3K4L5M6N7P8Q9R",
+                  "occurredAt": "2026-05-01T09:18:55.301Z",
+                  "source": { "service": "payments", "region": "eu-west-1", "version": "2.8.3" },
+                  "actor": { "type": "system", "id": "svc_settlement" },
+                  "payload": {
+                    "kind": "payment.captured",
+                    "paymentId": "pay_77031",
+                    "amountMinor": 9998,
+                    "currency": "EUR",
+                    "settlementBatch": "btch_2026_05_01_a"
+                  },
+                  "tags": ["payments"]
+                }
+            - title: "message 9"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKL0M1N2P3Q4R5S6T",
+                  "occurredAt": "2026-05-02T06:04:12.559Z",
+                  "source": { "service": "fulfilment", "region": "eu-west-1", "version": "3.4.1" },
+                  "actor": { "type": "system", "id": "svc_warehouse_sync" },
+                  "payload": {
+                    "kind": "shipment.dispatched",
+                    "orderId": "ord_1042",
+                    "trackingNumber": "JD0002216990123456",
+                    "carrier": "dhl",
+                    "warehouse": "WH-AMS-02"
+                  },
+                  "tags": ["fulfilment", "sla:next-day"]
+                }
+            - title: "message 10"
+              message: |-
+                {
+                  "eventId": "evt_01HZ8QKN7P8Q9R0S1T2U3V",
+                  "occurredAt": "2026-05-03T11:27:03.884Z",
+                  "source": { "service": "orders", "region": "eu-west-1", "version": "6.1.0" },
+                  "actor": { "type": "user", "id": "usr_8412", "sessionId": "sess_d47b21" },
+                  "payload": {
+                    "kind": "order.delivered",
+                    "orderId": "ord_1042",
+                    "deliveredAt": "2026-05-03T11:26:58Z",
+                    "signedBy": "reception",
+                    "npsPrompted": true
+                  },
+                  "tags": ["orders", "lifecycle:complete"]
+                }
+          auth: inherit
+      - name: "Bare Method"
         type: "grpc"
-        url: "{{host}}/orders.OrderService"
+        url: "{{grpcUrl}}"
   - info:
       name: billing
       type: folder

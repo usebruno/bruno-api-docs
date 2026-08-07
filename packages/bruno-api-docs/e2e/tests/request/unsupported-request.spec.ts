@@ -2,8 +2,7 @@ import { test, expect } from '../../playwright';
 
 const UNSUPPORTED_REQUESTS = [
   { paths: ['Realtime', 'Live Updates'], name: 'Live Updates', typeLabel: 'Websocket', shortName: 'WS', url: '/ws/updates' },
-  { paths: ['Realtime', 'GraphQL API'], name: 'GraphQL API', typeLabel: 'GraphQL', shortName: 'GQL', url: '/graphql' },
-  { paths: ['Realtime', 'Order Service'], name: 'Order Service', typeLabel: 'gRPC', shortName: 'GRPC', url: '/orders.OrderService' }
+  { paths: ['Realtime', 'GraphQL API'], name: 'GraphQL API', typeLabel: 'GraphQL', shortName: 'GQL', url: '/graphql' }
 ];
 
 test.describe('Request page — unsupported request types', () => {

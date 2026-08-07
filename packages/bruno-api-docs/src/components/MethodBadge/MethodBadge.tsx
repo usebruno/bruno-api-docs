@@ -10,12 +10,14 @@ interface MethodBadgeProps {
 
 export const MethodBadge: React.FC<MethodBadgeProps> = ({ method, className }) => {
   const resolvedMethod = method || 'GET';
+  const asWritten = resolvedMethod !== resolvedMethod.toLowerCase() && resolvedMethod !== resolvedMethod.toUpperCase();
+
   return (
     <StyledWrapper
-      className={cx('method-badge', className)}
+      className={cx('method-badge', { 'method-badge--as-written': asWritten }, className)}
       style={{ color: getMethodColorVar(method) }}
     >
-      {resolvedMethod.toUpperCase()}
+      {asWritten ? resolvedMethod : resolvedMethod.toUpperCase()}
     </StyledWrapper>
   );
 };

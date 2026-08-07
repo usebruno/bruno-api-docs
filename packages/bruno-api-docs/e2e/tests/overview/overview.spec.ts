@@ -22,9 +22,9 @@ test.describe('Collection Overview', () => {
     });
   });
 
-  test('shows three stat cards with the request (41), folder (7) and environment (2) counts', async ({ overviewPage }) => {
+  test('shows three stat cards with the request (48), folder (7) and environment (2) counts', async ({ overviewPage }) => {
     await expect(overviewPage.stats.cards).toHaveCount(3);
-    await expect(overviewPage.stats.valueFor('Requests')).toHaveText('41');
+    await expect(overviewPage.stats.valueFor('Requests')).toHaveText('48');
     await expect(overviewPage.stats.valueFor('Folders')).toHaveText('7');
     await expect(overviewPage.stats.valueFor('Environments')).toHaveText('2');
   });

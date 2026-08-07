@@ -1,4 +1,3 @@
-import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import ActionIconButton from './ActionIconButton';
 import { useRenderToDom } from '@/hooks/useRenderToDom';

@@ -1,174 +1,272 @@
+import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestBody } from '@opencollection/types/requests/http';
+import type { Tag } from '@opencollection/types/common/tags';
+import {
+  getRequestUrl,
+  getHttpMethod,
+  getHttpHeaders,
+  getHttpBody,
+  getHttpParams,
+  getRequestAuth,
+  getItemName
+} from '../../utils/schemaHelpers';
+import { createRequestHeaderList, type HeaderList } from './header-list';
+import type { JsonValue } from './bruno-response';
+
+type RequestConfig = HttpRequest & {
+  __brunoDisableParsingResponseJson?: boolean;
+  __bruno__executionMode?: string;
+};
+
+const RAW_BODY_TYPES = ['json', 'text', 'xml', 'sparql'] as const;
+
+const sameName = (a: string, b: string): boolean => a.toLowerCase() === b.toLowerCase();
+
 class BrunoRequest {
-  req: any;
+  req: RequestConfig;
   url: string;
   method: string;
-  headers: any;
-  timeout: number;
-  name: string;
-  tags: string[];
-  body: any;
+  headers: Record<string, string>;
+  timeout: number | 'inherit' | undefined;
+  name: string | undefined;
+  pathParams: Array<{ name: string; value: string; type: string }>;
+  tags: Tag[];
+  body: JsonValue | undefined;
+  headerList: HeaderList;
+  private warnings: string[] | undefined;
 
-  /**
-   * The following properties are available as shorthand:
-   * - req.url
-   * - req.method
-   * - req.headers
-   * - req.timeout
-   * - req.body
-   *
-   * Above shorthands are useful for accessing the request properties directly in the scripts
-   * It must be noted that the user cannot set these properties directly.
-   * They should use the respective setter methods to set these properties.
-   */
-  constructor(req: any) {
+  constructor(req: RequestConfig, warnings?: string[]) {
     this.req = req;
-    this.url = req.url;
-    this.method = req.method;
-    this.headers = req.headers;
-    this.timeout = req.timeout;
-    this.name = req.name;
-    this.tags = req.tags || [];
-    /**
-     * We automatically parse the JSON body if the content type is JSON
-     * This is to make it easier for the user to access the body directly
-     *
-     * It must be noted that the request data is always a string and is what gets sent over the network
-     * If the user wants to access the raw data, they can use getBody({raw: true}) method
-     */
-    const isJson = this.hasJSONContentType(this.req.headers);
-    if (isJson) {
-      this.body = this.__safeParseJSON(req.data);
+    this.warnings = warnings;
+    this.headerList = createRequestHeaderList(() => this.headersArray());
+    this.url = getRequestUrl(req);
+    this.method = getHttpMethod(req);
+    this.headers = this.headerList.toObject(true) as Record<string, string>;
+    this.timeout = this.getTimeout();
+    this.name = this.getName();
+    this.pathParams = this.getPathParams();
+    this.tags = this.getTags();
+
+    if (this.isJsonBody()) {
+      const raw = this.getBodyData();
+      if (typeof raw === 'string') this.body = this.__safeParseJSON(raw) as JsonValue;
     }
   }
 
   getUrl() {
-    return this.req.url;
+    return getRequestUrl(this.req);
   }
 
   setUrl(url: string) {
     this.url = url;
-    this.req.url = url;
+    this.http().url = url;
+  }
+
+  getHost() {
+    try {
+      return new URL(this.getUrl()).host;
+    } catch {
+      return '';
+    }
+  }
+
+  getPath() {
+    try {
+      const url = new URL(this.getUrl());
+      const pathParams = this.pathParamList();
+      if (!pathParams.length) return url.pathname;
+
+      return url.pathname
+        .split('/')
+        .map((segment) => {
+          if (!segment.startsWith(':')) return segment;
+          const param = pathParams.find((p) => p.name === segment.slice(1));
+          const usable = param
+            && param.disabled !== true
+            && param.value != null
+            && (typeof param.value !== 'string' || param.value.trim() !== '');
+          return usable ? param.value : segment;
+        })
+        .join('/');
+    } catch {
+      return '';
+    }
+  }
+
+  getQueryString() {
+    try {
+      const { search } = new URL(this.getUrl());
+      return search ? search.substring(1) : '';
+    } catch {
+      return '';
+    }
   }
 
   getMethod() {
-    return this.req.method;
+    return getHttpMethod(this.req);
   }
 
-  getAuthMode() {
-    if (this.req?.oauth2) {
-      return 'oauth2';
-    } else if (this.headers?.['Authorization']?.startsWith('Bearer')) {
-      return 'bearer';
-    } else if (this.headers?.['Authorization']?.startsWith('Basic') || this.req?.auth?.username) {
-      return 'basic';
-    } else if (this.req?.awsv4) {
-      return 'awsv4';
-    } else if (this.req?.digestConfig) {
-      return 'digest';
-    } else if (this.headers?.['X-WSSE'] || this.req?.auth?.username) {
-      return 'wsse';
-    } else {
-      return 'none';
+  getAuthMode(): string {
+    const auth = getRequestAuth(this.req);
+    if (auth && typeof auth === 'object' && typeof auth.type === 'string' && auth.type !== 'none') {
+      return auth.type;
     }
+    const authHeader = this.getHeader('Authorization');
+    if (typeof authHeader === 'string') {
+      if (authHeader.startsWith('Bearer')) return 'bearer';
+      if (authHeader.startsWith('Basic')) return 'basic';
+    }
+    if (this.getHeader('X-WSSE') != null) return 'wsse';
+    return 'none';
   }
 
   setMethod(method: string) {
     this.method = method;
-    this.req.method = method;
+    this.http().method = method;
   }
 
   getHeaders() {
-    return this.req.headers;
+    return this.headerList.toObject(true) as Record<string, string>;
   }
 
-  setHeaders(headers: any) {
-    this.headers = headers;
-    this.req.headers = headers;
+  setHeaders(headers: Record<string, string>) {
+    const list = this.headersArray();
+    const disabled = list.filter((h) => h.disabled);
+    list.length = 0;
+    disabled.forEach((h) => list.push(h));
+    Object.entries(headers || {}).forEach(([name, value]) => list.push({ name, value: String(value ?? '') }));
+    this.headers = this.headerList.toObject(true) as Record<string, string>;
   }
 
   getHeader(name: string) {
-    return this.req.headers[name];
+    const header = getHttpHeaders(this.req).find((h) => !h.disabled && sameName(h.name, name));
+    return header ? header.value : undefined;
   }
 
-  setHeader(name: string, value: any) {
-    this.headers[name] = value;
-    this.req.headers[name] = value;
+  setHeader(name: string, value: string) {
+    const list = this.headersArray();
+    const existing = list.find((h) => !h.disabled && sameName(h.name, name));
+    if (existing) {
+      existing.value = String(value ?? '');
+    } else {
+      list.push({ name, value: String(value ?? '') });
+    }
   }
 
-  hasJSONContentType(headers: any) {
-    const contentType = headers?.['Content-Type'] || headers?.['content-type'] || '';
-    return contentType.includes('json');
+  deleteHeader(name: string) {
+    const list = this.headersArray();
+    for (let i = list.length - 1; i >= 0; i--) {
+      if (sameName(list[i].name, name)) list.splice(i, 1);
+    }
   }
 
-  /**
-   * Get the body of the request
-   *
-   * We automatically parse and return the JSON body if the content type is JSON
-   * If the user wants the raw body, they can pass the raw option as true
-   */
-  getBody(options: any = {}) {
-    if (options.raw) {
-      return this.req.data;
-    }
-
-    const isJson = this.hasJSONContentType(this.req.headers);
-    if (isJson) {
-      return this.__safeParseJSON(this.req.data);
-    }
-
-    return this.req.data;
+  deleteHeaders(names: string[]) {
+    names.forEach((name) => this.deleteHeader(name));
   }
 
-  /**
-   * If the content type is JSON and if the data is an object
-   *  - We set the body property as the object itself
-   *  - We set the request data as the stringified JSON as it is what gets sent over the network
-   * Otherwise
-   *  - We set the request data as the data itself
-   *  - We set the body property as the data itself
-   *
-   * If the user wants to override this behavior, they can pass the raw option as true
-   */
-  setBody(data: any, options: any = {}) {
-    if (options.raw) {
-      this.req.data = data;
-      this.body = data;
-      return;
-    }
+  getBody(options: { raw?: boolean } = {}): JsonValue | HttpRequestBody['data'] | undefined {
+    const data = this.getBodyData();
+    if (options.raw) return data;
+    if (this.isJsonBody() && typeof data === 'string') return this.__safeParseJSON(data) as JsonValue;
+    return data;
+  }
 
-    const isJson = this.hasJSONContentType(this.req.headers);
-    if (isJson && this.__isObject(data)) {
-      this.body = data;
-      this.req.data = this.__safeStringifyJSON(data);
-      return;
-    }
-
-    this.req.data = data;
+  setBody(data: JsonValue, options: { raw?: boolean } = {}) {
+    const isJson = this.isJsonBody();
+    const asObject = !options.raw && isJson && this.__isObject(data);
+    const serialized = asObject || typeof data !== 'string' ? this.__safeStringifyJSON(data) : data;
+    this.writeBodyData(serialized, isJson);
     this.body = data;
   }
 
-  setMaxRedirects(maxRedirects: number) {
-    this.req.maxRedirects = maxRedirects;
+  setMaxRedirects() {
+    this.addWarning('req.setMaxRedirects');
+  }
+
+  onFail() {
+    this.addWarning('req.onFail');
   }
 
   getTimeout() {
-    return this.req.timeout;
+    return this.req.settings?.timeout ?? (this.req as { timeout?: number | 'inherit' }).timeout;
   }
 
   setTimeout(timeout: number) {
     this.timeout = timeout;
-    this.req.timeout = timeout;
+    this.settings().timeout = timeout;
   }
 
-  onFail(callback: any) {
-    if (typeof callback === 'function') {
-      this.req.onFailHandler = callback;
-    } else if (callback) {
-      throw new Error(`${callback} is not a function`);
+  disableParsingResponseJson() {
+    this.req.__brunoDisableParsingResponseJson = true;
+  }
+
+  getExecutionMode() {
+    return this.req.__bruno__executionMode;
+  }
+
+  getName() {
+    return getItemName(this.req);
+  }
+
+  getPathParams() {
+    return this.pathParamList().map((p) => ({ name: p.name, value: p.value, type: p.type }));
+  }
+
+  private pathParamList(): HttpRequestParam[] {
+    return (getHttpParams(this.req) as HttpRequestParam[]).filter((p) => p.type === 'path');
+  }
+
+  getTags(): Tag[] {
+    return this.req.info?.tags ?? (this.req as { tags?: Tag[] }).tags ?? [];
+  }
+
+  private addWarning(api: string) {
+    if (!this.warnings) return;
+    const message = `${api} is not currently supported in the Bruno playground. Please use the Bruno desktop app.`;
+    if (!this.warnings.includes(message)) {
+      this.warnings.push(message);
     }
   }
 
-  __safeParseJSON(str: any) {
+  private http() {
+    this.req.http ??= {};
+    return this.req.http;
+  }
+
+  private settings() {
+    this.req.settings ??= {};
+    return this.req.settings;
+  }
+
+  private headersArray(): HttpRequestHeader[] {
+    const http = this.http();
+    if (!Array.isArray(http.headers)) http.headers = [];
+    return http.headers;
+  }
+
+  private isJsonBody(): boolean {
+    const body = getHttpBody(this.req);
+    if (body && !Array.isArray(body) && body.type === 'json') return true;
+    const contentType = getHttpHeaders(this.req)
+      .find((h) => !h.disabled && h.name.toLowerCase() === 'content-type')?.value;
+    return typeof contentType === 'string' && contentType.toLowerCase().includes('json');
+  }
+
+  private getBodyData(): HttpRequestBody['data'] | undefined {
+    const body = getHttpBody(this.req);
+    return body && !Array.isArray(body) ? body.data : undefined;
+  }
+
+  private writeBodyData(data: string, isJson: boolean) {
+    const http = this.http();
+    const body = http.body;
+    if (body && !Array.isArray(body) && (RAW_BODY_TYPES as readonly string[]).includes(body.type)) {
+      (body as { data: string }).data = data;
+    } else {
+      http.body = { type: isJson ? 'json' : 'text', data };
+    }
+  }
+
+  private __safeParseJSON(str: string) {
     try {
       return JSON.parse(str);
     } catch {
@@ -176,32 +274,17 @@ class BrunoRequest {
     }
   }
 
-  __safeStringifyJSON(obj: any) {
+  private __safeStringifyJSON(obj: JsonValue): string {
     try {
-      return JSON.stringify(obj);
+      const json = JSON.stringify(obj);
+      return json === undefined ? '' : json;
     } catch {
-      return obj;
+      return String(obj);
     }
   }
 
-  __isObject(obj: any) {
+  private __isObject(obj: JsonValue): boolean {
     return obj !== null && typeof obj === 'object';
-  }
-
-  disableParsingResponseJson() {
-    this.req.__brunoDisableParsingResponseJson = true;
-  }
-
-  getName() {
-    return this.req.name;
-  }
-
-  /**
-   * Get the tags associated with this request
-   * @returns {Array<string>} Array of tag strings
-   */
-  getTags() {
-    return this.req.tags || [];
   }
 }
 

@@ -82,6 +82,7 @@ export interface RunRequestResponse {
   requestId?: string;
   assertionResults?: AssertionResultsResponse;
   testResults?: TestResultsResponse;
+  warnings?: string[] | null;
 }
 
 export class RequestRunner {
@@ -98,12 +99,14 @@ export class RequestRunner {
   async runRequest(options: RunRequestOptions): Promise<RunRequestResponse> {
     const { item, collection, environment, runtimeVariables = {}, timeout = 30000 } = options;
     const requestId = this.generateRequestId();
+    const warnings: string[] = [];
 
     try {
       const environmentVariables = this.getEnvironmentVariables(environment);
       const processEnvVars = typeof process !== 'undefined' && process.env ? process.env : {};
 
       const processedRequest = await this.preprocessRequest(item, collection);
+      (processedRequest as { __bruno__executionMode?: string }).__bruno__executionMode = 'standalone';
 
       const { collectionVariables, folderVariables, requestVariables } = getCollectionFolderRequestVariables(collection, processedRequest);
 
@@ -128,12 +131,14 @@ export class RequestRunner {
             request: processedRequest,
             variables: allVariables,
             collectionName: collection.info?.name || '',
-            collectionPath: ''
+            collectionPath: '',
+            warnings
           });
         } catch (scriptError) {
           return {
             requestId,
-            error: `Pre-request script error: ${scriptError instanceof Error ? scriptError.message : 'Unknown script error'}`
+            error: `Pre-request script error: ${scriptError instanceof Error ? scriptError.message : 'Unknown script error'}`,
+            warnings: warnings.length ? warnings : null
           };
         }
       }
@@ -151,7 +156,8 @@ export class RequestRunner {
             response,
             variables: allVariables,
             collectionName: collection.info?.name || '',
-            collectionPath: ''
+            collectionPath: '',
+            warnings
           });
         } catch (scriptError) {
           // Don't fail the request for post-response script errors, just log them
@@ -187,7 +193,8 @@ export class RequestRunner {
             variables: allVariables,
             collectionName: collection.info?.name || '',
             collectionPath: '',
-            assertionResults
+            assertionResults,
+            warnings
           });
 
           // Capture test results and assertion results from bru object
@@ -207,12 +214,14 @@ export class RequestRunner {
         ...response,
         requestId,
         assertionResults: assertionResultsResponse,
-        testResults: testResultsResponse
+        testResults: testResultsResponse,
+        warnings: warnings.length ? warnings : null
       };
     } catch (error) {
       return {
         requestId,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        warnings: warnings.length ? warnings : null
       };
     }
   }

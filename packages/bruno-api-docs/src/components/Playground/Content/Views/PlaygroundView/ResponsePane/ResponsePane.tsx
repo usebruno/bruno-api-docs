@@ -4,6 +4,7 @@ import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
 import TestResultsTab from '../../Common/TestResultsTab';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
+import WarningBanner from '@/ui/WarningBanner/WarningBanner';
 import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
 import { SendIcon } from '@/assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
@@ -140,17 +141,24 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   );
 
   return (
-    <StyledWrapper>
-      <Tabs
-        variant="responsive"
-        testId="response-tabs"
-        className="h-full"
-        tabs={tabs}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        rightElement={response.error ? undefined : statusInfo}
-        rightContentExpandedWidth={RESPONSE_ACTIONS_EXPANDED_WIDTH}
-      />
+    <StyledWrapper className="flex flex-col">
+      {response.warnings?.length ? (
+        <div className="pb-4 shrink-0">
+          <WarningBanner warnings={response.warnings} />
+        </div>
+      ) : null}
+      <div className="flex-1 min-h-0">
+        <Tabs
+          variant="responsive"
+          testId="response-tabs"
+          className="h-full"
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          rightElement={response.error ? undefined : statusInfo}
+          rightContentExpandedWidth={RESPONSE_ACTIONS_EXPANDED_WIDTH}
+        />
+      </div>
     </StyledWrapper>
   );
 };

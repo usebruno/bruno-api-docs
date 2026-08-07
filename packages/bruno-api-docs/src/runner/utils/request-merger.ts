@@ -50,7 +50,7 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
     request.http = { method: getHttpMethod(request), url: getRequestUrl(request) };
   }
   if (!request.http.headers) {
-    request.http.headers = [];
+    request.http.headers = [...currentHeaders];
   }
 
   // Merge with existing request headers (request headers take precedence)

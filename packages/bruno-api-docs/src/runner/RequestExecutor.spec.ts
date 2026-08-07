@@ -34,6 +34,7 @@ describe('RequestExecutor', () => {
 
   afterEach(() => {
     global.fetch = originalFetch;
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -111,6 +112,72 @@ describe('RequestExecutor', () => {
 
     it.each(['GET', 'HEAD'])('omits the body for %s', async (method) => {
       expect((await sendWithBody(method)).body).toBeUndefined();
+    });
+  });
+
+  describe('timeout', () => {
+    const run = async (request: Parameters<RequestExecutor['executeRequest']>[0], options?: { timeout?: number }) => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+      vi.stubGlobal('fetch', fetchMock);
+      await new RequestExecutor().executeRequest(request, options);
+      return fetchMock.mock.calls[0][1];
+    };
+    const httpReq = (settings?: { timeout?: number | 'inherit' }) => ({
+      type: 'http',
+      http: { method: 'GET', url: 'https://api.example.com/data' },
+      ...(settings ? { settings } : {})
+    });
+
+    it('uses request.settings.timeout for the abort signal, overriding the runner default', async () => {
+      const spy = vi.spyOn(AbortSignal, 'timeout');
+      await run(httpReq({ timeout: 5000 }), { timeout: 30000 });
+      expect(spy).toHaveBeenCalledWith(5000);
+    });
+
+    it('skips the abort signal when the timeout is 0 (no timeout)', async () => {
+      const spy = vi.spyOn(AbortSignal, 'timeout');
+      const opts = await run(httpReq({ timeout: 0 }), { timeout: 30000 });
+      expect(spy).not.toHaveBeenCalled();
+      expect(opts.signal).toBeUndefined();
+    });
+
+    it('falls back to the runner timeout when settings.timeout is not a number (e.g. "inherit")', async () => {
+      const spy = vi.spyOn(AbortSignal, 'timeout');
+      await run(httpReq({ timeout: 'inherit' }), { timeout: 12000 });
+      expect(spy).toHaveBeenCalledWith(12000);
+    });
+  });
+
+  describe('disableParsingResponseJson', () => {
+    const runJson = async (
+      request: Parameters<RequestExecutor['executeRequest']>[0] & { __brunoDisableParsingResponseJson?: boolean }
+    ) => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{"a":1}').buffer
+      });
+      vi.stubGlobal('fetch', fetchMock);
+      return new RequestExecutor().executeRequest(request);
+    };
+    const httpReq = { type: 'http', http: { method: 'GET', url: 'https://api.example.com/data' } };
+
+    it('parses a JSON response body by default', async () => {
+      const res = await runJson(httpReq);
+      expect(res.data).toEqual({ a: 1 });
+    });
+
+    it('returns the raw text when the request set __brunoDisableParsingResponseJson', async () => {
+      const res = await runJson({ ...httpReq, __brunoDisableParsingResponseJson: true });
+      expect(res.data).toBe('{"a":1}');
     });
   });
 });

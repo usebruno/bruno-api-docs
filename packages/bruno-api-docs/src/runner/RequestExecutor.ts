@@ -40,7 +40,10 @@ export class RequestExecutor {
       const response = await fetch(requestUrl, fetchOptions);
       const endTime = Date.now();
 
-      const responseData = await this.parseResponse(response);
+      const disableJsonParsing = Boolean(
+        (request as { __brunoDisableParsingResponseJson?: boolean }).__brunoDisableParsingResponseJson
+      );
+      const responseData = await this.parseResponse(response, disableJsonParsing);
       const responseHeaders = this.parseHeaders(response.headers);
 
       return {
@@ -75,10 +78,13 @@ export class RequestExecutor {
     // `fetch` upper-cases only the methods it knows, so a collection storing
     // `purge` would go out lower-cased while the badge shows PURGE.
     const method = getHttpMethod(request).trim().toUpperCase();
+
+    const configuredTimeout = request.settings?.timeout ?? (request as { timeout?: number | 'inherit' }).timeout;
+    const effectiveTimeout = typeof configuredTimeout === 'number' ? configuredTimeout : timeout;
     const options: RequestInit = {
       method,
       headers: this.buildHeaders(request),
-      signal: AbortSignal.timeout(timeout)
+      ...(effectiveTimeout > 0 ? { signal: AbortSignal.timeout(effectiveTimeout) } : {})
     };
 
     const body = getHttpBody(request);
@@ -226,7 +232,7 @@ export class RequestExecutor {
     return formData;
   }
 
-  private async parseResponse(response: Response) {
+  private async parseResponse(response: Response, disableJsonParsing = false) {
     const contentType = response.headers.get('content-type') || '';
     const arrayBuffer = await response.arrayBuffer();
     // Read the size off the ArrayBuffer directly — no full Buffer copy needed just to measure.
@@ -242,7 +248,7 @@ export class RequestExecutor {
     let data: any;
     if (!isBinary) {
       const text = buffer.toString('utf-8');
-      if (contentType.includes('application/json')) {
+      if (!disableJsonParsing && contentType.includes('application/json')) {
         try {
           data = JSON.parse(text);
         } catch {

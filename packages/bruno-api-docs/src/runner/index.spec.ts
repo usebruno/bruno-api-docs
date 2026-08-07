@@ -146,6 +146,131 @@ describe('RequestRunner', () => {
       global.fetch = originalFetch;
     });
 
+    it('a pre-request script can setTimeout/disableParsingResponseJson and read getExecutionMode, all reaching the run', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "prereq scripting"
+items:
+  - name: "GET data"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/data"
+    scripts:
+      preRequest: |
+        req.setTimeout(1234);
+        req.disableParsingResponseJson();
+      tests: |
+        bru.setVar('executionMode', req.getExecutionMode());
+`;
+      const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{"a":1}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const runtimeVariables: Record<string, string> = {};
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0],
+        collection,
+        runtimeVariables,
+        timeout: 30000
+      });
+
+      expect(timeoutSpy).toHaveBeenCalledWith(1234); // setTimeout(1234) overrode the runner's 30000
+      expect(response.data).toBe('{"a":1}'); // disableParsingResponseJson kept the raw string
+      expect(runtimeVariables.executionMode).toBe('standalone'); // getExecutionMode resolved via the runner
+
+      timeoutSpy.mockRestore();
+      global.fetch = originalFetch;
+    });
+
+    it('surfaces a de-duplicated warning across script phases for unsupported req methods, while supported ones stay silent and the request still runs', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "unsupported methods"
+items:
+  - name: "GET data"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/data"
+    scripts:
+      preRequest: |
+        req.setTimeout(1234);
+        req.setMaxRedirects(5);
+        req.setMaxRedirects(10);
+      tests: |
+        req.setMaxRedirects(20);
+        req.onFail(function (err) { return err; });
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{"a":1}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0],
+        collection,
+        timeout: 30000
+      });
+
+      expect(response.warnings).toEqual([
+        'req.setMaxRedirects is not currently supported in the Bruno playground. Please use the Bruno desktop app.',
+        'req.onFail is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
+      ]);
+      expect(response.status).toBe(200);
+
+      global.fetch = originalFetch;
+    });
+
+    it('carries a flat request\'s own header onto the wire alongside collection headers (mergeHeaders preserves both)', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "flat headers"
+request:
+  headers:
+    - name: "X-Collection"
+      value: "c"
+items:
+  - name: "post"
+    type: "http"
+    method: "POST"
+    url: "https://api.example.com/data"
+    headers:
+      - name: "Content-Type"
+        value: "application/json"
+`;
+      let sentHeaders: Headers | undefined;
+      global.fetch = vi.fn().mockImplementation((_url: string, init: RequestInit) => {
+        sentHeaders = new Headers(init.headers);
+        return Promise.resolve({
+          status: 200,
+          statusText: 'OK',
+          url: 'https://api.example.com/data',
+          headers: new Headers({ 'content-type': 'application/json' }),
+          arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+        });
+      });
+
+      const collection = parseYaml(yaml);
+      await new RequestRunner().runRequest({ item: collection.items[0], collection, timeout: 30000 });
+
+      expect(sentHeaders?.get('Content-Type')).toBe('application/json'); // the request's own header survives the merge
+      expect(sentHeaders?.get('X-Collection')).toBe('c'); // collection-level header is layered in
+
+      global.fetch = originalFetch;
+    });
+
     it('should strip JSON comments from body before sending', async () => {
       // Mock fetch to capture what body was sent
       let sentBody: string | undefined;

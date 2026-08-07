@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { cloneDeep } from 'lodash-es';
 import { get } from './query-get';
-import { createResponseHeaderList, type ResponseHeaderList, type HeadersRecord } from './header-list';
+import { createResponseHeaderList, type HeaderList, type HeadersRecord } from './header-list';
 import type { RunRequestResponse } from '../../runner';
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -18,7 +18,7 @@ class BrunoResponse {
   body: JsonValue | null;
   responseTime: number | null;
   url: string | null;
-  headerList: ResponseHeaderList;
+  headerList: HeaderList;
 
   constructor(res: ResponseData | null | undefined) {
     this.res = res ?? null;

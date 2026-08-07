@@ -1,139 +1,116 @@
+import type { QuickJSContext } from 'quickjs-emscripten';
 import { marshallToVm } from '../utils';
+import { createShimHelpers } from './helpers';
+import type { HeaderEntry } from '../../../utils/header-list';
+import type BrunoRequest from '../../../utils/bruno-request';
 
-const addBrunoRequestShimToContext = (vm: any, req: any) => {
+const addBrunoRequestShimToContext = (vm: QuickJSContext, req: BrunoRequest) => {
+  const { setValue, setMethod, defineMethod, entryCallback, reduceCallback } = createShimHelpers(vm);
+
   const reqObject = vm.newObject();
 
-  const url = marshallToVm(req.getUrl(), vm);
-  const method = marshallToVm(req.getMethod(), vm);
-  const headers = marshallToVm(req.getHeaders(), vm);
-  const body = marshallToVm(req.getBody(), vm);
-  const timeout = marshallToVm(req.getTimeout(), vm);
-  const name = marshallToVm(req.getName(), vm);
-  const tags = marshallToVm(req.getTags(), vm);
+  setValue(reqObject, 'url', req.getUrl());
+  setValue(reqObject, 'method', req.getMethod());
+  setValue(reqObject, 'headers', req.getHeaders());
+  const bodyHandle = marshallToVm(req.getBody() ?? null, vm);
+  vm.setProp(reqObject, 'body', bodyHandle);
+  bodyHandle.dispose();
+  setValue(reqObject, 'timeout', req.getTimeout() ?? null);
+  setValue(reqObject, 'name', req.getName() ?? null);
+  setValue(reqObject, 'pathParams', req.getPathParams());
+  setValue(reqObject, 'tags', req.getTags());
 
-  vm.setProp(reqObject, 'url', url);
-  vm.setProp(reqObject, 'method', method);
-  vm.setProp(reqObject, 'headers', headers);
-  vm.setProp(reqObject, 'body', body);
-  vm.setProp(reqObject, 'timeout', timeout);
-  vm.setProp(reqObject, 'name', name);
-  vm.setProp(reqObject, 'tags', tags);
+  setMethod(reqObject, 'getUrl', () => req.getUrl());
+  setMethod(reqObject, 'setUrl', (url) => req.setUrl(url as string));
+  setMethod(reqObject, 'getHost', () => req.getHost());
+  setMethod(reqObject, 'getPath', () => req.getPath());
+  setMethod(reqObject, 'getQueryString', () => req.getQueryString());
+  setMethod(reqObject, 'getMethod', () => req.getMethod());
+  setMethod(reqObject, 'setMethod', (method) => req.setMethod(method as string));
+  setMethod(reqObject, 'getAuthMode', () => req.getAuthMode());
+  setMethod(reqObject, 'getName', () => req.getName());
+  setMethod(reqObject, 'getPathParams', () => req.getPathParams());
+  setMethod(reqObject, 'getTags', () => req.getTags());
 
-  url.dispose();
-  method.dispose();
-  headers.dispose();
-  body.dispose();
-  timeout.dispose();
-  name.dispose();
-  tags.dispose();
+  setMethod(reqObject, 'getHeaders', () => req.getHeaders());
+  setMethod(reqObject, 'setHeaders', (headers) => req.setHeaders(headers as Record<string, string>));
+  setMethod(reqObject, 'getHeader', (name) => req.getHeader(name as string));
+  setMethod(reqObject, 'setHeader', (name, value) => req.setHeader(name as string, value as string));
+  setMethod(reqObject, 'deleteHeader', (name) => req.deleteHeader(name as string));
+  setMethod(reqObject, 'deleteHeaders', (names) => req.deleteHeaders(names as string[]));
 
-  const getUrl = vm.newFunction('getUrl', function () {
-    return marshallToVm(req.getUrl(), vm);
+  setMethod(reqObject, 'getBody', (options) => req.getBody(options as { raw?: boolean }));
+  setMethod(reqObject, 'setBody', (data, options) => req.setBody(data, options as { raw?: boolean }));
+
+  setMethod(reqObject, 'setMaxRedirects', () => req.setMaxRedirects());
+  defineMethod(reqObject, 'onFail', () => {
+    req.onFail();
+    return vm.undefined;
   });
-  vm.setProp(reqObject, 'getUrl', getUrl);
-  getUrl.dispose();
+  setMethod(reqObject, 'getTimeout', () => req.getTimeout());
+  setMethod(reqObject, 'setTimeout', (timeout) => req.setTimeout(timeout as number));
+  setMethod(reqObject, 'disableParsingResponseJson', () => req.disableParsingResponseJson());
+  setMethod(reqObject, 'getExecutionMode', () => req.getExecutionMode());
 
-  const setUrl = vm.newFunction('setUrl', function (url: any) {
-    req.setUrl(vm.dump(url));
-  });
-  vm.setProp(reqObject, 'setUrl', setUrl);
-  setUrl.dispose();
+  const hl = req.headerList;
+  const headerListObj = vm.newObject();
 
-  const getMethod = vm.newFunction('getMethod', function () {
-    return marshallToVm(req.getMethod(), vm);
-  });
-  vm.setProp(reqObject, 'getMethod', getMethod);
-  getMethod.dispose();
+  setMethod(headerListObj, 'get', (name) => hl.get(name as string));
+  setMethod(headerListObj, 'one', (name) => hl.one(name as string));
+  setMethod(headerListObj, 'all', () => hl.all());
+  setMethod(headerListObj, 'count', () => hl.count());
+  setMethod(headerListObj, 'has', (name, value) =>
+    hl.has(name as Parameters<typeof hl.has>[0], value as string | undefined));
+  setMethod(headerListObj, 'indexOf', (item) => hl.indexOf(item as Parameters<typeof hl.indexOf>[0]));
+  setMethod(headerListObj, 'toObject', (excludeDisabled, caseSensitive, multiValue, sanitizeKeys) =>
+    hl.toObject(
+      excludeDisabled as boolean | undefined,
+      caseSensitive as boolean | undefined,
+      multiValue as boolean | undefined,
+      sanitizeKeys as boolean | undefined
+    ));
+  setMethod(headerListObj, 'toString', () => hl.toString());
+  setMethod(headerListObj, 'toJSON', () => hl.toJSON());
 
-  const getAuthMode = vm.newFunction('getAuthMode', function () {
-    return marshallToVm(req.getAuthMode(), vm);
+  setMethod(headerListObj, 'add', (item, value) =>
+    hl.add(item as Parameters<typeof hl.add>[0], value as string | undefined));
+  setMethod(headerListObj, 'upsert', (item, value) =>
+    hl.upsert(item as Parameters<typeof hl.upsert>[0], value as string | undefined));
+  setMethod(headerListObj, 'clear', () => hl.clear());
+  setMethod(headerListObj, 'populate', (items) => hl.populate(items as Parameters<typeof hl.populate>[0]));
+  setMethod(headerListObj, 'repopulate', (items) => hl.repopulate(items as Parameters<typeof hl.repopulate>[0]));
+  defineMethod(headerListObj, 'assimilate', (source, prune) => {
+    hl.assimilate(vm.dump(source) as HeaderEntry[], vm.dump(prune) as boolean | undefined);
+    return vm.undefined;
   });
-  vm.setProp(reqObject, 'getAuthMode', getAuthMode);
-  getAuthMode.dispose();
 
-  const getName = vm.newFunction('getName', function () {
-    return marshallToVm(req.getName(), vm);
+  defineMethod(headerListObj, 'each', (fn, ctx) => {
+    hl.each(entryCallback<boolean>(fn, ctx));
+    return vm.undefined;
   });
-  vm.setProp(reqObject, 'getName', getName);
-  getName.dispose();
+  defineMethod(headerListObj, 'filter', (fn, ctx) =>
+    marshallToVm(hl.filter(entryCallback<boolean>(fn, ctx)), vm));
+  defineMethod(headerListObj, 'find', (fn, ctx) =>
+    marshallToVm(hl.find(entryCallback<boolean>(fn, ctx)), vm));
+  defineMethod(headerListObj, 'map', (fn, ctx) =>
+    marshallToVm(hl.map(entryCallback(fn, ctx)), vm));
+  defineMethod(headerListObj, 'reduce', (fn, ...rest) => {
+    const ctx = rest.length > 1 ? rest[1] : undefined;
+    const callback = reduceCallback(fn, ctx);
+    const reduced = rest.length > 0 ? hl.reduce(callback, vm.dump(rest[0])) : hl.reduce(callback);
+    return marshallToVm(reduced, vm);
+  });
+  defineMethod(headerListObj, 'remove', (predicate, ctx) => {
+    if (vm.typeof(predicate) === 'function') {
+      hl.remove(entryCallback<boolean>(predicate, ctx));
+    } else {
+      hl.remove(vm.dump(predicate) as Parameters<typeof hl.remove>[0]);
+    }
+    return vm.undefined;
+  });
 
-  const setMethod = vm.newFunction('setMethod', function (method: any) {
-    req.setMethod(vm.dump(method));
-  });
-  vm.setProp(reqObject, 'setMethod', setMethod);
-  setMethod.dispose();
-
-  const getHeaders = vm.newFunction('getHeaders', function () {
-    return marshallToVm(req.getHeaders(), vm);
-  });
-  vm.setProp(reqObject, 'getHeaders', getHeaders);
-  getHeaders.dispose();
-
-  const setHeaders = vm.newFunction('setHeaders', function (headers: any) {
-    req.setHeaders(vm.dump(headers));
-  });
-  vm.setProp(reqObject, 'setHeaders', setHeaders);
-  setHeaders.dispose();
-
-  const getHeader = vm.newFunction('getHeader', function (name: any) {
-    return marshallToVm(req.getHeader(vm.dump(name)), vm);
-  });
-  vm.setProp(reqObject, 'getHeader', getHeader);
-  getHeader.dispose();
-
-  const setHeader = vm.newFunction('setHeader', function (name: any, value: any) {
-    req.setHeader(vm.dump(name), vm.dump(value));
-  });
-  vm.setProp(reqObject, 'setHeader', setHeader);
-  setHeader.dispose();
-
-  const getBody = vm.newFunction('getBody', function (options: any) {
-    return marshallToVm(req.getBody(vm.dump(options)), vm);
-  });
-  vm.setProp(reqObject, 'getBody', getBody);
-  getBody.dispose();
-
-  const setBody = vm.newFunction('setBody', function (data: any, options: any) {
-    req.setBody(vm.dump(data), vm.dump(options));
-  });
-  vm.setProp(reqObject, 'setBody', setBody);
-  setBody.dispose();
-
-  const setMaxRedirects = vm.newFunction('setMaxRedirects', function (maxRedirects: any) {
-    req.setMaxRedirects(vm.dump(maxRedirects));
-  });
-  vm.setProp(reqObject, 'setMaxRedirects', setMaxRedirects);
-  setMaxRedirects.dispose();
-
-  const getTimeout = vm.newFunction('getTimeout', function () {
-    return marshallToVm(req.getTimeout(), vm);
-  });
-  vm.setProp(reqObject, 'getTimeout', getTimeout);
-  getTimeout.dispose();
-
-  const setTimeout = vm.newFunction('setTimeout', function (timeout: any) {
-    req.setTimeout(vm.dump(timeout));
-  });
-  vm.setProp(reqObject, 'setTimeout', setTimeout);
-  setTimeout.dispose();
-
-  const disableParsingResponseJson = vm.newFunction('disableParsingResponseJson', function () {
-    req.disableParsingResponseJson();
-  });
-  vm.setProp(reqObject, 'disableParsingResponseJson', disableParsingResponseJson);
-  disableParsingResponseJson.dispose();
-
-  const getTags = vm.newFunction('getTags', function () {
-    return marshallToVm(req.getTags(), vm);
-  });
-  vm.setProp(reqObject, 'getTags', getTags);
-  getTags.dispose();
-
-  const onFail = vm.newFunction('onFail', function (callback: any) {
-    req.onFail(vm.dump(callback));
-  });
-  vm.setProp(reqObject, 'onFail', onFail);
-  onFail.dispose();
+  vm.setProp(reqObject, 'headerList', headerListObj);
+  headerListObj.dispose();
 
   vm.setProp(vm.global, 'req', reqObject);
   reqObject.dispose();

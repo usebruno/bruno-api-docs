@@ -1,63 +1,17 @@
 import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
 import { marshallToVm } from '../utils';
+import { createShimHelpers } from './helpers';
 import type { CallableResponse, QueryArg, JsonValue } from '../../../utils/bruno-response';
-import { READ_ONLY_METHODS, READ_ONLY_MESSAGE, type HeaderEntry } from '../../../utils/header-list';
+import { READ_ONLY_METHODS, READ_ONLY_MESSAGE } from '../../../utils/header-list';
 
 const addBrunoResponseShimToContext = (vm: QuickJSContext, res: CallableResponse) => {
-  const setValue = (target: QuickJSHandle, name: string, value: JsonValue) => {
-    const handle: QuickJSHandle = marshallToVm(value, vm);
-    vm.setProp(target, name, handle);
-    handle.dispose();
-  };
-
-  const setMethod = <R>(target: QuickJSHandle, name: string, fn: (...args: JsonValue[]) => R) => {
-    const handle = vm.newFunction(name, (...args: QuickJSHandle[]) =>
-      marshallToVm(fn(...args.map((a) => vm.dump(a) as JsonValue)), vm));
-    vm.setProp(target, name, handle);
-    handle.dispose();
-  };
-
-  const setThrowingMethod = (target: QuickJSHandle, name: string, message: string) => {
-    const handle = vm.newFunction(name, () => { throw vm.newError(message); });
-    vm.setProp(target, name, handle);
-    handle.dispose();
-  };
-
-  const defineMethod = (target: QuickJSHandle, name: string, handler: (...args: QuickJSHandle[]) => QuickJSHandle) => {
-    const handle = vm.newFunction(name, handler);
-    vm.setProp(target, name, handle);
-    handle.dispose();
-  };
-
-  const callVmCallback = (fnHandle: QuickJSHandle, thisArg: QuickJSHandle, argHandles: QuickJSHandle[]): JsonValue => {
-    const result = vm.callFunction(fnHandle, thisArg, ...argHandles);
-    argHandles.forEach((handle) => handle.dispose());
-    if (result.error) {
-      const error = vm.dump(result.error);
-      result.error.dispose();
-      throw error;
-    }
-    const value = vm.dump(result.value) as JsonValue;
-    result.value.dispose();
-    return value;
-  };
-
-  const thisArgOf = (ctxHandle?: QuickJSHandle): QuickJSHandle =>
-    ctxHandle !== undefined && vm.typeof(ctxHandle) !== 'undefined' ? ctxHandle : vm.undefined;
+  const { setValue, setMethod, setThrowingMethod, defineMethod, callVmCallback, entryCallback, reduceCallback }
+    = createShimHelpers(vm);
 
   const toHostQueryArg = (arg: QuickJSHandle): QueryArg => {
     if (vm.typeof(arg) !== 'function') return vm.dump(arg) as QueryArg;
     return (item: JsonValue) => callVmCallback(arg, vm.undefined, [marshallToVm(item, vm)]);
   };
-
-  const entryCallback = <R extends JsonValue>(fnHandle: QuickJSHandle, ctxHandle?: QuickJSHandle) =>
-    (header: HeaderEntry, index: number): R =>
-      callVmCallback(fnHandle, thisArgOf(ctxHandle), [marshallToVm(header, vm), marshallToVm(index, vm)]) as R;
-
-  const reduceCallback = (fnHandle: QuickJSHandle, ctxHandle?: QuickJSHandle) =>
-    (accumulator: JsonValue, header: HeaderEntry, index: number): JsonValue =>
-      callVmCallback(fnHandle, thisArgOf(ctxHandle),
-        [marshallToVm(accumulator, vm), marshallToVm(header, vm), marshallToVm(index, vm)]);
 
   const resFn = vm.newFunction('res', function (exprStr: QuickJSHandle, ...queryArgs: QuickJSHandle[]) {
     const nativeArgs = queryArgs.map((arg) => toHostQueryArg(arg));

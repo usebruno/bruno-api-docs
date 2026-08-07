@@ -14,6 +14,7 @@ interface RunScriptOptions {
   collectionPath?: string;
   variables?: any;
   assertionResults?: AssertionResult[];
+  warnings?: string[];
 }
 
 class ScriptRuntime {
@@ -26,12 +27,13 @@ class ScriptRuntime {
     collectionName,
     collectionPath,
     variables,
-    assertionResults
+    assertionResults,
+    warnings
   }: RunScriptOptions): Promise<Bru> {
     const bru = new Bru({ collectionPath, collectionName, variables });
     let req, res;
     if (request) {
-      req = new BrunoRequest(request);
+      req = new BrunoRequest(request, warnings);
     }
     if (response) {
       res = new BrunoResponse(response);

@@ -3,9 +3,6 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
 import type { HttpRequest, HttpRequestParam, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
-import type { GrpcRequest } from '@opencollection/types/requests/grpc';
-import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import { useMarkdownRenderer } from '../../hooks';
 import { AUTH_MODE_LABELS } from '../../constants';
 import {
@@ -19,7 +16,9 @@ import {
   getItemDocs,
   getItemDescription,
   getRequestExamples,
-  isUnsupportedRequest
+  isHttpRequest,
+  isUnsupportedRequestInDocs,
+  isGrpcRequest
 } from '../../utils/schemaHelpers';
 import {
   resolveInheritedAuth,
@@ -55,10 +54,11 @@ import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTab
 import { Examples } from '../../components/Examples/Examples';
 import { ExecutionContext } from '../../components/ExecutionContext/ExecutionContext';
 import { UnsupportedRequest } from '../../components/UnsupportedRequest/UnsupportedRequest';
+import { GrpcRequestContent } from '../../components/GrpcRequestContent/GrpcRequestContent';
 import { StyledWrapper } from './StyledWrapper';
 
 interface RequestProps {
-  item: HttpRequest | WebSocketRequest | GraphQLRequest | GrpcRequest;
+  item: Item;
   ancestry?: Item[];
   collection?: OpenCollection | null;
   onTryClick?: () => void;
@@ -305,7 +305,18 @@ export const Request: React.FC<RequestProps> = ({
   onBreadcrumbClick,
   highlightedExampleIndex
 }) => {
-  if (isUnsupportedRequest(item)) {
+  if (isGrpcRequest(item)) {
+    return (
+      <GrpcRequestContent
+        item={item}
+        ancestry={ancestry}
+        collection={collection}
+        onBreadcrumbClick={onBreadcrumbClick}
+      />
+    );
+  }
+
+  if (isUnsupportedRequestInDocs(item)) {
     return (
       <PageWrapper>
         <UnsupportedRequest
@@ -326,16 +337,20 @@ export const Request: React.FC<RequestProps> = ({
     );
   }
 
-  return (
-    <RequestContent
-      item={item}
-      ancestry={ancestry}
-      collection={collection}
-      onTryClick={onTryClick}
-      onBreadcrumbClick={onBreadcrumbClick}
-      highlightedExampleIndex={highlightedExampleIndex}
-    />
-  );
+  if (isHttpRequest(item)) {
+    return (
+      <RequestContent
+        item={item}
+        ancestry={ancestry}
+        collection={collection}
+        onTryClick={onTryClick}
+        onBreadcrumbClick={onBreadcrumbClick}
+        highlightedExampleIndex={highlightedExampleIndex}
+      />
+    );
+  }
+
+  return null;
 };
 
 export default Request;

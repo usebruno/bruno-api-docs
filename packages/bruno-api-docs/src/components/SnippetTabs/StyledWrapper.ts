@@ -85,6 +85,21 @@ export const StyledWrapper = styled.div`
     outline-offset: 2px;
   }
 
+  .snippet-box .code-content-numbered,
+  .snippet-box .code-content:not(.code-content--numbered) {
+    max-height: calc(100vh - 12rem);
+    overflow-y: auto;
+  }
+
+  .snippet-box .code-content-numbered {
+    align-items: flex-start;
+  }
+
+  &.is-modal .snippet-box .code-content-numbered,
+  &.is-modal .snippet-box .code-content:not(.code-content--numbered) {
+    max-height: none;
+  }
+
   .snippet-copy {
     align-self: center;
     flex: 0 0 auto;

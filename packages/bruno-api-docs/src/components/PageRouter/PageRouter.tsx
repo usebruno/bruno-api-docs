@@ -1,6 +1,5 @@
 import React, { useMemo, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { ScriptFile, Folder as FolderItem } from '@opencollection/types/collection/item';
 import { useActiveResolution, useNavModel } from '../../routing/hooks';
 import { useAppSelector } from '../../store/hooks';
@@ -93,7 +92,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         return item ? (
           <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
             <Request
-              item={item as HttpRequest}
+              item={item}
               ancestry={ancestry}
               collection={collection}
               onTryClick={onOpenPlayground}

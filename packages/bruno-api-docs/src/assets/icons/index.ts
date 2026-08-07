@@ -31,3 +31,7 @@ export * from './ExampleIcon';
 export * from './DotIcon';
 export * from './ChevronsRightIcon';
 export * from './CheckIcon';
+export * from './UnaryIcon';
+export * from './ServerStreamingIcon';
+export * from './ClientStreamingIcon';
+export * from './BidiStreamingIcon';

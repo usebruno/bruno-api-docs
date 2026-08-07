@@ -69,15 +69,23 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     </div>
   );
 
-  const renderResponseBody = () =>
-    response.error ? renderErrorBanner() : (
-      <ResponseBodyTab
-        response={response}
-        selectedFormat={selectedFormat}
-        showPreview={showPreview}
-        contentType={contentType}
-      />
-    );
+  const renderResponseBody = () => (
+    <>
+      {response.warnings?.length ? (
+        <div className="pb-4">
+          <WarningBanner warnings={response.warnings} />
+        </div>
+      ) : null}
+      {response.error ? renderErrorBanner() : (
+        <ResponseBodyTab
+          response={response}
+          selectedFormat={selectedFormat}
+          showPreview={showPreview}
+          contentType={contentType}
+        />
+      )}
+    </>
+  );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (
     <TestResultsTab
@@ -142,11 +150,6 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
 
   return (
     <StyledWrapper className="flex flex-col">
-      {response.warnings?.length ? (
-        <div className="pb-4 shrink-0">
-          <WarningBanner warnings={response.warnings} />
-        </div>
-      ) : null}
       <div className="flex-1 min-h-0">
         <Tabs
           variant="responsive"

@@ -1,9 +1,10 @@
 import React, { forwardRef, useRef, useCallback, useState, useImperativeHandle, useEffect, useMemo } from 'react';
 import { IconChevronDown } from '@tabler/icons';
 import type { Instance, Placement } from 'tippy.js';
+import cx from '@/utils/cx';
 import Dropdown, { type DropdownProps } from './Dropdown';
-import SubMenuItem from './SubMenuItem';
 import { TriggerButton } from './StyledWrapper';
+import SubMenuItem from './SubMenuItem';
 import type {
   MenuDropdownItem,
   MenuDropdownGroup,
@@ -15,7 +16,6 @@ import type {
   MenuGroupStyle,
   MenuItemExtraProps
 } from './types';
-import cx from '../../utils/cx';
 
 const NAVIGATION_KEYS = ['ArrowDown', 'ArrowUp', 'Home', 'End', 'Escape'];
 const ACTION_KEYS = ['Enter', ' '];

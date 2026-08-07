@@ -1,6 +1,6 @@
 import type { Variable, VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
-import { unwrapVariableTyped } from './variableResolution';
 import { resolveDescription } from './description';
+import { unwrapVariableTyped } from './variableResolution';
 
 /** The data types offered in the pre-request variable value dropdown (Bruno's BRUNO_VARIABLE_DATATYPES). */
 export type VariableDataType = 'string' | 'number' | 'boolean' | 'object';

@@ -1,10 +1,10 @@
 import React from 'react';
-import { MethodBadge } from '../../MethodBadge/MethodBadge';
-import { VariableText } from '../../VariableText/VariableText';
-import { CopyButton } from '../../../ui/CopyButton/CopyButton';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import { SendIcon } from '../../../assets/icons';
+import { SendIcon } from '@/assets/icons';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { StyledWrapper } from './StyledWrapper';
+import { MethodBadge } from '../../MethodBadge/MethodBadge';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
+import { VariableText } from '../../VariableText/VariableText';
 
 interface RequestUrlBarProps {
   method: string;

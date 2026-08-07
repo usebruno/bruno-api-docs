@@ -1,6 +1,6 @@
-import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import { describe, it, expect } from 'vitest';
 import { countItems, getCollectionStats, hasCollectionConfiguration } from './collectionOverview';
 
 describe('countItems', () => {

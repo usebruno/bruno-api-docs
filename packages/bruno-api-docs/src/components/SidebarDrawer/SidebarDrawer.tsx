@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
-import { Portal } from '../../ui/Portal/Portal';
-import { useEscapeKey, useLockBodyScroll } from '../../hooks';
+import { useEscapeKey, useLockBodyScroll } from '@/hooks';
+import { Portal } from '@/ui/Portal/Portal';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SidebarDrawerProps {

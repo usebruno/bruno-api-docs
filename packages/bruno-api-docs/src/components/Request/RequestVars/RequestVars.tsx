@@ -1,8 +1,8 @@
 import React from 'react';
-import { SubHeading } from '../../SubHeading/SubHeading';
-import { PropertyTable } from '../../PropertyTable/PropertyTable';
-import type { PreRequestVarRow, PostResponseVarRow } from '../../../utils/request';
+import type { PreRequestVarRow, PostResponseVarRow } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
+import { PropertyTable } from '../../PropertyTable/PropertyTable';
+import { SubHeading } from '../../SubHeading/SubHeading';
 
 interface RequestVarsProps {
   preRequest?: PreRequestVarRow[];

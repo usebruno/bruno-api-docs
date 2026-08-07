@@ -1,6 +1,6 @@
 import React from 'react';
-import { Tooltip } from '../Tooltip/Tooltip';
 import { StyledWrapper } from './StyledWrapper';
+import { Tooltip } from '../Tooltip/Tooltip';
 
 export interface BreadcrumbSegment {
   name: string;

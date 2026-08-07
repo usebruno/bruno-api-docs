@@ -1,12 +1,12 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { createOpenCollectionStore } from '@/store/store';
+import { query } from '@/test-utils/dom';
+import { setDocsCollection } from '@slices/docs';
 import Sidebar from './Sidebar';
-import { createOpenCollectionStore } from '../../../store/store';
-import { setDocsCollection } from '../../../store/slices/docs';
-import { useRenderToDom } from '../../../hooks/useRenderToDom';
-import { query } from '../../../test-utils/dom';
 
 const collection = {
   info: { name: 'C' },

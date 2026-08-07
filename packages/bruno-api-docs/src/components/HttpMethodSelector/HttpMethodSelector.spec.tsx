@@ -1,14 +1,15 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { MenuDropdownItem } from '../../ui/MenuDropdown';
+import type { MenuDropdownItem } from '@/ui/MenuDropdown';
+import HttpMethodSelector from './HttpMethodSelector';
 
 // The real MenuDropdown (Tippy) only renders its rows while open, so the options
 // never reach the DOM in an SSR render, so intercepting the props is the only way
 // to observe which methods are offered and which one is marked selected.
 const capturedProps: { items: MenuDropdownItem[]; selectedItemId?: string | number | null }[] = [];
 
-vi.mock('../../ui/MenuDropdown', () => ({
+vi.mock('@/ui/MenuDropdown', () => ({
   default: ({
     items,
     selectedItemId,
@@ -22,8 +23,6 @@ vi.mock('../../ui/MenuDropdown', () => ({
     return <>{children}</>;
   }
 }));
-
-import HttpMethodSelector from './HttpMethodSelector';
 
 const render = (method: string): string =>
   renderToStaticMarkup(<HttpMethodSelector method={method} onMethodChange={() => {}} testId="method-select" />);

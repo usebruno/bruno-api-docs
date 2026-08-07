@@ -1,7 +1,7 @@
 import { BasePage } from './base.page';
-import { SidebarComponent } from '../components/sidebar.component';
 import { BreadcrumbComponent } from '../components/breadcrumb.component';
 import { ScriptContentComponent } from '../components/script/script-content.component';
+import { SidebarComponent } from '../components/sidebar.component';
 
 export class ScriptPage extends BasePage {
   readonly root = this.page.getByTestId('script-page');

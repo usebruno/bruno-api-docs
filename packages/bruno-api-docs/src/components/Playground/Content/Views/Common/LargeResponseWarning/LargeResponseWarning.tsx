@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
-import { formatBytes } from '@/utils/exampleResponse';
-import type { RunRequestResponse } from '@/runner';
-import { downloadResponse } from '@/utils/downloadResponse';
-import { StyledWrapper } from './StyledWrapper';
 import { IconAlertTriangle, IconCheck, IconCopy, IconDownload, IconEye } from '@tabler/icons';
 import useCopy from '@/hooks/useCopy';
+import type { RunRequestResponse } from '@/runner';
+import { downloadResponse } from '@/utils/downloadResponse';
+import { formatBytes } from '@/utils/exampleResponse';
+import { StyledWrapper } from './StyledWrapper';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 

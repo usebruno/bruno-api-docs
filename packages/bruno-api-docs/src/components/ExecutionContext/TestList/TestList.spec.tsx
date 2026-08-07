@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
+import type { TestRow } from '@/utils/fileUtils';
 import { TestList } from './TestList';
-import type { TestRow } from '../../../utils/fileUtils';
 
 const tests: TestRow[] = [
   { level: 'collection', name: 'is authenticated', sourceName: 'API', code: 'test(\'is authenticated\', () => { expect(ok).to.equal(true); })' },

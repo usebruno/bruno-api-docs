@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { RequestParams } from './RequestParams';
-import { useRenderToDom } from '../../../hooks/useRenderToDom';
 
 describe('RequestParams', () => {
   it('renders Path and Query groups for the params present', () => {

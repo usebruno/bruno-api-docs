@@ -1,21 +1,16 @@
 import React, { useRef, useEffect } from 'react';
-import { HashRouter } from 'react-router-dom';
+import type {
+  OpenCollection as OpenCollectionCollection,
+  OpenCollection as IOpenCollection
+} from '@opencollection/types';
 import { Provider } from 'react-redux';
-import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { OpenCollection as IOpenCollection } from '@opencollection/types';
-import AppShell from '../AppShell/AppShell';
-import { parseYaml } from '../../utils/yamlUtils';
-import { hydrateWithUUIDs } from '../../utils/fileUtils';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import {
-  selectDocsCollection,
-  setDocsCollection,
-  clearDocsCollection
-} from '@slices/docs';
-import {
-  setPlaygroundCollection,
-  clearPlaygroundCollection
-} from '@slices/playground';
+import { HashRouter } from 'react-router-dom';
+import { VariableResolverProvider } from '@/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { createOpenCollectionStore, type AppStore } from '@/store/store';
+import { applyTheme } from '@/theme/applyTheme';
+import { hydrateWithUUIDs } from '@/utils/fileUtils';
+import { parseYaml } from '@/utils/yamlUtils';
 import {
   selectCollectionStatus,
   selectCollectionError,
@@ -25,9 +20,16 @@ import {
   resetCollectionState,
   setGitCollectionUrl
 } from '@slices/app';
-import { createOpenCollectionStore, type AppStore } from '../../store/store';
-import { VariableResolverProvider } from '../../hooks';
-import { applyTheme } from '../../theme/applyTheme';
+import {
+  selectDocsCollection,
+  setDocsCollection,
+  clearDocsCollection
+} from '@slices/docs';
+import {
+  setPlaygroundCollection,
+  clearPlaygroundCollection
+} from '@slices/playground';
+import AppShell from '../AppShell/AppShell';
 
 // Set data-theme on the root element before the component first paints to avoid a flash.
 applyTheme();

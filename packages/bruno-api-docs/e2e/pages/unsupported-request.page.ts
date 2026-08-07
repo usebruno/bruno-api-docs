@@ -1,7 +1,7 @@
 import { BasePage } from './base.page';
-import { SidebarComponent } from '../components/sidebar.component';
 import { BreadcrumbComponent } from '../components/breadcrumb.component';
 import { RequestUrlBarComponent } from '../components/request/url-bar.component';
+import { SidebarComponent } from '../components/sidebar.component';
 
 export class UnsupportedRequestPage extends BasePage {
   readonly sidebar = new SidebarComponent(this.page);

@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { ThemeMode } from '../../theme/types';
+import type { ThemeMode } from '@/theme/types';
 
 export const THEME_STORAGE_KEY = 'oc-docs.theme';
 

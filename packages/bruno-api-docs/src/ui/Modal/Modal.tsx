@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, type ReactNode } from 'react';
-import { Portal } from '../Portal/Portal';
-import { CloseIcon } from '../../assets/icons';
+import { CloseIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import { Portal } from '../Portal/Portal';
 
 interface ModalProps {
   open: boolean;

@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
+import type { ScriptChainStep } from '@/utils/request';
 import { ScriptStep } from './ScriptStep';
-import type { ScriptChainStep } from '../../../utils/request';
 
 const step: ScriptChainStep = {
   level: 'request',

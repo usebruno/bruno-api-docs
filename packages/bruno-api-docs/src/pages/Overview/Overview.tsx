@@ -1,19 +1,19 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { StructuredText } from '@opencollection/types/common/description';
-import { useMarkdownRenderer } from '../../hooks';
-import { getCollectionStats, hasCollectionConfiguration } from '../../utils/collectionOverview';
-import { scriptsArrayToObject } from '../../utils/schemaHelpers';
-import { getCollectionVariables } from '../../utils/request';
-import { AUTH_MODE_LABELS } from '../../constants';
-import { CollectionStats } from '../../components/CollectionStats/CollectionStats';
-import { CollectionConfiguration } from '../../components/OverviewCollectionConfiguration/CollectionConfiguration';
-import { EmptyState } from '../../ui/EmptyState/EmptyState';
-import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
-import { Heading } from '../../components/Heading/Heading';
-import { Section } from '../../components/Section/Section';
-import { ViewMore } from '../../components/ViewMore/ViewMore';
-import { BookIcon } from '../../assets/icons';
+import { BookIcon } from '@/assets/icons';
+import { CollectionStats } from '@/components/CollectionStats/CollectionStats';
+import { Heading } from '@/components/Heading/Heading';
+import { CollectionConfiguration } from '@/components/OverviewCollectionConfiguration/CollectionConfiguration';
+import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
+import { Section } from '@/components/Section/Section';
+import { ViewMore } from '@/components/ViewMore/ViewMore';
+import { AUTH_MODE_LABELS } from '@/constants';
+import { useMarkdownRenderer } from '@/hooks';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { getCollectionStats, hasCollectionConfiguration } from '@/utils/collectionOverview';
+import { getCollectionVariables } from '@/utils/request';
+import { scriptsArrayToObject } from '@/utils/schemaHelpers';
 import { StyledWrapper } from './StyledWrapper';
 
 const getDocsContent = (docs: OpenCollection['docs']): string => {

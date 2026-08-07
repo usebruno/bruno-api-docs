@@ -1,9 +1,9 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { useRenderToDom } from '../../../../../hooks/useRenderToDom';
+import { describe, it, expect } from 'vitest';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import type { RequestBody } from '@/utils/schemaHelpers';
 import { BodyTab } from './BodyTab';
-import type { RequestBody } from '../../../../../utils/schemaHelpers';
 
 const noop = () => {};
 const item = { http: { method: 'POST', url: 'https://api.example.com' } } as HttpRequest;

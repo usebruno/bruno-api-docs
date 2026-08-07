@@ -1,7 +1,7 @@
 import React from 'react';
-import IconButton from '../../../ui/IconButton/IconButton';
-import { DockInlineIcon, DockBottomIcon, DockModalIcon } from '../../../assets/icons';
-import type { DockMode } from '../../../utils/playgroundDock';
+import { DockInlineIcon, DockBottomIcon, DockModalIcon } from '@/assets/icons';
+import IconButton from '@/ui/IconButton/IconButton';
+import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 const DOCKS: { mode: DockMode; label: string; Icon: React.FC }[] = [

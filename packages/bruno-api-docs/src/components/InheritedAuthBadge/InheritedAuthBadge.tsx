@@ -1,5 +1,5 @@
 import React from 'react';
-import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '../../utils/request';
+import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '@/utils/request';
 import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
 
 interface InheritedAuthBadgeProps {

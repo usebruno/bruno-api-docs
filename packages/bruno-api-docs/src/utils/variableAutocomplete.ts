@@ -1,4 +1,4 @@
-import { mockDataFunctions } from '../runner/utils/faker-functions';
+import { mockDataFunctions } from '@/runner/utils/faker-functions';
 
 /** The `$`-prefixed mock/dynamic function hints, e.g. `$randomUUID` (Bruno's MOCK_DATA_HINTS). */
 const MOCK_HINTS = Object.keys(mockDataFunctions).map((key) => `$${key}`);

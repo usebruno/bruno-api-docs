@@ -8,10 +8,10 @@ import React, {
   type ReactElement,
   type ReactNode
 } from 'react';
-import { Portal } from '../Portal/Portal';
-import { useEscapeKey } from '../../hooks/useEscapeKey';
-import { computeAnchoredPosition, type AnchoredPosition } from '../../utils/anchoredPosition';
+import { useEscapeKey } from '@/hooks/useEscapeKey';
+import { computeAnchoredPosition, type AnchoredPosition } from '@/utils/anchoredPosition';
 import { StyledWrapper } from './StyledWrapper';
+import { Portal } from '../Portal/Portal';
 
 interface PopoverProps {
   content: ReactNode;

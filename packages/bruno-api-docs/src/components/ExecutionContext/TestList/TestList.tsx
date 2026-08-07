@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { ScopeTag } from '../ScopeTag/ScopeTag';
-import { Code } from '../../Code/Code';
-import { Collapse } from '../../../ui/Collapse/Collapse';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import type { TestRow } from '../../../utils/fileUtils';
+import { Collapse } from '@/ui/Collapse/Collapse';
+import type { TestRow } from '@/utils/fileUtils';
 import { StyledWrapper } from './StyledWrapper';
+import { Code } from '../../Code/Code';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
+import { ScopeTag } from '../ScopeTag/ScopeTag';
 
 interface TestListProps {
   tests: TestRow[];

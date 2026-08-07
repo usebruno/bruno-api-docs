@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
-import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import IconButton from '../../../ui/IconButton/IconButton';
-import { SettingsIcon } from '../../../assets/icons';
-import { useAutoHideScrollbar, useIsMobileDevice } from '../../../hooks';
-import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
+import { SettingsIcon } from '@/assets/icons';
+import { useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
+import IconButton from '@/ui/IconButton/IconButton';
+import Tooltip from '@/ui/Tooltip/Tooltip';
 import { StyledWrapper } from './StyledWrapper';
-import Tooltip from '../../../ui/Tooltip/Tooltip';
+import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
+import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
+import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
 
 interface PlaygroundSidebarProps {
   collection: OpenCollectionCollection | null;

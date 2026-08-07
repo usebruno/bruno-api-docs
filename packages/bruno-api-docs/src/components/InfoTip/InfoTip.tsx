@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip } from '../../ui/Tooltip/Tooltip';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { StyledWrapper } from './StyledWrapper';
 
 interface InfoTipProps {

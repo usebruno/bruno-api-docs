@@ -1,19 +1,19 @@
 import React, { useMemo } from 'react';
 import type { HttpRequest, HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '../../../../MethodBadge/MethodBadge';
-import { CopyButton } from '../../../../../ui/CopyButton/CopyButton';
-import { PropertyTable } from '../../../../PropertyTable/PropertyTable';
-import { RequestParams } from '../../../../Request/RequestParams/RequestParams';
-import { RequestBody } from '../../../../Request/RequestBody/RequestBody';
-import { Code } from '../../../../Code/Code';
-import { SplitDivider } from '../../../../SplitDivider/SplitDivider';
-import { resolvePathAndQueryParams } from '../../../../../utils/pathParams';
-import { getBodyView, getDescription, headerRows } from '../../../../../utils/request';
-import { getHttpMethod, getRequestUrl } from '../../../../../utils/schemaHelpers';
-import { responseBodyLanguage, statusCodePhrase } from '../../../../../utils/exampleResponse';
-import { statusToneColor, statusToneBackground } from '../../../../../utils/common';
-import { useSplitPane, type SplitOrientation } from '../../../../../hooks/useSplitPane';
+import { useSplitPane, type SplitOrientation } from '@/hooks/useSplitPane';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
+import { statusToneColor, statusToneBackground } from '@/utils/common';
+import { responseBodyLanguage, statusCodePhrase } from '@/utils/exampleResponse';
+import { resolvePathAndQueryParams } from '@/utils/pathParams';
+import { getBodyView, getDescription, headerRows } from '@/utils/request';
+import { getHttpMethod, getRequestUrl } from '@/utils/schemaHelpers';
 import { StyledWrapper } from './StyledWrapper';
+import { Code } from '../../../../Code/Code';
+import { MethodBadge } from '../../../../MethodBadge/MethodBadge';
+import { PropertyTable } from '../../../../PropertyTable/PropertyTable';
+import { RequestBody } from '../../../../Request/RequestBody/RequestBody';
+import { RequestParams } from '../../../../Request/RequestParams/RequestParams';
+import { SplitDivider } from '../../../../SplitDivider/SplitDivider';
 
 interface ExampleViewProps {
   request: HttpRequest;

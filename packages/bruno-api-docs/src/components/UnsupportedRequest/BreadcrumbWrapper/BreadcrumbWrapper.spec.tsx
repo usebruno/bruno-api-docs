@@ -1,11 +1,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { parse } from 'node-html-parser';
-import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
+import { parse } from 'node-html-parser';
+import { describe, it, expect } from 'vitest';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import BreadcrumbWrapper from './BreadcrumbWrapper';
-import { getByTestId, queryByTestId } from '../../../test-utils/dom';
 
 const collection = { info: { name: 'My collection' } } as unknown as OpenCollection;
 

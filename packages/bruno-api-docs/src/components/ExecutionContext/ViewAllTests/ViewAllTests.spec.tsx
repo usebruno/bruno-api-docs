@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
+import type { RawTestScript } from '@/utils/fileUtils';
 import { ViewAllTests } from './ViewAllTests';
-import type { RawTestScript } from '../../../utils/fileUtils';
 
 const withCode: RawTestScript[] = [{ level: 'request', code: 'const x = 1;\ntest(\'t1\', () => { runIt(); })' }];
 const noCode: RawTestScript[] = [{ level: 'request', code: '   ' }];

@@ -1,4 +1,4 @@
-import { GAP, VIEWPORT_MARGIN } from '../constants/ui';
+import { GAP, VIEWPORT_MARGIN } from '@/constants/ui';
 
 // Clamp `value` to [min, max]. The Math.max(min, max) guards an inverted range: when the panel is
 // larger than the space available (max < min), the result pins to `min` instead of flipping the bounds.

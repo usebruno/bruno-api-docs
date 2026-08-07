@@ -1,6 +1,6 @@
 import type { Monaco } from '@monaco-editor/react';
 import type { editor, IDisposable, languages } from 'monaco-editor';
-import { getScriptApiCompletions, type ScriptApiRoot } from '../../utils/scriptAutocomplete';
+import { getScriptApiCompletions, type ScriptApiRoot } from '@/utils/scriptAutocomplete';
 
 /**
  * Per-model API roots (`showHintsFor`). A Monaco completion provider is global

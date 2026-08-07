@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { fakeStorage } from '@/test-utils/storage';
 import { readStored, writeStored } from './useStorage';
-import { fakeStorage } from '../test-utils/storage';
 
 describe('readStored', () => {
   it('falls back to the default value when the key has never been written', () => {

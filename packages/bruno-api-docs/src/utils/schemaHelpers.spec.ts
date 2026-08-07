@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import { describe, it, expect } from 'vitest';
 import { getItemDescription, getRequestBadgeLabel, getRequestAuth } from './schemaHelpers';
 
 const item = (data: Record<string, unknown>): OpenCollectionItem => data as unknown as OpenCollectionItem;

@@ -1,7 +1,7 @@
 import type { Monaco } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { HOVER_OPEN_MS, HOVER_CLOSE_MS } from '../../constants/ui';
-import { templateVariableGlobalRegex } from '../../utils/common';
+import { HOVER_OPEN_MS, HOVER_CLOSE_MS } from '@/constants/ui';
+import { templateVariableGlobalRegex } from '@/utils/common';
 
 interface TokenHit {
   name: string;

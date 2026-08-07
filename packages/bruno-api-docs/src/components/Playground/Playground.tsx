@@ -1,12 +1,12 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import { usePlaygroundUrlState, useIsMobilePhone } from '../../hooks';
-import { useAppDispatch } from '../../store/hooks';
+import { usePlaygroundUrlState, useIsMobilePhone } from '@/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import { resetPlaygroundEnvironments } from '@slices/playground';
-import InlineDock from './docks/InlineDock/InlineDock';
-import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
-import ModalDock from './docks/ModalDock/ModalDock';
-import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
+import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
+import InlineDock from './docks/InlineDock/InlineDock';
+import MobileDock from './docks/MobileDock/MobileDock';
+import ModalDock from './docks/ModalDock/ModalDock';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
 const PlaygroundBody = lazy(() => import('./PlaygroundBody/PlaygroundBody'));

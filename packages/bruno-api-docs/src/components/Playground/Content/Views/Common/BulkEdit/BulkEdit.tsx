@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import CodeEditor from '../../../../../../ui/CodeEditor/CodeEditor';
-import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import { parseBulkKeyValue, preserveDescriptions, serializeBulkKeyValue } from '../../../../../../utils/bulkKeyValue';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import CodeEditor from '@/ui/CodeEditor/CodeEditor';
+import { parseBulkKeyValue, preserveDescriptions, serializeBulkKeyValue } from '@/utils/bulkKeyValue';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface BulkEditProps {

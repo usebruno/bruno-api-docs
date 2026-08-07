@@ -1,11 +1,11 @@
+import { newQuickJSWASMModule, memoizePromiseFactory } from 'quickjs-emscripten';
+import { getBundledCode } from './bundled-libraries.iife.js';
 import addBruShimToContext from './shims/bru';
 import addBrunoRequestShimToContext from './shims/bruno-request';
-import addConsoleShimToContext from './shims/console';
 import addBrunoResponseShimToContext from './shims/bruno-response';
+import addConsoleShimToContext from './shims/console';
 import addTestShimToContext from './shims/test';
-import { newQuickJSWASMModule, memoizePromiseFactory } from 'quickjs-emscripten';
 import { marshallToVm } from './utils';
-import { getBundledCode } from './bundled-libraries.iife.js';
 
 let QuickJSSyncContext: any;
 const loader = memoizePromiseFactory(() => newQuickJSWASMModule());

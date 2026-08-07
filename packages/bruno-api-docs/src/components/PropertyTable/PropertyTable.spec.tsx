@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query } from '@/test-utils/dom';
 import { PropertyTable } from './PropertyTable';
 
 describe('PropertyTable', () => {

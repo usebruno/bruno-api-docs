@@ -1,12 +1,12 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { MemoryRouter } from 'react-router-dom';
+import { describe, it, expect } from 'vitest';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import { Request } from './Request';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '../../test-utils/dom';
 
 const collection: OpenCollection = {
   info: { name: 'Auth API', version: '1.0.0' },

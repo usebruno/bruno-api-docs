@@ -1,11 +1,11 @@
 import React from 'react';
-import { ScopeTag } from '../ScopeTag/ScopeTag';
-import { DisabledBadge } from '../../DisabledBadge/DisabledBadge';
-import { VariableText } from '../../VariableText/VariableText';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import { Description } from '../../Description/Description';
-import type { AssertionRow } from '../../../utils/assertions';
+import type { AssertionRow } from '@/utils/assertions';
 import { StyledWrapper } from './StyledWrapper';
+import { Description } from '../../Description/Description';
+import { DisabledBadge } from '../../DisabledBadge/DisabledBadge';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
+import { VariableText } from '../../VariableText/VariableText';
+import { ScopeTag } from '../ScopeTag/ScopeTag';
 
 interface AssertListProps {
   assertions: AssertionRow[];

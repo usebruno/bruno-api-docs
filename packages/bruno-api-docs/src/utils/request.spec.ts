@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { AUTH_MODE_LABELS } from '@/constants';
+import { COLLECTION_ROOT_CRUMB } from './common';
 import {
   humanizeAuthMode,
   resolveInheritedAuth,
@@ -23,8 +25,6 @@ import {
   getShortMethod,
   getVariableType
 } from './request';
-import { AUTH_MODE_LABELS } from '../constants';
-import { COLLECTION_ROOT_CRUMB } from './common';
 
 describe('requestAuth', () => {
   it('humanizes auth modes with fallbacks', () => {

@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
+import type { ScriptChainStep, ScriptFlow } from '@/utils/request';
+import { StyledWrapper } from './StyledWrapper';
 import { VariableText } from '../../VariableText/VariableText';
 import { ScriptStep } from '../ScriptStep/ScriptStep';
-import type { ScriptChainStep, ScriptFlow } from '../../../utils/request';
-import { StyledWrapper } from './StyledWrapper';
 
 interface ScriptChainProps {
   steps: ScriptChainStep[];

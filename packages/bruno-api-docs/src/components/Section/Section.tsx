@@ -1,10 +1,10 @@
 import React, { useId } from 'react';
-import { SectionLabel } from '../SectionLabel/SectionLabel';
-import { ChevronArrow } from '../ChevronArrow/ChevronArrow';
-import { Collapse } from '../../ui/Collapse/Collapse';
-import { useSessionStorage } from '../../hooks';
-import { cx } from '../../utils/cx';
+import { useSessionStorage } from '@/hooks';
+import { Collapse } from '@/ui/Collapse/Collapse';
+import { cx } from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
+import { ChevronArrow } from '../ChevronArrow/ChevronArrow';
+import { SectionLabel } from '../SectionLabel/SectionLabel';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4';
 

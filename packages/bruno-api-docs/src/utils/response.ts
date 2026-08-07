@@ -1,5 +1,4 @@
 import { Buffer } from 'buffer';
-import type { RunRequestResponse } from '../runner';
 import {
   type ResponseBodyFormat,
   type ResponseBodyFormatViewData,
@@ -17,7 +16,8 @@ import {
   DATA_URL_PREFIX_PATTERN,
   NON_BASE64_CHARS_PATTERN,
   RESPONSE_FORMAT_RULES
-} from '../constants';
+} from '@/constants';
+import type { RunRequestResponse } from '@/runner';
 
 // Normalize a response's content-type header into a canonical MIME type, or '' when absent.
 export function getContentType(headers: RunRequestResponse['headers']): string {

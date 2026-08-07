@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { HttpRequestExample } from '@opencollection/types/requests/http';
 import { describe, it, expect } from 'vitest';
 import { ExampleCard } from './ExampleCard';
-import type { HttpRequestExample } from '@opencollection/types/requests/http';
 
 const example: HttpRequestExample = {
   name: 'Successful login',

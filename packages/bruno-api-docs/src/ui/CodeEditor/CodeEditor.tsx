@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react';
-import { useAppSelector } from '../../store/hooks';
-import { useResolvedVariables } from '../../hooks/useVariableResolver';
-import { CopyButton } from '../CopyButton/CopyButton';
-import { Portal } from '../Portal/Portal';
+import { useResolvedVariables } from '@/hooks/useVariableResolver';
+import { useAppSelector } from '@/store/hooks';
+import type { ScriptApiRoot } from '@/utils/scriptAutocomplete';
 import { ensureScriptApiCompletions, setModelHints } from './scriptApiCompletions';
+import { StyledWrapper } from './StyledWrapper';
 import { createVariableDecorator, type VariableDecorator } from './variableDecorations';
 import { createVariableHover, type VariableHover } from './variableHoverWidget';
-import type { ScriptApiRoot } from '../../utils/scriptAutocomplete';
-import { StyledWrapper } from './StyledWrapper';
+import { CopyButton } from '../CopyButton/CopyButton';
+import { Portal } from '../Portal/Portal';
 
 type EditorInstance = Parameters<OnMount>[0];
 

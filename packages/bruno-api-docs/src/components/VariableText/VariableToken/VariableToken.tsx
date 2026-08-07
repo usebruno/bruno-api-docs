@@ -1,8 +1,8 @@
 import React from 'react';
-import { useResolvedVariables } from '../../../hooks';
-import { Popover } from '../../../ui/Popover/Popover';
-import { VariableInfoCard } from '../../VariableInfoCard/VariableInfoCard';
+import { useResolvedVariables } from '@/hooks';
+import { Popover } from '@/ui/Popover/Popover';
 import { StyledWrapper } from './StyledWrapper';
+import { VariableInfoCard } from '../../VariableInfoCard/VariableInfoCard';
 
 export const VariableToken: React.FC<{ token: string; highlighted?: boolean }> = ({ token, highlighted = true }) => {
   const { showVars, resolve } = useResolvedVariables();

@@ -1,17 +1,17 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
-import PlaygroundBody from './PlaygroundBody';
-import { createOpenCollectionStore } from '../../../store/store';
-import { useRenderToDom } from '../../../hooks/useRenderToDom';
+import { describe, it, expect } from 'vitest';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { createOpenCollectionStore } from '@/store/store';
+import { getItemUuid } from '@/utils/itemUtils';
 import {
   setPlaygroundCollection,
   setSelectedItemId,
   setSelectedExampleIndex,
   setViewMode
-} from '../../../store/slices/playground';
-import { getItemUuid } from '../../../utils/itemUtils';
+} from '@slices/playground';
+import PlaygroundBody from './PlaygroundBody';
 
 const collection = {
   info: { name: 'C' },

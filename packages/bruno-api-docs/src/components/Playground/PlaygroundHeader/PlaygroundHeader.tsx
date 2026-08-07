@@ -1,9 +1,9 @@
 import React from 'react';
-import IconButton from '../../../ui/IconButton/IconButton';
-import { BrunoGlyph, SidebarToggleIcon, CloseIcon, ChevronDownIcon } from '../../../assets/icons';
-import DockSwitcher from '../DockSwitcher/DockSwitcher';
-import type { DockMode } from '../../../utils/playgroundDock';
+import { BrunoGlyph, SidebarToggleIcon, CloseIcon, ChevronDownIcon } from '@/assets/icons';
+import IconButton from '@/ui/IconButton/IconButton';
+import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
+import DockSwitcher from '../DockSwitcher/DockSwitcher';
 
 interface PlaygroundHeaderProps {
   dock: DockMode;

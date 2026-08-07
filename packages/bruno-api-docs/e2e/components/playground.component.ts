@@ -1,11 +1,11 @@
 import type { Locator } from '@playwright/test';
 import { BaseComponent } from './base.component';
-import { KeyValueTableComponent } from './key-value-table/key-value-table.component';
 import { CodeEditorComponent } from './code-editor/code-editor.component';
+import { KeyValueTableComponent } from './key-value-table/key-value-table.component';
+import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import { RequestAuthComponent } from './playground/auth.component';
 import { MethodSelectorComponent } from './playground/method-selector.component';
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
-import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import type { DockMode } from '../../src/utils/playgroundDock';
 
 export class PlaygroundComponent extends BaseComponent {

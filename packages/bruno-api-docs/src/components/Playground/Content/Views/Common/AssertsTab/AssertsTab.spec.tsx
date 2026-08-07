@@ -1,10 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { Assertion } from '@opencollection/types/common/assertions';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import type { Assertion } from '@opencollection/types/common/assertions';
+import { getByTestId } from '@/test-utils/dom';
 import { AssertsTab } from './AssertsTab';
-import { getByTestId } from '../../../../../../test-utils/dom';
 
 const noop = () => {};
 

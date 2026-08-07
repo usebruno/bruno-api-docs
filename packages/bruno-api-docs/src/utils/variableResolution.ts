@@ -1,12 +1,12 @@
-import type { Environment } from '@opencollection/types/config/environments';
 import type {
   Variable,
   SecretVariable,
   VariableValueOrVariants,
   VariableValueType
 } from '@opencollection/types/common/variables';
+import type { Environment } from '@opencollection/types/config/environments';
+import { VARIABLE_NAME_REGEX } from '@/constants/regex';
 import { isTemplateVariable, templateVariableGlobalRegex } from './common';
-import { VARIABLE_NAME_REGEX } from '../constants/regex';
 
 /**
  * Pure, DOM-free variable resolution for read-only display. Kept separate from

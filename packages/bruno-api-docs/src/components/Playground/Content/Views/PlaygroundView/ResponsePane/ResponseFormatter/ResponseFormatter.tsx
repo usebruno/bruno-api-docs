@@ -1,5 +1,4 @@
 import { IconEye } from '@tabler/icons';
-import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@/ui/MenuDropdown';
 import type {
   ResponseBodyFormat } from '@/constants';
 import {
@@ -9,6 +8,7 @@ import {
   FORMAT_LABELS,
   FORMAT_ICONS
 } from '@/constants';
+import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@/ui/MenuDropdown';
 import PreviewToggleHeader from './PreviewToggleHeader/PreviewToggleHeader';
 
 interface ResponseFormatSelectorProps {

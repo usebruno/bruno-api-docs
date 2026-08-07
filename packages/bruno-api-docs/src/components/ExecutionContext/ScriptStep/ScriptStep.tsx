@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Code } from '../../Code/Code';
-import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
-import { Collapse } from '../../../ui/Collapse/Collapse';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import type { ScriptChainStep } from '../../../utils/request';
+import { Collapse } from '@/ui/Collapse/Collapse';
+import type { ScriptChainStep } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
+import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
+import { Code } from '../../Code/Code';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
 
 interface ScriptStepProps {
   step: ScriptChainStep;

@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { getByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId } from '@/test-utils/dom';
+import type { InheritedSource } from '@/utils/request';
 import { InheritedSourceLink } from './InheritedSourceLink';
-import type { InheritedSource } from '../../utils/request';
 
 const folderSource: InheritedSource = { level: 'folder', name: 'Folder A', uuid: 'folder-uid' };
 const collectionSource: InheritedSource = { level: 'collection', name: 'My Collection', uuid: '__collection_root__' };

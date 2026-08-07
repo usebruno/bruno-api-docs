@@ -1,20 +1,20 @@
 import React, { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '../../MethodBadge/MethodBadge';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
+import { statusToneColor } from '@/utils/common';
+import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '@/utils/exampleResponse';
+import { resolvePathAndQueryParams } from '@/utils/pathParams';
+import { getBodyView, getDescription, headerRows } from '@/utils/request';
+import { StyledWrapper } from './StyledWrapper';
 import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
-import { CopyButton } from '../../../ui/CopyButton/CopyButton';
+import { Code } from '../../Code/Code';
+import { Description } from '../../Description/Description';
+import { MethodBadge } from '../../MethodBadge/MethodBadge';
 import { PropertyTable } from '../../PropertyTable/PropertyTable';
+import { RequestBody } from '../../Request/RequestBody/RequestBody';
+import { RequestParams } from '../../Request/RequestParams/RequestParams';
 import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import { VariableText } from '../../VariableText/VariableText';
-import { Description } from '../../Description/Description';
-import { RequestParams } from '../../Request/RequestParams/RequestParams';
-import { RequestBody } from '../../Request/RequestBody/RequestBody';
-import { Code } from '../../Code/Code';
-import { resolvePathAndQueryParams } from '../../../utils/pathParams';
-import { getBodyView, getDescription, headerRows } from '../../../utils/request';
-import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '../../../utils/exampleResponse';
-import { statusToneColor } from '../../../utils/common';
-import { StyledWrapper } from './StyledWrapper';
 
 interface ExampleCardProps {
   example: HttpRequestExample;

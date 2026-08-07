@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { getByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId } from '@/test-utils/dom';
 import { CopyButton } from './CopyButton';
 
 describe('CopyButton', () => {

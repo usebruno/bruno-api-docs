@@ -1,9 +1,9 @@
 import type { OpenCollection } from '@opencollection/types';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable } from '@opencollection/types/common/variables';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
+import { coerceVariableValue } from '@/utils/variableDataType';
 import { getTreePathFromCollectionToItem } from './tree-utils';
-import { isFolder, getRequestVariables } from '../../utils/schemaHelpers';
-import { coerceVariableValue } from '../../utils/variableDataType';
 
 /**
  * Merge variables from collection and folder hierarchy into the request. Values are kept in their

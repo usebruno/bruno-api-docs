@@ -1,15 +1,15 @@
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import type { Environment } from '@opencollection/types/config/environments';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
+import ScriptRuntime from '@/scripting/runtime/script-runtime';
+import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '@/utils/schemaHelpers';
+import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
+import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
 import { RequestExecutor } from './RequestExecutor';
-import ScriptRuntime from '../scripting/runtime/script-runtime';
-import AssertRuntime, { type AssertionResult } from '../scripting/runtime/assert-runtime';
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars } from './utils';
 import { getCollectionFolderRequestVariables } from './utils/variable-merger';
-import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '../utils/variableDataType';
-import { externalSecretValues, type ExternalSecretEntry } from '../utils/variableResolution';
-import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
-import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '../utils/schemaHelpers';
 
 interface DeclaredEnvironmentVariable {
   name?: string;

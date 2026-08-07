@@ -1,11 +1,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import type { HttpRequest } from '@opencollection/types/requests/http';
+import { getByTestId } from '@/test-utils/dom';
+import type { RequestBody } from '@/utils/schemaHelpers';
 import { BodyModeSelector, resolveBodyMode } from './BodyModeSelector';
-import type { RequestBody } from '../../../../../../utils/schemaHelpers';
-import { getByTestId } from '../../../../../../test-utils/dom';
 
 const noop = () => {};
 

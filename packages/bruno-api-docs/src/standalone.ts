@@ -1,11 +1,11 @@
 import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
+import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import './styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
-import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import type { OpenCollection as IOpenCollection } from '@opencollection/types';
+import Prism from './utils/prism';
 import { parseCollectionContent } from './utils/yamlUtils';
 
 // Ensure Prism is available globally for any code that might access it

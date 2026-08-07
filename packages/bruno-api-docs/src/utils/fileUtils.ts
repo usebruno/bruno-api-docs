@@ -1,10 +1,10 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Scripts } from '@opencollection/types/common/scripts';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { ScriptFlow } from './request';
 import { getItemName, getRequestScripts, scriptsArrayToObject, isFolder } from './schemaHelpers';
 import { isYamlFile, parseYaml } from './yamlUtils';
-import type { ScriptFlow } from './request';
 
 const loadOpenCollectionData = async (source: string | File): Promise<any> => {
   let content: string;

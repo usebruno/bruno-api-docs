@@ -14,7 +14,7 @@ import ChangeLayout from './ChangeLayout/ChangeLayout';
 import { StyledWrapper } from './StyledWrapper';
 import MenuDropdown from '@/ui/MenuDropdown';
 import type { MenuDropdownItem } from '@/ui/MenuDropdown';
-import IconButton from '@/ui/IconButton/IconButton';
+import ActionIconButton from './ActionIconButton/ActionIconButton';
 import type { RunRequestResponse } from '@/runner';
 import type { ResponseBodyFormat } from '@/constants';
 import { useAppDispatch } from '@/store/hooks';
@@ -85,9 +85,9 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
     <StyledWrapper className="response-pane-actions-wrapper" data-testid="response-pane-actions-wrapper">
       <div className="actions-dropdown" data-testid="actions-dropdown">
         <MenuDropdown items={menuItems} placement="bottom-end" testId="response-actions-menu">
-          <IconButton label="More actions" showTooltip={false} className="p-1">
-            <IconDots size={13} stroke={1.5} style={{ color: 'var(--text-muted)' }} />
-          </IconButton>
+          <ActionIconButton label="More actions" showTooltip={false} className="p-1 more-actions-button">
+            <IconDots size={16} stroke={1.5} style={{ color: 'var(--text-muted)' }} />
+          </ActionIconButton>
         </MenuDropdown>
       </div>
       <div className="actions-buttons" data-testid="actions-buttons">

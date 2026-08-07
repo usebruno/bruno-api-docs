@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import { Select } from './Select';
-import { getByTestId } from '../../../test-utils/dom';
+import { query, getByTestId } from '../../../test-utils/dom';
 
 const OPTIONS = [
   { value: 'a', label: 'Apple' },
@@ -35,7 +35,7 @@ describe('Select', () => {
 
   it('renders a caret icon', () => {
     const root = render(<Select value="a" options={OPTIONS} onChange={noop} testId="fruit-select" />);
-    expect(getByTestId(root, 'fruit-select').querySelector('svg')).toBeTruthy();
+    query(getByTestId(root, 'fruit-select'), 'svg');
   });
 
   it('shows an empty label when the value matches no option', () => {

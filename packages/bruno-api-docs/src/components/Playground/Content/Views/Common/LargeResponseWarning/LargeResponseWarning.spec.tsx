@@ -42,7 +42,7 @@ describe('LargeResponseWarning', () => {
     const root = useRenderToDom(
       <LargeResponseWarning responseSize={responseSize} response={response} onReveal={() => {}} />
     );
-    expect(getByTestId(root, 'large-response-copy')).toBeTruthy();
+    getByTestId(root, 'large-response-copy');
   });
 
   it('renders a Download button', () => {

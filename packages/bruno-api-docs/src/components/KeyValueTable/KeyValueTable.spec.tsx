@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query } from '../../test-utils/dom';
+import { query, getByTestId } from '../../test-utils/dom';
 import KeyValueTable, { type KeyValueRow } from './KeyValueTable';
 
 const noop = () => {};
@@ -16,7 +16,7 @@ describe('KeyValueTable — description column', () => {
   it('renders a Description column and the authored description when showDescription is set', () => {
     const root = useRenderToDom(<KeyValueTable data={rows} onChange={noop} showDescription />);
     expect(headerTexts(root)).toContain('Description');
-    expect(root.querySelector('[data-testid="key-value-table-description-input"]')).toBeTruthy();
+    getByTestId(root, 'key-value-table-description-input');
     expect(root.text).toContain('Correlation id');
   });
 

@@ -41,7 +41,7 @@ describe('Field', () => {
         />
       </Field>
     );
-    expect(getByTestId(root, 'placement')).toBeTruthy();
+    getByTestId(root, 'placement');
   });
 
   it('renders without a label when none is given', () => {

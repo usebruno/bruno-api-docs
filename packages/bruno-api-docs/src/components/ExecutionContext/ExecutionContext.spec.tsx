@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { ExecutionContext } from './ExecutionContext';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query } from '../../test-utils/dom';
+import { query, queryByTestId } from '../../test-utils/dom';
 import type { ScriptChainStep } from '../../utils/request';
 import type { AssertionRow } from '../../utils/assertions';
 import type { TestRow, RawTestScript } from '../../utils/fileUtils';
@@ -66,7 +66,7 @@ describe('ExecutionContext', () => {
       expect(query(root, '[data-testid="execution-context"]').text).toContain('2 vars inherited');
       const panel = query(root, panelSelector('variables'));
       expect(panel.text).toContain('baseUrl');
-      expect(panel.querySelector('[data-testid="inherited-source"]')).not.toBeNull();
+      expect(queryByTestId(panel, 'inherited-source')).not.toBeNull();
     });
 
     it('mounts only the active tab panel (Variables first)', () => {
@@ -111,8 +111,8 @@ describe('ExecutionContext', () => {
       const testsOnly = useRenderToDom(
         <ExecutionContext scriptChain={[]} preVars={[]} postVars={[]} assertions={[]} tests={tests} testScripts={testScripts} />
       );
-      expect(testsOnly.querySelector('[data-testid="execution-context-view-complete-code"]')).not.toBeNull();
-      expect(useRenderToDom(full()).querySelector('[data-testid="execution-context-view-complete-code"]')).toBeNull();
+      expect(queryByTestId(testsOnly, 'execution-context-view-complete-code')).not.toBeNull();
+      expect(queryByTestId(useRenderToDom(full()), 'execution-context-view-complete-code')).toBeNull();
     });
 
     it('exposes an accessible tablist with the first tab selected', () => {
@@ -132,7 +132,7 @@ describe('ExecutionContext', () => {
       expect(query(root, panelSelector('asserts')).text).toContain('is defined');
       expect(query(root, panelSelector('tests')).text).toContain('returns a token');
       expect(query(root, flowSelector).text).toBe('Sandwich execution flow');
-      expect(root.querySelector('[data-testid="execution-context-view-complete-code"]')).not.toBeNull();
+      expect(queryByTestId(root, 'execution-context-view-complete-code')).not.toBeNull();
     });
   });
 
@@ -140,6 +140,6 @@ describe('ExecutionContext', () => {
     const root = useRenderToDom(
       <ExecutionContext scriptChain={[]} preVars={[]} postVars={[]} assertions={[]} tests={[]} />
     );
-    expect(root.querySelector('[data-testid="execution-context"]')).toBeNull();
+    expect(queryByTestId(root, 'execution-context')).toBeNull();
   });
 });

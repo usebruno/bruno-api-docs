@@ -1,6 +1,7 @@
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
+import type { Buffer } from 'buffer';
 import { RequestExecutor } from './RequestExecutor';
 import ScriptRuntime from '../scripting/runtime/script-runtime';
 import AssertRuntime, { type AssertionResult } from '../scripting/runtime/assert-runtime';
@@ -66,6 +67,7 @@ export interface RunRequestResponse {
   statusText?: string;
   headers?: Record<string, any>;
   data?: any;
+  dataBuffer?: Buffer;
   /** Present only when needed downstream — binary previews, byte views, or an unreconstructable body. */
   base64Data?: string;
   /** Content type sniffed from the response bytes at parse time (magic numbers → SVG → text), or null. */

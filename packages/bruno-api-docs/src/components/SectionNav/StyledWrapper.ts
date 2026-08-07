@@ -87,7 +87,7 @@ export const StyledWrapper = styled.div`
   @keyframes sectionNavOpen {
     from {
       opacity: 0;
-      transform: translateX(2rem);
+      transform: translateX(1.25rem);
     }
     to {
       opacity: 1;

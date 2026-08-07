@@ -104,7 +104,7 @@ const executeQuickJsVmAsync = async ({
       return `
         globalThis.require = (mod) => {
           let lib = globalThis.requireObject[mod];
-          let isModuleAPath = (module) => (module?.startsWith('.') || module?.startsWith?.(bru.cwd()))
+          let isModuleAPath = (module) => (module?.startsWith('.') || module?.startsWith?.(''))
           if (lib) {
             return lib;
           }
@@ -118,7 +118,7 @@ const executeQuickJsVmAsync = async ({
               const copyModuleExportsCode = "\\n;globalThis.requireObject[mod] = module.exports;";
               const patchedRequire = ${`
                 "\\n;" +
-                "let require = (subModule) => isModuleAPath(subModule) ? globalThis.require(path.resolve(bru.cwd(), mod, '..', subModule)) : globalThis.require(subModule)" +
+                "let require = (subModule) => isModuleAPath(subModule) ? globalThis.require(path.resolve('', mod, '..', subModule)) : globalThis.require(subModule)" +
                 "\\n;" 
               `}
               eval(initModuleExportsCode + patchedRequire + localModuleCode + copyModuleExportsCode);

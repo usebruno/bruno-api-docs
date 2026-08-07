@@ -56,7 +56,9 @@ const prepareMockObj = (obj: Record<string, any>, escapeJSONStrings: boolean): R
  * Resolve `{{...}}` in a string: built-in dynamic `{{$var}}` tokens first, then
  * regular `{{var}}` lookups (also resolving dynamic tokens inside var values).
  */
-const interpolate = (str: string, variables: Record<string, any>, options: { escapeJSONStrings?: boolean } = {}): string => {
+export const interpolate = (
+  str: string, variables: Record<string, any>, options: { escapeJSONStrings?: boolean } = {}
+): string => {
   if (!str || typeof str !== 'string') {
     return str;
   }

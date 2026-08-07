@@ -189,6 +189,37 @@ items:
       global.fetch = originalFetch;
     });
 
+    it('a pre-request script can call bru.disableParsingResponseJson() to keep the raw response body', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "bru disableParsing"
+items:
+  - name: "GET data"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/data"
+    scripts:
+      preRequest: |
+        bru.disableParsingResponseJson();
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{"a":1}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const response = await new RequestRunner().runRequest({ item: collection.items[0], collection, timeout: 30000 });
+
+      expect(response.data).toBe('{"a":1}'); // bru.disableParsingResponseJson kept the raw string
+      expect(response.status).toBe(200);
+
+      global.fetch = originalFetch;
+    });
+
     it('surfaces a de-duplicated warning across script phases for unsupported req methods, while supported ones stay silent and the request still runs', async () => {
       const yaml = `
 opencollection: "1.0.0"
@@ -267,6 +298,251 @@ items:
 
       expect(sentHeaders?.get('Content-Type')).toBe('application/json'); // the request's own header survives the merge
       expect(sentHeaders?.get('X-Collection')).toBe('c'); // collection-level header is layered in
+
+      global.fetch = originalFetch;
+    });
+
+    it('surfaces bru out-of-scope warnings (visualize, cookies) across script phases in the response', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "bru warnings"
+items:
+  - name: "GET data"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/data"
+    scripts:
+      preRequest: |
+        bru.setVar('greeting', 'hello');
+        bru.visualize('html', { content: 'x' });
+      tests: |
+        bru.cookies.get('sid');
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0],
+        collection,
+        timeout: 30000
+      });
+
+      expect(response.warnings).toEqual([
+        'bru.visualize is not currently supported in the Bruno playground. Please use the Bruno desktop app.',
+        'bru.cookies.get is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
+      ]);
+      expect(response.status).toBe(200);
+
+      global.fetch = originalFetch;
+    });
+
+    it('bru.runRequest runs a sibling request (its scripts included) and shares runtime variables with the caller', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "runRequest"
+items:
+  - name: "Parent"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/parent"
+    scripts:
+      tests: |
+        const res = await bru.runRequest('Child');
+        bru.setVar('childStatus', res.status);
+        bru.setVar('childData', JSON.stringify(res.data));
+        bru.setVar('childKeys', Object.keys(res).sort().join(','));
+  - name: "Child"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/child"
+    scripts:
+      preRequest: |
+        bru.setVar('ranChild', 'yes');
+`;
+      global.fetch = vi.fn().mockImplementation((url: string) => Promise.resolve({
+        status: 200,
+        statusText: 'OK',
+        url,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode(JSON.stringify({ from: url.includes('child') ? 'child' : 'parent' })).buffer
+      }));
+
+      const collection = parseYaml(yaml);
+      const runtimeVariables: Record<string, string | number> = {};
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0],
+        collection,
+        runtimeVariables,
+        timeout: 30000
+      });
+
+      expect(response.status).toBe(200);
+      expect(runtimeVariables.ranChild).toBe('yes'); // Child's own pre-request script ran, sharing the variable store
+      expect(runtimeVariables.childStatus).toBe(200); // the caller captured Child's response
+      expect(runtimeVariables.childData).toBe('{"from":"child"}');
+      // Only the documented response fields are surfaced — no dataBuffer/base64Data/testResults/warnings leak.
+      expect(runtimeVariables.childKeys).toBe('data,headers,status,statusText');
+
+      global.fetch = originalFetch;
+    });
+
+    it('bru.runRequest reports a self-cycle and an invalid path as a resolved { message } (never an infinite loop)', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "runRequest errors"
+items:
+  - name: "Self"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/self"
+    scripts:
+      tests: |
+        const cycle = await bru.runRequest('Self');
+        bru.setVar('cycleError', cycle.message);
+        const bad = await bru.runRequest('Nope');
+        bru.setVar('pathError', bad.message);
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/self',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const runtimeVariables: Record<string, string> = {};
+      await new RequestRunner().runRequest({ item: collection.items[0], collection, runtimeVariables, timeout: 30000 });
+
+      expect(runtimeVariables.cycleError).toContain('circular reference');
+      expect(runtimeVariables.pathError).toContain('invalid request path');
+
+      global.fetch = originalFetch;
+    });
+
+    it('bru.runRequest surfaces a failed sub-request as a resolved { message } (matching the desktop app)', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "runRequest failure"
+items:
+  - name: "Parent"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/parent"
+    scripts:
+      tests: |
+        const r = await bru.runRequest('Child');
+        bru.setVar('outcome', r && r.message ? ('message:' + r.message) : ('resolved:' + JSON.stringify(r)));
+  - name: "Child"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/child"
+    scripts:
+      preRequest: |
+        throw new Error('child pre-request failed');
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/parent',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const runtimeVariables: Record<string, string> = {};
+      await new RequestRunner().runRequest({ item: collection.items[0], collection, runtimeVariables, timeout: 30000 });
+
+      expect(runtimeVariables.outcome).toContain('message:');
+      expect(runtimeVariables.outcome).toContain('child pre-request failed');
+
+      global.fetch = originalFetch;
+    });
+
+    it('setNextRequest is handled (warns, never a silent no-op) across every phase and both call sites, de-duplicated', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "setNextRequest"
+items:
+  - name: "Req"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/data"
+    scripts:
+      preRequest: |
+        bru.setNextRequest('Login');
+      postResponse: |
+        bru.runner.setNextRequest('Login');
+      tests: |
+        bru.setNextRequest(null);
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const response = await new RequestRunner().runRequest({ item: collection.items[0], collection, timeout: 30000 });
+      const warnings = response.warnings ?? [];
+
+      expect(warnings).toContain('bru.setNextRequest is not currently supported in the Bruno playground. Please use the Bruno desktop app.');
+      expect(warnings).toContain('bru.runner.setNextRequest is not currently supported in the Bruno playground. Please use the Bruno desktop app.');
+      // Called in both the pre-request and tests phases (with a name and with null) → one de-duplicated warning.
+      expect(warnings.filter((w) => w.startsWith('bru.setNextRequest '))).toHaveLength(1);
+      expect(response.status).toBe(200);
+
+      global.fetch = originalFetch;
+    });
+
+    it('setNextRequest warns for every argument form and the warning survives a later pre-request error', async () => {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "setNextRequest edges"
+items:
+  - name: "Req"
+    type: "http"
+    method: "GET"
+    url: "https://api.example.com/data"
+    scripts:
+      preRequest: |
+        bru.setNextRequest('a');
+        bru.setNextRequest();
+        bru.setNextRequest(null);
+        bru.setNextRequest(42);
+        throw new Error('boom after setNextRequest');
+`;
+      global.fetch = vi.fn().mockResolvedValue({
+        status: 200,
+        statusText: 'OK',
+        url: 'https://api.example.com/data',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+
+      const collection = parseYaml(yaml);
+      const response = await new RequestRunner().runRequest({ item: collection.items[0], collection, timeout: 30000 });
+
+      // The pre-request threw, so the request never sent — the warning must still be surfaced.
+      expect(response.error).toContain('boom after setNextRequest');
+      const warnings = response.warnings ?? [];
+      expect(warnings).toContain('bru.setNextRequest is not currently supported in the Bruno playground. Please use the Bruno desktop app.');
+      // name, no-arg, null and a number all warn, de-duplicated to a single message.
+      expect(warnings.filter((w) => w.startsWith('bru.setNextRequest '))).toHaveLength(1);
 
       global.fetch = originalFetch;
     });

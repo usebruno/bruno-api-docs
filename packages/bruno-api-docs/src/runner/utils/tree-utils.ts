@@ -54,6 +54,24 @@ export const getTreePathFromCollectionToItem = (
   return path.slice(0, -1);
 };
 
+export const findItemByPath = (collection: OpenCollection, requestPath: string): Item | null => {
+  if (typeof requestPath !== 'string') return null;
+  const normalized = requestPath.trim().replace(/^\/+/, '').replace(/\.(bru|ya?ml)$/i, '');
+  const segments = normalized.split('/').map((segment) => segment.trim()).filter(Boolean);
+  if (!segments.length) return null;
+
+  const walk = (items: Item[] | undefined, [head, ...rest]: string[]): Item | null => {
+    if (!items) return null;
+    if (!rest.length) {
+      return items.find((item) => !isFolder(item) && getItemName(item) === head) ?? null;
+    }
+    const folder = items.find((item) => isFolder(item) && getItemName(item) === head);
+    return folder ? walk((folder as Folder).items, rest) : null;
+  };
+
+  return walk(collection.items, segments);
+};
+
 /**
  * Check if two HTTP requests are the same (for finding items in tree)
  */

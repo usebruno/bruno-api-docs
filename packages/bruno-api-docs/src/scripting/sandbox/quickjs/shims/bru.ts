@@ -1,159 +1,171 @@
+import type { QuickJSContext } from 'quickjs-emscripten';
 import { cleanJson } from '../../../utils/common';
 import { marshallToVm } from '../utils';
+import { createShimHelpers } from './helpers';
+import type Bru from '../../../utils/bru';
 
-const addBruShimToContext = (vm: any, bru: any) => {
+const messageOf = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+
+const addBruShimToContext = (vm: QuickJSContext, bru: Bru) => {
+  const { setMethod } = createShimHelpers(vm);
   const bruObject = vm.newObject();
-  const bruRunnerObject = vm.newObject();
 
-  const cwd = vm.newFunction('cwd', function () {
-    return marshallToVm(bru.cwd(), vm);
+  setMethod(bruObject, 'cwd', () => bru.cwd());
+  setMethod(bruObject, 'getEnvName', () => bru.getEnvName());
+  setMethod(bruObject, 'getCollectionName', () => bru.getCollectionName());
+  setMethod(bruObject, 'interpolate', (str) => bru.interpolate(str));
+  setMethod(bruObject, 'isSafeMode', () => bru.isSafeMode());
+  setMethod(bruObject, 'disableParsingResponseJson', () => bru.disableParsingResponseJson());
+  setMethod(bruObject, 'getProcessEnv', () => bru.getProcessEnv());
+
+  setMethod(bruObject, 'hasEnvVar', (key) => bru.hasEnvVar(key as string));
+  setMethod(bruObject, 'getEnvVar', (key) => bru.getEnvVar(key as string));
+  setMethod(bruObject, 'setEnvVar', (key, value) => bru.setEnvVar(key as string, value));
+  setMethod(bruObject, 'deleteEnvVar', (key) => bru.deleteEnvVar(key as string));
+  setMethod(bruObject, 'getAllEnvVars', () => bru.getAllEnvVars());
+  setMethod(bruObject, 'deleteAllEnvVars', () => bru.deleteAllEnvVars());
+
+  setMethod(bruObject, 'hasGlobalEnvVar', () => bru.hasGlobalEnvVar());
+  setMethod(bruObject, 'getGlobalEnvVar', () => bru.getGlobalEnvVar());
+  setMethod(bruObject, 'setGlobalEnvVar', () => bru.setGlobalEnvVar());
+  setMethod(bruObject, 'deleteGlobalEnvVar', () => bru.deleteGlobalEnvVar());
+  setMethod(bruObject, 'getAllGlobalEnvVars', () => bru.getAllGlobalEnvVars());
+  setMethod(bruObject, 'deleteAllGlobalEnvVars', () => bru.deleteAllGlobalEnvVars());
+
+  setMethod(bruObject, 'hasVar', (key) => bru.hasVar(key as string));
+  setMethod(bruObject, 'getVar', (key) => bru.getVar(key as string));
+  setMethod(bruObject, 'setVar', (key, value) => bru.setVar(key as string, value));
+  setMethod(bruObject, 'deleteVar', (key) => bru.deleteVar(key as string));
+  setMethod(bruObject, 'deleteAllVars', () => bru.deleteAllVars());
+  setMethod(bruObject, 'getAllVars', () => bru.getAllVars());
+
+  setMethod(bruObject, 'getCollectionVar', (key) => bru.getCollectionVar(key as string));
+  setMethod(bruObject, 'setCollectionVar', (key, value) => bru.setCollectionVar(key as string, value));
+  setMethod(bruObject, 'hasCollectionVar', (key) => bru.hasCollectionVar(key as string));
+  setMethod(bruObject, 'deleteCollectionVar', (key) => bru.deleteCollectionVar(key as string));
+  setMethod(bruObject, 'deleteAllCollectionVars', () => bru.deleteAllCollectionVars());
+  setMethod(bruObject, 'getAllCollectionVars', () => bru.getAllCollectionVars());
+
+  setMethod(bruObject, 'getFolderVar', (key) => bru.getFolderVar(key as string));
+  setMethod(bruObject, 'getRequestVar', (key) => bru.getRequestVar(key as string));
+  setMethod(bruObject, 'getSecretVar', (key) => bru.getSecretVar(key as string));
+
+  setMethod(bruObject, 'visualize', () => bru.visualize());
+  setMethod(bruObject, 'clearVisualizations', () => bru.clearVisualizations());
+  setMethod(bruObject, 'getOauth2CredentialVar', () => bru.getOauth2CredentialVar());
+  setMethod(bruObject, 'resetOauth2Credential', () => bru.resetOauth2Credential());
+  setMethod(bruObject, 'setNextRequest', () => bru.setNextRequest());
+
+  const utilsObj = vm.newObject();
+  setMethod(utilsObj, 'minifyJson', (json) => bru.utils.minifyJson(json));
+  setMethod(utilsObj, 'minifyXml', (xml) => bru.utils.minifyXml(xml));
+  vm.setProp(bruObject, 'utils', utilsObj);
+  utilsObj.dispose();
+
+  const runnerObj = vm.newObject();
+  setMethod(runnerObj, 'setNextRequest', () => bru.runner.setNextRequest());
+  setMethod(runnerObj, 'skipRequest', () => bru.runner.skipRequest());
+  setMethod(runnerObj, 'stopExecution', () => bru.runner.stopExecution());
+
+  const buildIterationData = () => {
+    const obj = vm.newObject();
+    for (const name of Object.keys(bru.runner.iterationData)) {
+      setMethod(obj, name, () => bru.runner.iterationData[name]());
+    }
+    return obj;
+  };
+
+  vm.defineProp(runnerObj, 'iterationData', {
+    enumerable: true,
+    get: () => {
+      bru.warnUnsupported('bru.runner.iterationData');
+      return buildIterationData();
+    }
   });
-  vm.setProp(bruObject, 'cwd', cwd);
-  cwd.dispose();
-
-  const getEnvName = vm.newFunction('getEnvName', function () {
-    return marshallToVm(bru.getEnvName(), vm);
+  vm.defineProp(runnerObj, 'iterationIndex', {
+    enumerable: true,
+    get: () => {
+      bru.warnUnsupported('bru.runner.iterationIndex');
+      return vm.undefined;
+    }
   });
-  vm.setProp(bruObject, 'getEnvName', getEnvName);
-  getEnvName.dispose();
-
-  const getCollectionName = vm.newFunction('getCollectionName', function () {
-    return marshallToVm(bru.getCollectionName(), vm);
+  vm.defineProp(runnerObj, 'totalIterations', {
+    enumerable: true,
+    get: () => {
+      bru.warnUnsupported('bru.runner.totalIterations');
+      return vm.undefined;
+    }
   });
-  vm.setProp(bruObject, 'getCollectionName', getCollectionName);
-  getCollectionName.dispose();
 
-  const interpolate = vm.newFunction('interpolate', function (str: any) {
-    return marshallToVm(bru.interpolate(vm.dump(str)), vm);
-  });
-  vm.setProp(bruObject, 'interpolate', interpolate);
-  interpolate.dispose();
+  vm.setProp(bruObject, 'runner', runnerObj);
+  runnerObj.dispose();
 
-  const hasEnvVar = vm.newFunction('hasEnvVar', function (key: any) {
-    return marshallToVm(bru.hasEnvVar(vm.dump(key)), vm);
-  });
-  vm.setProp(bruObject, 'hasEnvVar', hasEnvVar);
-  hasEnvVar.dispose();
+  const cookiesObj = vm.newObject();
+  for (const name of Object.keys(bru.cookies)) {
+    setMethod(cookiesObj, name, () => bru.cookies[name]());
+  }
+  vm.setProp(bruObject, 'cookies', cookiesObj);
+  cookiesObj.dispose();
 
-  const getEnvVar = vm.newFunction('getEnvVar', function (key: any) {
-    return marshallToVm(bru.getEnvVar(vm.dump(key)), vm);
-  });
-  vm.setProp(bruObject, 'getEnvVar', getEnvVar);
-  getEnvVar.dispose();
+  if (bru.getTestResults) {
+    const getTestResults = bru.getTestResults.bind(bru);
+    const fn = vm.newFunction('getTestResults', () => {
+      const promise = vm.newPromise();
+      getTestResults()
+        .then((results) => promise.resolve(marshallToVm(cleanJson(results), vm)))
+        .catch((err) => promise.resolve(marshallToVm(cleanJson({ message: messageOf(err) }), vm)));
+      promise.settled.then(vm.runtime.executePendingJobs);
+      return promise.handle;
+    });
+    fn.consume((handle) => vm.setProp(bruObject, 'getTestResults', handle));
+  }
 
-  const setEnvVar = vm.newFunction('setEnvVar', function (key: any, value: any, options: any = {}) {
-    bru.setEnvVar(vm.dump(key), vm.dump(value), vm.dump(options));
-  });
-  vm.setProp(bruObject, 'setEnvVar', setEnvVar);
-  setEnvVar.dispose();
+  if (bru.getAssertionResults) {
+    const getAssertionResults = bru.getAssertionResults.bind(bru);
+    const fn = vm.newFunction('getAssertionResults', () => {
+      const promise = vm.newPromise();
+      getAssertionResults()
+        .then((results) => promise.resolve(marshallToVm(cleanJson(results), vm)))
+        .catch((err) => promise.resolve(marshallToVm(cleanJson({ message: messageOf(err) }), vm)));
+      promise.settled.then(vm.runtime.executePendingJobs);
+      return promise.handle;
+    });
+    fn.consume((handle) => vm.setProp(bruObject, 'getAssertionResults', handle));
+  }
 
-  const deleteEnvVar = vm.newFunction('deleteEnvVar', function (key: any) {
-    bru.deleteEnvVar(vm.dump(key));
-  });
-  vm.setProp(bruObject, 'deleteEnvVar', deleteEnvVar);
-  deleteEnvVar.dispose();
-
-  const getGlobalEnvVar = vm.newFunction('getGlobalEnvVar', function (key: any) {
-    return marshallToVm(bru.getGlobalEnvVar(vm.dump(key)), vm);
-  });
-  vm.setProp(bruObject, 'getGlobalEnvVar', getGlobalEnvVar);
-  getGlobalEnvVar.dispose();
-
-  const setGlobalEnvVar = vm.newFunction('setGlobalEnvVar', function (key: any, value: any) {
-    bru.setGlobalEnvVar(vm.dump(key), vm.dump(value));
-  });
-  vm.setProp(bruObject, 'setGlobalEnvVar', setGlobalEnvVar);
-  setGlobalEnvVar.dispose();
-
-  const hasVar = vm.newFunction('hasVar', function (key: any) {
-    return marshallToVm(bru.hasVar(vm.dump(key)), vm);
-  });
-  vm.setProp(bruObject, 'hasVar', hasVar);
-  hasVar.dispose();
-
-  const getVar = vm.newFunction('getVar', function (key: any) {
-    return marshallToVm(bru.getVar(vm.dump(key)), vm);
-  });
-  vm.setProp(bruObject, 'getVar', getVar);
-  getVar.dispose();
-
-  const setVar = vm.newFunction('setVar', function (key: any, value: any) {
-    bru.setVar(vm.dump(key), vm.dump(value));
-  });
-  vm.setProp(bruObject, 'setVar', setVar);
-  setVar.dispose();
-
-  const deleteVar = vm.newFunction('deleteVar', function (key: any) {
-    bru.deleteVar(vm.dump(key));
-  });
-  vm.setProp(bruObject, 'deleteVar', deleteVar);
-  deleteVar.dispose();
-
-  const deleteAllVars = vm.newFunction('deleteAllVars', function () {
-    bru.deleteAllVars();
-  });
-  vm.setProp(bruObject, 'deleteAllVars', deleteAllVars);
-  deleteAllVars.dispose();
-
-  const getTestResults = vm.newFunction('getTestResults', () => {
+  const sleep = vm.newFunction('sleep', (msHandle) => {
+    const ms = Number(vm.dump(msHandle)) || 0;
     const promise = vm.newPromise();
-    bru
-      .getTestResults()
-      .then((results: any) => {
-        promise.resolve(marshallToVm(cleanJson(results), vm));
-      })
-      .catch((err: any) => {
-        promise.resolve(
-          marshallToVm(
-            cleanJson({
-              message: err.message
-            }),
-            vm
-          )
-        );
-      });
+    bru.sleep(ms).then(() => promise.resolve(vm.undefined));
     promise.settled.then(vm.runtime.executePendingJobs);
     return promise.handle;
   });
-  getTestResults.consume((handle: any) => vm.setProp(bruObject, 'getTestResults', handle));
+  sleep.consume((handle) => vm.setProp(bruObject, 'sleep', handle));
 
-  const getAssertionResults = vm.newFunction('getAssertionResults', () => {
+  const sendRequest = vm.newFunction('sendRequest', (configHandle) => {
+    const config = vm.dump(configHandle);
     const promise = vm.newPromise();
-    bru
-      .getAssertionResults()
-      .then((results: any) => {
-        promise.resolve(marshallToVm(cleanJson(results), vm));
-      })
-      .catch((err: any) => {
-        promise.resolve(
-          marshallToVm(
-            cleanJson({
-              message: err.message
-            }),
-            vm
-          )
-        );
-      });
+    bru.sendRequest(config)
+      .then((result) => promise.resolve(marshallToVm(cleanJson(result), vm)))
+      .catch((err) => promise.reject(marshallToVm(cleanJson({ message: messageOf(err) }), vm)));
     promise.settled.then(vm.runtime.executePendingJobs);
     return promise.handle;
   });
-  getAssertionResults.consume((handle: any) => vm.setProp(bruObject, 'getAssertionResults', handle));
+  sendRequest.consume((handle) => vm.setProp(bruObject, 'sendRequest', handle));
 
-  const sleep = vm.newFunction('sleep', (timer: any) => {
-    const t = vm.getString(timer);
+  const runRequest = vm.newFunction('runRequest', (pathHandle) => {
+    const path = String(vm.dump(pathHandle) ?? '');
     const promise = vm.newPromise();
-    setTimeout(() => {
-      promise.resolve(vm.newString('slept'));
-    }, t);
+    bru.runRequest(path)
+      .then((result) => promise.resolve(marshallToVm(cleanJson(result), vm)))
+      .catch((err) => promise.resolve(marshallToVm(cleanJson({ message: messageOf(err) }), vm)));
     promise.settled.then(vm.runtime.executePendingJobs);
     return promise.handle;
   });
-  sleep.consume((handle: any) => vm.setProp(bruObject, 'sleep', handle));
+  runRequest.consume((handle) => vm.setProp(bruObject, 'runRequest', handle));
 
-  vm.setProp(bruObject, 'runner', bruRunnerObject);
   vm.setProp(vm.global, 'bru', bruObject);
   bruObject.dispose();
-  bruRunnerObject.dispose();
 };
 
 export default addBruShimToContext;

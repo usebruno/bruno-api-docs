@@ -46,13 +46,18 @@ export const createShimHelpers = (vm: QuickJSContext) => {
     ctxHandle !== undefined && vm.typeof(ctxHandle) !== 'undefined' ? ctxHandle : vm.undefined;
 
   const entryCallback = <R extends JsonValue>(fnHandle: QuickJSHandle, ctxHandle?: QuickJSHandle) =>
-    (header: HeaderEntry, index: number): R =>
-      callVmCallback(fnHandle, thisArgOf(ctxHandle), [marshallToVm(header, vm), marshallToVm(index, vm)]) as R;
+    (header: HeaderEntry, index: number, collection?: HeaderEntry[]): R =>
+      callVmCallback(fnHandle, thisArgOf(ctxHandle),
+        [marshallToVm(header, vm), marshallToVm(index, vm), marshallToVm(collection ?? [], vm)]) as R;
 
   const reduceCallback = (fnHandle: QuickJSHandle, ctxHandle?: QuickJSHandle) =>
-    (accumulator: JsonValue, header: HeaderEntry, index: number): JsonValue =>
-      callVmCallback(fnHandle, thisArgOf(ctxHandle),
-        [marshallToVm(accumulator, vm), marshallToVm(header, vm), marshallToVm(index, vm)]);
+    (accumulator: JsonValue, header: HeaderEntry, index: number, collection?: HeaderEntry[]): JsonValue =>
+      callVmCallback(fnHandle, thisArgOf(ctxHandle), [
+        marshallToVm(accumulator, vm),
+        marshallToVm(header, vm),
+        marshallToVm(index, vm),
+        marshallToVm(collection ?? [], vm)
+      ]);
 
   return {
     setValue,

@@ -61,7 +61,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   // A failed request (no HTTP response) renders a danger banner inside the
   // Response tab, keeping the same tab shell as a successful response.
   const renderErrorBanner = () => (
-    <div className="p-4">
+    <div className="pb-4">
       <ErrorBanner
         title={response.errorTitle || 'Request Failed'}
         message={response.error ?? ''}

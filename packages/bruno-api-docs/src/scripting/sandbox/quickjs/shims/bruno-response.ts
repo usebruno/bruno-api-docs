@@ -47,7 +47,13 @@ const addBrunoResponseShimToContext = (vm: QuickJSContext, res: CallableResponse
     setMethod(headerListObj, 'has', (name, value) =>
       hl.has(name as Parameters<typeof hl.has>[0], value as string | undefined));
     setMethod(headerListObj, 'indexOf', (item) => hl.indexOf(item as Parameters<typeof hl.indexOf>[0]));
-    setMethod(headerListObj, 'toObject', () => hl.toObject());
+    setMethod(headerListObj, 'toObject', (excludeDisabled, caseSensitive, multiValue, sanitizeKeys) =>
+      hl.toObject(
+        excludeDisabled as boolean | undefined,
+        caseSensitive as boolean | undefined,
+        multiValue as boolean | undefined,
+        sanitizeKeys as boolean | undefined
+      ));
     setMethod(headerListObj, 'toString', () => hl.toString());
     setMethod(headerListObj, 'toJSON', () => hl.toJSON());
 

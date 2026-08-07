@@ -222,4 +222,4 @@ export const FORMAT_ICONS: Record<ResponseBodyFormat, TablerIcon> = {
 
 // Width the actions block occupies when shown as buttons; the responsive tab bar uses it to
 // decide whether to expand the actions inline or collapse them into a menu.
-export const RESPONSE_ACTIONS_EXPANDED_WIDTH = 135;
+export const RESPONSE_ACTIONS_EXPANDED_WIDTH = 302;

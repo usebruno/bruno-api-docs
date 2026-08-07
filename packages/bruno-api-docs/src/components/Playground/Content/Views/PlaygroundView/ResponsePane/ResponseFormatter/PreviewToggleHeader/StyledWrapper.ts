@@ -4,9 +4,8 @@ export const StyledWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1.5rem;
-  min-width: 11.875rem;
-  padding: 0.25rem;
+  gap: 0.75rem;
+  padding: 0.35rem 0.625rem;
 
   .preview-toggle-label {
     font-size: 0.8125rem;
@@ -16,11 +15,11 @@ export const StyledWrapper = styled.div`
   .preview-toggle {
     position: relative;
     flex-shrink: 0;
-    width: 2.125rem;
-    height: 1.125rem;
+    width: 2rem;
+    height: 1rem;
     padding: 0;
     border: none;
-    border-radius: 0.5625rem;
+    border-radius: 1.5rem;
     cursor: pointer;
     background: var(--oc-background-surface2);
     transition: background 0.15s ease;
@@ -32,10 +31,10 @@ export const StyledWrapper = styled.div`
 
   .preview-toggle-knob {
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 0.875rem;
-    height: 0.875rem;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 0.75rem;
+    height: 0.75rem;
     border-radius: 50%;
     background: var(--oc-background-base);
     transition: left 0.15s ease;

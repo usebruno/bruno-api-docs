@@ -43,7 +43,10 @@ test.describe('Request page — GraphQL', () => {
     await expect(snippet).toContainText('query');
   });
 
-  test('shows the Execution Context section', async ({ graphqlRequestPage }) => {
-    await expect(graphqlRequestPage.section('Execution Context')).toBeVisible();
+  test('shows the Execution Context with the request variables and set-variable actions', async ({ graphqlRequestPage }) => {
+    const exec = graphqlRequestPage.section('Execution Context');
+    await expect(exec).toBeVisible();
+    await expect(exec).toContainText('countryCode');
+    await expect(exec).toContainText('countryName');
   });
 });

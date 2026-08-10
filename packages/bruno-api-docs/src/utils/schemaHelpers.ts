@@ -121,11 +121,16 @@ export const isWebSocketRequest = (item: OpenCollectionItem | null | undefined):
   return getItemType(item) === 'websocket';
 };
 
-// Check if an item is a request the docs viewer can't render (gRPC or WebSocket).
 export const isUnsupportedRequest = (
   item: OpenCollectionItem | null | undefined
 ): item is GrpcRequest | WebSocketRequest => {
   return isGrpcRequest(item) || isWebSocketRequest(item);
+};
+
+export const isPlaygroundUnsupported = (
+  item: OpenCollectionItem | null | undefined
+): item is GraphQLRequest | GrpcRequest | WebSocketRequest => {
+  return isGraphQLRequest(item) || isUnsupportedRequest(item);
 };
 
 /**

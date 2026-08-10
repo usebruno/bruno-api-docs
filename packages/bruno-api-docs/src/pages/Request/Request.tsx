@@ -15,7 +15,6 @@ import { EyeOffIcon } from '../../assets/icons';
 import { Section } from '../../components/Section/Section';
 import { RequestBody } from '../../components/Request/RequestBody/RequestBody';
 import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeBadge';
-import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTabs';
 import { Examples } from '../../components/Examples/Examples';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
 import { UnsupportedRequest } from '../../components/UnsupportedRequest/UnsupportedRequest';
@@ -52,16 +51,6 @@ const RequestContent: React.FC<RequestContentProps> = ({
   const hasBody = bodyView.render !== 'none';
   const bodyContentType = hasBody ? bodyView.contentTypeLabel : undefined;
 
-  const codeSnippet = (
-    <CodeSnippetTabs
-      method={method}
-      url={data.url}
-      headers={data.effectiveHeaders}
-      body={body}
-      auth={data.effectiveAuth}
-    />
-  );
-
   const examplesSection = examples.length > 0 ? (
     <Section label="Examples" testId="request-section-examples" className="request-fullwidth">
       <Examples examples={examples} method={method} url={data.url} highlightedIndex={highlightedExampleIndex} />
@@ -75,7 +64,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
       badgeLabel={method}
       hasConfigContent={hasBody}
       emptyConfigSubheading="This request has no parameters, body, headers, or authentication configured. These may be inherited from the collection or folder."
-      codeSnippet={codeSnippet}
+      snippetBody={body}
       afterColumns={examplesSection}
       onTryClick={onTryClick}
       onBreadcrumbClick={onBreadcrumbClick}

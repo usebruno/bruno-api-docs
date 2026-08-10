@@ -11,7 +11,6 @@ import {
 import { buildGraphqlSnippetBody } from '../../utils/graphql';
 import { Section } from '../../components/Section/Section';
 import { Code } from '../../components/Code/Code';
-import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTabs';
 import { useRequestPageData } from './useRequestPageData';
 import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from './RequestPageLayout';
 
@@ -39,15 +38,6 @@ export const GraphqlRequest: React.FC<GraphqlRequestProps> = ({
   const hasVariables = variables.trim().length > 0;
 
   const snippetBody = useMemo(() => buildGraphqlSnippetBody(query, variables), [query, variables]);
-  const codeSnippet = (
-    <CodeSnippetTabs
-      method={method}
-      url={data.url}
-      headers={data.effectiveHeaders}
-      body={snippetBody}
-      auth={data.effectiveAuth}
-    />
-  );
 
   return (
     <RequestPageLayout
@@ -56,7 +46,7 @@ export const GraphqlRequest: React.FC<GraphqlRequestProps> = ({
       badgeLabel={badgeLabel}
       hasConfigContent={hasQuery || hasVariables}
       emptyConfigSubheading="This request has no query, variables, headers, or authentication configured. These may be inherited from the collection or folder."
-      codeSnippet={codeSnippet}
+      snippetBody={snippetBody}
       onBreadcrumbClick={onBreadcrumbClick}
       testId={testId}
     >

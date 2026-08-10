@@ -5,16 +5,11 @@ export const buildGraphqlSnippetBody = (query: string, variables: string): HttpR
   const trimmedQuery = (query ?? '').trim();
   if (!trimmedQuery) return undefined;
 
-  const queryField = `"query":${JSON.stringify(trimmedQuery)}`;
+  const fields = [`"query":${JSON.stringify(trimmedQuery)}`];
   const trimmedVariables = (variables ?? '').trim();
-  let variablesField = '';
   if (trimmedVariables) {
-    try {
-      variablesField = `,"variables":${JSON.stringify(JSON.parse(trimmedVariables))}`;
-    } catch {
-      variablesField = '';
-    }
+    fields.push(`"variables":${trimmedVariables}`);
   }
 
-  return { type: BODY_TYPES.JSON, data: `{${queryField}${variablesField}}` } as HttpRequestBody;
+  return { type: BODY_TYPES.JSON, data: `{${fields.join(',')}}` } as HttpRequestBody;
 };

@@ -15,6 +15,8 @@ import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeB
 import { PropertyTable } from '../../components/PropertyTable/PropertyTable';
 import { InheritedAuthBadge } from '../../components/InheritedAuthBadge/InheritedAuthBadge';
 import { ExecutionContext } from '../../components/ExecutionContext/ExecutionContext';
+import { CodeSnippetTabs } from '../../components/CodeSnippetTabs/CodeSnippetTabs';
+import type { HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { RequestPageData } from './useRequestPageData';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -27,7 +29,7 @@ interface RequestPageLayoutProps {
   badgeLabel: string;
   hasConfigContent: boolean;
   emptyConfigSubheading: string;
-  codeSnippet: React.ReactNode;
+  snippetBody?: HttpRequestBody | HttpRequestBodyVariant[];
   afterColumns?: React.ReactNode;
   onTryClick?: () => void;
   onBreadcrumbClick?: (uuid: string) => void;
@@ -41,7 +43,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
   badgeLabel,
   hasConfigContent,
   emptyConfigSubheading,
-  codeSnippet,
+  snippetBody,
   afterColumns,
   onTryClick,
   onBreadcrumbClick,
@@ -56,6 +58,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
     queryParams,
     ownAuth,
     effectiveAuth,
+    effectiveHeaders,
     showAuth,
     authSource,
     inheritedHeaders,
@@ -152,7 +155,15 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
           </div>
 
           <div className="request-col-right">
-            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>{codeSnippet}</Section>
+            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>
+              <CodeSnippetTabs
+                method={method}
+                url={url}
+                headers={effectiveHeaders}
+                body={snippetBody}
+                auth={effectiveAuth}
+              />
+            </Section>
           </div>
         </div>
 

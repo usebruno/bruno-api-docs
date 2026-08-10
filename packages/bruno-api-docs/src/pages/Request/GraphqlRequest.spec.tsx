@@ -114,6 +114,8 @@ describe('GraphQL request page', () => {
     expect(exec.text).toContain('countryCode');
     expect(exec.text).toContain('countryName');
     expect(exec.text).toContain('the resolved country name');
+    expect(queryByTestId(root, 'execution-context-tabs-tab-asserts')).not.toBeNull();
+    expect(queryByTestId(root, 'execution-context-tabs-tab-tests')).not.toBeNull();
   });
 
   it('shows the config empty state when a graphql request has no query, headers or auth', () => {
@@ -131,5 +133,20 @@ describe('GraphQL request page', () => {
     expect(queryByTestId(root, 'request-section-query')).toBeNull();
     expect(queryByTestId(root, 'request-config-empty')).not.toBeNull();
     expect(queryByTestId(root, 'request-section-code-snippet')).not.toBeNull();
+  });
+
+  it('renders the Params section when the graphql request declares params', () => {
+    const withParams = {
+      info: { name: 'GQL with params', type: 'graphql' },
+      graphql: { method: 'POST', url: '/graphql', params: [{ name: 'apiVersion', value: 'v2', type: 'query' }] }
+    } as unknown as GraphQLRequest;
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <GraphqlRequest item={withParams} ancestry={ancestry} collection={collection} onBreadcrumbClick={() => {}} />
+      </MemoryRouter>
+    );
+
+    const params = getByTestId(root, 'request-section-params');
+    expect(params.text).toContain('apiVersion');
   });
 });

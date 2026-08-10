@@ -14,17 +14,17 @@ describe('buildGraphqlSnippetBody', () => {
     });
   });
 
-  it('embeds parsed variables as an object alongside the query', () => {
+  it('embeds the variables object alongside the query', () => {
     expect(buildGraphqlSnippetBody('query { me }', '{"id":"1"}')).toEqual({
       type: 'json',
       data: JSON.stringify({ query: 'query { me }', variables: { id: '1' } })
     });
   });
 
-  it('omits variables when they are not valid JSON', () => {
-    expect(buildGraphqlSnippetBody('query { me }', '{ not json')).toEqual({
+  it('embeds variables verbatim so unquoted templates survive (matching the Variables section and the HTTP body path)', () => {
+    expect(buildGraphqlSnippetBody('query { me }', '{ "first": {{pageSize}} }')).toEqual({
       type: 'json',
-      data: JSON.stringify({ query: 'query { me }' })
+      data: '{"query":"query { me }","variables":{ "first": {{pageSize}} }}'
     });
   });
 

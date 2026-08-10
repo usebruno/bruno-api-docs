@@ -133,6 +133,8 @@ describe('ScriptRuntime', () => {
         expect(found.value).to.eql('abc');
         const tagged = res.headerList.map(function (h) { return this.p + h.key; }, { p: '#' });
         expect(tagged).to.include('#x-token');
+        const counts = res.headerList.map(function (h, i, all) { return all.length; });
+        expect(counts[0]).to.eql(2);
         const joined = res.headerList.reduce(function (acc, h) { return acc + h.key + ';'; }, '');
         expect(joined).to.match(/x-token;/);
       });
@@ -256,5 +258,64 @@ describe('ScriptRuntime', () => {
       'req.setMaxRedirects is not currently supported in the Bruno playground. Please use the Bruno desktop app.',
       'req.onFail is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
     ]);
+  });
+
+  it('runs the full bru API inside the QuickJS sandbox — stores, interpolate, utils, isSafeMode, and out-of-scope warnings', async () => {
+    const runtime = new ScriptRuntime();
+    const warnings: string[] = [];
+    const runtimeVariables: Record<string, string> = {};
+
+    const script = `
+      await test('bru variable stores round-trip through the sandbox', () => {
+        bru.setVar('token', 'abc');
+        expect(bru.getVar('token')).to.equal('abc');
+        expect(bru.hasVar('token')).to.equal(true);
+        bru.setCollectionVar('cv', '1');
+        expect(bru.getCollectionVar('cv')).to.equal('1');
+        expect(bru.getAllVars().token).to.equal('abc');
+      });
+      await test('bru.interpolate resolves {{var}} using the runtime store', () => {
+        bru.setVar('host', 'example.com');
+        expect(bru.interpolate('https://{{host}}/api')).to.equal('https://example.com/api');
+      });
+      await test('bru.utils.minifyJson and bru.isSafeMode run in the sandbox', () => {
+        expect(bru.utils.minifyJson('{ "a": 1 }')).to.equal('{"a":1}');
+        expect(bru.isSafeMode()).to.equal(true);
+      });
+
+      bru.visualize('html', { content: 'x' });
+      bru.runner.skipRequest();
+      bru.runner.iterationIndex;
+      bru.runner.totalIterations;
+      bru.runner.iterationData.get('key');
+      bru.getAllGlobalEnvVars();
+      bru.cwd();
+      bru.getProcessEnv('X');
+      bru.cookies.get('sid');
+      bru.getOauth2CredentialVar('k');
+    `;
+
+    const bru = await runtime.runScript({
+      script,
+      variables: { runtimeVariables },
+      collectionName: 'C',
+      collectionPath: '/c',
+      warnings
+    });
+
+    if (!bru.getTestResults) throw new Error('getTestResults was not attached to bru');
+    const results = await bru.getTestResults();
+    expect(results.summary.failed).toBe(0);
+    expect(results.summary.total).toBe(3);
+
+    expect(runtimeVariables.token).toBe('abc');
+    const unsupported = (api: string) => `${api} is not currently supported in the Bruno playground. Please use the Bruno desktop app.`;
+    for (const api of [
+      'bru.visualize', 'bru.runner.skipRequest', 'bru.runner.iterationIndex', 'bru.runner.totalIterations',
+      'bru.runner.iterationData', 'bru.runner.iterationData.get', 'bru.getAllGlobalEnvVars', 'bru.cwd',
+      'bru.getProcessEnv', 'bru.cookies.get', 'bru.getOauth2CredentialVar'
+    ]) {
+      expect(warnings).toContain(unsupported(api));
+    }
   });
 });

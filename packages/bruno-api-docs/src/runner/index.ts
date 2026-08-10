@@ -4,13 +4,33 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Buffer } from 'buffer';
 import { RequestExecutor } from './RequestExecutor';
 import ScriptRuntime from '../scripting/runtime/script-runtime';
+import type { RunRequestCallback } from '../scripting/utils/bru';
 import AssertRuntime, { type AssertionResult } from '../scripting/runtime/assert-runtime';
-import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars } from './utils';
+import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
 import { getCollectionFolderRequestVariables } from './utils/variable-merger';
 import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '../utils/variableDataType';
 import { externalSecretValues, type ExternalSecretEntry } from '../utils/variableResolution';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
-import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '../utils/schemaHelpers';
+import {
+  getRequestScripts, getRequestAssertions, scriptsArrayToObject,
+  isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl
+} from '../utils/schemaHelpers';
+import { getItemUuid } from '../utils/itemUtils';
+
+const MAX_RUN_REQUEST_DEPTH = 25;
+
+interface RunContext {
+  collection: OpenCollectionCollection;
+  environment?: Environment;
+  environmentVariables: Record<string, any>;
+  runtimeVariables: Record<string, any>;
+  processEnvVars: Record<string, any>;
+  timeout: number;
+  warnings: string[];
+}
+
+const requestKey = (item: HttpRequest): string =>
+  getItemUuid(item) || `${getItemName(item) ?? ''}|${getHttpMethod(item)}|${getRequestUrl(item)}`;
 
 interface DeclaredEnvironmentVariable {
   name?: string;
@@ -98,13 +118,63 @@ export class RequestRunner {
 
   async runRequest(options: RunRequestOptions): Promise<RunRequestResponse> {
     const { item, collection, environment, runtimeVariables = {}, timeout = 30000 } = options;
+    const context: RunContext = {
+      collection,
+      environment,
+      environmentVariables: this.getEnvironmentVariables(environment),
+      processEnvVars: typeof process !== 'undefined' && process.env ? process.env : {},
+      runtimeVariables,
+      timeout,
+      warnings: []
+    };
+    return this.runRequestWithContext(item, context, 0, []);
+  }
+
+  private makeNestedRunRequest(
+    context: RunContext,
+    depth: number,
+    chain: string[],
+    currentItem: HttpRequest
+  ): RunRequestCallback {
+    return async (rawPath: string) => {
+      if (depth >= MAX_RUN_REQUEST_DEPTH) {
+        throw new Error(`bru.runRequest: exceeded the maximum nesting depth of ${MAX_RUN_REQUEST_DEPTH}`);
+      }
+      const target = findItemByPath(context.collection, rawPath);
+      if (!target) {
+        throw new Error(`bru.runRequest: invalid request path - ${rawPath}`);
+      }
+      if (!isHttpRequest(target)) {
+        throw new Error(`bru.runRequest does not support ${getItemType(target) || 'non-http'} requests`);
+      }
+      const nextChain = [...chain, requestKey(currentItem)];
+      if (nextChain.includes(requestKey(target))) {
+        throw new Error(`bru.runRequest: circular reference detected for "${rawPath}"`);
+      }
+
+      const response = await this.runRequestWithContext(target, context, depth + 1, nextChain);
+      if (response.error) {
+        throw new Error(response.error);
+      }
+      return {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        data: response.data
+      };
+    };
+  }
+
+  private async runRequestWithContext(
+    item: HttpRequest,
+    context: RunContext,
+    depth: number,
+    chain: string[]
+  ): Promise<RunRequestResponse> {
+    const { collection, environmentVariables, runtimeVariables, processEnvVars, timeout, warnings } = context;
     const requestId = this.generateRequestId();
-    const warnings: string[] = [];
 
     try {
-      const environmentVariables = this.getEnvironmentVariables(environment);
-      const processEnvVars = typeof process !== 'undefined' && process.env ? process.env : {};
-
       const processedRequest = await this.preprocessRequest(item, collection);
       (processedRequest as { __bruno__executionMode?: string }).__bruno__executionMode = 'standalone';
 
@@ -119,6 +189,8 @@ export class RequestRunner {
         requestVariables
       };
 
+      const runRequest = this.makeNestedRunRequest(context, depth, chain, item);
+
       // Get scripts in object format for easier access
       const scriptsObj = scriptsArrayToObject(getRequestScripts(processedRequest));
       const assertions = getRequestAssertions(processedRequest);
@@ -132,7 +204,8 @@ export class RequestRunner {
             variables: allVariables,
             collectionName: collection.info?.name || '',
             collectionPath: '',
-            warnings
+            warnings,
+            runRequest
           });
         } catch (scriptError) {
           return {
@@ -157,7 +230,8 @@ export class RequestRunner {
             variables: allVariables,
             collectionName: collection.info?.name || '',
             collectionPath: '',
-            warnings
+            warnings,
+            runRequest
           });
         } catch (scriptError) {
           // Don't fail the request for post-response script errors, just log them
@@ -194,7 +268,8 @@ export class RequestRunner {
             collectionName: collection.info?.name || '',
             collectionPath: '',
             assertionResults,
-            warnings
+            warnings,
+            runRequest
           });
 
           // Capture test results and assertion results from bru object

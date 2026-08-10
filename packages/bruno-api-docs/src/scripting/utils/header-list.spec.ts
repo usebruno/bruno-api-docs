@@ -44,6 +44,12 @@ describe('createResponseHeaderList (read-only response headers)', () => {
     expect(h.reduce(function (this: { sep: string }, acc, x) { return acc + this.sep + x.key; }, '', { sep: '-' })).toBe('-a-b');
   });
 
+  it('passes the whole collection as the last iterator argument (map/each 3rd, reduce 4th), like native Array', () => {
+    const h = make({ a: '1', b: '2' });
+    expect(h.map((_x, _i, all) => all.length)).toEqual([2, 2]);
+    expect(h.reduce((acc, _x, _i, all) => acc + all.length, 0)).toBe(4);
+  });
+
   it('throws a clear read-only error from every mutating method (add, upsert, remove, clear, populate, repopulate, assimilate) because response headers cannot be changed', () => {
     const h = make({ a: '1' });
     expect(() => h.add({ key: 'x', value: 'y' })).toThrow(/read-only/);

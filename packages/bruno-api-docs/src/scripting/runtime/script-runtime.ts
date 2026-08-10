@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import Bru from '../utils/bru';
+import Bru, { type RunRequestCallback } from '../utils/bru';
 import BrunoRequest from '../utils/bruno-request';
 import BrunoResponse from '../utils/bruno-response';
 import { executeQuickJsVmAsync } from '../sandbox/quickjs';
@@ -15,6 +15,7 @@ interface RunScriptOptions {
   variables?: any;
   assertionResults?: AssertionResult[];
   warnings?: string[];
+  runRequest?: RunRequestCallback;
 }
 
 class ScriptRuntime {
@@ -28,9 +29,10 @@ class ScriptRuntime {
     collectionPath,
     variables,
     assertionResults,
-    warnings
+    warnings,
+    runRequest
   }: RunScriptOptions): Promise<Bru> {
-    const bru = new Bru({ collectionPath, collectionName, variables });
+    const bru = new Bru({ collectionPath, collectionName, variables, warnings, runRequest, request });
     let req, res;
     if (request) {
       req = new BrunoRequest(request, warnings);

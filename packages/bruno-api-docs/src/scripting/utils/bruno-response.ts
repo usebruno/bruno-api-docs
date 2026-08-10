@@ -19,6 +19,7 @@ class BrunoResponse {
   responseTime: number | null;
   url: string | null;
   headerList: HeaderList;
+  private bodyReplaced: boolean;
 
   constructor(res: ResponseData | null | undefined) {
     this.res = res ?? null;
@@ -28,10 +29,11 @@ class BrunoResponse {
     this.body = res ? (res.data ?? null) : null;
     this.responseTime = res ? (res.duration ?? null) : null;
     this.url = res?.url ?? null;
+    this.bodyReplaced = false;
 
     this.headerList = createResponseHeaderList(() => this.res?.headers);
 
-    const callable = (path: string, ...fns: QueryArg[]): JsonValue | undefined => get(this.body, path, ...fns);
+    const callable = (path: string, ...fns: QueryArg[]): JsonValue | undefined => get(this.getBody(), path, ...fns);
     Object.setPrototypeOf(callable, this.constructor.prototype);
     return Object.assign(callable, this);
   }
@@ -45,12 +47,10 @@ class BrunoResponse {
   }
 
   getHeader(name: string) {
-    const headers = this.res?.headers;
-    if (typeof name !== 'string' || !headers) {
+    if (typeof name !== 'string') {
       return null;
     }
-    const match = Object.keys(headers).find((k) => k.toLowerCase() === name.toLowerCase());
-    return match ? headers[match] : null;
+    return this.headerList.get(name) ?? null;
   }
 
   getHeaders() {
@@ -76,19 +76,9 @@ class BrunoResponse {
     }
 
     const clonedData = cloneDeep(data);
-
-    let dataBuffer: Buffer;
-    if (clonedData === null || clonedData === undefined) {
-      dataBuffer = Buffer.from('');
-    } else if (typeof clonedData === 'string') {
-      dataBuffer = Buffer.from(clonedData);
-    } else {
-      dataBuffer = Buffer.from(JSON.stringify(clonedData));
-    }
-
     res.data = clonedData;
     this.body = clonedData;
-    res.dataBuffer = dataBuffer;
+    this.bodyReplaced = true;
   }
 
   getSize() {
@@ -98,17 +88,21 @@ class BrunoResponse {
     }
 
     const { data, dataBuffer, headers } = res;
-    let bodySize = 0;
+    const byteLengthOf = (value: JsonValue): number =>
+      Buffer.byteLength(typeof value === 'string' ? value : JSON.stringify(value));
 
-    if (Buffer.isBuffer(dataBuffer)) {
+    let bodySize = 0;
+    if (this.bodyReplaced) {
+      bodySize = data != null ? byteLengthOf(data) : 0;
+    } else if (Buffer.isBuffer(dataBuffer)) {
       bodySize = dataBuffer.length;
     } else {
-      const contentLength = headers?.['content-length'] ?? headers?.['Content-Length'];
-      if (contentLength != null && !isNaN(Number(contentLength))) {
-        bodySize = parseInt(String(contentLength), 10);
+      const contentLength = this.headerList.get('content-length');
+      const parsedLength = contentLength != null ? parseInt(String(contentLength), 10) : NaN;
+      if (!isNaN(parsedLength)) {
+        bodySize = parsedLength;
       } else if (data != null) {
-        const raw = typeof data === 'string' ? data : JSON.stringify(data);
-        bodySize = Buffer.byteLength(raw);
+        bodySize = byteLengthOf(data);
       }
     }
 

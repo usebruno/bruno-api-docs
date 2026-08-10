@@ -131,4 +131,19 @@ test.describe('The res object available to scripts (end-to-end in the playground
     await expect(page.getByText(/Passed: [1-9]\d*, Failed: 0/).first()).toBeVisible();
     await expect(page.getByText(/Failed: [1-9]/)).toHaveCount(0);
   });
+
+  test('res.setBody in a post-response script replaces the body shown in the response pane', async ({ page, playground, responsePane }) => {
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+
+    await playground.selectTab('scripts');
+    await page.getByTestId('scripts-tabs-tab-post-response').click();
+    await setEditorScript(page, playground.postResponseScriptEditor, `res.setBody({ marker: 'hey there' });`);
+
+    await responsePane.send();
+
+    await expect(responsePane.bodyEditor.root).toContainText('marker');
+    await expect(responsePane.bodyEditor.root).toContainText('there');
+    await expect(responsePane.bodyEditor.root).not.toContainText('Ada');
+  });
 });

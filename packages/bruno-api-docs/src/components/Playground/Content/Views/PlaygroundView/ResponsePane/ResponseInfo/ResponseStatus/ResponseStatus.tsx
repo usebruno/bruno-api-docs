@@ -13,7 +13,7 @@ const ResponseStatus: React.FC<ResponseStatusProps> = ({ status, statusText }) =
 
   return (
     <div
-      className="font-mono font-medium"
+      className="font-bold"
       style={{
         color: getStatusColor(status)
       }}

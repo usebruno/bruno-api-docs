@@ -114,17 +114,17 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   // the responsive tab bar can measure the actions block (the last child) to decide whether to show
   // it as inline buttons or collapse it into a menu.
   const statusInfo = (
-    <>
-      <div className="flex items-center gap-3 flex-wrap text-xs">
-        {activeTab === 'response' && (
-          <ResponseFormatSelector
-            selectedFormat={selectedFormat}
-            allowedFormats={allowedFormats}
-            handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
-            showPreview={showPreview}
-            toggleView={toggleView}
-          />
-        )}
+    <div className="flex items-center gap-3 flex-wrap text-xs">
+      {activeTab === 'response' && (
+        <ResponseFormatSelector
+          selectedFormat={selectedFormat}
+          allowedFormats={allowedFormats}
+          handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
+          showPreview={showPreview}
+          toggleView={toggleView}
+        />
+      )}
+      <div className="flex items-center gap-2 flex-wrap">
         <ResponseStatus status={response.status} statusText={response.statusText} />
         <ResponseDuration duration={response.duration} />
         <ResponseSize size={response.size} />
@@ -136,7 +136,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
         selectedFormat={selectedFormat}
         showPreview={showPreview}
       />
-    </>
+    </div>
   );
 
   return (

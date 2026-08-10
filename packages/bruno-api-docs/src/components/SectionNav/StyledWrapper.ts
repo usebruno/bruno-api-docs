@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.div`
   position: fixed;
-  top: 5rem;
+  top: 13rem;
   right: 0;
   z-index: calc(var(--z-overlay, 50) - 1);
   font-family: var(--font-sans);
@@ -81,7 +81,18 @@ export const StyledWrapper = styled.div`
     background: var(--bg-primary);
     border-color: var(--border-color);
     overflow-y: auto;
-    transition: background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    animation: sectionNavOpen 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes sectionNavOpen {
+    from {
+      opacity: 0;
+      transform: translateX(1.25rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
   &.section-nav--open .section-nav-item {
     justify-content: flex-start;
@@ -93,7 +104,6 @@ export const StyledWrapper = styled.div`
     opacity: 1;
     white-space: normal;
     overflow-wrap: break-word;
-    transition: max-width 0.18s ease, max-height 0.18s ease, opacity 0.18s ease;
   }
   &.section-nav--open .section-nav-tick-slot {
     display: none;

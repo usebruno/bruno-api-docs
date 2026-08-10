@@ -8,6 +8,11 @@ const req = (name: string, seq?: number, method = 'GET') => ({
   http: { method, url: `https://x/${name}` }
 });
 
+const gqlReq = (name: string, seq?: number) => ({
+  info: { name, type: 'graphql', seq },
+  graphql: { method: 'POST', url: `https://x/${name}/graphql` }
+});
+
 const folder = (name: string, seq?: number, items: unknown[] = []) => ({
   info: { name, type: 'folder', seq },
   items
@@ -36,6 +41,18 @@ const sample = () =>
   ]);
 
 const slugs = (c: OpenCollection) => buildNavModel(c).ordered.map((e) => e.slug);
+
+describe('buildNavModel — page types', () => {
+  it('classifies a graphql request as its own page type (routed to the GraphQL page)', () => {
+    const entry = buildNavModel(collection([gqlReq('Countries')])).ordered.find((e) => e.name === 'Countries');
+    expect(entry?.type).toBe('graphql');
+  });
+
+  it('classifies an http request as the request page type', () => {
+    const entry = buildNavModel(collection([req('Ping')])).ordered.find((e) => e.name === 'Ping');
+    expect(entry?.type).toBe('request');
+  });
+});
 
 describe('buildNavModel — ordered sequence', () => {
   it('puts overview then environments at the front, then DFS of items', () => {

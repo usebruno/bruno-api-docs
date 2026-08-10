@@ -142,9 +142,73 @@ items:
           * **Message Size Limits:** While the protocol itself supports large messages, practically all implementations (like Tomcat, Cloudflare Workers, or Kong) enforce message size limits to prevent out-of-memory crashes.
           * **Handling Large Payloads:** If you need to transfer large files or data, most developers use **chunking** (splitting data into smaller pieces) or push a tiny notification to the client requesting it to fetch the data from a standard REST endpoint.
           * **Scalability:** Maintaining thousands of open connections consumes server resources. Developers often scale horizontally by placing a **message broker** (like Redis or RabbitMQ) between multiple WebSocket servers so that messages are broadcasted to all users regardless of which server node they are connected to.
-      - name: "GraphQL API"
-        type: "graphql"
-        url: "{{host}}/graphql"
+      - info:
+          name: "GraphQL Details"
+          type: "graphql"
+          description: "Fetches a country's name, capital, and emoji by its ISO country code."
+        graphql:
+          method: "POST"
+          url: "https://api.example.com/graphql"
+          headers:
+            - name: "x-api-key"
+              value: "abc123"
+              description: "This is the description for the api key"
+          body:
+            query: |-
+              query {
+                country(code: "IN") {
+                  name
+                  capital
+                  emoji
+                }
+              }
+            variables: |-
+              {
+                "countryCode": "{{countryCode}}"
+              }
+          auth:
+            type: "basic"
+            username: "user@example.com"
+            password: "supersecretpassword"
+        runtime:
+          variables:
+            - name: "countryCode"
+              value: "IN"
+              description: "Country code to query"
+            - name: "baseURL"
+              value: "https://countries.trevorblades.com/graphql"
+              description: "GraphQL endpoint"
+            - name: "authToken"
+              value: "test-token"
+              description: "Sample bearer token"
+          actions:
+            - type: set-variable
+              phase: after-response
+              description: "country name"
+              selector:
+                expression: res.body.data.country.name
+                method: jsonq
+              variable:
+                name: countryName
+                scope: runtime
+            - type: set-variable
+              phase: after-response
+              description: "capital city"
+              selector:
+                expression: res.body.data.country.capital
+                method: jsonq
+              variable:
+                name: capital
+                scope: runtime
+            - type: set-variable
+              phase: after-response
+              description: "country emoji"
+              selector:
+                expression: res.body.data.country.emoji
+                method: jsonq
+              variable:
+                name: emoji
+                scope: runtime
       - name: "Order Service"
         type: "grpc"
         url: "{{host}}/orders.OrderService"

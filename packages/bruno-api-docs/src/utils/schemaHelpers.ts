@@ -13,14 +13,16 @@
 
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollection/types/collection/item';
-import type { HttpRequest, HttpRequestHeader, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
 import { PROTOCOL_BADGE_LABELS } from '../constants';
 
-type RequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;
+export type SupportedRequestItem = HttpRequest | GraphQLRequest;
+
+type RequestItem = SupportedRequestItem | GrpcRequest | WebSocketRequest;
 
 /** A request body as stored on an item: a single body, a list of body variants, or none. */
 export type RequestBody = HttpRequestBody | HttpRequestBodyVariant[] | undefined;
@@ -119,11 +121,11 @@ export const isWebSocketRequest = (item: OpenCollectionItem | null | undefined):
   return getItemType(item) === 'websocket';
 };
 
-// Check if an item is a request the docs viewer can't render (GraphQL, gRPC or WebSocket).
+// Check if an item is a request the docs viewer can't render (gRPC or WebSocket).
 export const isUnsupportedRequest = (
   item: OpenCollectionItem | null | undefined
-): item is GraphQLRequest | GrpcRequest | WebSocketRequest => {
-  return isGraphQLRequest(item) || isGrpcRequest(item) || isWebSocketRequest(item);
+): item is GrpcRequest | WebSocketRequest => {
+  return isGrpcRequest(item) || isWebSocketRequest(item);
 };
 
 /**
@@ -274,6 +276,61 @@ export const getRequestAuth = (item: RequestItem | null | undefined): any => {
   }
 
   return undefined;
+};
+
+export const pickSelectedVariant = <T extends { selected?: boolean }>(variants: T[]): T | undefined =>
+  variants.find((variant) => variant.selected) ?? variants[0];
+
+interface ProtocolDetails {
+  headers?: HttpRequestHeader[];
+  params?: HttpRequestParam[];
+}
+
+const getProtocolDetails = (item: RequestItem | null | undefined): ProtocolDetails | undefined => {
+  if (!item) return undefined;
+  const blocks = item as Record<string, ProtocolDetails | undefined>;
+  for (const key of REQUEST_PROTOCOL_KEYS) {
+    if (blocks[key]) return blocks[key];
+  }
+  return undefined;
+};
+
+export const getRequestHeaders = (item: RequestItem | null | undefined): HttpRequestHeader[] => {
+  const details = getProtocolDetails(item);
+  if (details?.headers) return details.headers;
+  const rootHeaders = (item as { headers?: HttpRequestHeader[] } | null | undefined)?.headers;
+  return Array.isArray(rootHeaders) ? rootHeaders : [];
+};
+
+export const getRequestParams = (item: RequestItem | null | undefined): HttpRequestParam[] => {
+  const details = getProtocolDetails(item);
+  if (details?.params) return details.params;
+  const rootParams = (item as { params?: HttpRequestParam[] } | null | undefined)?.params;
+  return Array.isArray(rootParams) ? rootParams : [];
+};
+
+const getGraphqlBody = (item: RequestItem | null | undefined): { query?: string; variables?: string } => {
+  const graphql = item && 'graphql' in item ? (item as GraphQLRequest).graphql : undefined;
+  const body = graphql?.body;
+  if (Array.isArray(body)) {
+    return pickSelectedVariant(body)?.body ?? {};
+  }
+  return body ?? {};
+};
+
+export const getGraphqlQuery = (item: RequestItem | null | undefined): string => {
+  const query = getGraphqlBody(item).query;
+  return typeof query === 'string' ? query : '';
+};
+
+export const getGraphqlVariables = (item: RequestItem | null | undefined): string => {
+  const variables = getGraphqlBody(item).variables;
+  return typeof variables === 'string' ? variables : '';
+};
+
+export const getGraphqlMethod = (item: RequestItem | null | undefined): string => {
+  const graphql = item && 'graphql' in item ? (item as GraphQLRequest).graphql : undefined;
+  return graphql?.method || 'POST';
 };
 
 /**

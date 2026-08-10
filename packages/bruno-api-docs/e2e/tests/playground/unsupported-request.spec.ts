@@ -5,7 +5,7 @@ const openAt = (dock: string): string => `/#/?pg=1&dock=${dock}`;
 
 const UNSUPPORTED = [
   { paths: ['Realtime', 'Live Updates'], name: 'Live Updates', typeLabel: 'Websocket' },
-  { paths: ['Realtime', 'GraphQL API'], name: 'GraphQL API', typeLabel: 'GraphQL' },
+  { paths: ['Realtime', 'GraphQL Details'], name: 'GraphQL Details', typeLabel: 'GraphQL' },
   { paths: ['Realtime', 'Order Service'], name: 'Order Service', typeLabel: 'gRPC' }
 ];
 

@@ -1,6 +1,16 @@
 import { describe, it, expect } from 'vitest';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
-import { getItemDescription, getRequestBadgeLabel, getRequestAuth } from './schemaHelpers';
+import {
+  getItemDescription,
+  getRequestBadgeLabel,
+  getRequestAuth,
+  getGraphqlQuery,
+  getGraphqlVariables,
+  getGraphqlMethod,
+  getRequestHeaders,
+  getRequestParams,
+  isUnsupportedRequest
+} from './schemaHelpers';
 
 const item = (data: Record<string, unknown>): OpenCollectionItem => data as unknown as OpenCollectionItem;
 
@@ -66,5 +76,76 @@ describe('getRequestAuth', () => {
 
   it('treats a cleared request-block auth as no auth', () => {
     expect(getRequestAuth(requestItem({ method: 'POST', request: { auth: undefined } }))).toBeUndefined();
+  });
+});
+
+describe('GraphQL getters', () => {
+  const gql = (graphql: Record<string, unknown>) =>
+    ({ info: { type: 'graphql' }, graphql }) as unknown as Parameters<typeof getGraphqlQuery>[0];
+
+  it('reads the query and variables from graphql.body', () => {
+    const gqlItem = gql({ body: { query: 'query { me }', variables: '{"a":1}' } });
+    expect(getGraphqlQuery(gqlItem)).toBe('query { me }');
+    expect(getGraphqlVariables(gqlItem)).toBe('{"a":1}');
+  });
+
+  it('selects the chosen variant (or the first) when the body is a list of variants', () => {
+    const gqlItem = gql({
+      body: [
+        { title: 'A', body: { query: 'query A' } },
+        { title: 'B', selected: true, body: { query: 'query B', variables: '{}' } }
+      ]
+    });
+    expect(getGraphqlQuery(gqlItem)).toBe('query B');
+    expect(getGraphqlVariables(gqlItem)).toBe('{}');
+  });
+
+  it('returns empty strings when the body is missing', () => {
+    expect(getGraphqlQuery(gql({}))).toBe('');
+    expect(getGraphqlVariables(gql({}))).toBe('');
+    expect(getGraphqlQuery(null)).toBe('');
+  });
+
+  it('defaults the method to POST', () => {
+    expect(getGraphqlMethod(gql({ method: 'GET' }))).toBe('GET');
+    expect(getGraphqlMethod(gql({}))).toBe('POST');
+  });
+
+  it('labels the badge GQL', () => {
+    expect(getRequestBadgeLabel(gql({}))).toBe('GQL');
+  });
+});
+
+describe('generalized request headers/params getters', () => {
+  const req = (data: Record<string, unknown>) => data as unknown as Parameters<typeof getRequestHeaders>[0];
+
+  it('reads headers and params from the graphql block', () => {
+    const gqlItem = req({
+      info: { type: 'graphql' },
+      graphql: { headers: [{ name: 'x-a', value: '1' }], params: [{ name: 'p', value: 'v' }] }
+    });
+    expect(getRequestHeaders(gqlItem)).toEqual([{ name: 'x-a', value: '1' }]);
+    expect(getRequestParams(gqlItem)).toEqual([{ name: 'p', value: 'v' }]);
+  });
+
+  it('reads headers from the http block', () => {
+    const httpItem = req({ info: { type: 'http' }, http: { headers: [{ name: 'x-b', value: '2' }] } });
+    expect(getRequestHeaders(httpItem)).toEqual([{ name: 'x-b', value: '2' }]);
+  });
+
+  it('returns an empty array when there is no protocol block', () => {
+    expect(getRequestHeaders(req({ info: { type: 'graphql' } }))).toEqual([]);
+    expect(getRequestParams(null)).toEqual([]);
+  });
+});
+
+describe('isUnsupportedRequest', () => {
+  it('no longer treats graphql as unsupported', () => {
+    expect(isUnsupportedRequest({ info: { type: 'graphql' } } as unknown as OpenCollectionItem)).toBe(false);
+  });
+
+  it('still treats grpc and websocket as unsupported', () => {
+    expect(isUnsupportedRequest({ info: { type: 'grpc' } } as unknown as OpenCollectionItem)).toBe(true);
+    expect(isUnsupportedRequest({ info: { type: 'websocket' } } as unknown as OpenCollectionItem)).toBe(true);
   });
 });

@@ -6,6 +6,7 @@ export type PageType
     | 'environments'
     | 'folder'
     | 'script'
+    | 'graphql'
     | 'request';
 
 /** A single breadcrumb hop: a folder above the current node. */

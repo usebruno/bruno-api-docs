@@ -1,8 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
-import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Scripts } from '@opencollection/types/common/scripts';
-import { getItemName, getRequestScripts, scriptsArrayToObject, isFolder } from './schemaHelpers';
+import { getItemName, getRequestScripts, scriptsArrayToObject, isFolder, type SupportedRequestItem } from './schemaHelpers';
 import { isYamlFile, parseYaml } from './yamlUtils';
 import type { ScriptFlow } from './request';
 
@@ -306,7 +305,7 @@ interface TestSource {
 const forEachTestSource = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest,
+  item: SupportedRequestItem,
   flow: ScriptFlow,
   visit: (level: TestRow['level'], code: string | undefined, sourceName?: string) => void
 ): void => {
@@ -327,7 +326,7 @@ const forEachTestSource = (
 export const collectTests = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest,
+  item: SupportedRequestItem,
   flow: ScriptFlow = 'sandwich'
 ): TestRow[] => {
   const rows: TestRow[] = [];
@@ -356,7 +355,7 @@ export interface RawTestScript {
 export const collectRawTestScripts = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest,
+  item: SupportedRequestItem,
   flow: ScriptFlow = 'sandwich'
 ): RawTestScript[] => {
   const scripts: RawTestScript[] = [];

@@ -49,9 +49,19 @@ export const StyledWrapper = styled.div`
     padding: 0.5rem 0.875rem;
     min-height: 2rem;
   }
+  .property-key {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .property-value-cell {
+    grid-column: 2;
+    grid-row: 1;
+  }
   .property-row .description {
     grid-column: 1 / -1;
-    max-width: calc(100cqi - 1.75rem);
+    grid-row: 2;
+    min-width: 100%;
+    max-width: 0;
   }
   .property-row + .property-row {
     border-top: 1px solid var(--border-color);
@@ -92,12 +102,26 @@ export const StyledWrapper = styled.div`
     align-self: center;
     flex: none;
   }
-  .property-value-line .property-value-main + .inherited-source,
-  .property-value-line .property-type + .inherited-source {
-    margin-left: auto;
+  .property-row > .inherited-source {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    align-self: stretch;
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    background: var(--oc-background-base);
   }
-  .property-value-line .inherited-source {
-    flex: none;
+  .property-row:has(.description) > .inherited-source {
+    grid-row: 1 / span 2;
+  }
+  .property-row:has(> .inherited-source) .property-value-cell {
+    padding-right: 2.5rem;
+  }
+  .property-row:has(> .inherited-source) .description {
+    min-width: calc(100% - 2.5rem);
   }
   .property-value-main {
     min-width: 0;

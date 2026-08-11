@@ -67,11 +67,11 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
                 <div className="property-value-main" data-testid="property-value"><ValueCell row={row} testId={testId} /></div>
                 {row.type ? <span className="property-type">{row.type}</span> : null}
                 {row.disabled ? <DisabledBadge /> : null}
-                {row.inheritedSource ? (
-                  <InheritedSourceLink source={row.inheritedSource} itemName={row.label} onNavigate={onNavigate} />
-                ) : null}
               </div>
             </dd>
+            {row.inheritedSource ? (
+              <InheritedSourceLink source={row.inheritedSource} itemName={row.label} onNavigate={onNavigate} />
+            ) : null}
             <Description text={row.description} />
           </div>
         ))}

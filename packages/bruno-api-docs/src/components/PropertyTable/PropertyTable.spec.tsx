@@ -51,21 +51,20 @@ describe('PropertyTable', () => {
     expect(root.querySelector('.property-type')).toBeNull();
   });
 
-  it('renders the inherited-source link pinned at the end of the value line, after the disabled badge', () => {
+  it('renders the inherited-source link as a row-level cell (sibling of the value line) so it can center across the whole row', () => {
     const root = useRenderToDom(
       <PropertyTable
         rows={[{ label: 'X-Trace', value: 'abc', disabled: true, inheritedSource: { level: 'folder', name: 'Parent', uuid: 'p1' } }]}
         onNavigate={() => {}}
       />
     );
-    const line = query(root, '.property-value-line');
-    expect(line.querySelector('[data-testid="inherited-source"]')).not.toBeNull();
-    const html = line.innerHTML;
-    expect(html.indexOf('disabled-badge')).toBeLessThan(html.indexOf('data-testid="inherited-source"'));
+    expect(query(root, '.property-row').querySelector('[data-testid="inherited-source"]')).not.toBeNull();
+    expect(query(root, '.property-value-line').querySelector('[data-testid="inherited-source"]')).toBeNull();
+    expect(query(root, '.property-value-line').querySelector('.disabled-badge')).not.toBeNull();
   });
 
   it('omits the inherited-source link when a row is not inherited', () => {
     const root = useRenderToDom(<PropertyTable rows={[{ label: 'Accept', value: 'application/json' }]} />);
-    expect(query(root, '.property-value-line').querySelector('[data-testid="inherited-source"]')).toBeNull();
+    expect(query(root, '.property-row').querySelector('[data-testid="inherited-source"]')).toBeNull();
   });
 });

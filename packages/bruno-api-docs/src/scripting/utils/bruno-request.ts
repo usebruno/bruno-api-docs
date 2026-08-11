@@ -171,8 +171,8 @@ class BrunoRequest {
   }
 
   setBody(data: JsonValue, options: { raw?: boolean } = {}) {
-    const isJson = this.isJsonBody();
-    const asObject = !options.raw && isJson && this.__isObject(data);
+    const asObject = !options.raw && this.__isObject(data);
+    const isJson = asObject || this.isJsonBody();
     const serialized = asObject || typeof data !== 'string' ? this.__safeStringifyJSON(data) : data;
     this.writeBodyData(serialized, isJson);
     this.body = data;

@@ -95,8 +95,7 @@ const createHeaderListBase = (entries: () => HeaderEntry[], mutators: HeaderMuta
     fn: (accumulator: T, header: HeaderEntry, index: number) => T,
     ...rest: [initial?: T, ctx?: object]
   ): T => {
-    const ctx = rest.length > 1 ? rest[1] : undefined;
-    const reducer = ctx !== undefined ? fn.bind(ctx) : fn;
+    const reducer = rest.length > 1 ? fn.bind(rest[1]) : fn;
     const list = entries();
     const hasInitial = rest.length > 0;
     if (!hasInitial && list.length === 0) {

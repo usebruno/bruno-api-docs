@@ -1,96 +1,126 @@
+import { Buffer } from 'buffer';
+import { cloneDeep } from 'lodash-es';
 import { get } from './query-get';
+import { createResponseHeaderList, type ResponseHeaderList, type HeadersRecord } from './header-list';
+import type { RunRequestResponse } from '../../runner';
+
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+
+export type ResponseData = RunRequestResponse;
+
+export type QueryArg = ((item: JsonValue) => boolean | JsonValue) | Record<string, JsonValue>;
 
 class BrunoResponse {
-  res: any;
+  res: ResponseData | null;
   status: number | null;
   statusText: string | null;
-  headers: any;
-  body: any;
+  headers: HeadersRecord | null;
+  body: JsonValue | null;
   responseTime: number | null;
   url: string | null;
+  headerList: ResponseHeaderList;
 
-  constructor(res: any) {
-    this.res = res;
-    this.status = res ? res.status : null;
-    this.statusText = res ? res.statusText : null;
-    this.headers = res ? res.headers : null;
-    this.body = res ? res.data : null;
-    this.responseTime = res ? res.responseTime : null;
-    this.url = res?.request ? res.request.protocol + '//' + res.request.host + res.request.path : null;
+  constructor(res: ResponseData | null | undefined) {
+    this.res = res ?? null;
+    this.status = res ? (res.status ?? null) : null;
+    this.statusText = res ? (res.statusText ?? null) : null;
+    this.headers = res ? (res.headers ?? null) : null;
+    this.body = res ? (res.data ?? null) : null;
+    this.responseTime = res ? (res.duration ?? null) : null;
+    this.url = res?.url ?? null;
 
-    // Make the instance callable
-    const callable = (...args: any[]) => get(this.body, args[0], ...args.slice(1));
+    this.headerList = createResponseHeaderList(() => this.res?.headers);
+
+    const callable = (path: string, ...fns: QueryArg[]): JsonValue | undefined => get(this.body, path, ...fns);
     Object.setPrototypeOf(callable, this.constructor.prototype);
-    Object.assign(callable, this);
-
-    return callable as any;
+    return Object.assign(callable, this);
   }
 
   getStatus() {
-    return this.res ? this.res.status : null;
+    return this.res ? (this.res.status ?? null) : null;
   }
 
   getStatusText() {
-    return this.res ? this.res.statusText : null;
+    return this.res ? (this.res.statusText ?? null) : null;
   }
 
   getHeader(name: string) {
-    return this.res && this.res.headers ? this.res.headers[name] : null;
+    const headers = this.res?.headers;
+    if (typeof name !== 'string' || !headers) {
+      return null;
+    }
+    const match = Object.keys(headers).find((k) => k.toLowerCase() === name.toLowerCase());
+    return match ? headers[match] : null;
   }
 
   getHeaders() {
-    return this.res ? this.res.headers : null;
+    return this.res ? (this.res.headers ?? null) : null;
   }
 
   getBody() {
-    return this.res ? this.res.data : null;
+    return this.res ? (this.res.data ?? null) : null;
   }
 
   getResponseTime() {
-    return this.res ? this.res.responseTime : null;
+    return this.res ? (this.res.duration ?? null) : null;
   }
 
   getUrl() {
     return this.res ? this.url : null;
   }
 
-  setBody(data: any) {
-    if (!this.res) {
+  setBody(data: JsonValue) {
+    const res = this.res;
+    if (!res) {
       return;
     }
 
-    const clonedData = JSON.parse(JSON.stringify(data));
-    this.res.data = clonedData;
+    const clonedData = cloneDeep(data);
+    res.data = clonedData;
     this.body = clonedData;
+
+    let dataBuffer: Buffer;
+    if (clonedData == null) {
+      dataBuffer = Buffer.from('');
+    } else if (typeof clonedData === 'string') {
+      dataBuffer = Buffer.from(clonedData);
+    } else {
+      try {
+        dataBuffer = Buffer.from(JSON.stringify(clonedData));
+      } catch {
+        dataBuffer = Buffer.from('');
+      }
+    }
+
+    res.dataBuffer = dataBuffer;
+    res.base64Data = dataBuffer.toString('base64');
+    res.size = dataBuffer.length;
   }
 
-  // TODO: Refactor: dataBuffer size calculation should be handled in a shared utility so it can be passed and reused across the application
   getSize() {
-    if (!this.res) {
+    const res = this.res;
+    if (!res) {
       return { header: 0, body: 0, total: 0 };
     }
 
-    const { data, dataBuffer, headers } = this.res;
+    const { data, dataBuffer, headers } = res;
     let bodySize = 0;
 
-    // Use raw received bytes
     if (Buffer.isBuffer(dataBuffer)) {
       bodySize = dataBuffer.length;
     } else {
-      // Use server-reported Content-Length
-      const contentLength = headers && (headers['content-length'] || headers['Content-Length']);
-      if (contentLength && !isNaN(contentLength)) {
-        bodySize = parseInt(contentLength, 10);
+      const contentLength = headers?.['content-length'] ?? headers?.['Content-Length'];
+      if (contentLength != null && !isNaN(Number(contentLength))) {
+        bodySize = parseInt(String(contentLength), 10);
       } else if (data != null) {
-        // Manual calculation
         const raw = typeof data === 'string' ? data : JSON.stringify(data);
         bodySize = Buffer.byteLength(raw);
       }
     }
 
     const headerLines = [
-      `HTTP/1.1 ${this.res.status} ${this.res.statusText}`,
-      ...Object.entries(this.res.headers || {}).flatMap(([key, value]) =>
+      `HTTP/1.1 ${res.status} ${res.statusText}`,
+      ...Object.entries(headers || {}).flatMap(([key, value]) =>
         Array.isArray(value)
           ? value.map((v) => `${key}: ${v}`)
           : [`${key}: ${value}`]
@@ -104,8 +134,10 @@ class BrunoResponse {
   }
 
   getDataBuffer() {
-    return this.res ? this.res.dataBuffer : null;
+    return this.res ? (this.res.dataBuffer ?? null) : null;
   }
 }
+
+export type CallableResponse = BrunoResponse & ((path: string, ...fns: QueryArg[]) => JsonValue | undefined);
 
 export default BrunoResponse;

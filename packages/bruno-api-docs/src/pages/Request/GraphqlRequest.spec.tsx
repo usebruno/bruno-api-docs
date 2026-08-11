@@ -149,4 +149,40 @@ describe('GraphQL request page', () => {
     const params = getByTestId(root, 'request-section-params');
     expect(params.text).toContain('apiVersion');
   });
+
+  it('renders the Query section but omits Variables when the variables block is empty', () => {
+    const queryOnly = {
+      info: { name: 'Query Only GQL', type: 'graphql' },
+      graphql: { method: 'POST', url: '/graphql', body: { query: 'query { me }', variables: '' } }
+    } as unknown as GraphQLRequest;
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <GraphqlRequest item={queryOnly} ancestry={ancestry} collection={collection} onBreadcrumbClick={() => {}} />
+      </MemoryRouter>
+    );
+
+    expect(queryByTestId(root, 'request-section-query')).not.toBeNull();
+    expect(queryByTestId(root, 'request-section-variables')).toBeNull();
+    expect(queryByTestId(root, 'request-config-empty')).toBeNull();
+  });
+
+  it('renders an inherited auth badge when the graphql request auth is "inherit"', () => {
+    const parent = {
+      info: { name: 'Country API', version: '1.0.0' },
+      request: { auth: { type: 'bearer', token: '{{tok}}' } }
+    } as unknown as OpenCollection;
+    const inheritItem = {
+      info: { name: 'Inherited Auth GQL', type: 'graphql' },
+      graphql: { method: 'POST', url: '/graphql', auth: 'inherit', body: { query: 'query { me }' } }
+    } as unknown as GraphQLRequest;
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <GraphqlRequest item={inheritItem} ancestry={ancestry} collection={parent} onBreadcrumbClick={() => {}} />
+      </MemoryRouter>
+    );
+
+    const auth = getByTestId(root, 'request-section-auth');
+    expect(auth.text).toContain('Inherited');
+    expect(queryByTestId(root, 'request-auth-inherited')).not.toBeNull();
+  });
 });

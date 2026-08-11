@@ -49,4 +49,10 @@ test.describe('Request page — GraphQL', () => {
     await expect(exec).toContainText('countryCode');
     await expect(exec).toContainText('countryName');
   });
+
+  test('renders the request description and no Params section for a request without params', async ({ graphqlRequestPage, page }) => {
+    await expect(graphqlRequestPage.description).toBeVisible();
+    await expect(graphqlRequestPage.description).toContainText('country');
+    await expect(page.getByTestId('request-section-params')).toHaveCount(0);
+  });
 });

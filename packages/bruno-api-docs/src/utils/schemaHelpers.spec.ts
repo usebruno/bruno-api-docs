@@ -9,7 +9,10 @@ import {
   getGraphqlMethod,
   getRequestHeaders,
   getRequestParams,
-  isUnsupportedRequest
+  isUnsupportedRequest,
+  isGraphQLRequest,
+  isPlaygroundUnsupported,
+  pickSelectedVariant
 } from './schemaHelpers';
 
 const item = (data: Record<string, unknown>): OpenCollectionItem => data as unknown as OpenCollectionItem;
@@ -147,5 +150,38 @@ describe('isUnsupportedRequest', () => {
   it('still treats grpc and websocket as unsupported', () => {
     expect(isUnsupportedRequest({ info: { type: 'grpc' } } as unknown as OpenCollectionItem)).toBe(true);
     expect(isUnsupportedRequest({ info: { type: 'websocket' } } as unknown as OpenCollectionItem)).toBe(true);
+  });
+});
+
+describe('isGraphQLRequest', () => {
+  it('is true only for graphql items', () => {
+    expect(isGraphQLRequest({ info: { type: 'graphql' } } as unknown as OpenCollectionItem)).toBe(true);
+    expect(isGraphQLRequest({ info: { type: 'http' } } as unknown as OpenCollectionItem)).toBe(false);
+    expect(isGraphQLRequest(null)).toBe(false);
+  });
+});
+
+describe('isPlaygroundUnsupported', () => {
+  it('is true for graphql, grpc and websocket (they cannot run in the interactive playground)', () => {
+    expect(isPlaygroundUnsupported({ info: { type: 'graphql' } } as unknown as OpenCollectionItem)).toBe(true);
+    expect(isPlaygroundUnsupported({ info: { type: 'grpc' } } as unknown as OpenCollectionItem)).toBe(true);
+    expect(isPlaygroundUnsupported({ info: { type: 'websocket' } } as unknown as OpenCollectionItem)).toBe(true);
+  });
+
+  it('is false for http requests and non-request items', () => {
+    expect(isPlaygroundUnsupported({ info: { type: 'http' } } as unknown as OpenCollectionItem)).toBe(false);
+    expect(isPlaygroundUnsupported({ info: { type: 'folder' } } as unknown as OpenCollectionItem)).toBe(false);
+    expect(isPlaygroundUnsupported(null)).toBe(false);
+  });
+});
+
+describe('pickSelectedVariant', () => {
+  type Variant = { title: string; selected?: boolean };
+  it('returns the selected variant, otherwise the first, otherwise undefined', () => {
+    const withSelected: Variant[] = [{ title: 'A' }, { title: 'B', selected: true }];
+    const noneSelected: Variant[] = [{ title: 'A' }, { title: 'B' }];
+    expect(pickSelectedVariant(withSelected)).toEqual({ title: 'B', selected: true });
+    expect(pickSelectedVariant(noneSelected)).toEqual({ title: 'A' });
+    expect(pickSelectedVariant<Variant>([])).toBeUndefined();
   });
 });

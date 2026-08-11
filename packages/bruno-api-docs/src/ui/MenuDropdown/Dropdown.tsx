@@ -12,9 +12,8 @@ export interface DropdownProps extends Omit<TippyProps, 'render' | 'children' | 
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
   onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
   /**
-   * Floor the popover width at the trigger's width, so the surface is
-   * `max(content-width, trigger-width)` — it never renders narrower than the
-   * trigger, but still grows for wider content. Off by default.
+   * The popover width is set to the maximum of the content width and the trigger width,
+   * it never renders narrower than the trigger, but still grows for wider content.
    */
   matchTriggerWidth?: boolean;
 }

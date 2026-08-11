@@ -10,6 +10,10 @@ export const StyledWrapper = styled.div`
     overflow-y: auto;
   }
 
+  .tabs-right {
+    gap: 0.75rem;
+  }
+
   .response-actions-measure {
     position: absolute;
     top: 0;

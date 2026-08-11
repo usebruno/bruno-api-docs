@@ -112,12 +112,14 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     }
   ];
 
-  // The format selector, status metadata, and actions are separate direct children of the tab bar's
-  // right slot: the responsive tab bar measures the volatile leading children live and only needs a
-  // supplied width for the actions (the last child) — whose expanded form isn't in the DOM until it
-  // decides to show it — to choose inline buttons vs. a collapsed menu.
+  // MUST stay a fragment: the format selector, status metadata, and actions have to be *direct*
+  // children of the tab bar's right slot. The responsive tab bar measures the leading children live
+  // and swaps in a supplied width only for the actions (the last child) to choose inline buttons vs.
+  // a collapsed menu. Wrapping these in a container collapses them into one child, so that model
+  // discards the format/status widths and the actions stop collapsing (see useResponsiveTabs). To
+  // adjust spacing between the groups, set `.tabs-right { gap }` in this pane's StyledWrapper.
   const statusInfo = (
-    <div className="flex items-center gap-3">
+    <>
       {activeTab === 'response' && (
         <ResponseFormatSelector
           selectedFormat={selectedFormat}
@@ -139,7 +141,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
         selectedFormat={selectedFormat}
         showPreview={showPreview}
       />
-    </div>
+    </>
   );
 
   return (

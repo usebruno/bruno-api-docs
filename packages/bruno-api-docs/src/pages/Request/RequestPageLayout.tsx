@@ -86,7 +86,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
       ) : (
         <ContentTypeBadge label="Inherited" />
       )
-    ) : undefined;
+    ) : null;
 
   const hasLeftColumn = showAuth || hasParams || hasConfigContent || hasHeaders || hasInheritedHeaders;
 
@@ -132,7 +132,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
                     badge={
                       hasInheritedHeaders ? (
                         <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
-                      ) : undefined
+                      ) : null
                     }
                   >
                     <PropertyTable rows={headerTableRows} onNavigate={onBreadcrumbClick} />

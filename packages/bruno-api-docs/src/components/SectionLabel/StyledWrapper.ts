@@ -13,4 +13,8 @@ export const StyledWrapper = styled.h2`
   &.section-label-lower {
     text-transform: none;
   }
+
+  &.section-label-muted {
+    color: var(--text-muted);
+  }
 `;

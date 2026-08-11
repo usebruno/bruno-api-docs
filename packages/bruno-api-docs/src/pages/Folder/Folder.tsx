@@ -59,7 +59,7 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
         </header>
 
         {docsHtml && (
-          <Section label="Documentation" testId="folder-section-documentation" className="folder-fullwidth">
+          <Section label="Documentation" testId="folder-section-documentation" className="folder-fullwidth" labelClassName="section-label-muted">
             <ViewMore collapsedHeight="4.5rem" testId="folder-docs">
               <div
                 className="markdown-documentation"
@@ -71,7 +71,7 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
           </Section>
         )}
 
-        <Section label="Folder Configuration" testId="folder-section-configuration" className="folder-fullwidth">
+        <Section label="Folder Configuration" testId="folder-section-configuration" className="folder-fullwidth" labelClassName="section-label-muted">
           {showConfig ? (
             <FolderConfiguration
               config={config}

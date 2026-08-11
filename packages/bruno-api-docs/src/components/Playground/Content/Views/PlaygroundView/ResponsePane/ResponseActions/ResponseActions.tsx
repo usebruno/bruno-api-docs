@@ -22,8 +22,6 @@ interface ResponseActionsProps {
   response: RunRequestResponse;
   selectedFormat: ResponseBodyFormat;
   showPreview: boolean;
-  /** Render a hidden, non-interactive copy laid out in the expanded (inline-buttons) form purely so
-   *  its width can be measured. See the measurement branch below. */
   renderActionButtonsOnly?: boolean;
 }
 

@@ -59,7 +59,7 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
                 stroke={1.5}
                 aria-hidden
                 data-testid="response-format-selector-trigger-icon"
-                style={{ color: 'var(--oc-brand)' }}
+                className="trigger-icon"
               />
             )}
             {item.label}

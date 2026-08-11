@@ -5,8 +5,9 @@ export const StyledWrapper = styled.div`
     &:hover {
       border-color: var(--oc-colors-text-subtext2);
     }
-  }
-  .trigger-icon {
-    color: var(--oc-brand);
+    
+    .menu-dropdown-trigger-label svg {
+      color: var(--oc-brand);
+    }
   }
 `;

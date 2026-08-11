@@ -20,7 +20,7 @@ export const StyledWrapper = styled.div`
     .actions-buttons { 
       display: flex; 
       align-items: center; 
-      gap: 0.5rem; 
+      gap: 0.125rem; 
     }
   }
 `;

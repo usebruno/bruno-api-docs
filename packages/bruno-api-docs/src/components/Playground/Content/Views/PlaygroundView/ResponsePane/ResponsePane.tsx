@@ -117,7 +117,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   // supplied width for the actions (the last child) — whose expanded form isn't in the DOM until it
   // decides to show it — to choose inline buttons vs. a collapsed menu.
   const statusInfo = (
-    <>
+    <div className="flex items-center gap-3">
       {activeTab === 'response' && (
         <ResponseFormatSelector
           selectedFormat={selectedFormat}
@@ -139,7 +139,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
         selectedFormat={selectedFormat}
         showPreview={showPreview}
       />
-    </>
+    </div>
   );
 
   return (

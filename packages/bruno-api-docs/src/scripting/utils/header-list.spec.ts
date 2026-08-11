@@ -18,7 +18,7 @@ describe('createResponseHeaderList (read-only response headers)', () => {
     expect(h.has({ key: 'X-Count' })).toBe(true);
     expect(h.indexOf('X-Count')).toBe(1);
     expect(h.indexOf('nope')).toBe(-1);
-    expect(h.indexOf({ key: 'X-Count' })).toBe(1);
+    expect(h.indexOf({ key: 'X-Count' })).toBe(-1);
     expect(h.indexOf({ key: 'X-Count', value: '2' })).toBe(1);
     expect(h.indexOf({ key: 'x-count', value: 'wrong' })).toBe(-1);
   });

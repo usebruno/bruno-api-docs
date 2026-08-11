@@ -10,6 +10,14 @@ export const StyledWrapper = styled.div`
     overflow-y: auto;
   }
 
+  .response-actions-measure {
+    position: absolute;
+    top: 0;
+    left: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   & .send-icon {
     padding: 0.5625rem;
     border-radius: 50%;

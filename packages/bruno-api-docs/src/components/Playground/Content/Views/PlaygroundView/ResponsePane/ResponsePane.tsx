@@ -14,7 +14,7 @@ import type { RunRequestResponse } from '@/runner';
 import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
 import ResponseActions from './ResponseActions/ResponseActions';
-import { RESPONSE_ACTIONS_EXPANDED_WIDTH } from '@/constants/response';
+import useResponseActions from './ResponseActions/hooks/useResponseActions';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
@@ -25,6 +25,8 @@ interface ResponsePaneProps {
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
   const [activeTab, setActiveTab] = useState('response');
+  const { actionsExpandedWidth, measureActions } = useResponseActions();
+
   const {
     selectedFormat,
     showPreview,
@@ -110,21 +112,22 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     }
   ];
 
-  // The status metadata and the actions are separate direct children of the tab bar's right slot so
-  // the responsive tab bar can measure the actions block (the last child) to decide whether to show
-  // it as inline buttons or collapse it into a menu.
+  // The format selector, status metadata, and actions are separate direct children of the tab bar's
+  // right slot: the responsive tab bar measures the volatile leading children live and only needs a
+  // supplied width for the actions (the last child) — whose expanded form isn't in the DOM until it
+  // decides to show it — to choose inline buttons vs. a collapsed menu.
   const statusInfo = (
     <>
-      <div className="flex items-center gap-3 flex-wrap text-xs">
-        {activeTab === 'response' && (
-          <ResponseFormatSelector
-            selectedFormat={selectedFormat}
-            allowedFormats={allowedFormats}
-            handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
-            showPreview={showPreview}
-            toggleView={toggleView}
-          />
-        )}
+      {activeTab === 'response' && (
+        <ResponseFormatSelector
+          selectedFormat={selectedFormat}
+          allowedFormats={allowedFormats}
+          handleSelection={(value: ResponseBodyFormat) => handleFormatChange(value)}
+          showPreview={showPreview}
+          toggleView={toggleView}
+        />
+      )}
+      <div className="flex items-center gap-2 flex-wrap text-xs">
         <ResponseStatus status={response.status} statusText={response.statusText} />
         <ResponseDuration duration={response.duration} />
         <ResponseSize size={response.size} />
@@ -141,6 +144,18 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
 
   return (
     <StyledWrapper>
+      {!response.error && (
+        <div className="response-actions-measure" aria-hidden="true" ref={measureActions} inert>
+          <ResponseActions
+            renderActionButtonsOnly
+            orientation={orientation}
+            itemUuid={itemUuid}
+            response={response}
+            selectedFormat={selectedFormat}
+            showPreview={showPreview}
+          />
+        </div>
+      )}
       <Tabs
         variant="responsive"
         testId="response-tabs"
@@ -148,8 +163,8 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        rightElement={response.error ? undefined : statusInfo}
-        rightContentExpandedWidth={RESPONSE_ACTIONS_EXPANDED_WIDTH}
+        rightElement={response.error ? null : statusInfo}
+        rightContentExpandedWidth={actionsExpandedWidth}
       />
     </StyledWrapper>
   );

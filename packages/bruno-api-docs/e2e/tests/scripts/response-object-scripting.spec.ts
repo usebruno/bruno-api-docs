@@ -94,8 +94,8 @@ test('res.setBody replaces the response body, and res.getBody returns the new va
 });
 `;
 
-const ABSENT_HEADER_SCRIPT = `
-test('a custom header absent from the response reads back empty across getHeader, headers, and headerList', function () {
+const HIDDEN_HEADER_SCRIPT = `
+test('a header the server sends but does not CORS-expose is hidden by the browser and reads back empty on res', function () {
   expect(res.body.users).to.have.length(1);
   expect(res.getHeader('content-type')).to.contain('application/json');
   expect(res.getHeader('x-token') == null).to.equal(true);
@@ -159,13 +159,14 @@ test.describe('The res object available to scripts (end-to-end in the playground
     await expect(responsePane.bodyEditor.root).not.toContainText('Ada');
   });
 
-  test('a custom header absent from the response reads back empty everywhere on res', async ({ page, playground, responsePane }) => {
+  test('a custom header sent without access-control-expose-headers is hidden by the browser', async ({ page, playground, responsePane }) => {
     await page.unroute('**/api/users**');
     await page.route('**/api/users**', (route) =>
       route.fulfill({
         status: 200,
         headers: {
           'content-type': 'application/json',
+          'x-token': 'abc',
           'access-control-allow-origin': '*'
         },
         body: JSON.stringify({ users: [{ id: 1, name: 'Ada' }] })
@@ -175,7 +176,7 @@ test.describe('The res object available to scripts (end-to-end in the playground
     await page.goto('/#/?pg=1&dock=bottom');
     await playground.openSidebarItem('get users');
     await playground.selectTab('tests');
-    await setEditorScript(page, playground.testsEditor, ABSENT_HEADER_SCRIPT);
+    await setEditorScript(page, playground.testsEditor, HIDDEN_HEADER_SCRIPT);
 
     await responsePane.send();
     await responsePane.switchToTab('tests');

@@ -1,12 +1,5 @@
 import React, { useCallback } from 'react';
-import {
-  IconCopy,
-  IconDownload,
-  IconEraser,
-  IconLayoutColumns,
-  IconLayoutRows,
-  IconDots
-} from '@tabler/icons';
+import { IconCopy, IconDownload, IconEraser, IconLayoutColumns, IconLayoutRows, IconDots } from '@tabler/icons';
 import CopyResponse from './CopyResponse/CopyResponse';
 import ClearResponse from './ClearResponse/ClearResponse';
 import DownloadResponse from './DownloadResponse/DownloadResponse';
@@ -29,6 +22,7 @@ interface ResponseActionsProps {
   response: RunRequestResponse;
   selectedFormat: ResponseBodyFormat;
   showPreview: boolean;
+  renderActionButtonsOnly?: boolean;
 }
 
 const ResponseActions: React.FC<ResponseActionsProps> = ({
@@ -36,10 +30,10 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   itemUuid,
   response,
   selectedFormat,
-  showPreview
+  showPreview,
+  renderActionButtonsOnly = false
 }) => {
-  const getCopyText = useCallback((
-  ): string => {
+  const getCopyText = useCallback((): string => {
     const data = response?.data;
     const dataBuffer = response?.base64Data;
     // Preview shows the raw data, so copy that as-is.
@@ -50,12 +44,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
       return formatResponse(data, dataBuffer, selectedFormat);
     }
     return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
-  }, [
-    response?.data,
-    response?.base64Data,
-    selectedFormat,
-    showPreview
-  ]);
+  }, [response?.data, response?.base64Data, selectedFormat, showPreview]);
   const copyDisabled = !response.data;
   const { copied, copyResponse } = useCopy({
     getText: getCopyText,
@@ -71,7 +60,13 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
 
   const menuItems: MenuDropdownItem[] = [
     { id: 'copy', label: 'Copy Response', leftSection: IconCopy, disabled: copyDisabled, onClick: copyResponse },
-    { id: 'download', label: 'Download Response', leftSection: IconDownload, disabled: downloadDisabled, onClick: onDownload },
+    {
+      id: 'download',
+      label: 'Download Response',
+      leftSection: IconDownload,
+      disabled: downloadDisabled,
+      onClick: onDownload
+    },
     { id: 'clear', label: 'Clear Response', leftSection: IconEraser, onClick: onClear },
     {
       id: 'layout',
@@ -80,6 +75,31 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
       onClick: onToggleLayout
     }
   ];
+
+  const actionButtons = (
+    <>
+      <CopyResponse copied={copied} onClick={copyResponse} disabled={copyDisabled} />
+      <DownloadResponse onClick={onDownload} disabled={downloadDisabled} />
+      <ClearResponse onClick={onClear} />
+      <ChangeLayout orientation={orientation} handleChangeLayout={onToggleLayout} />
+    </>
+  );
+
+  // Width probe for the responsive tab bar: it needs the expanded buttons' width to decide whether
+  // to show them inline before it has committed to expanding. Rendered as buttons-only with no
+  // testids so tests and queries never confuse this copy with the live actions.
+  if (renderActionButtonsOnly) {
+    return (
+      <StyledWrapper
+        className="response-pane-actions-wrapper render-action-buttons-only"
+        aria-hidden="true"
+        data-testid="forceful-renderred-action-buttons"
+        inert={true}
+      >
+        <div className="actions-buttons">{actionButtons}</div>
+      </StyledWrapper>
+    );
+  }
 
   return (
     <StyledWrapper className="response-pane-actions-wrapper" data-testid="response-pane-actions-wrapper">
@@ -91,10 +111,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
         </MenuDropdown>
       </div>
       <div className="actions-buttons" data-testid="actions-buttons">
-        <CopyResponse copied={copied} onClick={copyResponse} disabled={copyDisabled} />
-        <DownloadResponse onClick={onDownload} disabled={downloadDisabled} />
-        <ClearResponse onClick={onClear} />
-        <ChangeLayout orientation={orientation} handleChangeLayout={onToggleLayout} />
+        {actionButtons}
       </div>
     </StyledWrapper>
   );

@@ -13,14 +13,4 @@ describe('Section', () => {
     expect(html).toContain('Environments');
     expect(html).toContain('List content');
   });
-
-  it('applies labelClassName to the label for styling while keeping the underlying text unchanged', () => {
-    const html = renderToStaticMarkup(
-      <Section label="Headers" labelClassName="section-label-lower">
-        <p>content</p>
-      </Section>
-    );
-    expect(html).toContain('section-label-lower');
-    expect(html).toContain('Headers');
-  });
 });

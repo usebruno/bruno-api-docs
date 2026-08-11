@@ -94,6 +94,18 @@ test('res.setBody replaces the response body, and res.getBody returns the new va
 });
 `;
 
+const ABSENT_HEADER_SCRIPT = `
+test('a custom header absent from the response reads back empty across getHeader, headers, and headerList', function () {
+  expect(res.body.users).to.have.length(1);
+  expect(res.getHeader('content-type')).to.contain('application/json');
+  expect(res.getHeader('x-token') == null).to.equal(true);
+  expect(res.headers['x-token'] === undefined).to.equal(true);
+  expect(res.headerList.has('x-token')).to.equal(false);
+  expect(res.headerList.get('x-token') == null).to.equal(true);
+  expect(res.headerList.one('x-token') == null).to.equal(true);
+});
+`;
+
 const setEditorScript = async (page: Page, editor: CodeEditorComponent, script: string): Promise<void> => {
   await editor.focus();
   await page.keyboard.press('ControlOrMeta+a');
@@ -145,5 +157,30 @@ test.describe('The res object available to scripts (end-to-end in the playground
     await expect(responsePane.bodyEditor.root).toContainText('marker');
     await expect(responsePane.bodyEditor.root).toContainText('there');
     await expect(responsePane.bodyEditor.root).not.toContainText('Ada');
+  });
+
+  test('a custom header absent from the response reads back empty everywhere on res', async ({ page, playground, responsePane }) => {
+    await page.unroute('**/api/users**');
+    await page.route('**/api/users**', (route) =>
+      route.fulfill({
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+          'access-control-allow-origin': '*'
+        },
+        body: JSON.stringify({ users: [{ id: 1, name: 'Ada' }] })
+      })
+    );
+
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+    await playground.selectTab('tests');
+    await setEditorScript(page, playground.testsEditor, ABSENT_HEADER_SCRIPT);
+
+    await responsePane.send();
+    await responsePane.switchToTab('tests');
+
+    await expect(page.getByText(/Passed: [1-9]\d*, Failed: 0/).first()).toBeVisible();
+    await expect(page.getByText(/Failed: [1-9]/)).toHaveCount(0);
   });
 });

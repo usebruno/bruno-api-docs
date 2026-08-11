@@ -51,12 +51,12 @@ export const GraphqlRequest: React.FC<GraphqlRequestProps> = ({
       testId={testId}
     >
       {hasQuery && (
-        <Section label="Query" testId="request-section-query" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem}>
+        <Section label="Query" testId="request-section-query" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} labelClassName="section-label-lower">
           <Code code={query} language="graphql" showLineNumbers variableAware testId="request-graphql-query" />
         </Section>
       )}
       {hasVariables && (
-        <Section label="Variables" testId="request-section-variables" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem}>
+        <Section label="Variables" testId="request-section-variables" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} labelClassName="section-label-lower">
           <Code code={variables} language="json" showLineNumbers variableAware testId="request-graphql-variables" />
         </Section>
       )}

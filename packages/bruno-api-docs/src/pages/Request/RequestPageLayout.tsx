@@ -115,7 +115,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
             {hasLeftColumn ? (
               <>
                 {hasParams && (
-                  <Section label="Params" testId="request-section-params" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem}>
+                  <Section label="Params" testId="request-section-params" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} labelClassName="section-label-lower">
                     <RequestParams path={pathParams} query={queryParams} />
                   </Section>
                 )}
@@ -128,6 +128,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
                     testId="request-section-headers"
                     navGroup={NAV_GROUP.configuration}
                     navLevel={NAV_LEVEL.configItem}
+                    labelClassName="section-label-lower"
                     badge={
                       hasInheritedHeaders ? (
                         <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
@@ -139,7 +140,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
                 )}
 
                 {showAuth && (
-                  <Section label="Auth" testId="request-section-auth" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} badge={authBadge}>
+                  <Section label="Auth" testId="request-section-auth" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} badge={authBadge} labelClassName="section-label-lower">
                     <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
                   </Section>
                 )}
@@ -155,7 +156,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
           </div>
 
           <div className="request-col-right">
-            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>
+            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav labelClassName="section-label-lower">
               <CodeSnippetTabs
                 method={method}
                 url={url}

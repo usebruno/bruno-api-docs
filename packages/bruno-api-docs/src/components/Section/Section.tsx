@@ -21,6 +21,7 @@ interface SectionProps {
   hideFromNav?: boolean;
   navLevel?: number;
   navGroup?: string;
+  labelClassName?: string;
 }
 
 export const Section: React.FC<SectionProps> = ({
@@ -35,7 +36,8 @@ export const Section: React.FC<SectionProps> = ({
   as = 'h2',
   hideFromNav = false,
   navLevel: navLevelProp,
-  navGroup
+  navGroup,
+  labelClassName
 }) => {
   const [open, setOpen] = useSessionStorage(storageKey ? `section-${storageKey}` : '', defaultOpen);
   const panelId = useId();
@@ -54,7 +56,7 @@ export const Section: React.FC<SectionProps> = ({
         data-nav-group={navGroup}
       >
         <div className="section-head">
-          <SectionLabel as={as} className="section-head-label">
+          <SectionLabel as={as} className={cx('section-head-label', labelClassName)}>
             <button
               type="button"
               id={labelId}
@@ -86,11 +88,11 @@ export const Section: React.FC<SectionProps> = ({
     >
       {badge ? (
         <div className="section-head">
-          <SectionLabel as={as} className="section-head-label">{label}</SectionLabel>
+          <SectionLabel as={as} className={cx('section-head-label', labelClassName)}>{label}</SectionLabel>
           {badge}
         </div>
       ) : (
-        <SectionLabel as={as}>{label}</SectionLabel>
+        <SectionLabel as={as} className={labelClassName}>{label}</SectionLabel>
       )}
       {children}
     </StyledWrapper>

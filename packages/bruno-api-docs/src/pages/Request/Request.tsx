@@ -76,6 +76,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
           testId="request-section-body"
           navGroup={NAV_GROUP.configuration}
           navLevel={NAV_LEVEL.configItem}
+          labelClassName="section-label-lower"
           badge={bodyContentType ? <ContentTypeBadge label={bodyContentType} /> : undefined}
         >
           <RequestBody body={body} showContentType={false} />

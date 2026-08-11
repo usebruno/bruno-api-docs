@@ -54,7 +54,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       {hasHeaders && (
         <div className="config-group" data-testid="folder-config-headers" data-nav-section="Headers" data-nav-level={2}>
           <div className="config-group-head">
-            <SectionLabel className="config-group-label">Headers</SectionLabel>
+            <SectionLabel className="config-group-label section-label-lower">Headers</SectionLabel>
             {hasInheritedHeaders && (
               <ContentTypeBadge label={inheritedCountLabel(config.inheritedHeaders.length, 'header')} />
             )}
@@ -66,7 +66,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       {hasAuth && (
         <div className="config-group" data-testid="folder-config-auth" data-nav-section="Auth" data-nav-level={2}>
           <div className="config-group-head">
-            <SectionLabel className="config-group-label">Auth</SectionLabel>
+            <SectionLabel className="config-group-label section-label-lower">Auth</SectionLabel>
             {authBadge}
           </div>
           <AuthDetails auth={config.auth} authModeLabels={authModeLabels} testId="folder-config-auth-details" />
@@ -76,7 +76,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       {hasVariables && (
         <div className="config-group" data-testid="folder-config-vars" data-nav-section="Vars" data-nav-level={2}>
           <div className="config-group-head">
-            <SectionLabel className="config-group-label">Vars</SectionLabel>
+            <SectionLabel className="config-group-label section-label-lower">Vars</SectionLabel>
             {inheritedVarCount > 0 && <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} />}
           </div>
           <div className="config-columns">
@@ -99,7 +99,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       {hasScripts && (
         <div className="config-group" data-testid="folder-config-script" data-nav-section="Script" data-nav-level={2}>
           <div className="config-group-head">
-            <SectionLabel className="config-group-label">Script</SectionLabel>
+            <SectionLabel className="config-group-label section-label-lower">Script</SectionLabel>
           </div>
           <div className="config-columns">
             {config.preRequest && (
@@ -121,7 +121,7 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
       {hasTests && (
         <div className="config-group" data-testid="folder-config-tests" data-nav-section="Tests" data-nav-level={2}>
           <div className="config-group-head">
-            <SectionLabel className="config-group-label">Tests</SectionLabel>
+            <SectionLabel className="config-group-label section-label-lower">Tests</SectionLabel>
           </div>
           <Code code={config.tests as string} language="javascript" showLineNumbers testId="folder-config-tests-code" />
         </div>

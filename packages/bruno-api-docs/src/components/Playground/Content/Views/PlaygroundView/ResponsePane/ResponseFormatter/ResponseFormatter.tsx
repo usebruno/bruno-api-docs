@@ -52,12 +52,18 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
       itemToText={(item: MenuDropdownItem) => (
         <span className="inline-flex items-center gap-1.5">
           {TriggerIcon && (
-            <TriggerIcon size={14} stroke={1.5} aria-hidden data-testid="response-format-selector-trigger-icon" />
+            <TriggerIcon
+              size={14}
+              stroke={1.5}
+              aria-hidden
+              data-testid="response-format-selector-trigger-icon"
+              style={{ color: 'var(--oc-brand)' }}
+            />
           )}
           {item.label}
         </span>
       )}
-      placement="bottom-start"
+      placement="bottom-end"
       header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
       testId="response-format-selector"
     />

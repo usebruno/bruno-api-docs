@@ -85,7 +85,7 @@ const createHeaderListBase = (entries: () => HeaderEntry[], mutators: HeaderMuta
       return list.findIndex((h) => eqKey(h.key, item));
     }
     if (!item || typeof item !== 'object') return -1;
-    return list.findIndex((h) => eqKey(h.key, item.key) && (item.value === undefined || h.value === item.value));
+    return list.findIndex((h) => eqKey(h.key, item.key) && h.value === item.value);
   },
   find: (fn, ctx) => entries().find(fn, ctx),
   filter: (fn, ctx) => entries().filter(fn, ctx),

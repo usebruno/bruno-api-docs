@@ -32,9 +32,9 @@ const rowIndent = (level: number): string => `${0.5 + Math.min(level, 7) * 0.4}r
 // The docs column's outer padding collapses at its `@container docs (max-width: 768px)` breakpoint,
 // leaving no gutter — below it the rail hides rather than overlapping the content.
 const DOCS_MIN_WIDTH = 768;
-// The rail's fixed top (`top: 5rem`) plus a small gap; its height is capped at the docs area's
+// The rail's fixed top (`top: 13rem`) plus a small gap; its height is capped at the docs area's
 // bottom minus this so it clips at, rather than draws over, a bottom-docked playground.
-const RAIL_TOP_PX = 88;
+const RAIL_TOP_PX = 216;
 // Below this remaining height the rail hides entirely rather than show a cramped/overlapping sliver.
 const MIN_RAIL_HEIGHT = 24;
 

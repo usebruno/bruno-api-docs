@@ -173,11 +173,6 @@ export const StyledWrapper = styled.div`
     margin: 0.25rem 0;
   }
 
-  .dropdown-header-container,
-  .dropdown-footer-container {
-    padding: 0.25rem 0.625rem;
-  }
-
   .dropdown-divider {
     height: 1px;
     background-color: var(--oc-dropdown-separator);
@@ -224,10 +219,6 @@ export const TriggerButton = styled.button`
 
   &:hover {
     color: var(--oc-text);
-  }
-  &[aria-expanded='true'] {
-    color: var(--oc-accents-primary);
-    border-color: var(--oc-accents-primary);
   }
   &:focus-visible {
     outline: 2px solid var(--oc-accents-primary);

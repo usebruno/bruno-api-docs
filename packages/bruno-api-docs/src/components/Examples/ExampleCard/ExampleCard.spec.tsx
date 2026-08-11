@@ -237,4 +237,21 @@ describe('ExampleCard', () => {
     expect(html).toContain('orgId');
     expect(html).toContain('alice');
   });
+
+  describe('code snippet', () => {
+    it('offers a labelled Code Snippet trigger when expanded, with the dialog still closed', () => {
+      const html = renderToStaticMarkup(
+        <ExampleCard example={example} method="post" url="{{baseUrl}}/auth/login" defaultExpanded />
+      );
+      expect(html).toContain('data-testid="example-code-snippet-trigger"');
+      expect(html).toContain('Code Snippet');
+      expect(html).toContain('aria-haspopup="dialog"');
+      expect(html).not.toContain('curl');
+    });
+
+    it('does not render the trigger while the card is collapsed', () => {
+      const html = renderToStaticMarkup(<ExampleCard example={example} method="post" url="/x" />);
+      expect(html).not.toContain('data-testid="example-code-snippet-trigger"');
+    });
+  });
 });

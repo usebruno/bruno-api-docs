@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import type { HttpRequestBody, HttpRequestBodyVariant, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
 import { Code } from '../Code/Code';
@@ -15,6 +15,8 @@ import {
   type SnippetInput
 } from '../../utils/codeSnippets';
 import { StyledWrapper } from './StyledWrapper';
+import { IconCode } from '@tabler/icons';
+import { cx } from '@/utils/cx';
 
 interface CodeSnippetTabsProps {
   method: string;
@@ -22,6 +24,7 @@ interface CodeSnippetTabsProps {
   headers?: HttpRequestHeader[];
   body?: HttpRequestBody | HttpRequestBodyVariant[];
   auth?: Auth;
+  variant?: 'inline' | 'embedded';
   className?: string;
   testId?: string;
 }
@@ -32,10 +35,11 @@ const LANGUAGES = [
   { id: 'python', label: 'Python', language: 'python', generate: generatePythonCode }
 ] as const;
 
-export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, headers, body, auth, className, testId = 'request-code-snippet' }) => {
+export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, headers, body, auth, variant = 'inline', className, testId = 'request-code-snippet' }) => {
   const [active, setActive] = useState<string>(LANGUAGES[0].id);
   const [modalActive, setModalActive] = useState<string>(LANGUAGES[0].id);
   const [expanded, setExpanded] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const { showVars, resolve } = useResolvedVariables();
 
   const snippetHeaders: SnippetHeader[] = useMemo(
@@ -59,8 +63,13 @@ export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, h
     setExpanded(true);
   };
 
+  const closeModal = () => {
+    setExpanded(false);
+    triggerRef.current?.focus();
+  };
+
   const renderSnippetBox = (
-    variant: 'inline' | 'modal',
+    placement: 'inline' | 'modal',
     activeId: string,
     setActiveId: (id: string) => void
   ) => {
@@ -86,8 +95,9 @@ export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, h
             ))}
           </div>
           <span className="snippet-head-spacer" />
-          {variant === 'inline' ? (
+          {placement === 'inline' ? (
             <button
+              ref={triggerRef}
               type="button"
               className="code-snippet-expand"
               aria-label="Expand code snippet"
@@ -100,17 +110,33 @@ export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, h
             <CopyButton text={copyText} label="Copy code" className="snippet-copy" />
           )}
         </div>
-        <Code code={snippet} language={activeLang.language} showLineNumbers showCopy={variant === 'inline'} variableAware copyText={copyText} testId="code-snippet-code" />
+        <Code code={snippet} language={activeLang.language} showLineNumbers showCopy={placement === 'inline'} variableAware copyText={copyText} testId="code-snippet-code" />
       </div>
     );
   };
 
   return (
-    <StyledWrapper className={['code-snippet-tabs', className].filter(Boolean).join(' ')} data-testid={testId}>
-      {renderSnippetBox('inline', active, setActive)}
-      <Modal open={expanded} onClose={() => setExpanded(false)} title={<SectionLabel>Code snippet</SectionLabel>} ariaLabel="Code snippet">
+    <StyledWrapper className={cx('code-snippet-tabs', className)} data-testid={testId}>
+      {variant === 'inline' ? (
+        renderSnippetBox('inline', active, setActive)
+      ) : (
+        <button
+          ref={triggerRef}
+          type="button"
+          className="snippet-trigger"
+          aria-haspopup="dialog"
+          data-testid={`${testId}-trigger`}
+          onClick={openModal}
+        >
+          <IconCode size={16} stroke={1.5} />
+          Code Snippet
+        </button>
+      )}
+      <Modal open={expanded} onClose={closeModal} title={<SectionLabel>Code snippet</SectionLabel>} ariaLabel="Code snippet">
         {expanded && (
-          <StyledWrapper className="code-snippet-tabs" data-testid="code-snippet-modal">{renderSnippetBox('modal', modalActive, setModalActive)}</StyledWrapper>
+          <StyledWrapper className={cx('code-snippet-tabs', className)} data-testid="code-snippet-modal">
+            {renderSnippetBox('modal', modalActive, setModalActive)}
+          </StyledWrapper>
         )}
       </Modal>
     </StyledWrapper>

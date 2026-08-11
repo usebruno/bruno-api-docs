@@ -84,4 +84,69 @@ test.describe('Request page — Examples', () => {
     await examples.open(BAD_REQUEST_EXAMPLE);
     await expect(examples.responseBody(BAD_REQUEST_EXAMPLE)).toContainText('invalid_request');
   });
+
+  test.describe('Code snippet', () => {
+    test('offers a Code Snippet trigger on an expanded example', async ({ requestPage }) => {
+      const { examples } = requestPage;
+      await expect(examples.snippetButton(OK_EXAMPLE)).toBeVisible();
+      await expect(examples.snippetButton(OK_EXAMPLE)).toHaveText('Code Snippet');
+    });
+
+    test('opens a dialog with every supported language', async ({ requestPage }) => {
+      const { examples } = requestPage;
+      await examples.openSnippet(OK_EXAMPLE);
+      await expect(examples.snippetLanguageTab('curl')).toBeVisible();
+      await expect(examples.snippetLanguageTab('javascript')).toBeVisible();
+      await expect(examples.snippetLanguageTab('python')).toBeVisible();
+    });
+
+    test('shows the example request, and switches language on demand', async ({ requestPage }) => {
+      const { examples } = requestPage;
+      await examples.openSnippet(OK_EXAMPLE);
+      await expect(examples.snippetCode).toContainText('curl');
+      await expect(examples.snippetCode).toContainText('per_page=10');
+      await examples.snippetLanguageTab('python').click();
+      await expect(examples.snippetCode).toContainText('requests');
+      await expect(examples.snippetCode).toContainText('per_page=10');
+    });
+
+    test('builds each snippet from its own example, not a shared one', async ({ requestPage }) => {
+      const { examples } = requestPage;
+      await examples.open(BAD_REQUEST_EXAMPLE);
+      await examples.openSnippet(BAD_REQUEST_EXAMPLE);
+      await expect(examples.snippetCode).toContainText('per_page=999');
+      await expect(examples.snippetCode).not.toContainText('per_page=10');
+    });
+
+    test('offers a copy action for the snippet', async ({ requestPage }) => {
+      const { examples } = requestPage;
+      await examples.openSnippet(OK_EXAMPLE);
+      await expect(examples.snippetModal.getByTestId('copy-button')).toBeVisible();
+    });
+
+    test('renders only one dialog — the embedded snippet brings no modal of its own', async ({ requestPage, page }) => {
+      const { examples } = requestPage;
+      await examples.openSnippet(OK_EXAMPLE);
+      await expect(page.getByRole('dialog')).toHaveCount(1);
+      await expect(examples.snippetModal.getByTestId('code-snippet-expand')).toHaveCount(0);
+    });
+
+    test('dismisses on Escape and returns focus to the trigger', async ({ requestPage, page }) => {
+      const { examples } = requestPage;
+      await examples.openSnippet(OK_EXAMPLE);
+
+      await page.keyboard.press('Escape');
+      await expect(examples.snippetModal).toBeHidden();
+      await expect(examples.snippetButton(OK_EXAMPLE)).toBeFocused();
+    });
+
+    test('dismisses on close-button click and returns focus to the trigger', async ({ requestPage }) => {
+      const { examples } = requestPage;
+      await examples.openSnippet(OK_EXAMPLE);
+
+      await examples.snippetModal.getByRole('button', { name: 'Close' }).click();
+      await expect(examples.snippetModal).toBeHidden();
+      await expect(examples.snippetButton(OK_EXAMPLE)).toBeFocused();
+    });
+  });
 });

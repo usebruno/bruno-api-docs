@@ -20,7 +20,7 @@ const ResponseSize: React.FC<ResponseSizeProps> = ({ size }) => {
   );
 
   return (
-    <div className="font-mono" style={{ color: 'var(--text-primary)' }}>
+    <div className="font-medium">
       {sizeToDisplay}
     </div>
   );

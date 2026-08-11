@@ -2,17 +2,19 @@ import React from 'react';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
 import { ExampleCard } from './ExampleCard/ExampleCard';
 import { StyledWrapper } from './StyledWrapper';
+import type { Auth } from '@opencollection/types/common/auth';
 
 interface ExamplesProps {
   examples?: HttpRequestExample[];
   method: string;
   url: string;
+  auth?: Auth;
   highlightedIndex?: number;
   className?: string;
   testId?: string;
 }
 
-export const Examples: React.FC<ExamplesProps> = ({ examples, method, url, highlightedIndex, className, testId = 'request-examples' }) => {
+export const Examples: React.FC<ExamplesProps> = ({ examples, method, url, auth, highlightedIndex, className, testId = 'request-examples' }) => {
   if (!examples || examples.length === 0) return null;
 
   // A highlight that no longer resolves (out of range) falls back to the
@@ -28,6 +30,7 @@ export const Examples: React.FC<ExamplesProps> = ({ examples, method, url, highl
           example={example}
           method={method}
           url={url}
+          auth={auth}
           defaultExpanded={validHighlight ? highlightedIndex === index : index === 0}
           active={validHighlight && highlightedIndex === index}
         />

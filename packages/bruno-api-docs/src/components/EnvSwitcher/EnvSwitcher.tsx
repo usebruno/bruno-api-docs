@@ -64,6 +64,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ testId = 'env-switcher' }) =>
         selectedItemId={hasEnvironments ? activeEnv?.name : undefined}
         showTickMark={false}
         placement="bottom-end"
+        matchTriggerWidth
         testId={testId}
       >
         <button

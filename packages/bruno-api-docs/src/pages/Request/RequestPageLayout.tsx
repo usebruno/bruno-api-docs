@@ -26,7 +26,6 @@ export const NAV_LEVEL = { section: 1, configItem: 2 } as const;
 interface RequestPageLayoutProps {
   data: RequestPageData;
   method: string;
-  badgeLabel: string;
   hasConfigContent: boolean;
   emptyConfigSubheading: string;
   snippetBody?: HttpRequestBody | HttpRequestBodyVariant[];
@@ -40,7 +39,6 @@ interface RequestPageLayoutProps {
 export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
   data,
   method,
-  badgeLabel,
   hasConfigContent,
   emptyConfigSubheading,
   snippetBody,
@@ -97,7 +95,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
 
         <Heading size="md" style={{ marginTop: '0.25rem' }} testId="request-title">{name}</Heading>
 
-        <RequestUrlBar method={badgeLabel} url={url} onTry={onTryClick} style={{ marginTop: '0.75rem' }} />
+        <RequestUrlBar method={method} url={url} onTry={onTryClick} style={{ marginTop: '0.75rem' }} />
 
         {descHtml && (
           <ViewMore collapsedHeight="4.5rem" style={{ marginTop: '1.5rem' }} testId="request-description">

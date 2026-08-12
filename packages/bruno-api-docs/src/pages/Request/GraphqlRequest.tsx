@@ -4,7 +4,6 @@ import type { Item } from '@opencollection/types/collection/item';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import {
   getGraphqlMethod,
-  getRequestBadgeLabel,
   getGraphqlQuery,
   getGraphqlVariables
 } from '../../utils/schemaHelpers';
@@ -31,7 +30,6 @@ export const GraphqlRequest: React.FC<GraphqlRequestProps> = ({
 }) => {
   const data = useRequestPageData(collection, ancestry, item);
   const method = getGraphqlMethod(item);
-  const badgeLabel = getRequestBadgeLabel(item) || method;
   const query = getGraphqlQuery(item);
   const variables = getGraphqlVariables(item);
   const hasQuery = query.trim().length > 0;
@@ -43,7 +41,6 @@ export const GraphqlRequest: React.FC<GraphqlRequestProps> = ({
     <RequestPageLayout
       data={data}
       method={method}
-      badgeLabel={badgeLabel}
       hasConfigContent={hasQuery || hasVariables}
       emptyConfigSubheading="This request has no query, variables, headers, or authentication configured. These may be inherited from the collection or folder."
       snippetBody={snippetBody}

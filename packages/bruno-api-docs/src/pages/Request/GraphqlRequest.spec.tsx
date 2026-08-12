@@ -48,7 +48,7 @@ const graphqlItem: GraphQLRequest = {
 } as unknown as GraphQLRequest;
 
 describe('GraphQL request page', () => {
-  it('renders the name, GQL badge, url and description with the shared request layout', () => {
+  it('renders the name, POST method, url and description with the shared request layout', () => {
     const root = useRenderToDom(
       <MemoryRouter>
         <GraphqlRequest item={graphqlItem} ancestry={ancestry} collection={collection} onBreadcrumbClick={() => {}} />
@@ -58,7 +58,7 @@ describe('GraphQL request page', () => {
     expect(getByTestId(root, 'graphql-request-page')).toBeTruthy();
     expect(getByTestId(root, 'request-breadcrumb').text).toContain('Authentication');
     expect(getByTestId(root, 'request-title').text).toContain('GraphQL Details');
-    expect(getByTestId(root, 'request-method').text).toContain('GQL');
+    expect(getByTestId(root, 'request-method').text).toContain('POST');
     expect(getByTestId(root, 'request-url').text).toContain('graphql');
     expect(getByTestId(root, 'request-description').text).toContain('Fetch a country');
   });

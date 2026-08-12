@@ -7,9 +7,9 @@ test.describe('Request page — GraphQL', () => {
     await graphqlRequestPage.open(GRAPHQL_DETAILS);
   });
 
-  test('shows the GQL badge, the endpoint url and the request name', async ({ graphqlRequestPage }) => {
+  test('shows the POST method, the endpoint url and the request name', async ({ graphqlRequestPage }) => {
     await expect(graphqlRequestPage.title).toHaveText('GraphQL Details');
-    await expect(graphqlRequestPage.urlBar.method).toHaveText('GQL');
+    await expect(graphqlRequestPage.urlBar.method).toHaveText('POST');
     await expect(graphqlRequestPage.urlBar.url).toContainText('api.example.com/graphql');
   });
 

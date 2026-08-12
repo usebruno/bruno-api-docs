@@ -61,7 +61,6 @@ const RequestContent: React.FC<RequestContentProps> = ({
     <RequestPageLayout
       data={data}
       method={method}
-      badgeLabel={method}
       hasConfigContent={hasBody}
       emptyConfigSubheading="This request has no parameters, body, headers, or authentication configured. These may be inherited from the collection or folder."
       snippetBody={body}

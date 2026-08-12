@@ -6,12 +6,12 @@ import {
   getGraphqlMethod,
   getGraphqlQuery,
   getGraphqlVariables
-} from '../../utils/schemaHelpers';
-import { buildGraphqlSnippetBody } from '../../utils/graphql';
-import { Section } from '../../components/Section/Section';
-import { Code } from '../../components/Code/Code';
-import { useRequestPageData } from '../../hooks/useRequestPageData';
-import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from '../../components/RequestPageLayout/RequestPageLayout';
+} from '@/utils/schemaHelpers';
+import { buildGraphqlSnippetBody } from '@/utils/graphql';
+import { Section } from '@/components/Section/Section';
+import { Code } from '@/components/Code/Code';
+import { useRequestPageData } from '@/hooks/useRequestPageData';
+import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from '@/components/RequestPageLayout/RequestPageLayout';
 
 interface GraphqlRequestProps {
   item: GraphQLRequest;

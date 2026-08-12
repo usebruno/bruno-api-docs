@@ -5,7 +5,7 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useRequestPageData, type RequestPageData } from './useRequestPageData';
-import type { SupportedRequestItem } from '../utils/schemaHelpers';
+import type { SupportedRequestItem } from '@/utils/schemaHelpers';
 
 let captured: RequestPageData;
 

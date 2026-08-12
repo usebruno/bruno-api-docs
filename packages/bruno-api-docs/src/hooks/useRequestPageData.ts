@@ -13,7 +13,7 @@ import {
   getItemDocs,
   getItemDescription,
   type SupportedRequestItem
-} from '../utils/schemaHelpers';
+} from '@/utils/schemaHelpers';
 import {
   resolveInheritedAuth,
   getPreRequestVars,
@@ -22,13 +22,13 @@ import {
   buildScriptChain,
   getScriptFlow,
   headerRows
-} from '../utils/request';
-import { collectAssertions } from '../utils/assertions';
-import { collectTests, collectRawTestScripts } from '../utils/fileUtils';
-import { resolvePathAndQueryParams } from '../utils/pathParams';
-import { buildBreadcrumbSegments } from '../utils/common';
-import { inheritedHeaderRows } from '../components/PropertyTable/inheritedRows';
-import type { BreadcrumbSegment } from '../ui/Breadcrumb/Breadcrumb';
+} from '@/utils/request';
+import { collectAssertions } from '@/utils/assertions';
+import { collectTests, collectRawTestScripts } from '@/utils/fileUtils';
+import { resolvePathAndQueryParams } from '@/utils/pathParams';
+import { buildBreadcrumbSegments } from '@/utils/common';
+import { inheritedHeaderRows } from '@/components/PropertyTable/inheritedRows';
+import type { BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
 
 export const useRequestPageData = (
   collection: OpenCollection | null | undefined,

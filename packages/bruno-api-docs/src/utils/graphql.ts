@@ -1,5 +1,5 @@
 import type { HttpRequestBody } from '@opencollection/types/requests/http';
-import { BODY_TYPES } from '../constants';
+import { BODY_TYPES } from '@/constants';
 
 export const buildGraphqlSnippetBody = (query: string, variables: string): HttpRequestBody | undefined => {
   const trimmedQuery = (query ?? '').trim();

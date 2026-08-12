@@ -11,7 +11,7 @@ import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
 import { useAppDispatch, useAppSelector } from '../../../../../store/hooks';
 import { updatePlaygroundItem, setPlaygroundResponse, selectPlaygroundResponse } from '../../../../../store/slices/playground';
-import { getItemName, isPlaygroundUnsupported } from '../../../../../utils/schemaHelpers';
+import { getItemName, isPlaygroundUnsupported } from '@/utils/schemaHelpers';
 import { getInheritedAuthSummary } from '../../../../../utils/request';
 import UnsupportedRequest from '../../../../UnsupportedRequest/UnsupportedRequest';
 import { FileNotFoundIcon } from '../../../../../assets/icons';

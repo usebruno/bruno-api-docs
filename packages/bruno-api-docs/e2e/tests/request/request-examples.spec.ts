@@ -23,6 +23,12 @@ test.describe('Request page — Examples', () => {
     await expect(examples.statusCode(BAD_REQUEST_EXAMPLE)).toHaveText('400');
   });
 
+  test('an example code snippet carries the request\'s resolved auth', async ({ requestPage }) => {
+    const { examples } = requestPage;
+    await examples.openSnippet(OK_EXAMPLE);
+    await expect(examples.snippetCode).toContainText('Bearer');
+  });
+
   test.describe('Request pane', () => {
     test('shows the query parameters by default', async ({ requestPage }) => {
       const { examples } = requestPage;

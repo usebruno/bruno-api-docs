@@ -18,7 +18,7 @@ import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { StyledWrapper } from './StyledWrapper';
 import { Overview } from '../../pages/Overview/Overview';
 import Request from '../../pages/Request/Request';
-import GraphqlRequest from '../../pages/Request/GraphqlRequest';
+import GraphqlRequest from '../../pages/GraphqlRequest/GraphqlRequest';
 import Script from '../../pages/Script/Script';
 import Folder from '../../pages/Folder/Folder';
 import Environments from '../../pages/Environments/Environments';

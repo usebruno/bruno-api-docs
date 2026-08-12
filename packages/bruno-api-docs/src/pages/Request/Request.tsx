@@ -18,8 +18,8 @@ import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeB
 import { Examples } from '../../components/Examples/Examples';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
 import { UnsupportedRequest } from '../../components/UnsupportedRequest/UnsupportedRequest';
-import { useRequestPageData } from './useRequestPageData';
-import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from './RequestPageLayout';
+import { useRequestPageData } from '../../hooks/useRequestPageData';
+import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from '../../components/RequestPageLayout/RequestPageLayout';
 
 interface RequestProps {
   item: HttpRequest | WebSocketRequest | GrpcRequest;
@@ -53,9 +53,15 @@ const RequestContent: React.FC<RequestContentProps> = ({
 
   const examplesSection = examples.length > 0 ? (
     <Section label="Examples" testId="request-section-examples" className="request-fullwidth">
-      <Examples examples={examples} method={method} url={data.url} highlightedIndex={highlightedExampleIndex} />
+      <Examples
+        examples={examples}
+        method={method}
+        url={data.url}
+        auth={data.effectiveAuth}
+        highlightedIndex={highlightedExampleIndex}
+      />
     </Section>
-  ) : undefined;
+  ) : null;
 
   return (
     <RequestPageLayout

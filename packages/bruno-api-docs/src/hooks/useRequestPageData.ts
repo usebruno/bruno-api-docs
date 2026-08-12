@@ -3,7 +3,7 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
 import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { useMarkdownRenderer } from '../../hooks';
+import { useMarkdownRenderer } from './useMarkdownRenderer';
 import {
   getItemName,
   getRequestUrl,
@@ -13,7 +13,7 @@ import {
   getItemDocs,
   getItemDescription,
   type SupportedRequestItem
-} from '../../utils/schemaHelpers';
+} from '../utils/schemaHelpers';
 import {
   resolveInheritedAuth,
   getPreRequestVars,
@@ -22,13 +22,13 @@ import {
   buildScriptChain,
   getScriptFlow,
   headerRows
-} from '../../utils/request';
-import { collectAssertions } from '../../utils/assertions';
-import { collectTests, collectRawTestScripts } from '../../utils/fileUtils';
-import { resolvePathAndQueryParams } from '../../utils/pathParams';
-import { buildBreadcrumbSegments } from '../../utils/common';
-import { inheritedHeaderRows } from '../../components/PropertyTable/inheritedRows';
-import type { BreadcrumbSegment } from '../../ui/Breadcrumb/Breadcrumb';
+} from '../utils/request';
+import { collectAssertions } from '../utils/assertions';
+import { collectTests, collectRawTestScripts } from '../utils/fileUtils';
+import { resolvePathAndQueryParams } from '../utils/pathParams';
+import { buildBreadcrumbSegments } from '../utils/common';
+import { inheritedHeaderRows } from '../components/PropertyTable/inheritedRows';
+import type { BreadcrumbSegment } from '../ui/Breadcrumb/Breadcrumb';
 
 export const useRequestPageData = (
   collection: OpenCollection | null | undefined,

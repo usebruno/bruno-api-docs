@@ -231,4 +231,54 @@ items:
     const sent = await sendWith(yaml, [0, 0]);
     expect(sent.headers?.get('X-From-Folder')).toBe('yes');
   });
+
+  it('editing an inherited header in a pre-request script stays request-local and does not corrupt the shared collection config', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Inherited Header Isolation"
+request:
+  headers:
+    - name: "X-Inherited"
+      value: "original"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('X-Inherited', 'mutated');
+`;
+    const originalFetch = global.fetch;
+    let sent: SentRequest = {};
+    global.fetch = vi.fn().mockImplementation((url: string, init: RequestInit) => {
+      sent = { url, method: init.method, headers: new Headers(init.headers), body: init.body };
+      return Promise.resolve({
+        status: 200,
+        statusText: 'OK',
+        url,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+    });
+
+    const collection = parseYaml(yaml);
+    const item = (collection as { items: unknown[] }).items[0];
+    await new RequestRunner().runRequest({
+      item: item as Parameters<RequestRunner['runRequest']>[0]['item'],
+      collection,
+      timeout: 30000
+    });
+    global.fetch = originalFetch;
+
+    const inheritedHeaders
+      = (collection as { request?: { headers?: Array<{ name: string; value: string }> } }).request?.headers ?? [];
+    const inherited = inheritedHeaders.find((h) => h.name === 'X-Inherited');
+    expect(sent.headers?.get('X-Inherited')).toBe('mutated');
+    expect(inherited?.value).toBe('original');
+  });
 });

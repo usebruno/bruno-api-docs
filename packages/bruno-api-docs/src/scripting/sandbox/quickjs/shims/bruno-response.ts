@@ -1,8 +1,8 @@
 import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
 import { marshallToVm } from '../utils';
 import { createShimHelpers } from './helpers';
-import type { CallableResponse, QueryArg, JsonValue } from '../../../utils/bruno-response';
-import { READ_ONLY_METHODS, READ_ONLY_MESSAGE } from '../../../utils/header-list';
+import type { CallableResponse, QueryArg, JsonValue } from '@/scripting/utils/bruno-response';
+import { READ_ONLY_METHODS, READ_ONLY_MESSAGE } from '@/scripting/utils/header-list';
 
 const addBrunoResponseShimToContext = (vm: QuickJSContext, res: CallableResponse) => {
   const { setValue, setMethod, setThrowingMethod, defineMethod, callVmCallback, entryCallback, reduceCallback }

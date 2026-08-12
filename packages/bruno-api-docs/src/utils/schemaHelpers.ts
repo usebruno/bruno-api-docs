@@ -25,6 +25,12 @@ type RequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest
 /** A request body as stored on an item: a single body, a list of body variants, or none. */
 export type RequestBody = HttpRequestBody | HttpRequestBodyVariant[] | undefined;
 
+export type InternalHttpRequest = HttpRequest & {
+  __brunoDisableParsingResponseJson?: boolean;
+  __bruno__executionMode?: string;
+  timeout?: number | 'inherit';
+};
+
 /**
  * Get the type of an item (from info block or root for backwards compatibility)
  */

@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { RunRequestResponse } from './index';
-import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams } from '../utils/schemaHelpers';
+import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '../utils/schemaHelpers';
 import { buildRequestUrl } from '../utils/pathParams';
 import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
 import { detectContentTypeFromBytes, isByteFormatContentType } from '../utils/response';
@@ -27,7 +27,7 @@ export const applyApiKeyToUrl = (url: string, auth: Record<string, unknown> | un
 };
 
 export class RequestExecutor {
-  async executeRequest(request: HttpRequest, options: { timeout?: number } = {}): Promise<RunRequestResponse> {
+  async executeRequest(request: InternalHttpRequest, options: { timeout?: number } = {}): Promise<RunRequestResponse> {
     const startTime = Date.now();
     const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
     const requestUrl = applyApiKeyToUrl(
@@ -40,9 +40,7 @@ export class RequestExecutor {
       const response = await fetch(requestUrl, fetchOptions);
       const endTime = Date.now();
 
-      const disableJsonParsing = Boolean(
-        (request as { __brunoDisableParsingResponseJson?: boolean }).__brunoDisableParsingResponseJson
-      );
+      const disableJsonParsing = Boolean(request.__brunoDisableParsingResponseJson);
       const responseData = await this.parseResponse(response, disableJsonParsing);
       const responseHeaders = this.parseHeaders(response.headers);
 
@@ -74,12 +72,12 @@ export class RequestExecutor {
     }
   }
 
-  private async buildFetchOptions(request: HttpRequest, timeout = DEFAULT_TIMEOUT_MS): Promise<RequestInit> {
+  private async buildFetchOptions(request: InternalHttpRequest, timeout = DEFAULT_TIMEOUT_MS): Promise<RequestInit> {
     // `fetch` upper-cases only the methods it knows, so a collection storing
     // `purge` would go out lower-cased while the badge shows PURGE.
     const method = getHttpMethod(request).trim().toUpperCase();
 
-    const configuredTimeout = request.settings?.timeout ?? (request as { timeout?: number | 'inherit' }).timeout;
+    const configuredTimeout = request.settings?.timeout ?? request.timeout;
     const effectiveTimeout = typeof configuredTimeout === 'number' ? configuredTimeout : timeout;
     const options: RequestInit = {
       method,

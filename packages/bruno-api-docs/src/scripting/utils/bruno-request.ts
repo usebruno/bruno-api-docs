@@ -1,4 +1,4 @@
-import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestBody } from '@opencollection/types/requests/http';
+import type { HttpRequestHeader, HttpRequestParam, HttpRequestBody } from '@opencollection/types/requests/http';
 import type { Tag } from '@opencollection/types/common/tags';
 import {
   getRequestUrl,
@@ -7,22 +7,18 @@ import {
   getHttpBody,
   getHttpParams,
   getRequestAuth,
-  getItemName
+  getItemName,
+  type InternalHttpRequest
 } from '../../utils/schemaHelpers';
 import { createRequestHeaderList, type HeaderList } from './header-list';
 import type { JsonValue } from './bruno-response';
-
-type RequestConfig = HttpRequest & {
-  __brunoDisableParsingResponseJson?: boolean;
-  __bruno__executionMode?: string;
-};
 
 const RAW_BODY_TYPES = ['json', 'text', 'xml', 'sparql'] as const;
 
 const sameName = (a: string, b: string): boolean => a.toLowerCase() === b.toLowerCase();
 
 class BrunoRequest {
-  req: RequestConfig;
+  req: InternalHttpRequest;
   url: string;
   method: string;
   headers: Record<string, string>;
@@ -34,7 +30,7 @@ class BrunoRequest {
   headerList: HeaderList;
   private warnings: string[] | undefined;
 
-  constructor(req: RequestConfig, warnings?: string[]) {
+  constructor(req: InternalHttpRequest, warnings?: string[]) {
     this.req = req;
     this.warnings = warnings;
     this.headerList = createRequestHeaderList(() => this.headersArray());
@@ -187,7 +183,7 @@ class BrunoRequest {
   }
 
   getTimeout() {
-    return this.req.settings?.timeout ?? (this.req as { timeout?: number | 'inherit' }).timeout;
+    return this.req.settings?.timeout ?? this.req.timeout;
   }
 
   setTimeout(timeout: number) {

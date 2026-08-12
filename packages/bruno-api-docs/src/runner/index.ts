@@ -10,7 +10,7 @@ import { getCollectionFolderRequestVariables } from './utils/variable-merger';
 import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '../utils/variableDataType';
 import { externalSecretValues, type ExternalSecretEntry } from '../utils/variableResolution';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
-import { getRequestScripts, getRequestAssertions, scriptsArrayToObject } from '../utils/schemaHelpers';
+import { getRequestScripts, getRequestAssertions, scriptsArrayToObject, type InternalHttpRequest } from '../utils/schemaHelpers';
 
 interface DeclaredEnvironmentVariable {
   name?: string;
@@ -105,8 +105,8 @@ export class RequestRunner {
       const environmentVariables = this.getEnvironmentVariables(environment);
       const processEnvVars = typeof process !== 'undefined' && process.env ? process.env : {};
 
-      const processedRequest = await this.preprocessRequest(item, collection);
-      (processedRequest as { __bruno__executionMode?: string }).__bruno__executionMode = 'standalone';
+      const processedRequest: InternalHttpRequest = await this.preprocessRequest(item, collection);
+      processedRequest.__bruno__executionMode = 'standalone';
 
       const { collectionVariables, folderVariables, requestVariables } = getCollectionFolderRequestVariables(collection, processedRequest);
 

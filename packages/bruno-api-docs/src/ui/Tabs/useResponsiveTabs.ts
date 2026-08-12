@@ -76,13 +76,11 @@ export const useResponsiveTabs = (
     let rightWidth = rightEl?.offsetWidth ?? 0;
     let rightModeled = false;
     if (rightContentExpandedWidth != null && rightEl != null && rightEl.children.length > 0) {
-      const children = rightEl.children;
-      const expandableIndex = children.length - 1;
-      let modeled = 0;
-      for (let i = 0; i < children.length; i += 1) {
-        modeled += i === expandableIndex ? rightContentExpandedWidth : (children[i] as HTMLElement).offsetWidth;
-      }
-      rightWidth = modeled;
+      // The trailing child (e.g. an actions block) can collapse to a compact form, so its live width
+      // understates the space it needs when expanded. Swap only that child's contribution for the
+      // supplied expanded width, taken from the slot's real width so inter-child gaps still count.
+      const expandable = rightEl.children[rightEl.children.length - 1] as HTMLElement;
+      rightWidth = rightEl.offsetWidth - expandable.offsetWidth + rightContentExpandedWidth;
       rightModeled = true;
     }
 
@@ -129,9 +127,9 @@ export const useResponsiveTabs = (
 
   const idsKey = ids.join(',');
 
-  // Recompute when responsiveness toggles, the tab set changes, or the active tab
-  // changes. idsKey/activeId are read through refs inside recalcRef, so they are
-  // listed here purely to re-run the measurement rather than referenced directly.
+  // Recompute when responsiveness toggles, the tab set changes, the active tab changes, or the
+  // supplied right-content expanded width updates. idsKey/activeId are read through refs inside
+  // recalcRef, so they are listed here purely to re-run the measurement rather than referenced directly.
   useEffect(() => {
     if (!enabled) {
       setVisibleIds((prev) => (sameOrder(prev, idsRef.current) ? prev : idsRef.current));
@@ -141,7 +139,7 @@ export const useResponsiveTabs = (
     }
     const frame = requestAnimationFrame(() => recalcRef.current());
     return () => cancelAnimationFrame(frame);
-  }, [enabled, idsKey, activeId]);
+  }, [enabled, idsKey, activeId, rightContentExpandedWidth]);
 
   // Observe only the container — the source of the available-width budget. Deliberately NOT the
   // right slot: its width is subtracted from that budget, but the trailing actions block collapses

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import type { Variable } from '@opencollection/types/common/variables';
+import type { Variable, SecretProviderType } from '@opencollection/types/common/variables';
 import type { KeyValueRow } from '../../../../../components/KeyValueTable/KeyValueTable';
 import KeyValueTable from '../../../../../components/KeyValueTable/KeyValueTable';
 import Tabs from '../../../../../ui/Tabs/Tabs';
@@ -26,14 +26,12 @@ const ENV_TABS = [
 
 type EnvTabId = (typeof ENV_TABS)[number]['id'];
 
-// Local mirror: @opencollection/types@0.9.2 dist doesn't export SecretProviderType (importing it fails tsc).
-type SecretProviderType = 'hashicorp-vault-cloud' | 'hashicorp-vault-server' | 'aws-secrets-manager' | 'azure-key-vault';
-
-const SECRET_POINTER_FIELD: Record<SecretProviderType, 'path' | 'secretName' | 'vaultName'> = {
+const SECRET_POINTER_FIELD: Record<SecretProviderType, 'path' | 'secretName' | 'vaultName' | 'projectId'> = {
   'hashicorp-vault-cloud': 'path',
   'hashicorp-vault-server': 'path',
   'aws-secrets-manager': 'secretName',
-  'azure-key-vault': 'vaultName'
+  'azure-key-vault': 'vaultName',
+  'gcp-secrets-manager': 'projectId'
 };
 
 interface TabPanelProps {

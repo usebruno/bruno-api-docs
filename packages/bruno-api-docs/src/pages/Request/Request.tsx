@@ -256,6 +256,7 @@ const RequestContent: React.FC<RequestContentProps> = ({
               examples={examples}
               method={method}
               url={url}
+              auth={effectiveAuth}
               highlightedIndex={highlightedExampleIndex}
             />
           </Section>

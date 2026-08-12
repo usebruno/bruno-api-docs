@@ -15,11 +15,14 @@ import { getBodyView, getDescription, headerRows } from '../../../utils/request'
 import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '../../../utils/exampleResponse';
 import { statusToneColor } from '../../../utils/common';
 import { StyledWrapper } from './StyledWrapper';
+import type { Auth } from '@opencollection/types/common/auth';
+import { CodeSnippetTabs } from '../../CodeSnippetTabs/CodeSnippetTabs';
 
 interface ExampleCardProps {
   example: HttpRequestExample;
   method: string;
   url: string;
+  auth?: Auth;
   defaultExpanded?: boolean;
   active?: boolean;
   testId?: string;
@@ -163,7 +166,7 @@ const Pane: React.FC<{
   );
 };
 
-export const ExampleCard: React.FC<ExampleCardProps> = ({ example, method, url, defaultExpanded, active, testId = 'example-card' }) => {
+export const ExampleCard: React.FC<ExampleCardProps> = ({ example, method, url, auth, defaultExpanded, active, testId = 'example-card' }) => {
   const [expanded, setExpanded] = useState(Boolean(defaultExpanded));
   const [mounted, setMounted] = useState(Boolean(defaultExpanded));
   const detailId = useId();
@@ -324,6 +327,15 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({ example, method, url, 
                 <TruncatedText className="example-url-text" text={displayUrl}>
                   <VariableText value={displayUrl} />
                 </TruncatedText>
+                <CodeSnippetTabs
+                  variant="embedded"
+                  method={displayMethod}
+                  url={displayUrl}
+                  headers={request.headers}
+                  body={request.body}
+                  auth={auth}
+                  testId="example-code-snippet"
+                />
                 <CopyButton text={displayUrl} />
               </div>
 

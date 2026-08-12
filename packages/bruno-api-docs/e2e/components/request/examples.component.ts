@@ -29,6 +29,24 @@ export class ExamplesComponent extends BaseComponent {
     await this.example(name).getByTestId('example-toggle').click();
   }
 
+  // The snippet dialog is portalled to <body>, so it is scoped to the page, not the card.
+  readonly snippetModal = this.page.getByRole('dialog', { name: 'Code snippet' });
+
+  readonly snippetCode = this.snippetModal.getByTestId('code-snippet-code');
+
+  snippetButton(name: string): Locator {
+    return this.example(name).getByTestId('example-code-snippet-trigger');
+  }
+
+  snippetLanguageTab(language: string): Locator {
+    return this.snippetModal.getByTestId(`code-snippet-tab-${language}`);
+  }
+
+  async openSnippet(name: string): Promise<void> {
+    await this.snippetButton(name).click();
+    await this.snippetModal.waitFor({ state: 'visible' });
+  }
+
   async selectRequestTab(name: string, tab: string): Promise<void> {
     await this.example(name).getByTestId(`example-request-pane-tab-${tab}`).click();
   }

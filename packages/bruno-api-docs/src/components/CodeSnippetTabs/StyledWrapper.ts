@@ -89,4 +89,33 @@ export const StyledWrapper = styled.div`
     align-self: center;
     flex: 0 0 auto;
   }
+
+  .snippet-trigger {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.3rem 0.5rem;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--text-tertiary);
+    background-color: var(--oc-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--oc-radius);
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      background-color 0.15s ease;
+  }
+  .snippet-trigger:hover {
+    color: var(--text-secondary);
+    background-color: var(--badge-bg);
+  }
+
+  .snippet-trigger:focus-visible {
+    outline: none;
+  }
 `;

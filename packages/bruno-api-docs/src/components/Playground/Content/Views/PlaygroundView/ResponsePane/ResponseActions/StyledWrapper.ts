@@ -3,13 +3,24 @@ import styled from '@emotion/styled';
 export const StyledWrapper = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 
   .actions-dropdown { display: flex; }
   .actions-buttons { display: none; }
 
-  .expandable & {
-    .actions-dropdown { display: none; }
-    .actions-buttons { display: flex; align-items: center; gap: 0.5rem; }
+  .more-actions-button {
+    border: 1px solid var(--oc-input-border);
+    height: 1.25rem;
+  }
+
+  .expandable &,
+  &.render-action-buttons-only {
+    .actions-dropdown { 
+      display: none; 
+    }
+    .actions-buttons { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.125rem; 
+    }
   }
 `;

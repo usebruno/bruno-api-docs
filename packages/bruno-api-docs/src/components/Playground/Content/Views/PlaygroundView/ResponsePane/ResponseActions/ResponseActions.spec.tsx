@@ -115,6 +115,16 @@ describe('ResponseActions', () => {
     });
   });
 
+  describe('buttons-only rendering', () => {
+    it('renders buttons-only with no testids or dropdown so the tab bar can measure its width', () => {
+      const root = render({ renderActionButtonsOnly: true });
+      getByTestId(root, 'forceful-renderred-action-buttons');
+      expect(query(root, '[aria-label="Copy Response"]')).toBeTruthy();
+      expect(query(root, '[aria-label="Change Layout"]')).toBeTruthy();
+      expect(root.querySelector('[aria-label="More actions"]')).toBeNull();
+    });
+  });
+
   describe('collapsed kebab menu', () => {
     it('renders the "More actions" dropdown trigger, closed by default', () => {
       const root = render();

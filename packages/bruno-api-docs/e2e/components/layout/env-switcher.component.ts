@@ -14,6 +14,7 @@ export class EnvSwitcherComponent extends BaseComponent {
   readonly showVarsToggle = this.page.getByTestId('show-vars-toggle');
   readonly trigger: Locator;
   readonly menu: Locator;
+  readonly surface: Locator;
   readonly emptyOption: Locator;
 
   constructor(
@@ -23,6 +24,7 @@ export class EnvSwitcherComponent extends BaseComponent {
     super(page, page.getByTestId(`${base}-root`));
     this.trigger = this.root.getByTestId(base);
     this.menu = this.page.getByTestId(`${base}-dropdown`);
+    this.surface = this.menu.locator('xpath=ancestor::div[@data-tippy-root]');
     this.emptyOption = this.option('no-environments');
   }
 

@@ -13,15 +13,20 @@ test.describe('Request page — GraphQL', () => {
     await expect(graphqlRequestPage.urlBar.url).toContainText('api.example.com/graphql');
   });
 
+  test('shows the breadcrumb with the parent folder and the current request', async ({ graphqlRequestPage }) => {
+    await expect(graphqlRequestPage.breadcrumb.current).toHaveText('GraphQL Details');
+    await expect(graphqlRequestPage.breadcrumb.segment('Realtime')).toBeVisible();
+  });
+
   test('does not offer a Try button (the interactive playground does not support graphql yet)', async ({ graphqlRequestPage }) => {
     await expect(graphqlRequestPage.urlBar.tryButton).toHaveCount(0);
   });
 
-  test('renders a Query section and a Variables section instead of a Body section', async ({ graphqlRequestPage, page }) => {
-    await expect(graphqlRequestPage.section('Query')).toBeVisible();
-    await expect(graphqlRequestPage.section('Query')).toContainText('country');
-    await expect(graphqlRequestPage.section('Variables')).toBeVisible();
-    await expect(graphqlRequestPage.section('Variables')).toContainText('countryCode');
+  test('renders the GraphQL query and variables instead of a Body section', async ({ graphqlRequestPage, page }) => {
+    await expect(graphqlRequestPage.query).toBeVisible();
+    await expect(graphqlRequestPage.query).toContainText('country');
+    await expect(graphqlRequestPage.variables).toBeVisible();
+    await expect(graphqlRequestPage.variables).toContainText('countryCode');
     await expect(page.getByTestId('request-section-body')).toHaveCount(0);
   });
 
@@ -37,17 +42,14 @@ test.describe('Request page — GraphQL', () => {
   });
 
   test('builds a GraphQL POST code snippet from the query and variables', async ({ graphqlRequestPage }) => {
-    const snippet = graphqlRequestPage.section('Code Snippet');
-    await expect(snippet).toBeVisible();
-    await expect(snippet).toContainText('graphql');
-    await expect(snippet).toContainText('query');
+    await expect(graphqlRequestPage.codeSnippet.code).toContainText('graphql');
+    await expect(graphqlRequestPage.codeSnippet.code).toContainText('query');
   });
 
-  test('shows the Execution Context with the request variables and set-variable actions', async ({ graphqlRequestPage }) => {
-    const exec = graphqlRequestPage.section('Execution Context');
-    await expect(exec).toBeVisible();
-    await expect(exec).toContainText('countryCode');
-    await expect(exec).toContainText('countryName');
+  test('shows the Execution Context variables, including set-variable actions', async ({ graphqlRequestPage }) => {
+    await graphqlRequestPage.executionContext.openTab('variables');
+    await expect(graphqlRequestPage.executionContext.variable('countryCode')).toBeVisible();
+    await expect(graphqlRequestPage.executionContext.variable('countryName')).toBeVisible();
   });
 
   test('renders the request description and no Params section for a request without params', async ({ graphqlRequestPage, page }) => {

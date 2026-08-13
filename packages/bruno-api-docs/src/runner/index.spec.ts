@@ -535,7 +535,7 @@ describe('RequestExecutor parseResponse — content-type handling', () => {
     const res = await run();
     expect(res.detectedContentType).toBe('image/svg+xml');
     expect(res.data).toContain('<svg');
-    expect(res.base64Data).toBeUndefined();
+    expect(res.base64Data).toBe('PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjwvc3ZnPg==');
     global.fetch = originalFetch;
   });
 

@@ -79,6 +79,8 @@ class BrunoResponse {
     res.data = clonedData;
     this.body = clonedData;
     this.bodyReplaced = true;
+    res.dataBuffer = undefined;
+    res.base64Data = undefined;
   }
 
   getSize() {

@@ -5,8 +5,9 @@ import type { CallableResponse, QueryArg, JsonValue } from '@/scripting/utils/br
 import { READ_ONLY_METHODS, READ_ONLY_MESSAGE } from '@/scripting/utils/header-list';
 
 const addBrunoResponseShimToContext = (vm: QuickJSContext, res: CallableResponse) => {
-  const { setValue, setMethod, setThrowingMethod, defineMethod, callVmCallback, entryCallback, reduceCallback }
-    = createShimHelpers(vm);
+  const {
+    setValue, defineGetter, setMethod, setThrowingMethod, defineMethod, callVmCallback, entryCallback, reduceCallback
+  } = createShimHelpers(vm);
 
   const toHostQueryArg = (arg: QuickJSHandle): QueryArg => {
     if (vm.typeof(arg) !== 'function') return vm.dump(arg) as QueryArg;
@@ -21,7 +22,7 @@ const addBrunoResponseShimToContext = (vm: QuickJSContext, res: CallableResponse
   setValue(resFn, 'status', res.status);
   setValue(resFn, 'statusText', res.statusText);
   setValue(resFn, 'headers', res.headers);
-  setValue(resFn, 'body', res.body);
+  defineGetter(resFn, 'body', () => res.getBody());
   setValue(resFn, 'responseTime', res.responseTime);
   setValue(resFn, 'url', res.url);
 

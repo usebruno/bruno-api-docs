@@ -146,6 +146,11 @@ describe('ScriptRuntime', () => {
         expect(s).to.match(/Lin/);
         expect(s).to.not.match(/Ada/);
       });
+      await test('res.body reflects res.setBody mid-script and agrees with getBody (live getter, not a start-of-script snapshot)', () => {
+        res.setBody({ replaced: true });
+        expect(res.body.replaced).to.eql(true);
+        expect(JSON.stringify(res.body)).to.eql(JSON.stringify(res.getBody()));
+      });
     `;
 
     const bru = await runtime.runScript({
@@ -159,7 +164,7 @@ describe('ScriptRuntime', () => {
     if (!bru.getTestResults) throw new Error('getTestResults was not attached to bru');
     const results = await bru.getTestResults();
     expect(results.summary.failed).toBe(0);
-    expect(results.summary.total).toBe(6);
+    expect(results.summary.total).toBe(7);
   });
 
   it('runs the full req API inside the QuickJS sandbox — reads the nested http shape, and setter/headerList writes reach the request object', async () => {
@@ -212,6 +217,13 @@ describe('ScriptRuntime', () => {
         expect(req.getHeader('X-Script')).to.eql('yes');
         expect(req.headerList.has('x-added')).to.eql(true);
       });
+      await test('req.headers reflects mid-script mutations and agrees with getHeaders (live getter, not a start-of-script snapshot)', () => {
+        req.setHeader('X-Live', 'now');
+        req.headerList.add('X-Also', 'too');
+        expect(req.headers['X-Live']).to.eql('now');
+        expect(req.headers['X-Also']).to.eql('too');
+        expect(JSON.stringify(req.headers)).to.eql(JSON.stringify(req.getHeaders()));
+      });
     `;
 
     const bru = await runtime.runScript({
@@ -225,7 +237,7 @@ describe('ScriptRuntime', () => {
     if (!bru.getTestResults) throw new Error('getTestResults was not attached to bru');
     const results = await bru.getTestResults();
     expect(results.summary.failed).toBe(0);
-    expect(results.summary.total).toBe(5);
+    expect(results.summary.total).toBe(6);
 
     expect(mockRequest.http.url).toBe('https://api.example.com/v2');
     expect(mockRequest.http.body).toEqual({ type: 'json', data: '{"updated":true}' });

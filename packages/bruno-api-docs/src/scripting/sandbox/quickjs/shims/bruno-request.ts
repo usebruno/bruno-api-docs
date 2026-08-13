@@ -5,13 +5,13 @@ import type { HeaderEntry } from '@/scripting/utils/header-list';
 import type BrunoRequest from '@/scripting/utils/bruno-request';
 
 const addBrunoRequestShimToContext = (vm: QuickJSContext, req: BrunoRequest) => {
-  const { setValue, setMethod, defineMethod, entryCallback, reduceCallback } = createShimHelpers(vm);
+  const { setValue, defineGetter, setMethod, defineMethod, entryCallback, reduceCallback } = createShimHelpers(vm);
 
   const reqObject = vm.newObject();
 
   setValue(reqObject, 'url', req.getUrl());
   setValue(reqObject, 'method', req.getMethod());
-  setValue(reqObject, 'headers', req.getHeaders());
+  defineGetter(reqObject, 'headers', () => req.getHeaders());
   const bodyHandle = marshallToVm(req.getBody() ?? null, vm);
   vm.setProp(reqObject, 'body', bodyHandle);
   bodyHandle.dispose();

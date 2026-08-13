@@ -21,7 +21,6 @@ class BrunoRequest {
   req: InternalHttpRequest;
   url: string;
   method: string;
-  headers: Record<string, string>;
   timeout: number | 'inherit' | undefined;
   name: string | undefined;
   pathParams: Array<{ name: string; value: string; type: string }>;
@@ -36,7 +35,6 @@ class BrunoRequest {
     this.headerList = createRequestHeaderList(() => this.headersArray());
     this.url = getRequestUrl(req);
     this.method = getHttpMethod(req);
-    this.headers = this.headerList.toObject(true) as Record<string, string>;
     this.timeout = this.getTimeout();
     this.name = this.getName();
     this.pathParams = this.getPathParams();
@@ -120,6 +118,10 @@ class BrunoRequest {
     this.http().method = method;
   }
 
+  get headers(): Record<string, string> {
+    return this.getHeaders();
+  }
+
   getHeaders() {
     return this.headerList.toObject(true) as Record<string, string>;
   }
@@ -130,7 +132,6 @@ class BrunoRequest {
     list.length = 0;
     disabled.forEach((h) => list.push(h));
     Object.entries(headers || {}).forEach(([name, value]) => list.push({ name, value: String(value ?? '') }));
-    this.headers = this.headerList.toObject(true) as Record<string, string>;
   }
 
   getHeader(name: string) {

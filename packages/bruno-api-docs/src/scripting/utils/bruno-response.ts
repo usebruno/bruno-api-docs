@@ -78,23 +78,7 @@ class BrunoResponse {
     const clonedData = cloneDeep(data);
     res.data = clonedData;
     this.body = clonedData;
-
-    let dataBuffer: Buffer;
-    if (clonedData == null) {
-      dataBuffer = Buffer.from('');
-    } else if (typeof clonedData === 'string') {
-      dataBuffer = Buffer.from(clonedData);
-    } else {
-      try {
-        dataBuffer = Buffer.from(JSON.stringify(clonedData));
-      } catch {
-        dataBuffer = Buffer.from('');
-      }
-    }
-
-    res.dataBuffer = dataBuffer;
-    res.base64Data = dataBuffer.toString('base64');
-    res.size = dataBuffer.length;
+    this.bodyReplaced = true;
   }
 
   getSize() {

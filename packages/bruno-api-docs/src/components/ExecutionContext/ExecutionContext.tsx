@@ -29,7 +29,7 @@ interface ExecutionContextProps {
   tests: TestRow[];
   testScripts?: RawTestScript[];
   flow?: ScriptFlow;
-  method?: string;
+  requestLabel?: string;
   url?: string;
   variant?: 'tabs' | 'docs';
   className?: string;
@@ -65,7 +65,7 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
   tests,
   testScripts = [],
   flow = 'sandwich',
-  method,
+  requestLabel,
   url,
   variant = 'tabs',
   className,
@@ -88,7 +88,9 @@ export const ExecutionContext: React.FC<ExecutionContextProps> = ({
   const inheritedVarCount = inheritedPreVars.length + inheritedPostVars.length;
   const inheritedVarsBadge
     = inheritedVarCount > 0 ? <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} /> : undefined;
-  const scripts = <ScriptChain steps={scriptChain} flow={flow} method={method} url={url} onNavigate={onNavigate} />;
+  const scripts = (
+    <ScriptChain steps={scriptChain} flow={flow} requestLabel={requestLabel} url={url} onNavigate={onNavigate} />
+  );
   const variables = (
     <VariablesPanel
       preVars={preVars}

@@ -6,6 +6,7 @@ import { GraphqlRequestPage } from '../pages/graphql-request.page';
 import { ScriptPage } from '../pages/script.page';
 import { FolderPage } from '../pages/folder.page';
 import { UnsupportedRequestPage } from '../pages/unsupported-request.page';
+import { GrpcRequestPage } from '../pages/grpc-request.page';
 import { SidebarComponent } from '../components/sidebar.component';
 import { TooltipComponent } from '../components/tooltip.component';
 import { PlaygroundComponent } from '../components/playground.component';
@@ -26,6 +27,7 @@ type Fixtures = {
   scriptPage: ScriptPage;
   folderPage: FolderPage;
   unsupportedRequestPage: UnsupportedRequestPage;
+  grpcRequestPage: GrpcRequestPage;
   sidebar: SidebarComponent;
   tooltip: TooltipComponent;
   playground: PlaygroundComponent;
@@ -60,6 +62,9 @@ export const test = base.extend<Fixtures>({
   },
   unsupportedRequestPage: async ({ page }, use) => {
     await use(new UnsupportedRequestPage(page));
+  },
+  grpcRequestPage: async ({ page }, use) => {
+    await use(new GrpcRequestPage(page));
   },
   sidebar: async ({ page }, use) => {
     await use(new SidebarComponent(page));

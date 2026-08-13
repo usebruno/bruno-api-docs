@@ -11,7 +11,9 @@ describe('LargeResponseWarning', () => {
   const response: RunRequestResponse = { data: { hello: 'world' }, base64Data: 'aGVsbG8=' };
 
   it('renders the warning icon', () => {
-    const root = useRenderToDom(<LargeResponseWarning responseSize={responseSize} onReveal={() => {}} />);
+    const root = useRenderToDom(
+      <LargeResponseWarning responseSize={responseSize} response={response} onReveal={() => {}} />
+    );
     query(root, '.warning-icon');
   });
 

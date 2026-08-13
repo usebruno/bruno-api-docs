@@ -12,14 +12,15 @@ export const StyledWrapper = styled.div`
     height: 1.25rem;
   }
 
-  .expandable & {
+  .expandable &,
+  &.render-action-buttons-only {
     .actions-dropdown { 
       display: none; 
     }
     .actions-buttons { 
-      display: flex;
-      align-items: center;
-      gap: 0.125rem;
+      display: flex; 
+      align-items: center; 
+      gap: 0.125rem; 
     }
   }
 `;

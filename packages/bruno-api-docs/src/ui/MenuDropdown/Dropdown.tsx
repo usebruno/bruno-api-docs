@@ -11,6 +11,11 @@ export interface DropdownProps extends Omit<TippyProps, 'render' | 'children' | 
   /** Mouse handlers applied to the popover surface (used for hover-driven submenus). */
   onMouseEnter?: React.MouseEventHandler<HTMLDivElement>;
   onMouseLeave?: React.MouseEventHandler<HTMLDivElement>;
+  /**
+   * The popover width is set to the maximum of the content width and the trigger width,
+   * it never renders narrower than the trigger, but still grows for wider content.
+   */
+  matchTriggerWidth?: boolean;
 }
 
 /**
@@ -29,6 +34,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
   onMouseEnter,
   onMouseLeave,
   className,
+  matchTriggerWidth,
   ...props
 }) => {
   // Default to portaling the popover to <body> so it escapes any `overflow:
@@ -37,11 +43,35 @@ export const Dropdown: React.FC<DropdownProps> = ({
   // `appendTo` is itself the portal — no separate createPortal is needed.
   const resolvedAppendTo = appendTo ?? (() => document.body);
 
+  // Popper modifier that floors the popover's min-width at the trigger's width.
+  // `effect` sets it before popper first measures the popover (so the initial
+  // placement uses the widened box); `fn` keeps it in sync on later updates.
+  const resolvedPopperOptions: TippyProps['popperOptions'] = matchTriggerWidth
+    ? {
+        ...props.popperOptions,
+        modifiers: [
+          ...(props.popperOptions?.modifiers ?? []),
+          {
+            name: 'matchTriggerWidth',
+            enabled: true,
+            phase: 'beforeWrite',
+            requires: ['computeStyles'],
+            fn: ({ state }) => {
+              state.styles.popper.minWidth = `${state.rects.reference.width}px`;
+            },
+            effect: ({ state }) => {
+              state.elements.popper.style.minWidth = `${(state.elements.reference as HTMLElement).offsetWidth}px`;
+            }
+          }
+        ]
+      }
+    : props.popperOptions;
+
   // When controlled (visible provided) Tippy must not also manage a trigger.
   const tippyProps: Partial<TippyProps>
     = visible !== undefined
-      ? { ...props, visible, interactive: true, appendTo: resolvedAppendTo }
-      : { ...props, trigger: 'click', interactive: true, appendTo: resolvedAppendTo };
+      ? { ...props, visible, interactive: true, appendTo: resolvedAppendTo, popperOptions: resolvedPopperOptions }
+      : { ...props, trigger: 'click', interactive: true, appendTo: resolvedAppendTo, popperOptions: resolvedPopperOptions };
 
   return (
     <Tippy

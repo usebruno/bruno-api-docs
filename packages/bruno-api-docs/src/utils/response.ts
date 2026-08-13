@@ -19,6 +19,8 @@ import {
   RESPONSE_FORMAT_RULES
 } from '../constants';
 
+export type { ResponseBodyFormat } from '../constants';
+
 // Normalize a response's content-type header into a canonical MIME type, or '' when absent.
 export function getContentType(headers: RunRequestResponse['headers']): string {
   if (!headers || typeof headers !== 'object' || Object.keys(headers).length === 0) {

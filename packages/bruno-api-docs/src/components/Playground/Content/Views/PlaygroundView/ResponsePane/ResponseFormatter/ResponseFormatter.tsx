@@ -10,6 +10,7 @@ import {
   FORMAT_ICONS
 } from '@/constants';
 import PreviewToggleHeader from './PreviewToggleHeader/PreviewToggleHeader';
+import { StyledWrapper } from './StyledWrapper';
 
 interface ResponseFormatSelectorProps {
   handleSelection?: (value: ResponseBodyFormat) => void;
@@ -46,27 +47,28 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
   const TriggerIcon = showPreview ? IconEye : selectedFormat ? FORMAT_ICONS[selectedFormat] : undefined;
 
   return (
-    <MenuDropdown
-      items={items}
-      selectedItemId={selectedFormat}
-      itemToText={(item: MenuDropdownItem) => (
-        <span className="inline-flex items-center gap-1.5">
-          {TriggerIcon && (
-            <TriggerIcon
-              size={14}
-              stroke={1.5}
-              aria-hidden
-              data-testid="response-format-selector-trigger-icon"
-              style={{ color: 'var(--oc-brand)' }}
-            />
-          )}
-          {item.label}
-        </span>
-      )}
-      placement="bottom-end"
-      header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
-      testId="response-format-selector"
-    />
+    <StyledWrapper>
+      <MenuDropdown
+        items={items}
+        selectedItemId={selectedFormat}
+        itemToText={(item: MenuDropdownItem) => (
+          <span className="inline-flex items-center gap-1.5">
+            {TriggerIcon && (
+              <TriggerIcon
+                size={14}
+                stroke={1.5}
+                aria-hidden
+                data-testid="response-format-selector-trigger-icon"
+              />
+            )}
+            {item.label}
+          </span>
+        )}
+        placement="bottom-end"
+        header={<PreviewToggleHeader checked={showPreview} onChange={toggleView} />}
+        testId="response-format-selector"
+      />
+    </StyledWrapper>
   );
 };
 

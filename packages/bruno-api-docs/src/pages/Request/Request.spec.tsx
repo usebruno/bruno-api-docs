@@ -4,9 +4,10 @@ import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
 import { MemoryRouter } from 'react-router-dom';
+import type { RequestItem } from '@/utils/schemaHelpers';
 import { Request } from './Request';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 
 const collection: OpenCollection = {
   info: { name: 'Auth API', version: '1.0.0' },
@@ -269,5 +270,31 @@ describe('Request page', () => {
     expect(description.text).toContain('(c)');
     expect(description.text).not.toContain('–'); // en-dash
     expect(description.text).not.toContain('©'); // ©
+  });
+});
+
+describe('Request — unrecognised request types', () => {
+  const unknownItem = (data: Record<string, unknown>): RequestItem => data as unknown as RequestItem;
+
+  it('renders a type the viewer has no page for as a request rather than a blank page', () => {
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <Request item={unknownItem({ info: { name: 'Quantum Ping', type: 'quic' }, url: 'quic://h:1' })} />
+      </MemoryRouter>
+    );
+
+    expect(getByTestId(root, 'request-page')).toBeTruthy();
+    expect(getByTestId(root, 'request-title').text).toContain('Quantum Ping');
+  });
+
+  it('does the same for an item that names no type at all', () => {
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <Request item={unknownItem({ info: { name: 'Mystery' } })} />
+      </MemoryRouter>
+    );
+
+    expect(getByTestId(root, 'request-page')).toBeTruthy();
+    expect(getByTestId(root, 'request-title').text).toContain('Mystery');
   });
 });

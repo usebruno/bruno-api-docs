@@ -7,5 +7,8 @@ export const StyledWrapper = styled.span`
   font-weight: 700;
   font-size: 0.75rem;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
+
+  &.method-badge--as-written {
+    text-transform: none;
+  }
 `;

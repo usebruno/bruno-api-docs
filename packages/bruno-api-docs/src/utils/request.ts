@@ -22,7 +22,8 @@ import {
   getRequestVariables,
   getRequestHeaders,
   pickSelectedVariant,
-  type SupportedRequestItem
+  type SupportedRequestItem,
+  type RequestItem
 } from './schemaHelpers';
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
@@ -91,7 +92,7 @@ export const resolveInheritedAuth = (
   ancestors: Item[],
   item: Item
 ): ResolvedAuth => {
-  const own = getRequestAuth(item as HttpRequest) as Auth | undefined;
+  const own = getRequestAuth(item as RequestItem) as Auth | undefined;
   if (own !== 'inherit') return { auth: own };
 
   // Walk ancestors leaf->root. Only an `inherit` folder is transparent; the first folder that
@@ -130,7 +131,7 @@ export const getInheritedAuthSummary = (
   ancestors: Item[],
   item: Item
 ): InheritedAuthSummary | null => {
-  if (getRequestAuth(item as HttpRequest) !== 'inherit') return null;
+  if (getRequestAuth(item as RequestItem) !== 'inherit') return null;
   const resolved = resolveInheritedAuth(collection, ancestors, item);
   return {
     sourceName: resolved.source?.name || collection?.info?.name || 'Collection',
@@ -347,8 +348,11 @@ const toPostResponseVarRow = (action: Action): PostResponseVarRow => ({
 export const getPreRequestVars = (item: SupportedRequestItem): PreRequestVarRow[] =>
   getRequestVariables(item).map(toPreRequestVarRow);
 
-export const getPostResponseVars = (item: SupportedRequestItem): PostResponseVarRow[] =>
-  (item.runtime?.actions ?? []).filter(isAfterResponseSetVariable).map(toPostResponseVarRow);
+export const getPostResponseVars = (item: SupportedRequestItem): PostResponseVarRow[] => {
+  const runtime = item.runtime;
+  const actions = runtime && 'actions' in runtime ? runtime.actions ?? [] : [];
+  return actions.filter(isAfterResponseSetVariable).map(toPostResponseVarRow);
+};
 
 // Bridge the OC actions model (after-response set-variable) to the editable Variables rows, and back.
 export const actionsToPostResponseVars = (actions: Action[] = []): PostResponseVar[] =>

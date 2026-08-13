@@ -41,7 +41,7 @@ describe('ScriptChain', () => {
   });
 
   it('numbers every row 1..N in display order, including the HTTP marker', () => {
-    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" url="http://x" method="POST" />);
+    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" url="http://x" />);
     expect(html).toContain('HTTP');
     // 3 post-response steps + 1 marker → positions 1..4 are present.
     ['>1<', '>2<', '>3<', '>4<'].forEach((n) => expect(html).toContain(n));

@@ -186,7 +186,6 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
               tests={tests}
               testScripts={testScripts}
               flow={scriptFlow}
-              method={method}
               url={url}
               onNavigate={onBreadcrumbClick}
             />

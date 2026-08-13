@@ -37,6 +37,13 @@ export const STANDARD_HTTP_METHODS = [
   'CONNECT'
 ] as const;
 
+export const GRPC_METHOD_TYPE_LABELS: Record<string, string> = {
+  'unary': 'Unary',
+  'client-streaming': 'Client Streaming',
+  'server-streaming': 'Server Streaming',
+  'bidi-streaming': 'Bidirectional Streaming'
+};
+
 export const PROTOCOL_BADGE_LABELS: Record<string, string> = {
   GRAPHQL: 'GQL',
   GRPC: 'GRPC',

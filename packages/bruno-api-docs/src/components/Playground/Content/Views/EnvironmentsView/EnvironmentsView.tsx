@@ -26,7 +26,7 @@ const ENV_TABS = [
 
 type EnvTabId = (typeof ENV_TABS)[number]['id'];
 
-const SECRET_POINTER_FIELD: Record<SecretProviderType, 'path' | 'secretName' | 'vaultName' | 'projectId'> = {
+const SECRET_POINTER_FIELD: Record<SecretProviderType | 'gcp-secrets-manager', 'path' | 'secretName' | 'vaultName' | 'projectId'> = {
   'hashicorp-vault-cloud': 'path',
   'hashicorp-vault-server': 'path',
   'aws-secrets-manager': 'secretName',

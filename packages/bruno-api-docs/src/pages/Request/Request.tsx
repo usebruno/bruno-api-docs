@@ -2,13 +2,13 @@ import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { GrpcRequest } from '@opencollection/types/requests/grpc';
-import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import {
   getHttpMethod,
   getHttpBody,
   getRequestExamples,
-  isUnsupportedRequest
+  isWebSocketRequest,
+  isGrpcRequest,
+  type RequestItem
 } from '../../utils/schemaHelpers';
 import { getBodyView } from '@/utils/request';
 import { EyeOffIcon } from '@/assets/icons';
@@ -20,9 +20,10 @@ import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
 import { UnsupportedRequest } from '../../components/UnsupportedRequest/UnsupportedRequest';
 import { useRequestPageData } from '@/hooks/useRequestPageData';
 import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from '@/components/RequestPageLayout/RequestPageLayout';
+import { GrpcRequest } from '../GrpcRequest/GrpcRequest';
 
 interface RequestProps {
-  item: HttpRequest | WebSocketRequest | GrpcRequest;
+  item: RequestItem;
   ancestry?: Item[];
   collection?: OpenCollection | null;
   onTryClick?: () => void;
@@ -99,7 +100,18 @@ export const Request: React.FC<RequestProps> = ({
   onBreadcrumbClick,
   highlightedExampleIndex
 }) => {
-  if (isUnsupportedRequest(item)) {
+  if (isGrpcRequest(item)) {
+    return (
+      <GrpcRequest
+        item={item}
+        ancestry={ancestry}
+        collection={collection}
+        onBreadcrumbClick={onBreadcrumbClick}
+      />
+    );
+  }
+
+  if (isWebSocketRequest(item)) {
     return (
       <PageWrapper>
         <UnsupportedRequest
@@ -118,7 +130,7 @@ export const Request: React.FC<RequestProps> = ({
 
   return (
     <RequestContent
-      item={item}
+      item={item as HttpRequest}
       ancestry={ancestry}
       collection={collection}
       onTryClick={onTryClick}

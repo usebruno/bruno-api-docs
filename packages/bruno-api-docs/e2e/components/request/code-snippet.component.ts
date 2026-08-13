@@ -1,18 +1,24 @@
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 
 export class CodeSnippetComponent extends BaseComponent {
-  readonly root = this.page.getByTestId('request-code-snippet');
+  readonly code: Locator;
+  readonly copyButton: Locator;
+  readonly expandButton: Locator;
+  readonly modal: Locator;
+  readonly modalCode: Locator;
 
-  readonly code = this.root.getByTestId('code-snippet-code');
-
-  readonly copyButton = this.root.getByTestId('code-snippet-code-copy');
-
-  readonly expandButton = this.root.getByTestId('code-snippet-expand');
-
-  readonly modal = this.page.getByTestId('code-snippet-modal');
-
-  readonly modalCode = this.modal.getByTestId('code-snippet-code');
+  constructor(
+    page: Page,
+    private readonly base = 'request-code-snippet'
+  ) {
+    super(page, page.getByTestId(base));
+    this.code = this.root.getByTestId(`${base}-code`);
+    this.copyButton = this.root.getByTestId(`${base}-code-copy`);
+    this.expandButton = this.root.getByTestId(`${base}-expand`);
+    this.modal = page.getByTestId(`${base}-modal`);
+    this.modalCode = this.modal.getByTestId(`${base}-code`);
+  }
 
   variableToken(name: string): Locator {
     return this.code.getByTestId(`variable-token-${name}`).first();
@@ -23,11 +29,11 @@ export class CodeSnippetComponent extends BaseComponent {
   }
 
   languageTab(language: string): Locator {
-    return this.root.getByTestId(`code-snippet-tab-${language}`);
+    return this.root.getByTestId(`${this.base}-tab-${language}`);
   }
 
   modalLanguageTab(language: string): Locator {
-    return this.modal.getByTestId(`code-snippet-tab-${language}`);
+    return this.modal.getByTestId(`${this.base}-tab-${language}`);
   }
 
   async selectLanguage(language: string): Promise<void> {

@@ -89,7 +89,7 @@ const normalizeBody = (raw: SnippetInput['body']): NormalizedBody => {
  * (api-key in the query, awsv4/digest, basic with variables, …) returns a
  * `comment` instead, which the caller renders as a leading comment in the snippet.
  */
-const authToHeaders = (auth: Auth | undefined): { headers: SnippetHeader[]; comment?: string } => {
+export const authToHeaders = (auth: Auth | undefined): { headers: SnippetHeader[]; comment?: string } => {
   if (!auth || auth === 'inherit') return { headers: [] };
   switch (auth.type) {
     case AUTH_TYPES.BASIC: {

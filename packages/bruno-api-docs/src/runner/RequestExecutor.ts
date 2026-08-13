@@ -258,9 +258,7 @@ export class RequestExecutor {
     // aren't round-trippable). A small plain-text/SVG string body carries its own bytes, so skip the
     // redundant copy — but oversized bodies are still encoded here, since they're actioned
     // (download/copy) from the reveal warning; only their formatting is deferred.
-    const isReconstructableText
-      = (detectedContentType === 'text/plain' || detectedContentType === 'image/svg+xml')
-        && typeof data === 'string';
+    const isReconstructableText = detectedContentType === 'text/plain' && typeof data === 'string';
     const base64Data = isReconstructableText && !isLarge ? undefined : buffer.toString('base64');
 
     return { data, size, base64Data, detectedContentType };

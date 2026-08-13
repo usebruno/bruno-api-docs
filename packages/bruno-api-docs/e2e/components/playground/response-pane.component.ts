@@ -56,6 +56,7 @@ export class ResponsePaneComponent extends BaseComponent {
   }
 
   readonly previewToggle = this.page.getByRole('switch', { name: 'Toggle preview' });
+  readonly previewImage = this.page.getByTestId('response-preview-image');
 
   formatOption(format: ResponseBodyFormat): Locator {
     return this.page.getByTestId(`response-format-selector-${format}`);

@@ -32,6 +32,7 @@ interface TableProps {
   caption?: string;
   emptyMessage?: string;
   minWidth?: string;
+  hideHeader?: boolean;
   className?: string;
   testId?: string;
 }
@@ -89,6 +90,7 @@ export const Table: React.FC<TableProps> = ({
   caption,
   emptyMessage,
   minWidth,
+  hideHeader = false,
   className,
   testId
 }) => {
@@ -112,7 +114,7 @@ export const Table: React.FC<TableProps> = ({
             <col key={column.key} style={column.width ? { width: column.width } : undefined} />
           ))}
         </colgroup>
-        <thead>
+        <thead className={hideHeader ? 'table-head table-head--hidden' : 'table-head'}>
           <tr>
             {columns.map((column) => (
               <th

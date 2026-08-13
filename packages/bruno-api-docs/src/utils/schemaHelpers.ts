@@ -15,15 +15,21 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollection/types/collection/item';
 import type { HttpRequest, HttpRequestHeader, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
-import type { GrpcRequest } from '@opencollection/types/requests/grpc';
+import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
 import { PROTOCOL_BADGE_LABELS } from '../constants';
 
-type RequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;
+export type RequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;
 
 /** A request body as stored on an item: a single body, a list of body variants, or none. */
 export type RequestBody = HttpRequestBody | HttpRequestBodyVariant[] | undefined;
+
+export type InternalHttpRequest = HttpRequest & {
+  __brunoDisableParsingResponseJson?: boolean;
+  __bruno__executionMode?: string;
+  timeout?: number | 'inherit';
+};
 
 /**
  * Get the type of an item (from info block or root for backwards compatibility)
@@ -119,8 +125,13 @@ export const isWebSocketRequest = (item: OpenCollectionItem | null | undefined):
   return getItemType(item) === 'websocket';
 };
 
-// Check if an item is a request the docs viewer can't render (GraphQL, gRPC or WebSocket).
-export const isUnsupportedRequest = (
+export const isUnsupportedRequestInDocs = (
+  item: OpenCollectionItem | null | undefined
+): item is GraphQLRequest | WebSocketRequest => {
+  return isGraphQLRequest(item) || isWebSocketRequest(item);
+};
+
+export const isUnsupportedRequestInPlayground = (
   item: OpenCollectionItem | null | undefined
 ): item is GraphQLRequest | GrpcRequest | WebSocketRequest => {
   return isGraphQLRequest(item) || isGrpcRequest(item) || isWebSocketRequest(item);
@@ -184,6 +195,52 @@ export const getRequestUrl = (item: RequestItem | null | undefined): string => {
   }
 
   return '';
+};
+
+export interface GrpcMessageEntry {
+  title: string;
+  message: string;
+}
+
+const getGrpcDetails = (item: OpenCollectionItem | null | undefined): GrpcRequestDetails =>
+  (item && 'grpc' in item ? (item as GrpcRequest).grpc : undefined) ?? {};
+
+export const getGrpcMethod = (item: OpenCollectionItem | null | undefined): string =>
+  getGrpcDetails(item).method ?? '';
+
+export const getGrpcMethodType = (item: OpenCollectionItem | null | undefined): GrpcMethodType | undefined =>
+  getGrpcDetails(item).methodType;
+
+export const getGrpcMetadata = (item: OpenCollectionItem | null | undefined): GrpcMetadata[] =>
+  getGrpcDetails(item).metadata ?? [];
+
+export const getGrpcMessages = (item: OpenCollectionItem | null | undefined): GrpcMessageEntry[] => {
+  const message = getGrpcDetails(item).message;
+
+  if (typeof message === 'string') {
+    return message.trim() ? [{ title: 'Message 1', message }] : [];
+  }
+
+  if (Array.isArray(message)) {
+    return message
+      .map((variant, index) => ({
+        title: variant.title || `Message ${index + 1}`,
+        message: variant.message ?? ''
+      }))
+      .filter((entry) => entry.message.trim().length > 0);
+  }
+
+  return [];
+};
+
+export const getGrpcProtoFilePath = (item: OpenCollectionItem | null | undefined): string | undefined =>
+  getGrpcDetails(item).protoFilePath || undefined;
+
+export const getGrpcProtoFileName = (item: OpenCollectionItem | null | undefined): string | undefined => {
+  const protoFilePath = getGrpcDetails(item).protoFilePath;
+  if (!protoFilePath) return undefined;
+  const segments = protoFilePath.split(/[\\/]/).filter(Boolean);
+  return segments[segments.length - 1];
 };
 
 /**

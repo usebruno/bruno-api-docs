@@ -1,5 +1,6 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
+import type { GrpcRequest } from '@opencollection/types/requests/grpc';
 import type {
   HttpRequest,
   HttpRequestBody,
@@ -20,7 +21,8 @@ import {
   getRequestScripts,
   scriptsArrayToObject,
   getRequestVariables,
-  getHttpHeaders
+  getHttpHeaders,
+  type RequestItem
 } from './schemaHelpers';
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
@@ -89,7 +91,7 @@ export const resolveInheritedAuth = (
   ancestors: Item[],
   item: Item
 ): ResolvedAuth => {
-  const own = getRequestAuth(item as HttpRequest) as Auth | undefined;
+  const own = getRequestAuth(item as RequestItem) as Auth | undefined;
   if (own !== 'inherit') return { auth: own };
 
   // Walk ancestors leaf->root. Only an `inherit` folder is transparent; the first folder that
@@ -128,7 +130,7 @@ export const getInheritedAuthSummary = (
   ancestors: Item[],
   item: Item
 ): InheritedAuthSummary | null => {
-  if (getRequestAuth(item as HttpRequest) !== 'inherit') return null;
+  if (getRequestAuth(item as RequestItem) !== 'inherit') return null;
   const resolved = resolveInheritedAuth(collection, ancestors, item);
   return {
     sourceName: resolved.source?.name || collection?.info?.name || 'Collection',
@@ -275,7 +277,7 @@ const stepLabel = (level: ScriptLevel, phase: ScriptPhase): string => {
 export const buildScriptChain = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest
+  item: HttpRequest | GrpcRequest
 ): ScriptChainStep[] => {
   const collectionScripts = scriptsArrayToObject(collection?.request?.scripts);
   const sources: ScriptSource[] = [
@@ -342,11 +344,13 @@ const toPostResponseVarRow = (action: Action): PostResponseVarRow => ({
   disabled: action.disabled
 });
 
-export const getPreRequestVars = (item: HttpRequest): PreRequestVarRow[] =>
+export const getPreRequestVars = (item: HttpRequest | GrpcRequest): PreRequestVarRow[] =>
   getRequestVariables(item).map(toPreRequestVarRow);
 
-export const getPostResponseVars = (item: HttpRequest): PostResponseVarRow[] =>
-  (item.runtime?.actions ?? []).filter(isAfterResponseSetVariable).map(toPostResponseVarRow);
+export const getPostResponseVars = (item: HttpRequest | GrpcRequest): PostResponseVarRow[] =>
+  ((item as { runtime?: { actions?: Action[] } }).runtime?.actions ?? [])
+    .filter(isAfterResponseSetVariable)
+    .map(toPostResponseVarRow);
 
 // Bridge the OC actions model (after-response set-variable) to the editable Variables rows, and back.
 export const actionsToPostResponseVars = (actions: Action[] = []): PostResponseVar[] =>

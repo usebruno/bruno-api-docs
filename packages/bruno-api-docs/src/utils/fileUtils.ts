@@ -1,6 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { GrpcRequest } from '@opencollection/types/requests/grpc';
 import type { Scripts } from '@opencollection/types/common/scripts';
 import { getItemName, getRequestScripts, scriptsArrayToObject, isFolder } from './schemaHelpers';
 import { isYamlFile, parseYaml } from './yamlUtils';
@@ -306,7 +307,7 @@ interface TestSource {
 const forEachTestSource = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest,
+  item: HttpRequest | GrpcRequest,
   flow: ScriptFlow,
   visit: (level: TestRow['level'], code: string | undefined, sourceName?: string) => void
 ): void => {
@@ -327,7 +328,7 @@ const forEachTestSource = (
 export const collectTests = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest,
+  item: HttpRequest | GrpcRequest,
   flow: ScriptFlow = 'sandwich'
 ): TestRow[] => {
   const rows: TestRow[] = [];
@@ -356,7 +357,7 @@ export interface RawTestScript {
 export const collectRawTestScripts = (
   collection: OpenCollection | null | undefined,
   ancestors: Item[],
-  item: HttpRequest,
+  item: HttpRequest | GrpcRequest,
   flow: ScriptFlow = 'sandwich'
 ): RawTestScript[] => {
   const scripts: RawTestScript[] = [];

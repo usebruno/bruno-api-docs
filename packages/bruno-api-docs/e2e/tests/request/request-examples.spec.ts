@@ -128,7 +128,7 @@ test.describe('Request page — Examples', () => {
       const { examples } = requestPage;
       await examples.openSnippet(OK_EXAMPLE);
       await expect(page.getByRole('dialog')).toHaveCount(1);
-      await expect(examples.snippetModal.getByTestId('code-snippet-expand')).toHaveCount(0);
+      await expect(examples.snippetModal.getByTestId('example-code-snippet-expand')).toHaveCount(0);
     });
 
     test('dismisses on Escape and returns focus to the trigger', async ({ requestPage, page }) => {

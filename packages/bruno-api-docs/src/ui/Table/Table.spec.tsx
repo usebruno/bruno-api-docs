@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { Table, type TableColumn } from './Table';
 
 const columns: TableColumn[] = [
@@ -50,5 +50,25 @@ describe('Table', () => {
     const root = useRenderToDom(<Table columns={columns} rows={[]} emptyMessage="Nothing here" />);
     expect(root.querySelector('.table-empty-message')?.text.trim()).toBe('Nothing here');
     expect(root.querySelector('table')).toBeNull();
+  });
+});
+
+describe('Table — hidden header', () => {
+  const rows = [{ id: 'r1', cells: { name: 'authorization', value: 'Bearer t' } }];
+
+  it('keeps the header cells in the markup so their scope survives', () => {
+    const root = useRenderToDom(<Table columns={columns} rows={rows} hideHeader />);
+
+    const headers = root.querySelectorAll('th[scope="col"]');
+    expect(headers.length).toBe(2);
+    expect(headers[0].text).toContain('Name');
+  });
+
+  it('marks the header row hidden rather than dropping it', () => {
+    const hidden = useRenderToDom(<Table columns={columns} rows={rows} hideHeader />);
+    expect(hidden.querySelector('thead')?.attributes.class).toContain('table-head--hidden');
+
+    const shown = useRenderToDom(<Table columns={columns} rows={rows} />);
+    expect(shown.querySelector('thead')?.attributes.class).not.toContain('table-head--hidden');
   });
 });

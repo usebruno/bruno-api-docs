@@ -1,7 +1,10 @@
 import type { Locator } from '@playwright/test';
 import { BaseComponent } from '../base.component';
+import { CodeSnippetComponent } from './code-snippet.component';
 
 export class ExamplesComponent extends BaseComponent {
+  readonly snippet = new CodeSnippetComponent(this.page, 'example-code-snippet');
+
   readonly root = this.page.getByTestId('request-examples');
 
   readonly items = this.root.getByTestId('example-card');
@@ -32,14 +35,14 @@ export class ExamplesComponent extends BaseComponent {
   // The snippet dialog is portalled to <body>, so it is scoped to the page, not the card.
   readonly snippetModal = this.page.getByRole('dialog', { name: 'Code snippet' });
 
-  readonly snippetCode = this.snippetModal.getByTestId('code-snippet-code');
+  readonly snippetCode = this.snippet.modalCode;
 
   snippetButton(name: string): Locator {
     return this.example(name).getByTestId('example-code-snippet-trigger');
   }
 
   snippetLanguageTab(language: string): Locator {
-    return this.snippetModal.getByTestId(`code-snippet-tab-${language}`);
+    return this.snippet.modalLanguageTab(language);
   }
 
   async openSnippet(name: string): Promise<void> {

@@ -13,7 +13,7 @@ import { externalSecretValues, type ExternalSecretEntry } from '../utils/variabl
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
-  isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl
+  isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl, type InternalHttpRequest
 } from '../utils/schemaHelpers';
 import { getItemUuid } from '../utils/itemUtils';
 
@@ -175,8 +175,8 @@ export class RequestRunner {
     const requestId = this.generateRequestId();
 
     try {
-      const processedRequest = await this.preprocessRequest(item, collection);
-      (processedRequest as { __bruno__executionMode?: string }).__bruno__executionMode = 'standalone';
+      const processedRequest: InternalHttpRequest = await this.preprocessRequest(item, collection);
+      processedRequest.__bruno__executionMode = 'standalone';
 
       const { collectionVariables, folderVariables, requestVariables } = getCollectionFolderRequestVariables(collection, processedRequest);
 

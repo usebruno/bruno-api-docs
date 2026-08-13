@@ -100,6 +100,17 @@ describe('BrunoRequest (req object over the OpenCollection http.* shape)', () =>
     expect(raw.http?.headers?.map((h) => h.name)).toEqual(['X-Off']);
   });
 
+  it('the req.headers shorthand stays live after setHeader, deleteHeader, and a direct req.headerList mutation (never a stale snapshot)', () => {
+    const { req } = make();
+    expect(req.headers).toEqual({ 'Content-Type': 'application/json', 'X-Token': 'abc' });
+    req.setHeader('X-New', '1');
+    expect(req.headers).toMatchObject({ 'X-New': '1' });
+    req.deleteHeader('X-Token');
+    expect(req.headers['X-Token']).toBeUndefined();
+    req.headerList.add('X-Direct', 'd');
+    expect(req.headers).toMatchObject({ 'X-Direct': 'd' });
+  });
+
   it('setHeader coerces a nullish value (e.g. a disabled/missing variable) to "" so it is not sent as the literal "undefined"', () => {
     const { req, raw } = make();
     const vars: Record<string, string | undefined> = {}; // bru.getEnvVar('disabledVar') resolves to undefined

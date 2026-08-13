@@ -10,6 +10,14 @@ export const createShimHelpers = (vm: QuickJSContext) => {
     handle.dispose();
   };
 
+  const defineGetter = (target: QuickJSHandle, name: string, read: () => JsonValue) => {
+    vm.defineProp(target, name, {
+      enumerable: true,
+      configurable: true,
+      get: () => marshallToVm(read(), vm)
+    });
+  };
+
   const setMethod = <R>(target: QuickJSHandle, name: string, fn: (...args: JsonValue[]) => R) => {
     const handle = vm.newFunction(name, (...args: QuickJSHandle[]) =>
       marshallToVm(fn(...args.map((a) => vm.dump(a) as JsonValue)), vm));
@@ -61,6 +69,7 @@ export const createShimHelpers = (vm: QuickJSContext) => {
 
   return {
     setValue,
+    defineGetter,
     setMethod,
     setThrowingMethod,
     defineMethod,

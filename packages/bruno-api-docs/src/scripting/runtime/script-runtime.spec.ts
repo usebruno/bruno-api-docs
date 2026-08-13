@@ -148,6 +148,11 @@ describe('ScriptRuntime', () => {
         expect(s).to.match(/Lin/);
         expect(s).to.not.match(/Ada/);
       });
+      await test('res.body reflects res.setBody mid-script and agrees with getBody (live getter, not a start-of-script snapshot)', () => {
+        res.setBody({ replaced: true });
+        expect(res.body.replaced).to.eql(true);
+        expect(JSON.stringify(res.body)).to.eql(JSON.stringify(res.getBody()));
+      });
     `;
 
     const bru = await runtime.runScript({
@@ -161,7 +166,110 @@ describe('ScriptRuntime', () => {
     if (!bru.getTestResults) throw new Error('getTestResults was not attached to bru');
     const results = await bru.getTestResults();
     expect(results.summary.failed).toBe(0);
+    expect(results.summary.total).toBe(7);
+  });
+
+  it('runs the full req API inside the QuickJS sandbox — reads the nested http shape, and setter/headerList writes reach the request object', async () => {
+    const runtime = new ScriptRuntime();
+
+    const mockRequest = {
+      info: { name: 'Create User', tags: ['smoke'] },
+      http: {
+        method: 'POST',
+        url: 'https://api.example.com/users/:id?active=true',
+        headers: [
+          { name: 'Content-Type', value: 'application/json' },
+          { name: 'X-Token', value: 'abc' }
+        ],
+        params: [{ name: 'id', value: '42', type: 'path' }],
+        body: { type: 'json', data: '{"a":1}' },
+        auth: { type: 'bearer', token: 'xyz' }
+      },
+      settings: { timeout: 5000 }
+    };
+
+    const script = `
+      await test('req reads url/method/name/auth and derives host/path from the nested shape', () => {
+        expect(req.getUrl()).to.eql('https://api.example.com/users/:id?active=true');
+        expect(req.getMethod()).to.eql('POST');
+        expect(req.getName()).to.eql('Create User');
+        expect(req.getAuthMode()).to.eql('bearer');
+        expect(req.getHost()).to.eql('api.example.com');
+        expect(req.getPath()).to.eql('/users/42');
+      });
+      await test('req header reads and the writable headerList resolve headers', () => {
+        expect(req.getHeader('X-Token')).to.eql('abc');
+        expect(req.headerList.get('content-type')).to.eql('application/json');
+        expect(req.headerList.count()).to.eql(2);
+      });
+      await test('req.getBody parses the JSON body; getPathParams and getTags read the request', () => {
+        expect(JSON.stringify(req.getBody())).to.eql('{"a":1}');
+        expect(req.getPathParams()[0].name).to.eql('id');
+        expect(req.getTags()).to.include('smoke');
+      });
+      await test('req.headerList iterators run their callbacks across the sandbox', () => {
+        expect(req.headerList.map(function (h) { return h.key; })).to.include('Content-Type');
+        expect(req.headerList.find(function (h) { return h.key === 'X-Token'; }).value).to.eql('abc');
+      });
+      await test('setHeader / headerList.add / setBody / setUrl mutate the request', () => {
+        req.setHeader('X-Script', 'yes');
+        req.headerList.add('X-Added', '1');
+        req.setBody({ updated: true });
+        req.setUrl('https://api.example.com/v2');
+        expect(req.getHeader('X-Script')).to.eql('yes');
+        expect(req.headerList.has('x-added')).to.eql(true);
+      });
+      await test('req.headers reflects mid-script mutations and agrees with getHeaders (live getter, not a start-of-script snapshot)', () => {
+        req.setHeader('X-Live', 'now');
+        req.headerList.add('X-Also', 'too');
+        expect(req.headers['X-Live']).to.eql('now');
+        expect(req.headers['X-Also']).to.eql('too');
+        expect(JSON.stringify(req.headers)).to.eql(JSON.stringify(req.getHeaders()));
+      });
+    `;
+
+    const bru = await runtime.runScript({
+      script,
+      request: mockRequest,
+      collectionName: 'C',
+      collectionPath: '/c',
+      variables: {}
+    });
+
+    if (!bru.getTestResults) throw new Error('getTestResults was not attached to bru');
+    const results = await bru.getTestResults();
+    expect(results.summary.failed).toBe(0);
     expect(results.summary.total).toBe(6);
+
+    expect(mockRequest.http.url).toBe('https://api.example.com/v2');
+    expect(mockRequest.http.body).toEqual({ type: 'json', data: '{"updated":true}' });
+    expect(mockRequest.http.headers).toContainEqual({ name: 'X-Script', value: 'yes' });
+    expect(mockRequest.http.headers).toContainEqual({ name: 'X-Added', value: '1' });
+  });
+
+  it('collects a warning (never a silent no-op) when a script calls an unsupported req method; call args are accepted and ignored', async () => {
+    const runtime = new ScriptRuntime();
+    const warnings: string[] = [];
+
+    const script = `
+      req.setMaxRedirects(5);
+      req.onFail(function (err) { return err; });
+      req.setMaxRedirects(10);
+    `;
+
+    await runtime.runScript({
+      script,
+      request: { http: { method: 'GET', url: 'https://api.example.com' } },
+      collectionName: 'C',
+      collectionPath: '/c',
+      variables: {},
+      warnings
+    });
+
+    expect(warnings).toEqual([
+      'req.setMaxRedirects is not currently supported in the Bruno playground. Please use the Bruno desktop app.',
+      'req.onFail is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
+    ]);
   });
 
   it('runs the full req API inside the QuickJS sandbox — reads the nested http shape, and setter/headerList writes reach the request object', async () => {

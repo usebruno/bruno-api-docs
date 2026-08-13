@@ -11,7 +11,7 @@ import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
 import { useAppDispatch, useAppSelector } from '../../../../../store/hooks';
 import { updatePlaygroundItem, setPlaygroundResponse, selectPlaygroundResponse } from '../../../../../store/slices/playground';
-import { getItemName, isUnsupportedRequest } from '../../../../../utils/schemaHelpers';
+import { getItemName, isUnsupportedRequestInPlayground } from '../../../../../utils/schemaHelpers';
 import { getInheritedAuthSummary } from '../../../../../utils/request';
 import UnsupportedRequest from '../../../../UnsupportedRequest/UnsupportedRequest';
 import { FileNotFoundIcon } from '../../../../../assets/icons';
@@ -152,7 +152,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
 };
 
 const PlaygroundView: React.FC<PlaygroundViewProps> = ({ item, ...otherProps }) => {
-  if (isUnsupportedRequest(item)) {
+  if (isUnsupportedRequestInPlayground(item)) {
     return (
       <UnsupportedRequest
         className="px-5"

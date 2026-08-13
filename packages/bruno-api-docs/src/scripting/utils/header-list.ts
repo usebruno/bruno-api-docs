@@ -87,7 +87,7 @@ const createHeaderListBase = (entries: () => HeaderEntry[], mutators: HeaderMuta
       return list.findIndex((h) => eqKey(h.key, item));
     }
     if (!item || typeof item !== 'object') return -1;
-    return list.findIndex((h) => eqKey(h.key, item.key) && (item.value === undefined || h.value === item.value));
+    return list.findIndex((h) => eqKey(h.key, item.key) && h.value === item.value);
   },
   find: (fn, ctx) => entries().find(fn, ctx),
   filter: (fn, ctx) => entries().filter(fn, ctx),
@@ -164,12 +164,12 @@ export const createRequestHeaderList = (getHeaders: () => RequestHeaderEntry[]):
   };
 
   const add = (itemOrName: HeaderInput, value?: string): void => {
-    const item = typeof itemOrName === 'string' && value !== undefined
-      ? { key: itemOrName, value }
-      : (typeof itemOrName === 'string' ? parseHeaderString(itemOrName) : itemOrName);
-    if (item && item.key) {
-      getHeaders().push({ name: item.key, value: String(item.value ?? '') });
+    if (typeof itemOrName === 'string' && value !== undefined) {
+      upsert({ key: itemOrName, value });
+      return;
     }
+    const item = typeof itemOrName === 'string' ? parseHeaderString(itemOrName) : itemOrName;
+    if (item) upsert(item);
   };
 
   const remove = (predicate: HeaderPredicate | string | HeaderRef, ctx?: object): void => {

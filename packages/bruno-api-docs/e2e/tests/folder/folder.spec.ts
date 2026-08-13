@@ -4,7 +4,7 @@ test.describe('Folder page', () => {
   test('displays the folder name and how many requests it contains', async ({ folderPage }) => {
     await folderPage.open(['Realtime']);
     await expect(folderPage.title).toHaveText('Realtime');
-    await expect(folderPage.requestCount).toHaveText('3 requests');
+    await expect(folderPage.requestCount).toHaveText('10 requests');
   });
 
   test('shows config inherited from the collection even when the folder has no own config', async ({ folderPage }) => {

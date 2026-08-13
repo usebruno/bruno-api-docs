@@ -1,22 +1,14 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import type { HttpRequestBody, HttpRequestBodyVariant, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { Code } from '../Code/Code';
-import { CopyButton } from '../../ui/CopyButton/CopyButton';
-import { useResolvedVariables } from '../../hooks';
-import { SectionLabel } from '../SectionLabel/SectionLabel';
-import { Modal } from '../../ui/Modal/Modal';
-import { ExpandIcon } from '../../assets/icons';
+import { SnippetTabs, type Snippet } from '../SnippetTabs/SnippetTabs';
 import {
   generateCurlCommand,
   generateJavaScriptCode,
   generatePythonCode,
   type SnippetHeader,
   type SnippetInput
-} from '../../utils/codeSnippets';
-import { StyledWrapper } from './StyledWrapper';
-import { IconCode } from '@tabler/icons';
-import { cx } from '@/utils/cx';
+} from '@/utils/codeSnippets';
 
 interface CodeSnippetTabsProps {
   method: string;
@@ -35,13 +27,16 @@ const LANGUAGES = [
   { id: 'python', label: 'Python', language: 'python', generate: generatePythonCode }
 ] as const;
 
-export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, headers, body, auth, variant = 'inline', className, testId = 'request-code-snippet' }) => {
-  const [active, setActive] = useState<string>(LANGUAGES[0].id);
-  const [modalActive, setModalActive] = useState<string>(LANGUAGES[0].id);
-  const [expanded, setExpanded] = useState(false);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const { showVars, resolve } = useResolvedVariables();
-
+export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({
+  method,
+  url,
+  headers,
+  body,
+  auth,
+  variant = 'inline',
+  className,
+  testId
+}) => {
   const snippetHeaders: SnippetHeader[] = useMemo(
     () =>
       (headers ?? [])
@@ -50,97 +45,17 @@ export const CodeSnippetTabs: React.FC<CodeSnippetTabsProps> = ({ method, url, h
     [headers]
   );
 
-  const snippets = useMemo(() => {
+  const snippets: Snippet[] = useMemo(() => {
     const input: SnippetInput = { method, url, headers: snippetHeaders, body, auth };
-    return LANGUAGES.reduce<Record<string, string>>((acc, lang) => {
-      acc[lang.id] = lang.generate(input);
-      return acc;
-    }, {});
+    return LANGUAGES.map((lang) => ({
+      id: lang.id,
+      label: lang.label,
+      language: lang.language,
+      code: lang.generate(input)
+    }));
   }, [method, url, snippetHeaders, body, auth]);
 
-  const openModal = () => {
-    setModalActive(active);
-    setExpanded(true);
-  };
-
-  const closeModal = () => {
-    setExpanded(false);
-    triggerRef.current?.focus();
-  };
-
-  const renderSnippetBox = (
-    placement: 'inline' | 'modal',
-    activeId: string,
-    setActiveId: (id: string) => void
-  ) => {
-    const activeLang = LANGUAGES.find((lang) => lang.id === activeId) ?? LANGUAGES[0];
-    const snippet = snippets[activeId];
-    const copyText = showVars ? resolve(snippet) : snippet;
-    return (
-      <div className="snippet-box">
-        <div className="snippet-head">
-          <div className="snippet-tabs" role="tablist" aria-label="Snippet language">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang.id}
-                type="button"
-                role="tab"
-                aria-selected={activeId === lang.id}
-                data-testid={`code-snippet-tab-${lang.id}`}
-                className={['snippet-tab', activeId === lang.id ? 'is-active' : ''].filter(Boolean).join(' ')}
-                onClick={() => setActiveId(lang.id)}
-              >
-                {lang.label}
-              </button>
-            ))}
-          </div>
-          <span className="snippet-head-spacer" />
-          {placement === 'inline' ? (
-            <button
-              ref={triggerRef}
-              type="button"
-              className="code-snippet-expand"
-              aria-label="Expand code snippet"
-              data-testid="code-snippet-expand"
-              onClick={openModal}
-            >
-              <ExpandIcon />
-            </button>
-          ) : (
-            <CopyButton text={copyText} label="Copy code" className="snippet-copy" />
-          )}
-        </div>
-        <Code code={snippet} language={activeLang.language} showLineNumbers showCopy={placement === 'inline'} variableAware copyText={copyText} testId="code-snippet-code" />
-      </div>
-    );
-  };
-
-  return (
-    <StyledWrapper className={cx('code-snippet-tabs', className)} data-testid={testId}>
-      {variant === 'inline' ? (
-        renderSnippetBox('inline', active, setActive)
-      ) : (
-        <button
-          ref={triggerRef}
-          type="button"
-          className="snippet-trigger"
-          aria-haspopup="dialog"
-          data-testid={`${testId}-trigger`}
-          onClick={openModal}
-        >
-          <IconCode size={16} stroke={1.5} />
-          Code Snippet
-        </button>
-      )}
-      <Modal open={expanded} onClose={closeModal} title={<SectionLabel>Code snippet</SectionLabel>} ariaLabel="Code snippet">
-        {expanded && (
-          <StyledWrapper className={cx('code-snippet-tabs', className)} data-testid="code-snippet-modal">
-            {renderSnippetBox('modal', modalActive, setModalActive)}
-          </StyledWrapper>
-        )}
-      </Modal>
-    </StyledWrapper>
-  );
+  return <SnippetTabs snippets={snippets} variant={variant} className={className} testId={testId} />;
 };
 
 export default CodeSnippetTabs;

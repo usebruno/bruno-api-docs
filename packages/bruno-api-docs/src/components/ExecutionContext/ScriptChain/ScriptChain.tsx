@@ -7,18 +7,18 @@ import { StyledWrapper } from './StyledWrapper';
 interface ScriptChainProps {
   steps: ScriptChainStep[];
   flow: ScriptFlow;
-  method?: string;
+  requestLabel?: string;
   url?: string;
   onNavigate?: (uuid: string) => void;
 }
 
-const HttpMarker: React.FC<{ position: number; url?: string }> = ({ position, url }) => (
+const RequestMarker: React.FC<{ position: number; label: string; url?: string }> = ({ position, label, url }) => (
   <div className="script-row">
     <div className="script-line script-http">
       <span className="step-num">{position}</span>
       <span aria-hidden="true" />
       <span className="script-http-main">
-        <span className="script-http-label">HTTP</span>
+        <span className="script-http-label" data-testid="script-chain-request-label">{label}</span>
         {url && (
           <span className="script-http-url">
             <VariableText value={url} />
@@ -30,7 +30,7 @@ const HttpMarker: React.FC<{ position: number; url?: string }> = ({ position, ur
   </div>
 );
 
-export const ScriptChain: React.FC<ScriptChainProps> = ({ steps, flow, url, onNavigate }) => {
+export const ScriptChain: React.FC<ScriptChainProps> = ({ steps, flow, requestLabel = 'HTTP', url, onNavigate }) => {
   const { pre, post } = useMemo(() => {
     const byOrderAsc = (a: ScriptChainStep, b: ScriptChainStep) => a.order - b.order;
     const pre = steps.filter((s) => s.phase === 'before-request').sort(byOrderAsc);
@@ -49,7 +49,7 @@ export const ScriptChain: React.FC<ScriptChainProps> = ({ steps, flow, url, onNa
       {pre.map((step, index) => (
         <ScriptStep key={`pre-${step.order}-${index}`} step={step} position={next()} onNavigate={onNavigate} />
       ))}
-      <HttpMarker position={next()} url={url} />
+      <RequestMarker position={next()} label={requestLabel} url={url} />
       {post.map((step, index) => (
         <ScriptStep key={`post-${step.order}-${index}`} step={step} position={next()} onNavigate={onNavigate} />
       ))}

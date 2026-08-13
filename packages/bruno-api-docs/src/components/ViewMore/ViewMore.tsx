@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import { prefersReducedMotion } from '../../utils/motion';
+import { ExpandToggle } from '../ExpandToggle/ExpandToggle';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ViewMoreProps {
@@ -99,30 +100,15 @@ export const ViewMore: React.FC<ViewMoreProps> = ({
         {children}
       </div>
       {overflowing && (
-        <button
-          type="button"
+        <ExpandToggle
+          expanded={expanded}
+          moreLabel="View more"
+          lessLabel="View less"
+          onToggle={toggle}
+          controls={contentId}
           className="view-more-toggle"
-          aria-expanded={expanded}
-          aria-controls={contentId}
-          data-testid={testId ? `${testId}-toggle` : undefined}
-          onClick={toggle}
-        >
-          <span>{expanded ? 'View less' : 'View more'}</span>
-          <svg
-            className="view-more-chevron"
-            width="1em"
-            height="1em"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </button>
+          testId={testId && `${testId}-toggle`}
+        />
       )}
     </StyledWrapper>
   );

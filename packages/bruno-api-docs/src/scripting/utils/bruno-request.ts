@@ -7,26 +7,21 @@ import {
   getHttpBody,
   getHttpParams,
   getRequestAuth,
-  getItemName
+  getItemName,
+  type InternalHttpRequest
 } from '../../utils/schemaHelpers';
 import { createRequestHeaderList, type HeaderList } from './header-list';
 import type { JsonValue } from './bruno-response';
 import { addUnsupportedWarning } from './unsupported-warning';
-
-type RequestConfig = HttpRequest & {
-  __brunoDisableParsingResponseJson?: boolean;
-  __bruno__executionMode?: string;
-};
 
 const RAW_BODY_TYPES = ['json', 'text', 'xml', 'sparql'] as const;
 
 const sameName = (a: string, b: string): boolean => a.toLowerCase() === b.toLowerCase();
 
 class BrunoRequest {
-  req: RequestConfig;
+  req: InternalHttpRequest;
   url: string;
   method: string;
-  headers: Record<string, string>;
   timeout: number | 'inherit' | undefined;
   name: string | undefined;
   pathParams: Array<{ name: string; value: string; type: string }>;
@@ -35,13 +30,12 @@ class BrunoRequest {
   headerList: HeaderList;
   private warnings: string[] | undefined;
 
-  constructor(req: RequestConfig, warnings?: string[]) {
+  constructor(req: InternalHttpRequest, warnings?: string[]) {
     this.req = req;
     this.warnings = warnings;
     this.headerList = createRequestHeaderList(() => this.headersArray());
     this.url = getRequestUrl(req);
     this.method = getHttpMethod(req);
-    this.headers = this.headerList.toObject(true) as Record<string, string>;
     this.timeout = this.getTimeout();
     this.name = this.getName();
     this.pathParams = this.getPathParams();
@@ -125,6 +119,10 @@ class BrunoRequest {
     this.http().method = method;
   }
 
+  get headers(): Record<string, string> {
+    return this.getHeaders();
+  }
+
   getHeaders() {
     return this.headerList.toObject(true) as Record<string, string>;
   }
@@ -135,7 +133,6 @@ class BrunoRequest {
     list.length = 0;
     disabled.forEach((h) => list.push(h));
     Object.entries(headers || {}).forEach(([name, value]) => list.push({ name, value: String(value ?? '') }));
-    this.headers = this.headerList.toObject(true) as Record<string, string>;
   }
 
   getHeader(name: string) {
@@ -172,8 +169,8 @@ class BrunoRequest {
   }
 
   setBody(data: JsonValue, options: { raw?: boolean } = {}) {
-    const isJson = this.isJsonBody();
-    const asObject = !options.raw && isJson && this.__isObject(data);
+    const asObject = !options.raw && this.__isObject(data);
+    const isJson = asObject || this.isJsonBody();
     const serialized = asObject || typeof data !== 'string' ? this.__safeStringifyJSON(data) : data;
     this.writeBodyData(serialized, isJson);
     this.body = data;
@@ -188,7 +185,7 @@ class BrunoRequest {
   }
 
   getTimeout() {
-    return this.req.settings?.timeout ?? (this.req as { timeout?: number | 'inherit' }).timeout;
+    return this.req.settings?.timeout ?? this.req.timeout;
   }
 
   setTimeout(timeout: number) {

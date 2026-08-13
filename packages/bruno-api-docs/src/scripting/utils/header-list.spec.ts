@@ -18,7 +18,7 @@ describe('createResponseHeaderList (read-only response headers)', () => {
     expect(h.has({ key: 'X-Count' })).toBe(true);
     expect(h.indexOf('X-Count')).toBe(1);
     expect(h.indexOf('nope')).toBe(-1);
-    expect(h.indexOf({ key: 'X-Count' })).toBe(1);
+    expect(h.indexOf({ key: 'X-Count' })).toBe(-1);
     expect(h.indexOf({ key: 'X-Count', value: '2' })).toBe(1);
     expect(h.indexOf({ key: 'x-count', value: 'wrong' })).toBe(-1);
   });
@@ -126,10 +126,10 @@ describe('createRequestHeaderList (writable request headers)', () => {
     ]);
   });
 
-  it('add appends rather than overwriting an existing key', () => {
+  it('add replaces an existing key instead of duplicating it', () => {
     const { list, arr } = make([{ name: 'X-Trace', value: 'a' }]);
     list.add('X-Trace', 'b');
-    expect(arr).toEqual([{ name: 'X-Trace', value: 'a' }, { name: 'X-Trace', value: 'b' }]);
+    expect(arr).toEqual([{ name: 'X-Trace', value: 'b' }]);
   });
 
   it('all/map/each/indexOf iterate in stored order even with a disabled header present (only get/one prefer the enabled twin)', () => {

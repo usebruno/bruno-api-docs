@@ -49,7 +49,8 @@ const QueryResultPreview: React.FC<QueryResultPreviewProps> = ({
       return <HtmlPreview data={data} baseUrl={baseUrl} />;
     }
     case 'preview-image': {
-      return <img src={`data:${contentType.split(';')[0].trim()};base64,${dataBuffer}`} />;
+      const mimeType = contentType.split(';')[0].trim();
+      return <img data-testid="response-preview-image" src={`data:${mimeType};base64,${dataBuffer}`} />;
     }
     case 'preview-pdf': {
       return (

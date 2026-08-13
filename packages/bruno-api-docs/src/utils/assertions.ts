@@ -1,4 +1,5 @@
 import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { GrpcRequest } from '@opencollection/types/requests/grpc';
 import type { Assertion } from '@opencollection/types/common/assertions';
 import { getRequestAssertions } from './schemaHelpers';
 import { getDescription } from './request';
@@ -52,7 +53,7 @@ export interface AssertionRow {
   disabled?: boolean;
 }
 
-export const collectAssertions = (item: HttpRequest): AssertionRow[] =>
+export const collectAssertions = (item: HttpRequest | GrpcRequest): AssertionRow[] =>
   getRequestAssertions(item).map((assertion: Assertion) => {
     const unary = isUnaryOperator(assertion.operator);
     return {

@@ -1,4 +1,4 @@
-import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestBody } from '@opencollection/types/requests/http';
+import type { HttpRequestHeader, HttpRequestParam, HttpRequestBody } from '@opencollection/types/requests/http';
 import type { Tag } from '@opencollection/types/common/tags';
 import {
   getRequestUrl,

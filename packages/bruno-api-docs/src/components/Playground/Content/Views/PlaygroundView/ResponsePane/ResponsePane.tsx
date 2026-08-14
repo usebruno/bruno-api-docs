@@ -167,17 +167,16 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
           />
         </div>
       )}
-
-        <Tabs
-          variant="responsive"
-          testId="response-tabs"
-          className="h-full"
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          rightElement={response.error ? undefined : statusInfo}
-          rightContentExpandedWidth={actionsExpandedWidth}
-        />
+      <Tabs
+        variant="responsive"
+        testId="response-tabs"
+        className="h-full"
+        tabs={tabs}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        rightElement={response.error ? undefined : statusInfo}
+        rightContentExpandedWidth={actionsExpandedWidth}
+      />
 
     </StyledWrapper>
   );

@@ -36,11 +36,6 @@ test('res.getSize reports the header, body, and total sizes as numbers', functio
   expect(size.total).to.be.at.least(0);
 });
 
-test('res.getDataBuffer can be called (the browser has no raw byte buffer, so it is empty)', function () {
-  var db = res.getDataBuffer();
-  expect(db === undefined || db === null).to.equal(true);
-});
-
 test('res can be called to read into the body, with and without a filter function', function () {
   expect(res('users[0].name')).to.equal('Ada');
   var filtered = JSON.stringify(res('users[?].name', function (u) { return u.id === 2; }));

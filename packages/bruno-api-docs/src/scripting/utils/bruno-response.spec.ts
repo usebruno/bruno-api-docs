@@ -66,10 +66,9 @@ describe('BrunoResponse (res object)', () => {
     expect(res.getBody()).toEqual({ users: [{ id: 9, name: 'Zed' }] });
   });
 
-  it('setBody() writes no Buffer, so getDataBuffer() stays null and getSize() still measures the new body', () => {
+  it('setBody() measures the new body via getSize (no separate wire buffer)', () => {
     const res = makeRes({ data: { a: 1 } });
     res.setBody({ hello: 'world' });
-    expect(res.getDataBuffer()).toBe(null);
     expect(res.getSize().body).toBe(Buffer.byteLength(JSON.stringify({ hello: 'world' })));
   });
 

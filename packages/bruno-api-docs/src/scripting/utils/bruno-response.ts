@@ -79,8 +79,17 @@ class BrunoResponse {
     res.data = clonedData;
     this.body = clonedData;
     this.bodyReplaced = true;
-    res.dataBuffer = undefined;
     res.base64Data = undefined;
+    res.size = this.bodyByteLength(clonedData);
+  }
+
+  private bodyByteLength(value: JsonValue | undefined): number {
+    if (value == null) return 0;
+    try {
+      return Buffer.byteLength(typeof value === 'string' ? value : JSON.stringify(value));
+    } catch {
+      return 0;
+    }
   }
 
   getSize() {
@@ -89,22 +98,18 @@ class BrunoResponse {
       return { header: 0, body: 0, total: 0 };
     }
 
-    const { data, dataBuffer, headers } = res;
-    const byteLengthOf = (value: JsonValue): number =>
-      Buffer.byteLength(typeof value === 'string' ? value : JSON.stringify(value));
+    const { data, headers } = res;
 
     let bodySize = 0;
     if (this.bodyReplaced) {
-      bodySize = data != null ? byteLengthOf(data) : 0;
-    } else if (Buffer.isBuffer(dataBuffer)) {
-      bodySize = dataBuffer.length;
+      bodySize = this.bodyByteLength(data);
     } else {
       const contentLength = this.headerList.get('content-length');
       const parsedLength = contentLength != null ? parseInt(String(contentLength), 10) : NaN;
       if (!isNaN(parsedLength)) {
         bodySize = parsedLength;
       } else if (data != null) {
-        bodySize = byteLengthOf(data);
+        bodySize = this.bodyByteLength(data);
       }
     }
 
@@ -121,10 +126,6 @@ class BrunoResponse {
     const headerSize = Buffer.byteLength(headerLines.join('\r\n'));
 
     return { header: headerSize, body: bodySize, total: headerSize + bodySize };
-  }
-
-  getDataBuffer() {
-    return this.res ? (this.res.dataBuffer ?? null) : null;
   }
 }
 

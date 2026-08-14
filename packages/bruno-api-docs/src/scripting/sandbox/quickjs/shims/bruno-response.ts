@@ -35,7 +35,6 @@ const addBrunoResponseShimToContext = (vm: QuickJSContext, res: CallableResponse
   setMethod(resFn, 'getUrl', () => res.getUrl());
   setMethod(resFn, 'setBody', (data) => res.setBody(data));
   setMethod(resFn, 'getSize', () => res.getSize());
-  setMethod(resFn, 'getDataBuffer', () => res.getDataBuffer());
 
   if (res.headerList) {
     const hl = res.headerList;

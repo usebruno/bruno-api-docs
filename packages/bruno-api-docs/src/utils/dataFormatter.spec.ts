@@ -19,7 +19,7 @@ describe('formatResponse', () => {
       ];
 
       invalidCases.forEach(([data, buffer, mode]) => {
-        const result = formatResponse(data, buffer as string, mode as string);
+        const result = formatResponse(data as Parameters<typeof formatResponse>[0], buffer as string, mode as string);
         expect(result).toBe('');
         expect(typeof result).toBe('string');
       });
@@ -195,7 +195,7 @@ describe('formatResponse', () => {
       ];
 
       testCases.forEach(([data, buffer, mode]) => {
-        const result = formatResponse(data, buffer, mode);
+        const result = formatResponse(data as Parameters<typeof formatResponse>[0], buffer, mode);
         expect(typeof result).toBe('string');
       });
     });

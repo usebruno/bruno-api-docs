@@ -9,6 +9,7 @@ import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth,
 import { getCollectionFolderRequestVariables } from './utils/variable-merger';
 import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '../utils/variableDataType';
 import { externalSecretValues, type ExternalSecretEntry } from '../utils/variableResolution';
+import type { Variables, JsonValue } from './utils/variable-interpolator';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
@@ -21,9 +22,9 @@ const MAX_RUN_REQUEST_DEPTH = 25;
 interface RunContext {
   collection: OpenCollectionCollection;
   environment?: Environment;
-  environmentVariables: Record<string, any>;
-  runtimeVariables: Record<string, any>;
-  processEnvVars: Record<string, any>;
+  environmentVariables: Variables;
+  runtimeVariables: Variables;
+  processEnvVars: Variables;
   timeout: number;
   warnings: string[];
 }
@@ -43,7 +44,7 @@ export interface RunRequestOptions {
   item: HttpRequest;
   collection: OpenCollectionCollection;
   environment?: Environment;
-  runtimeVariables?: Record<string, any>;
+  runtimeVariables?: Variables;
   timeout?: number;
   validateSSL?: boolean;
 }
@@ -58,8 +59,8 @@ export interface TestResultsResponse {
   results: Array<{
     status: string;
     description: string;
-    expected?: any;
-    actual?: any;
+    expected?: JsonValue;
+    actual?: JsonValue;
     error?: string;
   }>;
 }
@@ -76,7 +77,7 @@ export interface AssertionResultsResponse {
     lhsExpr?: string;
     rhsExpr?: string;
     operator?: string;
-    rhsOperand?: any;
+    rhsOperand?: JsonValue;
     error?: string;
   }>;
 }
@@ -84,8 +85,8 @@ export interface AssertionResultsResponse {
 export interface RunRequestResponse {
   status?: number;
   statusText?: string;
-  headers?: Record<string, any>;
-  data?: any;
+  headers?: Record<string, string>;
+  data?: JsonValue;
   /** Present only when needed downstream — binary previews, byte views, or an unreconstructable body. */
   base64Data?: string;
   /** Content type sniffed from the response bytes at parse time (magic numbers → SVG → text), or null. */
@@ -120,7 +121,7 @@ export class RequestRunner {
       collection,
       environment,
       environmentVariables: this.getEnvironmentVariables(environment),
-      processEnvVars: typeof process !== 'undefined' && process.env ? process.env : {},
+      processEnvVars: (typeof process !== 'undefined' && process.env ? process.env : {}) as Record<string, string>,
       runtimeVariables,
       timeout,
       warnings: []
@@ -182,9 +183,9 @@ export class RequestRunner {
         environmentVariables,
         runtimeVariables,
         processEnvVars,
-        collectionVariables,
-        folderVariables,
-        requestVariables
+        collectionVariables: collectionVariables as Variables,
+        folderVariables: folderVariables as Variables,
+        requestVariables: requestVariables as Variables
       };
 
       const runRequest = this.makeNestedRunRequest(context, depth, chain, item);
@@ -303,7 +304,7 @@ export class RequestRunner {
     return `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private getEnvironmentVariables(environment?: Environment): Record<string, any> {
+  private getEnvironmentVariables(environment?: Environment): Variables {
     // External secrets are referenced as ordinary `{{name}}` variables, so they
     // go in first and a variable declared on the environment with the same name
     // takes precedence over them.
@@ -318,12 +319,12 @@ export class RequestRunner {
         // Coerce typed values (number/boolean/object) to native, like folder/collection/request vars.
         // A secret carries its data type as a sibling `type` (value is a plain string), whereas a
         // non-secret nests it inside the value — so coerce each from the right place.
-        vars[name] = variable.secret
+        vars[name] = (variable.secret
           ? parseValueByDataType(variable.value as CoercedVariableValue, variable.type)
-          : coerceVariableValue(variable.value);
+          : coerceVariableValue(variable.value)) as JsonValue;
       }
       return vars;
-    }, { ...externalSecrets } as Record<string, unknown>);
+    }, { ...externalSecrets } as Variables);
   }
 
   private async preprocessRequest(
@@ -344,7 +345,7 @@ export class RequestRunner {
     return processed;
   }
 
-  getGlobalVariables(): Record<string, any> {
+  getGlobalVariables(): Variables {
     // todo
     return {};
   }

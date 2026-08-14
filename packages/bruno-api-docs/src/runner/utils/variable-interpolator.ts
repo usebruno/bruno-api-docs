@@ -1,8 +1,11 @@
-import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestHeader, HttpRequestParam } from '@opencollection/types/requests/http';
 import { isPlainObject } from 'lodash-es';
 import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '../../utils/schemaHelpers';
 import { templateVariableGlobalRegex } from '../../utils/common';
 import { mockDataFunctions } from './faker-functions';
+
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+export type Variables = Record<string, JsonValue>;
 
 // for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.
 const MOCK_PATTERN = /\{\{\$(\w+)\}\}/g;
@@ -35,15 +38,15 @@ const prepareMock = (str: string, escapeJSONStrings: boolean): string => {
   });
 };
 
-const prepareMockObj = (obj: Record<string, any>, escapeJSONStrings: boolean): Record<string, any> => {
-  const processed: Record<string, any> = {};
+const prepareMockObj = (obj: Variables, escapeJSONStrings: boolean): Variables => {
+  const processed: Variables = {};
 
   for (const [key, value] of Object.entries(obj)) {
     if (typeof value === 'string') {
       processed[key] = prepareMock(value, escapeJSONStrings);
     } else if (isPlainObject(value)) {
       // plain object only, to skip special objects like Date, RegExp, etc.
-      processed[key] = prepareMockObj(value, escapeJSONStrings);
+      processed[key] = prepareMockObj(value as Variables, escapeJSONStrings);
     } else {
       processed[key] = value;
     }
@@ -57,7 +60,7 @@ const prepareMockObj = (obj: Record<string, any>, escapeJSONStrings: boolean): R
  * regular `{{var}}` lookups (also resolving dynamic tokens inside var values).
  */
 export const interpolate = (
-  str: string, variables: Record<string, any>, options: { escapeJSONStrings?: boolean } = {}
+  str: string, variables: Variables, options: { escapeJSONStrings?: boolean } = {}
 ): string => {
   if (!str || typeof str !== 'string') {
     return str;
@@ -95,9 +98,12 @@ export const interpolate = (
 /**
  * Get nested value from object using dot notation
  */
-const getNestedValue = (obj: any, path: string): any => {
-  return path.split('.').reduce((current, key) => {
-    return current && current[key] !== undefined ? current[key] : undefined;
+const getNestedValue = (obj: JsonValue, path: string): JsonValue | undefined => {
+  return path.split('.').reduce<JsonValue | undefined>((current, key) => {
+    if (current != null && typeof current === 'object') {
+      return (current as { [k: string]: JsonValue })[key];
+    }
+    return undefined;
   }, obj);
 };
 
@@ -119,15 +125,15 @@ const getContentType = (headers: Record<string, string> = {}): string => {
 export const interpolateVars = (
   request: HttpRequest,
   variableSources: {
-    globalEnvironmentVariables?: Record<string, any>;
-    oauth2CredentialVariables?: Record<string, any>;
-    collectionVariables?: Record<string, any>;
-    folderVariables?: Record<string, any>;
-    requestVariables?: Record<string, any>;
-    environmentVariables?: Record<string, any>;
-    runtimeVariables?: Record<string, any>;
-    processEnvVars?: Record<string, any>;
-    promptVariables?: Record<string, any>;
+    globalEnvironmentVariables?: Variables;
+    oauth2CredentialVariables?: Variables;
+    collectionVariables?: Variables;
+    folderVariables?: Variables;
+    requestVariables?: Variables;
+    environmentVariables?: Variables;
+    runtimeVariables?: Variables;
+    processEnvVars?: Variables;
+    promptVariables?: Variables;
   } = {}
 ): HttpRequest => {
   // Clone the request to avoid mutation
@@ -226,7 +232,7 @@ export const interpolateVars = (
       } else if (contentType === 'application/x-www-form-urlencoded' && body.type === 'form-urlencoded') {
         // Handle form-urlencoded body
         if ('data' in body && Array.isArray(body.data)) {
-          body.data = body.data.map((entry: any) => ({
+          body.data = body.data.map((entry) => ({
             ...entry,
             value: _interpolate(entry.value)
           }));
@@ -234,10 +240,10 @@ export const interpolateVars = (
       } else if (contentType === 'multipart/form-data' && body.type === 'multipart-form') {
         // Handle multipart form body
         if ('data' in body && Array.isArray(body.data)) {
-          body.data = body.data.map((entry: any) => ({
+          body.data = body.data.map((entry) => ({
             ...entry,
             value: Array.isArray(entry.value)
-              ? entry.value.map((v: any) => _interpolate(String(v)))
+              ? entry.value.map((v) => _interpolate(String(v)))
               : _interpolate(String(entry.value))
           }));
         }
@@ -254,7 +260,7 @@ export const interpolateVars = (
   // Interpolate query parameters
   const currentParams = getHttpParams(interpolatedRequest);
   if (currentParams && currentParams.length > 0) {
-    interpolatedRequest.http.params = currentParams.map((param: any) => ({
+    interpolatedRequest.http.params = currentParams.map((param: HttpRequestParam) => ({
       ...param,
       name: _interpolate(param.name),
       value: _interpolate(param.value)
@@ -309,11 +315,11 @@ export const interpolateVars = (
  * Helper function to create variables object for interpolation
  */
 export const createInterpolationVariables = (
-  envVars: Record<string, any> = {},
-  runtimeVariables: Record<string, any> = {},
-  processEnvVars: Record<string, any> = {},
-  promptVariables: Record<string, any> = {}
-): Record<string, any> => {
+  envVars: Variables = {},
+  runtimeVariables: Variables = {},
+  processEnvVars: Variables = {},
+  promptVariables: Variables = {}
+): Variables => {
   return {
     ...envVars,
     ...runtimeVariables,

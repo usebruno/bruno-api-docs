@@ -105,9 +105,10 @@ describe('RequestRunner', () => {
       // Verify the response
       expect(response.status).toBe(200);
       expect(response.data).toBeDefined();
-      expect(response.data.title).toBe('request-level-variable-value');
-      expect(response.data.body).toBe('request-level-variable-value');
-      expect(response.data.userId).toBe(1);
+      const responseData = response.data as unknown as { title: string; body: string; userId: number };
+      expect(responseData.title).toBe('request-level-variable-value');
+      expect(responseData.body).toBe('request-level-variable-value');
+      expect(responseData.userId).toBe(1);
       expect(response.error).toBeUndefined();
 
       // Verify assertion results were captured
@@ -916,7 +917,7 @@ describe('RequestExecutor parseResponse — content-type handling', () => {
   it('parses JSON and keeps base64 (source text needed for precise formatting)', async () => {
     mockFetch(Buffer.from('{"a":1,"big":1736184243098437392}'), 'application/json');
     const res = await run();
-    expect(res.data.a).toBe(1);
+    expect((res.data as unknown as { a: number }).a).toBe(1);
     expect(res.detectedContentType).toBe('text/plain');
     expect(typeof res.base64Data).toBe('string');
     global.fetch = originalFetch;

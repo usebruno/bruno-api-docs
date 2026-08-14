@@ -10,7 +10,7 @@ import { getResponseSize } from './response';
 
 const applyJSONPathFilter = (data: RunRequestResponse['data'], filter: string): unknown => {
   try {
-    return JSONPath({ path: filter, json: data });
+    return JSONPath({ path: filter, json: data ?? null });
   } catch (e) {
     console.warn('Could not apply JSONPath filter:', e instanceof Error ? e.message : e);
     return data;

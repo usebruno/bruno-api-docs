@@ -154,7 +154,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   );
 
   return (
-    <StyledWrapper className="flex flex-col">
+    <StyledWrapper>
       {!response.error && (
         <div className="response-actions-measure" aria-hidden="true" ref={measureActions} inert>
           <ResponseActions
@@ -167,7 +167,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
           />
         </div>
       )}
-      <div className="flex-1 min-h-0">
+
         <Tabs
           variant="responsive"
           testId="response-tabs"
@@ -178,7 +178,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
           rightElement={response.error ? undefined : statusInfo}
           rightContentExpandedWidth={actionsExpandedWidth}
         />
-      </div>
+
     </StyledWrapper>
   );
 };

@@ -4,6 +4,7 @@ import type { Variable } from '@opencollection/types/common/variables';
 import { getTreePathFromCollectionToItem } from './tree-utils';
 import { isFolder, getRequestVariables } from '../../utils/schemaHelpers';
 import { coerceVariableValue } from '../../utils/variableDataType';
+import type { Variables, JsonValue } from './variable-interpolator';
 
 /**
  * Merge variables from collection and folder hierarchy into the request. Values are kept in their
@@ -14,9 +15,9 @@ export const getCollectionFolderRequestVariables = (
   collection: OpenCollection,
   request: HttpRequest
 ): {
-  collectionVariables: Record<string, unknown>;
-  folderVariables: Record<string, unknown>;
-  requestVariables: Record<string, unknown>;
+  collectionVariables: Variables;
+  folderVariables: Variables;
+  requestVariables: Variables;
 } => {
   // Get the tree path from collection to this item
   const requestTreePath = getTreePathFromCollectionToItem(collection, request);
@@ -24,16 +25,16 @@ export const getCollectionFolderRequestVariables = (
   const variables = new Map<string, Variable>();
 
   // Track variables by scope for debugging/inspection
-  const collectionVariables: Record<string, unknown> = {};
-  const folderVariables: Record<string, unknown> = {};
-  const requestVariablesResult: Record<string, unknown> = {};
+  const collectionVariables: Variables = {};
+  const folderVariables: Variables = {};
+  const requestVariablesResult: Variables = {};
 
   // Start with collection-level variables
   const collectionVars = collection.request?.variables || [];
   collectionVars.forEach((variable: any) => {
     if (!variable.disabled) {
       variables.set(variable.name, variable);
-      const value = coerceVariableValue(variable.value);
+      const value = coerceVariableValue(variable.value) as JsonValue;
       collectionVariables[variable.name] = value;
     }
   });
@@ -45,7 +46,7 @@ export const getCollectionFolderRequestVariables = (
       folderVars.forEach((variable: any) => {
         if (!variable.disabled) {
           variables.set(variable.name, variable);
-          const value = coerceVariableValue(variable.value);
+          const value = coerceVariableValue(variable.value) as JsonValue;
           folderVariables[variable.name] = value;
         }
       });
@@ -58,7 +59,7 @@ export const getCollectionFolderRequestVariables = (
   // Process request-level variables
   requestVars.forEach((variable: any) => {
     if (!variable.disabled) {
-      const value = coerceVariableValue(variable.value);
+      const value = coerceVariableValue(variable.value) as JsonValue;
       requestVariablesResult[variable.name] = value;
     }
   });

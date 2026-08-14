@@ -72,7 +72,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   );
 
   const renderResponseBody = () => (
-    <>
+    <div className="flex flex-col h-full">
       {response.warnings?.length ? (
         <div className="pb-4">
           <WarningBanner warnings={response.warnings} />
@@ -86,7 +86,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
           contentType={contentType}
         />
       )}
-    </>
+    </div>
   );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (

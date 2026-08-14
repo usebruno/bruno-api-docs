@@ -14,7 +14,7 @@ import type { VariableValueOrVariants, VariableValueType } from '@opencollection
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
   isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl, type InternalHttpRequest
-} from '../utils/schemaHelpers';
+} from '@/utils/schemaHelpers';
 import { getItemUuid } from '../utils/itemUtils';
 
 const MAX_RUN_REQUEST_DEPTH = 25;
@@ -183,9 +183,9 @@ export class RequestRunner {
         environmentVariables,
         runtimeVariables,
         processEnvVars,
-        collectionVariables: collectionVariables as Variables,
-        folderVariables: folderVariables as Variables,
-        requestVariables: requestVariables as Variables
+        collectionVariables,
+        folderVariables,
+        requestVariables
       };
 
       const runRequest = this.makeNestedRunRequest(context, depth, chain, item);
@@ -311,20 +311,24 @@ export class RequestRunner {
     const externalSecrets = externalSecretValues(
       environment?.externalSecrets?.variables as ExternalSecretEntry[] | undefined
     );
-    if (!environment?.variables) return externalSecrets;
+    const vars: Variables = { ...externalSecrets };
+    if (environment?.name) {
+      vars.__name__ = environment.name;
+    }
+    if (!environment?.variables) return vars;
 
-    return environment.variables.reduce((vars, variable: DeclaredEnvironmentVariable) => {
+    return environment.variables.reduce((acc, variable: DeclaredEnvironmentVariable) => {
       const name = variable.name;
       if (name && !variable.disabled) {
         // Coerce typed values (number/boolean/object) to native, like folder/collection/request vars.
         // A secret carries its data type as a sibling `type` (value is a plain string), whereas a
         // non-secret nests it inside the value — so coerce each from the right place.
-        vars[name] = (variable.secret
+        acc[name] = (variable.secret
           ? parseValueByDataType(variable.value as CoercedVariableValue, variable.type)
           : coerceVariableValue(variable.value)) as JsonValue;
       }
-      return vars;
-    }, { ...externalSecrets } as Variables);
+      return acc;
+    }, vars);
   }
 
   private async preprocessRequest(

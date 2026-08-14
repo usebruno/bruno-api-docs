@@ -28,7 +28,7 @@ const ResponseBodyTab: React.FC<ResponseBodyTabProps> = ({ response, selectedFor
   );
 
   return (
-    <div className="h-full">
+    <div className="flex-1">
       {hideForLargeResponse ? (
         <LargeResponseWarning
           responseSize={responseSize}

@@ -76,7 +76,7 @@ export const interpolate = (
     // Handle nested object access (e.g., process.env.NODE_ENV)
     const value = getNestedValue(preparedVars, trimmedName);
 
-    if (value === undefined || value === null) {
+    if (value === null) {
       return match; // Keep original if variable not found
     }
 
@@ -98,12 +98,12 @@ export const interpolate = (
 /**
  * Get nested value from object using dot notation
  */
-const getNestedValue = (obj: JsonValue, path: string): JsonValue | undefined => {
-  return path.split('.').reduce<JsonValue | undefined>((current, key) => {
+const getNestedValue = (obj: JsonValue, path: string): JsonValue => {
+  return path.split('.').reduce<JsonValue>((current, key) => {
     if (current != null && typeof current === 'object') {
-      return (current as { [k: string]: JsonValue })[key];
+      return (current as { [k: string]: JsonValue })[key] ?? null;
     }
-    return undefined;
+    return null;
   }, obj);
 };
 

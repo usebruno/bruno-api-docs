@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { expect, type FrameLocator, type Locator, type Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
 import type { ResponseBodyFormat } from '../../../src/utils/response';
@@ -56,7 +56,21 @@ export class ResponsePaneComponent extends BaseComponent {
   }
 
   readonly previewToggle = this.page.getByRole('switch', { name: 'Toggle preview' });
+  // The preview render paths, one per QueryResultPreview mode. Only the one matching the
+  // detected content type / selected format mounts at a time.
   readonly previewImage = this.page.getByTestId('response-preview-image');
+  readonly jsonPreview = this.page.getByTestId('response-preview-json');
+  readonly xmlPreview = this.page.getByTestId('response-preview-xml');
+  readonly textPreview = this.page.getByTestId('response-preview-text');
+  // The HTML/Javascript preview renders inside a sandboxed iframe; this is the iframe element.
+  readonly htmlPreview = this.page.getByTestId('response-preview-html');
+  // Monaco only mounts in the editor (source) view, so its absence signals a preview is showing.
+  readonly bodyEditorCanvas = this.bodyEditor.root.locator('.monaco-editor');
+
+  /** The document inside the sandboxed HTML/Javascript preview iframe, for asserting on its content. */
+  htmlPreviewBody(): FrameLocator {
+    return this.page.frameLocator('[data-testid="response-preview-html"]');
+  }
 
   formatOption(format: ResponseBodyFormat): Locator {
     return this.page.getByTestId(`response-format-selector-${format}`);

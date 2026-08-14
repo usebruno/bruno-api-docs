@@ -62,21 +62,23 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
 
   return (
     <Suspense fallback={null}>
-      <ReactJson
-        src={value}
-        theme={themeMode === 'dark' ? 'monokai' : 'rjv-default'}
-        collapsed={2}
-        groupArraysAfterLength={10}
-        displayDataTypes={false}
-        displayObjectSize
-        enableClipboard
-        name={false}
-        style={{
-          backgroundColor: 'transparent',
-          fontSize: '0.75rem',
-          fontFamily: 'var(--font-mono)'
-        }}
-      />
+      <div data-testid="response-preview-json">
+        <ReactJson
+          src={value}
+          theme={themeMode === 'dark' ? 'monokai' : 'rjv-default'}
+          collapsed={2}
+          groupArraysAfterLength={10}
+          displayDataTypes={false}
+          displayObjectSize
+          enableClipboard
+          name={false}
+          style={{
+            backgroundColor: 'transparent',
+            fontSize: '0.75rem',
+            fontFamily: 'var(--font-mono)'
+          }}
+        />
+      </div>
     </Suspense>
   );
 };

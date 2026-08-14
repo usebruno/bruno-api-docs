@@ -46,6 +46,7 @@ const HtmlPreview = memo(({ data, baseUrl = '' }: HtmlPreviewProps) => {
     <StyledWrapper className="h-full bg-white webview-container">
       <iframe
         title="HTML preview"
+        data-testid="response-preview-html"
         className="w-full h-full bg-white"
         sandbox="allow-same-origin"
         srcDoc={srcDoc}

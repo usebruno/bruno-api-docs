@@ -28,20 +28,20 @@ describe('Tabs', () => {
     const root = useRenderToDom(<Tabs tabs={tabs} testId="example" />);
     expect(getByTestId(root, 'example-tab-a').getAttribute('aria-selected')).toBe('true');
     expect(getByTestId(root, 'example-tab-b').getAttribute('aria-selected')).toBe('false');
-    expect(root.querySelector('[data-testid="alpha"]')).not.toBeNull();
-    expect(root.querySelector('[data-testid="beta"]')).toBeNull();
+    expect(queryByTestId(root, 'alpha')).not.toBeNull();
+    expect(queryByTestId(root, 'beta')).toBeNull();
   });
 
   it('honours a controlled activeTab', () => {
     const root = useRenderToDom(<Tabs tabs={tabs} activeTab="c" testId="example" />);
     expect(getByTestId(root, 'example-tab-c').getAttribute('aria-selected')).toBe('true');
-    expect(root.querySelector('[data-testid="gamma"]')).not.toBeNull();
-    expect(root.querySelector('[data-testid="alpha"]')).toBeNull();
+    expect(queryByTestId(root, 'gamma')).not.toBeNull();
+    expect(queryByTestId(root, 'alpha')).toBeNull();
   });
 
   it('honours defaultActiveTab', () => {
     const root = useRenderToDom(<Tabs tabs={tabs} defaultActiveTab="b" testId="example" />);
-    expect(root.querySelector('[data-testid="beta"]')).not.toBeNull();
+    expect(queryByTestId(root, 'beta')).not.toBeNull();
   });
 
   it('applies roving tabindex (only the active tab is tabbable)', () => {

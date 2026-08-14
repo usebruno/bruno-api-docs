@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query } from '../../test-utils/dom';
+import { query, queryByTestId } from '../../test-utils/dom';
 import { PropertyTable } from './PropertyTable';
 
 describe('PropertyTable', () => {
@@ -59,13 +59,13 @@ describe('PropertyTable', () => {
       />
     );
     const line = query(root, '.property-value-line');
-    expect(line.querySelector('[data-testid="inherited-source"]')).not.toBeNull();
+    expect(queryByTestId(line, 'inherited-source')).not.toBeNull();
     const html = line.innerHTML;
     expect(html.indexOf('disabled-badge')).toBeLessThan(html.indexOf('data-testid="inherited-source"'));
   });
 
   it('omits the inherited-source link when a row is not inherited', () => {
     const root = useRenderToDom(<PropertyTable rows={[{ label: 'Accept', value: 'application/json' }]} />);
-    expect(query(root, '.property-value-line').querySelector('[data-testid="inherited-source"]')).toBeNull();
+    expect(queryByTestId(query(root, '.property-value-line'), 'inherited-source')).toBeNull();
   });
 });

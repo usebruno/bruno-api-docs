@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../../../../../hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '../../../../../../test-utils/dom';
+import { query, getByTestId, queryByTestId } from '../../../../../../test-utils/dom';
 import OverviewTab from './OverviewTab';
 
 describe('OverviewTab', () => {
@@ -11,8 +11,8 @@ describe('OverviewTab', () => {
 
     expect(container.getAttribute('class')).toContain('markdown-documentation');
     expect(container.text).toContain('Hi');
-    expect(container.querySelector('h1')).toBeTruthy();
-    expect(container.querySelector('.heading-1')).toBeTruthy();
+    query(container, 'h1');
+    query(container, '.heading-1');
   });
 
   it('shows the empty state with the provided subheading when no docs are provided', () => {

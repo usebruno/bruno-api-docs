@@ -45,17 +45,17 @@ const inlineButton = (root: ReturnType<typeof render>, label: string) =>
 describe('ResponseActions', () => {
   it('renders the actions wrapper with both the inline and collapsed groups', () => {
     const root = render();
-    expect(getByTestId(root, 'response-pane-actions-wrapper')).toBeTruthy();
-    expect(getByTestId(root, 'actions-buttons')).toBeTruthy();
-    expect(getByTestId(root, 'actions-dropdown')).toBeTruthy();
+    getByTestId(root, 'response-pane-actions-wrapper');
+    getByTestId(root, 'actions-buttons');
+    getByTestId(root, 'actions-dropdown');
   });
 
   it('exposes Copy, Download, Clear and Change Layout as inline icon buttons', () => {
     const root = render();
-    expect(inlineButton(root, 'Copy Response')).toBeTruthy();
-    expect(inlineButton(root, 'Download Response')).toBeTruthy();
-    expect(inlineButton(root, 'Clear Response')).toBeTruthy();
-    expect(inlineButton(root, 'Change Layout')).toBeTruthy();
+    inlineButton(root, 'Copy Response');
+    inlineButton(root, 'Download Response');
+    inlineButton(root, 'Clear Response');
+    inlineButton(root, 'Change Layout');
   });
 
   describe('Copy Response', () => {

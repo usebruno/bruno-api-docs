@@ -137,7 +137,7 @@ describe('UnsupportedRequest', () => {
         <UnsupportedRequest item={websocketItem} showRequestDocs emptyStateProps={emptyStateProps} />
       )
     );
-    expect(queryByTestId(root, 'overview-markdown-documentation')).toBeTruthy();
+    getByTestId(root, 'overview-markdown-documentation');
   });
 
   it('omits the request docs when showRequestDocs is off', () => {

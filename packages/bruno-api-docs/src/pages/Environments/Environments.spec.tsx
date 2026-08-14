@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query } from '../../test-utils/dom';
+import { query, getByTestId, queryByTestId } from '../../test-utils/dom';
 import { Environments } from './Environments';
 
 const groupLabels = (root: ReturnType<typeof useRenderToDom>) =>
@@ -33,15 +33,15 @@ describe('Environments', () => {
     const root = useRenderToDom(<Environments collection={collection} />);
 
     expect(root.querySelector('[data-testid="environments-title"]')?.text.trim()).toBe('Environments');
-    expect(root.querySelector('[role="tablist"]')).toBeTruthy();
+    query(root, '[role="tablist"]');
     expect(root.querySelectorAll('[role="tab"]').map((t) => t.text.trim())).toEqual(['Development', 'Prod']);
-    expect(root.querySelector('[role="tabpanel"]')).toBeTruthy();
+    query(root, '[role="tabpanel"]');
 
     expect(groupLabels(root)).toEqual(['Variables', 'Secret Variables']);
     expect(cellText(root, '.environment-name')).toContain('baseUrl');
     expect(cellText(root, '.environment-value')).toContain('https://api.dev');
     expect(cellText(root, '.environment-name')).toContain('authToken');
-    expect(root.querySelector('[data-testid="environment-secret-value"]')).toBeTruthy();
+    getByTestId(root, 'environment-secret-value');
   });
 
   it('shows a "(Secret)" placeholder for a secret — display-only, no reveal toggle', () => {
@@ -55,7 +55,7 @@ describe('Environments', () => {
     const root = useRenderToDom(<Environments collection={collection} />);
 
     expect(query(root, '[data-testid="environment-secret-value"]').text).toBe('(Secret)');
-    expect(root.querySelector('[data-testid="environment-secret-value-toggle"]')).toBeNull();
+    expect(queryByTestId(root, 'environment-secret-value-toggle')).toBeNull();
   });
 
   it('renders an external secret variables section with the manager label', () => {

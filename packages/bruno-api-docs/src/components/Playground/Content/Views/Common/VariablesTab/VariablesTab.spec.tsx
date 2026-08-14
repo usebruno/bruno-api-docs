@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '../../../../../../hooks/useRenderToDom';
-import { query, queryByTestId } from '../../../../../../test-utils/dom';
+import { query, getByTestId } from '../../../../../../test-utils/dom';
 import { VariablesTab } from './VariablesTab';
 
 const noop = () => {};
@@ -22,7 +22,7 @@ describe('VariablesTab', () => {
     const values = inputValues(root);
     expect(values).toContain('baseUrl');
     expect(values).toContain('https://api.example.com');
-    expect(queryByTestId(root, 'variable-data-type-0')).toBeTruthy();
+    getByTestId(root, 'variable-data-type-0');
   });
 
   it('surfaces a typed value as its data string', () => {
@@ -36,7 +36,7 @@ describe('VariablesTab', () => {
     const root = useRenderToDom(
       <VariablesTab variables={[{ name: 'count', value: { type: 'number', data: 'abc' } }]} onVariablesChange={noop} />
     );
-    expect(root.querySelector('.var-type-warning')).toBeTruthy();
+    query(root, '.var-type-warning');
   });
 
   it('shows no warning for a valid typed value', () => {
@@ -77,7 +77,7 @@ describe('VariablesTab', () => {
     );
     expect(sectionTitles(root)).toContain('Post Response');
     expect(inputValues(root)).toContain('res.body.token');
-    expect(root.querySelector('[data-testid="post-response-expr-help"]')).toBeTruthy();
+    getByTestId(root, 'post-response-expr-help');
   });
 
   it('renders a typed variable value and reflects its type in the type dropdown', () => {

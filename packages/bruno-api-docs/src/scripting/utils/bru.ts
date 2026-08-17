@@ -409,7 +409,13 @@ class Bru {
       init.body = body;
     }
 
-    const response = await fetch(url, init);
+    let response: Response;
+    try {
+      response = await fetch(url, init);
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err);
+      throw new Error(`bru.sendRequest could not reach ${method} ${url}: ${reason}`);
+    }
     const responseHeaders: Record<string, string> = {};
     response.headers.forEach((value, name) => { responseHeaders[name] = value; });
 

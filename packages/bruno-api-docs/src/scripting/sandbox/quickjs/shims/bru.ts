@@ -142,7 +142,7 @@ const addBruShimToContext = (vm: QuickJSContext, bru: Bru) => {
   });
   sleep.consume((handle) => vm.setProp(bruObject, 'sleep', handle));
 
-  const sendRequest = vm.newFunction('sendRequest', (configHandle) => {
+  const sendRequest = vm.newFunction('_sendRequest', (configHandle) => {
     const config = vm.dump(configHandle);
     const promise = vm.newPromise();
     bru.sendRequest(config)
@@ -151,7 +151,7 @@ const addBruShimToContext = (vm: QuickJSContext, bru: Bru) => {
     promise.settled.then(vm.runtime.executePendingJobs);
     return promise.handle;
   });
-  sendRequest.consume((handle) => vm.setProp(bruObject, 'sendRequest', handle));
+  sendRequest.consume((handle) => vm.setProp(bruObject, '_sendRequest', handle));
 
   const runRequest = vm.newFunction('runRequest', (pathHandle) => {
     const path = String(vm.dump(pathHandle) ?? '');
@@ -166,6 +166,26 @@ const addBruShimToContext = (vm: QuickJSContext, bru: Bru) => {
 
   vm.setProp(vm.global, 'bru', bruObject);
   bruObject.dispose();
+
+  const wrapper = vm.evalCode(`
+    bru.sendRequest = async (requestConfig, callback) => {
+      if (!callback) return await bru._sendRequest(requestConfig);
+      try {
+        const response = await bru._sendRequest(requestConfig);
+        try {
+          await callback(null, response);
+          return response;
+        } catch (error) {
+          return Promise.reject(error);
+        }
+      } catch (error) {
+        await callback(error, null);
+        return Promise.reject(error);
+      }
+    };
+  `);
+  if (wrapper.error) wrapper.error.dispose();
+  else wrapper.value.dispose();
 };
 
 export default addBruShimToContext;

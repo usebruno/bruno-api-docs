@@ -1,7 +1,43 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import ScriptRuntime from './script-runtime';
 
 describe('ScriptRuntime', () => {
+  it('bru.sendRequest fires the Node-style (err, res) callback on success and on failure', async () => {
+    const runtime = new ScriptRuntime();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({
+        status: 200,
+        statusText: 'OK',
+        headers: new Headers({ 'content-type': 'application/json' }),
+        text: async () => '{"ok":true}'
+      })
+      .mockRejectedValueOnce(new Error('network down'));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const runtimeVariables: Record<string, string | boolean> = {};
+    const script = `
+      await new Promise((resolve) => {
+        bru.sendRequest({ url: 'https://api.example.com/ok' }, (err, res) => {
+          bru.setVar('successCb', err ? 'unexpected-error' : res.data.ok);
+          resolve();
+        });
+      });
+      await new Promise((resolve) => {
+        bru.sendRequest({ url: 'https://api.example.com/bad' }, (err) => {
+          const message = err ? String(err.message) : '';
+          const keepsReasonAndUrl = message.includes('network down') && message.includes('api.example.com/bad');
+          bru.setVar('errorCb', keepsReasonAndUrl ? 'reason-kept' : 'no-reason');
+          resolve();
+        });
+      });
+    `;
+
+    await runtime.runScript({ script, variables: { runtimeVariables } });
+
+    expect(runtimeVariables).toEqual({ successCb: true, errorCb: 'reason-kept' });
+    vi.unstubAllGlobals();
+  });
+
   it('should handle script execution', async () => {
     const runtime = new ScriptRuntime();
 

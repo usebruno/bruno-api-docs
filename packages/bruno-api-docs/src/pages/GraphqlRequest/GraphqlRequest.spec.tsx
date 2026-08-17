@@ -185,4 +185,19 @@ describe('GraphQL request page', () => {
     expect(auth.text).toContain('Inherited');
     expect(queryByTestId(root, 'request-auth-inherited')).not.toBeNull();
   });
+
+  it('labels the script-chain request marker as GQL', () => {
+    const withScript = {
+      info: { name: 'GQL with script', type: 'graphql' },
+      graphql: { method: 'POST', url: '/graphql', body: { query: 'query { me }' } },
+      runtime: { scripts: [{ type: 'before-request', code: 'bru.setVar("t", 1);' }] }
+    } as unknown as GraphQLRequest;
+    const root = useRenderToDom(
+      <MemoryRouter>
+        <GraphqlRequest item={withScript} ancestry={ancestry} collection={collection} onBreadcrumbClick={() => {}} />
+      </MemoryRouter>
+    );
+
+    expect(getByTestId(root, 'script-chain-request-label').text).toBe('GQL');
+  });
 });

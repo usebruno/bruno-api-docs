@@ -10,7 +10,7 @@ export const StyledWrapper = styled.div`
   }
 
   .vars-field-label {
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   &.vars-stacked {

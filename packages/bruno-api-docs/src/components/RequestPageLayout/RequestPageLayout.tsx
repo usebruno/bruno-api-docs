@@ -26,6 +26,7 @@ export const NAV_LEVEL = { section: 1, configItem: 2 } as const;
 interface RequestPageLayoutProps {
   data: RequestPageData;
   method: string;
+  requestLabel?: string;
   hasConfigContent: boolean;
   emptyConfigSubheading: string;
   snippetBody?: HttpRequestBody | HttpRequestBodyVariant[];
@@ -39,6 +40,7 @@ interface RequestPageLayoutProps {
 export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
   data,
   method,
+  requestLabel,
   hasConfigContent,
   emptyConfigSubheading,
   snippetBody,
@@ -186,6 +188,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
               tests={tests}
               testScripts={testScripts}
               flow={scriptFlow}
+              requestLabel={requestLabel}
               url={url}
               onNavigate={onBreadcrumbClick}
             />

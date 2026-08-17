@@ -38,7 +38,7 @@ export const StyledWrapper = styled.div`
     font-size: 0.625rem;
     line-height: 1;
     letter-spacing: 0.0525rem;
-    text-transform: uppercase;
+    text-transform: none;
     color: var(--text-tertiary);
   }
 `;

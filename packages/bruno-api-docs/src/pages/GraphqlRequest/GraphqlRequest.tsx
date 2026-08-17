@@ -41,6 +41,7 @@ export const GraphqlRequest: React.FC<GraphqlRequestProps> = ({
     <RequestPageLayout
       data={data}
       method={method}
+      requestLabel="GQL"
       hasConfigContent={hasQuery || hasVariables}
       emptyConfigSubheading="This request has no query, variables, headers, or authentication configured. These may be inherited from the collection or folder."
       snippetBody={snippetBody}

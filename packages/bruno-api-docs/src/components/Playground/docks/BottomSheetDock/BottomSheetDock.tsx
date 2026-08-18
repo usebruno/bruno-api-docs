@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import PlaygroundHeader from '@/components/Playground/PlaygroundHeader/PlaygroundHeader';
+import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
 import { useDockResize } from '@/hooks/useDockResize';
 import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';

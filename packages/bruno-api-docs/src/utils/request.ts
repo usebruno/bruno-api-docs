@@ -8,7 +8,7 @@ import type {
   HttpRequestHeader,
   HttpResponseHeader
 } from '@opencollection/types/requests/http';
-import type { PropertyRow } from '@/components/PropertyTable/PropertyTable';
+import type { PropertyRow } from '../components/PropertyTable/PropertyTable';
 import type { Auth } from '@opencollection/types/common/auth';
 import type { Scripts } from '@opencollection/types/common/scripts';
 import type { Variable, SecretVariable, VariableValue, VariableValueType } from '@opencollection/types/common/variables';

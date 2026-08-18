@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
 import { selectActiveEnvName, setActiveEnv } from '@/store/slices/env';
 import { ChevronDownIcon } from '@/assets/icons';
-import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel';
+import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
 import MenuDropdown, { type MenuDropdownItem } from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 

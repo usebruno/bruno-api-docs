@@ -3,7 +3,7 @@ import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { useEditableRows } from '@/hooks/useEditableRows';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { WarningIcon } from '@/assets/icons';
-import HighlightedInput from '@/components/HighlightedInput/HighlightedInput';
+import HighlightedInput from '../HighlightedInput/HighlightedInput';
 import { SecretValue } from '@/ui/SecretValue/SecretValue';
 import './KeyValueTable.css';
 import Checkbox from '@/ui/Checkbox/Checkbox';

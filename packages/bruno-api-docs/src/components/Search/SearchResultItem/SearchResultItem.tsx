@@ -4,7 +4,7 @@ import { getShortMethod } from '@/utils/request';
 import { FolderIcon } from '@/assets/icons';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { requestCountLabel } from '@/utils/folder';
-import { formatBreadcrumb, type SearchRecord, type FieldMatches } from '@/components/Search/searchIndex';
+import { formatBreadcrumb, type SearchRecord, type FieldMatches } from '../searchIndex';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SearchResultItemProps {

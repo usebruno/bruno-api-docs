@@ -1,22 +1,22 @@
 import React, { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '@/components/MethodBadge/MethodBadge';
-import { ChevronArrow } from '@/components/ChevronArrow/ChevronArrow';
+import { MethodBadge } from '../../MethodBadge/MethodBadge';
+import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { PropertyTable } from '@/components/PropertyTable/PropertyTable';
-import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
-import { VariableText } from '@/components/VariableText/VariableText';
-import { Description } from '@/components/Description/Description';
-import { RequestParams } from '@/components/Request/RequestParams/RequestParams';
-import { RequestBody } from '@/components/Request/RequestBody/RequestBody';
-import { Code } from '@/components/Code/Code';
+import { PropertyTable } from '../../PropertyTable/PropertyTable';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
+import { VariableText } from '../../VariableText/VariableText';
+import { Description } from '../../Description/Description';
+import { RequestParams } from '../../Request/RequestParams/RequestParams';
+import { RequestBody } from '../../Request/RequestBody/RequestBody';
+import { Code } from '../../Code/Code';
 import { resolvePathAndQueryParams } from '@/utils/pathParams';
 import { getBodyView, getDescription, headerRows } from '@/utils/request';
 import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '@/utils/exampleResponse';
 import { statusToneColor } from '@/utils/common';
 import { StyledWrapper } from './StyledWrapper';
 import type { Auth } from '@opencollection/types/common/auth';
-import { CodeSnippetTabs } from '@/components/CodeSnippetTabs/CodeSnippetTabs';
+import { CodeSnippetTabs } from '../../CodeSnippetTabs/CodeSnippetTabs';
 
 interface ExampleCardProps {
   example: HttpRequestExample;

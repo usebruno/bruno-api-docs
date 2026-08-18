@@ -1,10 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { IconCode } from '@tabler/icons';
 import cx from '@/utils/cx';
-import { Code } from '@/components/Code/Code';
+import { Code } from '../Code/Code';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { useResolvedVariables } from '@/hooks';
-import { SectionLabel } from '@/components/SectionLabel/SectionLabel';
+import { SectionLabel } from '../SectionLabel/SectionLabel';
 import { Modal } from '@/ui/Modal/Modal';
 import { ExpandIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';

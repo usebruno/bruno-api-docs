@@ -1,7 +1,7 @@
 import React from 'react';
 import IconButton from '@/ui/IconButton/IconButton';
 import { IconEraser } from '@tabler/icons';
-import ActionIconButton from '@/components/Playground/Content/Views/PlaygroundView/ResponsePane/ResponseActions/ActionIconButton/ActionIconButton';
+import ActionIconButton from '../ActionIconButton/ActionIconButton';
 
 interface ClearResponseProps {
   onClick: () => void;

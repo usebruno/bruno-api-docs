@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Tabs from '@/ui/Tabs/Tabs';
-import ResponseBodyTab from '@/components/Playground/Content/Views/Common/ResponseBodyTab';
-import ResponseHeadersTab from '@/components/Playground/Content/Views/Common/ResponseHeadersTab';
-import TestResultsTab from '@/components/Playground/Content/Views/Common/TestResultsTab';
+import ResponseBodyTab from '../../Common/ResponseBodyTab';
+import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
+import TestResultsTab from '../../Common/TestResultsTab';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import WarningBanner from '@/ui/WarningBanner/WarningBanner';
 import { SendIconWrapper, StyledWrapper } from './StyledWrapper';

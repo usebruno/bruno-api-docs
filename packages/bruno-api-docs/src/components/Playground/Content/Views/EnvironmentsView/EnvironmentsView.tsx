@@ -10,7 +10,7 @@ import { EmptyState } from '@/ui/EmptyState/EmptyState';
 import { StyledWrapper } from './StyledWrapper';
 import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel';
 import EnvVarCards from './EnvVarCards/EnvVarCards';
-import { variableTypeColumn } from '@/components/Playground/Content/Views/Common/VariableTypeControl/variableTypeColumn';
+import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
 import { GlobeIcon } from '@/assets/icons';
 import { useAppDispatch } from '@/store/hooks';
 import { cx } from '@/utils/cx';

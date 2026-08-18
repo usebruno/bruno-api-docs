@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest, HttpRequestExample } from '@opencollection/types/requests/http';
-import SidebarNavLink from '@/components/Docs/Sidebar/SidebarNavLink/SidebarNavLink';
+import SidebarNavLink from '../SidebarNavLink/SidebarNavLink';
 import { ExampleIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 import { getItemName, isFolder, isScriptFile, getRequestBadgeLabel } from '@/utils/schemaHelpers';

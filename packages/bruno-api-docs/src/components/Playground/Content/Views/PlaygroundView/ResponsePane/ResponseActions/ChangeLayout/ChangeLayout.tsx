@@ -1,5 +1,5 @@
 import React from 'react';
-import ActionIconButton from '@/components/Playground/Content/Views/PlaygroundView/ResponsePane/ResponseActions/ActionIconButton/ActionIconButton';
+import ActionIconButton from '../ActionIconButton/ActionIconButton';
 import { IconLayoutColumns, IconLayoutRows } from '@tabler/icons';
 
 interface ChangeLayoutProps {

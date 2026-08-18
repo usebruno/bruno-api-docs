@@ -5,7 +5,7 @@ import { VariablesPanel } from './VariablesPanel/VariablesPanel';
 import { AssertList } from './AssertList/AssertList';
 import { TestList } from './TestList/TestList';
 import { ViewAllTests } from './ViewAllTests/ViewAllTests';
-import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
+import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
 import { StyledWrapper } from './StyledWrapper';
 import {
   inheritedCountLabel,

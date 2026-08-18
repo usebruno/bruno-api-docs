@@ -5,7 +5,7 @@ import { InfoTip } from '@/components/InfoTip/InfoTip';
 import { unwrapVariableTyped } from '@/utils/variableResolution';
 import { toDataType } from '@/utils/variableDataType';
 import { VARIABLE_NAME_REGEX } from '@/constants/regex';
-import { variableTypeColumn } from '@/components/Playground/Content/Views/Common/VariableTypeControl/variableTypeColumn';
+import { variableTypeColumn } from '../VariableTypeControl/variableTypeColumn';
 import { getDescription, type PostResponseVar } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 

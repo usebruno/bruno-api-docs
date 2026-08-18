@@ -1,7 +1,7 @@
 import React from 'react';
 import type { HttpRequestParam } from '@opencollection/types/requests/http';
-import { SubHeading } from '@/components/SubHeading/SubHeading';
-import { PropertyTable, type PropertyRow } from '@/components/PropertyTable/PropertyTable';
+import { SubHeading } from '../../SubHeading/SubHeading';
+import { PropertyTable, type PropertyRow } from '../../PropertyTable/PropertyTable';
 import { getDescription } from '@/utils/request';
 import { cx } from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';

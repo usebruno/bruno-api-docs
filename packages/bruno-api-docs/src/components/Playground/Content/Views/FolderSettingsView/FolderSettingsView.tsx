@@ -6,10 +6,10 @@ import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { rowToVariable } from '@/utils/variableDataType';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
-import HeadersTab from '@/components/Playground/Content/Views/Common/HeadersTab/HeadersTab';
-import VariablesTab from '@/components/Playground/Content/Views/Common/VariablesTab/VariablesTab';
-import AuthTab from '@/components/Playground/Content/Views/Common/AuthTab/AuthTab';
-import ScriptsTab from '@/components/Playground/Content/Views/Common/ScriptsTab/ScriptsTab';
+import HeadersTab from '../Common/HeadersTab/HeadersTab';
+import VariablesTab from '../Common/VariablesTab/VariablesTab';
+import AuthTab from '../Common/AuthTab/AuthTab';
+import ScriptsTab from '../Common/ScriptsTab/ScriptsTab';
 import { useAppDispatch } from '@/store/hooks';
 import { updateFolderInCollection } from '@/store/slices/playground';
 import {
@@ -22,8 +22,8 @@ import {
 import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { getItemUuid } from '@/utils/itemUtils';
 import { getInheritedAuthSummary } from '@/utils/request';
-import TestsTab from '@/components/Playground/Content/Views/Common/TestsTab/TestsTab';
-import OverviewTab from '@/components/Playground/Content/Views/Common/OverviewTab/OverviewTab';
+import TestsTab from '../Common/TestsTab/TestsTab';
+import OverviewTab from '../Common/OverviewTab/OverviewTab';
 
 interface FolderSettingsProps {
   folder: Folder;

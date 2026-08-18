@@ -5,7 +5,7 @@ import { TrashIcon } from '@/assets/icons';
 import { useEditableRows } from '@/hooks/useEditableRows';
 import { cx } from '@/utils/cx';
 import { toDataType } from '@/utils/variableDataType';
-import { VariableTypeControl } from '@/components/Playground/Content/Views/Common/VariableTypeControl/VariableTypeControl';
+import { VariableTypeControl } from '../../Common/VariableTypeControl/VariableTypeControl';
 import { StyledWrapper } from './StyledWrapper';
 import Checkbox from '@/ui/Checkbox/Checkbox';
 

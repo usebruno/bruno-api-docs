@@ -1,4 +1,4 @@
-import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
 import { resolveDescription } from './description';
 
 export interface KeyValueEntry {

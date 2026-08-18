@@ -1,8 +1,8 @@
 import React from 'react';
-import { MethodBadge } from '@/components/MethodBadge/MethodBadge';
-import { VariableText } from '@/components/VariableText/VariableText';
+import { MethodBadge } from '../../MethodBadge/MethodBadge';
+import { VariableText } from '../../VariableText/VariableText';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import { SendIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 

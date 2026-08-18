@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { withTrailingBlank, committableRows, applyRowPatch, removeRowAt } from './useEditableRows';
-import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
 
 const row = (over: Partial<KeyValueRow>): KeyValueRow => ({ id: 'x', name: '', value: '', enabled: true, ...over });
 const names = (rows: KeyValueRow[]) => rows.map((r) => r.name);

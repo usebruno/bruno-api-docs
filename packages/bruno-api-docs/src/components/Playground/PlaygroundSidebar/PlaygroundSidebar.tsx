@@ -1,11 +1,11 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import EnvSwitcher from '@/components/EnvSwitcher/EnvSwitcher';
-import SidebarTree from '@/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
+import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import IconButton from '@/ui/IconButton/IconButton';
 import { SettingsIcon } from '@/assets/icons';
 import { useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
-import type { ExampleHighlight } from '@/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { StyledWrapper } from './StyledWrapper';
 import Tooltip from '@/ui/Tooltip/Tooltip';
 

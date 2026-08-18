@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { ScopeTag } from '@/components/ExecutionContext/ScopeTag/ScopeTag';
-import { Code } from '@/components/Code/Code';
+import { ScopeTag } from '../ScopeTag/ScopeTag';
+import { Code } from '../../Code/Code';
 import { Collapse } from '@/ui/Collapse/Collapse';
-import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
+import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import type { TestRow } from '@/utils/fileUtils';
 import { StyledWrapper } from './StyledWrapper';
 

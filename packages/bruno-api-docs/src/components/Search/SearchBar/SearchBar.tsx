@@ -10,11 +10,11 @@ import {
   orderFoldersFirst,
   type SearchHit,
   type SearchRecord
-} from '@/components/Search/searchIndex';
+} from '../searchIndex';
 import { SearchIcon, CloseIcon } from '@/assets/icons';
-import MethodChips from '@/components/Search/MethodChips/MethodChips';
-import FolderFilter from '@/components/Search/FolderFilter/FolderFilter';
-import SearchResultItem from '@/components/Search/SearchResultItem/SearchResultItem';
+import MethodChips from '../MethodChips/MethodChips';
+import FolderFilter from '../FolderFilter/FolderFilter';
+import SearchResultItem from '../SearchResultItem/SearchResultItem';
 import { StyledWrapper } from './StyledWrapper';
 
 const RESULTS_ID = 'search-listbox';

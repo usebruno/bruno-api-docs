@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import type { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
 import { parseBulkKeyValue, preserveDescriptions, serializeBulkKeyValue } from './bulkKeyValue';
 
 describe('parseBulkKeyValue', () => {

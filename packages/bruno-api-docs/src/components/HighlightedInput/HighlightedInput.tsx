@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Portal } from '@/ui/Portal/Portal';
-import { VariableInfoCard } from '@/components/VariableInfoCard/VariableInfoCard';
+import { VariableInfoCard } from '../VariableInfoCard/VariableInfoCard';
 import { isTemplateVariable, templateVariableSplitRegex } from '@/utils/common';
 import { classifyVariableToken } from '@/utils/variableHighlight';
 import {

@@ -4,7 +4,7 @@ import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import type { Assertion } from '@opencollection/types/common/assertions';
 import { AssertsTab } from './AssertsTab';
-import { getByTestId } from '../../../../../../test-utils/dom';
+import { getByTestId } from '@/test-utils/dom';
 
 const noop = () => {};
 

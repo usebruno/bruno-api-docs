@@ -1,7 +1,7 @@
 import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
-import { marshallToVm } from '../utils';
-import type { HeaderEntry } from '../../../utils/header-list';
-import type { JsonValue } from '../../../utils/bruno-response';
+import { marshallToVm } from '@/scripting/sandbox/quickjs/utils';
+import type { HeaderEntry } from '@/scripting/utils/header-list';
+import type { JsonValue } from '@/scripting/utils/bruno-response';
 
 export const createShimHelpers = (vm: QuickJSContext) => {
   const setValue = (target: QuickJSHandle, name: string, value: JsonValue) => {

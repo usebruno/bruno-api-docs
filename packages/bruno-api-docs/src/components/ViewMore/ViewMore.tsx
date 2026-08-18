@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { prefersReducedMotion } from '../../utils/motion';
-import { ExpandToggle } from '../ExpandToggle/ExpandToggle';
+import { prefersReducedMotion } from '@/utils/motion';
+import { ExpandToggle } from '@/components/ExpandToggle/ExpandToggle';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ViewMoreProps {

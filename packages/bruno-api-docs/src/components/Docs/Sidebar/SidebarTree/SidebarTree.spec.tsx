@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 import SidebarTree from './SidebarTree';
-import { useRenderToDom } from '../../../../hooks/useRenderToDom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
 
 const req = (uuid: string, name: string, method: string): OpenCollectionItem =>
   ({ type: 'http', uuid, name, method }) as unknown as OpenCollectionItem;

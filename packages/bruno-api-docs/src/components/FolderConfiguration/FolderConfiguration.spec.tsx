@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { query, getByTestId, queryByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query, getByTestId, queryByTestId } from '@/test-utils/dom';
 import { FolderConfiguration } from './FolderConfiguration';
-import type { FolderConfig } from '../../utils/folder';
+import type { FolderConfig } from '@/utils/folder';
 
 const baseConfig: FolderConfig = {
   headers: [],

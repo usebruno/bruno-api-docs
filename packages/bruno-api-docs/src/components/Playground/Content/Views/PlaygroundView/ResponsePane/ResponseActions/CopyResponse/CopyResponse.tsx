@@ -1,6 +1,6 @@
 import React from 'react';
 import { IconCheck, IconCopy } from '@tabler/icons';
-import ActionIconButton from '../ActionIconButton/ActionIconButton';
+import ActionIconButton from '@/components/Playground/Content/Views/PlaygroundView/ResponsePane/ResponseActions/ActionIconButton/ActionIconButton';
 
 interface CopyResponseProps {
   copied: boolean;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import type { TestResultsResponse, AssertionResultsResponse } from '../../../../../runner';
-import NoContentText from '../../../../../ui/NoContentText/NoContentText';
+import type { TestResultsResponse, AssertionResultsResponse } from '@/runner';
+import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface TestResultsTabProps {
   testResults?: TestResultsResponse;

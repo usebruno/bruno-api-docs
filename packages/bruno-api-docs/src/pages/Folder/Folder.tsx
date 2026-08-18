@@ -1,19 +1,19 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder as FolderItem } from '@opencollection/types/collection/item';
-import { useMarkdownRenderer } from '../../hooks';
-import { AUTH_MODE_LABELS } from '../../constants';
-import { getItemName, getItemDocs, getItemDescription } from '../../utils/schemaHelpers';
-import { buildBreadcrumbSegments } from '../../utils/common';
-import { getFolderConfig, hasFolderConfig, countFolderRequests, requestCountLabel } from '../../utils/folder';
-import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
-import { Heading } from '../../components/Heading/Heading';
-import { Section } from '../../components/Section/Section';
-import { Breadcrumb, type BreadcrumbSegment } from '../../ui/Breadcrumb/Breadcrumb';
-import { ViewMore } from '../../components/ViewMore/ViewMore';
-import { EmptyState } from '../../ui/EmptyState/EmptyState';
-import { FolderConfiguration } from '../../components/FolderConfiguration/FolderConfiguration';
-import { FolderIcon } from '../../assets/icons';
+import { useMarkdownRenderer } from '@/hooks';
+import { AUTH_MODE_LABELS } from '@/constants';
+import { getItemName, getItemDocs, getItemDescription } from '@/utils/schemaHelpers';
+import { buildBreadcrumbSegments } from '@/utils/common';
+import { getFolderConfig, hasFolderConfig, countFolderRequests, requestCountLabel } from '@/utils/folder';
+import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
+import { Heading } from '@/components/Heading/Heading';
+import { Section } from '@/components/Section/Section';
+import { Breadcrumb, type BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
+import { ViewMore } from '@/components/ViewMore/ViewMore';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { FolderConfiguration } from '@/components/FolderConfiguration/FolderConfiguration';
+import { FolderIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 interface FolderProps {

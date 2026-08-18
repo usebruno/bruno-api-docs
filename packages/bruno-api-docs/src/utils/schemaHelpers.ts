@@ -18,7 +18,7 @@ import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
-import { PROTOCOL_BADGE_LABELS } from '../constants';
+import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
 export type SupportedRequestItem = HttpRequest | GraphQLRequest | GrpcRequest;
 

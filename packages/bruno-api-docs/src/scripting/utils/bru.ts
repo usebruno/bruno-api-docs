@@ -1,6 +1,6 @@
 import xmlFormat from 'xml-formatter';
-import { interpolate as interpolateString } from '../../runner/utils/variable-interpolator';
-import { VARIABLE_NAME_REGEX } from '../../constants/regex';
+import { interpolate as interpolateString } from '@/runner/utils/variable-interpolator';
+import { VARIABLE_NAME_REGEX } from '@/constants/regex';
 import { addUnsupportedWarning } from './unsupported-warning';
 import type { JsonValue } from './bruno-response';
 

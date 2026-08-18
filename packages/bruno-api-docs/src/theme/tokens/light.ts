@@ -1,4 +1,4 @@
-import type { Theme } from '../types';
+import type { Theme } from '@/theme/types';
 
 interface Palette {
   primary: Record<string, string>;

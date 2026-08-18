@@ -1,6 +1,6 @@
 import React from 'react';
-import InitialsAvatar from '../../InitialsAvatar/InitialsAvatar';
-import TruncatedText from '../../TruncatedText/TruncatedText';
+import InitialsAvatar from '@/components/InitialsAvatar/InitialsAvatar';
+import TruncatedText from '@/components/TruncatedText/TruncatedText';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface BrandProps {

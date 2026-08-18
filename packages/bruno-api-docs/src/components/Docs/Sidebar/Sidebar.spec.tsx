@@ -3,10 +3,10 @@ import { describe, it, expect } from 'vitest';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { createOpenCollectionStore } from '../../../store/store';
-import { setDocsCollection } from '../../../store/slices/docs';
-import { useRenderToDom } from '../../../hooks/useRenderToDom';
-import { query } from '../../../test-utils/dom';
+import { createOpenCollectionStore } from '@/store/store';
+import { setDocsCollection } from '@/store/slices/docs';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query } from '@/test-utils/dom';
 
 const collection = {
   info: { name: 'C' },

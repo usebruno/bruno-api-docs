@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '../../hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '../../test-utils/dom';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import WarningBanner from './WarningBanner';
 
 const SET_MAX_REDIRECTS = 'req.setMaxRedirects is not currently supported in the Bruno playground. Please use the Bruno desktop app.';

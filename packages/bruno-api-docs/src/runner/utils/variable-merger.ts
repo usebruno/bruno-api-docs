@@ -2,8 +2,8 @@ import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable } from '@opencollection/types/common/variables';
 import { getTreePathFromCollectionToItem } from './tree-utils';
-import { isFolder, getRequestVariables } from '../../utils/schemaHelpers';
-import { coerceVariableValue } from '../../utils/variableDataType';
+import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
+import { coerceVariableValue } from '@/utils/variableDataType';
 import type { Variables, JsonValue } from './variable-interpolator';
 
 /**

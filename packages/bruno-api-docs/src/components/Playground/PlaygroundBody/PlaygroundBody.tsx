@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder } from '@opencollection/types/collection/item';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectHydratedCollection,
   selectViewMode,
@@ -13,21 +13,21 @@ import {
   setSelectedExampleIndex,
   toggleFolderCollapse,
   expandFolders
-} from '@slices/playground';
-import { selectActiveEnvName } from '../../../store/slices/env';
-import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import { useNavModel } from '../../../routing/hooks';
-import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '../../../hooks';
-import { getItemUuid, findItemByUuid } from '../../../utils/itemUtils';
-import { isFolder } from '../../../utils/schemaHelpers';
-import { exampleIndexForSlug, exampleSlugForIndex } from '../../../routing/slug';
-import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
-import FolderSettingsView from '../Content/Views/FolderSettingsView/FolderSettingsView';
-import EnvironmentsView from '../Content/Views/EnvironmentsView/EnvironmentsView';
-import CollectionSettingsView from '../Content/Views/CollectionSettingsView/CollectionSettingsView';
-import ExampleView from '../Content/Views/ExampleView/ExampleView';
-import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
-import type { DockMode } from '../../../utils/playgroundDock';
+} from '@/store/slices/playground';
+import { selectActiveEnvName } from '@/store/slices/env';
+import type { ExampleHighlight } from '@/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import { useNavModel } from '@/routing/hooks';
+import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
+import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
+import { isFolder } from '@/utils/schemaHelpers';
+import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
+import PlaygroundView from '@/components/Playground/Content/Views/PlaygroundView/PlaygroundView';
+import FolderSettingsView from '@/components/Playground/Content/Views/FolderSettingsView/FolderSettingsView';
+import EnvironmentsView from '@/components/Playground/Content/Views/EnvironmentsView/EnvironmentsView';
+import CollectionSettingsView from '@/components/Playground/Content/Views/CollectionSettingsView/CollectionSettingsView';
+import ExampleView from '@/components/Playground/Content/Views/ExampleView/ExampleView';
+import PlaygroundSidebar from '@/components/Playground/PlaygroundSidebar/PlaygroundSidebar';
+import type { DockMode } from '@/utils/playgroundDock';
 import {
   resolvePlaygroundTarget,
   PLAYGROUND_ENVIRONMENTS_SLUG,

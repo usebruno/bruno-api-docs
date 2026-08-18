@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { CopyButton } from '../../../ui/CopyButton/CopyButton';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { StyledWrapper } from './StyledWrapper';
 
-import Prism from '../../../utils/prism';
+import Prism from '@/utils/prism';
 
 export interface CodeViewerProps {
   code?: string;

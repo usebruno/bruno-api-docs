@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
-import Tabs from '../../../../../../ui/Tabs/Tabs';
-import type { KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import { rowToVariable } from '../../../../../../utils/variableDataType';
-import HeadersTab from '../../Common/HeadersTab/HeadersTab';
-import ParamsTab from '../../Common/ParamsTab/ParamsTab';
-import BodyTab from '../../Common/BodyTab';
-import BodyModeSelector from '../../Common/BodyModeSelector/BodyModeSelector';
-import AuthTab from '../../Common/AuthTab/AuthTab';
-import ScriptsTab from '../../Common/ScriptsTab/ScriptsTab';
-import TestsTab from '../../Common/TestsTab/TestsTab';
-import AssertsTab from '../../Common/AssertsTab/AssertsTab';
-import VariablesTab from '../../Common/VariablesTab/VariablesTab';
-import OverviewTab from '../../Common/OverviewTab/OverviewTab';
+import Tabs from '@/ui/Tabs/Tabs';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import { rowToVariable } from '@/utils/variableDataType';
+import HeadersTab from '@/components/Playground/Content/Views/Common/HeadersTab/HeadersTab';
+import ParamsTab from '@/components/Playground/Content/Views/Common/ParamsTab/ParamsTab';
+import BodyTab from '@/components/Playground/Content/Views/Common/BodyTab';
+import BodyModeSelector from '@/components/Playground/Content/Views/Common/BodyModeSelector/BodyModeSelector';
+import AuthTab from '@/components/Playground/Content/Views/Common/AuthTab/AuthTab';
+import ScriptsTab from '@/components/Playground/Content/Views/Common/ScriptsTab/ScriptsTab';
+import TestsTab from '@/components/Playground/Content/Views/Common/TestsTab/TestsTab';
+import AssertsTab from '@/components/Playground/Content/Views/Common/AssertsTab/AssertsTab';
+import VariablesTab from '@/components/Playground/Content/Views/Common/VariablesTab/VariablesTab';
+import OverviewTab from '@/components/Playground/Content/Views/Common/OverviewTab/OverviewTab';
 import { StyledWrapper } from './StyledWrapper';
 import {
   getHttpParams,
@@ -27,10 +27,10 @@ import {
   scriptsObjectToArray,
   getRequestUrl,
   getItemDocs
-} from '../../../../../../utils/schemaHelpers';
-import { setUrlQueryParams } from '../../../../../../utils/pathParams';
-import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '../../../../../../utils/request';
-import { keyValueRowToEntry } from '../../../../../../utils/keyValueRow';
+} from '@/utils/schemaHelpers';
+import { setUrlQueryParams } from '@/utils/pathParams';
+import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
+import { keyValueRowToEntry } from '@/utils/keyValueRow';
 
 interface RequestPaneProps {
   item: HttpRequest;

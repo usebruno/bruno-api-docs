@@ -1,5 +1,5 @@
 import type { QuickJSContext } from 'quickjs-emscripten';
-import { marshallToVm } from '../utils';
+import { marshallToVm } from '@/scripting/sandbox/quickjs/utils';
 import { createShimHelpers } from './helpers';
 import type { HeaderEntry } from '@/scripting/utils/header-list';
 import type BrunoRequest from '@/scripting/utils/bruno-request';

@@ -1,8 +1,8 @@
 import React from 'react';
 import { IconCaretDown } from '@tabler/icons';
 import type { Assertion } from '@opencollection/types/common/assertions';
-import KeyValueTable, { type KeyValueRow } from '../../../../../../components/KeyValueTable/KeyValueTable';
-import MenuDropdown from '../../../../../../ui/MenuDropdown';
+import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import MenuDropdown from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 
 /**

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { SplitOrientation } from '../../hooks/useSplitPane';
+import type { SplitOrientation } from '@/hooks/useSplitPane';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SplitDividerProps {

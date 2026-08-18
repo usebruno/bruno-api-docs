@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import { SearchResultItem } from './SearchResultItem';
-import type { RequestSearchRecord, FolderSearchRecord } from '../searchIndex';
+import type { RequestSearchRecord, FolderSearchRecord } from '@/components/Search/searchIndex';
 
 // Match "<text>" wrapped in a bold element, regardless of its attributes, so the
 // assertion keys off the tag (the highlight contract) and not a styling class.

@@ -1,10 +1,10 @@
 import React from 'react';
-import { getMethodColorVar } from '../../../theme/methodColors';
-import { getShortMethod } from '../../../utils/request';
-import { FolderIcon } from '../../../assets/icons';
-import { Tooltip } from '../../../ui/Tooltip/Tooltip';
-import { requestCountLabel } from '../../../utils/folder';
-import { formatBreadcrumb, type SearchRecord, type FieldMatches } from '../searchIndex';
+import { getMethodColorVar } from '@/theme/methodColors';
+import { getShortMethod } from '@/utils/request';
+import { FolderIcon } from '@/assets/icons';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
+import { requestCountLabel } from '@/utils/folder';
+import { formatBreadcrumb, type SearchRecord, type FieldMatches } from '@/components/Search/searchIndex';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SearchResultItemProps {

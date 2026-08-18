@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
-import { PropertyTable, type PropertyRow } from '../../PropertyTable/PropertyTable';
-import { SubHeading } from '../../SubHeading/SubHeading';
-import { preVarRows, postVarRows } from '../../PropertyTable/inheritedRows';
+import { PropertyTable, type PropertyRow } from '@/components/PropertyTable/PropertyTable';
+import { SubHeading } from '@/components/SubHeading/SubHeading';
+import { preVarRows, postVarRows } from '@/components/PropertyTable/inheritedRows';
 import type {
   PreRequestVarRow,
   PostResponseVarRow,
   InheritedPreRequestVarRow,
   InheritedPostResponseVarRow
-} from '../../../utils/request';
+} from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface VariablesPanelProps {

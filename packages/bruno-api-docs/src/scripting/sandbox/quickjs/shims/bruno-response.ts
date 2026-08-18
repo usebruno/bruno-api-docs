@@ -1,5 +1,5 @@
 import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
-import { marshallToVm } from '../utils';
+import { marshallToVm } from '@/scripting/sandbox/quickjs/utils';
 import { createShimHelpers } from './helpers';
 import type { CallableResponse, QueryArg, JsonValue } from '@/scripting/utils/bruno-response';
 import { READ_ONLY_METHODS, READ_ONLY_MESSAGE } from '@/scripting/utils/header-list';

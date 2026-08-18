@@ -12,8 +12,8 @@ import {
   scriptsArrayToObject,
   scriptsObjectToArray,
   type ScriptsObject
-} from '../../utils/schemaHelpers';
-import { resolveInheritedAuth } from '../../utils/request';
+} from '@/utils/schemaHelpers';
+import { resolveInheritedAuth } from '@/utils/request';
 
 /**
  * Merge headers from collection and folder hierarchy into the request

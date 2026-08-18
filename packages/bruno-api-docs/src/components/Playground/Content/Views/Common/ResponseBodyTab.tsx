@@ -5,7 +5,7 @@ import { formatResponse } from '@/utils/dataFormatter';
 import type { RunRequestResponse } from '@/runner';
 import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
 import useLargeResponse from '@/hooks/useLargeResponseWarning';
-import QueryResultPreview from '../../../QueryResultPreview/QueryResultPreview';
+import QueryResultPreview from '@/components/Playground/QueryResultPreview/QueryResultPreview';
 
 const CodeEditor = React.lazy(() => import('@/ui/CodeEditor/CodeEditor'));
 

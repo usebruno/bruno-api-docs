@@ -13,7 +13,7 @@ import reducer, {
   expandFolders,
   setPlaygroundVariable
 } from './playground';
-import { createOpenCollectionStore } from '../store';
+import { createOpenCollectionStore } from '@/store/store';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 

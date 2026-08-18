@@ -5,7 +5,7 @@ import xmlFormat from 'xml-formatter';
 import fastJsonFormat from 'fast-json-format';
 import prettierFormat from 'prettier/standalone';
 import parserBabel from 'prettier/parser-babel';
-import type { RunRequestResponse } from '../runner';
+import type { RunRequestResponse } from '@/runner';
 import { getResponseSize } from './response';
 
 const applyJSONPathFilter = (data: RunRequestResponse['data'], filter: string): unknown => {

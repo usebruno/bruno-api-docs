@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState, type ReactNode } from 'react';
-import MenuDropdown from '../MenuDropdown/MenuDropdown';
-import type { MenuDropdownHandle } from '../MenuDropdown/types';
-import { ChevronsRightIcon, DotIcon } from '../../assets/icons';
+import MenuDropdown from '@/ui/MenuDropdown/MenuDropdown';
+import type { MenuDropdownHandle } from '@/ui/MenuDropdown/types';
+import { ChevronsRightIcon, DotIcon } from '@/assets/icons';
 import { useResponsiveTabs } from './useResponsiveTabs';
 import { StyledWrapper } from './StyledWrapper';
 import cx from '@/utils/cx';

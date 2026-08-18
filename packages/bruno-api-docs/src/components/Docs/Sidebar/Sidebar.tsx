@@ -2,16 +2,16 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import SidebarNavLink from './SidebarNavLink/SidebarNavLink';
 import SidebarTree from './SidebarTree/SidebarTree';
-import { CubeIcon, GlobeIcon } from '../../../assets/icons';
+import { CubeIcon, GlobeIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 import { computeAutoReveal } from './autoReveal';
-import { useAppDispatch, useAppSelector } from '../../../store/hooks';
-import { toggleItem, expandFolders, selectDocsCollection } from '../../../store/slices/docs';
-import { getItemUuid } from '../../../utils/itemUtils';
-import { useNavModel } from '../../../routing/hooks';
-import { normalizeSlug, resolveSlug } from '../../../routing/resolve';
-import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '../../../routing/navModel';
-import { useDocsNavigate, useAutoHideScrollbar, useIsMobileDevice } from '../../../hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { toggleItem, expandFolders, selectDocsCollection } from '@/store/slices/docs';
+import { getItemUuid } from '@/utils/itemUtils';
+import { useNavModel } from '@/routing/hooks';
+import { normalizeSlug, resolveSlug } from '@/routing/resolve';
+import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@/routing/navModel';
+import { useDocsNavigate, useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
 import { useActiveExample } from './hooks/useActiveExample';
 
 interface SidebarProps {

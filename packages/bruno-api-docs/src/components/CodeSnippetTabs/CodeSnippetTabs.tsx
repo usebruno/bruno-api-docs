@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import type { HttpRequestBody, HttpRequestBodyVariant, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { SnippetTabs, type Snippet } from '../SnippetTabs/SnippetTabs';
+import { SnippetTabs, type Snippet } from '@/components/SnippetTabs/SnippetTabs';
 import {
   generateCurlCommand,
   generateJavaScriptCode,

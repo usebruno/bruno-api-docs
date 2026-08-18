@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import { Select } from './Select';
-import { getByTestId } from '../../../test-utils/dom';
+import { getByTestId } from '@/test-utils/dom';
 
 const OPTIONS = [
   { value: 'a', label: 'Apple' },

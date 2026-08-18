@@ -1,18 +1,18 @@
 import React, { useMemo } from 'react';
 import type { HttpRequest, HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '../../../../MethodBadge/MethodBadge';
-import { CopyButton } from '../../../../../ui/CopyButton/CopyButton';
-import { PropertyTable } from '../../../../PropertyTable/PropertyTable';
-import { RequestParams } from '../../../../Request/RequestParams/RequestParams';
-import { RequestBody } from '../../../../Request/RequestBody/RequestBody';
-import { Code } from '../../../../Code/Code';
-import { SplitDivider } from '../../../../SplitDivider/SplitDivider';
-import { resolvePathAndQueryParams } from '../../../../../utils/pathParams';
-import { getBodyView, getDescription, headerRows } from '../../../../../utils/request';
-import { getHttpMethod, getRequestUrl } from '../../../../../utils/schemaHelpers';
-import { responseBodyLanguage, statusCodePhrase } from '../../../../../utils/exampleResponse';
-import { statusToneColor, statusToneBackground } from '../../../../../utils/common';
-import { useSplitPane, type SplitOrientation } from '../../../../../hooks/useSplitPane';
+import { MethodBadge } from '@/components/MethodBadge/MethodBadge';
+import { CopyButton } from '@/ui/CopyButton/CopyButton';
+import { PropertyTable } from '@/components/PropertyTable/PropertyTable';
+import { RequestParams } from '@/components/Request/RequestParams/RequestParams';
+import { RequestBody } from '@/components/Request/RequestBody/RequestBody';
+import { Code } from '@/components/Code/Code';
+import { SplitDivider } from '@/components/SplitDivider/SplitDivider';
+import { resolvePathAndQueryParams } from '@/utils/pathParams';
+import { getBodyView, getDescription, headerRows } from '@/utils/request';
+import { getHttpMethod, getRequestUrl } from '@/utils/schemaHelpers';
+import { responseBodyLanguage, statusCodePhrase } from '@/utils/exampleResponse';
+import { statusToneColor, statusToneBackground } from '@/utils/common';
+import { useSplitPane, type SplitOrientation } from '@/hooks/useSplitPane';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ExampleViewProps {

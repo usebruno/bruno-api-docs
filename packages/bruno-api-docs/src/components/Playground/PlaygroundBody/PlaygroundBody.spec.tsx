@@ -3,15 +3,15 @@ import { describe, it, expect } from 'vitest';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import PlaygroundBody from './PlaygroundBody';
-import { createOpenCollectionStore } from '../../../store/store';
-import { useRenderToDom } from '../../../hooks/useRenderToDom';
+import { createOpenCollectionStore } from '@/store/store';
+import { useRenderToDom } from '@/hooks/useRenderToDom';
 import {
   setPlaygroundCollection,
   setSelectedItemId,
   setSelectedExampleIndex,
   setViewMode
-} from '../../../store/slices/playground';
-import { getItemUuid } from '../../../utils/itemUtils';
+} from '@/store/slices/playground';
+import { getItemUuid } from '@/utils/itemUtils';
 
 const collection = {
   info: { name: 'C' },

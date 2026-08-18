@@ -5,9 +5,9 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import type { RootState } from '../store';
-import { hydrateWithUUIDs, findAndUpdateItem } from '../../utils/fileUtils';
-import { isFolder, getRequestVariables } from '../../utils/schemaHelpers';
+import type { RootState } from '@/store/store';
+import { hydrateWithUUIDs, findAndUpdateItem } from '@/utils/fileUtils';
+import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
 import type { ResponseBodyFormat } from '@/constants';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';

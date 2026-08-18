@@ -9,7 +9,7 @@ import {
   getRequestAuth,
   getItemName,
   type InternalHttpRequest
-} from '../../utils/schemaHelpers';
+} from '@/utils/schemaHelpers';
 import { createRequestHeaderList, type HeaderList } from './header-list';
 import type { JsonValue } from './bruno-response';
 import { addUnsupportedWarning } from './unsupported-warning';

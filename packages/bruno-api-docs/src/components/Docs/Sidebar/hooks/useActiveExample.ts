@@ -1,8 +1,8 @@
-import { getItemUuid } from '../../../../utils/itemUtils';
-import { useDocsNavigate } from '../../../../hooks';
-import { useActiveResolution } from '../../../../routing/hooks';
-import { exampleSlugForIndex } from '../../../../routing/slug';
-import type { NavModel } from '../../../../routing';
+import { getItemUuid } from '@/utils/itemUtils';
+import { useDocsNavigate } from '@/hooks';
+import { useActiveResolution } from '@/routing/hooks';
+import { exampleSlugForIndex } from '@/routing/slug';
+import type { NavModel } from '@/routing';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 
 export function useActiveExample(model: NavModel, uuidToSlug: Map<string, string>, onNavigate?: () => void) {

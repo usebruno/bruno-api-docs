@@ -4,7 +4,7 @@ import {
   PLAYGROUND_ENVIRONMENTS_SLUG,
   PLAYGROUND_COLLECTION_SLUG
 } from './resolvePlaygroundTarget';
-import type { NavModel, NavEntry } from '../../../routing/types';
+import type { NavModel, NavEntry } from '@/routing/types';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
 
 const item = (uuid: string): OpenCollectionItem => ({ uuid } as unknown as OpenCollectionItem);

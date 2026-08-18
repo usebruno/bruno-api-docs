@@ -1,8 +1,8 @@
 import type { QuickJSContext } from 'quickjs-emscripten';
-import { cleanJson } from '../../../utils/common';
-import { marshallToVm } from '../utils';
+import { cleanJson } from '@/scripting/utils/common';
+import { marshallToVm } from '@/scripting/sandbox/quickjs/utils';
 import { createShimHelpers } from './helpers';
-import type Bru from '../../../utils/bru';
+import type Bru from '@/scripting/utils/bru';
 
 const messageOf = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 

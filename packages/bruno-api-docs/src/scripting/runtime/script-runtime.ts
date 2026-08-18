@@ -1,10 +1,10 @@
 import * as chai from 'chai';
-import Bru, { type RunRequestCallback } from '../utils/bru';
-import BrunoRequest from '../utils/bruno-request';
-import BrunoResponse from '../utils/bruno-response';
-import { executeQuickJsVmAsync } from '../sandbox/quickjs';
-import type { AssertionResult } from '../utils/test';
-import { createBruTestResultMethods, type BruTestResultMethods } from '../utils/test';
+import Bru, { type RunRequestCallback } from '@/scripting/utils/bru';
+import BrunoRequest from '@/scripting/utils/bruno-request';
+import BrunoResponse from '@/scripting/utils/bruno-response';
+import { executeQuickJsVmAsync } from '@/scripting/sandbox/quickjs';
+import type { AssertionResult } from '@/scripting/utils/test';
+import { createBruTestResultMethods, type BruTestResultMethods } from '@/scripting/utils/test';
 
 interface RunScriptOptions {
   script: string;

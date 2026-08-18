@@ -1,4 +1,4 @@
-import { marshallToVm } from '../utils';
+import { marshallToVm } from '@/scripting/sandbox/quickjs/utils';
 
 const addTestShimToContext = (vm: any, __brunoTestResults: any) => {
   const addResult = vm.newFunction('addResult', function (v: any) {

@@ -1,10 +1,10 @@
 import React from 'react';
-import { Field, type SelectOption } from '../../../../../../ui/Field';
-import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '../../../../../../constants';
-import { REQUEST_PROTOCOL_KEYS } from '../../../../../../utils/schemaHelpers';
-import type { InheritedAuthSummary } from '../../../../../../utils/request';
+import { Field, type SelectOption } from '@/ui/Field';
+import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
+import { REQUEST_PROTOCOL_KEYS } from '@/utils/schemaHelpers';
+import type { InheritedAuthSummary } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
-import NoContentText from '../../../../../../ui/NoContentText/NoContentText';
+import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface AuthTabProps {
   auth: any;

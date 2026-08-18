@@ -1,6 +1,6 @@
-import type { NavModel } from '../../../routing/types';
-import { ENVIRONMENTS_SLUG } from '../../../routing/navModel';
-import { getItemUuid } from '../../../utils/itemUtils';
+import type { NavModel } from '@/routing/types';
+import { ENVIRONMENTS_SLUG } from '@/routing/navModel';
+import { getItemUuid } from '@/utils/itemUtils';
 
 /**
  * The URL slot (`pgReq`) usually holds an item's slug. These two reserved values

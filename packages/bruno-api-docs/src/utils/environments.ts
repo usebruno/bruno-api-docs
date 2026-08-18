@@ -1,6 +1,6 @@
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable, VariableValueType } from '@opencollection/types/common/variables';
-import { MANAGER_LABELS } from '../constants';
+import { MANAGER_LABELS } from '@/constants';
 import { getDescription, getVariableTypeLabel } from './request';
 import { descriptionText, resolveDescription } from './description';
 import { isSecretVariable, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';

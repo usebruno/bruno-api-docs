@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { RequestRunner } from './index';
-import { parseYaml } from '../utils/yamlUtils';
+import { parseYaml } from '@/utils/yamlUtils';
 
 interface SentRequest {
   url?: string;

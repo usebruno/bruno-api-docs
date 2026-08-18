@@ -2,20 +2,20 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import { RequestExecutor } from './RequestExecutor';
-import ScriptRuntime from '../scripting/runtime/script-runtime';
-import type { RunRequestCallback } from '../scripting/utils/bru';
-import AssertRuntime, { type AssertionResult } from '../scripting/runtime/assert-runtime';
+import ScriptRuntime from '@/scripting/runtime/script-runtime';
+import type { RunRequestCallback } from '@/scripting/utils/bru';
+import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
 import { getCollectionFolderRequestVariables } from './utils/variable-merger';
-import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '../utils/variableDataType';
-import { externalSecretValues, type ExternalSecretEntry } from '../utils/variableResolution';
+import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
+import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
 import type { Variables, JsonValue } from './utils/variable-interpolator';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
   isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl, type InternalHttpRequest
 } from '@/utils/schemaHelpers';
-import { getItemUuid } from '../utils/itemUtils';
+import { getItemUuid } from '@/utils/itemUtils';
 
 const MAX_RUN_REQUEST_DEPTH = 25;
 

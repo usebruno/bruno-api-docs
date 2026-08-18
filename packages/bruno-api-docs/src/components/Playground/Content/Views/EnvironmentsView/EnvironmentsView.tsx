@@ -2,21 +2,21 @@ import React, { useState, useEffect } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable, SecretProviderType } from '@opencollection/types/common/variables';
-import type { KeyValueRow } from '../../../../../components/KeyValueTable/KeyValueTable';
-import KeyValueTable from '../../../../../components/KeyValueTable/KeyValueTable';
-import Tabs from '../../../../../ui/Tabs/Tabs';
-import TitleLabel from '../../../../TitleLabel/TitleLabel';
-import { EmptyState } from '../../../../../ui/EmptyState/EmptyState';
+import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
+import KeyValueTable from '@/components/KeyValueTable/KeyValueTable';
+import Tabs from '@/ui/Tabs/Tabs';
+import TitleLabel from '@/components/TitleLabel/TitleLabel';
+import { EmptyState } from '@/ui/EmptyState/EmptyState';
 import { StyledWrapper } from './StyledWrapper';
-import { EnvironmentLabel } from '../../../../EnvironmentLabel/EnvironmentLabel';
+import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel';
 import EnvVarCards from './EnvVarCards/EnvVarCards';
-import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
-import { GlobeIcon } from '../../../../../assets/icons';
-import { useAppDispatch } from '../../../../../store/hooks';
-import { cx } from '../../../../../utils/cx';
-import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '../../../../../utils/environments';
-import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '../../../../../utils/variableResolution';
-import { updateCollectionEnvironments } from '@slices/playground';
+import { variableTypeColumn } from '@/components/Playground/Content/Views/Common/VariableTypeControl/variableTypeColumn';
+import { GlobeIcon } from '@/assets/icons';
+import { useAppDispatch } from '@/store/hooks';
+import { cx } from '@/utils/cx';
+import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
+import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@/utils/variableResolution';
+import { updateCollectionEnvironments } from '@/store/slices/playground';
 
 const ENV_TABS = [
   { id: 'variables', label: 'Variables' },

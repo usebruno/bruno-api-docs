@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from 'react';
-import type { ResponseBodyFormat } from '../../../../../../../../constants';
+import type { ResponseBodyFormat } from '@/constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
-import type { RunRequestResponse } from '../../../../../../../../runner';
-import { getResponseFormatOptions } from '../../../../../../../../utils/response';
+import type { RunRequestResponse } from '@/runner';
+import { getResponseFormatOptions } from '@/utils/response';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectResponseFormat,

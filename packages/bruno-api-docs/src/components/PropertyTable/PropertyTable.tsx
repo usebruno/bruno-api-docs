@@ -1,12 +1,12 @@
 import React from 'react';
-import { SecretValue } from '../../ui/SecretValue/SecretValue';
-import { VariableText } from '../VariableText/VariableText';
-import { TruncatedText } from '../TruncatedText/TruncatedText';
-import { Description } from '../Description/Description';
-import { DisabledBadge } from '../DisabledBadge/DisabledBadge';
-import { InheritedSourceLink } from '../InheritedSourceLink/InheritedSourceLink';
-import type { InheritedSource } from '../../utils/request';
-import { cx } from '../../utils/cx';
+import { SecretValue } from '@/ui/SecretValue/SecretValue';
+import { VariableText } from '@/components/VariableText/VariableText';
+import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
+import { Description } from '@/components/Description/Description';
+import { DisabledBadge } from '@/components/DisabledBadge/DisabledBadge';
+import { InheritedSourceLink } from '@/components/InheritedSourceLink/InheritedSourceLink';
+import type { InheritedSource } from '@/utils/request';
+import { cx } from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface PropertyRow {

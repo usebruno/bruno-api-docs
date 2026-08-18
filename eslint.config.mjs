@@ -133,20 +133,6 @@ export default [
         }
       ],
 
-      'import/order': ['error', {
-        'groups': ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
-        'pathGroups': [
-          { pattern: 'react', group: 'external', position: 'before' },
-          { pattern: 'react-dom', group: 'external', position: 'before' },
-          { pattern: 'react-dom/**', group: 'external', position: 'before' },
-          { pattern: '@/**', group: 'internal' },
-          { pattern: '@slices/**', group: 'internal' }
-        ],
-        'pathGroupsExcludedImportTypes': [],
-        'alphabetize': { order: 'asc', caseInsensitive: true },
-        'newlines-between': 'never'
-      }],
-
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn'
     }

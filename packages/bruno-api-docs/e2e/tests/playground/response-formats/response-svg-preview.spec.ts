@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { test, expect } from '../../playwright';
+import { test, expect } from '../../../playwright';
 
 // A small SVG whose bytes the sniffer classifies as image/svg+xml. Small SVG bodies are kept as
 // selectable text (no base64 copy), so the preview must build the <img> src from that text —

@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
-import ErrorBanner from '../../../ui/ErrorBanner/ErrorBanner';
-import { useAppSelector } from '../../../store/hooks';
+import ErrorBanner from '../../../../ui/ErrorBanner/ErrorBanner';
+import { useAppSelector } from '../../../../store/hooks';
+import { StyledWrapper } from './StyledWrapper';
 
 // react-json-view touches browser globals at module load, so a static import
 // crashes under SSR (the server bundle and the renderToStaticMarkup unit tests).
@@ -62,7 +63,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
 
   return (
     <Suspense fallback={null}>
-      <div data-testid="response-preview-json">
+      <StyledWrapper data-testid="response-preview-json">
         <ReactJson
           src={value}
           theme={themeMode === 'dark' ? 'monokai' : 'rjv-default'}
@@ -72,13 +73,8 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
           displayObjectSize
           enableClipboard
           name={false}
-          style={{
-            backgroundColor: 'transparent',
-            fontSize: '0.75rem',
-            fontFamily: 'var(--font-mono)'
-          }}
         />
-      </div>
+      </StyledWrapper>
     </Suspense>
   );
 };

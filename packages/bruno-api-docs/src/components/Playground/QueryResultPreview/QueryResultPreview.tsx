@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import HtmlPreview from './HtmlPreview/HtmlPreview';
-import JsonPreview from './JsonPreview';
+import JsonPreview from './JsonPreview/JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
 import type { RunRequestResponse } from '../../../runner';

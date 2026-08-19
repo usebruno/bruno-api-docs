@@ -21,7 +21,10 @@ const TextPreview: React.FC<TextPreviewProps> = ({ data }) => {
   }, [data]);
 
   return (
-    <div className="p-4 font-mono text-[0.8125rem] whitespace-pre-wrap break-words overflow-auto overflow-x-hidden w-full max-w-full h-full">
+    <div
+      data-testid="response-preview-text"
+      className="p-4 font-mono text-[0.8125rem] whitespace-pre-wrap break-words overflow-auto overflow-x-hidden w-full max-w-full h-full"
+    >
       {displayData}
     </div>
   );

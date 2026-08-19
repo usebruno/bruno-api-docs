@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from '@/utils/cx';
 import { MethodBadge } from '../../MethodBadge/MethodBadge';
 import { VariableText } from '../../VariableText/VariableText';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
@@ -30,7 +31,7 @@ export const RequestUrlBar: React.FC<RequestUrlBarProps> = ({
 }) => {
   const { resolve } = useResolvedVariables();
   return (
-    <StyledWrapper style={style} className={['request-url-bar', className].filter(Boolean).join(' ')} data-testid={testId}>
+    <StyledWrapper style={style} className={cx('request-url-bar', className)} data-testid={testId}>
       <span className="request-url-bar-method" data-testid="request-method">
         <MethodBadge method={method} capitalizeMethod={capitalizeMethod} />
       </span>

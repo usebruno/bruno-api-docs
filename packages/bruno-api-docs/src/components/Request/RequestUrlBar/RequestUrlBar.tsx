@@ -3,6 +3,7 @@ import { MethodBadge } from '../../MethodBadge/MethodBadge';
 import { VariableText } from '../../VariableText/VariableText';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { TruncatedText } from '../../TruncatedText/TruncatedText';
+import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { SendIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -26,33 +27,36 @@ export const RequestUrlBar: React.FC<RequestUrlBarProps> = ({
   style,
   className,
   testId = 'request-url-bar'
-}) => (
-  <StyledWrapper style={style} className={['request-url-bar', className].filter(Boolean).join(' ')} data-testid={testId}>
-    <span className="request-url-bar-method" data-testid="request-method">
-      <MethodBadge method={method} capitalizeMethod={capitalizeMethod} />
-    </span>
-    <TruncatedText className="request-url-bar-url" testId="request-url" text={url}>
-      <VariableText value={url} />
-    </TruncatedText>
-    <span className="request-url-bar-actions">
-      <CopyButton
-        text={url}
-        label="Copy URL"
-        style={{
-          width: '1.5rem',
-          height: '1.5rem',
-          backgroundColor: 'var(--oc-background-base)',
-          borderColor: 'var(--oc-table-border)'
-        }}
-      />
-      {onTry && (
-        <button type="button" className="request-try" onClick={onTry} data-testid="request-try-button">
-          <SendIcon />
-          {tryLabel}
-        </button>
-      )}
-    </span>
-  </StyledWrapper>
-);
+}) => {
+  const { resolve } = useResolvedVariables();
+  return (
+    <StyledWrapper style={style} className={['request-url-bar', className].filter(Boolean).join(' ')} data-testid={testId}>
+      <span className="request-url-bar-method" data-testid="request-method">
+        <MethodBadge method={method} capitalizeMethod={capitalizeMethod} />
+      </span>
+      <TruncatedText className="request-url-bar-url" testId="request-url" text={url}>
+        <VariableText value={url} />
+      </TruncatedText>
+      <span className="request-url-bar-actions">
+        <CopyButton
+          text={resolve(url)}
+          label="Copy URL"
+          style={{
+            width: '1.5rem',
+            height: '1.5rem',
+            backgroundColor: 'var(--oc-background-base)',
+            borderColor: 'var(--oc-table-border)'
+          }}
+        />
+        {onTry && (
+          <button type="button" className="request-try" onClick={onTry} data-testid="request-try-button">
+            <SendIcon />
+            {tryLabel}
+          </button>
+        )}
+      </span>
+    </StyledWrapper>
+  );
+};
 
 export default RequestUrlBar;

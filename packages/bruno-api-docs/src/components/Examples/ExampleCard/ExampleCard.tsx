@@ -6,6 +6,7 @@ import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { PropertyTable } from '../../PropertyTable/PropertyTable';
 import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import { VariableText } from '../../VariableText/VariableText';
+import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { Description } from '../../Description/Description';
 import { RequestParams } from '../../Request/RequestParams/RequestParams';
 import { RequestBody } from '../../Request/RequestBody/RequestBody';
@@ -172,6 +173,7 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({ example, method, url, 
   const detailId = useId();
   const detailRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  const { resolve } = useResolvedVariables();
 
   useEffect(() => {
     const el = detailRef.current;
@@ -336,7 +338,7 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({ example, method, url, 
                   auth={auth}
                   testId="example-code-snippet"
                 />
-                <CopyButton text={displayUrl} />
+                <CopyButton text={resolve(displayUrl)} />
               </div>
 
               <div className="example-grid">

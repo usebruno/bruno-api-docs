@@ -1,5 +1,6 @@
 import React, { Suspense, lazy, useEffect, useMemo, useRef } from 'react';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
+import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { StyledWrapper } from './CodeViewer/StyledWrapper';
 import { HighlightedCode } from './HighlightedCode';
 import Prism from '@/utils/prism';
@@ -39,6 +40,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   testId
 }) => {
   const preRef = useRef<HTMLPreElement>(null);
+  const { resolve } = useResolvedVariables();
 
   useEffect(() => {
     if (!variableAware && preRef.current) {
@@ -47,6 +49,8 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
   }, [code, language, variableAware]);
 
   const lineCount = useMemo(() => (code ? code.split('\n').length : 1), [code]);
+
+  const resolvedCopyText = copyText ?? (variableAware ? resolve(code) : code);
 
   const wrapperClassName = ['code-content-wrapper overflow-hidden', surface === 'muted' ? 'code--muted' : '', className]
     .filter(Boolean)
@@ -64,7 +68,7 @@ const CodeViewer: React.FC<CodeViewerProps> = ({
       <div className="relative">
         {showCopy && (
           <CopyButton
-            text={copyText ?? code}
+            text={resolvedCopyText}
             label="Copy code"
             className="code-copy-floating"
             testId={testId ? `${testId}-copy` : undefined}

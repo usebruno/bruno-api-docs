@@ -38,6 +38,12 @@ export const StyledWrapper = styled.div`
     gap: 0.5rem;
     flex-shrink: 0;
   }
+  .request-url-bar-actions .copy-button {
+    width: 1.5rem;
+    height: 1.5rem;
+    background-color: var(--oc-background-base);
+    border-color: var(--oc-table-border);
+  }
 
   .request-try {
     display: inline-flex;

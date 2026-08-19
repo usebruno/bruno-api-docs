@@ -39,16 +39,7 @@ export const RequestUrlBar: React.FC<RequestUrlBarProps> = ({
         <VariableText value={url} />
       </TruncatedText>
       <span className="request-url-bar-actions">
-        <CopyButton
-          text={resolve(url)}
-          label="Copy URL"
-          style={{
-            width: '1.5rem',
-            height: '1.5rem',
-            backgroundColor: 'var(--oc-background-base)',
-            borderColor: 'var(--oc-table-border)'
-          }}
-        />
+        <CopyButton text={resolve(url)} label="Copy URL" />
         {onTry && (
           <button type="button" className="request-try" onClick={onTry} data-testid="request-try-button">
             <SendIcon />

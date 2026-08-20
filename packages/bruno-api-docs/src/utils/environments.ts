@@ -1,6 +1,6 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import type { Variable, VariableValueType } from '@opencollection/types/common/variables';
+import type { Variable, SecretVariable, VariableValueType } from '@opencollection/types/common/variables';
 import { MANAGER_LABELS } from '@/constants';
 import { getDescription, getVariableTypeLabel } from './request';
 import { descriptionText, resolveDescription } from './description';
@@ -148,13 +148,16 @@ const getExternalSecrets = (environment: Environment): EnvironmentExternalSecret
   return { type: config?.type ?? '', typeLabel: humanizeManager(config?.type), variables };
 };
 
-export const applyScriptEnvVars = (environment: Environment, finalVars: Record<string, JsonValue>): Variable[] => {
+export const applyScriptEnvVars = (
+  environment: Environment,
+  finalVars: Record<string, JsonValue>
+): (Variable | SecretVariable)[] => {
   const externalNames = new Set(
-    ((environment.externalSecrets?.variables ?? []) as { name?: string }[])
+    (environment.externalSecrets?.variables ?? [])
       .map((entry) => entry.name)
       .filter((name): name is string => Boolean(name))
   );
-  return reconcileScriptVariables((environment.variables ?? []) as Variable[], finalVars, externalNames);
+  return reconcileScriptVariables(environment.variables ?? [], finalVars, externalNames);
 };
 
 const readCollectionEnvironments = (collection: OpenCollection): Environment[] =>

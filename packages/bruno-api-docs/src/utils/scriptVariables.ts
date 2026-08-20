@@ -30,7 +30,10 @@ export const scriptVarToVariableValue = (value: JsonValue): VariableValueOrVaria
 
 type WritableSecret = SecretVariable & { value?: string };
 
-const applyScriptValueToVariable = (variable: Variable, scriptValue: JsonValue): Variable => {
+const applyScriptValueToVariable = (
+  variable: Variable | SecretVariable,
+  scriptValue: JsonValue
+): Variable | SecretVariable => {
   const newDataType = inferScriptVarDataType(scriptValue);
   const newValueString = coerceScriptVarValue(scriptValue);
 
@@ -42,7 +45,7 @@ const applyScriptValueToVariable = (variable: Variable, scriptValue: JsonValue):
     const updatedSecret: WritableSecret = { ...secret, value: newValueString };
     if (newDataType === 'string') delete updatedSecret.type;
     else updatedSecret.type = newDataType;
-    return updatedSecret as Variable;
+    return updatedSecret;
   }
 
   const current = unwrapVariableTyped(variable.value);
@@ -52,14 +55,14 @@ const applyScriptValueToVariable = (variable: Variable, scriptValue: JsonValue):
 };
 
 export const reconcileScriptVariables = (
-  existing: Variable[],
+  existing: (Variable | SecretVariable)[],
   finalVars: Record<string, JsonValue>,
   skip: Set<string> = new Set()
-): Variable[] => {
+): (Variable | SecretVariable)[] => {
   const finalKeys = Object.keys(finalVars);
   const finalSet = new Set(finalKeys);
   const seen = new Set<string>();
-  const result: Variable[] = [];
+  const result: (Variable | SecretVariable)[] = [];
 
   for (const variable of existing) {
     const name = variable.name ?? '';
@@ -88,6 +91,7 @@ export const applyScriptCollectionVarsToCollection = (
 ): OpenCollection | null => {
   if (!collection) return null;
   const request = collection.request ?? {};
-  const existing = (request.variables ?? []) as Variable[];
-  return { ...collection, request: { ...request, variables: reconcileScriptVariables(existing, finalVars) } };
+  const existing = request.variables ?? [];
+  const variables = reconcileScriptVariables(existing, finalVars) as Variable[];
+  return { ...collection, request: { ...request, variables } };
 };

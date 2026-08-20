@@ -3,6 +3,16 @@ import type { Environment } from '@opencollection/types/config/environments';
 import { RequestRunner } from './index';
 import { parseYaml } from '@/utils/yamlUtils';
 
+const okFetch = () => vi.fn().mockResolvedValue({
+  ok: true,
+  status: 200,
+  statusText: 'OK',
+  url: 'https://example.com/',
+  headers: new Headers({ 'content-type': 'application/json' }),
+  text: async () => '{}',
+  arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+});
+
 // Minimal collection YAML with one POST request
 const collectionYaml = `
 opencollection: "1.0.0"
@@ -969,16 +979,6 @@ items:
         bru.setEnvVar('foo', 'bar');
 `;
 
-  const okFetch = () => vi.fn().mockResolvedValue({
-    ok: true,
-    status: 200,
-    statusText: 'OK',
-    url: 'https://example.com/',
-    headers: new Headers({ 'content-type': 'application/json' }),
-    text: async () => '{}',
-    arrayBuffer: async () => new TextEncoder().encode('{}').buffer
-  });
-
   let originalFetch: typeof global.fetch;
   beforeEach(() => {
     originalFetch = global.fetch;
@@ -1057,16 +1057,6 @@ items:
       preRequest: |
         ${script}
 `;
-
-  const okFetch = () => vi.fn().mockResolvedValue({
-    ok: true,
-    status: 200,
-    statusText: 'OK',
-    url: 'https://example.com/',
-    headers: new Headers({ 'content-type': 'application/json' }),
-    text: async () => '{}',
-    arrayBuffer: async () => new TextEncoder().encode('{}').buffer
-  });
 
   let originalFetch: typeof global.fetch;
   beforeEach(() => {

@@ -140,7 +140,7 @@ export class RequestRunner {
         response.environmentVariables = { envName: environment.name, variables: finalVariables };
       } else {
         context.warnings.push('bru.setEnvVar: no environment is selected, so the changes were not saved.');
-        response.warnings = context.warnings.length ? context.warnings : null;
+        response.warnings = context.warnings;
       }
     }
 

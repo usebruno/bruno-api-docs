@@ -4,6 +4,9 @@ import {
   applyScriptEnvVars, applyScriptEnvVarsToCollection
 } from './environments';
 import { isExternalSecretActive } from './variableResolution';
+import type { OpenCollection } from '@opencollection/types';
+import type { Environment } from '@opencollection/types/config/environments';
+import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 
 describe('getEnvironmentVariables', () => {
   it('splits regular and secret variables', () => {
@@ -333,11 +336,19 @@ describe('mergeExternalSecretRows', () => {
 });
 
 describe('applyScriptEnvVars', () => {
-  const env = (variables: any[], externalSecrets?: any): any => ({
-    name: 'Dev',
-    variables,
-    ...(externalSecrets ? { externalSecrets } : {})
-  });
+  const env = (
+    variables: (Variable | SecretVariable)[],
+    externalSecretNames: string[] = []
+  ): Environment => {
+    const environment: Environment = { name: 'Dev', variables };
+    if (externalSecretNames.length) {
+      environment.externalSecrets = {
+        type: 'aws-secrets-manager',
+        variables: externalSecretNames.map((name) => ({ name, secretName: name }))
+      };
+    }
+    return environment;
+  };
 
   it('updates an existing enabled variable and preserves its other fields', () => {
     const out = applyScriptEnvVars(env([{ name: 'token', value: 'old', secret: true }]), { token: 'new' });
@@ -369,7 +380,7 @@ describe('applyScriptEnvVars', () => {
 
   it('never materialises or deletes an external-secret name', () => {
     const out = applyScriptEnvVars(
-      env([{ name: 'a', value: '1' }], { variables: [{ name: 'sekret' }] }),
+      env([{ name: 'a', value: '1' }], ['sekret']),
       { a: '1', sekret: 'resolved' }
     );
     expect(out).toEqual([{ name: 'a', value: '1' }]);
@@ -387,7 +398,7 @@ describe('applyScriptEnvVars', () => {
 });
 
 describe('applyScriptEnvVarsToCollection', () => {
-  const makeCollection = (): any => ({
+  const makeCollection = (): OpenCollection => ({
     config: {
       environments: [
         { name: 'Dev', variables: [{ name: 'a', value: '1' }] },

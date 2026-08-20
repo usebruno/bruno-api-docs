@@ -1,7 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
-import type { Variable, VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
+import type { Variable, SecretVariable, VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import type { JsonValue } from '@/runner/utils/variable-interpolator';
-import { unwrapVariableTyped } from './variableResolution';
+import { unwrapVariableTyped, isSecretVariable } from './variableResolution';
 import { toDataType, type VariableDataType } from './variableDataType';
 
 export const coerceScriptVarValue = (value: JsonValue | undefined): string => {
@@ -28,6 +28,29 @@ export const scriptVarToVariableValue = (value: JsonValue): VariableValueOrVaria
   return dataType === 'string' ? data : { type: dataType as VariableValueType, data };
 };
 
+type WritableSecret = SecretVariable & { value?: string };
+
+const applyScriptValueToVariable = (variable: Variable, scriptValue: JsonValue): Variable => {
+  const newDataType = inferScriptVarDataType(scriptValue);
+  const newValueString = coerceScriptVarValue(scriptValue);
+
+  if (isSecretVariable(variable)) {
+    const secret = variable as WritableSecret;
+    const isUnchanged = (secret.value ?? '') === newValueString && toDataType(secret.type) === toDataType(newDataType);
+    if (isUnchanged) return variable;
+
+    const updatedSecret: WritableSecret = { ...secret, value: newValueString };
+    if (newDataType === 'string') delete updatedSecret.type;
+    else updatedSecret.type = newDataType;
+    return updatedSecret as Variable;
+  }
+
+  const current = unwrapVariableTyped(variable.value);
+  const isUnchanged = current.value === newValueString && toDataType(current.dataType) === toDataType(newDataType);
+  if (isUnchanged) return variable;
+  return { ...variable, value: scriptVarToVariableValue(scriptValue) };
+};
+
 export const reconcileScriptVariables = (
   existing: Variable[],
   finalVars: Record<string, JsonValue>,
@@ -42,14 +65,11 @@ export const reconcileScriptVariables = (
     const name = variable.name ?? '';
     if (variable.disabled) {
       result.push(variable);
+      seen.add(name);
       continue;
     }
     if (finalSet.has(name)) {
-      const nextValue = scriptVarToVariableValue(finalVars[name]);
-      const prev = unwrapVariableTyped(variable.value);
-      const next = unwrapVariableTyped(nextValue);
-      const unchanged = prev.value === next.value && toDataType(prev.dataType) === toDataType(next.dataType);
-      result.push(unchanged ? variable : { ...variable, value: nextValue });
+      result.push(applyScriptValueToVariable(variable, finalVars[name]));
       seen.add(name);
     }
   }

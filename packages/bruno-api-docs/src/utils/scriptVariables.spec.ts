@@ -23,6 +23,11 @@ describe('reconcileScriptVariables', () => {
     expect(out).toEqual([{ name: 'a', value: '1', disabled: true }]);
   });
 
+  it('does not duplicate a disabled variable when the script sets the same name', () => {
+    const out = reconcileScriptVariables([{ name: 'a', value: '1', disabled: true }] as any, { a: '2' });
+    expect(out).toEqual([{ name: 'a', value: '1', disabled: true }]);
+  });
+
   it('keeps the other fields when updating a variable', () => {
     const out = reconcileScriptVariables([{ name: 'a', value: '1', secret: true }] as any, { a: '2' });
     expect(out).toEqual([{ name: 'a', value: '2', secret: true }]);
@@ -174,5 +179,34 @@ describe('the data type a script sets is the type shown in the variables table',
     );
     expect(out).toEqual({ config: { environments: [{ name: 'Dev', variables: storedVariables }] } });
     expect(environmentRows).toEqual(tableRows);
+  });
+});
+
+describe('reconcileScriptVariables keeps secret variables in their own shape', () => {
+  it('leaves a typed secret untouched when a different variable changes', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'apiKey', value: '5', type: 'number', secret: true }, { name: 'a', value: '1' }] as any,
+      { apiKey: 5, a: '2' }
+    );
+    expect(out).toEqual([
+      { name: 'apiKey', value: '5', type: 'number', secret: true },
+      { name: 'a', value: '2' }
+    ]);
+  });
+
+  it('updates a secret without wrapping its value, keeping the type beside it', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'apiKey', value: '5', type: 'number', secret: true }] as any,
+      { apiKey: 10 }
+    );
+    expect(out).toEqual([{ name: 'apiKey', value: '10', type: 'number', secret: true }]);
+  });
+
+  it('drops the type when a secret becomes a plain string', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'apiKey', value: '5', type: 'number', secret: true }] as any,
+      { apiKey: 'abc' }
+    );
+    expect(out).toEqual([{ name: 'apiKey', value: 'abc', secret: true }]);
   });
 });

@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Environment } from '@opencollection/types/config/environments';
 import { RequestRunner } from './index';
 import { parseYaml } from '@/utils/yamlUtils';
 
@@ -978,29 +979,28 @@ items:
     arrayBuffer: async () => new TextEncoder().encode('{}').buffer
   });
 
-  it('attaches a script setEnvVar to result.environmentVariables when an environment is active', async () => {
-    const original = global.fetch;
+  let originalFetch: typeof global.fetch;
+  beforeEach(() => {
+    originalFetch = global.fetch;
     global.fetch = okFetch();
-    try {
-      const collection = parseYaml(ENV_SCRIPT_YAML);
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        environment: { name: 'Dev', variables: [] } as any,
-        timeout: 5000
-      });
-      expect(response.environmentVariables?.envName).toBe('Dev');
-      expect(response.environmentVariables?.variables.foo).toBe('bar');
-    } finally {
-      global.fetch = original;
-    }
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('attaches a script setEnvVar to result.environmentVariables when an environment is active', async () => {
+    const collection = parseYaml(ENV_SCRIPT_YAML);
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      environment: { name: 'Dev', variables: [] } as Environment,
+      timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { foo: 'bar' } });
   });
 
   it('keeps a number, boolean, and object as native values, not strings', async () => {
-    const original = global.fetch;
-    global.fetch = okFetch();
-    try {
-      const yaml = `
+    const yaml = `
 opencollection: "1.0.0"
 info:
   name: "env types"
@@ -1016,38 +1016,25 @@ items:
         bru.setEnvVar('flag', false);
         bru.setEnvVar('cfg', { a: 1 });
 `;
-      const collection = parseYaml(yaml);
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        environment: { name: 'Dev', variables: [] } as any,
-        timeout: 5000
-      });
-      expect(response.environmentVariables?.variables.num).toBe(7);
-      expect(response.environmentVariables?.variables.flag).toBe(false);
-      expect(response.environmentVariables?.variables.cfg).toEqual({ a: 1 });
-    } finally {
-      global.fetch = original;
-    }
+    const collection = parseYaml(yaml);
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      environment: { name: 'Dev', variables: [] } as Environment,
+      timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { num: 7, flag: false, cfg: { a: 1 } } });
   });
 
   it('warns and attaches nothing when no environment is selected', async () => {
-    const original = global.fetch;
-    global.fetch = okFetch();
-    try {
-      const collection = parseYaml(ENV_SCRIPT_YAML);
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        timeout: 5000
-      });
-      expect(response.environmentVariables).toBeUndefined();
-      expect(response.warnings ?? []).toEqual(
-        expect.arrayContaining([expect.stringContaining('no environment is selected')])
-      );
-    } finally {
-      global.fetch = original;
-    }
+    const collection = parseYaml(ENV_SCRIPT_YAML);
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      timeout: 5000
+    });
+    expect(response.environmentVariables).toBeUndefined();
+    expect(response.warnings).toEqual(expect.arrayContaining([expect.stringContaining('no environment is selected')]));
   });
 });
 
@@ -1081,74 +1068,56 @@ items:
     arrayBuffer: async () => new TextEncoder().encode('{}').buffer
   });
 
-  it('attaches script setCollectionVar changes to result.collectionVariables', async () => {
-    const original = global.fetch;
+  let originalFetch: typeof global.fetch;
+  beforeEach(() => {
+    originalFetch = global.fetch;
     global.fetch = okFetch();
-    try {
-      const collection = parseYaml(COLL_SCRIPT_YAML('bru.setCollectionVar(\'foo\', \'bar\');'));
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        timeout: 5000
-      });
-      expect(response.collectionVariables?.foo).toBe('bar');
-      expect(response.collectionVariables?.existing).toBe('keep');
-    } finally {
-      global.fetch = original;
-    }
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('attaches script setCollectionVar changes to result.collectionVariables', async () => {
+    const collection = parseYaml(COLL_SCRIPT_YAML('bru.setCollectionVar(\'foo\', \'bar\');'));
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      timeout: 5000
+    });
+    expect(response.collectionVariables).toEqual({ existing: 'keep', foo: 'bar' });
   });
 
   it('keeps a number, boolean, and object as native values, not strings', async () => {
-    const original = global.fetch;
-    global.fetch = okFetch();
-    try {
-      const collection = parseYaml(COLL_SCRIPT_YAML(
-        'bru.setCollectionVar(\'count\', 3); bru.setCollectionVar(\'flag\', true); bru.setCollectionVar(\'cfg\', { on: 1 });'
-      ));
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        timeout: 5000
-      });
-      expect(response.collectionVariables?.count).toBe(3);
-      expect(response.collectionVariables?.flag).toBe(true);
-      expect(response.collectionVariables?.cfg).toEqual({ on: 1 });
-    } finally {
-      global.fetch = original;
-    }
+    const collection = parseYaml(COLL_SCRIPT_YAML(
+      'bru.setCollectionVar(\'count\', 3); bru.setCollectionVar(\'flag\', true); bru.setCollectionVar(\'cfg\', { on: 1 });'
+    ));
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      timeout: 5000
+    });
+    expect(response.collectionVariables).toEqual({ existing: 'keep', count: 3, flag: true, cfg: { on: 1 } });
   });
 
   it('does not attach collectionVariables when a script makes no change', async () => {
-    const original = global.fetch;
-    global.fetch = okFetch();
-    try {
-      const collection = parseYaml(COLL_SCRIPT_YAML('bru.getCollectionVar(\'existing\');'));
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        timeout: 5000
-      });
-      expect(response.collectionVariables).toBeUndefined();
-    } finally {
-      global.fetch = original;
-    }
+    const collection = parseYaml(COLL_SCRIPT_YAML('bru.getCollectionVar(\'existing\');'));
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      timeout: 5000
+    });
+    expect(response.collectionVariables).toBeUndefined();
   });
 
   it('keeps runtime vars (bru.setVar) ephemeral — they never trigger env or collection persistence', async () => {
-    const original = global.fetch;
-    global.fetch = okFetch();
-    try {
-      const collection = parseYaml(COLL_SCRIPT_YAML('bru.setVar(\'x\', \'y\');'));
-      const response = await new RequestRunner().runRequest({
-        item: collection.items[0],
-        collection,
-        environment: { name: 'Dev', variables: [] } as any,
-        timeout: 5000
-      });
-      expect(response.collectionVariables).toBeUndefined();
-      expect(response.environmentVariables).toBeUndefined();
-    } finally {
-      global.fetch = original;
-    }
+    const collection = parseYaml(COLL_SCRIPT_YAML('bru.setVar(\'x\', \'y\');'));
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      environment: { name: 'Dev', variables: [] } as Environment,
+      timeout: 5000
+    });
+    expect(response.collectionVariables).toBeUndefined();
+    expect(response.environmentVariables).toBeUndefined();
   });
 });

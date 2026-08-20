@@ -406,7 +406,13 @@ describe('applyScriptEnvVarsToCollection', () => {
 
   it('reconciles only the named environment and keeps others intact', () => {
     const out = applyScriptEnvVarsToCollection(makeCollection(), 'Dev', { a: '2', b: '3' });
-    expect(out?.config?.environments?.[0]).toEqual({ name: 'Dev', variables: [{ name: 'a', value: '2' }, { name: 'b', value: '3' }] });
-    expect(out?.config?.environments?.[1]).toEqual({ name: 'Prod', variables: [] });
+    expect(out).toEqual({
+      config: {
+        environments: [
+          { name: 'Dev', variables: [{ name: 'a', value: '2' }, { name: 'b', value: '3' }] },
+          { name: 'Prod', variables: [] }
+        ]
+      }
+    });
   });
 });

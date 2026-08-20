@@ -3,6 +3,7 @@ import { reconcileScriptVariables, applyScriptCollectionVarsToCollection, coerce
 import { applyScriptEnvVarsToCollection, envVariableToRow } from './environments';
 import { unwrapVariableTyped } from './variableResolution';
 import { toDataType } from './variableDataType';
+import type { Variable } from '@opencollection/types/common/variables';
 
 describe('reconcileScriptVariables', () => {
   it('updates, adds, and removes variables to match what the script set', () => {
@@ -52,19 +53,18 @@ describe('applyScriptCollectionVarsToCollection', () => {
   it('updates, adds, and removes the collection variables', () => {
     const collection = { request: { variables: [{ name: 'a', value: '1' }, { name: 'gone', value: 'x' }] } } as any;
     const out = applyScriptCollectionVarsToCollection(collection, { a: '2', b: '3' });
-    expect(out?.request?.variables).toEqual([{ name: 'a', value: '2' }, { name: 'b', value: '3' }]);
+    expect(out).toEqual({ request: { variables: [{ name: 'a', value: '2' }, { name: 'b', value: '3' }] } });
   });
 
   it('creates the variables list when the collection has none', () => {
     const out = applyScriptCollectionVarsToCollection({} as any, { a: '1' });
-    expect(out?.request?.variables).toEqual([{ name: 'a', value: '1' }]);
+    expect(out).toEqual({ request: { variables: [{ name: 'a', value: '1' }] } });
   });
 
   it('keeps the other request and collection fields', () => {
     const collection = { info: { name: 'C' }, request: { auth: { mode: 'none' }, variables: [] } } as any;
     const out = applyScriptCollectionVarsToCollection(collection, { a: '1' });
-    expect(out?.request?.auth).toEqual({ mode: 'none' });
-    expect(out?.info).toEqual({ name: 'C' });
+    expect(out).toEqual({ info: { name: 'C' }, request: { auth: { mode: 'none' }, variables: [{ name: 'a', value: '1' }] } });
   });
 });
 
@@ -106,8 +106,10 @@ describe('env and collection variable changes apply together without overwriting
     };
     const afterEnv = applyScriptEnvVarsToCollection(collection, 'Dev', { e: 'newE' });
     const afterBoth = applyScriptCollectionVarsToCollection(afterEnv, { c: 'newC' });
-    expect(afterBoth?.config?.environments?.[0].variables).toEqual([{ name: 'e', value: 'newE' }]);
-    expect(afterBoth?.request?.variables).toEqual([{ name: 'c', value: 'newC' }]);
+    expect(afterBoth).toEqual({
+      config: { environments: [{ name: 'Dev', variables: [{ name: 'e', value: 'newE' }] }] },
+      request: { variables: [{ name: 'c', value: 'newC' }] }
+    });
   });
 });
 
@@ -132,10 +134,10 @@ describe('reconcileScriptVariables sets the data type from the value', () => {
       retryCount: 3,
       featureFlags: { darkMode: true }
     });
-    expect(out?.request?.variables).toEqual([
+    expect(out).toEqual({ request: { variables: [
       { name: 'retryCount', value: { type: 'number', data: '3' } },
       { name: 'featureFlags', value: { type: 'object', data: '{"darkMode":true}' } }
-    ]);
+    ] } });
   });
 });
 
@@ -147,18 +149,21 @@ describe('the data type a script sets is the type shown in the variables table',
     { name: 'o', raw: { darkMode: true }, dataType: 'object', stored: { type: 'object', data: '{"darkMode":true}' }, display: '{"darkMode":true}' }
   ] as const;
   const finalVars = Object.fromEntries(CASES.map((c) => [c.name, c.raw]));
-  const byName = (vars: { name?: string }[]): Record<string, any> =>
-    Object.fromEntries(vars.map((v) => [v.name ?? '', v]));
+  const storedVariables: Variable[] = CASES.map((c) => ({ name: c.name, value: c.stored }));
+  const tableRows = CASES.map((c) => ({ name: c.name, dataType: c.dataType, display: c.display }));
+  const collectionRows = storedVariables.map((variable) => {
+    const { value, dataType } = unwrapVariableTyped(variable.value);
+    return { name: variable.name, dataType: toDataType(dataType), display: value };
+  });
+  const environmentRows = storedVariables.map((variable, index) => {
+    const row = envVariableToRow(variable, index);
+    return { name: row.name, dataType: row.dataType, display: row.value };
+  });
 
   it('setCollectionVar stores each type so the collection variables table shows it correctly', () => {
     const out = applyScriptCollectionVarsToCollection({ request: { variables: [] } } as any, finalVars);
-    const vars = byName((out?.request?.variables ?? []) as { name?: string }[]);
-    for (const c of CASES) {
-      expect(vars[c.name].value).toEqual(c.stored);
-      const { value, dataType } = unwrapVariableTyped(vars[c.name].value);
-      expect(toDataType(dataType)).toBe(c.dataType);
-      expect(value).toBe(c.display);
-    }
+    expect(out).toEqual({ request: { variables: storedVariables } });
+    expect(collectionRows).toEqual(tableRows);
   });
 
   it('setEnvVar stores each type so the environment variables table shows it correctly', () => {
@@ -167,12 +172,7 @@ describe('the data type a script sets is the type shown in the variables table',
       'Dev',
       finalVars
     );
-    const vars = byName((out?.config?.environments?.[0].variables ?? []) as { name?: string }[]);
-    for (const c of CASES) {
-      expect(vars[c.name].value).toEqual(c.stored);
-      const row = envVariableToRow(vars[c.name], 0);
-      expect(row.dataType).toBe(c.dataType);
-      expect(row.value).toBe(c.display);
-    }
+    expect(out).toEqual({ config: { environments: [{ name: 'Dev', variables: storedVariables }] } });
+    expect(environmentRows).toEqual(tableRows);
   });
 });

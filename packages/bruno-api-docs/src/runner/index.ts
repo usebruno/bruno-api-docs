@@ -341,7 +341,10 @@ export class RequestRunner {
     }
     if (!environment?.variables) return vars;
 
-    return environment.variables.reduce((acc, variable: DeclaredEnvironmentVariable) => {
+    const declared = environment.variables as DeclaredEnvironmentVariable[];
+    const secretsLast = [...declared.filter((v) => !v.secret), ...declared.filter((v) => v.secret)];
+
+    return secretsLast.reduce((acc, variable) => {
       const name = variable.name;
       if (name && !variable.disabled) {
         // Coerce typed values (number/boolean/object) to native, like folder/collection/request vars.

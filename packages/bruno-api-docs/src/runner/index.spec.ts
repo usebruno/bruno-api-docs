@@ -1111,3 +1111,51 @@ items:
     expect(response.environmentVariables).toBeUndefined();
   });
 });
+
+describe('RequestRunner - environment variable resolution', () => {
+  const HEADER_YAML = `
+opencollection: "1.0.0"
+info:
+  name: "env resolution"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    headers:
+      - name: "X-Token"
+        value: "{{token}}"
+`;
+
+  const capturedHeader = async (environment: Environment): Promise<string | undefined> => {
+    const originalFetch = global.fetch;
+    let headers: Record<string, string> = {};
+    global.fetch = vi.fn().mockImplementation((url: string, init: RequestInit) => {
+      headers = init.headers as Record<string, string>;
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        url,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        text: async () => '{}',
+        arrayBuffer: async () => new TextEncoder().encode('{}').buffer
+      });
+    });
+    const collection = parseYaml(HEADER_YAML);
+    await new RequestRunner().runRequest({ item: collection.items[0], collection, environment, timeout: 5000 });
+    global.fetch = originalFetch;
+    return headers['X-Token'];
+  };
+
+  it('resolves a secret variable over a plain variable of the same name, whatever the order', async () => {
+    const header = await capturedHeader({
+      name: 'Dev',
+      variables: [
+        { name: 'token', value: 'secret-value', secret: true },
+        { name: 'token', value: 'plain-value' }
+      ]
+    } as Environment);
+    expect(header).toBe('secret-value');
+  });
+});

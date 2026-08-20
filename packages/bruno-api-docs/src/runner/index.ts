@@ -16,6 +16,7 @@ import {
   isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl, type InternalHttpRequest
 } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
+import { cloneDeep, isEqual } from 'lodash-es';
 
 const MAX_RUN_REQUEST_DEPTH = 25;
 
@@ -102,6 +103,8 @@ export interface RunRequestResponse {
   assertionResults?: AssertionResultsResponse;
   testResults?: TestResultsResponse;
   warnings?: string[] | null;
+  environmentVariables?: { envName: string; variables: Variables };
+  collectionVariables?: Variables;
 }
 
 export class RequestRunner {
@@ -126,7 +129,22 @@ export class RequestRunner {
       timeout,
       warnings: []
     };
-    return this.runRequestWithContext(item, context, 0, []);
+
+    const initialEnvVariables = cloneDeep(context.environmentVariables);
+    const response = await this.runRequestWithContext(item, context, 0, []);
+
+    if (!isEqual(context.environmentVariables, initialEnvVariables)) {
+      const finalVariables = { ...context.environmentVariables };
+      delete finalVariables.__name__;
+      if (environment?.name) {
+        response.environmentVariables = { envName: environment.name, variables: finalVariables };
+      } else {
+        context.warnings.push('bru.setEnvVar: no environment is selected, so the changes were not saved.');
+        response.warnings = context.warnings.length ? context.warnings : null;
+      }
+    }
+
+    return response;
   }
 
   private makeNestedRunRequest(
@@ -187,6 +205,8 @@ export class RequestRunner {
         folderVariables,
         requestVariables
       };
+
+      const initialCollectionVariables = depth === 0 ? cloneDeep(collectionVariables) : null;
 
       const runRequest = this.makeNestedRunRequest(context, depth, chain, item);
 
@@ -284,12 +304,16 @@ export class RequestRunner {
         }
       }
 
+      const collectionVariablesChanged
+        = initialCollectionVariables !== null && !isEqual(collectionVariables, initialCollectionVariables);
+
       return {
         ...response,
         requestId,
         assertionResults: assertionResultsResponse,
         testResults: testResultsResponse,
-        warnings: warnings.length ? warnings : null
+        warnings: warnings.length ? warnings : null,
+        collectionVariables: collectionVariablesChanged ? { ...collectionVariables } : undefined
       };
     } catch (error) {
       return {

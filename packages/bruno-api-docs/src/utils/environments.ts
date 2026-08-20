@@ -1,10 +1,13 @@
+import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import type { Variable, VariableValueType } from '@opencollection/types/common/variables';
+import type { Variable, SecretVariable, VariableValueType } from '@opencollection/types/common/variables';
 import { MANAGER_LABELS } from '@/constants';
 import { getDescription, getVariableTypeLabel } from './request';
 import { descriptionText, resolveDescription } from './description';
 import { isSecretVariable, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
+import { reconcileScriptVariables } from './scriptVariables';
+import type { JsonValue } from '@/runner/utils/variable-interpolator';
 
 const humanizeManager = (type: string | undefined): string => {
   if (!type) return 'External';
@@ -143,6 +146,48 @@ const getExternalSecrets = (environment: Environment): EnvironmentExternalSecret
 
   if (!variables.length) return null;
   return { type: config?.type ?? '', typeLabel: humanizeManager(config?.type), variables };
+};
+
+export const applyScriptEnvVars = (
+  environment: Environment,
+  finalVars: Record<string, JsonValue>
+): (Variable | SecretVariable)[] => {
+  const externalNames = new Set(
+    (environment.externalSecrets?.variables ?? [])
+      .map((entry) => entry.name)
+      .filter((name): name is string => Boolean(name))
+  );
+  return reconcileScriptVariables(environment.variables ?? [], finalVars, externalNames);
+};
+
+const readCollectionEnvironments = (collection: OpenCollection): Environment[] =>
+  ((collection as { environments?: Environment[] }).environments
+    ?? collection.config?.environments
+    ?? []) as Environment[];
+
+export const applyScriptEnvVarsToCollection = (
+  collection: OpenCollection | null,
+  envName: string,
+  finalVars: Record<string, JsonValue>
+): OpenCollection | null => {
+  if (!collection) return null;
+  const environments = readCollectionEnvironments(collection);
+  const index = environments.findIndex((env) => env.name === envName);
+  if (index === -1) return null;
+
+  const updatedEnvironments = environments.map((env, i) =>
+    i === index ? { ...env, variables: applyScriptEnvVars(env, finalVars) } : env
+  );
+  const updated: OpenCollection = {
+    ...collection,
+    config: collection.config
+      ? { ...collection.config, environments: updatedEnvironments }
+      : { environments: updatedEnvironments }
+  };
+  if ((collection as { environments?: Environment[] }).environments) {
+    (updated as { environments?: Environment[] }).environments = updatedEnvironments;
+  }
+  return updated;
 };
 
 export const getEnvironmentVariables = (environment: Environment | null | undefined): EnvironmentVariableGroups => {

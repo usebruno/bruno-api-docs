@@ -1,6 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { getEnvironmentVariables, envVariableToRow, envRowToVariable, mergeExternalSecretRows } from './environments';
+import {
+  getEnvironmentVariables, envVariableToRow, envRowToVariable, mergeExternalSecretRows,
+  applyScriptEnvVars, applyScriptEnvVarsToCollection
+} from './environments';
 import { isExternalSecretActive } from './variableResolution';
+import type { OpenCollection } from '@opencollection/types';
+import type { Environment } from '@opencollection/types/config/environments';
+import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 
 describe('getEnvironmentVariables', () => {
   it('splits regular and secret variables', () => {
@@ -326,5 +332,98 @@ describe('mergeExternalSecretRows', () => {
     const out = mergeExternalSecretRows(existing, rows, 'secretName') as Record<string, string | boolean>[];
 
     expect(out).toEqual([{ name: 'fresh', secretName: 'prod/fresh', disabled: false }]);
+  });
+});
+
+describe('applyScriptEnvVars', () => {
+  const env = (
+    variables: (Variable | SecretVariable)[],
+    externalSecretNames: string[] = []
+  ): Environment => {
+    const environment: Environment = { name: 'Dev', variables };
+    if (externalSecretNames.length) {
+      environment.externalSecrets = {
+        type: 'aws-secrets-manager',
+        variables: externalSecretNames.map((name) => ({ name, secretName: name }))
+      };
+    }
+    return environment;
+  };
+
+  it('updates an existing enabled variable and preserves its other fields', () => {
+    const out = applyScriptEnvVars(env([{ name: 'token', value: 'old', secret: true }]), { token: 'new' });
+    expect(out).toEqual([{ name: 'token', value: 'new', secret: true }]);
+  });
+
+  it('creates a variable for a name the script introduced', () => {
+    const out = applyScriptEnvVars(env([{ name: 'a', value: '1' }]), { a: '1', b: '2' });
+    expect(out).toEqual([{ name: 'a', value: '1' }, { name: 'b', value: '2' }]);
+  });
+
+  it('drops an enabled variable the script deleted', () => {
+    const out = applyScriptEnvVars(env([{ name: 'a', value: '1' }, { name: 'b', value: '2' }]), { a: '1' });
+    expect(out).toEqual([{ name: 'a', value: '1' }]);
+  });
+
+  it('drops every enabled variable on delete-all (empty map)', () => {
+    const out = applyScriptEnvVars(env([{ name: 'a', value: '1' }, { name: 'b', value: '2' }]), {});
+    expect(out).toEqual([]);
+  });
+
+  it('leaves disabled variables untouched', () => {
+    const out = applyScriptEnvVars(
+      env([{ name: 'a', value: '1', disabled: true }, { name: 'b', value: '2' }]),
+      { b: '2b' }
+    );
+    expect(out).toEqual([{ name: 'a', value: '1', disabled: true }, { name: 'b', value: '2b' }]);
+  });
+
+  it('never materialises or deletes an external-secret name', () => {
+    const out = applyScriptEnvVars(
+      env([{ name: 'a', value: '1' }], ['sekret']),
+      { a: '1', sekret: 'resolved' }
+    );
+    expect(out).toEqual([{ name: 'a', value: '1' }]);
+  });
+
+  it('stores a number, boolean, and object with its own type and keeps null as an empty string', () => {
+    const out = applyScriptEnvVars(env([]), { n: 42, b: true, o: { x: 1 }, nil: null });
+    expect(out).toEqual([
+      { name: 'n', value: { type: 'number', data: '42' } },
+      { name: 'b', value: { type: 'boolean', data: 'true' } },
+      { name: 'o', value: { type: 'object', data: '{"x":1}' } },
+      { name: 'nil', value: '' }
+    ]);
+  });
+});
+
+describe('applyScriptEnvVarsToCollection', () => {
+  const makeCollection = (): OpenCollection => ({
+    config: {
+      environments: [
+        { name: 'Dev', variables: [{ name: 'a', value: '1' }] },
+        { name: 'Prod', variables: [] }
+      ]
+    }
+  });
+
+  it('returns null for a null collection', () => {
+    expect(applyScriptEnvVarsToCollection(null, 'Dev', { a: '2' })).toBeNull();
+  });
+
+  it('returns null when the environment does not exist', () => {
+    expect(applyScriptEnvVarsToCollection(makeCollection(), 'Nope', { a: '2' })).toBeNull();
+  });
+
+  it('reconciles only the named environment and keeps others intact', () => {
+    const out = applyScriptEnvVarsToCollection(makeCollection(), 'Dev', { a: '2', b: '3' });
+    expect(out).toEqual({
+      config: {
+        environments: [
+          { name: 'Dev', variables: [{ name: 'a', value: '2' }, { name: 'b', value: '3' }] },
+          { name: 'Prod', variables: [] }
+        ]
+      }
+    });
   });
 });

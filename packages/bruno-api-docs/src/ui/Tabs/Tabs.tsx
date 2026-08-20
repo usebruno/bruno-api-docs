@@ -216,6 +216,7 @@ export const Tabs: React.FC<TabsProps> = ({
             <div
               key={tab.id}
               id={panelId(tab.id)}
+              data-testid={panelId(tab.id)}
               role="tabpanel"
               aria-labelledby={tabButtonId(tab.id)}
               className="tab-panel"
@@ -230,6 +231,7 @@ export const Tabs: React.FC<TabsProps> = ({
           <div
             key={activeTabData.id}
             id={panelId(activeTabData.id)}
+            data-testid={panelId(activeTabData.id)}
             role="tabpanel"
             aria-labelledby={tabButtonId(activeTabData.id)}
             className="tab-panel"

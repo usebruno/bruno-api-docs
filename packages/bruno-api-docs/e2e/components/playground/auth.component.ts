@@ -13,6 +13,10 @@ export class RequestAuthComponent extends BaseComponent {
     return this.page.getByTestId(`auth-mode-select-${value}`);
   }
 
+  field(name: string): Locator {
+    return this.page.getByTestId(`auth-${name}`);
+  }
+
   async open(): Promise<void> {
     await this.modeSelect.click();
   }

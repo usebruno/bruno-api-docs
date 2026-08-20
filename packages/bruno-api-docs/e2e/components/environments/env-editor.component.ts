@@ -28,4 +28,11 @@ export class EnvEditorComponent extends BaseComponent {
   cardFor(name: string): Locator {
     return this.cardItems.filter({ has: this.page.getByRole('checkbox', { name: `Enable ${name}` }) });
   }
+
+  async addVariable(name: string, value: string): Promise<void> {
+    const index = (await this.nameInputs.count()) - 1;
+    await this.nameInputs.nth(index).fill(name);
+    await this.valueInputs.nth(index).fill(value);
+    await this.cardItems.nth(index + 1).waitFor({ state: 'visible' });
+  }
 }

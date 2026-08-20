@@ -16,12 +16,19 @@
  * NOTE: 4xx/5xx responses are NOT failures — they never reach this function.
  */
 
+import type { DigestBuildFailure } from './utils/digest-auth';
+
 export type RequestErrorType
   = | 'timeout'
     | 'mixed-content'
     | 'browser-blocked'
     | 'unreachable'
-    | 'unknown';
+    | 'unknown'
+    | 'digest-challenge-unreadable'
+    | 'digest-malformed-challenge'
+    | 'digest-unsupported-algorithm'
+    | 'digest-unsupported-qop'
+    | 'digest-redirected-challenge';
 
 export interface ClassifiedRequestError {
   type: RequestErrorType;
@@ -36,6 +43,18 @@ interface ClassifyOptions {
   requestUrl?: string;
   /** The page URL the docs are running on, typically window.location.href. */
   pageUrl?: string;
+}
+
+export type DigestFailureReason = DigestBuildFailure | 'challenge-unreadable' | 'redirected-challenge';
+
+export class DigestAuthError extends Error {
+  readonly reason: DigestFailureReason;
+
+  constructor(reason: DigestFailureReason) {
+    super(`Digest authentication failed: ${reason}`);
+    this.name = 'DigestAuthError';
+    this.reason = reason;
+  }
 }
 
 export const DEFAULT_TIMEOUT_MS = 30000;
@@ -115,10 +134,48 @@ const UNREACHABLE: ClassifiedRequestError = {
   message: 'Couldn\'t reach the server. It may be down, or the URL may be wrong.'
 };
 
+const DIGEST_FAILURES: Record<DigestFailureReason, ClassifiedRequestError> = {
+  'challenge-unreadable': {
+    type: 'digest-challenge-unreadable',
+    title: 'Couldn\'t read the digest challenge',
+    message:
+      'The browser couldn\'t read a WWW-Authenticate header on this response — either the '
+      + 'server didn\'t send one, or it sent one without exposing it. If the server does use '
+      + 'digest auth, it must send "Access-Control-Expose-Headers: WWW-Authenticate". '
+      + 'Try it in the Bruno desktop app.'
+  },
+  'malformed-challenge': {
+    type: 'digest-malformed-challenge',
+    title: 'Couldn\'t complete digest auth',
+    message: 'The server\'s digest challenge was missing its realm or nonce, so a response couldn\'t be computed.'
+  },
+  'unsupported-algorithm': {
+    type: 'digest-unsupported-algorithm',
+    title: 'Unsupported digest algorithm',
+    message: 'Only MD5 digest auth is supported. The server asked for a different algorithm.'
+  },
+  'unsupported-qop': {
+    type: 'digest-unsupported-qop',
+    title: 'Unsupported digest protection',
+    message: 'The server only accepts a digest protection mode other than qop="auth" (such as auth-int), which is not supported. Try it in the Bruno desktop app.'
+  },
+  'redirected-challenge': {
+    type: 'digest-redirected-challenge',
+    title: 'Digest challenge came from another origin',
+    message:
+      'The request was redirected to a different origin before the digest challenge arrived. '
+      + 'Answering it would send credential material to a server other than the one requested, so the attempt was stopped.'
+  }
+};
+
 export const classifyRequestError = (
   error: unknown,
   options: ClassifyOptions = {}
 ): ClassifiedRequestError => {
+  if (error instanceof DigestAuthError) {
+    return DIGEST_FAILURES[error.reason];
+  }
+
   if (isTimeoutError(error)) {
     return TIMEOUT;
   }

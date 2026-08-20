@@ -3,7 +3,8 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { RunRequestResponse } from './index';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
 import { buildRequestUrl } from '@/utils/pathParams';
-import { classifyRequestError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
+import { buildDigestAuthorization, findDigestChallenge, getDigestCredentials } from './utils/digest-auth';
+import { classifyRequestError, DigestAuthError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
 import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/response';
 import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
 import stripJsonComments from 'strip-json-comments';
@@ -11,6 +12,10 @@ import { statusCodePhrase } from '@/utils/exampleResponse';
 
 /** Methods `fetch` refuses to attach a request body to. */
 const BODYLESS_METHODS = ['GET', 'HEAD'];
+
+const pageHref = (): string | null => (typeof window !== 'undefined' ? window.location.href : null);
+
+const FALLBACK_BASE = 'http://localhost';
 
 export const applyApiKeyToUrl = (url: string, auth: Record<string, unknown> | undefined): string => {
   if (auth?.type !== 'apikey' || auth.placement !== 'query' || !auth.key) {
@@ -37,7 +42,7 @@ export class RequestExecutor {
 
     try {
       const fetchOptions = await this.buildFetchOptions(request, timeoutMs);
-      const response = await fetch(requestUrl, fetchOptions);
+      const response = await this.performFetch(requestUrl, fetchOptions, request);
       const endTime = Date.now();
 
       const disableJsonParsing = Boolean(request.__brunoDisableParsingResponseJson);
@@ -60,7 +65,7 @@ export class RequestExecutor {
       const classified = classifyRequestError(error, {
         timeoutMs,
         requestUrl,
-        pageUrl: typeof window !== 'undefined' ? window.location.href : undefined
+        pageUrl: pageHref() ?? undefined
       });
 
       return {
@@ -91,6 +96,60 @@ export class RequestExecutor {
     }
 
     return options;
+  }
+
+  private async performFetch(url: string, fetchOptions: RequestInit, request: HttpRequest): Promise<Response> {
+    const credentials = getDigestCredentials(getRequestAuth(request));
+    const headers = fetchOptions.headers as Record<string, string>;
+    const hasManualAuthorization = Object.keys(headers).some((key) =>
+      key.toLowerCase() === 'authorization');
+
+    if (credentials === null || hasManualAuthorization) {
+      return fetch(url, fetchOptions);
+    }
+
+    // Both digest requests must send credentials: 'omit' — a 401 challenge on a
+    // request that carries credentials makes the browser show its own login popup
+    // (and freezes the page in Firefox) instead of letting our code answer.
+    const initial = await fetch(url, { ...fetchOptions, credentials: 'omit' });
+    if (initial.status !== 401) {
+      return initial;
+    }
+
+    const requestOrigin = new URL(url, pageHref() ?? FALLBACK_BASE).origin;
+
+    if (initial.redirected && new URL(initial.url).origin !== requestOrigin) {
+      throw new DigestAuthError('redirected-challenge');
+    }
+
+    const challengeHeader = initial.headers.get('www-authenticate');
+    if (challengeHeader === null) {
+      const href = pageHref();
+      if (href !== null && requestOrigin !== new URL(href).origin) {
+        throw new DigestAuthError('challenge-unreadable');
+      }
+      return initial;
+    }
+
+    const challenge = findDigestChallenge(challengeHeader);
+    if (challenge === null) {
+      return initial;
+    }
+
+    const targetUrl = initial.redirected ? initial.url : url;
+    const parsedUrl = new URL(targetUrl, pageHref() ?? FALLBACK_BASE);
+    const result = buildDigestAuthorization({
+      challenge,
+      method: fetchOptions.method ?? 'GET',
+      uri: `${parsedUrl.pathname}${parsedUrl.search}`,
+      username: credentials.username,
+      password: credentials.password
+    });
+    if (!result.ok) {
+      throw new DigestAuthError(result.reason);
+    }
+
+    return fetch(targetUrl, { ...fetchOptions, credentials: 'omit', headers: { ...headers, Authorization: result.header } });
   }
 
   private buildHeaders(request: HttpRequest): HeadersInit {

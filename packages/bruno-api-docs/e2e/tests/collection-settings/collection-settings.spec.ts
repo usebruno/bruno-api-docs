@@ -54,12 +54,12 @@ test.describe('collection settings', () => {
     await expect(collectionSettings.authField('placement')).toBeVisible();
   });
 
-  test('does not offer Digest or AWS Signature v4 as selectable auth modes', async ({ collectionSettings }) => {
+  test('offers Digest but not AWS Signature v4 as selectable auth modes', async ({ collectionSettings }) => {
     await collectionSettings.openTab('auth');
     await collectionSettings.authMode.click();
 
     await expect(collectionSettings.authModeOption('basic')).toBeVisible();
-    await expect(collectionSettings.authModeOption('digest')).toHaveCount(0);
+    await expect(collectionSettings.authModeOption('digest')).toBeVisible();
     await expect(collectionSettings.authModeOption('awsv4')).toHaveCount(0);
   });
 

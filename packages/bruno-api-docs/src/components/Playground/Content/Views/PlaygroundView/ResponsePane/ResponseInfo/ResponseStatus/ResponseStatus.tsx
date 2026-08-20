@@ -14,6 +14,7 @@ const ResponseStatus: React.FC<ResponseStatusProps> = ({ status, statusText }) =
   return (
     <div
       className="font-bold"
+      data-testid="response-status"
       style={{
         color: getStatusColor(status)
       }}

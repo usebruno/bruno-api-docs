@@ -5,7 +5,7 @@ const DESKTOP = { width: 1280, height: 900 };
 test.describe('Playground request — inherited auth', () => {
   test.use({ viewport: DESKTOP });
 
-  test('the auth dropdown offers Inherit alongside the four supported types, and nothing more', async ({
+  test('the auth dropdown offers Inherit alongside the five supported types, and nothing more', async ({
     playground
   }) => {
     await playground.open('bottom');
@@ -18,8 +18,9 @@ test.describe('Playground request — inherited auth', () => {
     await expect(playground.auth.option('basic')).toBeVisible();
     await expect(playground.auth.option('bearer')).toBeVisible();
     await expect(playground.auth.option('apikey')).toBeVisible();
-    // No Auth + Inherit + Basic + Bearer + API Key — no other auth types are offered.
-    await expect(playground.auth.options).toHaveCount(5);
+    await expect(playground.auth.option('digest')).toBeVisible();
+    // No Auth + Inherit + Basic + Bearer + API Key + Digest — no other auth types are offered.
+    await expect(playground.auth.options).toHaveCount(6);
   });
 
   test('choosing Inherit shows the inherited-auth notice and marks the mode selected', async ({

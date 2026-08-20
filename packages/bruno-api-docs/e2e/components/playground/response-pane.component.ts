@@ -11,6 +11,11 @@ import type { ResponseBodyFormat } from '../../../src/utils/response';
 export class ResponsePaneComponent extends BaseComponent {
   readonly bodyEditor = new CodeEditorComponent(this.page, 'response-body-editor');
   readonly sendButton = this.page.getByTestId('query-bar-send');
+  readonly status = this.page.getByTestId('response-status');
+  readonly bodyPanel = this.page.getByTestId('response-tabs-panel-response');
+  readonly errorBanner = this.bodyPanel.getByTestId('error-banner');
+  readonly errorTitle = this.bodyPanel.getByTestId('error-title');
+  readonly errorMessage = this.bodyPanel.getByTestId('error-message');
   readonly formatSelector = this.page.getByTestId('response-format-selector');
   // The leading icon in the selector trigger (the eye when preview is on, else the format's icon).
   readonly formatSelectorIcon = this.page.getByTestId('response-format-selector-trigger-icon');

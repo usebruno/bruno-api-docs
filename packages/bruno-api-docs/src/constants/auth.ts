@@ -40,7 +40,8 @@ export const ADDITIONAL_PARAM_GROUPS: Array<{
 export const AUTH_DEFAULTS: Record<string, Record<string, string>> = {
   basic: { type: 'basic', username: '', password: '' },
   bearer: { type: 'bearer', token: '' },
-  apikey: { type: 'apikey', key: '', value: '', placement: 'header' }
+  apikey: { type: 'apikey', key: '', value: '', placement: 'header' },
+  digest: { type: 'digest', username: '', password: '' }
 };
 
 /** Where an API-key credential is sent. */

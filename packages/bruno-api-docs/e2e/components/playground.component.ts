@@ -77,11 +77,16 @@ export class PlaygroundComponent extends BaseComponent {
   }
 
   async openSidebarItem(name: string): Promise<void> {
+    await this.ensureSidebarOpen();
     await this.sidebarItem(name).click();
   }
 
   scriptTab(id: string): Locator {
     return this.page.getByTestId(`scripts-tabs-tab-${id}`);
+  }
+
+  folderSettingsTab(id: string): Locator {
+    return this.page.getByTestId(`folder-settings-tabs-tab-${id}`);
   }
 
   async selectScriptTab(id: string): Promise<void> {
@@ -90,7 +95,7 @@ export class PlaygroundComponent extends BaseComponent {
 
   async openTreeItem(names: string[]): Promise<void> {
     for (const name of names) {
-      await this.sidebarItem(name).click();
+      await this.openSidebarItem(name);
     }
   }
 
@@ -103,14 +108,19 @@ export class PlaygroundComponent extends BaseComponent {
   }
 
   async openRequest(name: string): Promise<void> {
-    await this.sidebarItem(name).click();
+    await this.openSidebarItem(name);
     await this.view.waitFor({ state: 'visible' });
   }
 
+  async ensureSidebarOpen(): Promise<void> {
+    await this.runner.waitFor({ state: 'visible' });
+    if (await this.sidebarPanel.isVisible()) return;
+    await this.sidebarToggle.click();
+    await this.sidebarPanel.waitFor({ state: 'visible' });
+  }
+
   async openEnvironments(): Promise<void> {
-    if (!(await this.gear.isVisible())) {
-      await this.sidebarToggle.click();
-    }
+    await this.ensureSidebarOpen();
     await this.gear.click();
   }
 

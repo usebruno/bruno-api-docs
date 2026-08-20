@@ -7,6 +7,7 @@ import { descriptionText, resolveDescription } from './description';
 import { isSecretVariable, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
 import { reconcileScriptVariables } from './scriptVariables';
+import type { JsonValue } from '@/runner/utils/variable-interpolator';
 
 const humanizeManager = (type: string | undefined): string => {
   if (!type) return 'External';
@@ -147,7 +148,7 @@ const getExternalSecrets = (environment: Environment): EnvironmentExternalSecret
   return { type: config?.type ?? '', typeLabel: humanizeManager(config?.type), variables };
 };
 
-export const applyScriptEnvVars = (environment: Environment, finalVars: Record<string, unknown>): Variable[] => {
+export const applyScriptEnvVars = (environment: Environment, finalVars: Record<string, JsonValue>): Variable[] => {
   const externalNames = new Set(
     ((environment.externalSecrets?.variables ?? []) as { name?: string }[])
       .map((entry) => entry.name)
@@ -164,7 +165,7 @@ const readCollectionEnvironments = (collection: OpenCollection): Environment[] =
 export const applyScriptEnvVarsToCollection = (
   collection: OpenCollection | null,
   envName: string,
-  finalVars: Record<string, unknown>
+  finalVars: Record<string, JsonValue>
 ): OpenCollection | null => {
   if (!collection) return null;
   const environments = readCollectionEnvironments(collection);
@@ -180,7 +181,7 @@ export const applyScriptEnvVarsToCollection = (
       ? { ...collection.config, environments: updatedEnvironments }
       : { environments: updatedEnvironments }
   };
-  if ((collection as { environments?: unknown }).environments) {
+  if ((collection as { environments?: Environment[] }).environments) {
     (updated as { environments?: Environment[] }).environments = updatedEnvironments;
   }
   return updated;

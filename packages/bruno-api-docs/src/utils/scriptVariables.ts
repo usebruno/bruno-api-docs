@@ -1,9 +1,10 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Variable, VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
+import type { JsonValue } from '@/runner/utils/variable-interpolator';
 import { unwrapVariableTyped } from './variableResolution';
 import { toDataType, type VariableDataType } from './variableDataType';
 
-export const coerceScriptVarValue = (value: unknown): string => {
+export const coerceScriptVarValue = (value: JsonValue | undefined): string => {
   if (value === null || value === undefined) return '';
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -14,14 +15,14 @@ export const coerceScriptVarValue = (value: unknown): string => {
   }
 };
 
-const inferScriptVarDataType = (value: unknown): VariableDataType => {
+const inferScriptVarDataType = (value: JsonValue): VariableDataType => {
   if (typeof value === 'number') return 'number';
   if (typeof value === 'boolean') return 'boolean';
   if (value !== null && typeof value === 'object') return 'object';
   return 'string';
 };
 
-export const scriptVarToVariableValue = (value: unknown): VariableValueOrVariants => {
+export const scriptVarToVariableValue = (value: JsonValue): VariableValueOrVariants => {
   const dataType = inferScriptVarDataType(value);
   const data = coerceScriptVarValue(value);
   return dataType === 'string' ? data : { type: dataType as VariableValueType, data };
@@ -29,7 +30,7 @@ export const scriptVarToVariableValue = (value: unknown): VariableValueOrVariant
 
 export const reconcileScriptVariables = (
   existing: Variable[],
-  finalVars: Record<string, unknown>,
+  finalVars: Record<string, JsonValue>,
   skip: Set<string> = new Set()
 ): Variable[] => {
   const finalKeys = Object.keys(finalVars);
@@ -63,7 +64,7 @@ export const reconcileScriptVariables = (
 
 export const applyScriptCollectionVarsToCollection = (
   collection: OpenCollection | null,
-  finalVars: Record<string, unknown>
+  finalVars: Record<string, JsonValue>
 ): OpenCollection | null => {
   if (!collection) return null;
   const request = collection.request ?? {};

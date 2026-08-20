@@ -5,7 +5,7 @@ import { unwrapVariableTyped } from './variableResolution';
 import { toDataType } from './variableDataType';
 
 describe('reconcileScriptVariables', () => {
-  it('updates, creates, and drops to match the final map', () => {
+  it('updates, adds, and removes variables to match what the script set', () => {
     const out = reconcileScriptVariables(
       [{ name: 'a', value: '1' }, { name: 'b', value: '2' }] as any,
       { a: '1x', c: '3' }
@@ -13,7 +13,7 @@ describe('reconcileScriptVariables', () => {
     expect(out).toEqual([{ name: 'a', value: '1x' }, { name: 'c', value: '3' }]);
   });
 
-  it('drops every enabled variable on an empty map (delete-all)', () => {
+  it('removes every enabled variable when the script sets none', () => {
     expect(reconcileScriptVariables([{ name: 'a', value: '1' }] as any, {})).toEqual([]);
   });
 
@@ -22,19 +22,19 @@ describe('reconcileScriptVariables', () => {
     expect(out).toEqual([{ name: 'a', value: '1', disabled: true }]);
   });
 
-  it('preserves other fields on an update', () => {
+  it('keeps the other fields when updating a variable', () => {
     const out = reconcileScriptVariables([{ name: 'a', value: '1', secret: true }] as any, { a: '2' });
     expect(out).toEqual([{ name: 'a', value: '2', secret: true }]);
   });
 
-  it('never creates a name in the skip set', () => {
+  it('never adds a variable whose name is in the skip list', () => {
     const out = reconcileScriptVariables([] as any, { sec: 'x', b: '2' }, new Set(['sec']));
     expect(out).toEqual([{ name: 'b', value: '2' }]);
   });
 });
 
 describe('coerceScriptVarValue', () => {
-  it('coerces primitives, objects, and nullish to strings', () => {
+  it('turns any value into a string, and null or undefined into an empty string', () => {
     expect(coerceScriptVarValue('s')).toBe('s');
     expect(coerceScriptVarValue(42)).toBe('42');
     expect(coerceScriptVarValue(true)).toBe('true');
@@ -49,18 +49,18 @@ describe('applyScriptCollectionVarsToCollection', () => {
     expect(applyScriptCollectionVarsToCollection(null, { a: '1' })).toBeNull();
   });
 
-  it('reconciles collection.request.variables (update + create + delete)', () => {
+  it('updates, adds, and removes the collection variables', () => {
     const collection = { request: { variables: [{ name: 'a', value: '1' }, { name: 'gone', value: 'x' }] } } as any;
     const out = applyScriptCollectionVarsToCollection(collection, { a: '2', b: '3' });
     expect(out?.request?.variables).toEqual([{ name: 'a', value: '2' }, { name: 'b', value: '3' }]);
   });
 
-  it('creates request.variables when the collection has none', () => {
+  it('creates the variables list when the collection has none', () => {
     const out = applyScriptCollectionVarsToCollection({} as any, { a: '1' });
     expect(out?.request?.variables).toEqual([{ name: 'a', value: '1' }]);
   });
 
-  it('preserves other request and collection fields', () => {
+  it('keeps the other request and collection fields', () => {
     const collection = { info: { name: 'C' }, request: { auth: { mode: 'none' }, variables: [] } } as any;
     const out = applyScriptCollectionVarsToCollection(collection, { a: '1' });
     expect(out?.request?.auth).toEqual({ mode: 'none' });
@@ -68,8 +68,8 @@ describe('applyScriptCollectionVarsToCollection', () => {
   });
 });
 
-describe('reconcileScriptVariables - preserves untouched value shapes (regression)', () => {
-  it('keeps a typed value wrapper when the script changed a different variable', () => {
+describe('reconcileScriptVariables keeps the data type and value shape of each variable', () => {
+  it('leaves a typed variable alone when the script changes a different one', () => {
     const out = reconcileScriptVariables(
       [{ name: 'count', value: { type: 'number', data: '8842' } }, { name: 'a', value: '1' }] as any,
       { count: 8842, a: '2' }
@@ -80,7 +80,7 @@ describe('reconcileScriptVariables - preserves untouched value shapes (regressio
     ]);
   });
 
-  it('keeps a variant array untouched', () => {
+  it('keeps all the values of a multi-value variable, not just the selected one', () => {
     const variant = [{ title: 'us', value: 'us-1' }, { title: 'eu', value: 'eu-1', selected: true }];
     const out = reconcileScriptVariables(
       [{ name: 'region', value: variant }, { name: 'a', value: '1' }] as any,
@@ -98,8 +98,8 @@ describe('reconcileScriptVariables - preserves untouched value shapes (regressio
   });
 });
 
-describe('env + collection var changes compose without clobbering (regression)', () => {
-  it('applying env then collection reconciles preserves both', () => {
+describe('env and collection variable changes apply together without overwriting each other', () => {
+  it('applies an env change and then a collection change and keeps both', () => {
     const collection: any = {
       config: { environments: [{ name: 'Dev', variables: [{ name: 'e', value: 'old' }] }] },
       request: { variables: [{ name: 'c', value: 'old' }] }
@@ -111,7 +111,7 @@ describe('env + collection var changes compose without clobbering (regression)',
   });
 });
 
-describe('reconcileScriptVariables - infers the data type of each variable from its value', () => {
+describe('reconcileScriptVariables sets the data type from the value', () => {
   it('stores a number, boolean, and object with its own type and keeps a string plain', () => {
     const out = reconcileScriptVariables([] as any, {
       retryCount: 3,

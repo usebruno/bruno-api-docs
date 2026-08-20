@@ -996,6 +996,41 @@ items:
     }
   });
 
+  it('keeps a number, boolean, and object as native values, not strings', async () => {
+    const original = global.fetch;
+    global.fetch = okFetch();
+    try {
+      const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "env types"
+  version: "1.0.0"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.setEnvVar('num', 7);
+        bru.setEnvVar('flag', false);
+        bru.setEnvVar('cfg', { a: 1 });
+`;
+      const collection = parseYaml(yaml);
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0],
+        collection,
+        environment: { name: 'Dev', variables: [] } as any,
+        timeout: 5000
+      });
+      expect(response.environmentVariables?.variables.num).toBe(7);
+      expect(response.environmentVariables?.variables.flag).toBe(false);
+      expect(response.environmentVariables?.variables.cfg).toEqual({ a: 1 });
+    } finally {
+      global.fetch = original;
+    }
+  });
+
   it('warns and attaches nothing when no environment is selected', async () => {
     const original = global.fetch;
     global.fetch = okFetch();
@@ -1058,6 +1093,26 @@ items:
       });
       expect(response.collectionVariables?.foo).toBe('bar');
       expect(response.collectionVariables?.existing).toBe('keep');
+    } finally {
+      global.fetch = original;
+    }
+  });
+
+  it('keeps a number, boolean, and object as native values, not strings', async () => {
+    const original = global.fetch;
+    global.fetch = okFetch();
+    try {
+      const collection = parseYaml(COLL_SCRIPT_YAML(
+        'bru.setCollectionVar(\'count\', 3); bru.setCollectionVar(\'flag\', true); bru.setCollectionVar(\'cfg\', { on: 1 });'
+      ));
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0],
+        collection,
+        timeout: 5000
+      });
+      expect(response.collectionVariables?.count).toBe(3);
+      expect(response.collectionVariables?.flag).toBe(true);
+      expect(response.collectionVariables?.cfg).toEqual({ on: 1 });
     } finally {
       global.fetch = original;
     }

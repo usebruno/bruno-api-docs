@@ -10,9 +10,7 @@ import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updatePlaygroundItem, setPlaygroundResponse, selectPlaygroundResponse, updateCollectionSettings } from '@/store/slices/playground';
-import { applyScriptEnvVarsToCollection } from '@/utils/environments';
-import { applyScriptCollectionVarsToCollection } from '@/utils/scriptVariables';
+import { updatePlaygroundItem, setPlaygroundResponse, selectPlaygroundResponse, applyScriptVariableChanges } from '@/store/slices/playground';
 import { getItemName, isPlaygroundUnsupported } from '@/utils/schemaHelpers';
 import { getInheritedAuthSummary } from '@/utils/request';
 import UnsupportedRequest from '@/components/UnsupportedRequest/UnsupportedRequest';
@@ -98,18 +96,12 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
 
       dispatch(setPlaygroundResponse({ uuid: itemUuid, response: result }));
 
-      let persisted = collection;
-      if (result.environmentVariables) {
-        persisted = applyScriptEnvVarsToCollection(
-          persisted,
-          result.environmentVariables.envName,
-          result.environmentVariables.variables
-        ) ?? persisted;
+      if (result.environmentVariables || result.collectionVariables) {
+        dispatch(applyScriptVariableChanges({
+          environmentVariables: result.environmentVariables,
+          collectionVariables: result.collectionVariables
+        }));
       }
-      if (result.collectionVariables) {
-        persisted = applyScriptCollectionVarsToCollection(persisted, result.collectionVariables) ?? persisted;
-      }
-      if (persisted !== collection) dispatch(updateCollectionSettings(persisted));
     } catch (error) {
       dispatch(setPlaygroundResponse({
         uuid: itemUuid,

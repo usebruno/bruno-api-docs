@@ -8,6 +8,9 @@ import type { Variable, SecretVariable } from '@opencollection/types/common/vari
 import type { RootState } from '@/store/store';
 import { hydrateWithUUIDs, findAndUpdateItem } from '@/utils/fileUtils';
 import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
+import { applyScriptEnvVars } from '@/utils/environments';
+import { reconcileScriptVariables } from '@/utils/scriptVariables';
+import type { Variables } from '@/runner/utils/variable-interpolator';
 import type { ResponseBodyFormat } from '@/constants';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
@@ -212,6 +215,35 @@ const playgroundSlice = createSlice({
       state.collection = action.payload;
       state.hydratedCollection = action.payload;
     },
+    applyScriptVariableChanges: (
+      state: PlaygroundState,
+      action: PayloadAction<{
+        environmentVariables?: { envName: string; variables: Variables };
+        collectionVariables?: Variables;
+      }>
+    ) => {
+      const { environmentVariables, collectionVariables } = action.payload;
+
+      const applyTo = (collection: OpenCollectionCollection | null): void => {
+        if (!collection) return;
+
+        if (environmentVariables) {
+          const env = readEnvironments(collection)?.find((e) => e.name === environmentVariables.envName);
+          if (env) env.variables = applyScriptEnvVars(env, environmentVariables.variables);
+        }
+
+        if (collectionVariables) {
+          if (!collection.request) collection.request = {};
+          collection.request.variables = reconcileScriptVariables(
+            collection.request.variables ?? [],
+            collectionVariables
+          ) as Variable[];
+        }
+      };
+
+      applyTo(state.collection);
+      applyTo(state.hydratedCollection);
+    },
     updateFolderInCollection: (state: PlaygroundState, action: PayloadAction<{ uuid: string; folder: Folder }>) => {
       if (!state.hydratedCollection?.items) return;
 
@@ -307,6 +339,7 @@ export const {
   expandFolders,
   updateCollectionSettings,
   updateCollectionEnvironments,
+  applyScriptVariableChanges,
   updateFolderInCollection,
   resetPlaygroundEnvironments,
   setPlaygroundVariable,

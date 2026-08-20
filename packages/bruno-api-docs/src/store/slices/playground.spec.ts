@@ -11,7 +11,8 @@ import reducer, {
   clearPlaygroundCollection,
   toggleFolderCollapse,
   expandFolders,
-  setPlaygroundVariable
+  setPlaygroundVariable,
+  applyScriptVariableChanges
 } from './playground';
 import { createOpenCollectionStore } from '@/store/store';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
@@ -213,5 +214,65 @@ describe('playground folder collapse', () => {
     store.dispatch(setPlaygroundCollection(withFolder()));
     store.dispatch(expandFolders(['f1']));
     expect(folder(store).isCollapsed).toBe(false);
+  });
+});
+
+describe('applyScriptVariableChanges', () => {
+  type NamedValue = { name: string; value: string };
+  interface CollectionView {
+    config: { environments: { name: string; variables: NamedValue[] }[] };
+    request: { variables: NamedValue[] };
+    items: { uuid: string; body: { data: string } }[];
+  }
+
+  const withRequestAndEnv = () =>
+    ({
+      info: { name: 'Test', version: '1.0.0' },
+      config: { environments: [{ name: 'Dev', variables: [{ name: 'a', value: '1' }] }] },
+      request: { variables: [{ name: 'c', value: 'keep' }] },
+      items: [{ type: 'http', uuid: 'r1', name: 'req', method: 'GET', url: 'https://example.com', body: { type: 'text', data: 'original' } }]
+    }) as unknown as OpenCollectionCollection;
+
+  const view = (store: ReturnType<typeof createOpenCollectionStore>): CollectionView => {
+    const collection = selectHydratedCollection(store.getState());
+    if (!collection) throw new Error('expected a hydrated collection');
+    return collection as unknown as CollectionView;
+  };
+
+  const devEnvVariables = (store: ReturnType<typeof createOpenCollectionStore>): NamedValue[] =>
+    view(store).config.environments[0].variables;
+
+  it('reconciles environment variables onto the current collection', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
+
+    store.dispatch(applyScriptVariableChanges({ environmentVariables: { envName: 'Dev', variables: { a: 'updated', added: 'x' } } }));
+
+    expect(devEnvVariables(store)).toEqual([{ name: 'a', value: 'updated' }, { name: 'added', value: 'x' }]);
+  });
+
+  it('reconciles collection variables onto the current collection', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
+
+    store.dispatch(applyScriptVariableChanges({ collectionVariables: { c: 'changed', d: '2' } }));
+
+    expect(view(store).request.variables).toEqual([{ name: 'c', value: 'changed' }, { name: 'd', value: '2' }]);
+  });
+
+  it('keeps a request edit made while the request was in flight', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
+
+    const inFlightItem = view(store).items[0];
+    store.dispatch(updatePlaygroundItem({
+      uuid: inFlightItem.uuid,
+      item: { ...inFlightItem, body: { type: 'text', data: 'edited while loading' } } as unknown as HttpRequest
+    }));
+
+    store.dispatch(applyScriptVariableChanges({ environmentVariables: { envName: 'Dev', variables: { a: 'fromScript' } } }));
+
+    expect(view(store).items[0].body.data).toBe('edited while loading');
+    expect(devEnvVariables(store)).toEqual([{ name: 'a', value: 'fromScript' }]);
   });
 });

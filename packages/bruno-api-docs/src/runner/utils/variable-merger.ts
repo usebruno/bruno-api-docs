@@ -6,68 +6,54 @@ import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
 import { coerceVariableValue } from '@/utils/variableDataType';
 import type { Variables, JsonValue } from './variable-interpolator';
 
+export const getCollectionVariables = (collection: OpenCollection): Variables => {
+  const result: Variables = {};
+  const collectionVars: Variable[] = collection.request?.variables || [];
+  collectionVars.forEach((variable) => {
+    if (!variable.disabled) {
+      result[variable.name] = coerceVariableValue(variable.value) as JsonValue;
+    }
+  });
+  return result;
+};
+
 /**
- * Merge variables from collection and folder hierarchy into the request. Values are kept in their
- * native, data-type-coerced form (object/number/boolean/string) — the interpolator inserts an
- * object as raw JSON and a number/boolean bare, so a typed variable stays valid inside a JSON body.
+ * Folder- and request-level variables merged into their native, data-type-coerced form
+ * (object/number/boolean/string) — the interpolator inserts an object as raw JSON and a
+ * number/boolean bare, so a typed variable stays valid inside a JSON body. Collection-level
+ * variables are resolved once via getCollectionVariables and shared on the run context.
  */
 export const getCollectionFolderRequestVariables = (
   collection: OpenCollection,
   request: HttpRequest
 ): {
-  collectionVariables: Variables;
   folderVariables: Variables;
   requestVariables: Variables;
 } => {
-  // Get the tree path from collection to this item
   const requestTreePath = getTreePathFromCollectionToItem(collection, request);
 
-  const variables = new Map<string, Variable>();
-
-  // Track variables by scope for debugging/inspection
-  const collectionVariables: Variables = {};
   const folderVariables: Variables = {};
   const requestVariablesResult: Variables = {};
 
-  // Start with collection-level variables
-  const collectionVars = collection.request?.variables || [];
-  collectionVars.forEach((variable: any) => {
-    if (!variable.disabled) {
-      variables.set(variable.name, variable);
-      const value = coerceVariableValue(variable.value) as JsonValue;
-      collectionVariables[variable.name] = value;
-    }
-  });
-
-  // Apply folder-level variables in order (parent to child)
+  // Folder-level variables, in order from parent to child.
   for (const item of requestTreePath) {
     if (isFolder(item)) {
       const folderVars = (item as any).request?.variables || [];
       folderVars.forEach((variable: any) => {
         if (!variable.disabled) {
-          variables.set(variable.name, variable);
-          const value = coerceVariableValue(variable.value) as JsonValue;
-          folderVariables[variable.name] = value;
+          folderVariables[variable.name] = coerceVariableValue(variable.value) as JsonValue;
         }
       });
     }
   }
 
-  // Get request variables using helper
+  // Request-level variables.
   const requestVars = getRequestVariables(request);
-
-  // Process request-level variables
   requestVars.forEach((variable: any) => {
     if (!variable.disabled) {
-      const value = coerceVariableValue(variable.value) as JsonValue;
-      requestVariablesResult[variable.name] = value;
+      requestVariablesResult[variable.name] = coerceVariableValue(variable.value) as JsonValue;
     }
   });
 
-  // Add variable scope tracking to the request object for debugging/inspection
-  return {
-    collectionVariables,
-    folderVariables,
-    requestVariables: requestVariablesResult
-  };
+  return { folderVariables, requestVariables: requestVariablesResult };
 };

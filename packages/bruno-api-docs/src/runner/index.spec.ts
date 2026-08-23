@@ -201,37 +201,6 @@ items:
       global.fetch = originalFetch;
     });
 
-    it('a pre-request script can call bru.disableParsingResponseJson() to keep the raw response body', async () => {
-      const yaml = `
-opencollection: "1.0.0"
-info:
-  name: "bru disableParsing"
-items:
-  - name: "GET data"
-    type: "http"
-    method: "GET"
-    url: "https://api.example.com/data"
-    scripts:
-      preRequest: |
-        bru.disableParsingResponseJson();
-`;
-      global.fetch = vi.fn().mockResolvedValue({
-        status: 200,
-        statusText: 'OK',
-        url: 'https://api.example.com/data',
-        headers: new Headers({ 'content-type': 'application/json' }),
-        arrayBuffer: async () => new TextEncoder().encode('{"a":1}').buffer
-      });
-
-      const collection = parseYaml(yaml);
-      const response = await new RequestRunner().runRequest({ item: collection.items[0], collection, timeout: 30000 });
-
-      expect(response.data).toBe('{"a":1}'); // bru.disableParsingResponseJson kept the raw string
-      expect(response.status).toBe(200);
-
-      global.fetch = originalFetch;
-    });
-
     it('surfaces a de-duplicated warning across script phases for unsupported req methods, while supported ones stay silent and the request still runs', async () => {
       const yaml = `
 opencollection: "1.0.0"
@@ -996,7 +965,7 @@ items:
       environment: { name: 'Dev', variables: [] } as Environment,
       timeout: 5000
     });
-    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { foo: 'bar' } });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { foo: 'bar' }, deleted: [] });
   });
 
   it('keeps a number, boolean, and object as native values, not strings', async () => {
@@ -1023,7 +992,7 @@ items:
       environment: { name: 'Dev', variables: [] } as Environment,
       timeout: 5000
     });
-    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { num: 7, flag: false, cfg: { a: 1 } } });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { num: 7, flag: false, cfg: { a: 1 } }, deleted: [] });
   });
 
   it('warns and attaches nothing when no environment is selected', async () => {
@@ -1074,7 +1043,7 @@ items:
       collection,
       timeout: 5000
     });
-    expect(response.collectionVariables).toEqual({ existing: 'keep', foo: 'bar' });
+    expect(response.collectionVariables).toEqual({ variables: { foo: 'bar' }, deleted: [] });
   });
 
   it('keeps a number, boolean, and object as native values, not strings', async () => {
@@ -1086,7 +1055,7 @@ items:
       collection,
       timeout: 5000
     });
-    expect(response.collectionVariables).toEqual({ existing: 'keep', count: 3, flag: true, cfg: { on: 1 } });
+    expect(response.collectionVariables).toEqual({ variables: { count: 3, flag: true, cfg: { on: 1 } }, deleted: [] });
   });
 
   it('does not attach collectionVariables when a script makes no change', async () => {
@@ -1157,5 +1126,222 @@ items:
       ]
     } as Environment);
     expect(header).toBe('secret-value');
+  });
+});
+
+describe('RequestRunner - script variable persistence (delta + nesting + failure)', () => {
+  let originalFetch: typeof global.fetch;
+  beforeEach(() => {
+    originalFetch = global.fetch;
+    global.fetch = okFetch();
+  });
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it('sends only the env vars that changed, never untouched vars or secret values', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "delta"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.setEnvVar('plainVar', 'changed');
+`;
+    const collection = parseYaml(yaml);
+    const environment = {
+      name: 'Dev',
+      variables: [
+        { name: 'plainVar', value: 'original' },
+        { name: 'untouched', value: 'stay' },
+        { name: 'apiToken', value: 'super-secret', secret: true, type: 'string' }
+      ]
+    } as Environment;
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0], collection, environment, timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({
+      envName: 'Dev',
+      variables: { plainVar: 'changed' },
+      deleted: []
+    });
+  });
+
+  it('reports a deleted env var as an explicit deleted name, not by omission', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "delete"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.deleteEnvVar('gone');
+`;
+    const collection = parseYaml(yaml);
+    const environment = {
+      name: 'Dev',
+      variables: [{ name: 'gone', value: 'x' }, { name: 'stay', value: 'y' }]
+    } as Environment;
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0], collection, environment, timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: {}, deleted: ['gone'] });
+  });
+
+  it('persists setCollectionVar and setEnvVar from a nested bru.runRequest', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "nested"
+request:
+  variables:
+    - name: "colStart"
+      value: "0"
+items:
+  - name: "Parent"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        await bru.runRequest('Child');
+  - name: "Child"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.setCollectionVar('fromChild', 'yes');
+        bru.setEnvVar('envFromChild', 'yes');
+`;
+    const collection = parseYaml(yaml);
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      environment: { name: 'Dev', variables: [] } as Environment,
+      timeout: 5000
+    });
+    expect(response.collectionVariables).toEqual({ variables: { fromChild: 'yes' }, deleted: [] });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { envFromChild: 'yes' }, deleted: [] });
+  });
+
+  it('persists setCollectionVar and setEnvVar even when the send fails', async () => {
+    global.fetch = vi.fn().mockRejectedValue(new Error('network down'));
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "failing"
+request:
+  variables:
+    - name: "colStart"
+      value: "0"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.setCollectionVar('colBeforeFail', 'survive');
+        bru.setEnvVar('envBeforeFail', 'survive');
+`;
+    const collection = parseYaml(yaml);
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0],
+      collection,
+      environment: { name: 'Dev', variables: [] } as Environment,
+      timeout: 5000
+    });
+    expect(response.error).toBeDefined();
+    expect(response.collectionVariables).toEqual({ variables: { colBeforeFail: 'survive' }, deleted: [] });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { envBeforeFail: 'survive' }, deleted: [] });
+  });
+
+  it('keeps an external-secret name out of the env delta when a script overwrites it', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "ext upsert"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.setEnvVar('regular', 'changed');
+        bru.setEnvVar('awsKey', 'override');
+`;
+    const collection = parseYaml(yaml);
+    const environment = {
+      name: 'Dev',
+      variables: [{ name: 'regular', value: 'orig' }],
+      externalSecrets: { type: 'aws-secrets-manager', variables: [{ name: 'awsKey', secretName: 'k', value: 'cached' }] }
+    } as unknown as Environment;
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0], collection, environment, timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { regular: 'changed' }, deleted: [] });
+  });
+
+  it('keeps an external-secret name out of the env delta deleted list on deleteAllEnvVars', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "ext delete"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.deleteAllEnvVars();
+`;
+    const collection = parseYaml(yaml);
+    const environment = {
+      name: 'Dev',
+      variables: [{ name: 'regular', value: 'orig' }],
+      externalSecrets: { type: 'aws-secrets-manager', variables: [{ name: 'awsKey', secretName: 'k', value: 'cached' }] }
+    } as unknown as Environment;
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0], collection, environment, timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: {}, deleted: ['regular'] });
+  });
+
+  it('still persists a script write to a declared env var that shares a name with an external secret', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "shared name"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com"
+    scripts:
+      preRequest: |
+        bru.setEnvVar('shared', 'fromScript');
+`;
+    const collection = parseYaml(yaml);
+    const environment = {
+      name: 'Dev',
+      variables: [{ name: 'shared', value: 'declared' }],
+      externalSecrets: { type: 'aws-secrets-manager', variables: [{ name: 'shared', secretName: 'k', value: 'cached' }] }
+    } as unknown as Environment;
+    const response = await new RequestRunner().runRequest({
+      item: collection.items[0], collection, environment, timeout: 5000
+    });
+    expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { shared: 'fromScript' }, deleted: [] });
   });
 });

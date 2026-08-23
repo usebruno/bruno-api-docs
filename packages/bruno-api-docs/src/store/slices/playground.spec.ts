@@ -246,7 +246,9 @@ describe('applyScriptVariableChanges', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
-    store.dispatch(applyScriptVariableChanges({ environmentVariables: { envName: 'Dev', variables: { a: 'updated', added: 'x' } } }));
+    store.dispatch(applyScriptVariableChanges({
+      environmentVariables: { envName: 'Dev', variables: { a: 'updated', added: 'x' }, deleted: [] }
+    }));
 
     expect(devEnvVariables(store)).toEqual([{ name: 'a', value: 'updated' }, { name: 'added', value: 'x' }]);
   });
@@ -255,9 +257,35 @@ describe('applyScriptVariableChanges', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
-    store.dispatch(applyScriptVariableChanges({ collectionVariables: { c: 'changed', d: '2' } }));
+    store.dispatch(applyScriptVariableChanges({ collectionVariables: { variables: { c: 'changed', d: '2' }, deleted: [] } }));
 
     expect(view(store).request.variables).toEqual([{ name: 'c', value: 'changed' }, { name: 'd', value: '2' }]);
+  });
+
+  it('deletes only the variables named in deleted and leaves the rest', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
+
+    store.dispatch(applyScriptVariableChanges({
+      environmentVariables: { envName: 'Dev', variables: {}, deleted: ['a'] },
+      collectionVariables: { variables: { d: '2' }, deleted: ['c'] }
+    }));
+
+    expect(devEnvVariables(store)).toEqual([]);
+    expect(view(store).request.variables).toEqual([{ name: 'd', value: '2' }]);
+  });
+
+  it('leaves store variables the delta never mentions untouched (upsert-only, not a full replace)', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
+
+    store.dispatch(applyScriptVariableChanges({
+      environmentVariables: { envName: 'Dev', variables: { added: 'x' }, deleted: [] },
+      collectionVariables: { variables: { d: '2' }, deleted: [] }
+    }));
+
+    expect(devEnvVariables(store)).toEqual([{ name: 'a', value: '1' }, { name: 'added', value: 'x' }]);
+    expect(view(store).request.variables).toEqual([{ name: 'c', value: 'keep' }, { name: 'd', value: '2' }]);
   });
 
   it('keeps a request edit made while the request was in flight', () => {
@@ -270,7 +298,9 @@ describe('applyScriptVariableChanges', () => {
       item: { ...inFlightItem, body: { type: 'text', data: 'edited while loading' } } as unknown as HttpRequest
     }));
 
-    store.dispatch(applyScriptVariableChanges({ environmentVariables: { envName: 'Dev', variables: { a: 'fromScript' } } }));
+    store.dispatch(applyScriptVariableChanges({
+      environmentVariables: { envName: 'Dev', variables: { a: 'fromScript' }, deleted: [] }
+    }));
 
     expect(view(store).items[0].body.data).toBe('edited while loading');
     expect(devEnvVariables(store)).toEqual([{ name: 'a', value: 'fromScript' }]);

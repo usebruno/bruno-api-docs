@@ -218,8 +218,8 @@ const playgroundSlice = createSlice({
     applyScriptVariableChanges: (
       state: PlaygroundState,
       action: PayloadAction<{
-        environmentVariables?: { envName: string; variables: Variables };
-        collectionVariables?: Variables;
+        environmentVariables?: { envName: string; variables: Variables; deleted: string[] };
+        collectionVariables?: { variables: Variables; deleted: string[] };
       }>
     ) => {
       const { environmentVariables, collectionVariables } = action.payload;
@@ -228,15 +228,17 @@ const playgroundSlice = createSlice({
         if (!collection) return;
 
         if (environmentVariables) {
-          const env = readEnvironments(collection)?.find((e) => e.name === environmentVariables.envName);
-          if (env) env.variables = applyScriptEnvVars(env, environmentVariables.variables);
+          const { envName, variables, deleted } = environmentVariables;
+          const env = readEnvironments(collection)?.find((e) => e.name === envName);
+          if (env) env.variables = applyScriptEnvVars(env, variables, new Set(deleted));
         }
 
         if (collectionVariables) {
           if (!collection.request) collection.request = {};
           collection.request.variables = reconcileScriptVariables(
             collection.request.variables ?? [],
-            collectionVariables
+            collectionVariables.variables,
+            { deleted: new Set(collectionVariables.deleted) }
           ) as Variable[];
         }
       };

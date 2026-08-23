@@ -39,17 +39,12 @@ export interface BruRunRequestResult {
 
 export type RunRequestCallback = (path: string) => Promise<BruRunRequestResult>;
 
-interface RequestWithParsingFlag {
-  __brunoDisableParsingResponseJson?: boolean;
-}
-
 interface BruOptions {
   collectionPath?: string;
   collectionName?: string;
   variables?: BruVariables;
   warnings?: string[];
   runRequest?: RunRequestCallback;
-  request?: RequestWithParsingFlag;
 }
 
 interface SendRequestResult {
@@ -132,9 +127,8 @@ class Bru {
 
   private warnings: string[] | undefined;
   private runRequestCallback: RunRequestCallback | undefined;
-  private request: RequestWithParsingFlag | undefined;
 
-  constructor({ collectionPath, collectionName, variables, warnings, runRequest, request }: BruOptions) {
+  constructor({ collectionPath, collectionName, variables, warnings, runRequest }: BruOptions) {
     const vars = variables || {};
     this.environmentVariables = vars.environmentVariables || {};
     this.runtimeVariables = vars.runtimeVariables || {};
@@ -147,7 +141,6 @@ class Bru {
     this.collectionName = collectionName;
     this.warnings = warnings;
     this.runRequestCallback = runRequest;
-    this.request = request;
     this.runner = this.createRunnerStubs();
     this.cookies = this.createCookieStubs();
     this.utils = { minifyJson, minifyXml };
@@ -367,12 +360,6 @@ class Bru {
 
   isSafeMode() {
     return true;
-  }
-
-  disableParsingResponseJson() {
-    if (this.request) {
-      this.request.__brunoDisableParsingResponseJson = true;
-    }
   }
 
   sleep(ms: number) {

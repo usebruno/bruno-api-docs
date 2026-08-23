@@ -15,7 +15,6 @@ const addBruShimToContext = (vm: QuickJSContext, bru: Bru) => {
   setMethod(bruObject, 'getCollectionName', () => bru.getCollectionName());
   setMethod(bruObject, 'interpolate', (str) => bru.interpolate(str));
   setMethod(bruObject, 'isSafeMode', () => bru.isSafeMode());
-  setMethod(bruObject, 'disableParsingResponseJson', () => bru.disableParsingResponseJson());
   setMethod(bruObject, 'getProcessEnv', () => bru.getProcessEnv());
 
   setMethod(bruObject, 'hasEnvVar', (key) => bru.hasEnvVar(key as string));

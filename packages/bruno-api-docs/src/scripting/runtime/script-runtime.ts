@@ -32,7 +32,7 @@ class ScriptRuntime {
     warnings,
     runRequest
   }: RunScriptOptions): Promise<Bru> {
-    const bru = new Bru({ collectionPath, collectionName, variables, warnings, runRequest, request });
+    const bru = new Bru({ collectionPath, collectionName, variables, warnings, runRequest });
     let req, res;
     if (request) {
       req = new BrunoRequest(request, warnings);

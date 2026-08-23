@@ -188,20 +188,6 @@ describe('Bru (bru object)', () => {
     });
   });
 
-  describe('disableParsingResponseJson', () => {
-    it('flags the request so the executor returns the raw response body', () => {
-      const request: { __brunoDisableParsingResponseJson?: boolean } = {};
-      const bru = new Bru({ collectionPath: '/c', collectionName: 'C', variables: {}, request });
-      expect(request.__brunoDisableParsingResponseJson).toBeUndefined();
-      bru.disableParsingResponseJson();
-      expect(request.__brunoDisableParsingResponseJson).toBe(true);
-    });
-
-    it('is a safe no-op when there is no request', () => {
-      expect(() => makeBru().disableParsingResponseJson()).not.toThrow();
-    });
-  });
-
   describe('sendRequest (browser fetch)', () => {
     afterEach(() => vi.unstubAllGlobals());
 

@@ -141,7 +141,6 @@ export const STATIC_API_HINTS: Record<ScriptApiRoot, string[]> = {
     'bru.getOauth2CredentialVar(key)',
     'bru.getCollectionName()',
     'bru.isSafeMode()',
-    'bru.disableParsingResponseJson()',
     'bru.hasGlobalEnvVar(key)',
     'bru.getGlobalEnvVar(key)',
     'bru.setGlobalEnvVar(key, value)',

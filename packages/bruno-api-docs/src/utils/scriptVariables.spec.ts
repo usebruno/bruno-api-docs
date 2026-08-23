@@ -1,32 +1,51 @@
 import { describe, it, expect } from 'vitest';
-import { reconcileScriptVariables, applyScriptCollectionVarsToCollection, coerceScriptVarValue } from './scriptVariables';
-import { applyScriptEnvVarsToCollection, envVariableToRow } from './environments';
+import { reconcileScriptVariables, coerceScriptVarValue } from './scriptVariables';
+import { applyScriptEnvVars, envVariableToRow } from './environments';
 import { unwrapVariableTyped } from './variableResolution';
 import { toDataType } from './variableDataType';
-import type { OpenCollection } from '@opencollection/types';
+import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable } from '@opencollection/types/common/variables';
 
 describe('reconcileScriptVariables', () => {
-  it('updates, adds, and removes variables to match what the script set', () => {
+  it('updates and adds the variables in upserts', () => {
     const out = reconcileScriptVariables(
       [{ name: 'a', value: '1' }, { name: 'b', value: '2' }],
       { a: '1x', c: '3' }
     );
-    expect(out).toEqual([{ name: 'a', value: '1x' }, { name: 'c', value: '3' }]);
+    expect(out).toEqual([{ name: 'a', value: '1x' }, { name: 'b', value: '2' }, { name: 'c', value: '3' }]);
   });
 
-  it('removes every enabled variable when the script sets none', () => {
-    expect(reconcileScriptVariables([{ name: 'a', value: '1' }], {})).toEqual([]);
+  it('leaves a variable the upserts never mention untouched (upsert-only, no blind delete)', () => {
+    const out = reconcileScriptVariables([{ name: 'a', value: '1' }, { name: 'b', value: '2' }], { a: '1x' });
+    expect(out).toEqual([{ name: 'a', value: '1x' }, { name: 'b', value: '2' }]);
   });
 
-  it('leaves disabled variables untouched', () => {
-    const out = reconcileScriptVariables([{ name: 'a', value: '1', disabled: true }], {});
+  it('removes only the variables listed as deleted', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'a', value: '1' }, { name: 'b', value: '2' }],
+      {},
+      { deleted: new Set(['b']) }
+    );
+    expect(out).toEqual([{ name: 'a', value: '1' }]);
+  });
+
+  it('applies upserts and deletes in one pass', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'a', value: '1' }, { name: 'b', value: '2' }, { name: 'c', value: '3' }],
+      { a: '1x', d: '4' },
+      { deleted: new Set(['c']) }
+    );
+    expect(out).toEqual([{ name: 'a', value: '1x' }, { name: 'b', value: '2' }, { name: 'd', value: '4' }]);
+  });
+
+  it('leaves disabled variables untouched, even when deleted names them', () => {
+    const out = reconcileScriptVariables([{ name: 'a', value: '1', disabled: true }], {}, { deleted: new Set(['a']) });
     expect(out).toEqual([{ name: 'a', value: '1', disabled: true }]);
   });
 
-  it('does not duplicate a disabled variable when the script sets the same name', () => {
+  it('creates a new enabled variable when the upsert name matches only a disabled one', () => {
     const out = reconcileScriptVariables([{ name: 'a', value: '1', disabled: true }], { a: '2' });
-    expect(out).toEqual([{ name: 'a', value: '1', disabled: true }]);
+    expect(out).toEqual([{ name: 'a', value: '1', disabled: true }, { name: 'a', value: '2' }]);
   });
 
   it('keeps the other fields when updating a variable', () => {
@@ -34,8 +53,24 @@ describe('reconcileScriptVariables', () => {
     expect(out).toEqual([{ name: 'a', value: '2', secret: true }]);
   });
 
+  it('writes a same-name plain/secret pair only once, into the last (resolver-visible) entry', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'token', value: 'plain' }, { name: 'token', value: 'old', secret: true }],
+      { token: 'new' }
+    );
+    expect(out).toEqual([{ name: 'token', value: 'plain' }, { name: 'token', value: 'new', secret: true }]);
+  });
+
+  it('writes to the secret entry even when it is listed before the plain one (matches the resolver)', () => {
+    const out = reconcileScriptVariables(
+      [{ name: 'token', value: 'old', secret: true }, { name: 'token', value: 'plain' }],
+      { token: 'new' }
+    );
+    expect(out).toEqual([{ name: 'token', value: 'new', secret: true }, { name: 'token', value: 'plain' }]);
+  });
+
   it('never adds a variable whose name is in the skip list', () => {
-    const out = reconcileScriptVariables([], { sec: 'x', b: '2' }, new Set(['sec']));
+    const out = reconcileScriptVariables([], { sec: 'x', b: '2' }, { skip: new Set(['sec']) });
     expect(out).toEqual([{ name: 'b', value: '2' }]);
   });
 });
@@ -48,29 +83,6 @@ describe('coerceScriptVarValue', () => {
     expect(coerceScriptVarValue({ a: 1 })).toBe('{"a":1}');
     expect(coerceScriptVarValue(null)).toBe('');
     expect(coerceScriptVarValue(undefined)).toBe('');
-  });
-});
-
-describe('applyScriptCollectionVarsToCollection', () => {
-  it('returns null for a null collection', () => {
-    expect(applyScriptCollectionVarsToCollection(null, { a: '1' })).toBeNull();
-  });
-
-  it('updates, adds, and removes the collection variables', () => {
-    const collection = { request: { variables: [{ name: 'a', value: '1' }, { name: 'gone', value: 'x' }] } };
-    const out = applyScriptCollectionVarsToCollection(collection, { a: '2', b: '3' });
-    expect(out).toEqual({ request: { variables: [{ name: 'a', value: '2' }, { name: 'b', value: '3' }] } });
-  });
-
-  it('creates the variables list when the collection has none', () => {
-    const out = applyScriptCollectionVarsToCollection({}, { a: '1' });
-    expect(out).toEqual({ request: { variables: [{ name: 'a', value: '1' }] } });
-  });
-
-  it('keeps the other request and collection fields', () => {
-    const collection: OpenCollection = { info: { name: 'C' }, request: { auth: 'inherit', variables: [] } };
-    const out = applyScriptCollectionVarsToCollection(collection, { a: '1' });
-    expect(out).toEqual({ info: { name: 'C' }, request: { auth: 'inherit', variables: [{ name: 'a', value: '1' }] } });
   });
 });
 
@@ -95,27 +107,26 @@ describe('reconcileScriptVariables keeps the data type and value shape of each v
     expect(out[0]).toEqual({ name: 'region', value: variant });
   });
 
+  it('updates the selected variant when a script changes a multi-value variable, keeping the array', () => {
+    const variant = [{ title: 'us', value: 'us-1' }, { title: 'eu', value: 'eu-1', selected: true }];
+    const out = reconcileScriptVariables([{ name: 'region', value: variant }], { region: 'us-1' });
+    expect(out).toEqual([{ name: 'region', value: [
+      { title: 'us', value: 'us-1' },
+      { title: 'eu', value: 'us-1', selected: true }
+    ] }]);
+  });
+
+  it('flattens an empty variants array to the script value instead of dropping the write', () => {
+    const out = reconcileScriptVariables([{ name: 'region', value: [] }], { region: 'us-1' });
+    expect(out).toEqual([{ name: 'region', value: 'us-1' }]);
+  });
+
   it('keeps a number typed as a number when the script changes its value', () => {
     const out = reconcileScriptVariables(
       [{ name: 'count', value: { type: 'number', data: '8842' } }],
       { count: 100 }
     );
     expect(out).toEqual([{ name: 'count', value: { type: 'number', data: '100' } }]);
-  });
-});
-
-describe('env and collection variable changes apply together without overwriting each other', () => {
-  it('applies an env change and then a collection change and keeps both', () => {
-    const collection: OpenCollection = {
-      config: { environments: [{ name: 'Dev', variables: [{ name: 'e', value: 'old' }] }] },
-      request: { variables: [{ name: 'c', value: 'old' }] }
-    };
-    const afterEnv = applyScriptEnvVarsToCollection(collection, 'Dev', { e: 'newE' });
-    const afterBoth = applyScriptCollectionVarsToCollection(afterEnv, { c: 'newC' });
-    expect(afterBoth).toEqual({
-      config: { environments: [{ name: 'Dev', variables: [{ name: 'e', value: 'newE' }] }] },
-      request: { variables: [{ name: 'c', value: 'newC' }] }
-    });
   });
 });
 
@@ -136,14 +147,11 @@ describe('reconcileScriptVariables sets the data type from the value', () => {
   });
 
   it('gives a script-set collection variable the type of its value', () => {
-    const out = applyScriptCollectionVarsToCollection({ request: { variables: [] } }, {
-      retryCount: 3,
-      featureFlags: { darkMode: true }
-    });
-    expect(out).toEqual({ request: { variables: [
+    const out = reconcileScriptVariables([], { retryCount: 3, featureFlags: { darkMode: true } });
+    expect(out).toEqual([
       { name: 'retryCount', value: { type: 'number', data: '3' } },
       { name: 'featureFlags', value: { type: 'object', data: '{"darkMode":true}' } }
-    ] } });
+    ]);
   });
 });
 
@@ -167,18 +175,14 @@ describe('the data type a script sets is the type shown in the variables table',
   });
 
   it('setCollectionVar stores each type so the collection variables table shows it correctly', () => {
-    const out = applyScriptCollectionVarsToCollection({ request: { variables: [] } }, finalVars);
-    expect(out).toEqual({ request: { variables: storedVariables } });
+    const out = reconcileScriptVariables([], finalVars);
+    expect(out).toEqual(storedVariables);
     expect(collectionRows).toEqual(tableRows);
   });
 
   it('setEnvVar stores each type so the environment variables table shows it correctly', () => {
-    const out = applyScriptEnvVarsToCollection(
-      { config: { environments: [{ name: 'Dev', variables: [] }] } },
-      'Dev',
-      finalVars
-    );
-    expect(out).toEqual({ config: { environments: [{ name: 'Dev', variables: storedVariables }] } });
+    const out = applyScriptEnvVars({ name: 'Dev', variables: [] } as Environment, finalVars);
+    expect(out).toEqual(storedVariables);
     expect(environmentRows).toEqual(tableRows);
   });
 });

@@ -6,7 +6,7 @@ import ScriptRuntime from '@/scripting/runtime/script-runtime';
 import type { RunRequestCallback } from '@/scripting/utils/bru';
 import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
-import { getCollectionFolderRequestVariables } from './utils/variable-merger';
+import { getCollectionFolderRequestVariables, getCollectionVariables } from './utils/variable-merger';
 import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
 import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
 import type { Variables, JsonValue } from './utils/variable-interpolator';
@@ -24,6 +24,7 @@ interface RunContext {
   collection: OpenCollectionCollection;
   environment?: Environment;
   environmentVariables: Variables;
+  collectionVariables: Variables;
   runtimeVariables: Variables;
   processEnvVars: Variables;
   timeout: number;
@@ -32,6 +33,24 @@ interface RunContext {
 
 const requestKey = (item: HttpRequest): string =>
   getItemUuid(item) || `${getItemName(item) ?? ''}|${getHttpMethod(item)}|${getRequestUrl(item)}`;
+
+const diffVariables = (
+  before: Variables,
+  after: Variables,
+  ignore: Set<string> = new Set()
+): { upserts: Variables; deleted: string[]; changed: boolean } => {
+  const upserts: Variables = {};
+  for (const [key, value] of Object.entries(after)) {
+    if (key === '__name__' || ignore.has(key)) continue;
+    if (!Object.prototype.hasOwnProperty.call(before, key) || !isEqual(before[key], value)) {
+      upserts[key] = value;
+    }
+  }
+  const deleted = Object.keys(before).filter(
+    (key) => key !== '__name__' && !ignore.has(key) && !Object.prototype.hasOwnProperty.call(after, key)
+  );
+  return { upserts, deleted, changed: Object.keys(upserts).length > 0 || deleted.length > 0 };
+};
 
 interface DeclaredEnvironmentVariable {
   name?: string;
@@ -103,8 +122,8 @@ export interface RunRequestResponse {
   assertionResults?: AssertionResultsResponse;
   testResults?: TestResultsResponse;
   warnings?: string[] | null;
-  environmentVariables?: { envName: string; variables: Variables };
-  collectionVariables?: Variables;
+  environmentVariables?: { envName: string; variables: Variables; deleted: string[] };
+  collectionVariables?: { variables: Variables; deleted: string[] };
 }
 
 export class RequestRunner {
@@ -124,6 +143,7 @@ export class RequestRunner {
       collection,
       environment,
       environmentVariables: this.getEnvironmentVariables(environment),
+      collectionVariables: getCollectionVariables(collection),
       processEnvVars: (typeof process !== 'undefined' && process.env ? process.env : {}) as Record<string, string>,
       runtimeVariables,
       timeout,
@@ -131,17 +151,38 @@ export class RequestRunner {
     };
 
     const initialEnvVariables = cloneDeep(context.environmentVariables);
+    const initialCollectionVariables = cloneDeep(context.collectionVariables);
     const response = await this.runRequestWithContext(item, context, 0, []);
 
-    if (!isEqual(context.environmentVariables, initialEnvVariables)) {
-      const finalVariables = { ...context.environmentVariables };
-      delete finalVariables.__name__;
+    const declaredEnvNames = new Set(
+      (environment?.variables ?? [])
+        .filter((variable) => !variable.disabled)
+        .map((variable) => variable.name)
+        .filter((name): name is string => Boolean(name))
+    );
+    const externalNames = new Set(
+      ((environment?.externalSecrets?.variables ?? []) as { name?: string }[])
+        .map((entry) => entry.name)
+        .filter((name): name is string => Boolean(name))
+        .filter((name) => !declaredEnvNames.has(name))
+    );
+    const envDelta = diffVariables(initialEnvVariables, context.environmentVariables, externalNames);
+    if (envDelta.changed) {
       if (environment?.name) {
-        response.environmentVariables = { envName: environment.name, variables: finalVariables };
+        response.environmentVariables = {
+          envName: environment.name,
+          variables: envDelta.upserts,
+          deleted: envDelta.deleted
+        };
       } else {
         context.warnings.push('bru.setEnvVar: no environment is selected, so the changes were not saved.');
         response.warnings = context.warnings;
       }
+    }
+
+    const collectionDelta = diffVariables(initialCollectionVariables, context.collectionVariables);
+    if (collectionDelta.changed) {
+      response.collectionVariables = { variables: collectionDelta.upserts, deleted: collectionDelta.deleted };
     }
 
     return response;
@@ -188,14 +229,16 @@ export class RequestRunner {
     depth: number,
     chain: string[]
   ): Promise<RunRequestResponse> {
-    const { collection, environmentVariables, runtimeVariables, processEnvVars, timeout, warnings } = context;
+    const {
+      collection, environmentVariables, collectionVariables, runtimeVariables, processEnvVars, timeout, warnings
+    } = context;
     const requestId = this.generateRequestId();
 
     try {
       const processedRequest: InternalHttpRequest = await this.preprocessRequest(item, collection);
       processedRequest.__bruno__executionMode = 'standalone';
 
-      const { collectionVariables, folderVariables, requestVariables } = getCollectionFolderRequestVariables(collection, processedRequest);
+      const { folderVariables, requestVariables } = getCollectionFolderRequestVariables(collection, processedRequest);
 
       const allVariables = {
         environmentVariables,
@@ -205,8 +248,6 @@ export class RequestRunner {
         folderVariables,
         requestVariables
       };
-
-      const initialCollectionVariables = depth === 0 ? cloneDeep(collectionVariables) : null;
 
       const runRequest = this.makeNestedRunRequest(context, depth, chain, item);
 
@@ -304,16 +345,12 @@ export class RequestRunner {
         }
       }
 
-      const collectionVariablesChanged
-        = initialCollectionVariables !== null && !isEqual(collectionVariables, initialCollectionVariables);
-
       return {
         ...response,
         requestId,
         assertionResults: assertionResultsResponse,
         testResults: testResultsResponse,
-        warnings: warnings.length ? warnings : null,
-        collectionVariables: collectionVariablesChanged ? { ...collectionVariables } : undefined
+        warnings: warnings.length ? warnings : null
       };
     } catch (error) {
       return {

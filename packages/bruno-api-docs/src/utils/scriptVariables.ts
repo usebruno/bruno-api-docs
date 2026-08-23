@@ -112,4 +112,3 @@ export const reconcileScriptVariables = (
 
   return result;
 };
-

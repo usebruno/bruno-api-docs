@@ -1,4 +1,3 @@
-import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable, SecretVariable, VariableValueType } from '@opencollection/types/common/variables';
 import { MANAGER_LABELS } from '@/constants';

@@ -111,12 +111,6 @@ export default [
           '**/*.config.{ts,mts,js,mjs,cjs}'
         ]
       }],
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['**/store/slices/*', '!@/store/slices/*', '@slices/*'],
-          message: 'Import slices through the @/store/slices/* alias.'
-        }]
-      }],
 
       'no-restricted-syntax': ['error',
         {

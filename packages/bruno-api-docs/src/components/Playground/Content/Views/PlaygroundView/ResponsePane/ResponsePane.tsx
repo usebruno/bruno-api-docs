@@ -12,6 +12,7 @@ import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseForma
 import type { ResponseBodyFormat } from '@/constants';
 import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
 import type { RunRequestResponse } from '@/runner';
+import { SCRIPT_ERROR_TITLES } from '@/runner/utils/script-errors';
 import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
 import ResponseActions from './ResponseActions/ResponseActions';
@@ -26,6 +27,7 @@ interface ResponsePaneProps {
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
   const [activeTab, setActiveTab] = useState('response');
+  const [dismissedScriptErrorsRequestId, setDismissedScriptErrorsRequestId] = useState<string | undefined>();
   const { actionsExpandedWidth, measureActions } = useResponseActions();
 
   const {
@@ -71,8 +73,25 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     </div>
   );
 
+  const scriptErrorsDismissed = dismissedScriptErrorsRequestId === response.requestId;
+  const scriptErrors = scriptErrorsDismissed ? [] : (response.scriptErrors ?? []);
+  const renderScriptErrors = (testId: string) =>
+    scriptErrors.length ? (
+      <div className="pb-4 space-y-3" data-testid={testId}>
+        {scriptErrors.map((scriptError) => (
+          <ErrorBanner
+            key={scriptError.phase}
+            title={SCRIPT_ERROR_TITLES[scriptError.phase]}
+            message={scriptError.message}
+            onDismiss={() => setDismissedScriptErrorsRequestId(response.requestId)}
+          />
+        ))}
+      </div>
+    ) : null;
+
   const renderResponseBody = () => (
     <div className="flex flex-col h-full">
+      {renderScriptErrors('response-script-errors')}
       {response.warnings?.length ? (
         <div className="pb-4">
           <WarningBanner warnings={response.warnings} />
@@ -90,10 +109,13 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (
-    <TestResultsTab
-      testResults={response.testResults}
-      assertionResults={response.assertionResults}
-    />
+    <div className="flex flex-col h-full">
+      {renderScriptErrors('tests-script-errors')}
+      <TestResultsTab
+        testResults={response.testResults}
+        assertionResults={response.assertionResults}
+      />
+    </div>
   );
 
   const headersCount = response.headers ? Object.keys(response.headers).length : 0;

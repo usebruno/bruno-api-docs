@@ -68,6 +68,14 @@ describe('sandbox library parity with desktop safe mode', () => {
     expect(inVm(`typeof require('axios').get`)).toBe('function');
   });
 
+  it('resolves relative-only path arguments from the root, since the sandbox has no working directory', () => {
+    expect(inVm(`require('path').resolve('a', 'b')`)).toBe('/a/b');
+    expect(inVm(`require('path').resolve()`)).toBe('/');
+    expect(inVm(`require('path').relative('a/b', 'a/c')`)).toBe('../c');
+    expect(inVm(`globalThis.path.resolve('x')`)).toBe('/x');
+    expect(inVm(`typeof globalThis.process`)).toBe('undefined');
+  });
+
   it('gives explanatory errors for developer-mode-only and node builtin modules', () => {
     expect(errorMessageOf(`require('lodash')`)).toContain('only available in the Bruno desktop app\'s developer mode');
     expect(errorMessageOf(`require('fs')`)).toContain('is a Node.js builtin');

@@ -4,7 +4,7 @@ import BrunoRequest from '@/scripting/utils/bruno-request';
 import BrunoResponse from '@/scripting/utils/bruno-response';
 import { executeQuickJsVmAsync } from '@/scripting/sandbox/quickjs';
 import type { AssertionResult } from '@/scripting/utils/test';
-import { createBruTestResultMethods, type BruTestResultMethods } from '@/scripting/utils/test';
+import { createBruTestResultMethods, type BruTestResultMethods, type TestResultsResponse } from '@/scripting/utils/test';
 
 interface RunScriptOptions {
   script: string;
@@ -16,6 +16,10 @@ interface RunScriptOptions {
   assertionResults?: AssertionResult[];
   warnings?: string[];
   runRequest?: RunRequestCallback;
+}
+
+export interface ScriptRunError extends Error {
+  partialTestResults?: TestResultsResponse;
 }
 
 class ScriptRuntime {
@@ -74,11 +78,17 @@ class ScriptRuntime {
       }
     };
 
-    await executeQuickJsVmAsync({
-      script: script,
-      context: context,
-      collectionPath
-    });
+    try {
+      await executeQuickJsVmAsync({
+        script: script,
+        context: context,
+        collectionPath
+      });
+    } catch (error) {
+      const scriptError: ScriptRunError = error instanceof Error ? error : new Error(String(error));
+      if (bru.getTestResults) scriptError.partialTestResults = await bru.getTestResults();
+      throw scriptError;
+    }
 
     // Return bru object so caller can access test results
     return bru;

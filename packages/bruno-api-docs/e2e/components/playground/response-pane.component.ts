@@ -16,6 +16,10 @@ export class ResponsePaneComponent extends BaseComponent {
   readonly errorBanner = this.bodyPanel.getByTestId('error-banner');
   readonly errorTitle = this.bodyPanel.getByTestId('error-title');
   readonly errorMessage = this.bodyPanel.getByTestId('error-message');
+  readonly testsPanel = this.page.getByTestId('response-tabs-panel-tests');
+  readonly scriptErrors = this.bodyPanel.getByTestId('response-script-errors');
+  readonly testsScriptErrors = this.testsPanel.getByTestId('tests-script-errors');
+  readonly testsScriptErrorsDismiss = this.testsScriptErrors.getByTestId('error-banner-dismiss');
   readonly formatSelector = this.page.getByTestId('response-format-selector');
   // The leading icon in the selector trigger (the eye when preview is on, else the format's icon).
   readonly formatSelectorIcon = this.page.getByTestId('response-format-selector-trigger-icon');

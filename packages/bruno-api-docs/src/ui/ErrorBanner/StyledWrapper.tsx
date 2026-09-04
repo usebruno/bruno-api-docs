@@ -1,6 +1,7 @@
 import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.div`
+  position: relative;
   background-color: var(--bg-secondary);
   border: 1px solid var(--oc-border-border2);
   border-left: 4px solid var(--oc-status-danger-border);
@@ -20,6 +21,23 @@ export const StyledWrapper = styled.div`
     white-space: pre-wrap;
     word-break: break-all;
     color: var(--text-primary);
+  }
+
+  .error-dismiss {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: inline-flex;
+    padding: 0.25rem;
+    border: none;
+    border-radius: var(--oc-radius);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text-primary);
+    }
   }
 
   .error-hint {

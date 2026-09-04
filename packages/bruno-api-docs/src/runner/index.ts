@@ -2,7 +2,8 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import { RequestExecutor } from './RequestExecutor';
-import ScriptRuntime from '@/scripting/runtime/script-runtime';
+import ScriptRuntime, { type ScriptRunError } from '@/scripting/runtime/script-runtime';
+import { appendScriptErrorResult, SCRIPT_ERROR_TITLES, type ScriptError } from './utils/script-errors';
 import type { RunRequestCallback } from '@/scripting/utils/bru';
 import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
@@ -17,6 +18,8 @@ import {
 } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
 import { cloneDeep, isEqual } from 'lodash-es';
+
+const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : 'Unknown script error');
 
 const MAX_RUN_REQUEST_DEPTH = 25;
 
@@ -121,6 +124,7 @@ export interface RunRequestResponse {
   requestId?: string;
   assertionResults?: AssertionResultsResponse;
   testResults?: TestResultsResponse;
+  scriptErrors?: ScriptError[];
   warnings?: string[] | null;
   environmentVariables?: { envName: string; variables: Variables; deleted: string[] };
   collectionVariables?: { variables: Variables; deleted: string[] };
@@ -255,6 +259,8 @@ export class RequestRunner {
       const scriptsObj = scriptsArrayToObject(getRequestScripts(processedRequest));
       const assertions = getRequestAssertions(processedRequest);
 
+      const scriptErrors: ScriptError[] = [];
+
       // Pre-request script
       if (scriptsObj.preRequest) {
         try {
@@ -270,7 +276,8 @@ export class RequestRunner {
         } catch (scriptError) {
           return {
             requestId,
-            error: `Pre-request script error: ${scriptError instanceof Error ? scriptError.message : 'Unknown script error'}`,
+            error: errorMessage(scriptError),
+            errorTitle: SCRIPT_ERROR_TITLES['pre-request'],
             warnings: warnings.length ? warnings : null
           };
         }
@@ -294,8 +301,8 @@ export class RequestRunner {
             runRequest
           });
         } catch (scriptError) {
-          // Don't fail the request for post-response script errors, just log them
           console.warn('Post-response script error:', scriptError);
+          scriptErrors.push({ phase: 'post-response', message: errorMessage(scriptError) });
         }
       }
       let assertionResults: AssertionResult[] | undefined;
@@ -340,9 +347,14 @@ export class RequestRunner {
             assertionResultsResponse = await bru.getAssertionResults();
           }
         } catch (scriptError) {
-          // Don't fail the request for test script errors, just log them
           console.warn('Test script error:', scriptError);
+          scriptErrors.push({ phase: 'tests', message: errorMessage(scriptError) });
+          testResultsResponse = (scriptError as ScriptRunError).partialTestResults;
         }
+      }
+
+      for (const scriptError of scriptErrors) {
+        testResultsResponse = appendScriptErrorResult(testResultsResponse, scriptError.phase, scriptError.message);
       }
 
       return {
@@ -350,6 +362,7 @@ export class RequestRunner {
         requestId,
         assertionResults: assertionResultsResponse,
         testResults: testResultsResponse,
+        scriptErrors: scriptErrors.length ? scriptErrors : undefined,
         warnings: warnings.length ? warnings : null
       };
     } catch (error) {

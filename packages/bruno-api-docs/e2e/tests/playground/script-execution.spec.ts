@@ -24,6 +24,21 @@ test('tv4 validates against a schema', function () {
 });
 `;
 
+const REQUIRE_FS_TESTS_SCRIPT = `
+test('ran before the throw', function () { expect(1).to.equal(1); });
+require('fs');
+test('never reached', function () { expect(1).to.equal(1); });
+`;
+
+const UNREACHABLE_HOST_POST_RESPONSE_SCRIPT = `
+const axios = require('axios');
+await axios.get('https://unreachable.invalid/get');
+`;
+
+const REQUIRE_LODASH_PRE_REQUEST_SCRIPT = `
+const _ = require('lodash');
+`;
+
 const setEditorScript = async (page: Page, editor: CodeEditorComponent, script: string): Promise<void> => {
   await editor.focus();
   await page.keyboard.press('ControlOrMeta+a');
@@ -53,5 +68,67 @@ test.describe('playground script execution', () => {
 
     await expect(page.getByText(/Passed: [1-9]\d*, Failed: 0/).first()).toBeVisible();
     await expect(page.getByText(/Failed: [1-9]/)).toHaveCount(0);
+  });
+
+  test('a tests script that throws shows a dismissable Test Script Error card and keeps the tests that ran', async ({ page, playground, responsePane }) => {
+    await responsePane.mockUsersResponse(JSON.stringify({ users: [] }));
+
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+    await playground.selectTab('tests');
+    await setEditorScript(page, playground.testsEditor, REQUIRE_FS_TESTS_SCRIPT);
+
+    await responsePane.send();
+
+    await expect(responsePane.status).toContainText('200');
+    await expect(responsePane.scriptErrors.getByTestId('error-title')).toHaveText('Test Script Error');
+    await expect(responsePane.scriptErrors.getByTestId('error-message')).toContainText('\'fs\' is a Node.js builtin');
+
+    await responsePane.switchToTab('tests');
+    await expect(responsePane.testsPanel.getByText('Tests (2), Passed: 1, Failed: 1')).toBeVisible();
+    await expect(responsePane.testsPanel.getByText('ran before the throw')).toBeVisible();
+    await expect(responsePane.testsPanel.getByText('never reached')).toHaveCount(0);
+    await expect(responsePane.testsScriptErrors.getByTestId('error-title')).toHaveText('Test Script Error');
+
+    await responsePane.testsScriptErrorsDismiss.click();
+    await expect(responsePane.testsScriptErrors).toHaveCount(0);
+    await responsePane.switchToTab('response');
+    await expect(responsePane.scriptErrors).toHaveCount(0);
+    await expect(responsePane.bodyEditor.surface).toBeVisible();
+  });
+
+  test('a pre-request script that throws shows a Pre-Request Script Error card instead of a response', async ({ page, playground, responsePane }) => {
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+    await playground.selectTab('scripts');
+    await setEditorScript(page, playground.preRequestScriptEditor, REQUIRE_LODASH_PRE_REQUEST_SCRIPT);
+
+    await responsePane.send();
+
+    await expect(responsePane.errorTitle).toHaveText('Pre-Request Script Error');
+    await expect(responsePane.errorMessage).toContainText('\'lodash\' is only available in the Bruno desktop app\'s developer mode');
+    await expect(responsePane.status).toHaveCount(0);
+  });
+
+  test('a post-response script that throws shows a Post-Response Script Error card while the body still renders', async ({ page, playground, responsePane }) => {
+    await responsePane.mockUsersResponse(JSON.stringify({ users: [] }));
+    await page.route('https://unreachable.invalid/**', (route) => route.abort('namenotresolved'));
+
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+    await playground.selectTab('scripts');
+    await page.getByTestId('scripts-tabs-tab-post-response').click();
+    await setEditorScript(page, playground.postResponseScriptEditor, UNREACHABLE_HOST_POST_RESPONSE_SCRIPT);
+
+    await responsePane.send();
+
+    await expect(responsePane.status).toContainText('200');
+    await expect(responsePane.scriptErrors.getByTestId('error-title')).toHaveText('Post-Response Script Error');
+    await expect(responsePane.scriptErrors.getByTestId('error-message')).toHaveText('Network Error');
+    await expect(responsePane.bodyEditor.surface).toBeVisible();
+
+    await responsePane.switchToTab('tests');
+    await expect(responsePane.testsPanel.getByText('Tests (1), Passed: 0, Failed: 1')).toBeVisible();
+    await expect(responsePane.testsPanel.getByText('Post-Response Script Error').first()).toBeVisible();
   });
 });

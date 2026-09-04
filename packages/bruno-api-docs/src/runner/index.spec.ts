@@ -528,6 +528,97 @@ items:
       global.fetch = originalFetch;
     });
 
+    describe('script errors after the response arrived', () => {
+      const scriptErrorCollection = (scripts: string) => parseYaml(`
+opencollection: "1.0.0"
+info:
+  name: "Script errors"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com/"
+    scripts:
+${scripts}
+`);
+
+      it('surfaces a tests-script throw as a scriptError and a failed row, keeping the tests that already ran', async () => {
+        global.fetch = okFetch();
+        const collection = scriptErrorCollection(`
+      tests: |
+        test("ran before the throw", function () { expect(1).to.equal(1); });
+        require("fs");
+        test("never reached", function () { expect(1).to.equal(1); });`);
+
+        const response = await new RequestRunner().runRequest({
+          item: collection.items[0], collection, runtimeVariables: {}
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.error).toBeUndefined();
+        expect(response.scriptErrors).toHaveLength(1);
+        expect(response.scriptErrors?.[0].phase).toBe('tests');
+        expect(response.scriptErrors?.[0].message).toContain('\'fs\' is a Node.js builtin');
+        expect(response.testResults?.results.map((r) => [r.status, r.description])).toEqual([
+          ['pass', 'ran before the throw'],
+          ['fail', 'Test Script Error']
+        ]);
+        expect(response.testResults?.results[1].error).toContain('\'fs\' is a Node.js builtin');
+        expect(response.testResults?.summary).toEqual({ total: 2, passed: 1, failed: 1, skipped: 0 });
+        global.fetch = originalFetch;
+      });
+
+      it('surfaces a post-response throw as a scriptError and a failed row while the response stays intact', async () => {
+        global.fetch = okFetch();
+        const collection = scriptErrorCollection(`
+      postResponse: |
+        throw new Error("post boom");`);
+
+        const response = await new RequestRunner().runRequest({
+          item: collection.items[0], collection, runtimeVariables: {}
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.scriptErrors).toEqual([{ phase: 'post-response', message: 'post boom' }]);
+        expect(response.testResults?.results).toEqual([
+          { status: 'fail', description: 'Post-Response Script Error', error: 'post boom' }
+        ]);
+        global.fetch = originalFetch;
+      });
+
+      it('titles a pre-request throw like the desktop app and keeps the raw message', async () => {
+        global.fetch = okFetch();
+        const collection = scriptErrorCollection(`
+      preRequest: |
+        require("lodash");`);
+
+        const response = await new RequestRunner().runRequest({
+          item: collection.items[0], collection, runtimeVariables: {}
+        });
+
+        expect(response.status).toBeUndefined();
+        expect(response.errorTitle).toBe('Pre-Request Script Error');
+        expect(response.error).toContain('\'lodash\' is only available in the Bruno desktop app\'s developer mode');
+        expect(response.error).not.toContain('Pre-request script error:');
+        global.fetch = originalFetch;
+      });
+
+      it('reports no scriptErrors when every script phase succeeds', async () => {
+        global.fetch = okFetch();
+        const collection = scriptErrorCollection(`
+      tests: |
+        test("ok", function () { expect(1).to.equal(1); });`);
+
+        const response = await new RequestRunner().runRequest({
+          item: collection.items[0], collection, runtimeVariables: {}
+        });
+
+        expect(response.scriptErrors).toBeUndefined();
+        expect(response.testResults?.summary.passed).toBe(1);
+        global.fetch = originalFetch;
+      });
+    });
+
     it('should strip JSON comments from body before sending', async () => {
       // Mock fetch to capture what body was sent
       let sentBody: string | undefined;

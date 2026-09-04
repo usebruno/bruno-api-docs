@@ -11,7 +11,16 @@ import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import * as uuid from 'uuid';
 import * as nanoid from 'nanoid';
-import path from 'path-browserify';
+import browserPath from 'path-browserify';
+
+// path-browserify reads process.cwd() to resolve relative paths and the sandbox has no process.
+// Treat '/' as the working directory instead.
+const path = {
+  ...browserPath,
+  resolve: (...segments: string[]) => browserPath.resolve('/', ...segments),
+  relative: (from: string, to: string) =>
+    browserPath.relative(browserPath.resolve('/', from), browserPath.resolve('/', to))
+};
 
 (globalThis as any).expect = expect;
 (globalThis as any).assert = assert;

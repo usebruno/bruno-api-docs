@@ -12,7 +12,7 @@ import { getItemUuid } from '@/utils/itemUtils';
 import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
 import {
   buildScopedVariableModel,
-  resolveVariables,
+  resolveValueDeep,
   singleReferenceName,
   detectSpecialScope,
   isValidVariableName,
@@ -95,7 +95,7 @@ const makeResolver = (
   activeEnvName: string | null
 ): VariableResolver => {
   const isSecret = (name: string) => model.secretNames.has(name.trim());
-  const interpolate = (raw: string) => resolveVariables(raw, model.values);
+  const interpolate = (raw: string) => resolveValueDeep(raw, model.values);
   return {
     showVars,
     activeEnvName,
@@ -263,7 +263,7 @@ export const ItemVariableResolverProvider: React.FC<{
   );
 
   const interpolateWithSecrets = useCallback(
-    (raw: string) => resolveVariables(raw, model.fullValues),
+    (raw: string) => resolveValueDeep(raw, model.fullValues),
     [model]
   );
 

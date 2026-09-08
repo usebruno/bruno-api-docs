@@ -4,8 +4,12 @@ on:
   pull_request:
     branches: [main, 'release/**']
     types: [opened, synchronize, reopened, ready_for_review]
+    # Markdown feeds no job here: eslint does not lint it, nothing in src imports it,
+    # and no vite config reads it. Changesets are .md, so a changeset-only push skips CI.
+    paths-ignore: ['**/*.md', 'LICENSE', '.gitignore']
   push:
     branches: [main, 'release/**']
+    paths-ignore: ['**/*.md', 'LICENSE', '.gitignore']
 
 
 

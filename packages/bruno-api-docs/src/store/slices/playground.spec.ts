@@ -5,7 +5,6 @@ import reducer, {
   updatePlaygroundItem,
   resetPlaygroundEnvironments,
   selectHydratedCollection,
-  selectPlaygroundCollection,
   setViewMode,
   setSelectedExampleIndex,
   clearPlaygroundCollection,
@@ -38,7 +37,7 @@ const envExternalSecrets = (store: ReturnType<typeof createOpenCollectionStore>)
 
 describe('resetPlaygroundEnvironments', () => {
   it('restores the original environments after an edit', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(makeCollection()));
 
     const edited = makeCollection();
@@ -51,7 +50,7 @@ describe('resetPlaygroundEnvironments', () => {
   });
 
   it('keeps the restore independent of later edits (cloned, not shared)', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(makeCollection()));
 
     store.dispatch(resetPlaygroundEnvironments());
@@ -89,7 +88,7 @@ describe('updatePlaygroundItem', () => {
     select(store.getState())!.items![0] as unknown as { uuid: string; http: { url: string } };
 
   it('updates the item in the hydrated collection (what the UI renders) as well as the base collection', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withRequest()));
 
     const updated = { type: 'http', uuid: 'r1', name: 'Req', http: { url: 'new', method: 'GET' } };
@@ -98,20 +97,17 @@ describe('updatePlaygroundItem', () => {
     // The tree the UI reads must reflect the edit, with the uuid preserved so findItemByUuid resolves.
     expect(firstItem(store, selectHydratedCollection).http.url).toBe('new');
     expect(firstItem(store, selectHydratedCollection).uuid).toBe('r1');
-    expect(firstItem(store, selectPlaygroundCollection).http.url).toBe('new');
   });
 });
 
 describe('setPlaygroundVariable', () => {
-  it('edits an environment variable in both the hydrated and base collections', () => {
-    const store = createOpenCollectionStore();
+  it('edits an environment variable in the collection the UI reads', () => {
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(makeCollection()));
 
     store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'a', value: '99', envName: 'Dev' }));
 
     expect((envVariables(store).find((v) => v.name === 'a') as unknown as { value: string }).value).toBe('99');
-    const base = selectPlaygroundCollection(store.getState())!.config!.environments![0].variables!;
-    expect((base.find((v) => v.name === 'a') as unknown as { value: string }).value).toBe('99');
   });
 
   it('edits the last enabled duplicate, matching the resolver', () => {
@@ -121,7 +117,7 @@ describe('setPlaygroundVariable', () => {
       { name: 'dup', value: 'shadowed', disabled: true },
       { name: 'dup', value: 'winner' }
     ];
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(collection));
 
     store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'dup', value: 'edited', envName: 'Dev' }));
@@ -135,7 +131,7 @@ describe('setPlaygroundVariable', () => {
   it('edits a collection variable', () => {
     const collection = makeCollection();
     collection.request = { variables: [{ name: 'cv', value: 'x' }] };
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(collection));
 
     store.dispatch(setPlaygroundVariable({ scope: 'collection', name: 'cv', value: 'y' }));
@@ -151,7 +147,7 @@ describe('setPlaygroundVariable', () => {
         { type: 'http', uuid: 'r1', name: 'Req', http: { url: 'u', method: 'GET' }, variables: [{ name: 'rv', value: '1' }] }
       ]
     } as unknown as OpenCollectionCollection;
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(collection));
 
     store.dispatch(setPlaygroundVariable({ scope: 'request', name: 'rv', value: '2', itemUuid: 'r1' }));
@@ -163,7 +159,7 @@ describe('setPlaygroundVariable', () => {
   it('writes a session value to a secret variable, keeping it marked secret', () => {
     const collection = makeCollection();
     collection.config.environments[0].variables.push({ name: 'sec', secret: true });
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(collection));
 
     store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'sec', value: 'typed', envName: 'Dev' }));
@@ -179,7 +175,7 @@ describe('setPlaygroundVariable', () => {
       type: 'aws-secrets-manager',
       variables: [{ name: 'vaultKey', secretName: 'prod/api-key' }]
     };
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(collection));
 
     store.dispatch(setPlaygroundVariable({ scope: '$secrets', name: 'vaultKey', value: 'typed', envName: 'Dev' }));
@@ -200,7 +196,7 @@ describe('playground folder collapse', () => {
     selectHydratedCollection(store.getState())!.items![0] as { isCollapsed?: boolean };
 
   it('expandFolders reveals a collapsed folder', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withFolder()));
     store.dispatch(toggleFolderCollapse('f1'));
     expect(folder(store).isCollapsed).toBe(true);
@@ -210,7 +206,7 @@ describe('playground folder collapse', () => {
   });
 
   it('expandFolders keeps an already-open folder open (never collapses)', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withFolder()));
     store.dispatch(expandFolders(['f1']));
     expect(folder(store).isCollapsed).toBe(false);
@@ -243,7 +239,7 @@ describe('applyScriptVariableChanges', () => {
     view(store).config.environments[0].variables;
 
   it('reconciles environment variables onto the current collection', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
     store.dispatch(applyScriptVariableChanges({
@@ -254,7 +250,7 @@ describe('applyScriptVariableChanges', () => {
   });
 
   it('reconciles collection variables onto the current collection', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
     store.dispatch(applyScriptVariableChanges({ collectionVariables: { variables: { c: 'changed', d: '2' }, deleted: [] } }));
@@ -263,7 +259,7 @@ describe('applyScriptVariableChanges', () => {
   });
 
   it('deletes only the variables named in deleted and leaves the rest', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
     store.dispatch(applyScriptVariableChanges({
@@ -276,7 +272,7 @@ describe('applyScriptVariableChanges', () => {
   });
 
   it('leaves store variables the delta never mentions untouched (upsert-only, not a full replace)', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
     store.dispatch(applyScriptVariableChanges({
@@ -289,7 +285,7 @@ describe('applyScriptVariableChanges', () => {
   });
 
   it('keeps a request edit made while the request was in flight', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: reducer });
     store.dispatch(setPlaygroundCollection(withRequestAndEnv()));
 
     const inFlightItem = view(store).items[0];

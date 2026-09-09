@@ -1,19 +1,21 @@
-import { configureStore } from '@reduxjs/toolkit';
-import appReducer from '@/store/slices/app';
-import docsReducer from '@/store/slices/docs';
+import { configureStore, type ReducersMapObject, type StateFromReducersMapObject } from '@reduxjs/toolkit';
+import collectionReducer from '@/store/slices/collection';
 import envReducer, { persistEnv } from '@/store/slices/env';
-import playgroundReducer from '@/store/slices/playground';
 import themeReducer, { persistThemeMode } from '@/store/slices/theme';
 
-export const createOpenCollectionStore = () => {
+// What every surface may read. A surface's own slice is registered by the root
+// that mounts it and is typed by that surface, never here.
+const coreReducers = {
+  collection: collectionReducer,
+  env: envReducer,
+  theme: themeReducer
+};
+
+export type RootState = StateFromReducersMapObject<typeof coreReducers>;
+
+export const createOpenCollectionStore = <S extends ReducersMapObject = Record<never, never>>(surfaces?: S) => {
   const store = configureStore({
-    reducer: {
-      app: appReducer,
-      docs: docsReducer,
-      env: envReducer,
-      playground: playgroundReducer,
-      theme: themeReducer
-    }
+    reducer: { ...coreReducers, ...surfaces }
   });
 
   // Persist theme changes (localStorage + root data-theme) outside the reducer.
@@ -38,4 +40,3 @@ export const createOpenCollectionStore = () => {
 
 export type AppStore = ReturnType<typeof createOpenCollectionStore>;
 export type AppDispatch = AppStore['dispatch'];
-export type RootState = ReturnType<AppStore['getState']>;

@@ -9,12 +9,11 @@ import SidebarDrawer from '../SidebarDrawer/SidebarDrawer';
 import IconButton from '@/ui/IconButton/IconButton';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
 import PageRouter from '../PageRouter/PageRouter';
-import Playground from '../Playground/Playground';
 import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
-import { selectGitCollectionUrl } from '@/store/slices/app';
+import { selectCollection } from '@/store/slices/collection';
+import { selectGitCollectionUrl } from '@/store/slices/collection';
 import { useActiveResolution } from '@/routing/hooks';
 import { layoutModeForWidth } from '@/hooks/useTopbarLayout';
 import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
@@ -23,10 +22,15 @@ import { StyledWrapper } from './StyledWrapper';
 interface AppShellProps {
   logo?: React.ReactNode;
   testId?: string;
+  /**
+   * Renders the playground when it is open. Omitted means this build has no
+   * playground at all - the Try affordance goes with it.
+   */
+  renderPlayground?: (openNonce: number) => React.ReactNode;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
-  const collection = useAppSelector(selectDocsCollection);
+const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', renderPlayground }) => {
+  const collection = useAppSelector(selectCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const resolution = useActiveResolution();
 
@@ -168,13 +172,13 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
               </IconButton>
             )}
             <main className="appshell-content" ref={contentRef}>
-              <PageRouter onOpenPlayground={handleOpenPlayground} />
+              <PageRouter onOpenPlayground={renderPlayground ? handleOpenPlayground : undefined} />
             </main>
           </div>
         </div>
       </div>
 
-      {playgroundOpen && <Playground openNonce={playgroundOpenNonce} />}
+      {renderPlayground && playgroundOpen && renderPlayground(playgroundOpenNonce)}
 
       {!isDesktop && (
         <SidebarDrawer open={drawerOpen} onClose={closeDrawer}>

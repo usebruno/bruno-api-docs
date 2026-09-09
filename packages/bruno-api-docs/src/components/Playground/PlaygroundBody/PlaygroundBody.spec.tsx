@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import PlaygroundBody from './PlaygroundBody';
 import { createOpenCollectionStore } from '@/store/store';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
+import playgroundReducer from '@/store/slices/playground';
 import {
   setPlaygroundCollection,
   setSelectedItemId,
@@ -28,7 +29,7 @@ const collection = {
 
 describe('PlaygroundBody example view', () => {
   it('renders ExampleView when viewMode is example', () => {
-    const store = createOpenCollectionStore();
+    const store = createOpenCollectionStore({ playground: playgroundReducer });
     store.dispatch(setPlaygroundCollection(collection));
     const requestUuid = getItemUuid((store.getState().playground.hydratedCollection as any).items[0])!;
     store.dispatch(setSelectedItemId(requestUuid));

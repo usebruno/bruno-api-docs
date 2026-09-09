@@ -53,7 +53,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "clean": "rimraf dist",
-    "clean:standalone": "rimraf dist-standalone"
+    "clean:standalone": "rimraf dist-standalone",
+    "build:docs": "vite build --config vite.config.docs.ts",
+    "build:playground": "vite build --config vite.config.playground.ts",
+    "build:surfaces": "npm run build:docs && npm run build:playground",
+    "serve:local": "node scripts/serve-local.mjs"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",

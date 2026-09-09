@@ -32,11 +32,14 @@ const playgroundLoadError = (
 interface PlaygroundProps {
   /** Bumped on each Try click, so the bottom sheet can re-expand from collapsed. */
   openNonce?: number;
+  /** Mounted without docs: always open, and there is nothing to close back to. */
+  standalone?: boolean;
 }
 
-const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
+const Playground: React.FC<PlaygroundProps> = ({ openNonce, standalone = false }) => {
   const dispatch = useAppDispatch();
-  const { open, dock, requestSlug, exampleSlug, setDock, closePlayground } = usePlaygroundUrlState();
+  const { open: urlOpen, dock, requestSlug, exampleSlug, setDock, closePlayground } = usePlaygroundUrlState();
+  const open = standalone || urlOpen;
   const isPhone = useIsMobilePhone();
   // On a phone the playground is always the fullscreen MobileDock, and its
   // sidebar behaves like the inline dock's overlay. Feed that dock downstream so
@@ -88,7 +91,7 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
     </ErrorBoundary>
   );
 
-  if (isPhone) return <MobileDock {...shared}>{body}</MobileDock>;
+  if (isPhone || standalone) return <MobileDock {...shared} showClose={!standalone}>{body}</MobileDock>;
   if (dock === 'inline') return <InlineDock {...shared}>{body}</InlineDock>;
   if (dock === 'modal') return <ModalDock {...shared}>{body}</ModalDock>;
   return <BottomSheetDock {...shared} openNonce={openNonce}>{body}</BottomSheetDock>;

@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
+import { selectCollection } from '@/store/slices/collection';
 import { buildNavModel } from './navModel';
 import { resolveSlug, type Resolution } from './resolve';
 import type { NavModel } from './types';
 
 /** Memoised nav model for the currently loaded collection. */
 export const useNavModel = (): NavModel => {
-  const collection = useAppSelector(selectDocsCollection);
+  const collection = useAppSelector(selectCollection);
   return useMemo(() => buildNavModel(collection), [collection]);
 };
 

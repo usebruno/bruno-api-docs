@@ -4,17 +4,19 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import type { Item } from '@opencollection/types/collection/item';
 import type { Auth } from '@opencollection/types/common/auth';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
-import { ItemVariableResolverProvider } from '@/hooks';
+import { ItemVariableResolverProvider, type VariableChange } from '@/hooks';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import {
   updatePlaygroundItem,
   setPlaygroundResponse,
   selectPlaygroundResponse,
-  applyScriptVariableChanges
+  applyScriptVariableChanges,
+  setPlaygroundVariable,
+  usePlaygroundSelector
 } from '@/store/slices/playground';
 import { getItemName, isPlaygroundUnsupported, getRequestAuth, getRequestHeaders } from '@/utils/schemaHelpers';
 import { getInheritedAuthSummary, resolveInheritedAuth, getInheritedHeaders } from '@/utils/request';
@@ -33,9 +35,10 @@ interface PlaygroundViewProps {
 const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collection, selectedEnvironment = '', orientation = 'horizontal' }) => {
   const dispatch = useAppDispatch();
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
+  const updateVariable = useCallback((change: VariableChange) => dispatch(setPlaygroundVariable(change)), [dispatch]);
   const itemName = getItemName(editableItem) || 'Untitled Request';
   const itemUuid = (item as any).uuid;
-  const response = useAppSelector((state) => selectPlaygroundResponse(state, itemUuid));
+  const response = usePlaygroundSelector((state) => selectPlaygroundResponse(state, itemUuid));
   const [isLoading, setIsLoading] = useState(false);
   // The request/response split is one draggable divider whose axis follows the
   // orientation: horizontal layout resizes width, vertical layout resizes height.
@@ -145,7 +148,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
       collection={collection}
       ancestry={ancestry}
       item={editableItem as unknown as Item}
-      writable
+      onUpdateVariable={updateVariable}
     >
       <div className="request-runner-container h-full flex flex-col px-5" style={{ backgroundColor: 'var(--bg-primary)' }}>
         <TitleLabel className="truncate mb-2 mt-5">{itemName}</TitleLabel>

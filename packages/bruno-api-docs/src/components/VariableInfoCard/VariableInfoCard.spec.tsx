@@ -2,7 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { collectionLoaded } from '@/store/slices/collection';
 import { setActiveEnv } from '@/store/slices/env';
 import { VariableResolverProvider, ItemVariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
@@ -45,7 +45,7 @@ const collection: any = {
 
 const cardTree = (name: string) => {
   const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
+  store.dispatch(collectionLoaded(collection));
   store.dispatch(setActiveEnv('Dev'));
   return (
     <Provider store={store}>
@@ -151,13 +151,13 @@ describe('VariableInfoCard', () => {
   });
 });
 
-// Editing needs a writable resolver, which only ItemVariableResolverProvider supplies.
+// Editing needs a writer, which only ItemVariableResolverProvider accepts.
 const editableCardTree = (name: string) => {
   const store = createOpenCollectionStore();
   store.dispatch(setActiveEnv('Dev'));
   return (
     <Provider store={store}>
-      <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
+      <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} onUpdateVariable={() => {}}>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>
     </Provider>
@@ -184,7 +184,7 @@ describe('VariableInfoCard (editable)', () => {
 
   it('stays read-only when the resolver cannot write, even with editable set', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(collection));
+    store.dispatch(collectionLoaded(collection));
     store.dispatch(setActiveEnv('Dev'));
     const tree = (
       <Provider store={store}>

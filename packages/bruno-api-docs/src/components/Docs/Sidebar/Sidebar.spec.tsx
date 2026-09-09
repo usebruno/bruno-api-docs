@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { collectionLoaded } from '@/store/slices/collection';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
 
@@ -20,7 +20,7 @@ const collection = {
 // navigates to.
 const buildSidebar = () => {
   const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
+  store.dispatch(collectionLoaded(collection));
   return (
     <Provider store={store}>
       <MemoryRouter initialEntries={['/login/ok']}>

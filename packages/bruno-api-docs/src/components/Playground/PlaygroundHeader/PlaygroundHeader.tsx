@@ -9,6 +9,7 @@ interface PlaygroundHeaderProps {
   dock: DockMode;
   onDockChange: (dock: DockMode) => void;
   showDockSwitcher?: boolean;
+  showClose?: boolean;
   sidebarOpen?: boolean;
   onToggleSidebar: () => void;
   onClose: () => void;
@@ -21,6 +22,7 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
   dock,
   onDockChange,
   showDockSwitcher = true,
+  showClose = true,
   sidebarOpen = false,
   onToggleSidebar,
   onClose,
@@ -58,9 +60,11 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
           <ChevronDownIcon />
         </IconButton>
       )}
-      <IconButton className="header-close" label="Close playground" title="Close" data-testid="playground-close" onClick={onClose}>
-        <CloseIcon />
-      </IconButton>
+      {showClose && (
+        <IconButton className="header-close" label="Close playground" title="Close" data-testid="playground-close" onClick={onClose}>
+          <CloseIcon />
+        </IconButton>
+      )}
     </div>
   </StyledWrapper>
 );

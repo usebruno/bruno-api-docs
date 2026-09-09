@@ -5,6 +5,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
+import { useSelector, type TypedUseSelectorHook } from 'react-redux';
 import type { RootState } from '@/store/store';
 import { hydrateWithUUIDs, findAndUpdateItem } from '@/utils/fileUtils';
 import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
@@ -12,11 +13,12 @@ import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
 import type { Variables } from '@/runner/utils/variable-interpolator';
 import type { ResponseBodyFormat } from '@/constants';
+import type { VariableChange } from '@/hooks/useVariableResolver';
+import { collectionLoaded, collectionCleared, collectionFailed } from '@/store/slices/collection';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 
 export interface PlaygroundState {
-  collection: OpenCollectionCollection | null;
   hydratedCollection: OpenCollectionCollection | null;
   pristineEnvironments: Environment[] | null;
   responses: Record<string, any>; // Store responses by item UUID
@@ -30,7 +32,6 @@ export interface PlaygroundState {
 }
 
 const initialState: PlaygroundState = {
-  collection: null,
   hydratedCollection: null,
   pristineEnvironments: null,
   responses: {},
@@ -124,44 +125,47 @@ const preserveCollapsedState = (
   }
 };
 
+// The working copy: forked from the document on load, edited here, never
+// written back. Re-hydrating makes fresh item objects, which matters because the
+// document reducer has already stored (and Immer has frozen) its own copy.
+const seedWorkingCopy = (state: PlaygroundState, document: OpenCollectionCollection) => {
+  const envs = readEnvironments(document);
+  state.pristineEnvironments = envs ? cloneDeep(envs) : null;
+
+  const hydrated = hydrateWithUUIDs(document);
+
+  if (state.hydratedCollection?.items && hydrated.items) {
+    preserveCollapsedState(hydrated.items, state.hydratedCollection.items);
+  } else if (hydrated.items) {
+    initializeCollapsedState(hydrated.items);
+  }
+
+  state.hydratedCollection = hydrated;
+};
+
+const clearWorkingCopy = (state: PlaygroundState) => {
+  state.hydratedCollection = null;
+  state.pristineEnvironments = null;
+  state.responses = {};
+  state.selectedItemId = null;
+  state.selectedExampleIndex = null;
+};
+
 const playgroundSlice = createSlice({
   name: 'playground',
   initialState,
   reducers: {
     setPlaygroundCollection: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection | null>) => {
-      state.collection = action.payload;
-
       if (!action.payload) {
         state.hydratedCollection = null;
         state.pristineEnvironments = null;
         return;
       }
-
-      const envs = readEnvironments(action.payload);
-      state.pristineEnvironments = envs ? cloneDeep(envs) : null;
-
-      const hydrated = hydrateWithUUIDs(action.payload);
-
-      // Preserve existing collapsed states from previous hydrated collection
-      if (state.hydratedCollection?.items && hydrated.items) {
-        preserveCollapsedState(hydrated.items, state.hydratedCollection.items);
-      } else if (hydrated.items) {
-        initializeCollapsedState(hydrated.items);
-      }
-
-      state.hydratedCollection = hydrated;
+      seedWorkingCopy(state, action.payload);
     },
-    clearPlaygroundCollection: (state: PlaygroundState) => {
-      state.collection = null;
-      state.hydratedCollection = null;
-      state.pristineEnvironments = null;
-      state.responses = {};
-      state.selectedItemId = null;
-      state.selectedExampleIndex = null;
-    },
+    clearPlaygroundCollection: clearWorkingCopy,
     updatePlaygroundItem: (state: PlaygroundState, action: PayloadAction<{ uuid: string; item: HttpRequest }>) => {
       const { uuid, item } = action.payload;
-      if (state.collection?.items) findAndUpdateItemInCollection(state.collection.items, uuid, item);
       if (state.hydratedCollection?.items) findAndUpdateItemInCollection(state.hydratedCollection.items, uuid, item);
     },
     setPlaygroundResponse: (state: PlaygroundState, action: PayloadAction<{ uuid: string; response: any }>) => {
@@ -208,11 +212,9 @@ const playgroundSlice = createSlice({
       }
     },
     updateCollectionSettings: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection>) => {
-      state.collection = action.payload;
       state.hydratedCollection = action.payload;
     },
     updateCollectionEnvironments: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection>) => {
-      state.collection = action.payload;
       state.hydratedCollection = action.payload;
     },
     applyScriptVariableChanges: (
@@ -243,7 +245,6 @@ const playgroundSlice = createSlice({
         }
       };
 
-      applyTo(state.collection);
       applyTo(state.hydratedCollection);
     },
     updateFolderInCollection: (state: PlaygroundState, action: PayloadAction<{ uuid: string; folder: Folder }>) => {
@@ -253,28 +254,14 @@ const playgroundSlice = createSlice({
       findAndUpdateItem(state.hydratedCollection.items, uuid, (item) => {
         Object.assign(item, folder);
       });
-
-      // Also update the base collection
-      if (state.collection?.items) {
-        findAndUpdateItem(state.collection.items, uuid, (item) => {
-          Object.assign(item, folder);
-        });
-      }
     },
     resetPlaygroundEnvironments: (state: PlaygroundState) => {
       const environments = state.pristineEnvironments ? cloneDeep(state.pristineEnvironments) : null;
       if (state.hydratedCollection) writeEnvironments(state.hydratedCollection, environments);
-      if (state.collection) writeEnvironments(state.collection, environments);
     },
     setPlaygroundVariable: (
       state: PlaygroundState,
-      action: PayloadAction<{
-        scope: 'environment' | 'collection' | 'folder' | 'request' | '$secrets';
-        name: string;
-        value: string;
-        envName?: string;
-        itemUuid?: string;
-      }>
+      action: PayloadAction<VariableChange>
     ) => {
       const { scope, name, value, envName, itemUuid } = action.payload;
       // Secret variables are writable. Their values only ever live on this
@@ -304,7 +291,6 @@ const playgroundSlice = createSlice({
         }
       };
       apply(state.hydratedCollection);
-      apply(state.collection);
     },
     setResponseFormat: (state: PlaygroundState, action: PayloadAction<{
       uuid: PlaygroundState['selectedItemId'];
@@ -324,6 +310,13 @@ const playgroundSlice = createSlice({
       if (uuid != null)
         state.showResponsePreview[uuid] = showResponsePreview;
     }
+  },
+  // The playground follows the document's lifecycle; nothing has to tell it.
+  extraReducers: (builder) => {
+    builder
+      .addCase(collectionLoaded, (state, action) => seedWorkingCopy(state, action.payload))
+      .addCase(collectionCleared, clearWorkingCopy)
+      .addCase(collectionFailed, clearWorkingCopy);
   }
 });
 
@@ -350,19 +343,21 @@ export const {
 } = playgroundSlice.actions;
 
 // Selectors
-export const selectPlaygroundCollection = (state: RootState) => state.playground.collection;
-export const selectHydratedCollection = (state: RootState) => state.playground.hydratedCollection;
-export const selectPlaygroundResponses = (state: RootState) => state.playground.responses;
-export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
-export const selectViewMode = (state: RootState) => state.playground.viewMode;
-export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
-export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;
-export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;
+type WithPlayground = { playground: PlaygroundState };
+export const usePlaygroundSelector: TypedUseSelectorHook<RootState & WithPlayground> = useSelector;
+
+export const selectHydratedCollection = (state: WithPlayground) => state.playground.hydratedCollection;
+export const selectPlaygroundResponses = (state: WithPlayground) => state.playground.responses;
+export const selectPlaygroundResponse = (state: WithPlayground, uuid: string) => state.playground.responses[uuid];
+export const selectViewMode = (state: WithPlayground) => state.playground.viewMode;
+export const selectSelectedItemId = (state: WithPlayground) => state.playground.selectedItemId;
+export const selectSelectedExampleIndex = (state: WithPlayground) => state.playground.selectedExampleIndex;
+export const selectResponsePaneOrientation = (state: WithPlayground) => state.playground.responsePaneOrientation;
 export const selectResponseFormat
   = (uuid: PlaygroundState['selectedItemId']) =>
-    (state: RootState) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
+    (state: WithPlayground) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
 export const selectShowResponsePreview
   = (uuid: PlaygroundState['selectedItemId']) =>
-    (state: RootState) => uuid ? state.playground.showResponsePreview[uuid] : null;
+    (state: WithPlayground) => uuid ? state.playground.showResponsePreview[uuid] : null;
 
 export default playgroundSlice.reducer;

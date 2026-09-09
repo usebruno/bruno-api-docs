@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder } from '@opencollection/types/collection/item';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import {
   selectHydratedCollection,
   selectViewMode,
@@ -12,7 +12,8 @@ import {
   setSelectedItemId,
   setSelectedExampleIndex,
   toggleFolderCollapse,
-  expandFolders
+  expandFolders,
+  usePlaygroundSelector
 } from '@/store/slices/playground';
 import { selectActiveEnvName } from '@/store/slices/env';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
@@ -64,12 +65,12 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const dispatch = useAppDispatch();
   const model = useNavModel();
   const { setRequestSlug, setRequestExample } = usePlaygroundUrlState();
-  const collection = useAppSelector(selectHydratedCollection);
-  const viewMode = useAppSelector(selectViewMode);
-  const selectedItemId = useAppSelector(selectSelectedItemId);
-  const selectedExampleIndex = useAppSelector(selectSelectedExampleIndex);
-  const activeEnvName = useAppSelector(selectActiveEnvName);
-  const orientationOverride = useAppSelector(selectResponsePaneOrientation);
+  const collection = usePlaygroundSelector(selectHydratedCollection);
+  const viewMode = usePlaygroundSelector(selectViewMode);
+  const selectedItemId = usePlaygroundSelector(selectSelectedItemId);
+  const selectedExampleIndex = usePlaygroundSelector(selectSelectedExampleIndex);
+  const activeEnvName = usePlaygroundSelector(selectActiveEnvName);
+  const orientationOverride = usePlaygroundSelector(selectResponsePaneOrientation);
 
   const uuidToSlug = useMemo<Map<string, string>>(() => {
     const map = new Map<string, string>();

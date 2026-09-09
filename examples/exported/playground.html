@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playground only - Exported Fixture</title>
+    <style>
+        body { margin: 0; padding: 0; }
+        #opencollection-container { width: 100vw; height: 100vh; }
+    </style>
+    <link rel="stylesheet" href="/api-docs/playground.css">
+    <script src="/api-docs/playground.js"></script>
+</head>
+<body>
+    <div id="opencollection-container"></div>
+    <script>
+        const collectionData = {"info":{"name":"Exported Fixture","version":"1.0.0"},"config":{"environments":[{"name":"Local","variables":[{"name":"postId","value":"1"}]}]},"items":[{"name":"Get post","type":"http","method":"GET","url":"https://jsonplaceholder.typicode.com/posts/{{postId}}","headers":[{"name":"Accept","value":"application/json"}],"docs":"Rendered by the Playground-only bundle."}]};
+        new window.OpenCollectionPlayground({
+            target: document.getElementById('opencollection-container'),
+            opencollection: collectionData
+        });
+    </script>
+</body>
+</html>

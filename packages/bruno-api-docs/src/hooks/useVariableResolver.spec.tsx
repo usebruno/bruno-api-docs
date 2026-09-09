@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { collectionLoaded } from '@/store/slices/collection';
 import { setActiveEnv, setShowVars } from '@/store/slices/env';
 import { useVariableResolver, useResolvedVariables, ItemVariableResolverProvider } from './useVariableResolver';
 
@@ -37,7 +37,7 @@ const Probe: React.FC = () => {
 
 const render = (configure: (store: ReturnType<typeof createOpenCollectionStore>) => void): string => {
   const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
+  store.dispatch(collectionLoaded(collection));
   configure(store);
   return renderToStaticMarkup(
     <Provider store={store}>
@@ -98,7 +98,7 @@ describe('lookup (variable hover card)', () => {
 
   const renderLookup = (name: string, showVars = false): string => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(collection));
+    store.dispatch(collectionLoaded(collection));
     store.dispatch(setActiveEnv('Dev'));
     if (showVars) store.dispatch(setShowVars(true));
     return renderToStaticMarkup(
@@ -165,13 +165,13 @@ describe('nested variable resolution', () => {
 
   it('follows a variable that points at another variable, for display and for interpolation', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(nested));
+    store.dispatch(collectionLoaded(nested));
     store.dispatch(setActiveEnv('Dev'));
     store.dispatch(setShowVars(true));
 
     const html = renderToStaticMarkup(
       <Provider store={store}>
-        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} onUpdateVariable={() => {}}>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </Provider>
@@ -183,13 +183,13 @@ describe('nested variable resolution', () => {
 
   it('gates resolve on showVars but never interpolate', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(nested));
+    store.dispatch(collectionLoaded(nested));
     store.dispatch(setActiveEnv('Dev'));
     store.dispatch(setShowVars(false));
 
     const html = renderToStaticMarkup(
       <Provider store={store}>
-        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} onUpdateVariable={() => {}}>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </Provider>
@@ -197,5 +197,45 @@ describe('nested variable resolution', () => {
 
     expect(html).toContain('<span data-testid="nested-resolve">{{endpoint}}</span>');
     expect(html).toContain('<span data-testid="nested-interpolate">https://api.test/v1</span>');
+  });
+
+  const WriteProbe: React.FC = () => {
+    const r = useResolvedVariables();
+    r.updateVariable('host', 'https://edited.test');
+    return <span data-testid="can-write">{String(r.canWrite)}</span>;
+  };
+
+  it('hands the change to the injected writer instead of writing the store itself', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(collectionLoaded(nested));
+    store.dispatch(setActiveEnv('Dev'));
+    const changes: unknown[] = [];
+
+    const html = renderToStaticMarkup(
+      <Provider store={store}>
+        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} onUpdateVariable={(c) => changes.push(c)}>
+          <WriteProbe />
+        </ItemVariableResolverProvider>
+      </Provider>
+    );
+
+    expect(html).toContain('<span data-testid="can-write">true</span>');
+    expect(changes).toEqual([{ scope: 'collection', name: 'host', value: 'https://edited.test' }]);
+  });
+
+  it('is read-only with no writer, as the docs pages mount it', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(collectionLoaded(nested));
+    store.dispatch(setActiveEnv('Dev'));
+
+    const html = renderToStaticMarkup(
+      <Provider store={store}>
+        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null}>
+          <WriteProbe />
+        </ItemVariableResolverProvider>
+      </Provider>
+    );
+
+    expect(html).toContain('<span data-testid="can-write">false</span>');
   });
 });

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
 import type { Environment } from '@opencollection/types/config/environments';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
+import { selectCollection } from '@/store/slices/collection';
 import { selectActiveEnvName, setActiveEnv } from '@/store/slices/env';
 import { ChevronDownIcon } from '@/assets/icons';
 import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
@@ -24,7 +24,7 @@ export interface EnvSwitcherProps {
  */
 const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ testId = 'env-switcher' }) => {
   const dispatch = useAppDispatch();
-  const collection = useAppSelector(selectDocsCollection);
+  const collection = useAppSelector(selectCollection);
   const activeEnvName = useAppSelector(selectActiveEnvName);
 
   const environments = useMemo(

@@ -56,7 +56,8 @@
     "clean:standalone": "rimraf dist-standalone",
     "build:docs": "vite build --config vite.config.docs.ts",
     "build:playground": "vite build --config vite.config.playground.ts",
-    "build:surfaces": "npm run build:docs && npm run build:playground"
+    "build:surfaces": "npm run build:docs && npm run build:playground",
+    "serve:local": "node scripts/serve-local.mjs"
   },
   "dependencies": {
     "@emotion/css": "^11.13.5",

@@ -97,7 +97,7 @@ interface AssertionResultsResponse {
 
 const setupBruTestMethods = (bru: any, __brunoTestResults: TestResults, assertionResults: AssertionResult[]) => {
   const getTestResults = async (): Promise<TestResultsResponse> => {
-    const results = __brunoTestResults.getResults();
+    const results = await __brunoTestResults.getResults();
     const summary = getResultsSummary(results);
     return {
       summary,

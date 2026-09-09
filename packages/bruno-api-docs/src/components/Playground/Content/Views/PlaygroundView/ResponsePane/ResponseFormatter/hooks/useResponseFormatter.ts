@@ -3,21 +3,22 @@ import type { ResponseBodyFormat } from '@/constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
 import type { RunRequestResponse } from '@/runner';
 import { getResponseFormatOptions } from '@/utils/response';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import {
   selectResponseFormat,
   selectShowResponsePreview,
   selectSelectedItemId,
   setResponseFormat,
-  setShowResponsePreview
+  setShowResponsePreview,
+  usePlaygroundSelector
 } from '@/store/slices/playground';
 
 export function useResponseFormatter(
   response: RunRequestResponse
 ) {
-  const selectedItemId = useAppSelector(selectSelectedItemId);
-  const selectedResponseFormat = useAppSelector(selectResponseFormat(selectedItemId));
-  const showResponsePreview = useAppSelector(selectShowResponsePreview(selectedItemId));
+  const selectedItemId = usePlaygroundSelector(selectSelectedItemId);
+  const selectedResponseFormat = usePlaygroundSelector(selectResponseFormat(selectedItemId));
+  const showResponsePreview = usePlaygroundSelector(selectShowResponsePreview(selectedItemId));
   const dispatch = useAppDispatch();
   const { format, view, detectedContentType, headerContentType, contentType } = useInitialResponseFormat(response);
 

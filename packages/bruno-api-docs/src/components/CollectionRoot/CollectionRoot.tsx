@@ -16,6 +16,7 @@ import {
   collectionCleared,
   setGitCollectionUrl
 } from '@/store/slices/collection';
+import type { ReducersMapObject } from '@reduxjs/toolkit';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { applyTheme } from '@/theme/applyTheme';
@@ -65,11 +66,13 @@ const resolveCollectionSource = async (
 export interface CollectionRootProps {
   collection: IOpenCollection | string | File;
   gitCollectionUrl?: string;
+  /** The slices owned by the surfaces this root mounts. Core slices are always present. */
+  reducers?: ReducersMapObject;
   /** The surface to mount over the loaded collection. */
   children: React.ReactNode;
 }
 
-const CollectionRootContent: React.FC<CollectionRootProps> = ({
+const CollectionRootContent: React.FC<Omit<CollectionRootProps, 'reducers'>> = ({
   collection,
   gitCollectionUrl,
   children
@@ -135,11 +138,13 @@ const CollectionRootContent: React.FC<CollectionRootProps> = ({
  * variable resolver, and the parsed collection. Docs and playground compose over
  * this rather than through each other.
  */
-const CollectionRoot: React.FC<CollectionRootProps> = (props) => {
+const CollectionRoot: React.FC<CollectionRootProps> = ({ reducers, ...props }) => {
   const storeRef = useRef<AppStore | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore();
+    // Typed as the core store on purpose: shared code selects core state only,
+    // and each surface types its own slice through its own selector hook.
+    storeRef.current = createOpenCollectionStore(reducers) as AppStore;
   }
 
   return (

@@ -5,6 +5,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
+import { useSelector, type TypedUseSelectorHook } from 'react-redux';
 import type { RootState } from '@/store/store';
 import { hydrateWithUUIDs, findAndUpdateItem } from '@/utils/fileUtils';
 import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
@@ -342,18 +343,21 @@ export const {
 } = playgroundSlice.actions;
 
 // Selectors
-export const selectHydratedCollection = (state: RootState) => state.playground.hydratedCollection;
-export const selectPlaygroundResponses = (state: RootState) => state.playground.responses;
-export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
-export const selectViewMode = (state: RootState) => state.playground.viewMode;
-export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
-export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;
-export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;
+type WithPlayground = { playground: PlaygroundState };
+export const usePlaygroundSelector: TypedUseSelectorHook<RootState & WithPlayground> = useSelector;
+
+export const selectHydratedCollection = (state: WithPlayground) => state.playground.hydratedCollection;
+export const selectPlaygroundResponses = (state: WithPlayground) => state.playground.responses;
+export const selectPlaygroundResponse = (state: WithPlayground, uuid: string) => state.playground.responses[uuid];
+export const selectViewMode = (state: WithPlayground) => state.playground.viewMode;
+export const selectSelectedItemId = (state: WithPlayground) => state.playground.selectedItemId;
+export const selectSelectedExampleIndex = (state: WithPlayground) => state.playground.selectedExampleIndex;
+export const selectResponsePaneOrientation = (state: WithPlayground) => state.playground.responsePaneOrientation;
 export const selectResponseFormat
   = (uuid: PlaygroundState['selectedItemId']) =>
-    (state: RootState) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
+    (state: WithPlayground) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
 export const selectShowResponsePreview
   = (uuid: PlaygroundState['selectedItemId']) =>
-    (state: RootState) => uuid ? state.playground.showResponsePreview[uuid] : null;
+    (state: WithPlayground) => uuid ? state.playground.showResponsePreview[uuid] : null;
 
 export default playgroundSlice.reducer;

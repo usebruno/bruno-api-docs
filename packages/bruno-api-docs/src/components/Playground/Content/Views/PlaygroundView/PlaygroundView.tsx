@@ -9,13 +9,14 @@ import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import {
   updatePlaygroundItem,
   setPlaygroundResponse,
   selectPlaygroundResponse,
   applyScriptVariableChanges,
-  setPlaygroundVariable
+  setPlaygroundVariable,
+  usePlaygroundSelector
 } from '@/store/slices/playground';
 import { getItemName, isPlaygroundUnsupported, getRequestAuth, getRequestHeaders } from '@/utils/schemaHelpers';
 import { getInheritedAuthSummary, resolveInheritedAuth, getInheritedHeaders } from '@/utils/request';
@@ -37,7 +38,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   const updateVariable = useCallback((change: VariableChange) => dispatch(setPlaygroundVariable(change)), [dispatch]);
   const itemName = getItemName(editableItem) || 'Untitled Request';
   const itemUuid = (item as any).uuid;
-  const response = useAppSelector((state) => selectPlaygroundResponse(state, itemUuid));
+  const response = usePlaygroundSelector((state) => selectPlaygroundResponse(state, itemUuid));
   const [isLoading, setIsLoading] = useState(false);
   // The request/response split is one draggable divider whose axis follows the
   // orientation: horizontal layout resizes width, vertical layout resizes height.

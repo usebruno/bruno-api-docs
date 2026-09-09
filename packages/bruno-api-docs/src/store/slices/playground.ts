@@ -12,6 +12,7 @@ import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
 import type { Variables } from '@/runner/utils/variable-interpolator';
 import type { ResponseBodyFormat } from '@/constants';
+import type { VariableChange } from '@/hooks/useVariableResolver';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 
@@ -251,13 +252,7 @@ const playgroundSlice = createSlice({
     },
     setPlaygroundVariable: (
       state: PlaygroundState,
-      action: PayloadAction<{
-        scope: 'environment' | 'collection' | 'folder' | 'request' | '$secrets';
-        name: string;
-        value: string;
-        envName?: string;
-        itemUuid?: string;
-      }>
+      action: PayloadAction<VariableChange>
     ) => {
       const { scope, name, value, envName, itemUuid } = action.payload;
       // Secret variables are writable. Their values only ever live on this

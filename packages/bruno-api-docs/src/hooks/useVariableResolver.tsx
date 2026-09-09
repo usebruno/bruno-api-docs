@@ -3,9 +3,8 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
-import { setPlaygroundVariable } from '@/store/slices/playground';
 import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
@@ -56,6 +55,16 @@ const classifyDynamic = (name: string): DynamicVariableKind => {
  *   exactly a secret reference is reported by `secretRefName()` so the caller
  *   can mask the whole cell.
  */
+// The one write this hook can request. Named here, at the boundary, so the
+// surface that owns the state supplies the writer instead of the hook importing it.
+export interface VariableChange {
+  scope: 'environment' | 'collection' | 'folder' | 'request' | '$secrets';
+  name: string;
+  value: string;
+  envName?: string;
+  itemUuid?: string;
+}
+
 export interface VariableResolver {
   showVars: boolean;
   activeEnvName: string | null;
@@ -221,15 +230,15 @@ export const ItemVariableResolverProvider: React.FC<{
   collection: OpenCollection | null;
   ancestry: Item[];
   item: Item | null;
-  writable?: boolean;
+  onUpdateVariable?: (change: VariableChange) => void;
   children: React.ReactNode;
-}> = ({ collection, ancestry, item, writable = false, children }) => {
-  const dispatch = useAppDispatch();
+}> = ({ collection, ancestry, item, onUpdateVariable, children }) => {
+  const writable = onUpdateVariable !== undefined;
   const activeEnvName = useAppSelector(selectActiveEnvName);
   const showVars = useAppSelector(selectShowVars);
 
   // Both the docs pages and the playground mount this provider; only the
-  // playground passes `writable`, and only it can supply an external secret.
+  // playground supplies a writer, and only it can supply an external secret.
   const model = useMemo(() => {
     const sources: VariableSource[] = collectionAndEnvSources(collection, activeEnvName, writable);
     for (const folder of ancestry) {
@@ -245,21 +254,21 @@ export const ItemVariableResolverProvider: React.FC<{
     (name: string, value: string) => {
       const { name: varName, scope } = resolver.lookup(name);
       if (scope === 'environment' || scope === '$secrets') {
-        if (activeEnvName) dispatch(setPlaygroundVariable({ scope, name: varName, value, envName: activeEnvName }));
+        if (activeEnvName) onUpdateVariable?.({ scope, name: varName, value, envName: activeEnvName });
       } else if (scope === 'collection') {
-        dispatch(setPlaygroundVariable({ scope, name: varName, value }));
+        onUpdateVariable?.({ scope, name: varName, value });
       } else if (scope === 'request') {
         const itemUuid = getItemUuid(item);
-        if (itemUuid) dispatch(setPlaygroundVariable({ scope, name: varName, value, itemUuid }));
+        if (itemUuid) onUpdateVariable?.({ scope, name: varName, value, itemUuid });
       } else if (scope === 'folder') {
         const owner = [...ancestry].reverse().find((folder) =>
           folderVariables(folder).some((v) => v.name === varName && !v.disabled)
         );
         const itemUuid = getItemUuid(owner);
-        if (itemUuid) dispatch(setPlaygroundVariable({ scope, name: varName, value, itemUuid }));
+        if (itemUuid) onUpdateVariable?.({ scope, name: varName, value, itemUuid });
       }
     },
-    [resolver, dispatch, activeEnvName, item, ancestry]
+    [resolver, onUpdateVariable, activeEnvName, item, ancestry]
   );
 
   const interpolateWithSecrets = useCallback(

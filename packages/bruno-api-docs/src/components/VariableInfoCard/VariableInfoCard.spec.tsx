@@ -151,13 +151,13 @@ describe('VariableInfoCard', () => {
   });
 });
 
-// Editing needs a writable resolver, which only ItemVariableResolverProvider supplies.
+// Editing needs a writer, which only ItemVariableResolverProvider accepts.
 const editableCardTree = (name: string) => {
   const store = createOpenCollectionStore();
   store.dispatch(setActiveEnv('Dev'));
   return (
     <Provider store={store}>
-      <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
+      <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} onUpdateVariable={() => {}}>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>
     </Provider>

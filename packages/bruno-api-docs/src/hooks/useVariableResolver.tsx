@@ -9,7 +9,7 @@ import { setPlaygroundVariable } from '@/store/slices/playground';
 import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
-import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
+import { mockDataFunctions, timeBasedDynamicVars } from '@/utils/faker-functions';
 import {
   buildScopedVariableModel,
   resolveValueDeep,

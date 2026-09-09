@@ -5,7 +5,6 @@ import reducer, {
   updatePlaygroundItem,
   resetPlaygroundEnvironments,
   selectHydratedCollection,
-  selectPlaygroundCollection,
   setViewMode,
   setSelectedExampleIndex,
   clearPlaygroundCollection,
@@ -98,20 +97,17 @@ describe('updatePlaygroundItem', () => {
     // The tree the UI reads must reflect the edit, with the uuid preserved so findItemByUuid resolves.
     expect(firstItem(store, selectHydratedCollection).http.url).toBe('new');
     expect(firstItem(store, selectHydratedCollection).uuid).toBe('r1');
-    expect(firstItem(store, selectPlaygroundCollection).http.url).toBe('new');
   });
 });
 
 describe('setPlaygroundVariable', () => {
-  it('edits an environment variable in both the hydrated and base collections', () => {
+  it('edits an environment variable in the collection the UI reads', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(makeCollection()));
 
     store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'a', value: '99', envName: 'Dev' }));
 
     expect((envVariables(store).find((v) => v.name === 'a') as unknown as { value: string }).value).toBe('99');
-    const base = selectPlaygroundCollection(store.getState())!.config!.environments![0].variables!;
-    expect((base.find((v) => v.name === 'a') as unknown as { value: string }).value).toBe('99');
   });
 
   it('edits the last enabled duplicate, matching the resolver', () => {

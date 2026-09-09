@@ -16,7 +16,6 @@ import type { ResponseBodyFormat } from '@/constants';
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 
 export interface PlaygroundState {
-  collection: OpenCollectionCollection | null;
   hydratedCollection: OpenCollectionCollection | null;
   pristineEnvironments: Environment[] | null;
   responses: Record<string, any>; // Store responses by item UUID
@@ -30,7 +29,6 @@ export interface PlaygroundState {
 }
 
 const initialState: PlaygroundState = {
-  collection: null,
   hydratedCollection: null,
   pristineEnvironments: null,
   responses: {},
@@ -129,8 +127,6 @@ const playgroundSlice = createSlice({
   initialState,
   reducers: {
     setPlaygroundCollection: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection | null>) => {
-      state.collection = action.payload;
-
       if (!action.payload) {
         state.hydratedCollection = null;
         state.pristineEnvironments = null;
@@ -152,7 +148,6 @@ const playgroundSlice = createSlice({
       state.hydratedCollection = hydrated;
     },
     clearPlaygroundCollection: (state: PlaygroundState) => {
-      state.collection = null;
       state.hydratedCollection = null;
       state.pristineEnvironments = null;
       state.responses = {};
@@ -161,7 +156,6 @@ const playgroundSlice = createSlice({
     },
     updatePlaygroundItem: (state: PlaygroundState, action: PayloadAction<{ uuid: string; item: HttpRequest }>) => {
       const { uuid, item } = action.payload;
-      if (state.collection?.items) findAndUpdateItemInCollection(state.collection.items, uuid, item);
       if (state.hydratedCollection?.items) findAndUpdateItemInCollection(state.hydratedCollection.items, uuid, item);
     },
     setPlaygroundResponse: (state: PlaygroundState, action: PayloadAction<{ uuid: string; response: any }>) => {
@@ -208,11 +202,9 @@ const playgroundSlice = createSlice({
       }
     },
     updateCollectionSettings: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection>) => {
-      state.collection = action.payload;
       state.hydratedCollection = action.payload;
     },
     updateCollectionEnvironments: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection>) => {
-      state.collection = action.payload;
       state.hydratedCollection = action.payload;
     },
     applyScriptVariableChanges: (
@@ -243,7 +235,6 @@ const playgroundSlice = createSlice({
         }
       };
 
-      applyTo(state.collection);
       applyTo(state.hydratedCollection);
     },
     updateFolderInCollection: (state: PlaygroundState, action: PayloadAction<{ uuid: string; folder: Folder }>) => {
@@ -253,18 +244,10 @@ const playgroundSlice = createSlice({
       findAndUpdateItem(state.hydratedCollection.items, uuid, (item) => {
         Object.assign(item, folder);
       });
-
-      // Also update the base collection
-      if (state.collection?.items) {
-        findAndUpdateItem(state.collection.items, uuid, (item) => {
-          Object.assign(item, folder);
-        });
-      }
     },
     resetPlaygroundEnvironments: (state: PlaygroundState) => {
       const environments = state.pristineEnvironments ? cloneDeep(state.pristineEnvironments) : null;
       if (state.hydratedCollection) writeEnvironments(state.hydratedCollection, environments);
-      if (state.collection) writeEnvironments(state.collection, environments);
     },
     setPlaygroundVariable: (
       state: PlaygroundState,
@@ -304,7 +287,6 @@ const playgroundSlice = createSlice({
         }
       };
       apply(state.hydratedCollection);
-      apply(state.collection);
     },
     setResponseFormat: (state: PlaygroundState, action: PayloadAction<{
       uuid: PlaygroundState['selectedItemId'];
@@ -350,7 +332,6 @@ export const {
 } = playgroundSlice.actions;
 
 // Selectors
-export const selectPlaygroundCollection = (state: RootState) => state.playground.collection;
 export const selectHydratedCollection = (state: RootState) => state.playground.hydratedCollection;
 export const selectPlaygroundResponses = (state: RootState) => state.playground.responses;
 export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];

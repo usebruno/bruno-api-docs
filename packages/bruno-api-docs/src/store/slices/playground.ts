@@ -13,6 +13,7 @@ import { reconcileScriptVariables } from '@/utils/scriptVariables';
 import type { Variables } from '@/runner/utils/variable-interpolator';
 import type { ResponseBodyFormat } from '@/constants';
 import type { VariableChange } from '@/hooks/useVariableResolver';
+import { collectionLoaded, collectionCleared, collectionFailed } from '@/store/slices/collection';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 
@@ -123,6 +124,32 @@ const preserveCollapsedState = (
   }
 };
 
+// The working copy: forked from the document on load, edited here, never
+// written back. Re-hydrating makes fresh item objects, which matters because the
+// document reducer has already stored (and Immer has frozen) its own copy.
+const seedWorkingCopy = (state: PlaygroundState, document: OpenCollectionCollection) => {
+  const envs = readEnvironments(document);
+  state.pristineEnvironments = envs ? cloneDeep(envs) : null;
+
+  const hydrated = hydrateWithUUIDs(document);
+
+  if (state.hydratedCollection?.items && hydrated.items) {
+    preserveCollapsedState(hydrated.items, state.hydratedCollection.items);
+  } else if (hydrated.items) {
+    initializeCollapsedState(hydrated.items);
+  }
+
+  state.hydratedCollection = hydrated;
+};
+
+const clearWorkingCopy = (state: PlaygroundState) => {
+  state.hydratedCollection = null;
+  state.pristineEnvironments = null;
+  state.responses = {};
+  state.selectedItemId = null;
+  state.selectedExampleIndex = null;
+};
+
 const playgroundSlice = createSlice({
   name: 'playground',
   initialState,
@@ -133,28 +160,9 @@ const playgroundSlice = createSlice({
         state.pristineEnvironments = null;
         return;
       }
-
-      const envs = readEnvironments(action.payload);
-      state.pristineEnvironments = envs ? cloneDeep(envs) : null;
-
-      const hydrated = hydrateWithUUIDs(action.payload);
-
-      // Preserve existing collapsed states from previous hydrated collection
-      if (state.hydratedCollection?.items && hydrated.items) {
-        preserveCollapsedState(hydrated.items, state.hydratedCollection.items);
-      } else if (hydrated.items) {
-        initializeCollapsedState(hydrated.items);
-      }
-
-      state.hydratedCollection = hydrated;
+      seedWorkingCopy(state, action.payload);
     },
-    clearPlaygroundCollection: (state: PlaygroundState) => {
-      state.hydratedCollection = null;
-      state.pristineEnvironments = null;
-      state.responses = {};
-      state.selectedItemId = null;
-      state.selectedExampleIndex = null;
-    },
+    clearPlaygroundCollection: clearWorkingCopy,
     updatePlaygroundItem: (state: PlaygroundState, action: PayloadAction<{ uuid: string; item: HttpRequest }>) => {
       const { uuid, item } = action.payload;
       if (state.hydratedCollection?.items) findAndUpdateItemInCollection(state.hydratedCollection.items, uuid, item);
@@ -301,6 +309,13 @@ const playgroundSlice = createSlice({
       if (uuid != null)
         state.showResponsePreview[uuid] = showResponsePreview;
     }
+  },
+  // The playground follows the document's lifecycle; nothing has to tell it.
+  extraReducers: (builder) => {
+    builder
+      .addCase(collectionLoaded, (state, action) => seedWorkingCopy(state, action.payload))
+      .addCase(collectionCleared, clearWorkingCopy)
+      .addCase(collectionFailed, clearWorkingCopy);
   }
 });
 

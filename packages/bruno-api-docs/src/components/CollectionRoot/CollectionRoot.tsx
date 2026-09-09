@@ -16,10 +16,6 @@ import {
   collectionCleared,
   setGitCollectionUrl
 } from '@/store/slices/collection';
-import {
-  setPlaygroundCollection,
-  clearPlaygroundCollection
-} from '@/store/slices/playground';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { applyTheme } from '@/theme/applyTheme';
@@ -98,18 +94,15 @@ const CollectionRootContent: React.FC<CollectionRootProps> = ({
         if (!isActive) return;
         const hydrated = hydrateWithUUIDs(resolved);
         dispatch(collectionLoaded(hydrated));
-        dispatch(setPlaygroundCollection(hydrated));
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
         dispatch(collectionFailed(message));
-        dispatch(clearPlaygroundCollection());
       }
     };
 
     if (collection == null) {
       dispatch(collectionCleared());
-      dispatch(clearPlaygroundCollection());
       return () => { isActive = false; };
     }
 
@@ -118,7 +111,6 @@ const CollectionRootContent: React.FC<CollectionRootProps> = ({
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
       dispatch(collectionLoaded(hydrated));
-      dispatch(setPlaygroundCollection(hydrated));
     }
 
     return () => { isActive = false; };

@@ -6,13 +6,14 @@ import './styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
 import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
+import OpenCollectionDocs from './components/OpenCollectionDocs/OpenCollectionDocs';
+import OpenCollectionPlayground from './components/OpenCollectionPlayground/OpenCollectionPlayground';
 import { createOpenCollectionStore } from './store/store';
 import { sampleCollectionYaml } from './sampleCollection';
 import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
 import { descriptionsFixtureCollection } from './e2eFixtures/descriptionsCollection';
 import { qaFixtureCollection } from './e2eFixtures/qaCollection';
-import type { Surface } from './surfaces';
 
 // `?fixture=folders` mounts a nested-folder collection for routing e2e tests;
 // `?fixture=qa` mounts the deep, deliberately awkward collection for manual QA.
@@ -28,11 +29,15 @@ const devCollection
           ? qaFixtureCollection
           : sampleCollectionYaml;
 
-// `?surfaces=docs` / `?surfaces=playground` mounts a single surface; default is both.
+// `?surfaces=docs` / `?surfaces=playground` mounts the single-surface component
+// each split bundle ships; default is the combined one.
 const surfacesParam = new URLSearchParams(window.location.search).get('surfaces');
-const devSurfaces = surfacesParam
-  ? (surfacesParam.split(',').filter((s): s is Surface => s === 'docs' || s === 'playground'))
-  : undefined;
+const Surface
+  = surfacesParam === 'docs'
+    ? OpenCollectionDocs
+    : surfacesParam === 'playground'
+      ? OpenCollectionPlayground
+      : OpenCollection;
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {
@@ -46,10 +51,9 @@ const DevApp: React.FC = () => {
   return (
     <Provider store={store}>
       <div style={{ height: '100vh', width: '100vw' }}>
-        <OpenCollection
+        <Surface
           collection={devCollection}
           gitCollectionUrl="https://github.com/usebruno/bruno-testbench.git"
-          surfaces={devSurfaces}
         />
       </div>
     </Provider>

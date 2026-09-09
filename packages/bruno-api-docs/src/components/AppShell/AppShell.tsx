@@ -9,7 +9,6 @@ import SidebarDrawer from '../SidebarDrawer/SidebarDrawer';
 import IconButton from '@/ui/IconButton/IconButton';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
 import PageRouter from '../PageRouter/PageRouter';
-import Playground from '../Playground/Playground';
 import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
@@ -18,16 +17,19 @@ import { selectGitCollectionUrl } from '@/store/slices/app';
 import { useActiveResolution } from '@/routing/hooks';
 import { layoutModeForWidth } from '@/hooks/useTopbarLayout';
 import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
-import { ALL_SURFACES, type Surface } from '@/surfaces';
 import { StyledWrapper } from './StyledWrapper';
 
 interface AppShellProps {
   logo?: React.ReactNode;
   testId?: string;
-  surfaces?: readonly Surface[];
+  /**
+   * Renders the playground when it is open. Omitted means this build has no
+   * playground at all - the Try affordance goes with it.
+   */
+  renderPlayground?: (openNonce: number) => React.ReactNode;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', surfaces = ALL_SURFACES }) => {
+const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', renderPlayground }) => {
   const collection = useAppSelector(selectDocsCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const resolution = useActiveResolution();
@@ -93,12 +95,6 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', surface
     openPlayground(resolution?.entry.slug);
     setPlaygroundOpenNonce((nonce) => nonce + 1);
   }, [openPlayground, resolution]);
-
-  const docsEnabled = surfaces.includes('docs');
-  const playgroundEnabled = surfaces.includes('playground');
-
-  // Without docs there is no shell to dock into: the playground is the surface.
-  if (!docsEnabled) return playgroundEnabled ? <Playground standalone /> : null;
 
   return (
     <StyledWrapper
@@ -176,13 +172,13 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', surface
               </IconButton>
             )}
             <main className="appshell-content" ref={contentRef}>
-              <PageRouter onOpenPlayground={playgroundEnabled ? handleOpenPlayground : undefined} />
+              <PageRouter onOpenPlayground={renderPlayground ? handleOpenPlayground : undefined} />
             </main>
           </div>
         </div>
       </div>
 
-      {playgroundEnabled && playgroundOpen && <Playground openNonce={playgroundOpenNonce} />}
+      {renderPlayground && playgroundOpen && renderPlayground(playgroundOpenNonce)}
 
       {!isDesktop && (
         <SidebarDrawer open={drawerOpen} onClose={closeDrawer}>

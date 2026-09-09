@@ -28,6 +28,7 @@ import {
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { applyTheme } from '@/theme/applyTheme';
+import { ALL_SURFACES, type Surface } from '@/surfaces';
 
 // Set data-theme on the root element before the component first paints to avoid a flash.
 applyTheme();
@@ -75,12 +76,15 @@ export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
+  /** Which surfaces to mount. Defaults to both. */
+  surfaces?: readonly Surface[];
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
-  gitCollectionUrl
+  gitCollectionUrl,
+  surfaces = ALL_SURFACES
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);
@@ -145,7 +149,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className="oc-playground">
-      <AppShell logo={logo} />
+      <AppShell logo={logo} surfaces={surfaces} />
     </div>
   );
 };

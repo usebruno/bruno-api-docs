@@ -12,6 +12,7 @@ import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
 import { descriptionsFixtureCollection } from './e2eFixtures/descriptionsCollection';
 import { qaFixtureCollection } from './e2eFixtures/qaCollection';
+import type { Surface } from './surfaces';
 
 // `?fixture=folders` mounts a nested-folder collection for routing e2e tests;
 // `?fixture=qa` mounts the deep, deliberately awkward collection for manual QA.
@@ -26,6 +27,12 @@ const devCollection
         : fixture === 'qa'
           ? qaFixtureCollection
           : sampleCollectionYaml;
+
+// `?surfaces=docs` / `?surfaces=playground` mounts a single surface; default is both.
+const surfacesParam = new URLSearchParams(window.location.search).get('surfaces');
+const devSurfaces = surfacesParam
+  ? (surfacesParam.split(',').filter((s): s is Surface => s === 'docs' || s === 'playground'))
+  : undefined;
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {
@@ -42,6 +49,7 @@ const DevApp: React.FC = () => {
         <OpenCollection
           collection={devCollection}
           gitCollectionUrl="https://github.com/usebruno/bruno-testbench.git"
+          surfaces={devSurfaces}
         />
       </div>
     </Provider>

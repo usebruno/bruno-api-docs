@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>OpenCollection - Docs only</title>
+	<style>
+		html, body { margin: 0; height: 100%; }
+		#opencollection-container { height: 100vh; }
+	</style>
+	<link rel="stylesheet" href="../../packages/bruno-api-docs/dist-docs/docs.css">
+	<script src="../../packages/bruno-api-docs/dist-docs/docs.js"></script>
+</head>
+<body>
+	<div id="opencollection-container"></div>
+
+	<script>
+		// Read-only reference. No Try button, no playground code in the bundle.
+		const sampleCollection = `
+info:
+  name: Split Bundle Example
+  version: "1.0.0"
+config:
+  environments:
+    - name: Local
+      variables:
+        - name: postId
+          value: "1"
+items:
+  - name: Get post
+    type: http
+    method: GET
+    url: https://jsonplaceholder.typicode.com/posts/{{postId}}
+    headers:
+      - name: Accept
+        value: application/json
+    docs: Fetches one post. Loaded from the Docs only bundle.
+`;
+
+		new window.OpenCollectionDocs({
+			target: document.getElementById('opencollection-container'),
+			opencollection: sampleCollection
+		});
+	</script>
+</body>
+</html>

@@ -7,23 +7,19 @@ import { parseYaml } from '@/utils/yamlUtils';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
-  selectDocsCollection,
-  setDocsCollection,
-  clearDocsCollection
-} from '@/store/slices/docs';
+  selectCollection,
+  selectCollectionStatus,
+  selectCollectionError,
+  collectionLoading,
+  collectionLoaded,
+  collectionFailed,
+  collectionCleared,
+  setGitCollectionUrl
+} from '@/store/slices/collection';
 import {
   setPlaygroundCollection,
   clearPlaygroundCollection
 } from '@/store/slices/playground';
-import {
-  selectCollectionStatus,
-  selectCollectionError,
-  setCollectionLoading,
-  setCollectionSucceeded,
-  setCollectionFailed,
-  resetCollectionState,
-  setGitCollectionUrl
-} from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { applyTheme } from '@/theme/applyTheme';
@@ -83,7 +79,7 @@ const CollectionRootContent: React.FC<CollectionRootProps> = ({
   children
 }) => {
   const dispatch = useAppDispatch();
-  const docsCollection = useAppSelector(selectDocsCollection);
+  const document = useAppSelector(selectCollection);
   const collectionStatus = useAppSelector(selectCollectionStatus);
   const collectionError = useAppSelector(selectCollectionError);
 
@@ -95,28 +91,25 @@ const CollectionRootContent: React.FC<CollectionRootProps> = ({
     let isActive = true;
 
     const load = async () => {
-      dispatch(setCollectionLoading());
+      dispatch(collectionLoading());
 
       try {
         const resolved = await resolveCollectionSource(collection);
         if (!isActive) return;
         const hydrated = hydrateWithUUIDs(resolved);
-        dispatch(setDocsCollection(hydrated));
+        dispatch(collectionLoaded(hydrated));
         dispatch(setPlaygroundCollection(hydrated));
-        dispatch(setCollectionSucceeded());
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
-        dispatch(setCollectionFailed(message));
-        dispatch(clearDocsCollection());
+        dispatch(collectionFailed(message));
         dispatch(clearPlaygroundCollection());
       }
     };
 
     if (collection == null) {
-      dispatch(clearDocsCollection());
+      dispatch(collectionCleared());
       dispatch(clearPlaygroundCollection());
-      dispatch(resetCollectionState());
       return () => { isActive = false; };
     }
 
@@ -124,15 +117,14 @@ const CollectionRootContent: React.FC<CollectionRootProps> = ({
       void load();
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
-      dispatch(setDocsCollection(hydrated));
+      dispatch(collectionLoaded(hydrated));
       dispatch(setPlaygroundCollection(hydrated));
-      dispatch(setCollectionSucceeded());
     }
 
     return () => { isActive = false; };
   }, [collection, dispatch]);
 
-  const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
+  const isInitialLoad = collectionStatus === 'idle' && !document;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
 
   if (isLoading) {

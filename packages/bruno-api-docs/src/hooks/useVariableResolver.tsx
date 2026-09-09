@@ -4,7 +4,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
+import { selectCollection } from '@/store/slices/collection';
 import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
@@ -154,7 +154,7 @@ const itemSource = (item: Item): VariableSource =>
     : { scope: 'request', variables: getRequestVariables(item as never) as (Variable | SecretVariable)[] };
 
 export const useVariableResolver = (): VariableResolver => {
-  const collection = useAppSelector(selectDocsCollection) as OpenCollection | null;
+  const collection = useAppSelector(selectCollection) as OpenCollection | null;
   const activeEnvName = useAppSelector(selectActiveEnvName);
   const showVars = useAppSelector(selectShowVars);
 

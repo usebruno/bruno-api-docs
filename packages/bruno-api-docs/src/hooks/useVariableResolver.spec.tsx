@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { collectionLoaded } from '@/store/slices/collection';
 import { setActiveEnv, setShowVars } from '@/store/slices/env';
 import { useVariableResolver, useResolvedVariables, ItemVariableResolverProvider } from './useVariableResolver';
 
@@ -37,7 +37,7 @@ const Probe: React.FC = () => {
 
 const render = (configure: (store: ReturnType<typeof createOpenCollectionStore>) => void): string => {
   const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
+  store.dispatch(collectionLoaded(collection));
   configure(store);
   return renderToStaticMarkup(
     <Provider store={store}>
@@ -98,7 +98,7 @@ describe('lookup (variable hover card)', () => {
 
   const renderLookup = (name: string, showVars = false): string => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(collection));
+    store.dispatch(collectionLoaded(collection));
     store.dispatch(setActiveEnv('Dev'));
     if (showVars) store.dispatch(setShowVars(true));
     return renderToStaticMarkup(
@@ -165,7 +165,7 @@ describe('nested variable resolution', () => {
 
   it('follows a variable that points at another variable, for display and for interpolation', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(nested));
+    store.dispatch(collectionLoaded(nested));
     store.dispatch(setActiveEnv('Dev'));
     store.dispatch(setShowVars(true));
 
@@ -183,7 +183,7 @@ describe('nested variable resolution', () => {
 
   it('gates resolve on showVars but never interpolate', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(nested));
+    store.dispatch(collectionLoaded(nested));
     store.dispatch(setActiveEnv('Dev'));
     store.dispatch(setShowVars(false));
 
@@ -207,7 +207,7 @@ describe('nested variable resolution', () => {
 
   it('hands the change to the injected writer instead of writing the store itself', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(nested));
+    store.dispatch(collectionLoaded(nested));
     store.dispatch(setActiveEnv('Dev'));
     const changes: unknown[] = [];
 
@@ -225,7 +225,7 @@ describe('nested variable resolution', () => {
 
   it('is read-only with no writer, as the docs pages mount it', () => {
     const store = createOpenCollectionStore();
-    store.dispatch(setDocsCollection(nested));
+    store.dispatch(collectionLoaded(nested));
     store.dispatch(setActiveEnv('Dev'));
 
     const html = renderToStaticMarkup(

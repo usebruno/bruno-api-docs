@@ -12,8 +12,8 @@ import PageRouter from '../PageRouter/PageRouter';
 import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
-import { selectGitCollectionUrl } from '@/store/slices/app';
+import { selectCollection } from '@/store/slices/collection';
+import { selectGitCollectionUrl } from '@/store/slices/collection';
 import { useActiveResolution } from '@/routing/hooks';
 import { layoutModeForWidth } from '@/hooks/useTopbarLayout';
 import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
@@ -30,7 +30,7 @@ interface AppShellProps {
 }
 
 const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', renderPlayground }) => {
-  const collection = useAppSelector(selectDocsCollection);
+  const collection = useAppSelector(selectCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const resolution = useActiveResolution();
 

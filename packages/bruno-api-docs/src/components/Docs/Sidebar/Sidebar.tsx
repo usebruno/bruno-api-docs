@@ -6,7 +6,7 @@ import { CubeIcon, GlobeIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 import { computeAutoReveal } from './autoReveal';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleItem, expandFolders, selectDocsCollection } from '@/store/slices/docs';
+import { toggleItem, expandFolders, selectCollection } from '@/store/slices/collection';
 import { getItemUuid } from '@/utils/itemUtils';
 import { useNavModel } from '@/routing/hooks';
 import { normalizeSlug, resolveSlug } from '@/routing/resolve';
@@ -21,7 +21,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ onNavigate, testId = 'sidebar' }) => {
   const dispatch = useAppDispatch();
-  const collection = useAppSelector(selectDocsCollection);
+  const collection = useAppSelector(selectCollection);
   const model = useNavModel();
   const docsNavigate = useDocsNavigate();
   const { pathname } = useLocation();

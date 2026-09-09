@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import AppShell from './AppShell';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { collectionLoaded } from '@/store/slices/collection';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { queryByTestId } from '@/test-utils/dom';
 
@@ -15,7 +15,7 @@ const collection = {
 
 const render = (renderPlayground?: (openNonce: number) => React.ReactNode, path = '/login') => {
   const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
+  store.dispatch(collectionLoaded(collection));
   return useRenderToDom(
     <Provider store={store}>
       <MemoryRouter initialEntries={[path]}>

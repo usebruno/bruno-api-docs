@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { collectionLoaded } from '@/store/slices/collection';
 import { setActiveEnv } from '@/store/slices/env';
 import { getByTestId } from '@/test-utils/dom';
 import EnvSwitcher from './EnvSwitcher';
@@ -21,7 +21,7 @@ const render = (
   props?: { testId?: string }
 ) => {
   const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
+  store.dispatch(collectionLoaded(collection));
   configure?.(store);
   const root = parse(
     renderToStaticMarkup(

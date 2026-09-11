@@ -31,7 +31,7 @@ Run these from `packages/bruno-api-docs`:
 
 1. Open or comment on an issue first for anything beyond a small fix.
 2. Create a branch from `main`.
-3. Make your change and add or update tests. Run `npm run lint` and `npm run test:run` before pushing; run `npm run test:e2e` when UI behavior changed.
+3. Make your change following [`CODING_STANDARDS.md`](./CODING_STANDARDS.md) and add or update tests. Run `npm run lint` and `npm run test:run` before pushing; run `npm run test:e2e` when UI behavior changed.
 4. Open a pull request against `main` describing the change and linking the issue.
 
 Continuous integration runs the end-to-end tests on pull requests via GitHub Actions.

@@ -1,0 +1,4 @@
+settings.local.json
+worktrees/
+*.lock
+.DS_Store

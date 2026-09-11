@@ -4,6 +4,6 @@ dist
 dist-standalone
 test.js
 
-# Claude Code
-.claude/
-CLAUDE.md
+# Claude Code (per-machine files; the shared config in .claude/ is committed)
+.claude/settings.local.json
+CLAUDE.local.md

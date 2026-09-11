@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: 'en-US'
+early_access: false
+tone_instructions: 'You are an expert code reviewer in TypeScript, React, Redux Toolkit, Emotion, Vite, Vitest, and Playwright. You work in an enterprise software developer team, providing concise and clear code review advice. You only elaborate or provide detailed explanations when requested.'
+
+knowledge_base:
+  opt_out: false
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - '**/CODING_STANDARDS.md'
+
+reviews:
+  profile: 'chill'
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: true
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches: ['main', 'release/*']
+  path_filters:
+    - '!**/dist/**'
+    - '!**/dist-standalone/**'
+    - '!**/playwright-report/**'
+    - '!**/test-results/**'
+    - '!**/package-lock.json'
+    - '!packages/bruno-api-docs/src/styles/theme.generated.css'
+  path_instructions:
+    - path: '**/*'
+      instructions: |
+        Bruno API Docs is the documentation renderer and embedded playground that Bruno
+        generates from an API collection. It runs in the reader's browser on macOS, Windows,
+        and Linux, ships as a standalone bundle loaded from a CDN, and is rendered to static
+        markup in unit tests. Reason about every change as "what should an API client do
+        here?" (requests, responses, auth, params, headers, bodies, environments), not as a
+        generic document tool or an API server.
+
+        `CODING_STANDARDS.md` is the source of truth for how code is written; apply it. Do not
+        restate ESLint-enforced style; the pre-commit hook fixes that. Focus on what a linter
+        cannot see: correctness, root cause over symptom patch, secret leakage, XSS through
+        rendered collection content, format-shape assumptions, missing tests, dead code left
+        behind, comments that narrate the change, and ticket identifiers in code.
+    - path: 'packages/bruno-api-docs/src/**/*.{ts,tsx}'
+      instructions: |
+        Review against CODING_STANDARDS.md §TypeScript, §Imports and aliases, §React components,
+        §Styling and theming, §State, §Reading the OpenCollection format, and §Cross-OS. Flag
+        deviations rather than proposing new patterns. In particular:
+        - Any colour or font not expressed as a CSS custom property; any static inline `style`.
+        - Any `.description` read that assumes a bare string or a `{ content }` object without
+          going through the normalisers in `utils/description.ts`, `utils/request.ts`, or
+          `utils/schemaHelpers.ts`.
+        - A change to how the docs pages read a field that is not mirrored in the playground
+          slice, or vice versa (`store/slices/docs.ts` vs `store/slices/playground.ts`).
+        - `x || default` where an empty auth token, param, or header is a legitimate state.
+        - `window`, `document`, `navigator`, or storage read at module scope or during render.
+        - A removed render path that leaves orphaned components, props, or store state behind.
+        - An edit to `src/styles/theme.generated.css` (tokens live in `src/theme/tokens/`).
+    - path: 'packages/bruno-api-docs/src/{runner,scripting}/**/*.ts'
+      instructions: |
+        This code builds real HTTP requests from collection data and runs reader-editable
+        scripts in a QuickJS sandbox. Treat every interpolated variable, header value, URL, and
+        script output as untrusted. Flag header or URL injection through `\r\n` or scheme
+        changes, any new host capability exposed to scripts, secrets reaching logs or error
+        messages, and behaviour that diverges from what the Bruno desktop app does for the same
+        request.
+    - path: 'packages/bruno-api-docs/src/**/*.{spec,test}.{ts,tsx}'
+      instructions: |
+        Unit tests run in Vitest with `environment: 'node'`; see CODING_STANDARDS.md §Tests and
+        `.claude/rules/unit-testing.md`. Ensure that:
+        - New component specs render through `useRenderToDom` and query with
+          `src/test-utils/dom.ts`, not raw `renderToStaticMarkup` string matching.
+        - Assertions are unconditional. Flag `?.`, `??`, `||`, `if`, or try/catch that could let
+          an assertion be skipped or an error be swallowed.
+        - Every behaviour the PR adds or changes has a spec exercising it; a bug fix ships with
+          a regression test. Interactive behaviour belongs in Playwright, not here.
+        - Assertions target the unique value the change produces, not a substring the fixture
+          already carries elsewhere.
+    - path: 'packages/bruno-api-docs/e2e/**/*.ts'
+      instructions: |
+        Review the following e2e test code written using the Playwright test library. Ensure that:
+        - Follow the guidance in `packages/bruno-api-docs/e2e/README.md` - the canonical E2E
+          guide (class-based page-object model: `pages/` extend `BasePage`, `components/`
+          extend `BaseComponent`, fixtures in `playwright/`, specs in `tests/` by feature).
+        - For anything the guide above doesn't cover, follow standard Playwright and e2e
+          automation best practices.
+        - Elements are located by `data-testid` through page-object and component classes;
+          never by styling classes, tag names, or index. Rendered Markdown internals are matched
+          by role within their test-id'd container.
+        - Specs import `test` and `expect` from the `playwright` folder and take page objects
+          and components off the test callback; no `new` and no raw selectors in specs.
+        - Every `expect` lives in the spec; page objects expose elements and actions only.
+        - All imports are relative; `e2e/` has no path aliases.
+        - Test titles read like documentation: plain English describing what the page does.
+        - Try to reduce usage of `page.waitForTimeout()` in code unless absolutely necessary
+          and the locator cannot be found using existing `expect()` playwright calls.
+        - Avoid using `page.pause()` in code.
+        - Avoid using `test.only`.
+        - Use locator variables for locators.
+        - Use multiple assertions.
+        - Promote the use of `test.step` as much as possible so the generated reports are
+          easier to read.
+        - Every user-visible behaviour the PR adds or changes has an e2e spec covering it.
+
+chat:
+  auto_reply: true

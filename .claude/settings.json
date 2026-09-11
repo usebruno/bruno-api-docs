@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./**/dist/**)",
+      "Read(./**/dist-standalone/**)",
+      "Read(./**/playwright-report/**)",
+      "Read(./**/test-results/**)"
+    ]
+  }
+}

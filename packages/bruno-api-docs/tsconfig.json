@@ -19,8 +19,7 @@
     "module": "ESNext",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@slices/*": ["src/store/slices/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": [

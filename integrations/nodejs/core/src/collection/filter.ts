@@ -1,6 +1,6 @@
-import yaml from 'js-yaml';
 import { ConfigError, type CollectionOptions, type EnvironmentsOption, type TagsOption } from '../options';
 import type { WalkedFile, SkippedFile } from './walk';
+import { safeLoad } from './yaml';
 
 interface FilterStage {
   files: WalkedFile[];
@@ -22,15 +22,6 @@ const FOLDER_FILE = /(^|\/)folder\.ya?ml$/;
 export const isManifest = (p: string): boolean => MANIFEST_FILE.test(p);
 
 const isRequestFile = (p: string): boolean => !isManifest(p) && !FOLDER_FILE.test(p) && !ENV_DIR.test(p);
-
-const safeLoad = (text: string): Record<string, unknown> | null => {
-  try {
-    const doc = yaml.load(text);
-    return doc && typeof doc === 'object' ? (doc as Record<string, unknown>) : null;
-  } catch {
-    return null;
-  }
-};
 
 export function environmentName(text: string): string | null {
   const doc = safeLoad(text);

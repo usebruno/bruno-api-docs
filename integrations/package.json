@@ -10,6 +10,7 @@
     "build:core": "tsc -p nodejs/core/tsconfig.json",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "test:collection": "npm run build:core && node nodejs/core/test/collection.test.mjs",
     "test:filter": "npm run build:core && node nodejs/core/test/filter.test.mjs",
     "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs"
   },

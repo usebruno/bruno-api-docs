@@ -1,0 +1,22 @@
+{
+  "name": "bruno-api-docs-integrations",
+  "private": true,
+  "description": "Serve a Bruno collection as API docs from inside your own app, behind your own auth.",
+  "license": "MIT",
+  "workspaces": [
+    "nodejs/*"
+  ],
+  "scripts": {
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@stylistic/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.39.0",
+    "eslint": "^9.21.0",
+    "globals": "^16.0.0",
+    "typescript": "^5.7.0"
+  }
+}

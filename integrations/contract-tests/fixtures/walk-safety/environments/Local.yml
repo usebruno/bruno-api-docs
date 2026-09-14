@@ -1,0 +1,6 @@
+name: Local
+variables:
+  - name: baseUrl
+    value: http://localhost:9999
+  - name: apiKey
+    value: fake-key-should-not-leak-in-endstate

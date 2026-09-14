@@ -1,0 +1,7 @@
+info:
+  name: ping
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: "{{baseUrl}}/ping"

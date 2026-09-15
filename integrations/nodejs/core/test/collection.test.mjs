@@ -137,6 +137,13 @@ const quiet = (fn) => {
   assert.equal(resolveCollectionSource(broken).mode, 'file', 'an unreadable manifest is not treated as a directory');
 
   assert.equal(resolveCollectionPath('/already/absolute'), '/already/absolute', 'path.resolve leaves an absolute path alone');
+
+  // guarded here, not in validateOptions: an empty path resolves to the app's own directory,
+  // so any caller that skipped the validator would walk it and serve whatever yml lives there
+  for (const empty of ['', undefined, null]) {
+    assert.throws(() => resolveCollectionPath(empty), ConfigError, `${JSON.stringify(empty)} is refused`);
+    assert.throws(() => quiet(() => providerFor({ collection: empty })), ConfigError, 'and refused through providerFor');
+  }
 }
 
 // --- a relative path resolves against the app's entry file, in CJS and in ESM

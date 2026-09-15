@@ -31,10 +31,6 @@ export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
 export class ConfigError extends Error {}
 
 export function validateOptions(options: CollectionOptions): void {
-  if (!options.collection) {
-    throw new ConfigError('apiDocs: `collection` is required');
-  }
-
   const env = options.environments;
   if (!env) return;
 

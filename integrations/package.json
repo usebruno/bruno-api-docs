@@ -14,6 +14,7 @@
     "lint:fix": "eslint --fix",
     "test:assemble": "node shell/test/assemble.test.mjs",
     "test:collection": "npm run build:core && node nodejs/core/test/collection.test.mjs",
+    "test:docs": "npm run build && node nodejs/core/test/docs.test.mjs",
     "test:filter": "npm run build:core && node nodejs/core/test/filter.test.mjs",
     "test:shell": "npm run build && node nodejs/core/test/shell.test.mjs",
     "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs"

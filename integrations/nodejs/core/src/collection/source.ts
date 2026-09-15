@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { ConfigError } from '../options';
 import { isManifest } from './filter';
 import { safeLoad } from './yaml';
 
@@ -14,6 +15,12 @@ export interface CollectionSource {
  * where `process.argv[1]` is the entry instead.
  */
 export function resolveCollectionPath(collectionOption: string): string {
+  // guarded here rather than in validateOptions: an empty path resolves to the app's own
+  // directory, and walking that would serve whatever yml the adopter happens to keep there
+  if (!collectionOption) {
+    throw new ConfigError('apiDocs: `collection` is required');
+  }
+
   const entryDir = require.main?.path
     ?? (process.argv[1] ? path.dirname(process.argv[1]) : undefined)
     ?? process.cwd();

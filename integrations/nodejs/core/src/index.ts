@@ -1,0 +1,7 @@
+export { createDocs } from './create-docs';
+export { ConfigError } from './options';
+
+export type { Docs } from './create-docs';
+export type { ApiDocsOptions, CollectionOptions, RendererOptions, EnvironmentsOption, TagsOption } from './options';
+export type { Handler, Request } from './routes/handler';
+export type { HttpResponse, Conditional } from './http';

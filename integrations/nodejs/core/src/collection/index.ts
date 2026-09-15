@@ -1,14 +1,10 @@
 // The collection layer's one entry point: where the document comes from is decided here, at startup.
 
 import { ConfigError, type CollectionOptions } from '../options';
+import { log } from '../log';
 import type { SkippedFile } from './walk';
 import { resolveCollectionSource } from './source';
 import { fileProvider, dirProvider, type Provider, type BuiltProvider } from './providers';
-
-const log = {
-  info: (line: string) => console.log(`[bruno-docs] ${line}`),
-  warn: (line: string) => console.warn(`[bruno-docs] ${line}`)
-};
 
 export function providerFor(options: CollectionOptions): Provider {
   const source = resolveCollectionSource(options.collection);

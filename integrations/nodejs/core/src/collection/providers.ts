@@ -1,7 +1,6 @@
 import fs from 'node:fs';
-import crypto from 'node:crypto';
 import { ConfigError, type CollectionOptions } from '../options';
-import type { HttpResponse, Conditional } from '../http';
+import { etagOf, type HttpResponse, type Conditional } from '../http';
 import type { SkippedFile } from './walk';
 import { walkCollection, CAPS, CapError } from './walk';
 import { applyFilters, isManifest } from './filter';
@@ -16,9 +15,6 @@ export interface BuiltProvider {
 }
 
 export class ManifestError extends Error {}
-
-export const etagOf = (data: string | Buffer): string =>
-  '"' + crypto.createHash('sha256').update(data).digest('hex').slice(0, 32) + '"';
 
 const DOCUMENT_HEADERS: Record<string, string> = {
   'Cache-Control': 'private, no-store',

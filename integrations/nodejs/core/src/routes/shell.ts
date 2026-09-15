@@ -2,14 +2,13 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import type { RendererOptions, ApiDocsOptions } from './options';
-import type { HttpResponse, Conditional } from './http';
-import { etagOf } from './collection/providers';
+import type { RendererOptions, ApiDocsOptions } from '../options';
+import { etagOf, type HttpResponse, type Conditional } from '../http';
 
 /** Hardcoded for the beta */
 export const CDN = 'https://cdn.usebruno.com/api-docs';
 
-const SHELL_DIR = path.join(__dirname, '..', 'shell');
+const SHELL_DIR = path.join(__dirname, '..', '..', 'shell');
 const EMBED_START = '<!-- embed:start -->';
 const EMBED_END = '<!-- embed:end -->';
 const DEFAULT_TITLE = 'API Documentation';

@@ -106,10 +106,9 @@ assert.equal(isRequestTagsIncluded(['a'], ['a', 'b'], []), true, 'any one includ
 assert.equal(isRequestTagsIncluded(['a', 'b'], [], ['b']), false, 'any one exclude tag is fatal');
 
 // --- startup validation of the same options
-assert.throws(() => validateOptions({ collection: './c', environments: { exclude: ['Prod'] } }), /needs a base/);
-assert.throws(() => validateOptions({ collection: './c', environments: { all: true, include: ['Local'] } }), /cannot be combined/);
-assert.throws(() => validateOptions({}), /`collection` is required/);
-validateOptions({ collection: './c' });
-validateOptions({ collection: './c', environments: { all: true, exclude: ['Prod'] } });
+assert.throws(() => validateOptions({ environments: { exclude: ['Prod'] } }), /needs a base/);
+assert.throws(() => validateOptions({ environments: { all: true, include: ['Local'] } }), /cannot be combined/);
+validateOptions({ environments: { all: true, exclude: ['Prod'] } });
+validateOptions({});
 
 console.log('filter-test: all assertions passed');

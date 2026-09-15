@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const dist = path.join(here, '..', 'dist');
-const { loadShell, rendererConfig, stripGitCredentials, CDN } = require(path.join(dist, 'shell.js'));
+const { loadShell, rendererConfig, stripGitCredentials, CDN } = require(path.join(dist, 'routes', 'shell.js'));
 
 // --- stamping: every placeholder is filled, at any mount
 {

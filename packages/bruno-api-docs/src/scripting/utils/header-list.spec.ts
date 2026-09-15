@@ -154,6 +154,21 @@ describe('createRequestHeaderList (writable request headers)', () => {
     expect(arr.filter((h) => h.name.toLowerCase() === 'x-token')).toHaveLength(1);
   });
 
+  it('upsert collapses duplicate enabled rows of the same key into one row holding the new value', () => {
+    const { list, arr } = make([
+      { name: 'Authorization', value: 'row-one' },
+      { name: 'Authorization', value: 'row-two' },
+      { name: 'Authorization', value: 'off', disabled: true }
+    ]);
+
+    expect(list.upsert('authorization', 'script')).toBe(false);
+
+    expect(arr.filter((h) => !h.disabled && h.name.toLowerCase() === 'authorization')).toEqual([
+      { name: 'authorization', value: 'script' }
+    ]);
+    expect(arr.filter((h) => h.disabled)).toHaveLength(1);
+  });
+
   it('remove deletes by string key, by object, and by predicate', () => {
     const { list, arr } = make([{ name: 'A', value: '1' }, { name: 'B', value: '2' }, { name: 'C', value: '3' }]);
     list.remove('a');

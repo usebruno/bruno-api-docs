@@ -99,3 +99,58 @@ describe('removeRowAt', () => {
     expect(names(out)).toEqual(['b', '']);
   });
 });
+
+describe('a row that has a value but no name', () => {
+  it('counts as a real row, so a fresh blank is added below it', () => {
+    const rows = [row({ name: 'a', value: '1' }), row({})];
+    const out = applyRowPatch(rows, 1, { value: 'orphan' }, false);
+
+    expect(out).toHaveLength(3);
+    expect(out[1]).toMatchObject({ name: '', value: 'orphan' });
+    expect(out[2]).toMatchObject({ name: '', value: '' });
+  });
+
+  it('is handed back to the caller, so it is saved and counted like any other row', () => {
+    const out = committableRows([
+      row({ name: 'a', value: '1' }),
+      row({ name: '', value: 'orphan' }),
+      row({})
+    ]);
+
+    expect(out).toHaveLength(2);
+    expect(out[1]).toMatchObject({ name: '', value: 'orphan' });
+  });
+
+  it('gets a trailing blank of its own when the rows are laid out', () => {
+    const out = withTrailingBlank([row({ name: '', value: 'orphan' })], false);
+
+    expect(out).toHaveLength(2);
+    expect(out[1]).toMatchObject({ name: '', value: '' });
+  });
+
+  it('can be deleted, leaving a blank row to type into', () => {
+    const rows = [row({ name: '', value: 'orphan' }), row({})];
+    const out = removeRowAt(rows, 0, false);
+
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ name: '', value: '' });
+  });
+
+  it('is not enough for the environments table, which waits for both fields', () => {
+    const out = applyRowPatch([row({})], 0, { value: 'orphan' }, false, undefined, true);
+
+    expect(out).toHaveLength(1);
+  });
+});
+
+describe('a row that is empty in both fields', () => {
+  it('is still treated as the trailing blank, so no second blank is added', () => {
+    const out = withTrailingBlank([row({ name: 'a', value: '1' }), row({})], false);
+    expect(out).toHaveLength(2);
+  });
+
+  it('is still dropped when the rows are handed back', () => {
+    const out = committableRows([row({ name: 'a', value: '1' }), row({ name: '   ', value: '  ' })]);
+    expect(names(out)).toEqual(['a']);
+  });
+});

@@ -13,14 +13,16 @@ const blankRow = (makeNewRow?: NewRow): KeyValueRow => ({
   ...makeNewRow?.()
 });
 
-const isBlank = (row?: KeyValueRow): boolean => !row?.name || row.name.trim() === '';
-const isComplete = (row?: KeyValueRow): boolean => !isBlank(row) && (row?.value ?? '').trim() !== '';
+const hasText = (value: unknown): boolean => typeof value === 'string' && value.trim() !== '';
+
+export const isBlankRow = (row?: KeyValueRow): boolean => !hasText(row?.name) && !hasText(row?.value);
+const isComplete = (row?: KeyValueRow): boolean => hasText(row?.name) && hasText(row?.value);
 
 // Whether the last row already serves as the trailing "type here" row, so we
 // don't append another. In addWhenComplete mode the trailing row lasts until it
-// has both a name and a value; otherwise until it has a name.
+// has both a name and a value; otherwise until either field has something in it.
 const hasTrailing = (last: KeyValueRow | undefined, addWhenComplete: boolean): boolean =>
-  addWhenComplete ? !isComplete(last) : isBlank(last);
+  addWhenComplete ? !isComplete(last) : isBlankRow(last);
 
 export const withTrailingBlank = (
   data: KeyValueRow[],
@@ -33,7 +35,7 @@ export const withTrailingBlank = (
   return [...rows, blankRow(makeNewRow)];
 };
 
-export const committableRows = (rows: KeyValueRow[]): KeyValueRow[] => rows.filter((row) => !isBlank(row));
+export const committableRows = (rows: KeyValueRow[]): KeyValueRow[] => rows.filter((row) => !isBlankRow(row));
 
 export const applyRowPatch = (
   rows: KeyValueRow[],
@@ -44,9 +46,9 @@ export const applyRowPatch = (
   addWhenComplete = false
 ): KeyValueRow[] => {
   const next = [...rows];
-  const wasBlank = isBlank(next[index]);
+  const wasBlank = isBlankRow(next[index]);
   next[index] = { ...next[index], ...patch };
-  const spawn = addWhenComplete ? isComplete(next[index]) : wasBlank && !isBlank(next[index]);
+  const spawn = addWhenComplete ? isComplete(next[index]) : wasBlank && !isBlankRow(next[index]);
   if (!disableNewRow && index === rows.length - 1 && spawn) {
     next.push(blankRow(makeNewRow));
   }
@@ -60,7 +62,7 @@ export const removeRowAt = (
   makeNewRow?: NewRow,
   addWhenComplete = false
 ): KeyValueRow[] => {
-  if (index === rows.length - 1 && isBlank(rows[index])) return rows;
+  if (index === rows.length - 1 && isBlankRow(rows[index])) return rows;
   const next = rows.filter((_, i) => i !== index);
   if (!disableNewRow && (next.length === 0 || !hasTrailing(next[next.length - 1], addWhenComplete))) {
     next.push(blankRow(makeNewRow));

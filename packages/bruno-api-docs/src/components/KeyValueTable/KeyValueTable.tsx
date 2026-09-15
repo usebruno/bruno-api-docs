@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
-import { useEditableRows } from '@/hooks/useEditableRows';
+import { isBlankRow, useEditableRows } from '@/hooks/useEditableRows';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { WarningIcon } from '@/assets/icons';
 import HighlightedInput from '../HighlightedInput/HighlightedInput';
@@ -263,7 +263,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
           <tbody>
             {rows.map((row, index) => {
               const isLastRow = index === rows.length - 1;
-              const isEmptyRow = !row.name || row.name.trim() === '';
+              const isEmptyRow = isBlankRow(row);
               const isLastEmptyRow = isLastRow && isEmptyRow;
               const updateCell = (field: string, value: unknown) => updateField(index, field, value);
 

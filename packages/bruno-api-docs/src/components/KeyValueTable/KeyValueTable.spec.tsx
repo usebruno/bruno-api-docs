@@ -57,3 +57,23 @@ describe('KeyValueTable — resizable columns', () => {
     expect(root.querySelector('.col-resize-handle')).toBeFalsy();
   });
 });
+
+describe('KeyValueTable — a row that has a value but no name', () => {
+  const valueOnlyRow: KeyValueRow[] = [{ id: 'r1', name: '', value: 'orphan', enabled: true }];
+
+  it('treats it as a real row: it gets a checkbox and a blank row appears underneath', () => {
+    const root = useRenderToDom(<KeyValueTable data={valueOnlyRow} onChange={noop} showEnabled />);
+
+    expect(root.querySelectorAll('tbody tr').length).toBe(2);
+    expect(root.querySelectorAll('tbody tr.empty-row').length).toBe(1);
+    expect(root.querySelectorAll('tbody input[type="checkbox"]').length).toBe(1);
+  });
+
+  it('leaves a row that is empty in both fields as the trailing blank, with no checkbox', () => {
+    const root = useRenderToDom(<KeyValueTable data={[]} onChange={noop} showEnabled />);
+
+    expect(root.querySelectorAll('tbody tr').length).toBe(1);
+    expect(root.querySelectorAll('tbody tr.empty-row').length).toBe(1);
+    expect(root.querySelectorAll('tbody input[type="checkbox"]').length).toBe(0);
+  });
+});

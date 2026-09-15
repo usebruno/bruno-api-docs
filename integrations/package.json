@@ -7,11 +7,15 @@
     "nodejs/*"
   ],
   "scripts": {
+    "build": "npm run build:shell && npm run build:core",
     "build:core": "tsc -p nodejs/core/tsconfig.json",
+    "build:shell": "esbuild shell/shell.src.mjs --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=shell/shell.js --log-level=warning && mkdir -p nodejs/core/shell && cp shell/shell.html shell/shell.js nodejs/core/shell/",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "test:assemble": "node shell/test/assemble.test.mjs",
     "test:collection": "npm run build:core && node nodejs/core/test/collection.test.mjs",
     "test:filter": "npm run build:core && node nodejs/core/test/filter.test.mjs",
+    "test:shell": "npm run build && node nodejs/core/test/shell.test.mjs",
     "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs"
   },
   "devDependencies": {
@@ -21,6 +25,7 @@
     "@types/node": "^22.10.0",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.39.0",
+    "esbuild": "^0.24.0",
     "eslint": "^9.21.0",
     "globals": "^16.0.0",
     "typescript": "^5.7.0"

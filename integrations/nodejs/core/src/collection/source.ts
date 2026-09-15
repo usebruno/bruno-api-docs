@@ -25,12 +25,16 @@ export function resolveCollectionSource(collectionOption: string): CollectionSou
   const resolved = resolveCollectionPath(collectionOption);
 
   try {
-    if (fs.statSync(resolved).isDirectory()) return { mode: 'dir', path: resolved };
+    if (fs.statSync(resolved).isDirectory()) {
+      return { mode: 'dir', path: resolved };
+    }
 
     // pointing at the manifest of an unbundled collection means the directory around it
     if (isManifest(path.basename(resolved))) {
       const manifest = safeLoad(fs.readFileSync(resolved, 'utf8'));
-      if (manifest?.bundled === false) return { mode: 'dir', path: path.dirname(resolved) };
+      if (manifest?.bundled === false) {
+        return { mode: 'dir', path: path.dirname(resolved) };
+      }
     }
   } catch {
     // failing to inspect it is the answer, not an error: treat it as a file and let the

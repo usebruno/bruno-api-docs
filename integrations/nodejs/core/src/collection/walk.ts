@@ -53,7 +53,9 @@ export function walkCollection(rootDir: string): WalkResult {
   };
 
   const visit = (dir: string, rel: string, depth: number): void => {
-    if (depth > CAPS.depth) throw new CapError('max directory depth', rel);
+    if (depth > CAPS.depth) {
+      throw new CapError('max directory depth', rel);
+    }
 
     // sorted so every language core serves the same bytes and the same ETag
     const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
@@ -89,10 +91,16 @@ export function walkCollection(rootDir: string): WalkResult {
       }
 
       const size = fs.statSync(absPath).size;
-      if (size > CAPS.fileBytes) throw new CapError('per-file size cap (1MB)', relPath);
+      if (size > CAPS.fileBytes) {
+        throw new CapError('per-file size cap (1MB)', relPath);
+      }
       totalBytes += size;
-      if (totalBytes > CAPS.totalBytes) throw new CapError('total size cap (5MB)', relPath);
-      if (files.length >= CAPS.fileCount) throw new CapError('file count cap', relPath);
+      if (totalBytes > CAPS.totalBytes) {
+        throw new CapError('total size cap (5MB)', relPath);
+      }
+      if (files.length >= CAPS.fileCount) {
+        throw new CapError('file count cap', relPath);
+      }
 
       let text: string;
       try {

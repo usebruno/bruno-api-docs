@@ -70,6 +70,26 @@ export default [
     }
   },
   {
+    files: ['shell/*.mjs'],
+    plugins: { '@stylistic': stylistic },
+    languageOptions: {
+      parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
+      globals: { ...globals.browser }
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...stylistic.configs.customize({ indent: 2, quotes: 'single', semi: true, jsx: false }).rules,
+      '@stylistic/comma-dangle': ['error', 'never'],
+      '@stylistic/arrow-parens': ['error', 'always'],
+      '@stylistic/max-len': ['error', { code: 120, ignoreStrings: true, ignoreTemplateLiterals: true }],
+      'curly': ['error', 'multi-line'],
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'no-console': ['error', { allow: ['info', 'warn', 'error'] }]
+    }
+  },
+  {
     files: ['**/example/**/*.{js,mjs,cjs}'],
     languageOptions: {
       sourceType: 'commonjs',

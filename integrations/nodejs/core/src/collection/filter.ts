@@ -86,19 +86,29 @@ function filterEnvironments(files: WalkedFile[], option: EnvironmentsOption | un
 
   const environments = partitionFiles(files, (file) => {
     if (!ROOT_ENV_FILE.test(file.path)) {
-      if (ENV_DIR.test(file.path)) return 'nested environments directory';
+      if (ENV_DIR.test(file.path)) {
+        return 'nested environments directory';
+      }
       return null;
     }
 
     // dropping unread is what keeps the server from parsing any YAML unless a filter is configured
-    if (!option) return 'environments not published by default';
+    if (!option) {
+      return 'environments not published by default';
+    }
 
     const name = environmentName(file.text);
-    if (name === null) return 'environment file without a name';
+    if (name === null) {
+      return 'environment file without a name';
+    }
     seen.add(name);
 
-    if (!publishAll && !include.has(name)) return 'environment not included';
-    if (exclude.has(name)) return 'environment excluded';
+    if (!publishAll && !include.has(name)) {
+      return 'environment not included';
+    }
+    if (exclude.has(name)) {
+      return 'environment excluded';
+    }
 
     return null;
   });
@@ -123,8 +133,12 @@ function filterTags(files: WalkedFile[], option: TagsOption | undefined): Filter
 
     const tags = requestTags(file.text);
     // fail closed: a request we cannot read the tags of might be one the filter was meant to hide
-    if (tags === null) return 'request file unreadable while filtering by tags';
-    if (!isRequestTagsIncluded(tags, includeTags, excludeTags)) return 'request excluded by tags';
+    if (tags === null) {
+      return 'request file unreadable while filtering by tags';
+    }
+    if (!isRequestTagsIncluded(tags, includeTags, excludeTags)) {
+      return 'request excluded by tags';
+    }
 
     return null;
   });

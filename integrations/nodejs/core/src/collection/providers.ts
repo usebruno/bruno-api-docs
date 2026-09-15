@@ -46,7 +46,9 @@ function serveFromMemory(body: string | Buffer, contentType: string): Provider {
 
 export function fileProvider(filePath: string): BuiltProvider {
   const size = fs.statSync(filePath).size;
-  if (size > CAPS.totalBytes) throw new CapError('total size cap (5MB)', filePath);
+  if (size > CAPS.totalBytes) {
+    throw new CapError('total size cap (5MB)', filePath);
+  }
 
   const body = fs.readFileSync(filePath);
 
@@ -61,7 +63,9 @@ export function dirProvider(rootDir: string, filters: Omit<CollectionOptions, 'c
 
   const filtered = applyFilters(walked.files, filters);
   const envelope: Record<string, string> = {};
-  for (const file of filtered.files) envelope[file.path] = file.text;
+  for (const file of filtered.files) {
+    envelope[file.path] = file.text;
+  }
   const body = JSON.stringify({ 'opencollection-fragments': '1', 'files': envelope });
 
   return {
@@ -74,10 +78,18 @@ export function dirProvider(rootDir: string, filters: Omit<CollectionOptions, 'c
 
 /** What the mount serves when the collection could not be built. The app still starts. */
 export function errorProvider(err: unknown): Provider {
-  if (err instanceof CapError) return () => errorResponse(413, err.message);
-  if (err instanceof ManifestError) return () => errorResponse(404, err.message);
-  if (err instanceof ConfigError) return () => errorResponse(500, err.message);
-  if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') return () => errorResponse(404, 'Collection not found.');
+  if (err instanceof CapError) {
+    return () => errorResponse(413, err.message);
+  }
+  if (err instanceof ManifestError) {
+    return () => errorResponse(404, err.message);
+  }
+  if (err instanceof ConfigError) {
+    return () => errorResponse(500, err.message);
+  }
+  if ((err as NodeJS.ErrnoException)?.code === 'ENOENT') {
+    return () => errorResponse(404, 'Collection not found.');
+  }
 
   return () => errorResponse(500, 'Collection could not be read.');
 }

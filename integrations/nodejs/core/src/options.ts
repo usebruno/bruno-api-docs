@@ -17,14 +17,16 @@ export interface CollectionOptions {
   tags?: TagsOption;
 }
 
+/** What is handed to the renderer. Only what it reads: an option it ignores does nothing. */
 export interface RendererOptions {
-  theme?: 'light' | 'dark';
-  pageTitle?: string;
   logo?: string;
   gitCollectionUrl?: string;
 }
 
-export interface ApiDocsOptions extends CollectionOptions, RendererOptions {}
+export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
+  /** The `<title>` of the page we serve. Not sent to the renderer; it has no use for it. */
+  pageTitle?: string;
+}
 
 export class ConfigError extends Error {}
 

@@ -10,6 +10,17 @@ export const StyledWrapper = styled.div`
     overflow-y: auto;
   }
 
+  .tab-panel-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex-shrink: 0;
+  }
+
+  .tab-panel-content:not(:first-child) {
+    padding-bottom: 1rem;
+  }
+
   .tabs-right {
     gap: 0.75rem;
   }

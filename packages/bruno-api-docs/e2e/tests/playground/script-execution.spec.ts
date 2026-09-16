@@ -35,6 +35,10 @@ const axios = require('axios');
 await axios.get('https://unreachable.invalid/get');
 `;
 
+const REQUIRE_LODASH_POST_RESPONSE_SCRIPT = `
+const _ = require('lodash');
+`;
+
 const REQUIRE_LODASH_PRE_REQUEST_SCRIPT = `
 const _ = require('lodash');
 `;
@@ -95,6 +99,39 @@ test.describe('playground script execution', () => {
     await responsePane.switchToTab('response');
     await expect(responsePane.scriptErrors).toHaveCount(0);
     await expect(responsePane.bodyEditor.surface).toBeVisible();
+  });
+
+  test('each script error card closes on its own and the body keeps its height below the cards', async ({ page, playground, responsePane }) => {
+    await page.setViewportSize({ width: 1280, height: 640 });
+    await responsePane.mockUsersResponse(JSON.stringify({ users: [] }));
+
+    await page.goto('/#/?pg=1&dock=bottom');
+    await playground.openSidebarItem('get users');
+    await playground.selectTab('scripts');
+    await page.getByTestId('scripts-tabs-tab-post-response').click();
+    await setEditorScript(page, playground.postResponseScriptEditor, REQUIRE_LODASH_POST_RESPONSE_SCRIPT);
+    await playground.selectTab('tests');
+    await setEditorScript(page, playground.testsEditor, REQUIRE_FS_TESTS_SCRIPT);
+
+    await responsePane.send();
+
+    await expect(responsePane.scriptErrors.getByTestId('error-title')).toHaveText(['Post-Response Script Error', 'Test Script Error']);
+    await expect.poll(() => responsePane.bodyEditor.surface.evaluate((el) => el.clientHeight)).toBeGreaterThan(100);
+    await responsePane.bodyPanel.evaluate((panel) => { panel.scrollTop = panel.scrollHeight; });
+    await expect.poll(() => responsePane.bodyPanel.evaluate((panel) => {
+      const editor = panel.querySelector('[data-testid="response-body-editor"]') as HTMLElement;
+      return panel.getBoundingClientRect().bottom - editor.getBoundingClientRect().bottom;
+    })).toBeGreaterThanOrEqual(15);
+
+    await responsePane.switchToTab('tests');
+    const summary = responsePane.testsPanel.getByText('Tests (3), Passed: 1, Failed: 2');
+    await summary.scrollIntoViewIfNeeded();
+    await expect(summary).toBeInViewport();
+
+    await responsePane.testsScriptErrors.getByTestId('error-banner-dismiss').first().click();
+    await expect(responsePane.testsScriptErrors.getByTestId('error-title')).toHaveText(['Test Script Error']);
+    await responsePane.switchToTab('response');
+    await expect(responsePane.scriptErrors.getByTestId('error-title')).toHaveText(['Test Script Error']);
   });
 
   test('a pre-request script that throws shows a Pre-Request Script Error card instead of a response', async ({ page, playground, responsePane }) => {

@@ -9,12 +9,18 @@ on:
 
 
 
+permissions:
+  contents: read
+  pull-requests: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint_unit_tests_and_builds:
+    needs: changes
+    if: needs.changes.outputs.renderer == 'true'
     runs-on: ubuntu-latest
     steps:
       # eslint-plugin-diff needs the base branch present to diff against.
@@ -43,8 +49,8 @@ jobs:
         run: npm run build:standalone -w packages/bruno-api-docs
 
   e2e:
-    needs: lint_unit_tests_and_builds
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    needs: [changes, lint_unit_tests_and_builds]
+    if: needs.changes.outputs.renderer == 'true' && (github.event_name == 'push' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -70,3 +76,51 @@ jobs:
           name: playwright-report
           path: packages/bruno-api-docs/playwright-report/
           retention-days: 30
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      renderer: ${{ steps.filter.outputs.renderer }}
+      integrations: ${{ steps.filter.outputs.integrations }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+        id: filter
+        with:
+          filters: |
+            renderer:
+              - '!integrations/**'
+            integrations:
+              - 'integrations/**'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/integrations-matrix.yml'
+
+  integrations:
+    needs: changes
+    # a job-level if, not a workflow paths filter: a skipped job still reports and satisfies the required check
+    if: needs.changes.outputs.integrations == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+        with:
+          working_directory: integrations
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-integrations-${{ hashFiles('integrations/package-lock.json') }}
+          restore-keys: npm-integrations-
+
+      - run: npm ci
+
+      - run: npm run test:ci
+
+      # depends on the live CDN bundle, which this repo does not control, so it cannot block a merge
+      - name: browser contract, against the CDN
+        continue-on-error: true
+        run: npx playwright install --with-deps chromium && npm run test:browser

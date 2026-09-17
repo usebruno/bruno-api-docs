@@ -60,8 +60,8 @@ status_is() { [ "$(curl -s -o /dev/null -w '%{http_code}' "${@:2}")" = "$1" ]; }
 header_of() { curl -s -D - -o /dev/null "${@:2}" | tr -d '\r' | awk -v k="$1" 'tolower($1)==tolower(k":"){sub(/^[^:]*: */,"");print}'; }
 header_has() { local name=$1 want=$2; shift 2; header_of "$name" "$@" | grep -q "$want"; }
 header_absent() { local name=$1; shift; [ -z "$(header_of "$name" "$@")" ]; }
-body_has() { curl -s "$1" | grep -q "$2"; }
-body_lacks() { ! curl -s "$1" | grep -Eq "$2"; }
+body_has() { grep -q "$2" <<<"$(curl -s "$1")"; }
+body_lacks() { ! grep -Eq "$2" <<<"$(curl -s "$1")"; }
 file_has() { grep -q "$2" "$1"; }
 file_lacks() { ! grep -q "$2" "$1"; }
 revalidates() { status_is 304 -H "If-None-Match: $(header_of ETag "$1")" "$1"; }

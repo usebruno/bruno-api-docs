@@ -1,0 +1,53 @@
+name: Integrations matrix
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1'
+  pull_request:
+    branches: [main, 'release/**']
+    types: [labeled, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  cells:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+        family: [express, fastify, nestjs]
+    name: node ${{ matrix.node }} / ${{ matrix.family }}
+    defaults:
+      run:
+        working-directory: integrations
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - run: npm ci
+
+      - run: bash nodejs/scripts/matrix.sh --family ${{ matrix.family }}
+
+  node-20:
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests')
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    name: node 20 (end of life, courtesy)
+    defaults:
+      run:
+        working-directory: integrations
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: bash nodejs/scripts/matrix.sh

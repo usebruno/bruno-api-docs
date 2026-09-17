@@ -7,11 +7,14 @@
     "nodejs/*"
   ],
   "scripts": {
-    "build": "npm run build:shell && npm run build:core",
+    "build": "npm run build:shell && npm run build:core && npm run build:express",
     "build:core": "tsc -p nodejs/core/tsconfig.json",
+    "build:express": "tsc -p nodejs/express/tsconfig.json",
     "build:shell": "esbuild shell/shell.src.mjs --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=shell/shell.js --log-level=warning && mkdir -p nodejs/core/shell && cp shell/shell.html shell/shell.js nodejs/core/shell/",
+    "check:express": "npm run build && bash contract-tests/check.sh --example nodejs/express/example/server.js --port 5456",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "start:express": "node nodejs/express/example/server.js",
     "test:assemble": "node shell/test/assemble.test.mjs",
     "test:collection": "npm run build:core && node nodejs/core/test/collection.test.mjs",
     "test:docs": "npm run build && node nodejs/core/test/docs.test.mjs",
@@ -22,13 +25,16 @@
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@stylistic/eslint-plugin": "^5.3.1",
+    "@types/express": "^5.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.10.0",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.39.0",
     "esbuild": "^0.24.0",
     "eslint": "^9.21.0",
+    "express": "^5.0.0",
     "globals": "^16.0.0",
+    "helmet": "^8.0.0",
     "typescript": "^5.7.0"
   }
 }

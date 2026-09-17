@@ -1,0 +1,7 @@
+info:
+  name: List products
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: "{{baseUrl}}/products"

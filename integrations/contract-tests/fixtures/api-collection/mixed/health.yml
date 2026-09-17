@@ -1,0 +1,7 @@
+info:
+  name: Health
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: "{{baseUrl}}/health"

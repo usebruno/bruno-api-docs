@@ -162,6 +162,16 @@ check "/broken/docs/ -> 404, not a crash"       status_is 404 "$BASE/broken/docs
 check "/broken/docs/ says what is wrong"        body_has "$BASE/broken/docs/" 'Collection not found'
 check "/broken/docs/collection.yml -> 404 too"  status_is 404 "$BASE/broken/docs/collection.yml"
 
+echo "== the host app is left alone"
+check "its own 404 still comes from it"         status_is 404 -X POST "$BASE/control"
+
+if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/openapi.json")" = "200" ]; then
+  echo "== the host publishes a spec, and the docs routes are not in it"
+  curl -s "$BASE/openapi.json" >"$TMP/spec.json"
+  check "no docs route leaked into it"          file_lacks "$TMP/spec.json" '/docs'
+  check "the host's own routes are still there" file_has "$TMP/spec.json" '/control'
+fi
+
 echo "== the adopter's CSP holds"
 check "helmet's CSP header is intact"           header_has Content-Security-Policy "script-src 'self' https://cdn.usebruno.com" "$BASE/docs/"
 

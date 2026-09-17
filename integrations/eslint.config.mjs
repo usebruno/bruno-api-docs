@@ -24,7 +24,7 @@ export default [
         ...globals.node
       }
     },
-    files: ['eslint.config.mjs', '**/src/**/*.ts', '**/test/**/*.{ts,mjs}'],
+    files: ['eslint.config.mjs', '**/src/**/*.ts', '**/test/**/*.{ts,mjs}', 'contract-tests/apps/*.js', '**/examples/**/*.{js,ts}'],
     rules: {
       ...js.configs.recommended.rules,
       ...stylistic.configs.customize({
@@ -33,6 +33,7 @@ export default [
         semi: true,
         jsx: false
       }).rules,
+      '@stylistic/quotes': ['error', 'single', { avoidEscape: true }],
       '@stylistic/comma-dangle': ['error', 'never'],
       '@stylistic/brace-style': ['error', '1tbs', { allowSingleLine: true }],
       '@stylistic/arrow-parens': ['error', 'always'],
@@ -90,11 +91,7 @@ export default [
     }
   },
   {
-    files: ['**/example/**/*.{js,mjs,cjs}'],
-    languageOptions: {
-      sourceType: 'commonjs',
-      globals: { ...globals.node }
-    },
+    files: ['contract-tests/apps/*.js', '**/examples/**/*.{js,ts}'],
     rules: {
       'no-console': 'off'
     }

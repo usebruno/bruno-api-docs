@@ -133,8 +133,6 @@ const handler = docs.handler();
     assert.match(String(res.body), /Collection not found/);
   }
 
-  assert.match(broken.embed({ base: '/docs' }), /<!-- bruno api docs: Collection not found/);
-
   const overCap = quiet(() => createDocs({
     collection: path.join(here, '..', '..', '..', 'contract-tests', 'fixtures', 'walk-oversize')
   }));
@@ -142,14 +140,6 @@ const handler = docs.handler();
 
   const badOptions = quiet(() => createDocs({ collection, environments: { exclude: ['Prod'] } }));
   assert.equal(badOptions.collection().status, 500, 'a config error reaches the mount too, not the boot');
-}
-
-// --- embed(): the block only, with the mount stamped in
-{
-  const embed = docs.embed({ base: '/docs' });
-  assert.ok(embed.includes('src="/docs/shell.js"'), 'a base without a trailing slash still works');
-  assert.equal(docs.embed({ base: '/docs/' }), embed, 'with or without, the same block');
-  assert.throws(() => docs.embed({ base: '' }), /`base`/);
 }
 
 fs.rmSync(path.join(os.tmpdir(), 'x-not-there'), { force: true });

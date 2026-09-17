@@ -1,7 +1,8 @@
 import type { FastifyPluginAsync, FastifyReply } from 'fastify';
-import { createDocs, type ApiDocsOptions, type HttpResponse } from '@usebruno/api-docs-core';
+import { createDocs, embed, type ApiDocsOptions, type HttpResponse } from '@usebruno/api-docs-core';
 
-export type { ApiDocsOptions, CollectionOptions, RendererOptions, EnvironmentsOption, TagsOption }
+export { createDocs, embed };
+export type { ApiDocsOptions, CollectionOptions, RendererOptions, EmbedOptions, EnvironmentsOption, TagsOption }
   from '@usebruno/api-docs-core';
 
 /** `hide` is @fastify/swagger's, read at runtime, and Fastify's own FastifySchema omits it. */
@@ -18,7 +19,7 @@ const send = (reply: FastifyReply, response: HttpResponse): FastifyReply => {
 };
 
 /**
- * `await app.register(apiDocs, { collection: './api-collection', prefix: '/docs' })`. The mount is
+ * `app.register(apiDocs, { collection: './api-collection', prefix: '/docs' })`. The mount is
  * Fastify's own `prefix`, so there is no `mountPath`. Deliberately not wrapped in `fastify-plugin`:
  * staying encapsulated is what keeps the 405 off the host's routes and lets an adopter put auth in
  * front with `child.addHook('onRequest', ...)`.

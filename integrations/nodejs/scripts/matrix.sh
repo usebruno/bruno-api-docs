@@ -94,9 +94,9 @@ run_cell() {
   local family="${cell%@*}"
   local app="$TMP/$cell"
 
-  mkdir -p "$app/example"
+  mkdir -p "$app/apps"
   printf '{ "name": "matrix-%s", "private": true, "version": "0.0.0" }\n' "${cell/@/-}" >"$app/package.json"
-  cp "$ROOT/nodejs/$family/example/server.js" "$app/example/server.js"
+  cp "$ROOT/contract-tests/apps/$family.js" "$app/apps/$family.js"
   cp -R "$ROOT/contract-tests/fixtures" "$app/fixtures"
 
   # shellcheck disable=SC2046
@@ -115,8 +115,7 @@ run_cell() {
   suite() {
     local port=$1
     shift
-    env COLLECTION=../fixtures/api-collection BUNDLED=../fixtures/bundled.yml "$@" \
-      bash "$ROOT/contract-tests/check.sh" --example "$app/example/server.js" --port "$port" | tail -1
+    env "$@" bash "$ROOT/contract-tests/check.sh" --app "$app/apps/$family.js" --port "$port" | tail -1
   }
   if [ "$family" = "nestjs" ]; then
     echo "   platform-express"

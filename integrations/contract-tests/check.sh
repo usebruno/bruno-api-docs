@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # The HTTP contract every wrapper, in every framework, in every language must satisfy.
-# Boots one example, asserts from outside it, exits non-zero on any miss.
+# Boots one rig from contract-tests/apps, asserts from outside it, exits non-zero on any miss.
 #
-#   bash contract-tests/check.sh --example nodejs/express/example/server.js --port 5456
-#   bash contract-tests/check.sh --example ... --save /tmp/express      keep the served bodies
-#   bash contract-tests/check.sh --example ... --compare /tmp/express   diff bodies against a run
+#   bash contract-tests/check.sh --app contract-tests/apps/express.js --port 5456
+#   bash contract-tests/check.sh --app ... --save /tmp/express      keep the served bodies
+#   bash contract-tests/check.sh --app ... --compare /tmp/express   diff bodies against a run
 #
-# Every example serves the same five mounts over the same fixture. That convention is what makes
-# one script cover the whole matrix: a cell is an invocation, not an edit.
+# Every rig serves the same five mounts over the same fixture. That convention is what makes one
+# script cover the whole matrix: a cell is an invocation, not an edit.
 #
 #   /docs          environments include Local, tags exclude internal, pageTitle, gitCollectionUrl
 #   /api/v2/docs   environments all minus Prod
@@ -17,77 +17,35 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-EXAMPLE=""
+source "$ROOT/contract-tests/lib.sh"
+
+APP=""
 PORT=5456
 SAVE=""
 COMPARE=""
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --example) EXAMPLE="$2"; shift 2 ;;
+    --app) APP="$2"; shift 2 ;;
     --port) PORT="$2"; shift 2 ;;
     --save) SAVE="$2"; shift 2 ;;
     --compare) COMPARE="$2"; shift 2 ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
-[ -n "$EXAMPLE" ] || { echo "--example is required" >&2; exit 2; }
-case "$EXAMPLE" in /*) ;; *) EXAMPLE="$ROOT/$EXAMPLE" ;; esac
-[ -f "$EXAMPLE" ] || { echo "no example at $EXAMPLE" >&2; exit 2; }
+[ -n "$APP" ] || { echo "--app is required" >&2; exit 2; }
+case "$APP" in /*) ;; *) APP="$ROOT/$APP" ;; esac
+[ -f "$APP" ] || { echo "no app at $APP" >&2; exit 2; }
 
 BASE="http://localhost:$PORT"
 TMP="$(mktemp -d)"
-# stderr goes first: the shell announces a killed background job, and that reads like a failure
-trap 'exec 2>/dev/null; pkill -P "${SERVER_PID:-0}" || true; kill "${SERVER_PID:-0}" || true; rm -rf "$TMP"' EXIT
-
-pass=0
-fail=0
-check() {
-  local name=$1
-  shift
-  if "$@"; then
-    pass=$((pass + 1))
-    printf '  ok   %s\n' "$name"
-  else
-    fail=$((fail + 1))
-    printf '  FAIL %s\n' "$name"
-  fi
-}
-
-# ---- helpers: each asserts exactly one fact ---------------------------------
-
-status_is() { [ "$(curl -s -o /dev/null -w '%{http_code}' "${@:2}")" = "$1" ]; }
-header_of() { curl -s -D - -o /dev/null "${@:2}" | tr -d '\r' | awk -v k="$1" 'tolower($1)==tolower(k":"){sub(/^[^:]*: */,"");print}'; }
-header_has() { local name=$1 want=$2; shift 2; header_of "$name" "$@" | grep -q "$want"; }
-header_absent() { local name=$1; shift; [ -z "$(header_of "$name" "$@")" ]; }
-body_has() { grep -q "$2" <<<"$(curl -s "$1")"; }
-body_lacks() { ! grep -Eq "$2" <<<"$(curl -s "$1")"; }
-file_has() { grep -q "$2" "$1"; }
-file_lacks() { ! grep -q "$2" "$1"; }
-revalidates() { status_is 304 -H "If-None-Match: $(header_of ETag "$1")" "$1"; }
-redirects_to() { status_is 301 "$1" && [ "$(header_of Location "$1")" = "$2" ]; }
-paths_in() { node -e 'const d=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log(Object.keys(d.files).sort().join(","))' "$1"; }
-paths_are() { [ "$(paths_in "$1")" = "$2" ]; }
-none_mention() { ! grep -q "$1" "${@:2}"; }
-no_origins() { ! grep -oE 'https?://[A-Za-z0-9./_-]+' "$1" | grep -q .; }
-occurs_once() { [ "$(curl -s "$1" | grep -c "$2")" = "1" ]; }
-config_of() { curl -s "$1" | grep -o 'data-config="[^"]*"'; }
-config_lacks() { ! config_of "$1" | grep -Eq "&quot;($2)&quot;:"; }
+trap 'stop; rm -rf "$TMP"' EXIT
 
 # ---- boot, from a different cwd on purpose ---------------------------------
 
-# a leftover server on this port would answer every assertion, and the suite would be grading
-# the wrong process. Say so once, instead of failing fifty times.
-if curl -s -o /dev/null --max-time 1 "$BASE/control"; then
-  echo "port $PORT is already serving something. Stop it, or pass --port." >&2
-  exit 2
-fi
-
-( cd "$TMP" && PORT="$PORT" node "$EXAMPLE" >"$TMP/server.log" 2>&1 ) &
-SERVER_PID=$!
-for _ in $(seq 1 60); do curl -s -o /dev/null "$BASE/control" && break; sleep 0.1; done
-curl -s -o /dev/null "$BASE/control" || { echo "server did not start"; cat "$TMP/server.log"; exit 1; }
-echo "booted $(basename "$(dirname "$(dirname "$EXAMPLE")")")/$(basename "$EXAMPLE") on :$PORT from $TMP"
+port_is_free "$PORT"
+boot "$APP" "$PORT"
+echo "booted $(basename "$APP") on :$PORT from $TMP"
 
 # ---- the routes, identical at every mount ----------------------------------
 

@@ -4,9 +4,9 @@ import { defineConfig } from '@playwright/test';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-// EXAMPLE and PORT are how another language core points this at its own server. The spec itself
+// APP and PORT are how another language core points this at its own server. The spec itself
 // asserts only what the contract promises, so it does not care which one booted.
-const EXAMPLE = process.env.EXAMPLE || 'nodejs/express/example/server.js';
+const APP = process.env.APP || 'contract-tests/apps/express.js';
 const PORT = process.env.PORT || '5462';
 
 export default defineConfig({
@@ -21,7 +21,7 @@ export default defineConfig({
     trace: 'retain-on-failure'
   },
   webServer: {
-    command: `node ${EXAMPLE}`,
+    command: `node ${APP}`,
     cwd: ROOT,
     env: { ...process.env, PORT },
     port: Number(PORT),

@@ -9,7 +9,7 @@ import { createRequire } from 'node:module';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const dist = path.join(here, '..', 'dist');
-const { loadShell, rendererConfig, stripGitCredentials, CDN } = require(path.join(dist, 'routes', 'shell.js'));
+const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(path.join(dist, 'routes', 'shell.js'));
 
 // --- stamping: every placeholder is filled, at any mount
 {
@@ -107,13 +107,17 @@ const { loadShell, rendererConfig, stripGitCredentials, CDN } = require(path.joi
   assert.equal(loadShell({ collection: './c' }).html('/docs/').headers['Cache-Control'], 'no-cache');
 }
 
-// --- embed(): the body block only, for an adopter's own page
+// --- embed(): the body block only, for an adopter's own page. No collection involved.
 {
-  const embed = loadShell({ collection: './c' }).embed('/docs/');
-  assert.ok(!embed.includes('<html'), 'no document wrapper');
-  assert.ok(!embed.includes('<title'), 'the host page owns the title');
-  assert.ok(embed.includes('id="bruno-docs"') && embed.includes('src="/docs/shell.js"'));
-  assert.ok(embed.startsWith('<!-- embed:start -->') && embed.endsWith('<!-- embed:end -->'));
+  const block = embed({ base: '/docs' });
+  assert.ok(!block.includes('<html'), 'no document wrapper');
+  assert.ok(!block.includes('<title'), 'the host page owns the title');
+  assert.ok(block.includes('id="bruno-docs"') && block.includes('src="/docs/shell.js"'), 'a base without a trailing slash still works');
+  assert.ok(block.startsWith('<!-- embed:start -->') && block.endsWith('<!-- embed:end -->'));
+  assert.equal(embed({ base: '/docs/' }), block, 'with or without the slash, the same block');
+  assert.ok(embed({ base: '/docs', gitCollectionUrl: 'https://u:p@github.com/acme/api' }).includes('github.com/acme/api'), 'renderer options reach the block');
+  assert.ok(!embed({ base: '/docs', gitCollectionUrl: 'https://u:p@github.com/acme/api' }).includes('u:p@'), 'with credentials stripped, as on the page');
+  assert.throws(() => embed({ base: '' }), /`base`/);
 }
 
 // --- the built bundle the core ships

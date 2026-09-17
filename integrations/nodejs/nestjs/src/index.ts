@@ -1,8 +1,9 @@
 import type { ServerResponse } from 'node:http';
 import { Module, type DynamicModule, type MiddlewareConsumer, type NestModule } from '@nestjs/common';
-import { createDocs, type ApiDocsOptions, type Request } from '@usebruno/api-docs-core';
+import { createDocs, embed, type ApiDocsOptions, type Request } from '@usebruno/api-docs-core';
 
-export type { ApiDocsOptions, CollectionOptions, RendererOptions, EnvironmentsOption, TagsOption }
+export { createDocs, embed };
+export type { ApiDocsOptions, CollectionOptions, RendererOptions, EmbedOptions, EnvironmentsOption, TagsOption }
   from '@usebruno/api-docs-core';
 
 export interface ApiDocsModuleOptions extends ApiDocsOptions {

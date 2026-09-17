@@ -1,7 +1,8 @@
 import type { RequestHandler } from 'express';
-import { createDocs, type ApiDocsOptions } from '@usebruno/api-docs-core';
+import { createDocs, embed, type ApiDocsOptions } from '@usebruno/api-docs-core';
 
-export type { ApiDocsOptions, CollectionOptions, RendererOptions, EnvironmentsOption, TagsOption }
+export { createDocs, embed };
+export type { ApiDocsOptions, CollectionOptions, RendererOptions, EmbedOptions, EnvironmentsOption, TagsOption }
   from '@usebruno/api-docs-core';
 
 /**

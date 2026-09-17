@@ -1,4 +1,4 @@
-import { validateOptions, ConfigError, type ApiDocsOptions } from './options';
+import { validateOptions, type ApiDocsOptions } from './options';
 import type { HttpResponse, Conditional } from './http';
 import { log } from './log';
 import { providerFor } from './collection';
@@ -11,7 +11,6 @@ export interface Docs {
   shell(base: string): HttpResponse;
   shellJs(conditional?: Conditional): HttpResponse;
   collection(conditional?: Conditional): HttpResponse;
-  embed(opts: { base: string }): string;
 }
 
 export function createDocs(options: ApiDocsOptions): Docs {
@@ -32,13 +31,6 @@ function liveDocs(shell: Shell, provider: Provider): Docs {
     shell: (base) => shell.html(base),
     shellJs: (conditional = {}) => shell.js(conditional),
     collection: (conditional = {}) => provider(conditional),
-    embed: ({ base }) => {
-      if (!base) {
-        throw new ConfigError('embed: `base` (the docs mount, e.g. "/docs") is required');
-      }
-
-      return shell.embed(base.endsWith('/') ? base : base + '/');
-    },
     handler: () => createHandler(docs)
   };
 
@@ -50,7 +42,6 @@ function failedDocs(serve: Provider): Docs {
     shell: () => serve({}),
     shellJs: () => serve({}),
     collection: () => serve({}),
-    embed: () => `<!-- bruno api docs: ${String(serve({}).body).trim()} -->`,
     handler: () => createHandler(docs)
   };
 

@@ -5,14 +5,13 @@ const { apiDocs } = require('@usebruno/api-docs-fastify');
 
 const PORT = Number(process.env.PORT || 5457);
 // relative on purpose: the core resolves it against this file, not the cwd
-const COLLECTION = process.env.COLLECTION || '../../../contract-tests/fixtures/api-collection';
-const BUNDLED = process.env.BUNDLED || '../../../contract-tests/fixtures/bundled.yml';
+const COLLECTION = '../fixtures/api-collection';
+const BUNDLED = '../fixtures/bundled.yml';
 
 const app = Fastify({ logger: false });
 
-
-// the same strict CSP the Express example sets with helmet, by hand here so the example
-// stays free of a plugin the contract does not depend on
+// the same CSP the Express rig sets with helmet, by hand so the rig stays free of a plugin the
+// contract does not depend on
 app.addHook('onSend', async (request, reply) => {
   reply.header(
     'content-security-policy',
@@ -20,7 +19,6 @@ app.addHook('onSend', async (request, reply) => {
     + "script-src 'self' https://cdn.usebruno.com 'wasm-unsafe-eval'; "
     + "style-src 'self' 'unsafe-inline' https://cdn.usebruno.com https://fonts.googleapis.com; "
     + "font-src 'self' https://fonts.gstatic.com; "
-    // data: because the renderer fetches its wasm sandbox from a data URI
     + "connect-src 'self' data:"
   );
 });
@@ -55,7 +53,7 @@ async function main() {
   await app.register(apiDocs, { prefix: '/broken/docs', collection: './there-is-no-collection-here' });
 
   await app.listen({ port: PORT, host: '127.0.0.1' });
-  console.log(`fastify example on http://localhost:${PORT}`);
+  console.log(`fastify rig on http://localhost:${PORT}`);
 }
 
 main();

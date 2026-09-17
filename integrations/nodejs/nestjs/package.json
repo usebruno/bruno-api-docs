@@ -1,0 +1,22 @@
+{
+  "name": "@usebruno/api-docs-nestjs",
+  "version": "0.1.0-beta.1",
+  "private": true,
+  "description": "Serve a Bruno collection as API docs from inside your own NestJS app, behind your own auth.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0",
+    "@nestjs/core": "^10.0.0 || ^11.0.0"
+  },
+  "dependencies": {
+    "@usebruno/api-docs-core": "0.1.0-beta.1"
+  }
+}

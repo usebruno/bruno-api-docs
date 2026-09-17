@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import type { IncomingHttpHeaders, ServerResponse } from 'node:http';
 import type { HttpResponse, Conditional } from '../http';
 
 export interface Routes {
@@ -8,11 +8,18 @@ export interface Routes {
 }
 
 /**
- * `url` is the path within the mount and `originalUrl`, when the framework sets it, is the
- * full path. Express gives both. A framework that gives neither has to strip the mount itself
- * before calling this, which is what `mountPath` is for in the NestJS package.
+ * Everything the handler reads, and nothing else. An `IncomingMessage` satisfies it, and so does
+ * an object a wrapper builds: NestJS on platform-fastify has to, because middie leaves `url` as
+ * `/` and only `originalUrl` carries the path.
+ *
+ * `url` is the path within the mount; `originalUrl`, where the framework sets it, is the whole one.
  */
-export type Request = IncomingMessage & { originalUrl?: string };
+export interface Request {
+  method?: string;
+  url?: string;
+  originalUrl?: string;
+  headers: IncomingHttpHeaders;
+}
 
 export type Handler = (req: Request, res: ServerResponse) => void;
 

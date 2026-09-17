@@ -7,13 +7,16 @@
     "nodejs/*"
   ],
   "scripts": {
-    "build": "npm run build:shell && npm run build:core && npm run build:express && npm run build:fastify",
+    "build": "npm run build:shell && npm run build:core && npm run build:express && npm run build:fastify && npm run build:nestjs",
     "build:core": "tsc -p nodejs/core/tsconfig.json",
     "build:express": "tsc -p nodejs/express/tsconfig.json",
     "build:fastify": "tsc -p nodejs/fastify/tsconfig.json",
+    "build:nestjs": "tsc -p nodejs/nestjs/tsconfig.json",
     "build:shell": "esbuild shell/shell.src.mjs --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=shell/shell.js --log-level=warning && mkdir -p nodejs/core/shell && cp shell/shell.html shell/shell.js nodejs/core/shell/",
     "check:express": "npm run build && bash contract-tests/check.sh --example nodejs/express/example/server.js --port 5456",
     "check:fastify": "npm run build && bash contract-tests/check.sh --example nodejs/fastify/example/server.js --port 5457",
+    "check:nestjs": "npm run build && bash contract-tests/check.sh --example nodejs/nestjs/example/server.js --port 5458",
+    "check:nestjs-fastify": "npm run build && ADAPTER=fastify bash contract-tests/check.sh --example nodejs/nestjs/example/server.js --port 5459",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "start:express": "node nodejs/express/example/server.js",
@@ -22,12 +25,17 @@
     "test:collection": "npm run build:core && node nodejs/core/test/collection.test.mjs",
     "test:docs": "npm run build && node nodejs/core/test/docs.test.mjs",
     "test:filter": "npm run build:core && node nodejs/core/test/filter.test.mjs",
+    "test:nestjs": "npm run build && node nodejs/nestjs/test/sub-path.test.mjs",
     "test:shell": "npm run build && node nodejs/core/test/shell.test.mjs",
     "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@fastify/swagger": "^9.8.1",
+    "@nestjs/common": "^11.2.5",
+    "@nestjs/core": "^11.2.5",
+    "@nestjs/platform-express": "^11.2.5",
+    "@nestjs/platform-fastify": "^11.2.5",
     "@stylistic/eslint-plugin": "^5.3.1",
     "@types/express": "^5.0.0",
     "@types/js-yaml": "^4.0.9",
@@ -40,6 +48,8 @@
     "fastify": "^5.12.5",
     "globals": "^16.0.0",
     "helmet": "^8.0.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
     "typescript": "^5.7.0"
   }
 }

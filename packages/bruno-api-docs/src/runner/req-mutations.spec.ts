@@ -232,6 +232,221 @@ items:
     expect(sent.headers?.get('X-From-Folder')).toBe('yes');
   });
 
+  it('a pre-request script that sets Authorization wins over inherited collection bearer auth', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Script Auth Precedence"
+request:
+  auth:
+    type: "bearer"
+    token: "collection-token"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      auth: inherit
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('authorization', 'Bearer script-token');
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('authorization')).toBe('Bearer script-token');
+  });
+
+  it('a pre-request script that sets the api key header wins over the request api key auth', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Script ApiKey Precedence"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      auth:
+        type: "apikey"
+        key: "X-API-Key"
+        value: "config-key"
+        placement: "header"
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('X-API-Key', 'script-key');
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('x-api-key')).toBe('script-key');
+  });
+
+  it('folder-level inherited basic auth overwrites a pre-request script Authorization header, as on desktop', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Folder Auth Precedence"
+items:
+  - name: "folder"
+    type: "folder"
+    request:
+      auth:
+        type: "basic"
+        username: "user"
+        password: "pass"
+    items:
+      - name: "r"
+        type: "http"
+        http:
+          method: "GET"
+          url: "https://api.example.com/base"
+          auth: inherit
+        runtime:
+          scripts:
+            - type: before-request
+              code: |
+                req.setHeader('AUTHORIZATION', 'Bearer script-token');
+`;
+    const sent = await sendWith(yaml, [0, 0]);
+    expect(sent.headers?.get('authorization')).toBe(`Basic ${btoa('user:pass')}`);
+  });
+
+  it('a Headers tab Authorization entry is overwritten by the request bearer auth when no script touches it', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Auth Tab Beats Headers Tab"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      headers:
+        - name: "Authorization"
+          value: "Bearer tab-token"
+      auth:
+        type: "bearer"
+        token: "config-token"
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('X-Other', 'set-by-script');
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('authorization')).toBe('Bearer config-token');
+    expect(sent.headers?.get('x-other')).toBe('set-by-script');
+  });
+
+  it('a pre-request script that overwrites the Headers tab Authorization entry wins over the request bearer auth', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Script Beats Both Tabs"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      headers:
+        - name: "Authorization"
+          value: "Bearer tab-token"
+      auth:
+        type: "bearer"
+        token: "config-token"
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('Authorization', 'Bearer script-token');
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('authorization')).toBe('Bearer script-token');
+  });
+
+  it('a collection cannot pre-declare script-written headers to suppress the configured auth', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Injected Script Header List"
+items:
+  - name: "r"
+    type: "http"
+    __brunoHeadersSetByScript: ["authorization"]
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      headers:
+        - name: "Authorization"
+          value: "Bearer tab-token"
+      auth:
+        type: "bearer"
+        token: "config-token"
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('authorization')).toBe('Bearer config-token');
+  });
+
+  it('a pre-request script overwriting a header that has duplicate rows sends the script value once, with no auth configured', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Duplicate Rows Collapse"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      headers:
+        - name: "X-Dup"
+          value: "row-one"
+        - name: "X-Dup"
+          value: "row-two"
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('X-Dup', 'script');
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('x-dup')).toBe('script');
+  });
+
+  it('a pre-request script overwriting duplicate Authorization rows wins over the configured bearer auth', async () => {
+    const yaml = `
+opencollection: "1.0.0"
+info:
+  name: "Duplicate Rows Then Script"
+items:
+  - name: "r"
+    type: "http"
+    http:
+      method: "GET"
+      url: "https://api.example.com/base"
+      headers:
+        - name: "Authorization"
+          value: "Bearer row-one"
+        - name: "Authorization"
+          value: "Bearer row-two"
+      auth:
+        type: "bearer"
+        token: "config-token"
+    runtime:
+      scripts:
+        - type: before-request
+          code: |
+            req.setHeader('Authorization', 'Bearer script-token');
+`;
+    const sent = await sendWith(yaml);
+    expect(sent.headers?.get('authorization')).toBe('Bearer script-token');
+  });
+
   it('editing an inherited header in a pre-request script stays request-local and does not corrupt the shared collection config', async () => {
     const yaml = `
 opencollection: "1.0.0"

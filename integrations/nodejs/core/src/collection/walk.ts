@@ -16,7 +16,14 @@ export interface WalkResult {
   skipped: SkippedFile[];
 }
 
-export const CAPS = Object.freeze({
+export interface Caps {
+  fileBytes: number;
+  totalBytes: number;
+  fileCount: number;
+  depth: number;
+}
+
+export const CAPS: Caps = Object.freeze({
   fileBytes: 1024 * 1024,
   totalBytes: 5 * 1024 * 1024,
   fileCount: 5000,
@@ -41,7 +48,8 @@ const isYaml = (name: string): boolean => name.endsWith('.yml') || name.endsWith
 
 const utf8Strict = new TextDecoder('utf-8', { fatal: true });
 
-export function walkCollection(rootDir: string): WalkResult {
+/** `caps` is a parameter so the limits can be tested without a 5 MB, 5000-file, 32-deep fixture. */
+export function walkCollection(rootDir: string, caps: Caps = CAPS): WalkResult {
   const rootReal = fs.realpathSync(rootDir);
   const files: WalkedFile[] = [];
   const skipped: SkippedFile[] = [];
@@ -53,7 +61,7 @@ export function walkCollection(rootDir: string): WalkResult {
   };
 
   const visit = (dir: string, rel: string, depth: number): void => {
-    if (depth > CAPS.depth) {
+    if (depth > caps.depth) {
       throw new CapError('max directory depth', rel);
     }
 
@@ -91,14 +99,14 @@ export function walkCollection(rootDir: string): WalkResult {
       }
 
       const size = fs.statSync(absPath).size;
-      if (size > CAPS.fileBytes) {
+      if (size > caps.fileBytes) {
         throw new CapError('per-file size cap (1MB)', relPath);
       }
       totalBytes += size;
-      if (totalBytes > CAPS.totalBytes) {
+      if (totalBytes > caps.totalBytes) {
         throw new CapError('total size cap (5MB)', relPath);
       }
-      if (files.length >= CAPS.fileCount) {
+      if (files.length >= caps.fileCount) {
         throw new CapError('file count cap', relPath);
       }
 

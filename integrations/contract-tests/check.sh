@@ -113,6 +113,8 @@ for MOUNT in /docs /api/v2/docs /internal/docs; do
   check "$MOUNT/ POST -> 405"                                  status_is 405 -X POST "$url/"
   check "$MOUNT/ POST -> Allow: GET, HEAD"                     header_has Allow 'GET, HEAD' "$url/" -X POST
   check "$MOUNT/ HEAD -> 200"                                  status_is 200 -I "$url/"
+  check "$MOUNT/shell.js HEAD -> 200"                          status_is 200 -I "$url/shell.js"
+  check "$MOUNT/collection.yml HEAD -> 200"                    status_is 200 -I "$url/collection.yml"
 
   curl -s "$url/collection.yml" >"$TMP/coll$saved.json"
   curl -s "$url/shell.js" >"$TMP/shell$saved.js"

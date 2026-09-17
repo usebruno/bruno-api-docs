@@ -42,4 +42,22 @@ const fixture = (name) => path.join(here, '..', '..', '..', 'contract-tests', 'f
   console.log('walk-oversize: CapError raised before reading the file');
 }
 
+// --- the other three caps, with the limits lowered instead of a 5 MB, 5000-file, 32-deep fixture
+{
+  const safety = fixture('walk-safety');
+  const generous = { fileBytes: 1e9, totalBytes: 1e9, fileCount: 1e9, depth: 1e9 };
+  assert.equal(walkCollection(safety, generous).files.length, 3, 'nothing is refused when the caps are wide');
+
+  assert.throws(() => walkCollection(safety, { ...generous, totalBytes: 100 }),
+    (err) => err instanceof CapError && /total size cap/.test(err.message), 'the total size cap');
+
+  assert.throws(() => walkCollection(safety, { ...generous, fileCount: 2 }),
+    (err) => err instanceof CapError && /file count cap/.test(err.message), 'the file count cap');
+
+  assert.throws(() => walkCollection(safety, { ...generous, depth: 0 }),
+    (err) => err instanceof CapError && /max directory depth/.test(err.message), 'the directory depth cap');
+
+  assert.equal(walkCollection(safety).files.length, 3, 'and the real caps are the default');
+}
+
 console.log('walk-test: all assertions passed');

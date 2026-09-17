@@ -4,6 +4,7 @@ const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
 const { apiDocs } = require('@usebruno/api-docs-express');
+const { createDocs } = require('@usebruno/api-docs-core');
 
 const PORT = Number(process.env.PORT || 5456);
 // relative on purpose: the core resolves it against this file, not the cwd, and check.sh
@@ -20,10 +21,12 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        scriptSrc: ["'self'", 'https://cdn.usebruno.com'],
+        // wasm-unsafe-eval, narrowly, because the renderer instantiates a wasm sandbox
+        scriptSrc: ["'self'", 'https://cdn.usebruno.com', "'wasm-unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.usebruno.com', 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        connectSrc: ["'self'"]
+        // data: because the renderer fetches its wasm sandbox from a data URI
+        connectSrc: ["'self'", 'data:']
       }
     }
   })
@@ -46,6 +49,19 @@ app.use('/internal/docs', apiDocs({ collection: COLLECTION }));
 app.use('/bundled/docs', apiDocs({ collection: BUNDLED }));
 
 app.use('/broken/docs', apiDocs({ collection: './there-is-no-collection-here' }));
+
+// an adopter who wants the docs inside their own page asks the core for the block and puts it
+// where they like. The mount still has to exist: the block loads shell.js and collection.yml from it.
+const embedded = createDocs({ collection: COLLECTION, environments: { include: ['Local'] } });
+app.use('/portal/docs', apiDocs({ collection: COLLECTION, environments: { include: ['Local'] } }));
+app.get('/portal', (req, res) => {
+  res.type('html').send(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Acme Developer Portal</title></head>
+<body>
+  <h1>Acme Developer Portal</h1>
+  ${embedded.embed({ base: '/portal/docs' })}
+</body></html>`);
+});
 
 app.listen(PORT, () => {
   console.log(`express example on http://localhost:${PORT}`);

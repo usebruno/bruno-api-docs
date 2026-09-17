@@ -70,10 +70,12 @@ async function main() {
   app.use(helmet({
     contentSecurityPolicy: {
       directives: {
-        scriptSrc: ["'self'", 'https://cdn.usebruno.com'],
+        // wasm-unsafe-eval, narrowly, because the renderer instantiates a wasm sandbox
+        scriptSrc: ["'self'", 'https://cdn.usebruno.com', "'wasm-unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.usebruno.com', 'https://fonts.googleapis.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
-        connectSrc: ["'self'"]
+        // data: because the renderer fetches its wasm sandbox from a data URI
+        connectSrc: ["'self'", 'data:']
       }
     }
   }));

@@ -17,10 +17,11 @@ app.addHook('onSend', async (request, reply) => {
   reply.header(
     'content-security-policy',
     "default-src 'self'; "
-    + "script-src 'self' https://cdn.usebruno.com; "
+    + "script-src 'self' https://cdn.usebruno.com 'wasm-unsafe-eval'; "
     + "style-src 'self' 'unsafe-inline' https://cdn.usebruno.com https://fonts.googleapis.com; "
     + "font-src 'self' https://fonts.gstatic.com; "
-    + "connect-src 'self'"
+    // data: because the renderer fetches its wasm sandbox from a data URI
+    + "connect-src 'self' data:"
   );
 });
 

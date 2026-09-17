@@ -70,6 +70,7 @@ paths_in() { node -e 'const d=JSON.parse(require("fs").readFileSync(process.argv
 paths_are() { [ "$(paths_in "$1")" = "$2" ]; }
 none_mention() { ! grep -q "$1" "${@:2}"; }
 no_origins() { ! grep -oE 'https?://[A-Za-z0-9./_-]+' "$1" | grep -q .; }
+occurs_once() { [ "$(curl -s "$1" | grep -c "$2")" = "1" ]; }
 config_of() { curl -s "$1" | grep -o 'data-config="[^"]*"'; }
 config_lacks() { ! config_of "$1" | grep -Eq "&quot;($2)&quot;:"; }
 
@@ -164,6 +165,15 @@ check "/broken/docs/ -> 404, not a crash"       status_is 404 "$BASE/broken/docs
 check "/broken/docs/ says what is wrong"        body_has "$BASE/broken/docs/" 'Collection not found'
 check "/broken/docs/collection.yml -> 404 too"  status_is 404 "$BASE/broken/docs/collection.yml"
 
+if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/portal")" = "200" ]; then
+  echo "== embed(): the docs block inside the host's own page"
+  check "the host's own page is what is served"  body_has "$BASE/portal" 'Acme Developer Portal'
+  check "the block is in it"                     body_has "$BASE/portal" 'id="bruno-docs"'
+  check "pointing at the mount it belongs to"    body_has "$BASE/portal" 'src="/portal/docs/shell.js"'
+  check "one html document, not two"             occurs_once "$BASE/portal" '<html'
+  check "and the host page keeps its own title"  occurs_once "$BASE/portal" '<title'
+fi
+
 echo "== the host app is left alone"
 check "its own 404 still comes from it"         status_is 404 -X POST "$BASE/control"
 
@@ -175,7 +185,9 @@ if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/openapi.json")" = "200" ];
 fi
 
 echo "== the adopter's CSP holds"
-check "helmet's CSP header is intact"           header_has Content-Security-Policy "script-src 'self' https://cdn.usebruno.com" "$BASE/docs/"
+check "the CSP allows the renderer's origin"    header_has Content-Security-Policy "script-src 'self' https://cdn.usebruno.com" "$BASE/docs/"
+check "and the data: uri its wasm comes from"  header_has Content-Security-Policy "connect-src 'self' data:" "$BASE/docs/"
+check "and instantiating that wasm"            header_has Content-Security-Policy "wasm-unsafe-eval" "$BASE/docs/"
 
 # ---- bodies, for comparing one framework against another -------------------
 

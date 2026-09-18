@@ -7,35 +7,71 @@
 #   bash nodejs/scripts/matrix.sh --family fastify     that family's majors (CI runs one job per family)
 #   bash nodejs/scripts/matrix.sh --cell nestjs@10     one cell, to reproduce a failure
 #   bash nodejs/scripts/matrix.sh --docker             every cell under node 22 and 24, in containers
+#   bash nodejs/scripts/matrix.sh --results DIR        also leave one result file per suite in DIR
+#   bash nodejs/scripts/matrix.sh --report DIR [--md]  only render the table from those files
 #
 # A cell is family@major. The nestjs cells run both adapters, since the adapter is what broke.
+# Every run ends with a cell x node table in markdown; CI's jobs each leave their results as an
+# artifact and one job renders them all into the step summary and the PR comment.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$ROOT/contract-tests/lib.sh"
+
 FAMILY=""
 CELL=""
 DOCKER=""
+RESULTS_DIR=""
+COLLECTED=""
+REPORT_DIR=""
+MD=""
 PASSTHROUGH=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --family) FAMILY="$2"; PASSTHROUGH+=("$1" "$2"); shift 2 ;;
     --cell) CELL="$2"; PASSTHROUGH+=("$1" "$2"); shift 2 ;;
     --docker) DOCKER=1; shift ;;
+    --results) RESULTS_DIR="$2"; COLLECTED=1; shift 2 ;;
+    --report) REPORT_DIR="$2"; shift 2 ;;
+    --md) MD="--md"; shift ;;
     *) echo "unknown argument: $1" >&2; exit 2 ;;
   esac
 done
 
+# ---- the table --------------------------------------------------------------------------
+
+report() {
+  echo
+  node "$ROOT/contract-tests/report.mjs" "$1" $MD
+}
+
+if [ -n "$REPORT_DIR" ]; then
+  report "$REPORT_DIR"
+  exit 0
+fi
+
 # --docker is a wrapper, not a second implementation: each container runs this same script natively
 if [ -n "$DOCKER" ]; then
   docker info >/dev/null 2>&1 || { echo "docker is installed but the daemon is not running" >&2; exit 2; }
+  # the container's stdout is a pipe, so it would go plain: pass our own colour decision in
+  docker_env=()
+  if [ -n "$GREEN" ]; then
+    docker_env=(-e FORCE_COLOR=1)
+  fi
+  # the containers write their results into one host directory, so the table covers both nodes
+  RESULTS_DIR="${RESULTS_DIR:-$(mktemp -d)}"
+  mkdir -p "$RESULTS_DIR"
+  status=0
   for node in 22 24; do
     echo
-    echo "############ node $node, in a container"
+    echo "${BOLD}############ node $node, in a container${RESET}"
     docker build --quiet --build-arg "NODE=$node" -f "$ROOT/nodejs/scripts/matrix.Dockerfile" \
       -t "api-docs-matrix:node$node" "$ROOT" >/dev/null
-    docker run --rm "api-docs-matrix:node$node" ${PASSTHROUGH[@]+"${PASSTHROUGH[@]}"}
+    docker run --rm ${docker_env[@]+"${docker_env[@]}"} -v "$RESULTS_DIR:/results" \
+      "api-docs-matrix:node$node" --results /results ${PASSTHROUGH[@]+"${PASSTHROUGH[@]}"} || status=1
   done
-  exit 0
+  report "$RESULTS_DIR"
+  exit "$status"
 fi
 
 ALL_CELLS="express@4 express@5 fastify@4 fastify@5 nestjs@10 nestjs@11 nestjs@12"
@@ -57,6 +93,18 @@ fi
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+RESULTS_DIR="${RESULTS_DIR:-$TMP/results}"
+mkdir -p "$RESULTS_DIR"
+NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]')"
+
+suites=0
+for c in $CELLS; do
+  case "$c" in nestjs@*) suites=$((suites + 2)) ;; *) suites=$((suites + 1)) ;; esac
+done
+echo
+echo "${BOLD}Integrations matrix${RESET} ${DIM}· node $(node -v) · $(echo $CELLS | wc -w | tr -d ' ') cells, $suites suites${RESET}"
+echo "  ${DIM}$CELLS${RESET}"
+echo
 
 # ---- pack once, every cell installs the same tarballs ---------------------------------
 
@@ -70,7 +118,7 @@ done
 core_files="$(tar -tzf "$TARBALLS"/*api-docs-core*.tgz)"
 grep -q 'package/shell/shell.js' <<<"$core_files" || { echo "shell.js is NOT in the core tarball" >&2; exit 1; }
 grep -q 'package/shell/shell.html' <<<"$core_files" || { echo "shell.html is NOT in the core tarball" >&2; exit 1; }
-echo "packed $(ls "$TARBALLS" | wc -l | tr -d ' ') tarballs, the core ships its shell"
+echo "${DIM}packed $(ls "$TARBALLS" | wc -l | tr -d ' ') tarballs, the core ships its shell${RESET}"
 
 # ---- what each cell installs, on top of our tarballs -----------------------------------
 
@@ -109,22 +157,34 @@ run_cell() {
     fastify) installed="fastify $(node -p "require('$app/node_modules/fastify/package.json').version")" ;;
     nestjs)  installed="@nestjs/core $(node -p "require('$app/node_modules/@nestjs/core/package.json').version")" ;;
   esac
-  echo "   installed $installed"
+  echo "  ${DIM}installed $installed${RESET}"
 
-  # suite PORT [VAR=value ...]
+  # suite PORT ADAPTER [VAR=value ...]: runs the contract suite, leaves its row for the table.
+  # A suite that never wrote its counts did not get as far as booting.
   suite() {
-    local port=$1
-    shift
-    env "$@" bash "$ROOT/contract-tests/check.sh" --app "$app/apps/$family.js" --port "$port" | tail -1
+    local port=$1 adapter=$2 status=0
+    shift 2
+    local counts="$TMP/counts.tsv"
+    rm -f "$counts"
+    env RESULTS_FILE="$counts" JUNIT_DIR="$RESULTS_DIR" JUNIT_NAME="node$NODE_MAJOR-$cell-$adapter" "$@" \
+      bash "$ROOT/contract-tests/check.sh" --app "$app/apps/$family.js" --port "$port" || status=1
+    printf '%s\t%s\t%s\t%s\n' "$NODE_MAJOR" "$cell" "$adapter" "$(cat "$counts" 2>/dev/null || printf -- '-\t-')" \
+      >"$RESULTS_DIR/node$NODE_MAJOR-$cell-$adapter.tsv"
+
+    return "$status"
   }
+  local status=0
   if [ "$family" = "nestjs" ]; then
-    echo "   platform-express"
-    suite "$port"
-    echo "   platform-fastify"
-    suite "$((port + 1))" ADAPTER=fastify
+    echo "  ${BOLD}platform-express${RESET}"
+    suite "$port" express || status=1
+    echo
+    echo "  ${BOLD}platform-fastify${RESET}"
+    suite "$((port + 1))" fastify ADAPTER=fastify || status=1
   else
-    suite "$port"
+    suite "$port" - || status=1
   fi
+
+  return "$status"
 }
 
 # ---- the run ----------------------------------------------------------------------------
@@ -135,7 +195,7 @@ failed=""
 for cell in $CELLS; do
   n=$((n + 1))
   echo
-  echo "### [$n/$total] node $(node -v)  $cell"
+  echo "${BOLD}▸ [$n/$total] $cell${RESET}"
   if run_cell "$cell" $((5470 + n * 2)); then
     :
   else
@@ -143,9 +203,12 @@ for cell in $CELLS; do
   fi
 done
 
+# with --results, whoever collects the files renders the table: the --docker host, or CI's report job
+if [ -z "$COLLECTED" ]; then
+  report "$RESULTS_DIR"
+fi
 echo
 if [ -n "$failed" ]; then
-  echo "FAILED:$failed"
+  echo "  ${RED}failed cells:$failed${RESET}"
   exit 1
 fi
-echo "all $total cells green on node $(node -v)"

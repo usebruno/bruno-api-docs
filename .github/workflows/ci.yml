@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   pull-requests: read
+  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -119,6 +120,18 @@ jobs:
       - run: npm ci
 
       - run: npm run test:ci
+        env:
+          FORCE_COLOR: 1
+          JUNIT_DIR: results
+
+      # every assertion in the Checks tab, failures as annotations
+      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        if: always()
+        with:
+          name: integrations
+          path: integrations/results/*.xml
+          reporter: java-junit
+          fail-on-error: false
 
       # depends on the live CDN bundle, which this repo does not control, so it cannot block a merge
       - name: browser contract, against the CDN

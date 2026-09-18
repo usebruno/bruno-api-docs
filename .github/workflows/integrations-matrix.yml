@@ -8,9 +8,17 @@ on:
     branches: [main, 'release/**']
     types: [labeled, synchronize]
 
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  FORCE_COLOR: 1
 
 jobs:
   cells:
@@ -34,7 +42,13 @@ jobs:
 
       - run: npm ci
 
-      - run: bash nodejs/scripts/matrix.sh --family ${{ matrix.family }}
+      - run: bash nodejs/scripts/matrix.sh --family ${{ matrix.family }} --results results
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matrix-${{ matrix.node }}-${{ matrix.family }}
+          path: integrations/results
 
   node-20:
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests')
@@ -50,4 +64,61 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-      - run: bash nodejs/scripts/matrix.sh
+      - run: bash nodejs/scripts/matrix.sh --results results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matrix-20-all
+          path: integrations/results
+
+  report:
+    needs: [cells, node-20]
+    if: always() && needs.cells.result != 'skipped'
+    runs-on: ubuntu-latest
+    name: results table
+    defaults:
+      run:
+        working-directory: integrations
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: matrix-*
+          merge-multiple: true
+          path: integrations/results
+
+      - run: |
+          {
+            echo "## Integrations matrix"
+            echo
+            bash nodejs/scripts/matrix.sh --report results --md
+            echo
+            echo "_${{ github.sha }} · node 20 is informational_"
+          } > table.md
+          cat table.md >> "$GITHUB_STEP_SUMMARY"
+
+      # every assertion in the Checks tab, failures as annotations
+      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        with:
+          name: integrations matrix
+          path: integrations/results/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      # one comment per PR, updated in place on every run
+      - if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          marker='<!-- integrations-matrix -->'
+          printf '%s\n' "$marker" > body.md
+          cat table.md >> body.md
+          existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
+            --jq ".[] | select(.body | startswith(\"$marker\")) | .id" | head -1)
+          if [ -n "$existing" ]; then
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$existing" -F body=@body.md >/dev/null
+          else
+            gh pr comment "$PR" --body-file body.md
+          fi

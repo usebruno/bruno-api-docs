@@ -24,7 +24,7 @@ export default [
         ...globals.node
       }
     },
-    files: ['eslint.config.mjs', '**/src/**/*.ts', '**/test/**/*.{ts,mjs}', 'contract-tests/apps/*.js', '**/examples/**/*.{js,ts}'],
+    files: ['eslint.config.mjs', '**/src/**/*.ts', '**/test/**/*.{ts,mjs}', 'contract-tests/**/*.{js,mjs}', '**/examples/**/*.{js,ts}'],
     rules: {
       ...js.configs.recommended.rules,
       ...stylistic.configs.customize({

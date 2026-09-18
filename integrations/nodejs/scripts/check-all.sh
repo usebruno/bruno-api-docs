@@ -5,14 +5,16 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+source "$ROOT/contract-tests/lib.sh"
+
 BODIES="$(mktemp -d)"
 trap 'rm -rf "$BODIES"' EXIT
 
 run() {
   local name=$1 app=$2 port=$3 adapter=${4:-express}
   echo
-  echo "### $name"
-  ADAPTER="$adapter" bash "$ROOT/contract-tests/check.sh" --app "$app" --port "$port" "${@:5}"
+  echo "${BOLD}▸ $name${RESET}"
+  ADAPTER="$adapter" JUNIT_NAME="check-${name//\//-}" bash "$ROOT/contract-tests/check.sh" --app "$app" --port "$port" "${@:5}"
 }
 
 # the first run is the baseline every other one is compared against
@@ -22,4 +24,4 @@ run "nestjs/express" contract-tests/apps/nestjs.js  5458 express --compare "$BOD
 run "nestjs/fastify" contract-tests/apps/nestjs.js  5459 fastify --compare "$BODIES"
 
 echo
-echo "every framework agrees, byte for byte"
+echo "${GREEN}every framework agrees, byte for byte${RESET}"

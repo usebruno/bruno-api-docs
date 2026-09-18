@@ -38,6 +38,7 @@ case "$APP" in /*) ;; *) APP="$ROOT/$APP" ;; esac
 [ -f "$APP" ] || { echo "no app at $APP" >&2; exit 2; }
 
 BASE="http://localhost:$PORT"
+JUNIT_NAME="${JUNIT_NAME:-check-$(basename "$APP" .js)${ADAPTER:+-$ADAPTER}}"
 TMP="$(mktemp -d)"
 trap 'stop; rm -rf "$TMP"' EXIT
 
@@ -45,12 +46,12 @@ trap 'stop; rm -rf "$TMP"' EXIT
 
 port_is_free "$PORT"
 boot "$APP" "$PORT"
-echo "booted $(basename "$APP") on :$PORT from $TMP"
+echo "${BOLD}$(basename "$APP")${RESET} on :$PORT ${DIM}(cwd $TMP)${RESET}"
 
 # ---- the routes, identical at every mount ----------------------------------
 
 for MOUNT in /docs /api/v2/docs /internal/docs; do
-  echo "== $MOUNT"
+  describe "$MOUNT"
   url="$BASE$MOUNT"
   last="${MOUNT##*/}"
   saved="${MOUNT//\//_}"
@@ -79,13 +80,13 @@ for MOUNT in /docs /api/v2/docs /internal/docs; do
   curl -s "$url/shell.js" >"$TMP/shell$saved.js"
 done
 
-echo "== shell.js is one file, whatever the mount"
+describe "shell.js is one file, whatever the mount"
 check "byte-identical across mounts"            cmp -s "$TMP/shell_docs.js" "$TMP/shell_api_v2_docs.js"
 check "byte-identical across mounts (2)"        cmp -s "$TMP/shell_docs.js" "$TMP/shell_internal_docs.js"
 check "no origin is baked into the bundle"      no_origins "$TMP/shell_docs.js"
 check "it understands the fragments envelope"   file_has "$TMP/shell_docs.js" 'opencollection-fragments'
 
-echo "== environments: server side, by whole file"
+describe "environments: server side, by whole file"
 check "/docs include Local -> exactly Local"    file_has "$TMP/coll_docs.json" 'environments/Local.yml'
 check "/docs -> no other environment"           file_lacks "$TMP/coll_docs.json" 'environments/Prod.yml'
 check "/api/v2 all minus Prod -> Local only"    file_has "$TMP/coll_api_v2_docs.json" 'environments/Local.yml'
@@ -93,7 +94,7 @@ check "/api/v2 -> Prod file absent"             file_lacks "$TMP/coll_api_v2_doc
 check "/internal default -> no environments"    file_lacks "$TMP/coll_internal_docs.json" 'environments/'
 check "Prod's token appears in no served byte"  none_mention 'prod-token-must-never-be-served' "$TMP"/coll_*.json "$TMP"/shell_docs.js
 
-echo "== tags: server side, by whole file, folders pruned behind them"
+describe "tags: server side, by whole file, folders pruned behind them"
 check "/docs -> the tagged request is gone"     file_lacks "$TMP/coll_docs.json" 'reindex catalog'
 check "/docs -> its URL literal is gone too"    file_lacks "$TMP/coll_docs.json" 'admin/reindex-catalog'
 check "/docs -> a folder with no survivor goes" file_lacks "$TMP/coll_docs.json" 'internal/folder.yml'
@@ -104,27 +105,27 @@ check "/internal no tags -> tagged request served" file_has "$TMP/coll_internal_
 check "/docs serves exactly these seven files" paths_are "$TMP/coll_docs.json" \
   'catalog/folder.yml,catalog/get product.yml,catalog/list products.yml,environments/Local.yml,mixed/folder.yml,mixed/health.yml,opencollection.yml'
 
-echo "== what reaches the browser"
+describe "what reaches the browser"
 check "/docs title comes from pageTitle"        body_has "$BASE/docs/" '<title>Acme API</title>'
 check "/docs data-config has no pageTitle"      config_lacks "$BASE/docs/" 'pageTitle'
 check "/docs data-config has no server option"  config_lacks "$BASE/docs/" 'tags|environments|collection'
 check "/docs git url is forwarded"              body_has "$BASE/docs/" 'acme/api-collection'
 check "/docs git credentials are stripped"      body_lacks "$BASE/docs/" 'token:secret'
 
-echo "== a single bundled file"
+describe "a single bundled file"
 check "/bundled/docs/ -> the page"              status_is 200 "$BASE/bundled/docs/"
 check "/bundled/docs/collection.yml -> yaml"    header_has Content-Type yaml "$BASE/bundled/docs/collection.yml"
 check "/bundled/docs/collection.yml -> ETag"    revalidates "$BASE/bundled/docs/collection.yml"
 check "/bundled/docs -> served as written"      body_has "$BASE/bundled/docs/collection.yml" 'Acme API (bundled)'
 
-echo "== a broken setup does not stop the app"
+describe "a broken setup does not stop the app"
 check "the app's own route still answers"       body_has "$BASE/control" 'the app itself'
 check "/broken/docs/ -> 404, not a crash"       status_is 404 "$BASE/broken/docs/"
 check "/broken/docs/ says what is wrong"        body_has "$BASE/broken/docs/" 'Collection not found'
 check "/broken/docs/collection.yml -> 404 too"  status_is 404 "$BASE/broken/docs/collection.yml"
 
 if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/portal")" = "200" ]; then
-  echo "== embed(): the docs block inside the host's own page"
+  describe "embed(): the docs block inside the host's own page"
   check "the host's own page is what is served"  body_has "$BASE/portal" 'Acme Developer Portal'
   check "the block is in it"                     body_has "$BASE/portal" 'id="bruno-docs"'
   check "pointing at the mount it belongs to"    body_has "$BASE/portal" 'src="/portal/docs/shell.js"'
@@ -132,17 +133,17 @@ if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/portal")" = "200" ]; then
   check "and the host page keeps its own title"  occurs_once "$BASE/portal" '<title'
 fi
 
-echo "== the host app is left alone"
+describe "the host app is left alone"
 check "its own 404 still comes from it"         status_is 404 -X POST "$BASE/control"
 
 if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/openapi.json")" = "200" ]; then
-  echo "== the host publishes a spec, and the docs routes are not in it"
+  describe "the host publishes a spec, and the docs routes are not in it"
   curl -s "$BASE/openapi.json" >"$TMP/spec.json"
   check "no docs route leaked into it"          file_lacks "$TMP/spec.json" '/docs'
   check "the host's own routes are still there" file_has "$TMP/spec.json" '/control'
 fi
 
-echo "== the adopter's CSP holds"
+describe "the adopter's CSP holds"
 check "the CSP allows the renderer's origin"    header_has Content-Security-Policy "script-src 'self' https://cdn.usebruno.com" "$BASE/docs/"
 check "and the data: uri its wasm comes from"  header_has Content-Security-Policy "connect-src 'self' data:" "$BASE/docs/"
 check "and instantiating that wasm"            header_has Content-Security-Policy "wasm-unsafe-eval" "$BASE/docs/"
@@ -156,13 +157,11 @@ if [ -n "$SAVE" ]; then
 fi
 
 if [ -n "$COMPARE" ]; then
-  echo "== byte-identical to $COMPARE"
+  describe "byte-identical to $COMPARE"
   for f in "$TMP"/coll_*.json "$TMP"/shell_docs.js; do
     name="$(basename "$f")"
     check "$name matches" cmp -s "$f" "$COMPARE/$name"
   done
 fi
 
-echo
-echo "$pass passed, $fail failed"
-[ "$fail" -eq 0 ]
+summary

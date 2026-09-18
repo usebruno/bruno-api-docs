@@ -18,6 +18,7 @@ while [ $# -gt 0 ]; do
 done
 
 BASE="http://localhost:$PORT"
+JUNIT_NAME="${JUNIT_NAME:-examples}"
 TMP="$(mktemp -d)"
 trap 'stop; rm -rf "$TMP"' EXIT
 port_is_free "$PORT"
@@ -25,8 +26,7 @@ port_is_free "$PORT"
 # example FILE: stops the one before, boots this one
 example() {
   stop
-  echo
-  echo "== ${1#nodejs/}"
+  describe "${1#nodejs/}"
   boot "$ROOT/$1" "$PORT"
 }
 
@@ -143,6 +143,4 @@ check "loading from the mount"                   body_has "$BASE/" 'src="/docs/s
 check "one document, not two"                    occurs_once "$BASE/" '<html'
 check "the mount serves the collection"          body_has "$BASE/docs/collection.yml" 'Acme API'
 
-echo
-echo "$pass passed, $fail failed"
-[ "$fail" -eq 0 ]
+summary

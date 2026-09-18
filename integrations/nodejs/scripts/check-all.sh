@@ -7,6 +7,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$ROOT/contract-tests/lib.sh"
 
+covered "$0" $(cd "$ROOT/contract-tests/apps" && ls *.js | sed 's|^|apps/|')
+
 BODIES="$(mktemp -d)"
 trap 'rm -rf "$BODIES"' EXIT
 

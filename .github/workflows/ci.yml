@@ -104,6 +104,9 @@ jobs:
     defaults:
       run:
         working-directory: integrations
+    env:
+      FORCE_COLOR: 1
+      JUNIT_DIR: results
     steps:
       - uses: actions/checkout@v4
 
@@ -119,17 +122,30 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run test:ci
-        env:
-          FORCE_COLOR: 1
-          JUNIT_DIR: results
+      - name: lint
+        run: npm run lint
+
+      - name: build
+        run: npm run build
+
+      - name: unit
+        run: bash nodejs/scripts/unit.sh
+
+      - name: contract, every framework byte for byte
+        run: bash nodejs/scripts/check-all.sh
+
+      - name: examples
+        run: bash contract-tests/examples.sh
+
+      - name: one matrix cell, from packed tarballs
+        run: bash nodejs/scripts/matrix.sh --cell express@5 --results results
 
       # every assertion in the Checks tab, failures as annotations
       - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
         if: always()
         with:
           name: integrations
-          path: integrations/results/*.xml
+          path: integrations/results/**/*.xml
           reporter: java-junit
           fail-on-error: false
 

@@ -22,6 +22,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "matrix": "npm run build && bash nodejs/scripts/matrix.sh",
+    "matrix:docker": "npm run build && bash nodejs/scripts/matrix.sh --docker",
     "pack-check": "npm run build && bash nodejs/scripts/matrix.sh --cell express@5",
     "setup": "bash scripts/setup.sh",
     "start:express": "node contract-tests/apps/express.js",
@@ -37,7 +38,7 @@
     "test:filter": "npm run build:core && node nodejs/core/test/filter.test.mjs",
     "test:nestjs": "npm run build && node nodejs/nestjs/test/sub-path.test.mjs",
     "test:shell": "npm run build && node nodejs/core/test/shell.test.mjs",
-    "test:unit": "npm run build && node nodejs/core/test/walk.test.mjs && node nodejs/core/test/filter.test.mjs && node nodejs/core/test/collection.test.mjs && node nodejs/core/test/shell.test.mjs && node nodejs/core/test/docs.test.mjs && node nodejs/nestjs/test/sub-path.test.mjs && node shell/test/assemble.test.mjs",
+    "test:unit": "npm run build && bash nodejs/scripts/unit.sh",
     "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs"
   },
   "devDependencies": {

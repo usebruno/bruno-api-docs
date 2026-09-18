@@ -92,6 +92,16 @@ summary() {
   [ "$fail" -eq 0 ]
 }
 
+# covered SCRIPT NAME...: every NAME must appear in SCRIPT, or something new was dropped in without
+# being wired up. Fails loudly rather than leaving a silent gap in coverage.
+covered() {
+  local script=$1
+  shift
+  for name in "$@"; do
+    grep -qF "$name" "$script" || { echo "$(basename "$script") does not run $name. Add it." >&2; exit 1; }
+  done
+}
+
 # ---- the server ---------------------------------------------------------------
 
 # a leftover server on the port would answer every assertion, and the suite would be grading the

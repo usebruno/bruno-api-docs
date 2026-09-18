@@ -75,6 +75,10 @@ if [ -n "$DOCKER" ]; then
 fi
 
 ALL_CELLS="express@4 express@5 fastify@4 fastify@5 nestjs@10 nestjs@11 nestjs@12"
+for app in "$ROOT"/contract-tests/apps/*.js; do
+  family="$(basename "$app" .js)"
+  [[ " $ALL_CELLS " == *" $family@"* ]] || { echo "$family has a rig but no cells in the matrix. Add its majors to ALL_CELLS and deps_for." >&2; exit 1; }
+done
 if [ -n "$CELL" ]; then
   case " $ALL_CELLS " in *" $CELL "*) ;; *) echo "unknown cell '$CELL'. one of: $ALL_CELLS" >&2; exit 2 ;; esac
   CELLS="$CELL"

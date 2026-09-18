@@ -17,6 +17,10 @@ while [ $# -gt 0 ]; do
   esac
 done
 
+covered "$0" \
+  $(cd "$ROOT" && ls nodejs/*/examples/*.js) \
+  $(cd "$ROOT" && ls -d nodejs/nestjs/examples/0*/ | sed 's|examples/\(.*\)/$|examples/dist/\1/main.js|')
+
 BASE="http://localhost:$PORT"
 JUNIT_NAME="${JUNIT_NAME:-examples}"
 TMP="$(mktemp -d)"

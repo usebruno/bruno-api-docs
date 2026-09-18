@@ -1,0 +1,11 @@
+info:
+  name: Drain node
+  type: http
+  seq: 2
+  tags:
+    - internal
+    - dangerous
+http:
+  method: POST
+  url: "{{baseUrl}}/admin/drain-node"
+  auth: inherit

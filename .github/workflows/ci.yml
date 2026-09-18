@@ -9,12 +9,19 @@ on:
 
 
 
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   lint_unit_tests_and_builds:
+    needs: changes
+    if: needs.changes.outputs.renderer == 'true'
     runs-on: ubuntu-latest
     steps:
       # eslint-plugin-diff needs the base branch present to diff against.
@@ -43,8 +50,8 @@ jobs:
         run: npm run build:standalone -w packages/bruno-api-docs
 
   e2e:
-    needs: lint_unit_tests_and_builds
-    if: github.event_name == 'push' || github.event.pull_request.draft == false
+    needs: [changes, lint_unit_tests_and_builds]
+    if: needs.changes.outputs.renderer == 'true' && (github.event_name == 'push' || github.event.pull_request.draft == false)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -70,3 +77,88 @@ jobs:
           name: playwright-report
           path: packages/bruno-api-docs/playwright-report/
           retention-days: 30
+
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      renderer: ${{ steps.filter.outputs.renderer }}
+      integrations: ${{ steps.filter.outputs.integrations }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+        id: filter
+        with:
+          filters: |
+            renderer:
+              - '!integrations/**'
+            integrations:
+              - 'integrations/**'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/integrations-matrix.yml'
+
+  integrations:
+    needs: changes
+    # a job-level if, not a workflow paths filter: a skipped job still reports and satisfies the required check
+    if: needs.changes.outputs.integrations == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations
+    env:
+      FORCE_COLOR: 1
+      JUNIT_DIR: results
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+        with:
+          working_directory: integrations
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-integrations-${{ hashFiles('integrations/package-lock.json') }}
+          restore-keys: npm-integrations-
+
+      - run: npm ci
+
+      - name: lint
+        run: npm run lint
+
+      - name: build
+        run: npm run build
+
+      - name: unit
+        run: bash nodejs/scripts/unit.sh
+
+      - name: contract, every framework byte for byte
+        run: bash nodejs/scripts/check-all.sh
+
+      - name: examples
+        run: bash contract-tests/examples.sh
+
+      - name: one matrix cell, from packed tarballs
+        run: bash nodejs/scripts/matrix.sh --cell express@5 --results results
+
+      # every assertion in the Checks tab, failures as annotations
+      - uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3.0.0
+        if: always()
+        with:
+          name: integrations
+          path: integrations/results/**/*.xml
+          reporter: java-junit
+          fail-on-error: false
+
+      # both tiers depend on the live CDN bundle, which this repo does not control, so neither can
+      # block a merge. `contract` is ours to fix when red; `renderer` is theirs to know about.
+      - name: browser
+        continue-on-error: true
+        run: npx playwright install --with-deps chromium
+
+      - name: browser, our contract
+        continue-on-error: true
+        run: npx playwright test --config contract-tests/browser/playwright.config.mjs --project=contract
+
+      - name: browser, the renderer
+        continue-on-error: true
+        run: npx playwright test --config contract-tests/browser/playwright.config.mjs --project=renderer

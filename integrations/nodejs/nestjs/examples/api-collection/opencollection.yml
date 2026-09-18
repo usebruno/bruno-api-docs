@@ -1,0 +1,5 @@
+opencollection: 1.0.0
+info:
+  name: Acme API
+  version: 1.0.0
+  summary: A small collection to see the docs with. Point the option at your own to replace it.

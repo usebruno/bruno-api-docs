@@ -1,0 +1,13 @@
+info:
+  name: Purge cache
+  type: http
+  seq: 1
+  tags:
+    - internal
+http:
+  method: POST
+  url: "{{baseUrl}}/admin/purge-cache"
+  headers:
+    - name: X-Admin-Key
+      value: "{{adminKey}}"
+  auth: inherit

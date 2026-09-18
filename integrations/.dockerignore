@@ -1,0 +1,8 @@
+# the container installs its own: esbuild and playwright ship native binaries built for this host
+node_modules
+nodejs/*/node_modules
+nodejs/*/dist
+shell/shell.js
+nodejs/*/shell
+test-results
+nodejs/nestjs/examples/dist

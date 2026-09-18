@@ -1,0 +1,5 @@
+info:
+  name: Catalog
+  seq: 1
+request:
+  auth: inherit

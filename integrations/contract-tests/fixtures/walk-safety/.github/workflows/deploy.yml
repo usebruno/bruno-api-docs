@@ -1,0 +1,4 @@
+name: deploy
+on: push
+env:
+  DEPLOY_SECRET: leaked-if-served

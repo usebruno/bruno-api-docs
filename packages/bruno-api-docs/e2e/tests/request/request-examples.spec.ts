@@ -3,6 +3,9 @@ import { test, expect } from '../../playwright';
 const GET_ALL_CUSTOMERS = ['billing', 'customers', 'Get All Customers'];
 const OK_EXAMPLE = '200 OK - first page';
 const BAD_REQUEST_EXAMPLE = '400 Bad Request - invalid per_page';
+const SNIPPET_LANGUAGES = ['curl', 'javascript', 'python'] as const;
+const VARS_REQUEST = '/?fixture=vars#/customers/variables-demo';
+const VARS_EXAMPLE = '200 OK';
 
 test.describe('Request page — Examples', () => {
   test.beforeEach(async ({ requestPage }) => {
@@ -92,18 +95,24 @@ test.describe('Request page — Examples', () => {
   });
 
   test.describe('Code snippet', () => {
-    test('offers a Code Snippet trigger on an expanded example', async ({ requestPage }) => {
+    test('offers a Code Snippet trigger on each saved example', async ({ requestPage }) => {
       const { examples } = requestPage;
       await expect(examples.snippetButton(OK_EXAMPLE)).toBeVisible();
       await expect(examples.snippetButton(OK_EXAMPLE)).toHaveText('Code Snippet');
+
+      await examples.open(BAD_REQUEST_EXAMPLE);
+      await expect(examples.snippetButton(BAD_REQUEST_EXAMPLE)).toBeVisible();
+      await expect(examples.snippetButton(BAD_REQUEST_EXAMPLE)).toHaveText('Code Snippet');
     });
 
-    test('opens a dialog with every supported language', async ({ requestPage }) => {
-      const { examples } = requestPage;
+    test('opens a dialog with the same languages as the request page Code Snippet', async ({ requestPage }) => {
+      const { examples, codeSnippet } = requestPage;
       await examples.openSnippet(OK_EXAMPLE);
-      await expect(examples.snippetLanguageTab('curl')).toBeVisible();
-      await expect(examples.snippetLanguageTab('javascript')).toBeVisible();
-      await expect(examples.snippetLanguageTab('python')).toBeVisible();
+
+      const pageLanguages = await codeSnippet.languageIds();
+      const exampleLanguages = await examples.snippet.modalLanguageIds();
+      expect(pageLanguages.length).toBeGreaterThan(0);
+      expect(exampleLanguages).toEqual(pageLanguages);
     });
 
     test('shows the example request, and switches language on demand', async ({ requestPage }) => {
@@ -124,10 +133,22 @@ test.describe('Request page — Examples', () => {
       await expect(examples.snippetCode).not.toContainText('per_page=10');
     });
 
-    test('offers a copy action for the snippet', async ({ requestPage }) => {
+    test('copied snippet matches the language selected in the modal', async ({ requestPage, page }) => {
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
       const { examples } = requestPage;
+      const clipboard = () => page.evaluate(() => navigator.clipboard.readText());
+      const markers = { curl: 'curl', javascript: 'fetch', python: 'requests' } as const;
+
       await examples.openSnippet(OK_EXAMPLE);
-      await expect(examples.snippetModal.getByTestId('copy-button')).toBeVisible();
+      await expect(examples.snippet.modalCopyButton).toBeVisible();
+
+      for (const language of SNIPPET_LANGUAGES) {
+        await examples.snippetLanguageTab(language).click();
+        await expect(examples.snippetCode).toContainText(markers[language]);
+        await examples.snippet.modalCopyButton.click();
+        await expect.poll(clipboard).toContain(markers[language]);
+        expect(await clipboard()).toContain('per_page=10');
+      }
     });
 
     test('renders only one dialog — the embedded snippet brings no modal of its own', async ({ requestPage, page }) => {
@@ -154,5 +175,84 @@ test.describe('Request page — Examples', () => {
       await expect(examples.snippetModal).toBeHidden();
       await expect(examples.snippetButton(OK_EXAMPLE)).toBeFocused();
     });
+  });
+});
+
+test.describe('Request page — Examples (no saved examples)', () => {
+  test('renders no Examples section — and no example Code Snippet button — when the request has none', async ({
+    requestPage,
+    page
+  }) => {
+    await requestPage.open(['billing', 'customers', 'Get Customers - Filter by Date Range']);
+
+    await expect(requestPage.examples.root).toHaveCount(0);
+    await expect(page.getByTestId('example-code-snippet-trigger')).toHaveCount(0);
+  });
+});
+
+test.describe('Request page — Example code snippet (Show vars)', () => {
+  test.beforeEach(async ({ requestPage, envSwitcher }) => {
+    await requestPage.goto(VARS_REQUEST);
+    await envSwitcher.selectEnvironment('Dev');
+  });
+
+  test('keeps {{var}} placeholders in the example snippet when Show vars is off', async ({
+    requestPage,
+    envSwitcher
+  }) => {
+    const { examples } = requestPage;
+    await expect(envSwitcher.showVarsToggle).toHaveAttribute('aria-checked', 'false');
+
+    await examples.open(VARS_EXAMPLE);
+    await examples.openSnippet(VARS_EXAMPLE);
+    await expect(examples.snippetCode).toContainText('{{host}}');
+    await expect(examples.snippetCode).toContainText('{{exampleOnly}}');
+    await expect(examples.snippetCode).not.toContainText('https://api.dev.example.com');
+  });
+
+  test('interpolates example snippet variables when Show vars is on', async ({
+    requestPage,
+    envSwitcher,
+    page
+  }) => {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    const { examples } = requestPage;
+    const clipboard = () => page.evaluate(() => navigator.clipboard.readText());
+
+    await envSwitcher.toggle();
+    await expect(envSwitcher.showVarsToggle).toHaveAttribute('aria-checked', 'true');
+
+    await examples.open(VARS_EXAMPLE);
+    await examples.openSnippet(VARS_EXAMPLE);
+    await expect(examples.snippet.modalInterpolate).toBeChecked();
+    await expect(examples.snippetCode).toContainText('https://api.dev.example.com/customers');
+    await expect(examples.snippetCode).toContainText('example-value');
+    await expect(examples.snippetCode).not.toContainText('{{host}}');
+    await expect(examples.snippetCode).not.toContainText('{{exampleOnly}}');
+
+    await examples.snippet.modalCopyButton.click();
+    await expect.poll(clipboard).toContain('https://api.dev.example.com/customers');
+    const copied = await clipboard();
+    expect(copied).toContain('example-value');
+    expect(copied).not.toContain('{{host}}');
+    expect(copied).not.toContain('{{exampleOnly}}');
+  });
+
+  test('Interpolate Variables follows Show vars on open, and interpolates without flipping the page toggle', async ({
+    requestPage,
+    envSwitcher
+  }) => {
+    const { examples } = requestPage;
+    await expect(envSwitcher.showVarsToggle).toHaveAttribute('aria-checked', 'false');
+
+    await examples.open(VARS_EXAMPLE);
+    await examples.openSnippet(VARS_EXAMPLE);
+    await expect(examples.snippet.modalInterpolate).not.toBeChecked();
+    await expect(examples.snippetCode).toContainText('{{host}}');
+
+    await examples.snippet.modalInterpolate.setChecked(true);
+    await expect(examples.snippetCode).toContainText('https://api.dev.example.com/customers');
+    await expect(examples.snippetCode).toContainText('example-value');
+    await expect(envSwitcher.showVarsToggle).toHaveAttribute('aria-checked', 'false');
   });
 });

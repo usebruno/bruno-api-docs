@@ -4,6 +4,7 @@ info:
   version: 1.0.0
   summary: The fixture every example serves and every contract run asserts against.
 bundled: false
-auth:
-  type: bearer
-  token: "{{apiToken}}"
+request:
+  auth:
+    type: bearer
+    token: "{{apiToken}}"

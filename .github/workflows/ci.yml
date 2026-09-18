@@ -149,7 +149,16 @@ jobs:
           reporter: java-junit
           fail-on-error: false
 
-      # depends on the live CDN bundle, which this repo does not control, so it cannot block a merge
-      - name: browser contract, against the CDN
+      # both tiers depend on the live CDN bundle, which this repo does not control, so neither can
+      # block a merge. `contract` is ours to fix when red; `renderer` is theirs to know about.
+      - name: browser
         continue-on-error: true
-        run: npx playwright install --with-deps chromium && npm run test:browser
+        run: npx playwright install --with-deps chromium
+
+      - name: browser, our contract
+        continue-on-error: true
+        run: npx playwright test --config contract-tests/browser/playwright.config.mjs --project=contract
+
+      - name: browser, the renderer
+        continue-on-error: true
+        run: npx playwright test --config contract-tests/browser/playwright.config.mjs --project=renderer

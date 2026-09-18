@@ -35,6 +35,8 @@ const names = (items) => items.map((i) => i.info.name);
   assert.deepEqual(names(doc.items), ['Public', 'Admin', 'zeta', 'alpha', 'beta'],
     'folders first by seq, then requests by seq, then the unsequenced by name');
   assert.deepEqual(names(doc.items[0].items), ['hello'], 'a folder carries its own requests');
+  assert.equal(doc.items[0].info.type, 'folder', 'a folder.yml that omits the type is still a folder');
+  assert.equal(doc.items[0].info.seq, 1, 'and keeps everything else it said');
 }
 
 // --- a folder with no folder.yml still becomes a folder, named after the directory

@@ -1,3 +1,5 @@
 info:
   name: Internal
   seq: 2
+request:
+  auth: inherit

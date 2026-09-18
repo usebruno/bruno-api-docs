@@ -5,3 +5,4 @@ info:
 http:
   method: GET
   url: "{{baseUrl}}/health"
+  auth: inherit

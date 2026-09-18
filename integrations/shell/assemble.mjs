@@ -100,7 +100,10 @@ function materialize(dir, dirs) {
   const folders = node.children.map((childDir) => {
     const child = dirs.get(childDir);
     const name = childDir.slice(childDir.lastIndexOf('/') + 1);
-    const folder = child.meta || { info: { name, type: 'folder' } };
+    const folder = child.meta || { info: { name } };
+    // a directory is a folder whatever its folder.yml says or leaves out; the renderer decides
+    // by this field alone, and without it a folder renders as an empty request
+    folder.info = { ...folder.info, type: 'folder' };
     folder.items = materialize(childDir, dirs);
 
     return folder;

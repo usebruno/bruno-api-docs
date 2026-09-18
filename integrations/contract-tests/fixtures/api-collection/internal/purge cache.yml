@@ -10,3 +10,4 @@ http:
   headers:
     - name: X-Admin-Key
       value: "{{adminKey}}"
+  auth: inherit

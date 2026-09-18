@@ -8,3 +8,4 @@ info:
 http:
   method: POST
   url: "{{baseUrl}}/admin/drain-node"
+  auth: inherit

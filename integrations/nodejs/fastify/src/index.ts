@@ -1,4 +1,4 @@
-import type { FastifyPluginAsync, FastifyReply } from 'fastify';
+import type { FastifyPluginAsync, FastifyReply, RegisterOptions } from 'fastify';
 import { createDocs, embed, type ApiDocsOptions, type HttpResponse } from '@usebruno/api-docs-core';
 
 export { createDocs, embed };
@@ -25,7 +25,10 @@ const send = (reply: FastifyReply, response: HttpResponse): FastifyReply => {
  * front with `child.addHook('onRequest', ...)`.
  */
 export const apiDocs: FastifyPluginAsync<ApiDocsOptions> = async (fastify, options) => {
-  const docs = createDocs(options);
+  // Fastify hands its own register options (prefix, logLevel, ...) to the plugin with ours
+  const { prefix: _prefix, logLevel: _logLevel, logSerializers: _logSerializers, ...docsOptions }
+    = options as ApiDocsOptions & RegisterOptions;
+  const docs = createDocs(docsOptions);
   const base = `${fastify.prefix}/`;
   const lastSegment = fastify.prefix.split('/').filter(Boolean).pop() ?? '';
   const hide = { schema: { hide: true } };

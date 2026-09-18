@@ -26,8 +26,9 @@ export function subPathOf(fullUrl: string, mountPath: string): string {
 /** `ApiDocsModule.forRoot({ collection: './api-collection', mountPath: '/docs' })`. */
 export class ApiDocsModule {
   static forRoot(options: ApiDocsModuleOptions): DynamicModule {
-    const mountPath = (options.mountPath ?? DEFAULT_MOUNT_PATH).replace(/\/+$/, '');
-    const handler = createDocs(options).handler();
+    const { mountPath: mountOption, ...docsOptions } = options;
+    const mountPath = (mountOption ?? DEFAULT_MOUNT_PATH).replace(/\/+$/, '');
+    const handler = createDocs(docsOptions).handler();
 
     @Module({})
     class ApiDocsHostModule implements NestModule {

@@ -34,6 +34,7 @@ app.use('/docs', apiDocs({
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
+  logo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Ccircle cx=%225%22 cy=%225%22 r=%225%22/%3E%3C/svg%3E',
   gitCollectionUrl: 'https://token:secret@github.com/acme/api-collection'
 }));
 
@@ -44,6 +45,11 @@ app.use('/internal/docs', apiDocs({ collection: COLLECTION }));
 app.use('/bundled/docs', apiDocs({ collection: BUNDLED }));
 
 app.use('/broken/docs', apiDocs({ collection: './there-is-no-collection-here' }));
+
+app.use('/oversize/docs', apiDocs({ collection: '../fixtures/walk-oversize' }));
+
+// theme is what the renderer will take next; until it does, passing it is a mistake we report
+app.use('/misconfigured/docs', apiDocs({ collection: COLLECTION, theme: 'dark' }));
 
 // the docs inside the host's own page: the mount serves, the block only points at it
 app.use('/portal/docs', apiDocs({ collection: COLLECTION, environments: { include: ['Local'] } }));

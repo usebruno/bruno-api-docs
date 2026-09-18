@@ -140,6 +140,10 @@ const handler = docs.handler();
 
   const badOptions = quiet(() => createDocs({ collection, environments: { exclude: ['Prod'] } }));
   assert.equal(badOptions.collection().status, 500, 'a config error reaches the mount too, not the boot');
+
+  const typo = quiet(() => createDocs({ collection, theme: 'dark' }));
+  assert.equal(typo.collection().status, 500, 'an option we do not know is an error, not silently forwarded');
+  assert.match(String(typo.collection().body), /unknown option theme/);
 }
 
 fs.rmSync(path.join(os.tmpdir(), 'x-not-there'), { force: true });

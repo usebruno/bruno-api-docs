@@ -107,6 +107,7 @@ assert.equal(isRequestTagsIncluded(['a', 'b'], [], ['b']), false, 'any one exclu
 
 // --- startup validation of the same options
 assert.throws(() => validateOptions({ environments: { exclude: ['Prod'] } }), /needs a base/);
+assert.throws(() => validateOptions({ collection: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
 assert.throws(() => validateOptions({ environments: { all: true, include: ['Local'] } }), /cannot be combined/);
 validateOptions({ environments: { all: true, exclude: ['Prod'] } });
 validateOptions({});

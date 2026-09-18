@@ -25,6 +25,8 @@ const fixture = (name) => path.join(here, '..', '..', '..', 'contract-tests', 'f
     assert.ok(!f.text.includes('root:x:0:0'), '/etc/passwd content never served');
   }
   assert.ok(skipped.some((s) => s.path === 'control/not-utf8.yml' && /UTF-8/.test(s.rule)), 'invalid UTF-8 file is skipped, not served');
+  assert.ok(skipped.some((s) => s.path === 'node_modules' && /stray/.test(s.rule)), 'node_modules is skipped whole, never entered');
+  assert.ok(skipped.some((s) => s.path === 'notes.md' && /not \.yml/.test(s.rule)), 'a non-yml file is skipped by extension');
   assert.deepEqual(served, ['control/ping.yml', 'environments/Local.yml', 'opencollection.yml'], 'exactly these files, in this order');
   console.log(`walk-safety: ${served.length} served, ${skipped.length} skipped`);
   for (const s of skipped) {

@@ -14,6 +14,8 @@
 #   /internal/docs no options
 #   /bundled/docs  a single bundled yml
 #   /broken/docs   a collection that is not there
+#   /oversize/docs a collection over the caps
+#   /misconfigured/docs  an option the core does not know
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -66,6 +68,7 @@ for MOUNT in /docs /api/v2/docs /internal/docs; do
   check "$MOUNT/shell.js -> javascript"                        header_has Content-Type javascript "$url/shell.js"
   check "$MOUNT/shell.js -> public, max-age=3600"              header_has Cache-Control 'public, max-age=3600' "$url/shell.js"
   check "$MOUNT/shell.js -> 304 on If-None-Match"              revalidates "$url/shell.js"
+  check "$MOUNT/collection.yml -> json, it is a directory"     header_has Content-Type application/json "$url/collection.yml"
   check "$MOUNT/collection.yml -> no-store"                    header_has Cache-Control no-store "$url/collection.yml"
   check "$MOUNT/collection.yml -> nosniff"                     header_has X-Content-Type-Options nosniff "$url/collection.yml"
   check "$MOUNT/collection.yml -> 304 on If-None-Match"        revalidates "$url/collection.yml"
@@ -75,9 +78,11 @@ for MOUNT in /docs /api/v2/docs /internal/docs; do
   check "$MOUNT/ HEAD -> 200"                                  status_is 200 -I "$url/"
   check "$MOUNT/shell.js HEAD -> 200"                          status_is 200 -I "$url/shell.js"
   check "$MOUNT/collection.yml HEAD -> 200"                    status_is 200 -I "$url/collection.yml"
+  check "$MOUNT/collection.yml HEAD -> the GET's headers"      head_like_get "$url/collection.yml"
 
   curl -s "$url/collection.yml" >"$TMP/coll$saved.json"
   curl -s "$url/shell.js" >"$TMP/shell$saved.js"
+  curl -s "$url/" >"$TMP/page$saved.html"
 done
 
 describe "shell.js is one file, whatever the mount"
@@ -111,6 +116,8 @@ check "/docs data-config has no pageTitle"      config_lacks "$BASE/docs/" 'page
 check "/docs data-config has no server option"  config_lacks "$BASE/docs/" 'tags|environments|collection'
 check "/docs git url is forwarded"              body_has "$BASE/docs/" 'acme/api-collection'
 check "/docs git credentials are stripped"      body_lacks "$BASE/docs/" 'token:secret'
+check "/docs data-config carries the logo"      config_has "$BASE/docs/" 'logo'
+check "/internal/docs, no logo set, has none"   config_lacks "$BASE/internal/docs/" 'logo'
 
 describe "a single bundled file"
 check "/bundled/docs/ -> the page"              status_is 200 "$BASE/bundled/docs/"
@@ -123,6 +130,15 @@ check "the app's own route still answers"       body_has "$BASE/control" 'the ap
 check "/broken/docs/ -> 404, not a crash"       status_is 404 "$BASE/broken/docs/"
 check "/broken/docs/ says what is wrong"        body_has "$BASE/broken/docs/" 'Collection not found'
 check "/broken/docs/collection.yml -> 404 too"  status_is 404 "$BASE/broken/docs/collection.yml"
+
+describe "a collection over the caps is refused at the mount"
+check "/oversize/docs/collection.yml -> 413"    status_is 413 "$BASE/oversize/docs/collection.yml"
+check "/oversize/docs/ -> 413 as well"          status_is 413 "$BASE/oversize/docs/"
+check "and it names the cap"                    body_has "$BASE/oversize/docs/" 'per-file size cap'
+
+describe "an option we do not know is an error, not a silent no-op"
+check "/misconfigured/docs/ -> 500"             status_is 500 "$BASE/misconfigured/docs/"
+check "naming the key"                          body_has "$BASE/misconfigured/docs/" 'unknown option theme'
 
 if [ "$(curl -s -o /dev/null -w '%{http_code}' "$BASE/portal")" = "200" ]; then
   describe "embed(): the docs block inside the host's own page"
@@ -152,13 +168,13 @@ check "and instantiating that wasm"            header_has Content-Security-Polic
 
 if [ -n "$SAVE" ]; then
   mkdir -p "$SAVE"
-  cp "$TMP"/coll_*.json "$TMP"/shell_docs.js "$SAVE/"
+  cp "$TMP"/coll_*.json "$TMP"/page_*.html "$TMP"/shell_docs.js "$SAVE/"
   echo "saved served bodies to $SAVE"
 fi
 
 if [ -n "$COMPARE" ]; then
   describe "byte-identical to $COMPARE"
-  for f in "$TMP"/coll_*.json "$TMP"/shell_docs.js; do
+  for f in "$TMP"/coll_*.json "$TMP"/page_*.html "$TMP"/shell_docs.js; do
     name="$(basename "$f")"
     check "$name matches" cmp -s "$f" "$COMPARE/$name"
   done

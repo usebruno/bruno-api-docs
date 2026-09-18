@@ -25,6 +25,7 @@ Module({
       environments: { include: ['Local'] },
       tags: { exclude: ['internal'] },
       pageTitle: 'Acme API',
+      logo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Ccircle cx=%225%22 cy=%225%22 r=%225%22/%3E%3C/svg%3E',
       gitCollectionUrl: 'https://token:secret@github.com/acme/api-collection'
     }),
     ApiDocsModule.forRoot({
@@ -34,7 +35,9 @@ Module({
     }),
     ApiDocsModule.forRoot({ mountPath: '/internal/docs', collection: COLLECTION }),
     ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collection: BUNDLED }),
-    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collection: './there-is-no-collection-here' })
+    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collection: './there-is-no-collection-here' }),
+    ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collection: '../fixtures/walk-oversize' }),
+    ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collection: COLLECTION, theme: 'dark' })
   ]
 })(AppModule);
 

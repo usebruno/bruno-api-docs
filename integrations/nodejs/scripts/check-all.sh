@@ -24,4 +24,4 @@ run "nestjs/express" contract-tests/apps/nestjs.js  5458 express --compare "$BOD
 run "nestjs/fastify" contract-tests/apps/nestjs.js  5459 fastify --compare "$BODIES"
 
 echo
-echo "${GREEN}every framework agrees, byte for byte${RESET}"
+echo "${GREEN}every framework agrees, byte for byte: the page, the documents, the bundle${RESET}"

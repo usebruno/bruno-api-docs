@@ -39,6 +39,7 @@ async function main() {
     environments: { include: ['Local'] },
     tags: { exclude: ['internal'] },
     pageTitle: 'Acme API',
+    logo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Ccircle cx=%225%22 cy=%225%22 r=%225%22/%3E%3C/svg%3E',
     gitCollectionUrl: 'https://token:secret@github.com/acme/api-collection'
   });
 
@@ -51,6 +52,8 @@ async function main() {
   await app.register(apiDocs, { prefix: '/internal/docs', collection: COLLECTION });
   await app.register(apiDocs, { prefix: '/bundled/docs', collection: BUNDLED });
   await app.register(apiDocs, { prefix: '/broken/docs', collection: './there-is-no-collection-here' });
+  await app.register(apiDocs, { prefix: '/oversize/docs', collection: '../fixtures/walk-oversize' });
+  await app.register(apiDocs, { prefix: '/misconfigured/docs', collection: COLLECTION, theme: 'dark' });
 
   await app.listen({ port: PORT, host: '127.0.0.1' });
   console.log(`fastify rig on http://localhost:${PORT}`);

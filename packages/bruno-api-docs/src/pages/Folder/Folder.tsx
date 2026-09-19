@@ -16,6 +16,7 @@ import { FolderConfiguration } from '../../components/FolderConfiguration/Folder
 import { Tags } from '@/components/Tags/Tags';
 import { FolderIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 interface FolderProps {
   item: FolderItem;
@@ -69,11 +70,11 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
         {docsHtml && (
           <Section label="Documentation" testId="folder-section-documentation" className="folder-fullwidth" labelClassName="section-label-muted">
             <ViewMore collapsedHeight="4.5rem" testId="folder-docs">
-              <div
+              <MarkdownContent
                 className="markdown-documentation"
-                data-nav-headings
-                data-nav-level={2}
-                dangerouslySetInnerHTML={{ __html: docsHtml }}
+                navHeadings
+                navLevel={2}
+                html={docsHtml}
               />
             </ViewMore>
           </Section>

@@ -51,6 +51,7 @@ import { EmptyState } from '@/ui/EmptyState/EmptyState';
 import { RequestUrlBar } from '@/components/Request/RequestUrlBar/RequestUrlBar';
 import { StyledWrapper } from './StyledWrapper';
 import { FileIcon, RefreshIcon } from '@/assets/icons';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 const NO_ANCESTRY: Item[] = [];
 
@@ -189,11 +190,11 @@ export const GrpcRequest: React.FC<GrpcRequestProps> = ({
         <RequestUrlBar method="gRPC" capitalizeMethod={false} url={url} className="grpc-request-url-bar" />
         {descHtml && (
           <ViewMore className="grpc-request-description" collapsedHeight="4.5rem" testId="grpc-request-description">
-            <div
+            <MarkdownContent
               className="markdown-documentation"
-              data-nav-headings
-              data-nav-level={NAV_LEVEL.section}
-              dangerouslySetInnerHTML={{ __html: descHtml }}
+              navHeadings
+              navLevel={NAV_LEVEL.section}
+              html={descHtml}
             />
           </ViewMore>
         )}

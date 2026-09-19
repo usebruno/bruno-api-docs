@@ -702,30 +702,45 @@ tr.themed-row:nth-child(even) {
   margin-bottom: 0.625rem !important;
   font-family: var(--font-sans) !important;
   font-weight: 600 !important;
-  font-size: 0.8125rem !important;
-  line-height: 0.75rem !important;
+  line-height: 1.25 !important;
   letter-spacing: normal !important;
 }
 
-/* Per-level rules only adjust spacing; every level shares the typography above. */
 .markdown-documentation h1.heading-1 {
+  font-size: 2em !important;
   margin-top: 0 !important;
   margin-bottom: 0.75rem !important;
+  padding-bottom: 0.3em !important;
+  border-bottom: 1px solid var(--oc-dropdown-separator) !important;
 }
 
 .markdown-documentation h2.heading-2 {
+  font-size: 1.5em !important;
   margin-top: 1rem !important;
   margin-bottom: 0.5rem !important;
+  padding-bottom: 0.3em !important;
+  border-bottom: 1px solid var(--oc-dropdown-separator) !important;
 }
 
 .markdown-documentation h3.heading-3 {
+  font-size: 1.25em !important;
   margin-top: 1.25rem !important;
   margin-bottom: 0.5rem !important;
 }
 
 .markdown-documentation h4.heading-4 {
+  font-size: 1.125em !important;
   margin-top: 1rem !important;
   margin-bottom: 0.4rem !important;
+}
+
+.markdown-documentation h5.heading-5 {
+  font-size: 1em !important;
+}
+
+.markdown-documentation h6.heading-6 {
+  font-size: 0.875em !important;
+  color: var(--oc-colors-text-muted) !important;
 }
 
 .markdown-documentation p {
@@ -755,14 +770,31 @@ tr.themed-row:nth-child(even) {
   color: var(--prose-code-text) !important;
 }
 
+.markdown-documentation .md-code-block {
+  position: relative;
+}
+
 .markdown-documentation pre {
-  padding: 1rem 1.25rem !important;
-  background-color: var(--code-bg) !important;
+  padding: 0.75rem 1rem !important;
+  padding-right: 2.75rem !important;
+  background-color: var(--oc-sidebar-bg) !important;
+  border: 1px solid var(--oc-border-border0) !important;
   border-radius: var(--oc-radius) !important;
   overflow-x: auto !important;
   margin: 1rem 0 !important;
-  color: var(--code-text) !important;
-  border: none !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-mono) !important;
+}
+
+[data-theme="dark"] .markdown-documentation pre {
+  background-color: transparent !important;
+}
+
+.markdown-documentation .md-code-copy {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
 }
 
 .markdown-documentation pre code {
@@ -871,9 +903,94 @@ tr.themed-row:nth-child(even) {
   font-style: italic !important;
 }
 
+.markdown-documentation s,
 .markdown-documentation del {
   text-decoration: line-through !important;
   color: var(--text-secondary) !important;
+}
+
+.markdown-documentation li.task-list-item {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 0 0.5rem !important;
+  list-style: none !important;
+  margin-top: 0.2em !important;
+  margin-bottom: 0.2em !important;
+}
+
+.markdown-documentation li.task-list-item > ul,
+.markdown-documentation li.task-list-item > ol {
+  flex: 0 0 100% !important;
+  margin: 0.2em 0 0 !important;
+}
+
+.markdown-documentation .task-list-item-checkbox {
+  width: 14px;
+  height: 14px;
+  margin: 0.2em 0 0;
+  flex-shrink: 0;
+  vertical-align: top;
+  cursor: default;
+  background-color: transparent;
+  accent-color: var(--oc-primary-solid);
+  color-scheme: light;
+}
+
+[data-theme="dark"] .markdown-documentation .task-list-item-checkbox {
+  color-scheme: dark;
+}
+
+.markdown-documentation .hljs-keyword,
+.markdown-documentation .hljs-selector-tag,
+.markdown-documentation .hljs-title,
+.markdown-documentation .hljs-section,
+.markdown-documentation .hljs-doctag,
+.markdown-documentation .hljs-name,
+.markdown-documentation .hljs-strong {
+  color: var(--oc-codemirror-tokens-keyword);
+}
+
+.markdown-documentation .hljs-comment {
+  color: var(--oc-codemirror-tokens-comment);
+}
+
+.markdown-documentation .hljs-string,
+.markdown-documentation .hljs-title.class_,
+.markdown-documentation .hljs-title.class_.inherited__,
+.markdown-documentation .hljs-title.function_ {
+  color: var(--oc-codemirror-tokens-string);
+}
+
+.markdown-documentation .hljs-variable,
+.markdown-documentation .hljs-template-variable,
+.markdown-documentation .hljs-attribute {
+  color: var(--oc-codemirror-tokens-variable);
+}
+
+.markdown-documentation .hljs-attr,
+.markdown-documentation .hljs-property {
+  color: var(--oc-codemirror-tokens-property);
+}
+
+.markdown-documentation .hljs-number,
+.markdown-documentation .hljs-literal {
+  color: var(--oc-codemirror-tokens-number);
+}
+
+.markdown-documentation .hljs-built_in,
+.markdown-documentation .hljs-type,
+.markdown-documentation .hljs-params,
+.markdown-documentation .hljs-meta,
+.markdown-documentation .hljs-link {
+  color: var(--oc-codemirror-tokens-atom);
+}
+
+.markdown-documentation .hljs-symbol,
+.markdown-documentation .hljs-bullet,
+.markdown-documentation .hljs-addition,
+.markdown-documentation .hljs-deletion {
+  color: var(--oc-codemirror-tokens-tag);
 }
 
 /* ================================================================

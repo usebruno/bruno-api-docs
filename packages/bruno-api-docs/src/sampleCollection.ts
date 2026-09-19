@@ -606,12 +606,31 @@ items:
       seq: 4
       tags: ["billing"]
     docs: |
-      ## Billing
+      # Billing
 
       Endpoints for managing **customers** and their invoices.
 
+      ## Access
+
       - Auth is **inherited** from the collection.
       - Folder-level scripts record the execution chain for every request inside.
+
+      ### Rollout checklist
+
+      - [x] ~~Invoice export shipped~~
+      - [ ] Dunning emails
+      - Not a task item
+      - [ ] Parent task
+        - [x] Nested done
+
+      #### Notes
+
+      Line one<br/>line two
+
+      \`\`\`js
+      const invoice = await bru.get('/invoices/42');
+      const receipt = await bru.get('/invoices/42/receipt?include=lineItems,taxes,discounts,refunds,adjustments,credits&expand=customer,subscription,paymentMethod&currency=usd&locale=en-GB&format=pdf');
+      \`\`\`
     request:
       auth: inherit
       scripts:

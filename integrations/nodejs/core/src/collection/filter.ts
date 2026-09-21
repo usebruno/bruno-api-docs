@@ -14,16 +14,20 @@ export interface FilterResult extends FilterStage {
 /** The reason this file is not published, or `null` to publish it. */
 type SkipReason = (file: WalkedFile) => string | null;
 
-const MANIFEST_FILE = /^opencollection\.ya?ml$/;
-const ROOT_ENV_FILE = /^environments\/[^/]+\.ya?ml$/;
+const MANIFEST_FILE = /^(opencollection\.ya?ml|bruno\.json)$/;
+const COLLECTION_FILE = /^(opencollection\.ya?ml|bruno\.json|collection\.bru)$/;
+const ROOT_ENV_FILE = /^environments\/[^/]+\.(ya?ml|bru)$/;
 const ENV_DIR = /(^|\/)environments\//;
-const FOLDER_FILE = /(^|\/)folder\.ya?ml$/;
+const FOLDER_FILE = /(^|\/)folder\.(ya?ml|bru)$/;
+const META_BLOCK = /^meta \{\n([\s\S]*?)\n\}/;
+const META_TAGS = /^\s*tags: \[\n([\s\S]*?)\n\s*\]/m;
 
 export const isManifest = (p: string): boolean => MANIFEST_FILE.test(p);
+const isBru = (p: string): boolean => p.endsWith('.bru');
 
 const namesOf = (include: Filter['include']): string[] => (Array.isArray(include) ? include : []);
 
-const isRequestFile = (p: string): boolean => !isManifest(p) && !FOLDER_FILE.test(p) && !ENV_DIR.test(p);
+const isRequestFile = (p: string): boolean => !COLLECTION_FILE.test(p) && !FOLDER_FILE.test(p) && !ENV_DIR.test(p);
 
 export function environmentName(text: string): string | null {
   const doc = safeLoad(text);
@@ -31,6 +35,24 @@ export function environmentName(text: string): string | null {
 
   return doc.name;
 }
+
+/** A .bru environment is named by its file; the yml one names itself. */
+const environmentNameOf = (file: WalkedFile): string | null =>
+  isBru(file.path) ? file.path.slice(file.path.lastIndexOf('/') + 1, -'.bru'.length) : environmentName(file.text);
+
+/** The tags in a request's `meta { ... }` block. `null` when there is no such block to read. */
+export function bruMetaTags(text: string): string[] | null {
+  const meta = META_BLOCK.exec(text);
+  if (!meta) return null;
+
+  const tags = META_TAGS.exec(meta[1]);
+  if (!tags) return [];
+
+  return tags[1].split('\n').map((line) => line.trim()).filter(Boolean);
+}
+
+const requestTagsOf = (file: WalkedFile): string[] | null =>
+  isBru(file.path) ? bruMetaTags(file.text) : requestTags(file.text);
 
 /** `null` means the tags could not be read, which is not the same as carrying none. */
 export function requestTags(text: string): string[] | null {
@@ -99,7 +121,7 @@ function filterEnvironments(files: WalkedFile[], option: Filter | undefined): Fi
       return 'environments not published by default';
     }
 
-    const name = environmentName(file.text);
+    const name = environmentNameOf(file);
     if (name === null) {
       return 'environment file without a name';
     }
@@ -133,7 +155,7 @@ function filterTags(files: WalkedFile[], option: Filter | undefined): FilterStag
   const requests = partitionFiles(files, (file) => {
     if (!isRequestFile(file.path)) return null;
 
-    const tags = requestTags(file.text);
+    const tags = requestTagsOf(file);
     // fail closed: a request we cannot read the tags of might be one the filter was meant to hide
     if (tags === null) {
       return 'request file unreadable while filtering by tags';

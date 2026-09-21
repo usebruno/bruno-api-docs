@@ -1,0 +1,15 @@
+meta {
+  name: Drain node
+  type: http
+  seq: 2
+  tags: [
+    internal
+    dangerous
+  ]
+}
+
+post {
+  url: {{baseUrl}}/admin/drain-node
+  body: none
+  auth: inherit
+}

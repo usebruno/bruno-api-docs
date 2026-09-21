@@ -6,6 +6,7 @@ const { apiDocs } = require('@usebruno/api-docs-fastify');
 const PORT = Number(process.env.PORT || 5457);
 // relative on purpose: the core resolves it against this file, not the cwd
 const COLLECTION = '../fixtures/api-collection';
+const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
 
 const app = Fastify({ logger: false });
@@ -52,6 +53,7 @@ async function main() {
 
   await app.register(apiDocs, { prefix: '/internal/docs', collection: COLLECTION });
   await app.register(apiDocs, { prefix: '/bundled/docs', collection: BUNDLED });
+  await app.register(apiDocs, { prefix: '/bru/docs', collection: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } });
   await app.register(apiDocs, { prefix: '/broken/docs', collection: './there-is-no-collection-here' });
   await app.register(apiDocs, { prefix: '/oversize/docs', collection: '../fixtures/walk-oversize' });
   await app.register(apiDocs, { prefix: '/misconfigured/docs', collection: COLLECTION, theme: 'dark' });

@@ -29,7 +29,7 @@ if [ "$pinned" != "$current" ]; then
 fi
 
 # stale build output from another node or an older checkout is the usual source of a mystery failure
-rm -rf nodejs/*/dist nodejs/*/shell shell/shell.js
+rm -rf nodejs/*/dist nodejs/*/shell shell/shell.js shell/bru.js
 mise exec -- npm ci
 mise exec -- npm run build
 

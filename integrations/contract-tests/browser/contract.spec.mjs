@@ -91,6 +91,23 @@ test('try it sends the published environment, and only that', async ({ page }) =
   expect(errors, 'nothing the playground loads is blocked by the documented CSP').toEqual([]);
 });
 
+test('a .bru collection renders, and its filters hold', async ({ page }) => {
+  const errors = consoleErrorsOn(page);
+  await page.goto('/bru/docs/', { waitUntil: 'networkidle' });
+  const text = await page.evaluate(() => document.body.innerText);
+
+  await expect(page.getByText('Catalog', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('Mixed', { exact: true }).first()).toBeVisible();
+  expect(text).not.toContain('Internal');
+  for (const hidden of ['Reindex catalog', 'Purge cache', 'Drain node']) {
+    expect(text, `${hidden} is tagged internal`).not.toContain(hidden);
+  }
+  expect(text).toContain('Local');
+  expect(text).not.toContain('Prod');
+  expect(text).not.toContain('prod-token-must-never-be-served');
+  expect(errors).toEqual([]);
+});
+
 test('a bundled single file renders the same way', async ({ page }) => {
   await page.goto('/bundled/docs/', { waitUntil: 'networkidle' });
   await expect(page).toHaveTitle('API Documentation');

@@ -7,7 +7,7 @@ import tsParser from '@typescript-eslint/parser';
 // The repo's stylistic rules, minus everything browser-shaped.
 export default [
   {
-    ignores: ['**/node_modules/**', '**/dist/**', '**/shell/shell.js']
+    ignores: ['**/node_modules/**', '**/dist/**', '**/shell/shell.js', '**/shell/bru.js', 'shell/vendor/**']
   },
   {
     plugins: {

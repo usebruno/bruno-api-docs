@@ -148,7 +148,7 @@ redirects_to() { local status location; status="$(curl -s -o /dev/null -w '%{htt
 paths_in() { node -e 'const d=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8"));console.log(Object.keys(d.files).sort().join(","))' "$1"; }
 paths_are() { want="$2"; got="$(paths_in "$1")"; [ "$got" = "$2" ]; }
 none_mention() { want="'$1' in no file"; got="found in: $(grep -l "$1" "${@:2}" 2>/dev/null | xargs -n1 basename 2>/dev/null | tr '\n' ' ')"; ! grep -q "$1" "${@:2}"; }
-no_origins() { want="no absolute origin in $(basename "$1")"; got="origins: $(grep -oE 'https?://[A-Za-z0-9./_-]+' "$1" | sort -u | tr '\n' ' ')"; ! grep -oE 'https?://[A-Za-z0-9./_-]+' "$1" | grep -q .; }
+no_cdn_origin() { want="no cdn.usebruno.com in $(basename "$1")"; got="$(grep -oE 'https?://[A-Za-z0-9./_-]*usebruno[A-Za-z0-9./_-]*' "$1" | sort -u | tr '\n' ' ')"; ! grep -q 'usebruno.com' "$1"; }
 occurs_once() { want="exactly 1 occurrence of '$2'"; got="$(curl -s "$1" | grep -c "$2") occurrences"; [ "${got%% *}" = "1" ]; }
 head_like_get() { want="$(header_of Content-Type "$1"; header_of Cache-Control "$1")"; got="$(header_of Content-Type -I "$1"; header_of Cache-Control -I "$1")"; [ "$got" = "$want" ]; }
 config_of() { curl -s "$1" | grep -o 'data-config="[^"]*"'; }

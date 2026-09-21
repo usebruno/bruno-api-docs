@@ -62,4 +62,19 @@ const fixture = (name) => path.join(here, '..', '..', '..', 'contract-tests', 'f
   assert.equal(walkCollection(safety).files.length, 3, 'and the real caps are the default');
 }
 
+// --- a .bru collection: bruno.json is the manifest, .bru files are the collection, nothing else
+{
+  const { files, skipped } = walkCollection(fixture('api-collection-bru'), undefined, 'bru');
+  const served = files.map((f) => f.path);
+
+  assert.ok(served.includes('bruno.json'), 'the manifest is served');
+  assert.ok(served.includes('collection.bru'), 'and the collection file');
+  assert.ok(served.every((p) => p.endsWith('.bru') || p === 'bruno.json'), 'only .bru files and the manifest');
+  assert.equal(served.length, 13, 'every file of the fixture, before filtering');
+  assert.equal(skipped.length, 0);
+
+  const { files: ymlWalk } = walkCollection(fixture('api-collection-bru'));
+  assert.equal(ymlWalk.length, 0, 'walked as yml, a .bru collection has nothing to serve');
+}
+
 console.log('walk-test: all assertions passed');

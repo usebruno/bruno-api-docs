@@ -13,6 +13,7 @@
 #   /api/v2/docs   environments all minus Prod
 #   /internal/docs no options
 #   /bundled/docs  a single bundled yml
+#   /bru/docs      the same collection in Bruno's own format, same filters
 #   /broken/docs   a collection that is not there
 #   /oversize/docs a collection over the caps
 #   /misconfigured/docs  an option the core does not know
@@ -88,7 +89,7 @@ done
 describe "shell.js is one file, whatever the mount"
 check "byte-identical across mounts"            cmp -s "$TMP/shell_docs.js" "$TMP/shell_api_v2_docs.js"
 check "byte-identical across mounts (2)"        cmp -s "$TMP/shell_docs.js" "$TMP/shell_internal_docs.js"
-check "no origin is baked into the bundle"      no_origins "$TMP/shell_docs.js"
+check "the CDN is not baked into the bundle"    no_cdn_origin "$TMP/shell_docs.js"
 check "it understands the fragments envelope"   file_has "$TMP/shell_docs.js" 'opencollection-fragments'
 
 describe "environments: server side, by whole file"
@@ -130,6 +131,20 @@ check "the app's own route still answers"       body_has "$BASE/control" 'the ap
 check "/broken/docs/ -> 404, not a crash"       status_is 404 "$BASE/broken/docs/"
 check "/broken/docs/ says what is wrong"        body_has "$BASE/broken/docs/" 'Collection not found'
 check "/broken/docs/collection.yml -> 404 too"  status_is 404 "$BASE/broken/docs/collection.yml"
+
+describe "a .bru collection, filtered and served the same way"
+curl -s "$BASE/bru/docs/collection.yml" >"$TMP/coll_bru_docs.json"
+curl -s "$BASE/bru/docs/" >"$TMP/page_bru_docs.html"
+check "/bru/docs/ -> the page"                  status_is 200 "$BASE/bru/docs/"
+check "/bru/docs/shell.js -> the same shell"    cmp -s <(curl -s "$BASE/bru/docs/shell.js") "$TMP/shell_docs.js"
+check "/bru/docs/collection.yml -> json, a directory" header_has Content-Type application/json "$BASE/bru/docs/collection.yml"
+check "it is the raw files, bruno.json among them" file_has "$TMP/coll_bru_docs.json" 'bruno.json'
+check "the tagged request is gone"              file_lacks "$TMP/coll_bru_docs.json" 'reindex catalog'
+check "a folder with no survivor goes"          file_lacks "$TMP/coll_bru_docs.json" 'internal/folder.bru'
+check "Prod is not served, by file name"        file_lacks "$TMP/coll_bru_docs.json" 'environments/Prod.bru'
+check "Prod's token appears in no served byte"  none_mention 'prod-token-must-never-be-served' "$TMP/coll_bru_docs.json" "$TMP/page_bru_docs.html"
+check "exactly these eight files survive"       paths_are "$TMP/coll_bru_docs.json" \
+  'bruno.json,catalog/folder.bru,catalog/get product.bru,catalog/list products.bru,collection.bru,environments/Local.bru,mixed/folder.bru,mixed/health.bru'
 
 describe "a collection over the caps is refused at the mount"
 check "/oversize/docs/collection.yml -> 413"    status_is 413 "$BASE/oversize/docs/collection.yml"

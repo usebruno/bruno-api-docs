@@ -1,8 +1,9 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { ConfigError, type CollectionFilters } from '../options';
 import { etagOf, type HttpResponse, type Conditional } from '../http';
 import type { SkippedFile } from './walk';
-import { walkCollection, CAPS, CapError } from './walk';
+import { walkCollection, CAPS, CapError, type CollectionFormat } from './walk';
 import { applyFilters, isManifest } from './filter';
 
 export type Provider = (conditional: Conditional) => HttpResponse;
@@ -51,10 +52,13 @@ export function fileProvider(filePath: string): BuiltProvider {
   return { serve: serveFromMemory(body, 'text/yaml; charset=utf-8'), fileCount: 1, skipped: [], unknownEnvironments: [] };
 }
 
+const formatOf = (rootDir: string): CollectionFormat =>
+  !fs.existsSync(path.join(rootDir, 'opencollection.yml')) && fs.existsSync(path.join(rootDir, 'bruno.json')) ? 'bru' : 'yml';
+
 export function dirProvider(rootDir: string, filters: CollectionFilters): BuiltProvider {
-  const walked = walkCollection(rootDir);
+  const walked = walkCollection(rootDir, CAPS, formatOf(rootDir));
   if (!walked.files.some((file) => isManifest(file.path))) {
-    throw new ManifestError('no opencollection.yml manifest at the collection root');
+    throw new ManifestError('no opencollection.yml or bruno.json manifest at the collection root');
   }
 
   const filtered = applyFilters(walked.files, filters);

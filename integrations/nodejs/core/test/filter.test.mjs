@@ -9,6 +9,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const { applyFilters, isManifest, environmentName, requestTags, isRequestTagsIncluded } = require(path.join(here, '..', 'dist', 'collection', 'filter.js'));
 const { ConfigError, validateOptions } = require(path.join(here, '..', 'dist', 'options.js'));
+const { bruMetaTags } = require(path.join(here, '..', 'dist', 'collection', 'filter.js'));
 
 const file = (p, text) => ({ path: p, text });
 const request = (name, tags) => `info:\n  name: ${name}\n${tags ? `  tags:\n${tags.map((t) => `    - ${t}\n`).join('')}` : ''}`;
@@ -122,5 +123,29 @@ validateOptions({ environments: { include: '*' }, tags: { include: '*' } });
 assert.throws(() => validateOptions({ collection: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
 validateOptions({ environments: { include: '*', exclude: ['Prod'] } });
 validateOptions({});
+
+// --- .bru: tags come from the meta block, environments are named by file
+assert.deepEqual(bruMetaTags('meta {\n  name: x\n  tags: [\n    internal\n    dangerous\n  ]\n}\n\nget {\n  url: /x\n}\n'), ['internal', 'dangerous']);
+assert.deepEqual(bruMetaTags('meta {\n  name: x\n  seq: 1\n}\n'), [], 'a meta block without tags carries none');
+assert.equal(bruMetaTags('get {\n  url: /x\n}\n'), null, 'no meta block is unreadable, not tagless');
+assert.equal(bruMetaTags(''), null);
+
+{
+  const bru = [
+    { path: 'bruno.json', text: '{"name":"x"}' },
+    { path: 'collection.bru', text: 'auth {\n  mode: none\n}\n' },
+    { path: 'a/folder.bru', text: 'meta {\n  name: A\n}\n' },
+    { path: 'a/keep.bru', text: 'meta {\n  name: keep\n  type: http\n}\n' },
+    { path: 'a/hide.bru', text: 'meta {\n  name: hide\n  type: http\n  tags: [\n    internal\n  ]\n}\n' },
+    { path: 'b/folder.bru', text: 'meta {\n  name: B\n}\n' },
+    { path: 'b/hide.bru', text: 'meta {\n  name: hide\n  tags: [\n    internal\n  ]\n}\n' },
+    { path: 'environments/Local.bru', text: 'vars {\n  a: 1\n}\n' },
+    { path: 'environments/Prod.bru', text: 'vars {\n  a: 2\n}\n' }
+  ];
+  const kept = applyFilters(bru, { environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }).files.map((f) => f.path).sort();
+  assert.deepEqual(kept, ['a/folder.bru', 'a/keep.bru', 'bruno.json', 'collection.bru', 'environments/Local.bru'],
+    'tagged requests and the folder left empty go, the environment is picked by file name');
+  assert.throws(() => applyFilters(bru, { environments: { include: ['Nope'] } }), ConfigError, 'an unknown .bru environment is a startup error too');
+}
 
 console.log('filter-test: all assertions passed');

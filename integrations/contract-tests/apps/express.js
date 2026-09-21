@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT || 5456);
 // relative on purpose: the core resolves it against this file, not the cwd, and check.sh boots
 // from a different directory to prove it
 const COLLECTION = '../fixtures/api-collection';
+const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
 
 const app = express();
@@ -44,6 +45,8 @@ app.use('/api/v2/docs', apiDocs({ collection: COLLECTION, environments: { includ
 app.use('/internal/docs', apiDocs({ collection: COLLECTION }));
 
 app.use('/bundled/docs', apiDocs({ collection: BUNDLED }));
+
+app.use('/bru/docs', apiDocs({ collection: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }));
 
 app.use('/broken/docs', apiDocs({ collection: './there-is-no-collection-here' }));
 

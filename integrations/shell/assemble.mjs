@@ -3,6 +3,7 @@
 // anything else with it.
 
 import { load as yamlLoad } from 'js-yaml';
+import { parseBruRequest, parseBruCollection, parseBruEnvironment, brunoToOpenCollection } from './bru.js';
 
 const MANIFEST_FILE = /^opencollection\.ya?ml$/;
 const FOLDER_FILE = /^folder\.ya?ml$/;
@@ -13,10 +14,64 @@ export function toOpenCollection(text) {
     return yamlLoad(text);
   }
   if (json['opencollection-fragments'] && json.files) {
-    return assembleFragments(json.files);
+    return 'bruno.json' in json.files ? assembleBru(json.files) : assembleFragments(json.files);
   }
 
   return json;
+}
+
+/**
+ * A .bru collection, the way the CLI reads one from disk: bruno.json and collection.bru at the
+ * root, folder.bru in each directory, environments named by file. The vendored converter then
+ * produces the same document the app's Generate Docs does.
+ */
+export function assembleBru(files) {
+  const brunoConfig = JSON.parse(files['bruno.json']);
+  const root = files['collection.bru'] ? parseBruCollection(files['collection.bru']) : {};
+  const environments = [];
+  const dirs = new Map([['', { root: null, requests: [], children: [] }]]);
+  const parentOf = (dir) => (dir.includes('/') ? dir.slice(0, dir.lastIndexOf('/')) : '');
+  const ensureDir = (dir) => {
+    if (!dirs.has(dir)) {
+      dirs.set(dir, { root: null, requests: [], children: [] });
+      ensureDir(parentOf(dir)).children.push(dir);
+    }
+
+    return dirs.get(dir);
+  };
+
+  for (const filePath of Object.keys(files)) {
+    if (filePath === 'bruno.json' || filePath === 'collection.bru') continue;
+    if (filePath.startsWith('environments/')) {
+      const name = filePath.slice('environments/'.length, -'.bru'.length);
+      environments.push({ name, ...parseBruEnvironment(files[filePath]) });
+      continue;
+    }
+
+    const slash = filePath.lastIndexOf('/');
+    const node = ensureDir(slash === -1 ? '' : filePath.slice(0, slash));
+    if (filePath.slice(slash + 1) === 'folder.bru') {
+      node.root = parseBruCollection(files[filePath]);
+    }
+    else {
+      node.requests.push(parseBruRequest(files[filePath]));
+    }
+  }
+
+  const bySeqThenName = (a, b) => (a.seq ?? Number.MAX_SAFE_INTEGER) - (b.seq ?? Number.MAX_SAFE_INTEGER) || (a.name || '').localeCompare(b.name || '');
+  const materialize = (dir) => {
+    const node = dirs.get(dir);
+    const folders = node.children.map((childDir) => {
+      const child = dirs.get(childDir);
+      const dirName = childDir.slice(childDir.lastIndexOf('/') + 1);
+
+      return { type: 'folder', name: child.root?.meta?.name || dirName, seq: child.root?.meta?.seq, root: child.root, items: materialize(childDir) };
+    });
+
+    return [...folders.sort(bySeqThenName), ...node.requests.sort(bySeqThenName)];
+  };
+
+  return brunoToOpenCollection({ name: brunoConfig.name, brunoConfig, root, items: materialize(''), environments });
 }
 
 function parseJsonOrNull(text) {

@@ -1,0 +1,14 @@
+meta {
+  name: Reindex catalog
+  type: http
+  seq: 3
+  tags: [
+    internal
+  ]
+}
+
+post {
+  url: {{baseUrl}}/admin/reindex-catalog
+  body: none
+  auth: inherit
+}

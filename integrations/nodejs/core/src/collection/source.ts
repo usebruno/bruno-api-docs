@@ -37,7 +37,11 @@ export function resolveCollectionSource(collectionOption: string): CollectionSou
     }
 
     // pointing at the manifest of an unbundled collection means the directory around it
-    if (isManifest(path.basename(resolved))) {
+    const name = path.basename(resolved);
+    if (name === 'bruno.json') {
+      return { mode: 'dir', path: path.dirname(resolved) };
+    }
+    if (isManifest(name)) {
       const manifest = safeLoad(fs.readFileSync(resolved, 'utf8'));
       if (manifest?.bundled === false) {
         return { mode: 'dir', path: path.dirname(resolved) };

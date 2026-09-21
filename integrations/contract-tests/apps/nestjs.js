@@ -12,6 +12,7 @@ const PORT = Number(process.env.PORT || 5458);
 const ADAPTER = process.env.ADAPTER || 'express';
 // relative on purpose: the core resolves it against this file, not the cwd
 const COLLECTION = '../fixtures/api-collection';
+const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
 
 // plain JS, so the decorator is applied as the function it is. The real Nest examples live in
@@ -35,6 +36,7 @@ Module({
     }),
     ApiDocsModule.forRoot({ mountPath: '/internal/docs', collection: COLLECTION }),
     ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collection: BUNDLED }),
+    ApiDocsModule.forRoot({ mountPath: '/bru/docs', collection: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }),
     ApiDocsModule.forRoot({ mountPath: '/broken/docs', collection: './there-is-no-collection-here' }),
     ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collection: '../fixtures/walk-oversize' }),
     ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collection: COLLECTION, theme: 'dark' })

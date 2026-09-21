@@ -1,6 +1,6 @@
 // Flat files in, one ordered document out. Run: npm run test:assemble
 import assert from 'node:assert/strict';
-import { toOpenCollection, assembleFragments } from '../assemble.mjs';
+import { toOpenCollection, assembleFragments, assembleBru } from '../assemble.mjs';
 
 const request = (name, seq) => `info:\n  name: ${name}\n  type: http\n${seq === undefined ? '' : `  seq: ${seq}\n`}`;
 const envelope = (files) => JSON.stringify({ 'opencollection-fragments': '1', files });
@@ -89,6 +89,37 @@ const names = (items) => items.map((i) => i.info.name);
   assert.equal(toOpenCollection('{"info":{"name":"Json"}}').info.name, 'Json', 'plain json passes through');
   assert.equal(toOpenCollection(envelope({ 'opencollection.yml': 'info:\n  name: Env\n' })).info.name, 'Env', 'an envelope is assembled');
   assert.equal(toOpenCollection(envelope({ 'opencollection.yml': 'info:\n  name: Env\n' })).bundled, true);
+}
+
+// --- a .bru envelope: parsed with bruno-lang, converted with the vendored converter
+{
+  const bru = {
+    'bruno.json': '{ "version": "1", "name": "Acme API", "type": "collection" }',
+    'collection.bru': 'auth {\n  mode: bearer\n}\n\nauth:bearer {\n  token: {{apiToken}}\n}\n',
+    'catalog/folder.bru': 'meta {\n  name: Catalog\n  seq: 2\n}\n\nauth {\n  mode: inherit\n}\n',
+    'catalog/list.bru': 'meta {\n  name: List products\n  type: http\n  seq: 1\n}\n\nget {\n  url: {{baseUrl}}/products\n  body: none\n  auth: inherit\n}\n',
+    'zeta/ping.bru': 'meta {\n  name: Ping\n  type: http\n  seq: 1\n}\n\nget {\n  url: {{baseUrl}}/ping\n  body: none\n  auth: inherit\n}\n',
+    'environments/Local.bru': 'vars {\n  baseUrl: http://localhost:1\n  apiToken: t\n}\n'
+  };
+  const doc = assembleBru(bru);
+
+  assert.equal(doc.info.name, 'Acme API', 'the name comes from bruno.json');
+  assert.equal(doc.bundled, true);
+  assert.deepEqual(names(doc.items), ['Catalog', 'zeta'], 'a folder without folder.bru is named by its directory and sorts after the sequenced ones');
+  assert.equal(doc.items[0].info.type, 'folder');
+  assert.equal(doc.items[0].info.seq, 2);
+  const list = doc.items[0].items[0];
+  assert.equal(list.info.name, 'List products');
+  assert.equal(list.info.type, 'http');
+  assert.equal(list.http.method, 'GET');
+  assert.equal(list.http.url, '{{baseUrl}}/products');
+  assert.equal(list.http.auth, 'inherit', 'request auth inherits');
+  assert.equal(doc.request.auth.type, 'bearer', 'collection auth from collection.bru');
+  assert.equal(doc.config.environments[0].name, 'Local', 'the environment is named by its file');
+  assert.equal(doc.config.environments[0].variables.find((v) => v.name === 'apiToken').value, 't');
+
+  const viaEnvelope = toOpenCollection(JSON.stringify({ 'opencollection-fragments': '1', 'files': bru }));
+  assert.deepEqual(viaEnvelope, doc, 'the envelope takes the .bru path when bruno.json is in it');
 }
 
 console.log('assemble-test: all assertions passed');

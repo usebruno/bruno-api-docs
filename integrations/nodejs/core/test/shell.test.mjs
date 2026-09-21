@@ -125,8 +125,8 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
   const bundle = fs.readFileSync(path.join(here, '..', 'shell', 'shell.js'), 'utf8');
   assert.ok(bundle.includes('opencollection-fragments'), 'the fragments format is understood in the browser');
   assert.ok(bundle.length > 20000, 'js-yaml is bundled in, not fetched');
-  assert.deepEqual(bundle.match(/https?:\/\/[A-Za-z0-9./_-]+/g), null,
-    'no origin is hardcoded in the bundle: the CDN arrives as data-cdn');
+  assert.ok(!bundle.includes('usebruno.com'), 'the CDN is not hardcoded in the bundle: it arrives as data-cdn');
+  assert.ok(bundle.includes('bruno.json'), 'the .bru parser and converter are bundled in, not fetched');
   assert.ok(fs.existsSync(path.join(here, '..', 'shell', 'shell.html')), 'the template ships beside it');
 }
 

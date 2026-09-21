@@ -44,12 +44,17 @@ const isStray = (name: string): boolean =>
   || STRAY_SUFFIXES.some((suffix) => name.endsWith(suffix))
   || (name.startsWith('#') && name.endsWith('#'));
 
-const isYaml = (name: string): boolean => name.endsWith('.yml') || name.endsWith('.yaml');
+export type CollectionFormat = 'yml' | 'bru';
+
+const isCollectionFile = (name: string, format: CollectionFormat): boolean =>
+  format === 'bru'
+    ? name.endsWith('.bru') || name === 'bruno.json'
+    : name.endsWith('.yml') || name.endsWith('.yaml');
 
 const utf8Strict = new TextDecoder('utf-8', { fatal: true });
 
 /** `caps` is a parameter so the limits can be tested without a 5 MB, 5000-file, 32-deep fixture. */
-export function walkCollection(rootDir: string, caps: Caps = CAPS): WalkResult {
+export function walkCollection(rootDir: string, caps: Caps = CAPS, format: CollectionFormat = 'yml'): WalkResult {
   const rootReal = fs.realpathSync(rootDir);
   const files: WalkedFile[] = [];
   const skipped: SkippedFile[] = [];
@@ -89,8 +94,8 @@ export function walkCollection(rootDir: string, caps: Caps = CAPS): WalkResult {
         skipped.push({ path: relPath, rule: 'not a regular file' });
         continue;
       }
-      if (!isYaml(name)) {
-        skipped.push({ path: relPath, rule: 'not .yml' });
+      if (!isCollectionFile(name, format)) {
+        skipped.push({ path: relPath, rule: `not .${format}` });
         continue;
       }
       if (!isInsideRoot(absPath)) {

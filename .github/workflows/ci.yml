@@ -12,7 +12,6 @@ on:
 permissions:
   contents: read
   pull-requests: read
-  checks: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -101,6 +100,10 @@ jobs:
     # a job-level if, not a workflow paths filter: a skipped job still reports and satisfies the required check
     if: needs.changes.outputs.integrations == 'true'
     runs-on: ubuntu-latest
+    # checks: write is for the test reporter; job-scoped so the renderer jobs keep least privilege
+    permissions:
+      contents: read
+      checks: write
     defaults:
       run:
         working-directory: integrations

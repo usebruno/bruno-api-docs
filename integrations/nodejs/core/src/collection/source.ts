@@ -14,22 +14,22 @@ export interface CollectionSource {
  * directories, so the cwd is not a stable base. `require.main` is undefined under ESM,
  * where `process.argv[1]` is the entry instead.
  */
-export function resolveCollectionPath(collectionPath: string): string {
+export function resolveCollectionPath(collectionOption: string): string {
   // guarded here rather than in validateOptions: an empty path resolves to the app's own
   // directory, and walking that would serve whatever yml the adopter happens to keep there
-  if (!collectionPath) {
-    throw new ConfigError('apiDocs: `collectionPath` is required');
+  if (!collectionOption) {
+    throw new ConfigError('apiDocs: `collection` is required');
   }
 
   const entryDir = require.main?.path
     ?? (process.argv[1] ? path.dirname(process.argv[1]) : undefined)
     ?? process.cwd();
 
-  return path.resolve(entryDir, collectionPath);
+  return path.resolve(entryDir, collectionOption);
 }
 
-export function resolveCollectionSource(collectionPath: string): CollectionSource {
-  const resolved = resolveCollectionPath(collectionPath);
+export function resolveCollectionSource(collectionOption: string): CollectionSource {
+  const resolved = resolveCollectionPath(collectionOption);
 
   try {
     if (fs.statSync(resolved).isDirectory()) {

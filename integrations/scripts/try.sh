@@ -51,15 +51,15 @@ echo
 case "$WHAT" in
   express)
     echo "  const { apiDocs } = require('@usebruno/api-docs-express');"
-    echo "  app.use('/docs', apiDocs({ collectionPath: './api-collection' }));"
+    echo "  app.use('/docs', apiDocs({ collection: './api-collection' }));"
     ;;
   fastify)
     echo "  const { apiDocs } = require('@usebruno/api-docs-fastify');"
-    echo "  app.register(apiDocs, { prefix: '/docs', collectionPath: './api-collection' });"
+    echo "  app.register(apiDocs, { prefix: '/docs', collection: './api-collection' });"
     ;;
   nestjs)
     echo "  import { ApiDocsModule } from '@usebruno/api-docs-nestjs';"
-    echo "  @Module({ imports: [ApiDocsModule.forRoot({ collectionPath: '../api-collection' })] })"
+    echo "  @Module({ imports: [ApiDocsModule.forRoot({ collection: '../api-collection' })] })"
     ;;
 esac
 echo

@@ -9,7 +9,7 @@ export interface CollectionFilters {
 }
 
 export interface CollectionOptions extends CollectionFilters {
-  collectionPath: string;
+  collection: string;
 }
 
 export interface RendererOptions {
@@ -23,7 +23,7 @@ export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
 
 export class ConfigError extends Error {}
 
-const KNOWN_OPTIONS = new Set(['collectionPath', 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
+const KNOWN_OPTIONS = new Set(['collection', 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
 
 export function validateOptions(options: ApiDocsOptions): void {
   const unknown = Object.keys(options).filter((key) => !KNOWN_OPTIONS.has(key));

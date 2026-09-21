@@ -13,7 +13,7 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
 
 // --- stamping: every placeholder is filled, at any mount
 {
-  const shell = loadShell({ collectionPath: './c', pageTitle: 'Acme API' });
+  const shell = loadShell({ collection: './c', pageTitle: 'Acme API' });
   const html = shell.html('/docs/').body;
 
   assert.ok(!html.includes('{{'), 'no placeholder survives stamping');
@@ -23,13 +23,13 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
   assert.ok(html.includes('src="/docs/shell.js"'), 'shell.js is loaded from the mount, same origin');
   assert.ok(html.includes(`src="${CDN}/api-docs.js"`), 'the renderer comes from the CDN');
 
-  assert.equal(loadShell({ collectionPath: './c' }).html('/x/').body.match(/<title>(.*)<\/title>/)[1], 'API Documentation');
-  assert.ok(loadShell({ collectionPath: './c' }).html('/a/b/c/').body.includes('data-base="/a/b/c/"'), 'any depth');
+  assert.equal(loadShell({ collection: './c' }).html('/x/').body.match(/<title>(.*)<\/title>/)[1], 'API Documentation');
+  assert.ok(loadShell({ collection: './c' }).html('/a/b/c/').body.includes('data-base="/a/b/c/"'), 'any depth');
 }
 
 // --- the CSP promise: nothing inline
 {
-  const html = loadShell({ collectionPath: './c' }).html('/docs/').body;
+  const html = loadShell({ collection: './c' }).html('/docs/').body;
   assert.ok(!/<style/i.test(html), 'no inline style');
   assert.ok(!/<script(?![^>]*\bsrc=)/i.test(html), 'every script tag has a src, none has a body');
 }
@@ -37,7 +37,7 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
 // --- escaping, because pageTitle and the config are adopter input
 {
   const nasty = loadShell({
-    collectionPath: './c',
+    collection: './c',
     pageTitle: '</title><script>alert(1)</script>',
     logo: 'https://x.test/a"onerror="alert(1)'
   }).html('/docs/').body;
@@ -50,7 +50,7 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
 // --- only renderer options reach the browser, and credentials never do
 {
   const config = rendererConfig({
-    collectionPath: './secret-path',
+    collection: './secret-path',
     environments: { include: '*' },
     tags: { exclude: ['internal'] },
     pageTitle: 'Docs',
@@ -64,7 +64,7 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
   assert.deepEqual(rendererConfig({}), {}, 'nothing set means nothing forwarded');
 
   const html = loadShell({
-    collectionPath: './secret-path',
+    collection: './secret-path',
     tags: { exclude: ['internal'] },
     environments: { include: ['Prod'] },
     pageTitle: 'Acme API'
@@ -89,7 +89,7 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
 
 // --- shell.js: static, cacheable, revalidates
 {
-  const shell = loadShell({ collectionPath: './c' });
+  const shell = loadShell({ collection: './c' });
   const res = shell.js({});
   assert.equal(res.status, 200);
   assert.equal(res.headers['Content-Type'], 'application/javascript; charset=utf-8');
@@ -98,13 +98,13 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
   assert.equal(shell.js({ ifNoneMatch: res.headers.ETag }).status, 304);
   assert.equal(shell.js({ ifNoneMatch: '"stale"' }).status, 200);
 
-  assert.equal(loadShell({ collectionPath: './c', pageTitle: 'Other' }).js({}).headers.ETag, res.headers.ETag,
+  assert.equal(loadShell({ collection: './c', pageTitle: 'Other' }).js({}).headers.ETag, res.headers.ETag,
     'shell.js is identical whatever the options, so it caches across mounts');
 }
 
 // --- the page itself must never be cached: it carries the per-mount base
 {
-  assert.equal(loadShell({ collectionPath: './c' }).html('/docs/').headers['Cache-Control'], 'no-cache');
+  assert.equal(loadShell({ collection: './c' }).html('/docs/').headers['Cache-Control'], 'no-cache');
 }
 
 // --- embed(): the body block only, for an adopter's own page. No collection involved.

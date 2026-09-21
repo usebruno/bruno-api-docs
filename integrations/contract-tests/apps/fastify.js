@@ -36,7 +36,7 @@ async function main() {
 
   await app.register(apiDocs, {
     prefix: '/docs',
-    collectionPath: COLLECTION,
+    collection: COLLECTION,
     environments: { include: ['Local'] },
     tags: { exclude: ['internal'] },
     pageTitle: 'Acme API',
@@ -46,15 +46,15 @@ async function main() {
 
   await app.register(apiDocs, {
     prefix: '/api/v2/docs',
-    collectionPath: COLLECTION,
+    collection: COLLECTION,
     environments: { include: '*', exclude: ['Prod'] }
   });
 
-  await app.register(apiDocs, { prefix: '/internal/docs', collectionPath: COLLECTION });
-  await app.register(apiDocs, { prefix: '/bundled/docs', collectionPath: BUNDLED });
-  await app.register(apiDocs, { prefix: '/broken/docs', collectionPath: './there-is-no-collection-here' });
-  await app.register(apiDocs, { prefix: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' });
-  await app.register(apiDocs, { prefix: '/misconfigured/docs', collectionPath: COLLECTION, theme: 'dark' });
+  await app.register(apiDocs, { prefix: '/internal/docs', collection: COLLECTION });
+  await app.register(apiDocs, { prefix: '/bundled/docs', collection: BUNDLED });
+  await app.register(apiDocs, { prefix: '/broken/docs', collection: './there-is-no-collection-here' });
+  await app.register(apiDocs, { prefix: '/oversize/docs', collection: '../fixtures/walk-oversize' });
+  await app.register(apiDocs, { prefix: '/misconfigured/docs', collection: COLLECTION, theme: 'dark' });
 
   await app.listen({ port: PORT, host: '127.0.0.1' });
   console.log(`fastify rig on http://localhost:${PORT}`);

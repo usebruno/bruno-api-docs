@@ -7,7 +7,7 @@ import { resolveCollectionSource } from './source';
 import { fileProvider, dirProvider, type Provider, type BuiltProvider } from './providers';
 
 export function providerFor(options: CollectionOptions): Provider {
-  const source = resolveCollectionSource(options.collectionPath);
+  const source = resolveCollectionSource(options.collection);
   const filters = { environments: options.environments, tags: options.tags };
 
   // built first: a path that is not there is reported as missing, not as a filter mistake

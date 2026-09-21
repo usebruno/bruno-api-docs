@@ -19,7 +19,7 @@ app.register(async (guarded) => {
     }
   });
 
-  await guarded.register(apiDocs, { prefix: '/docs', collectionPath: './api-collection' });
+  await guarded.register(apiDocs, { prefix: '/docs', collection: './api-collection' });
 });
 
 app.listen({ port }).then(() => console.log(`docs at http://localhost:${port}/docs/ (Authorization: Bearer let-me-in)`));

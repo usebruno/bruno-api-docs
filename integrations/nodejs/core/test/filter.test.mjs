@@ -119,7 +119,7 @@ assert.throws(() => validateOptions({ environments: { include: 'Local' } }), /`e
   'a string that is not the wildcard is named, not silently read as no names');
 assert.throws(() => validateOptions({ tags: { include: 'internal' } }), /`tags.include` takes a list/);
 validateOptions({ environments: { include: '*' }, tags: { include: '*' } });
-assert.throws(() => validateOptions({ collectionPath: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
+assert.throws(() => validateOptions({ collection: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
 validateOptions({ environments: { include: '*', exclude: ['Prod'] } });
 validateOptions({});
 

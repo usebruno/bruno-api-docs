@@ -31,7 +31,7 @@ app.use(
 app.get('/control', (req, res) => res.json({ ok: true, from: 'the app itself' }));
 
 app.use('/docs', apiDocs({
-  collectionPath: COLLECTION,
+  collection: COLLECTION,
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
@@ -39,21 +39,21 @@ app.use('/docs', apiDocs({
   gitCollectionUrl: 'https://token:secret@github.com/acme/api-collection'
 }));
 
-app.use('/api/v2/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: '*', exclude: ['Prod'] } }));
+app.use('/api/v2/docs', apiDocs({ collection: COLLECTION, environments: { include: '*', exclude: ['Prod'] } }));
 
-app.use('/internal/docs', apiDocs({ collectionPath: COLLECTION }));
+app.use('/internal/docs', apiDocs({ collection: COLLECTION }));
 
-app.use('/bundled/docs', apiDocs({ collectionPath: BUNDLED }));
+app.use('/bundled/docs', apiDocs({ collection: BUNDLED }));
 
-app.use('/broken/docs', apiDocs({ collectionPath: './there-is-no-collection-here' }));
+app.use('/broken/docs', apiDocs({ collection: './there-is-no-collection-here' }));
 
-app.use('/oversize/docs', apiDocs({ collectionPath: '../fixtures/walk-oversize' }));
+app.use('/oversize/docs', apiDocs({ collection: '../fixtures/walk-oversize' }));
 
 // theme is what the renderer will take next; until it does, passing it is a mistake we report
-app.use('/misconfigured/docs', apiDocs({ collectionPath: COLLECTION, theme: 'dark' }));
+app.use('/misconfigured/docs', apiDocs({ collection: COLLECTION, theme: 'dark' }));
 
 // the docs inside the host's own page: the mount serves, the block only points at it
-app.use('/portal/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: ['Local'] } }));
+app.use('/portal/docs', apiDocs({ collection: COLLECTION, environments: { include: ['Local'] } }));
 app.get('/portal', (req, res) => {
   res.type('html').send(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Acme Developer Portal</title></head>

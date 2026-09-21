@@ -41,7 +41,7 @@ export function subPathOf(fullUrl: string, mountPath: string): string {
 }
 
 /**
- * `ApiDocsModule.forRoot({ collectionPath: '../api-collection', mountPath: '/docs' })`. The path counts
+ * `ApiDocsModule.forRoot({ collection: '../api-collection', mountPath: '/docs' })`. The path counts
  * from the built entry file, `dist/main.js`, so a collection beside `src/` is one level up.
  */
 export class ApiDocsModule {

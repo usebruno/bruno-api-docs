@@ -21,7 +21,7 @@ Module({
   imports: [
     ApiDocsModule.forRoot({
       mountPath: '/docs',
-      collectionPath: COLLECTION,
+      collection: COLLECTION,
       environments: { include: ['Local'] },
       tags: { exclude: ['internal'] },
       pageTitle: 'Acme API',
@@ -30,14 +30,14 @@ Module({
     }),
     ApiDocsModule.forRoot({
       mountPath: '/api/v2/docs',
-      collectionPath: COLLECTION,
+      collection: COLLECTION,
       environments: { include: '*', exclude: ['Prod'] }
     }),
-    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collectionPath: COLLECTION }),
-    ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collectionPath: BUNDLED }),
-    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collectionPath: './there-is-no-collection-here' }),
-    ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' }),
-    ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collectionPath: COLLECTION, theme: 'dark' })
+    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collection: COLLECTION }),
+    ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collection: BUNDLED }),
+    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collection: './there-is-no-collection-here' }),
+    ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collection: '../fixtures/walk-oversize' }),
+    ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collection: COLLECTION, theme: 'dark' })
   ]
 })(AppModule);
 

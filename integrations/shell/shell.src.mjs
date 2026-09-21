@@ -73,6 +73,10 @@ import { toOpenCollection } from './assemble.mjs';
 })();
 
 function resolveBoot() {
+  if (typeof window.Bruno?.apiDocs === 'function') {
+    return (target, config) => window.Bruno.apiDocs(target, config);
+  }
+  // until the CDN has deployed a bundle that carries the namespace
   if (typeof window.OpenCollection === 'function') {
     return (target, config) => new window.OpenCollection({ target, ...config });
   }

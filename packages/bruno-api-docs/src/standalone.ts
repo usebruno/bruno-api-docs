@@ -112,5 +112,11 @@ export class OpenCollectionRenderer {
 export default OpenCollectionRenderer;
 
 if (typeof window !== 'undefined') {
-  (window as any).OpenCollection = OpenCollectionRenderer;
+  const globals = window as any;
+  globals.OpenCollection = OpenCollectionRenderer;
+  globals.Bruno = {
+    ...globals.Bruno,
+    apiDocs: (target: HTMLElement, options: Omit<OpenCollectionOptions, 'target'>) =>
+      new OpenCollectionRenderer({ target, ...options })
+  };
 }

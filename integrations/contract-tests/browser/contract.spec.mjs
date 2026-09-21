@@ -34,9 +34,7 @@ test('the renderer booted, from the CDN, with our shell from our own origin', as
 
   expect(sources.some((u) => u.endsWith('/docs/shell.js')), 'shell.js is same-origin').toBe(true);
   expect(sources.some((u) => u.startsWith('https://cdn.usebruno.com/')), 'the renderer is the CDN bundle').toBe(true);
-  expect(await page.evaluate(() => typeof window.OpenCollection)).toBe('function');
-
-  expect(await page.evaluate(() => typeof window.Bruno), 'window.Bruno has appeared on the CDN bundle').toBe('undefined');
+  expect(await page.evaluate(() => typeof window.OpenCollection), 'the entry the deployed bundle still carries').toBe('function');
 });
 
 test('the filters hold all the way to the page', async ({ page }) => {

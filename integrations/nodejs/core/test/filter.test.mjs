@@ -112,6 +112,13 @@ assert.equal(isRequestTagsIncluded(['a', 'b'], [], ['b']), false, 'any one exclu
 
 // --- startup validation of the same options
 assert.throws(() => validateOptions({ environments: { exclude: ['Prod'] } }), /needs a base/);
+validateOptions({ tags: { exclude: ['internal'] } });
+
+// a bare string is the natural typo for a list, and the only string we accept is the wildcard
+assert.throws(() => validateOptions({ environments: { include: 'Local' } }), /`environments.include` takes a list of names or '\*'/,
+  'a string that is not the wildcard is named, not silently read as no names');
+assert.throws(() => validateOptions({ tags: { include: 'internal' } }), /`tags.include` takes a list/);
+validateOptions({ environments: { include: '*' }, tags: { include: '*' } });
 assert.throws(() => validateOptions({ collectionPath: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
 validateOptions({ environments: { include: '*', exclude: ['Prod'] } });
 validateOptions({});

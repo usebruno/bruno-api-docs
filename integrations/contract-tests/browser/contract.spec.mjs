@@ -36,8 +36,6 @@ test('the renderer booted, from the CDN, with our shell from our own origin', as
   expect(sources.some((u) => u.startsWith('https://cdn.usebruno.com/')), 'the renderer is the CDN bundle').toBe(true);
   expect(await page.evaluate(() => typeof window.OpenCollection)).toBe('function');
 
-  // the shell boots through window.Bruno first when it exists. The day the CDN bundle ships it,
-  // this fails on purpose: re-check the boot order and the options we pass, then update it.
   expect(await page.evaluate(() => typeof window.Bruno), 'window.Bruno has appeared on the CDN bundle').toBe('undefined');
 });
 

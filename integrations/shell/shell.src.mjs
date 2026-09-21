@@ -73,9 +73,6 @@ import { toOpenCollection } from './assemble.mjs';
 })();
 
 function resolveBoot() {
-  if (window.Bruno && typeof window.Bruno.apiDocs === 'function') {
-    return (target, config) => window.Bruno.apiDocs(target, config);
-  }
   if (typeof window.OpenCollection === 'function') {
     return (target, config) => new window.OpenCollection({ target, ...config });
   }

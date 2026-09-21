@@ -9,3 +9,4 @@ test.js
 CLAUDE.md
 test-results
 !integrations/contract-tests/fixtures/walk-safety/node_modules/
+integrations/dist-tarballs

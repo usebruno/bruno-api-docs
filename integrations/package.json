@@ -39,7 +39,8 @@
     "test:nestjs": "npm run build && node nodejs/nestjs/test/sub-path.test.mjs",
     "test:shell": "npm run build && node nodejs/core/test/shell.test.mjs",
     "test:unit": "npm run build && bash nodejs/scripts/unit.sh",
-    "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs"
+    "test:walk": "npm run build:core && node nodejs/core/test/walk.test.mjs",
+    "try": "bash scripts/try.sh"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

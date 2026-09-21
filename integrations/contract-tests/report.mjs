@@ -24,6 +24,12 @@ const bold = (s) => paint(1, s);
 const files = (d) => fs.readdirSync(d, { withFileTypes: true })
   .flatMap((e) => (e.isDirectory() ? files(path.join(d, e.name)) : e.name.endsWith('.tsv') ? [path.join(d, e.name)] : []));
 
+if (!fs.existsSync(dir) || files(dir).length === 0) {
+  // every suite failed before writing its counts, or nothing ran: say so, the jobs carry the reason
+  console.log(mode === '--md' ? '_no results: no suite got as far as reporting_' : '  no results: no suite got as far as reporting');
+  process.exit(0);
+}
+
 const rows = files(dir).map((f) => {
   const [node, cell, adapter, passed, failed] = fs.readFileSync(f, 'utf8').trim().split('\t');
 

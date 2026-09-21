@@ -42,6 +42,8 @@ jobs:
 
       - run: npm ci
 
+      - run: npm run build
+
       - run: bash nodejs/scripts/matrix.sh --family ${{ matrix.family }} --results results
 
       - uses: actions/upload-artifact@v4
@@ -64,6 +66,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - run: npm run build
       - run: bash nodejs/scripts/matrix.sh --results results
       - uses: actions/upload-artifact@v4
         if: always()

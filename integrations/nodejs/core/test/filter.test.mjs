@@ -38,14 +38,14 @@ const ruleFor = (filters, p) => applyFilters(collection, filters).skipped.find((
 // --- environments: the table
 assert.deepEqual(envs({}), [], 'absent -> none');
 assert.deepEqual(envs({ environments: { include: ['Local'] } }), ['environments/Local.yml'], 'include -> those');
-assert.deepEqual(envs({ environments: { all: true } }), ['environments/Local.yml', 'environments/Prod.yml'], 'all -> all');
-assert.deepEqual(envs({ environments: { all: true, exclude: ['Prod'] } }), ['environments/Local.yml'], 'all minus exclude');
+assert.deepEqual(envs({ environments: { include: '*' } }), ['environments/Local.yml', 'environments/Prod.yml'], 'the wildcard publishes every environment');
+assert.deepEqual(envs({ environments: { include: '*', exclude: ['Prod'] } }), ['environments/Local.yml'], 'the wildcard minus an exclude');
 assert.deepEqual(envs({ environments: { include: ['Local', 'Prod'], exclude: ['Prod'] } }), ['environments/Local.yml'], 'include minus exclude');
 
 assert.throws(() => served({ environments: { include: ['Nope'] } }), ConfigError, 'unknown include is a startup error');
-assert.deepEqual(applyFilters(collection, { environments: { all: true, exclude: ['Nope'] } }).unknownEnvironments, ['Nope'], 'unknown exclude warns, does not throw');
+assert.deepEqual(applyFilters(collection, { environments: { include: '*', exclude: ['Nope'] } }).unknownEnvironments, ['Nope'], 'unknown exclude warns, does not throw');
 
-assert.equal(ruleFor({ environments: { all: true } }, 'control/environments/Sneaky.yml'), 'nested environments directory', 'a nested environments dir is never published');
+assert.equal(ruleFor({ environments: { include: '*' } }, 'control/environments/Sneaky.yml'), 'nested environments directory', 'a nested environments dir is never published');
 assert.equal(ruleFor({}, 'environments/Local.yml'), 'environments not published by default');
 
 // --- tags: whole request files, folders pruned behind them
@@ -70,6 +70,11 @@ assert.deepEqual(served({}).filter((p) => p.startsWith('control/') || p.startsWi
 }
 
 assert.deepEqual(served({ tags: { include: ['internal'], exclude: ['internal'] } }).filter((p) => !p.endsWith('folder.yml') && p !== 'opencollection.yml'), [], 'exclude wins over include');
+
+// --- the wildcard: on tags it says out loud what no option already means
+assert.deepEqual(served({ tags: { include: '*' } }), served({}), 'include * serves exactly what no tags option serves');
+assert.deepEqual(served({ tags: { include: '*', exclude: ['internal'] } }), served({ tags: { exclude: ['internal'] } }),
+  'and reads as everything-except without changing what is dropped');
 
 // --- fail closed: a request whose tags cannot be read is not published while a filter is set
 for (const unreadable of ['control/broken.yml', 'control/numeric-tags.yml']) {
@@ -107,9 +112,8 @@ assert.equal(isRequestTagsIncluded(['a', 'b'], [], ['b']), false, 'any one exclu
 
 // --- startup validation of the same options
 assert.throws(() => validateOptions({ environments: { exclude: ['Prod'] } }), /needs a base/);
-assert.throws(() => validateOptions({ collection: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
-assert.throws(() => validateOptions({ environments: { all: true, include: ['Local'] } }), /cannot be combined/);
-validateOptions({ environments: { all: true, exclude: ['Prod'] } });
+assert.throws(() => validateOptions({ collectionPath: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
+validateOptions({ environments: { include: '*', exclude: ['Prod'] } });
 validateOptions({});
 
 console.log('filter-test: all assertions passed');

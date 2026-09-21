@@ -8,7 +8,7 @@ const port = process.env.PORT ?? 3000;
 
 // the docs inside a page of your own. The mount serves the collection and shell.js; the block
 // only has to know where the mount is.
-app.use('/docs', apiDocs({ collection: './api-collection' }));
+app.use('/docs', apiDocs({ collectionPath: './api-collection' }));
 
 app.get('/', (req, res) => {
   res.type('html').send(`<!doctype html>

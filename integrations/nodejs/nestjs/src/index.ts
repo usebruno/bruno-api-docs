@@ -5,7 +5,7 @@ import { Module, type DynamicModule, type MiddlewareConsumer, type NestModule } 
 import { createDocs, embed, type ApiDocsOptions, type Request } from '@usebruno/api-docs-core';
 
 export { createDocs, embed };
-export type { ApiDocsOptions, CollectionOptions, RendererOptions, EmbedOptions, EnvironmentsOption, TagsOption }
+export type { ApiDocsOptions, CollectionOptions, CollectionFilters, Filter, RendererOptions, EmbedOptions }
   from '@usebruno/api-docs-core';
 
 export interface ApiDocsModuleOptions extends ApiDocsOptions {
@@ -41,7 +41,7 @@ export function subPathOf(fullUrl: string, mountPath: string): string {
 }
 
 /**
- * `ApiDocsModule.forRoot({ collection: '../api-collection', mountPath: '/docs' })`. The path counts
+ * `ApiDocsModule.forRoot({ collectionPath: '../api-collection', mountPath: '/docs' })`. The path counts
  * from the built entry file, `dist/main.js`, so a collection beside `src/` is one level up.
  */
 export class ApiDocsModule {

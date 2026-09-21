@@ -8,7 +8,7 @@ const port = process.env.PORT ?? 3000;
 
 // the docs inside a page of your own. The mount serves the collection and shell.js; the block
 // only has to know where the mount is.
-app.register(apiDocs, { prefix: '/docs', collection: './api-collection' });
+app.register(apiDocs, { prefix: '/docs', collectionPath: './api-collection' });
 
 app.get('/', async (request, reply) => {
   return reply.type('text/html').send(`<!doctype html>

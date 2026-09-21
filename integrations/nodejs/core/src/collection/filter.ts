@@ -1,4 +1,4 @@
-import { ConfigError, type CollectionOptions, type EnvironmentsOption, type TagsOption } from '../options';
+import { ConfigError, type CollectionFilters, type Filter } from '../options';
 import type { WalkedFile, SkippedFile } from './walk';
 import { safeLoad } from './yaml';
 
@@ -20,6 +20,8 @@ const ENV_DIR = /(^|\/)environments\//;
 const FOLDER_FILE = /(^|\/)folder\.ya?ml$/;
 
 export const isManifest = (p: string): boolean => MANIFEST_FILE.test(p);
+
+const namesOf = (include: Filter['include']): string[] => (Array.isArray(include) ? include : []);
 
 const isRequestFile = (p: string): boolean => !isManifest(p) && !FOLDER_FILE.test(p) && !ENV_DIR.test(p);
 
@@ -67,7 +69,7 @@ function partitionFiles(files: WalkedFile[], skipReason: SkipReason): FilterStag
   return { files: kept, skipped };
 }
 
-export function applyFilters(files: WalkedFile[], filters: Omit<CollectionOptions, 'collection'>): FilterResult {
+export function applyFilters(files: WalkedFile[], filters: CollectionFilters): FilterResult {
   const environments = filterEnvironments(files, filters.environments);
   const tags = filterTags(environments.files, filters.tags);
 
@@ -78,9 +80,9 @@ export function applyFilters(files: WalkedFile[], filters: Omit<CollectionOption
   };
 }
 
-function filterEnvironments(files: WalkedFile[], option: EnvironmentsOption | undefined): FilterResult {
-  const publishAll = option?.all === true;
-  const include = new Set(option?.include ?? []);
+function filterEnvironments(files: WalkedFile[], option: Filter | undefined): FilterResult {
+  const publishAll = option?.include === '*';
+  const include = new Set(namesOf(option?.include));
   const exclude = new Set(option?.exclude ?? []);
   const seen = new Set<string>();
 
@@ -121,8 +123,8 @@ function filterEnvironments(files: WalkedFile[], option: EnvironmentsOption | un
   return { ...environments, unknownEnvironments: [...exclude].filter((name) => !seen.has(name)) };
 }
 
-function filterTags(files: WalkedFile[], option: TagsOption | undefined): FilterStage {
-  const includeTags = option?.include ?? [];
+function filterTags(files: WalkedFile[], option: Filter | undefined): FilterStage {
+  const includeTags = namesOf(option?.include);
   const excludeTags = option?.exclude ?? [];
   if (includeTags.length === 0 && excludeTags.length === 0) {
     return { files, skipped: [] };

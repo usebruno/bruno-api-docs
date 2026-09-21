@@ -25,6 +25,6 @@ app.use(helmet({
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-app.use('/docs', apiDocs({ collection: './api-collection' }));
+app.use('/docs', apiDocs({ collectionPath: './api-collection' }));
 
 app.listen(port, () => console.log(`docs at http://localhost:${port}/docs/`));

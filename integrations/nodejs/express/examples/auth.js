@@ -20,6 +20,6 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 // the guard runs before the docs on this mount and nowhere else. It covers collection.yml too,
 // which is the file that carries the collection's own auth and variables.
-app.use('/docs', requireToken, apiDocs({ collection: './api-collection' }));
+app.use('/docs', requireToken, apiDocs({ collectionPath: './api-collection' }));
 
 app.listen(port, () => console.log(`docs at http://localhost:${port}/docs/ (Authorization: Bearer let-me-in)`));

@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { ConfigError, type CollectionOptions } from '../options';
+import { ConfigError, type CollectionFilters } from '../options';
 import { etagOf, type HttpResponse, type Conditional } from '../http';
 import type { SkippedFile } from './walk';
 import { walkCollection, CAPS, CapError } from './walk';
@@ -51,7 +51,7 @@ export function fileProvider(filePath: string): BuiltProvider {
   return { serve: serveFromMemory(body, 'text/yaml; charset=utf-8'), fileCount: 1, skipped: [], unknownEnvironments: [] };
 }
 
-export function dirProvider(rootDir: string, filters: Omit<CollectionOptions, 'collection'>): BuiltProvider {
+export function dirProvider(rootDir: string, filters: CollectionFilters): BuiltProvider {
   const walked = walkCollection(rootDir);
   if (!walked.files.some((file) => isManifest(file.path))) {
     throw new ManifestError('no opencollection.yml manifest at the collection root');

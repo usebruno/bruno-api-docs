@@ -41,7 +41,7 @@ for p in core "$WHAT"; do
 done
 
 # one install for both, so the wrapper's exact pin on the core resolves from the tarball beside it
-( cd "$APP" && npm install "$TARBALLS"/*api-docs-core*.tgz "$TARBALLS"/*api-docs-"$WHAT"*.tgz )
+( cd "$APP" && npm install --no-audit --no-fund "$TARBALLS"/*api-docs-core*.tgz "$TARBALLS"/*api-docs-"$WHAT"*.tgz )
 echo
 echo "installed @usebruno/api-docs-core and @usebruno/api-docs-$WHAT into $APP"
 echo

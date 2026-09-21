@@ -59,7 +59,7 @@ check "/docs/collection.yml with the token -> 200" status_is 200 "${BEARER[@]}" 
 
 example nodejs/express/examples/csp.js
 check "/docs/ -> 200"                            status_is 200 "$BASE/docs/"
-check "script-src allows the CDN and wasm"       header_has "$CSP" "script-src 'self' https://cdn.usebruno.com 'wasm-unsafe-eval'" "$BASE/docs/"
+check "script-src allows the CDN, Monaco and wasm" header_has "$CSP" "script-src 'self' https://cdn.usebruno.com https://cdn.jsdelivr.net 'wasm-unsafe-eval'" "$BASE/docs/"
 check "connect-src allows data:"                 header_has "$CSP" "connect-src 'self' data:" "$BASE/docs/"
 check "style-src allows the fonts"               header_has "$CSP" "fonts.googleapis.com" "$BASE/docs/"
 
@@ -92,7 +92,7 @@ check "/docs/collection.yml with the token -> 200" status_is 200 "${BEARER[@]}" 
 
 example nodejs/fastify/examples/csp.js
 check "/docs/ -> 200"                            status_is 200 "$BASE/docs/"
-check "script-src allows the CDN and wasm"       header_has "$CSP" "script-src 'self' https://cdn.usebruno.com 'wasm-unsafe-eval'" "$BASE/docs/"
+check "script-src allows the CDN, Monaco and wasm" header_has "$CSP" "script-src 'self' https://cdn.usebruno.com https://cdn.jsdelivr.net 'wasm-unsafe-eval'" "$BASE/docs/"
 check "connect-src allows data:"                 header_has "$CSP" "connect-src 'self' data:" "$BASE/docs/"
 check "style-src allows the fonts"               header_has "$CSP" "fonts.googleapis.com" "$BASE/docs/"
 
@@ -136,7 +136,7 @@ check "/docs/<deep>/ -> the page"                header_has Content-Type text/ht
 
 example nodejs/nestjs/examples/dist/05-csp/main.js
 check "/docs/ -> 200"                            status_is 200 "$BASE/docs/"
-check "script-src allows the CDN and wasm"       header_has "$CSP" "script-src 'self' https://cdn.usebruno.com 'wasm-unsafe-eval'" "$BASE/docs/"
+check "script-src allows the CDN, Monaco and wasm" header_has "$CSP" "script-src 'self' https://cdn.usebruno.com https://cdn.jsdelivr.net 'wasm-unsafe-eval'" "$BASE/docs/"
 check "connect-src allows data:"                 header_has "$CSP" "connect-src 'self' data:" "$BASE/docs/"
 check "style-src allows the fonts"               header_has "$CSP" "fonts.googleapis.com" "$BASE/docs/"
 

@@ -10,11 +10,11 @@ export function providerFor(options: CollectionOptions): Provider {
   const source = resolveCollectionSource(options.collection);
   const filters = { environments: options.environments, tags: options.tags };
 
+  // built first: a path that is not there is reported as missing, not as a filter mistake
+  const built = source.mode === 'file' ? fileProvider(source.path) : dirProvider(source.path, filters);
   if (source.mode === 'file' && (filters.environments || filters.tags)) {
     throw new ConfigError('apiDocs: `environments` / `tags` filtering needs a collection directory');
   }
-
-  const built = source.mode === 'file' ? fileProvider(source.path) : dirProvider(source.path, filters);
   report(source.path, built);
 
   return built.serve;

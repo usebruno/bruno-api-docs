@@ -73,6 +73,7 @@ test('the page is served at any depth, and the renderer routes by hash', async (
 });
 
 test('try it sends the published environment, and only that', async ({ page }) => {
+  const errors = consoleErrorsOn(page);
   let sent;
   // the fixture's baseUrl points at a port nothing listens on; answer for it and keep the request
   await page.route('**/products', async (route) => {
@@ -88,6 +89,10 @@ test('try it sends the published environment, and only that', async ({ page }) =
   const headers = await sent.allHeaders();
   expect(headers.authorization, 'the collection auth, resolved from the Local environment').toBe(`Bearer ${LOCAL_TOKEN}`);
   expect(sent.url(), 'the Local baseUrl was interpolated').toContain('localhost:5456/products');
+
+  // the response viewer is Monaco, loaded from jsdelivr: the CSP we document has to let it in
+  await expect(page.locator('.monaco-editor').first()).toBeVisible();
+  expect(errors, 'nothing the playground loads is blocked by the documented CSP').toEqual([]);
 });
 
 test('a bundled single file renders the same way', async ({ page }) => {

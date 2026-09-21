@@ -163,6 +163,9 @@ describe "the adopter's CSP holds"
 check "the CSP allows the renderer's origin"    header_has Content-Security-Policy "script-src 'self' https://cdn.usebruno.com" "$BASE/docs/"
 check "and the data: uri its wasm comes from"  header_has Content-Security-Policy "connect-src 'self' data:" "$BASE/docs/"
 check "and instantiating that wasm"            header_has Content-Security-Policy "wasm-unsafe-eval" "$BASE/docs/"
+check "and Monaco, which try it loads from jsdelivr" header_has Content-Security-Policy "script-src 'self' https://cdn.usebruno.com https://cdn.jsdelivr.net" "$BASE/docs/"
+check "with its workers"                         header_has Content-Security-Policy "worker-src 'self' blob: https://cdn.jsdelivr.net" "$BASE/docs/"
+check "and its icon font, a data: uri"            header_has Content-Security-Policy "font-src 'self' data:" "$BASE/docs/"
 
 # ---- bodies, for comparing one framework against another -------------------
 

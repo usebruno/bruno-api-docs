@@ -107,6 +107,8 @@ const quiet = (fn) => {
   assert.equal(resolveCollectionSource(gone).mode, 'file', 'an unstattable path falls through to file mode');
   assert.throws(() => quiet(() => providerFor({ collection: gone })), { code: 'ENOENT' });
   assert.equal(errorProvider(thrownBy(() => providerFor({ collection: gone })))({}).status, 404);
+  assert.throws(() => quiet(() => providerFor({ collection: gone, tags: { exclude: ['x'] } })), { code: 'ENOENT' },
+    'with filters set, a missing path is still reported as missing, not as a filter mistake');
 
   if (process.getuid?.() !== 0) {
     const locked = write('locked/opencollection.yml', 'opencollection: 1.0.0\nbundled: false\n');

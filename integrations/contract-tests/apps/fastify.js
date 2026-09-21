@@ -16,10 +16,11 @@ app.addHook('onSend', async (request, reply) => {
   reply.header(
     'content-security-policy',
     "default-src 'self'; "
-    + "script-src 'self' https://cdn.usebruno.com 'wasm-unsafe-eval'; "
-    + "style-src 'self' 'unsafe-inline' https://cdn.usebruno.com https://fonts.googleapis.com; "
-    + "font-src 'self' https://fonts.gstatic.com; "
-    + "connect-src 'self' data:"
+    + "script-src 'self' https://cdn.usebruno.com https://cdn.jsdelivr.net 'wasm-unsafe-eval'; "
+    + "style-src 'self' 'unsafe-inline' https://cdn.usebruno.com https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+    + "font-src 'self' data: https://fonts.gstatic.com; "
+    + "worker-src 'self' blob: https://cdn.jsdelivr.net; "
+    + "connect-src 'self' data: https://cdn.jsdelivr.net"
   );
 });
 

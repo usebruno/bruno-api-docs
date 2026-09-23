@@ -5,7 +5,7 @@ import path from 'node:path';
 import { ConfigError, type RendererOptions, type ApiDocsOptions } from '../options';
 import { etagOf, type HttpResponse, type Conditional } from '../http';
 
-/** Hardcoded for the beta */
+/** Hardcoded for now */
 export const CDN = 'https://cdn.usebruno.com/api-docs';
 
 const SHELL_DIR = path.join(__dirname, '..', '..', 'shell');

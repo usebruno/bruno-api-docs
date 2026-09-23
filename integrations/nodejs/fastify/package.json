@@ -1,6 +1,6 @@
 {
   "name": "@usebruno/api-docs-fastify",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0",
   "description": "Serve a Bruno collection as API docs from inside your own Fastify app, behind your own auth.",
   "license": "MIT",
   "main": "dist/index.js",
@@ -15,6 +15,6 @@
     "fastify": "^4.0.0 || ^5.0.0"
   },
   "dependencies": {
-    "@usebruno/api-docs-core": "0.1.0-beta.1"
+    "@usebruno/api-docs-core": "0.1.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@usebruno/api-docs-core",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0",
   "description": "Bruno API Docs core for Node: serves a Bruno collection's docs from inside your own app. Framework wrappers are one line over this.",
   "license": "MIT",
   "main": "dist/index.js",

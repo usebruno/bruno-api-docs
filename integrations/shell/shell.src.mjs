@@ -62,9 +62,7 @@ import { toOpenCollection } from './assemble.mjs';
   }
 
   try {
-    // both names on purpose: the renderer reads `opencollection` today and is moving to
-    // `content`. Passing both means neither side has to land first. Do not clean this up.
-    boot(mount, { ...config, opencollection: doc, content: doc });
+    boot(mount, config, doc);
   }
   catch (err) {
     return fail('The renderer threw while mounting:\n  ' + err.message);
@@ -74,11 +72,11 @@ import { toOpenCollection } from './assemble.mjs';
 
 function resolveBoot() {
   if (typeof window.Bruno?.apiDocs === 'function') {
-    return (target, config) => window.Bruno.apiDocs(target, config);
+    return (target, config, doc) => window.Bruno.apiDocs(target, { ...config, content: doc });
   }
   // until the CDN has deployed a bundle that carries the namespace
   if (typeof window.OpenCollection === 'function') {
-    return (target, config) => new window.OpenCollection({ target, ...config });
+    return (target, config, doc) => new window.OpenCollection({ target, ...config, opencollection: doc });
   }
   return null;
 }

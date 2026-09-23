@@ -20,7 +20,7 @@ const DEFAULT_MOUNT_PATH = '/docs';
  * a deprecation warning for `/*`. Read from the installed package, whose `exports` map on 12 no
  * longer lets `require('@nestjs/core/package.json')` through.
  */
-function wildcard(): string {
+export function wildcard(): string {
   let dir = path.dirname(require.resolve('@nestjs/core'));
   while (!fs.existsSync(path.join(dir, 'package.json'))) {
     dir = path.dirname(dir);

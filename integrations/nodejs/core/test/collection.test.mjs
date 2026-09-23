@@ -169,5 +169,17 @@ const quiet = (fn) => {
   }
 }
 
+// --- both manifests: yml wins when opencollection.yml is present
+{
+  const mixed = path.join(tmp, 'mixed-format');
+  fs.mkdirSync(mixed, { recursive: true });
+  fs.writeFileSync(path.join(mixed, 'opencollection.yml'), 'opencollection: 1.0.0\nbundled: false\n');
+  fs.writeFileSync(path.join(mixed, 'bruno.json'), '{"name":"x"}');
+  fs.writeFileSync(path.join(mixed, 'ping.yml'), 'info:\n  name: ping\n');
+  fs.writeFileSync(path.join(mixed, 'only.bru'), 'meta {\n  name: only\n}\n');
+  const files = Object.keys(JSON.parse(quiet(() => dirProvider(mixed, {})).serve({}).body).files).sort();
+  assert.deepEqual(files, ['opencollection.yml', 'ping.yml'], 'yml format: .bru files are not walked');
+}
+
 fs.rmSync(tmp, { recursive: true, force: true });
 console.log('collection-test: all assertions passed');

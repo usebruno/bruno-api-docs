@@ -1,13 +1,14 @@
 // Nest is the only wrapper that has to work out the path itself: on platform-fastify the
 // middleware is handed `/` whatever was requested. Run: npm run test:nestjs
 import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
-const { subPathOf } = require(path.join(here, '..', 'dist', 'index.js'));
+const { subPathOf, wildcard } = require(path.join(here, '..', 'dist', 'index.js'));
 
 // --- the ordinary mount
 assert.equal(subPathOf('/docs', '/docs'), '/', 'the mount itself is the root of the docs');
@@ -27,5 +28,15 @@ assert.equal(subPathOf('/api/docs', '/docs'), '/');
 
 // --- nothing to match
 assert.equal(subPathOf('/somewhere-else', '/docs'), '/somewhere-else', 'left alone rather than guessed at');
+
+// --- Nest major: 10 uses *, 11+ uses *splat
+{
+  let dir = path.dirname(require.resolve('@nestjs/core'));
+  while (!fs.existsSync(path.join(dir, 'package.json'))) {
+    dir = path.dirname(dir);
+  }
+  const major = Number(JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8')).version.split('.')[0]);
+  assert.equal(wildcard(), major >= 11 ? '*splat' : '*', `wildcard for Nest ${major}`);
+}
 
 console.log('sub-path-test: all assertions passed');

@@ -41,7 +41,7 @@ interface RequestPaneProps {
 }
 
 const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inheritedAuth }) => {
-  const [activeTab, setActiveTab] = useSessionStorage('playground-request-tab', 'overview');
+  const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundRequestTab', 'overview');
 
   const handleParamsChange = (params: KeyValueRow[]) => {
     const updatedParams = params.map((p) => ({ ...keyValueRowToEntry(p), type: p.type }));

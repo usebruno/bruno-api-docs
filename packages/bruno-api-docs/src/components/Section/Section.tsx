@@ -39,7 +39,7 @@ export const Section: React.FC<SectionProps> = ({
   navGroup,
   labelClassName
 }) => {
-  const [open, setOpen] = useSessionStorage(storageKey ? `section-${storageKey}` : '', defaultOpen);
+  const [open, setOpen] = useSessionStorage(storageKey ? `oc-docs:section-${storageKey}` : '', defaultOpen);
   const panelId = useId();
   const labelId = useId();
 
@@ -61,6 +61,7 @@ export const Section: React.FC<SectionProps> = ({
               type="button"
               id={labelId}
               className="section-toggle"
+              data-testid={testId ? `${testId}-toggle` : undefined}
               aria-expanded={open}
               aria-controls={panelId}
               onClick={() => setOpen((v) => !v)}

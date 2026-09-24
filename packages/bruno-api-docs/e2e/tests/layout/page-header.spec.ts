@@ -27,6 +27,22 @@ test.describe('Page header', () => {
     expect(box.y).toBeLessThanOrEqual(1);
   });
 
+  test('shows the full height of the brand name, descenders included', async ({ page, pageHeader }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/');
+
+    expect(await pageHeader.hidesVerticalOverflow(pageHeader.brandName)).toBe(false);
+  });
+
+  test('explains the Show vars switch in a tooltip on hover', async ({ page, envSwitcher }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/');
+
+    await envSwitcher.showVarsToggle.hover();
+
+    await expect(envSwitcher.showVarsTooltip).toHaveText('Show resolved variable values');
+  });
+
   test('shows the initials avatar derived from the collection name', async ({ page, pageHeader }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto('/');

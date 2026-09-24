@@ -80,6 +80,17 @@ test.describe('Request page — Examples', () => {
       await expect(examples.responseBody(OK_EXAMPLE)).toContainText('john.smith@example.com');
     });
 
+    test('keeps the response scrollbar hidden until the pane is hovered', async ({ page, requestPage }) => {
+      const { examples } = requestPage;
+      const body = examples.responseBody(OK_EXAMPLE);
+      await page.mouse.move(0, 0);
+
+      expect(await examples.getScrollbarColor(body)).toBe('rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)');
+
+      await body.hover();
+      expect(await examples.getScrollbarColor(body)).not.toBe('rgba(0, 0, 0, 0) rgba(0, 0, 0, 0)');
+    });
+
     test('switches to the Headers tab to reveal the response headers', async ({ requestPage }) => {
       const { examples } = requestPage;
       await examples.selectResponseTab(OK_EXAMPLE, 'headers');

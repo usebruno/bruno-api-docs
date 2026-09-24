@@ -233,15 +233,27 @@ export const StyledWrapper = styled.div`
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: thin;
+  }
+  .pane-body,
+  .pane-body .code-content {
+    scrollbar-color: transparent transparent;
+  }
+  .pane-body:hover,
+  .pane-body .code-content:hover {
     scrollbar-color: var(--oc-scrollbar-color) transparent;
   }
   .pane-body::-webkit-scrollbar {
     width: 6px;
     height: 6px;
   }
-  .pane-body::-webkit-scrollbar-thumb {
-    background-color: var(--oc-scrollbar-color);
+  .pane-body::-webkit-scrollbar-thumb,
+  .pane-body .code-content::-webkit-scrollbar-thumb {
+    background-color: transparent;
     border-radius: 3px;
+  }
+  .pane-body:hover::-webkit-scrollbar-thumb,
+  .pane-body .code-content:hover::-webkit-scrollbar-thumb {
+    background-color: var(--oc-scrollbar-color);
   }
   .pane-body::-webkit-scrollbar-track {
     background: transparent;

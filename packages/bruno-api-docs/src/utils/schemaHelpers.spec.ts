@@ -19,7 +19,6 @@ import {
   getGrpcMetadata,
   getGrpcProtoFileName,
   getItemTags,
-  getCollectionTags,
   getInheritedTags,
   type RequestItem
 } from './schemaHelpers';
@@ -27,8 +26,6 @@ import {
 const item = (data: Record<string, unknown>): OpenCollectionItem => data as unknown as OpenCollectionItem;
 
 const requestItem = (data: Record<string, unknown>): RequestItem => data as unknown as RequestItem;
-
-const collection = (data: Record<string, unknown>) => data as unknown as Parameters<typeof getCollectionTags>[0];
 
 describe('getItemDescription', () => {
   it('reads a plain string description from the info block', () => {
@@ -348,17 +345,6 @@ describe('getInheritedTags', () => {
   it('returns an empty list for untagged ancestors', () => {
     expect(getInheritedTags([item({ info: { name: 'f', type: 'folder' } })], ['auth'])).toEqual([]);
     expect(getInheritedTags([], [])).toEqual([]);
-  });
-});
-
-describe('getCollectionTags', () => {
-  it('reads tags from the collection info block', () => {
-    expect(getCollectionTags(collection({ info: { name: 'Hotel Booking', tags: ['public'] } }))).toEqual(['public']);
-  });
-
-  it('returns an empty array when absent', () => {
-    expect(getCollectionTags(null)).toEqual([]);
-    expect(getCollectionTags(collection({ info: { name: 'Hotel Booking' } }))).toEqual([]);
   });
 });
 

@@ -79,8 +79,13 @@ export const StyledWrapper = styled.div`
     letter-spacing: normal;
     color: var(--text-primary);
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
+  }
+  .property-key .oc-truncate {
+    overflow-x: clip;
+    overflow-y: visible;
   }
   .property-value-cell {
     margin: 0;

@@ -9,6 +9,18 @@ export abstract class BaseComponent {
     this.root = root ?? page.locator(':root');
   }
 
+  async hidesVerticalOverflow(target: Locator): Promise<boolean> {
+    return target.evaluate((el) => getComputedStyle(el).overflowY !== 'visible');
+  }
+
+  async isContentWiderThanBox(target: Locator): Promise<boolean> {
+    return target.evaluate((el) => el.scrollWidth > el.clientWidth + 1);
+  }
+
+  async getScrollbarColor(target: Locator): Promise<string> {
+    return target.evaluate((el) => getComputedStyle(el).scrollbarColor);
+  }
+
   /** Press the pointer on a resize handle; the grab point is kept for later moves. */
   protected async grabHandle(handle: Locator): Promise<void> {
     const box = await handle.boundingBox();

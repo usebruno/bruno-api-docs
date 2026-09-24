@@ -4,7 +4,6 @@ info:
   name: "Bruno Testbench"
   summary: "A comprehensive API collection for testing OpenCollection features"
   version: "1.0.0"
-  tags: ["testbench"]
 config:
   environments:
     - name: "Local"
@@ -59,6 +58,15 @@ config:
           - name: apiKey
             secretName: prod/payment-gateway/api-key
             enabled: true
+    - name: "staging-regression-automation-eu-west-1"
+      color: "#2563eb"
+      variables:
+        - name: "host"
+          value: "https://staging-eu-west-1.echo.usebruno.com"
+    - name: "Customer Sandbox (Partner Integrations, Asia Pacific)"
+      variables:
+        - name: "host"
+          value: "https://sandbox-apac.echo.usebruno.com"
 request:
   headers:
     - name: "collection-header"
@@ -2686,6 +2694,30 @@ items:
             type: "json"
             data: |
               {}
+
+  - name: "user options"
+    type: "http"
+    seq: 12
+    method: "OPTIONS"
+    url: "{{host}}/api/users"
+    headers:
+      - name: "Origin"
+        value: "https://docs.usebruno.com"
+      - name: "Access-Control-Request-Method"
+        value: "POST"
+    docs: "Ask the server which methods and headers the users endpoint accepts, the way a browser does before a cross-origin request."
+    examples:
+      - name: "Allowed"
+        response:
+          status: 204
+          statusText: "No Content"
+          headers:
+            - name: "Allow"
+              value: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            - name: "Access-Control-Allow-Origin"
+              value: "https://docs.usebruno.com"
+            - name: "Access-Control-Allow-Methods"
+              value: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 
   - info:
       name: "GraphQL Fixtures"

@@ -33,3 +33,15 @@ export const StyledWrapper = styled.div`
     color: var(--oc-codemirror-variable-prompt) !important;
   }
 `;
+
+export const ContextViewHost = styled.div`
+  position: fixed;
+  z-index: var(--z-popover);
+  width: 100vw;
+  height: 0;
+  pointer-events: none;
+
+  .context-view {
+    pointer-events: auto;
+  }
+`;

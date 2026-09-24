@@ -34,6 +34,17 @@ describe('Overview', () => {
     expect(html).toContain('Collection Configuration');
   });
 
+  it('shows no collection-level tags, which the desktop app does not support', () => {
+    const collection = {
+      info: { name: 'Tagged API', version: '1.0.0', tags: ['public'] }
+    } as unknown as OpenCollection;
+
+    const html = renderToStaticMarkup(<Overview collection={collection} />);
+
+    expect(html).not.toContain('overview-tags');
+    expect(html).not.toContain('public');
+  });
+
   it('renders an empty-state placeholder for each section when the collection is bare', () => {
     const collection: OpenCollection = {
       info: { name: 'Empty API', version: '1.0.0' }

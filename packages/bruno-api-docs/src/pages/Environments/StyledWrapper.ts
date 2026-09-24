@@ -74,7 +74,8 @@ export const StyledWrapper = styled.div`
     line-height: 1;
     letter-spacing: 0;
     color: var(--oc-primary-strong);
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
@@ -86,7 +87,8 @@ export const StyledWrapper = styled.div`
     line-height: 1;
     letter-spacing: 0;
     color: var(--text-primary); /* #343434 */
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

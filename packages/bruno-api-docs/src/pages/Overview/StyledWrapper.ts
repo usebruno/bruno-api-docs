@@ -17,9 +17,6 @@ export const StyledWrapper = styled.div`
     margin-bottom: 0.3rem;
     font-weight: 600;
   }
-  .overview-tags {
-    margin-top: 0.75rem;
-  }
   .overview-stats-row {
     margin-top: 1.25rem;
   }

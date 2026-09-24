@@ -7,7 +7,7 @@ import {
   hasCollectionExecutionContext,
   hasCollectionRequestConfig
 } from '@/utils/collectionOverview';
-import { scriptsArrayToObject, getCollectionTags } from '@/utils/schemaHelpers';
+import { scriptsArrayToObject } from '@/utils/schemaHelpers';
 import { getCollectionVariables } from '@/utils/request';
 import { AUTH_MODE_LABELS } from '@/constants';
 import { CollectionStats } from '../../components/CollectionStats/CollectionStats';
@@ -17,7 +17,6 @@ import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
 import { Heading } from '../../components/Heading/Heading';
 import { Section } from '../../components/Section/Section';
 import { ViewMore } from '../../components/ViewMore/ViewMore';
-import { Tags } from '@/components/Tags/Tags';
 import { BookIcon, RefreshIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -47,7 +46,6 @@ export const Overview: React.FC<OverviewProps> = ({ collection, testId = 'overvi
   const { preVars, postVars } = useMemo(() => getCollectionVariables(collection), [collection]);
   const version = collection.info?.version;
   const name = collection.info?.name || 'Untitled Collection';
-  const tags = getCollectionTags(collection);
 
   const docsHtml = useMemo(() => {
     const content = getDocsContent(collection.docs);
@@ -73,7 +71,6 @@ export const Overview: React.FC<OverviewProps> = ({ collection, testId = 'overvi
               <div className="overview-version" data-testid="overview-collection-version">{`Version : ${version}`}</div>
             ) : null}
             <Heading testId="overview-collection-name">{name}</Heading>
-            {tags.length > 0 && <Tags className="overview-tags" testId="overview-tags" tags={tags} />}
           </div>
         </header>
 

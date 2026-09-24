@@ -109,10 +109,6 @@ export const getItemTags = (item: OpenCollectionItem | null | undefined): string
   return [];
 };
 
-/** Get the collection-level tags from the info block. */
-export const getCollectionTags = (collection: OpenCollection | null | undefined): string[] =>
-  normalizeTags((collection as { info?: { tags?: string[] } } | null | undefined)?.info?.tags);
-
 /** Tags carried by ancestor folders that the item does not carry itself. */
 export const getInheritedTags = (ancestry: OpenCollectionItem[], ownTags: string[]): string[] => {
   const own = new Set(ownTags);

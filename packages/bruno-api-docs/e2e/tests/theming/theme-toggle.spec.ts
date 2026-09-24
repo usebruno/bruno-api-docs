@@ -15,6 +15,12 @@ test.describe('Theme switcher', () => {
     await expect(themeToggle.button).toHaveAccessibleName('Switch to dark theme');
   });
 
+  test('names the action in a tooltip on hover', async ({ themeToggle }) => {
+    await themeToggle.button.hover();
+
+    await expect(themeToggle.tooltip).toHaveText('Switch to dark theme');
+  });
+
   test('switches the whole app to dark mode when the toggle is clicked', async ({ page, themeToggle }) => {
     await themeToggle.toggle();
 

@@ -27,7 +27,7 @@ interface ResponsePaneProps {
 }
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
-  const [activeTab, setActiveTab] = useSessionStorage('playground-response-tab', 'response');
+  const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundResponseTab', 'response');
   const [dismissedScriptErrorKeys, setDismissedScriptErrorKeys] = useState<string[]>([]);
   const { actionsExpandedWidth, measureActions } = useResponseActions();
 

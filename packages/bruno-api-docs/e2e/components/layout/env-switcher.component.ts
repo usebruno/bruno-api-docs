@@ -12,6 +12,7 @@ import { BaseComponent } from '../base.component';
  */
 export class EnvSwitcherComponent extends BaseComponent {
   readonly showVarsToggle = this.page.getByTestId('show-vars-toggle');
+  readonly showVarsTooltip = this.page.getByTestId('show-vars-toggle-tooltip');
   readonly trigger: Locator;
   readonly menu: Locator;
   readonly surface: Locator;

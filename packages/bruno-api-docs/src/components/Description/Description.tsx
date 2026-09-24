@@ -9,7 +9,7 @@ interface DescriptionProps {
 export const Description: React.FC<DescriptionProps> = ({ text, className }) => {
   const trimmed = text?.trim();
   return trimmed ? (
-    <StyledWrapper text={trimmed} className={['description', className].filter(Boolean).join(' ')} />
+    <StyledWrapper text={trimmed} multilineTooltip className={['description', className].filter(Boolean).join(' ')} />
   ) : null;
 };
 

@@ -28,7 +28,8 @@ export const StyledWrapper = styled.div`
   .var-name {
     flex: 1;
     min-width: 0;
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 600;

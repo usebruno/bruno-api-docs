@@ -6,26 +6,30 @@ import type { OpenCollection } from '@opencollection/types';
  * Built to be awkward on purpose: chains deep enough to elide, folders that
  * share a name across branches, names long enough to fight the row for width,
  * a folder whose own name contains the breadcrumb separator, and folders that
- * count zero or one request. Not used by any automated spec, so it is safe to
- * keep adding hostile cases here.
+ * count zero or one request. The collection name, the `gateway_query_key` variable
+ * and the Typography folder are full of descenders (g, j, p, q, y) to check that
+ * truncated text never clips them. Not used by any automated spec, so it is safe
+ * to keep adding hostile cases here.
  */
 export const qaFixtureCollection = {
   opencollection: '1.0.0',
-  info: { name: 'QA Bench', version: '1.0.0' },
+  info: { name: 'QA Bench: jumpy glyph typography', version: '1.0.0' },
   config: {
     environments: [
       {
         name: 'Dev',
         variables: [
           { name: 'host', value: 'https://api.qa.dev' },
-          { name: 'api_key', value: 'dev-key-123' }
+          { name: 'api_key', value: 'dev-key-123' },
+          { name: 'gateway_query_key', value: 'jpgqy-gypsy-query-key' }
         ]
       },
       {
         name: 'Prod',
         variables: [
           { name: 'host', value: 'https://api.qa.com' },
-          { name: 'api_key', value: 'prod-key-abc' }
+          { name: 'api_key', value: 'prod-key-abc' },
+          { name: 'gateway_query_key', value: 'jpgqy-gypsy-query-key-prod' }
         ]
       }
     ]
@@ -209,7 +213,22 @@ export const qaFixtureCollection = {
         }
       ]
     },
-    { name: 'Health Check', type: 'http', seq: 5, method: 'GET', url: '{{host}}/ping' }
+    { name: 'Health Check', type: 'http', seq: 5, method: 'GET', url: '{{host}}/ping' },
+    {
+      name: 'Typography',
+      type: 'folder',
+      seq: 6,
+      items: [
+        {
+          name: 'Query gateway policy',
+          type: 'http',
+          seq: 1,
+          method: 'GET',
+          url: '{{host}}/gateway/jpgqy/policy?query={{gateway_query_key}}',
+          headers: [{ name: 'X-Gateway-Policy-Key', value: '{{gateway_query_key}}' }]
+        }
+      ]
+    }
   ]
 } as unknown as OpenCollection;
 

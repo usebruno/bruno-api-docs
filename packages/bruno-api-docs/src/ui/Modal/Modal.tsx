@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, type ReactNode } from 'react';
+import React, { useCallback, useEffect, useRef, type ReactNode } from 'react';
 import { Portal } from '@/ui/Portal/Portal';
 import { CloseIcon } from '@/assets/icons';
+import cx from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 export type ModalSize = 'md' | 'lg';
@@ -15,10 +16,23 @@ export interface ModalProps {
   ariaLabel?: string;
   className?: string;
   testId?: string;
+  initialFocusRef?: React.RefObject<HTMLElement | null>;
 }
 
-export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, footer, size = 'lg', ariaLabel, className, testId }) => {
-  const dialogRef = useRef<HTMLDivElement>(null);
+export const Modal: React.FC<ModalProps> = ({
+  open, onClose, title, children, footer, size = 'lg', ariaLabel, className, testId, initialFocusRef
+}) => {
+  const focusedRef = useRef(false);
+
+  const attachDialog = useCallback((node: HTMLDivElement | null) => {
+    if (!node) {
+      focusedRef.current = false;
+      return;
+    }
+    if (focusedRef.current) return;
+    focusedRef.current = true;
+    (initialFocusRef?.current ?? node).focus();
+  }, [initialFocusRef]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -28,7 +42,6 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, fo
     document.addEventListener('keydown', onKeyDown);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    dialogRef.current?.focus();
     return () => {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = previousOverflow;
@@ -40,14 +53,14 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, fo
   return (
     <Portal>
       <StyledWrapper
-        className={['modal-backdrop', className].filter(Boolean).join(' ')}
+        className={cx('modal-backdrop', className)}
         data-testid={testId ? `${testId}-backdrop` : undefined}
         onMouseDown={(event) => {
           if (event.target === event.currentTarget) onClose();
         }}
       >
         <div
-          ref={dialogRef}
+          ref={attachDialog}
           className={`modal-dialog is-${size}`}
           role="dialog"
           aria-modal="true"

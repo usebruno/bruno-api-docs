@@ -152,6 +152,15 @@ describe('Bru (bru object)', () => {
       expect(bru.interpolate('https://{{host}}/{{path}}')).toBe('https://runtime/users');
     });
 
+    it('resolves a prompt answer, so a script can read what the reader typed', () => {
+      const bru = makeBru({
+        promptVariables: { '?OTP': '123456' },
+        runtimeVariables: { host: 'api.example.com' }
+      });
+      expect(bru.interpolate('{{?OTP}}')).toBe('123456');
+      expect(bru.interpolate('https://{{host}}/verify/{{?OTP}}')).toBe('https://api.example.com/verify/123456');
+    });
+
     it('resolves nested {{}} inside a variable value and returns non-strings unchanged', () => {
       const bru = makeBru({ runtimeVariables: { base: 'api.example.com', url: 'https://{{base}}/v1', n: 42 } });
       expect(bru.getVar('url')).toBe('https://api.example.com/v1');

@@ -15,8 +15,11 @@ import type { Variables, JsonValue } from './utils/variable-interpolator';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
-  isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl, type InternalHttpRequest
+  isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl,
+  getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest
 } from '@/utils/schemaHelpers';
+import { extractPromptVariables } from '@/utils/promptVariables';
+import { selectBodyVariant } from '@/utils/request';
 import { getItemUuid } from '@/utils/itemUtils';
 import { cloneDeep, isEqual } from 'lodash-es';
 
@@ -30,6 +33,7 @@ interface RunContext {
   environmentVariables: Variables;
   collectionVariables: Variables;
   runtimeVariables: Variables;
+  promptVariables: Variables;
   processEnvVars: Variables;
   timeout: number;
   warnings: string[];
@@ -69,8 +73,10 @@ export interface RunRequestOptions {
   collection: OpenCollectionCollection;
   environment?: Environment;
   runtimeVariables?: Variables;
+  promptVariables?: Variables;
   timeout?: number;
   validateSSL?: boolean;
+  prepared?: HttpRequest;
 }
 
 export interface TestResultsResponse {
@@ -143,7 +149,9 @@ export class RequestRunner {
   }
 
   async runRequest(options: RunRequestOptions): Promise<RunRequestResponse> {
-    const { item, collection, environment, runtimeVariables = {}, timeout = 30000 } = options;
+    const {
+      item, collection, environment, runtimeVariables = {}, promptVariables = {}, timeout = 30000, prepared
+    } = options;
     const context: RunContext = {
       collection,
       environment,
@@ -151,13 +159,14 @@ export class RequestRunner {
       collectionVariables: getCollectionVariables(collection),
       processEnvVars: (typeof process !== 'undefined' && process.env ? process.env : {}) as Record<string, string>,
       runtimeVariables,
+      promptVariables,
       timeout,
       warnings: []
     };
 
     const initialEnvVariables = cloneDeep(context.environmentVariables);
     const initialCollectionVariables = cloneDeep(context.collectionVariables);
-    const response = await this.runRequestWithContext(item, context, 0, []);
+    const response = await this.runRequestWithContext(item, context, 0, [], prepared);
 
     const declaredEnvNames = new Set(
       (environment?.variables ?? [])
@@ -232,15 +241,17 @@ export class RequestRunner {
     item: HttpRequest,
     context: RunContext,
     depth: number,
-    chain: string[]
+    chain: string[],
+    prepared?: HttpRequest
   ): Promise<RunRequestResponse> {
     const {
-      collection, environmentVariables, collectionVariables, runtimeVariables, processEnvVars, timeout, warnings
+      collection, environmentVariables, collectionVariables, runtimeVariables, promptVariables,
+      processEnvVars, timeout, warnings
     } = context;
     const requestId = this.generateRequestId();
 
     try {
-      const processedRequest: InternalHttpRequest = await this.preprocessRequest(item, collection);
+      const processedRequest = (prepared ?? await this.prepareRequest(item, collection)) as InternalHttpRequest;
       processedRequest.__bruno__executionMode = 'standalone';
       processedRequest.__brunoHeadersSetByScript = [];
 
@@ -249,6 +260,7 @@ export class RequestRunner {
       const allVariables = {
         environmentVariables,
         runtimeVariables,
+        promptVariables,
         processEnvVars,
         collectionVariables,
         folderVariables,
@@ -415,7 +427,40 @@ export class RequestRunner {
     }, vars);
   }
 
-  private async preprocessRequest(
+  async collectPromptVariableNames(
+    options: Pick<RunRequestOptions, 'item' | 'collection' | 'environment' | 'runtimeVariables' | 'prepared'>
+  ): Promise<string[]> {
+    const { item, collection, environment, runtimeVariables = {}, prepared } = options;
+    const processed = prepared ?? await this.prepareRequest(item, collection);
+    const { folderVariables, requestVariables } = getCollectionFolderRequestVariables(collection, processed);
+    const body = getHttpBody(processed);
+
+    const enabled = <T>(rows: T[]): T[] =>
+      rows.filter((row) => (row as { disabled?: boolean } | null)?.disabled !== true);
+
+    const { body: selectedBody } = selectBodyVariant(body);
+    const bodyData = selectedBody && 'data' in selectedBody ? selectedBody.data : selectedBody;
+    const bodyToScan = Array.isArray(bodyData) ? enabled(bodyData as Array<{ disabled?: boolean }>) : bodyData;
+
+    const effectiveVariables = {
+      ...getCollectionVariables(collection),
+      ...this.getEnvironmentVariables(environment),
+      ...folderVariables,
+      ...requestVariables,
+      ...runtimeVariables
+    };
+
+    return extractPromptVariables([
+      effectiveVariables,
+      bodyToScan,
+      enabled(getHttpHeaders(processed)),
+      enabled(getHttpParams(processed)),
+      getRequestAuth(processed),
+      getRequestUrl(processed)
+    ]);
+  }
+
+  async prepareRequest(
     item: HttpRequest,
     collection: OpenCollectionCollection
   ): Promise<HttpRequest> {

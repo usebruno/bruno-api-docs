@@ -6,6 +6,7 @@ import type { Variable, SecretVariable } from '@opencollection/types/common/vari
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
 import { setPlaygroundVariable } from '@/store/slices/playground';
+import { promptVariableName } from '@/utils/promptVariables';
 import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
@@ -73,6 +74,10 @@ export interface VariableResolver {
 const lookupVariable = (rawName: string, model: ScopedVariableModel): VariableLookup => {
   const name = (rawName ?? '').trim();
   const base = { name, value: '', rawValue: '', secret: false, simpleString: false };
+
+  if (promptVariableName(rawName ?? '') !== null) {
+    return { ...base, name: rawName, scope: 'prompt', valid: true };
+  }
 
   const special = detectSpecialScope(name);
   if (special === 'dynamic') return { ...base, scope: 'dynamic', valid: true, dynamicKind: classifyDynamic(name) };

@@ -12,23 +12,36 @@ import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
 import { descriptionsFixtureCollection } from './e2eFixtures/descriptionsCollection';
 import { qaFixtureCollection } from './e2eFixtures/qaCollection';
+import {
+  generalFixtureCollection,
+  generalLongNameCollection,
+  generalNoEnvCollection,
+  generalNoVersionCollection,
+  generalOneEnvCollection
+} from './e2eFixtures/generalCollection';
 
-// `?fixture=folders` mounts a nested-folder collection for routing e2e tests;
-// `?fixture=qa` mounts the deep, deliberately awkward collection for manual QA;
+// Named collections for e2e. An unknown `?fixture=` value renders an error
+// instead of silently falling through to the sample collection.
 // `?nogit=1` drops the git url so the Open-in-Bruno download modal can be exercised.
+const fixtures = {
+  'folders': foldersFixtureCollection,
+  'vars': variablesFixtureCollection,
+  'descriptions': descriptionsFixtureCollection,
+  'qa': qaFixtureCollection,
+  'general': generalFixtureCollection,
+  'general-none': generalNoEnvCollection,
+  'general-one': generalOneEnvCollection,
+  'general-long': generalLongNameCollection,
+  'general-noversion': generalNoVersionCollection
+};
+
 const params = new URLSearchParams(window.location.search);
 const fixture = params.get('fixture');
 const noGit = params.get('nogit') === '1';
-const devCollection
-  = fixture === 'folders'
-    ? foldersFixtureCollection
-    : fixture === 'vars'
-      ? variablesFixtureCollection
-      : fixture === 'descriptions'
-        ? descriptionsFixtureCollection
-        : fixture === 'qa'
-          ? qaFixtureCollection
-          : sampleCollectionYaml;
+const unknownFixture = fixture != null && !(fixture in fixtures);
+const devCollection = unknownFixture || fixture == null
+  ? sampleCollectionYaml
+  : fixtures[fixture as keyof typeof fixtures];
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {
@@ -38,6 +51,14 @@ if (typeof window !== 'undefined') {
 // Development App component
 const DevApp: React.FC = () => {
   const store = createOpenCollectionStore();
+
+  if (unknownFixture) {
+    return (
+      <div data-testid="unknown-fixture">
+        {`Unknown fixture "${fixture}". Expected one of: ${Object.keys(fixtures).join(', ')}`}
+      </div>
+    );
+  }
 
   return (
     <Provider store={store}>

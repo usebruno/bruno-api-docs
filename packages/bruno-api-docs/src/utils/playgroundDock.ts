@@ -12,6 +12,9 @@ export const isDockMode = (value: string | null | undefined): value is DockMode 
   value === 'inline' || value === 'bottom' || value === 'modal';
 
 export const DOCK_STORAGE_KEY = 'oc-docs:playgroundDock';
+export const HEIGHT_STORAGE_KEY = 'oc-docs:playgroundBottomHeight';
+export const WIDTH_STORAGE_KEY = 'oc-docs:playgroundInlineWidth';
+export const COLLAPSED_STORAGE_KEY = 'oc-docs:playgroundBottomCollapsed';
 
 export const readStoredDock = (storage: Storage | null): DockMode | null => {
   if (!storage) return null;

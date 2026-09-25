@@ -188,4 +188,11 @@ export class PlaygroundComponent extends BaseComponent {
   async grabInlineResizer(): Promise<void> {
     await this.grabHandle(this.inlineResizer);
   }
+
+  async storedItem(area: 'session' | 'local', key: string): Promise<string | null> {
+    return this.page.evaluate(
+      ([area, key]) => (area === 'local' ? localStorage : sessionStorage).getItem(key),
+      [area, key] as [typeof area, string]
+    );
+  }
 }

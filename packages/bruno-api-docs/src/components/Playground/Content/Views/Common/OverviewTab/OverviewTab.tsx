@@ -4,6 +4,7 @@ import { StyledWrapper } from './StyledWrapper';
 import { EmptyState } from '@/ui/EmptyState/EmptyState';
 import { BookIcon } from '@/assets/icons';
 import NoContentText from '@/ui/NoContentText/NoContentText';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 interface OverviewTabProps {
   docs?: string;
@@ -35,10 +36,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({
   }
 
   return (
-    <StyledWrapper
+    <MarkdownContent
+      component={StyledWrapper}
       className="markdown-documentation"
-      data-testid="overview-markdown-documentation"
-      dangerouslySetInnerHTML={{ __html: docsHtml }}
+      testId="overview-markdown-documentation"
+      html={docsHtml}
     />
   );
 };

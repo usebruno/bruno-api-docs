@@ -19,6 +19,7 @@ import { Section } from '../../components/Section/Section';
 import { ViewMore } from '../../components/ViewMore/ViewMore';
 import { BookIcon, RefreshIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 const getDocsContent = (docs: OpenCollection['docs']): string => {
   if (!docs) return '';
@@ -83,12 +84,12 @@ export const Overview: React.FC<OverviewProps> = ({ collection, testId = 'overvi
             <Section label="Overview" testId="overview-section-label">
               {hasOverview ? (
                 <ViewMore testId="overview-markdown-view-more">
-                  <div
+                  <MarkdownContent
                     className="overview-markdown markdown-documentation"
-                    data-testid="overview-markdown-documentation"
-                    data-nav-headings
-                    data-nav-level={2}
-                    dangerouslySetInnerHTML={{ __html: docsHtml }}
+                    testId="overview-markdown-documentation"
+                    navHeadings
+                    navLevel={2}
+                    html={docsHtml}
                   />
                 </ViewMore>
               ) : (

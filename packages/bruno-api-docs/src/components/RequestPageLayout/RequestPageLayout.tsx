@@ -20,6 +20,7 @@ import { Tags } from '@/components/Tags/Tags';
 import type { HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { RequestPageData } from '@/hooks/useRequestPageData';
 import { StyledWrapper } from './StyledWrapper';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 export const NAV_GROUP = { configuration: 'Configuration' } as const;
 export const NAV_LEVEL = { section: 1, configItem: 2 } as const;
@@ -106,11 +107,11 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
 
         {descHtml && (
           <ViewMore collapsedHeight="4.5rem" style={{ marginTop: '1.5rem' }} testId="request-description">
-            <div
+            <MarkdownContent
               className="markdown-documentation"
-              data-nav-headings
-              data-nav-level={NAV_LEVEL.section}
-              dangerouslySetInnerHTML={{ __html: descHtml }}
+              navHeadings
+              navLevel={NAV_LEVEL.section}
+              html={descHtml}
             />
           </ViewMore>
         )}

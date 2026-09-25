@@ -12,6 +12,7 @@ import { REQUEST_TYPE_LABELS } from '@/constants';
 import ViewMore from '../ViewMore/ViewMore';
 import { TitleLabel } from '../TitleLabel/TitleLabel';
 import { useMarkdownRenderer } from '@/hooks';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 function getRequestTypeLabel(label: string | undefined) {
   const fallback = {
@@ -91,12 +92,12 @@ export const UnsupportedRequest: React.FC<UnsupportedRequestProps> = ({
 
       {showRequestDocs && (
         <ViewMore collapsedHeight="4.5rem" testId="overview-markdown-view-more">
-          <div
+          <MarkdownContent
             className="overview-markdown markdown-documentation mt-5"
-            data-testid="overview-markdown-documentation"
-            data-nav-headings
-            data-nav-level={1}
-            dangerouslySetInnerHTML={{ __html: docs }}
+            testId="overview-markdown-documentation"
+            navHeadings
+            navLevel={1}
+            html={docs}
           />
         </ViewMore>
       )}

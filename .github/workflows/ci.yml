@@ -50,7 +50,7 @@ jobs:
 
   e2e:
     needs: [changes, lint_unit_tests_and_builds]
-    if: needs.changes.outputs.renderer == 'true' && (github.event_name == 'push' || github.event.pull_request.draft == false)
+    if: needs.changes.outputs.renderer == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -78,6 +78,8 @@ jobs:
           retention-days: 30
 
   changes:
+    # nothing runs on a draft; marking it ready is a trigger of its own
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     outputs:
       renderer: ${{ steps.filter.outputs.renderer }}

@@ -22,7 +22,7 @@ env:
 
 jobs:
   cells:
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests')
+    if: github.event_name != 'pull_request' || (github.event.pull_request.draft == false && contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests'))
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -53,7 +53,7 @@ jobs:
           path: integrations/results
 
   node-20:
-    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests')
+    if: github.event_name != 'pull_request' || (github.event.pull_request.draft == false && contains(github.event.pull_request.labels.*.name, 'run-integrations-matrix-tests'))
     runs-on: ubuntu-latest
     continue-on-error: true
     name: node 20 (end of life, courtesy)

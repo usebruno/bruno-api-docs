@@ -141,6 +141,7 @@ header_has() { local name=$1 pattern=$2; shift 2; want="$name containing '$patte
 header_absent() { local name=$1; shift; want="no $name header"; got="$name: $(header_of "$name" "$@")"; [ "$got" = "$name: " ]; }
 body_has() { local body; body="$(curl -s "$1")"; want="'$2' in the body"; got="not there, in ${#body} bytes"; grep -q "$2" <<<"$body"; }
 body_lacks() { want="no '$2' in the body"; got="it is there"; ! grep -Eq "$2" <<<"$(curl -s "$1")"; }
+same_body() { want="the same bytes as $(basename "$2")"; got="they differ"; [ "$(curl -s "$1")" = "$(curl -s "$2")" ]; }
 file_has() { want="'$2' in $(basename "$1")"; got="not there"; grep -q "$2" "$1"; }
 file_lacks() { want="no '$2' in $(basename "$1")"; got="it is there"; ! grep -q "$2" "$1"; }
 revalidates() { status_is 304 -H "If-None-Match: $(header_of ETag "$1")" "$1"; }

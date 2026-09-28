@@ -18,7 +18,7 @@ export function resolveCollectionPath(collectionOption: string): string {
   // guarded here rather than in validateOptions: an empty path resolves to the app's own
   // directory, and walking that would serve whatever yml the adopter happens to keep there
   if (!collectionOption) {
-    throw new ConfigError('apiDocs: `collectionUrl` is required');
+    throw new ConfigError('apiDocs: `collectionPath` is required');
   }
 
   const entryDir = require.main?.path

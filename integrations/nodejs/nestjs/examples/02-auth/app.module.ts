@@ -14,8 +14,8 @@ function requireApiKey(req: Request, res: Response, next: NextFunction): void {
 
 @Module({
   imports: [
-    ApiDocsModule.forRoot({ collectionUrl: '../../api-collection' }),
-    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collectionUrl: '../../api-collection' })
+    ApiDocsModule.forRoot({ collectionPath: '../../api-collection' }),
+    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collectionPath: '../../api-collection' })
   ]
 })
 export class AppModule implements NestModule {

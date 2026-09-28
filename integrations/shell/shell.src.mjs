@@ -38,19 +38,19 @@ import { toOpenCollection } from './assemble.mjs';
     );
   }
 
-  const collectionUrl = new URL(base + 'collection.yml', location.origin).href;
+  const collectionPath = new URL(base + 'collection.yml', location.origin).href;
   let res;
   let text;
   try {
-    res = await fetch(collectionUrl);
+    res = await fetch(collectionPath);
     text = await res.text();
   }
   catch (err) {
-    return fail('GET ' + collectionUrl + '\n  -> ' + err.message);
+    return fail('GET ' + collectionPath + '\n  -> ' + err.message);
   }
   if (!res.ok) {
     const detail = text ? '\n\n' + text : '';
-    return fail('GET ' + collectionUrl + '\n  -> HTTP ' + res.status + ' ' + res.statusText + detail);
+    return fail('GET ' + collectionPath + '\n  -> HTTP ' + res.status + ' ' + res.statusText + detail);
   }
 
   let doc;
@@ -67,7 +67,7 @@ import { toOpenCollection } from './assemble.mjs';
   catch (err) {
     return fail('The renderer threw while mounting:\n  ' + err.message);
   }
-  console.info('[bruno-docs] api-docs ' + version + ', collection from ' + collectionUrl);
+  console.info('[bruno-docs] api-docs ' + version + ', collection from ' + collectionPath);
 })();
 
 function resolveBoot() {

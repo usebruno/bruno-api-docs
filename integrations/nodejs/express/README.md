@@ -11,7 +11,7 @@ npm install @usebruno/api-docs-express
 ```js
 const { apiDocs } = require('@usebruno/api-docs-express');
 
-app.use('/docs', apiDocs({ collectionUrl: './api-collection' }));
+app.use('/docs', apiDocs({ collectionPath: './api-collection' }));
 ```
 
 Open `http://localhost:<port>/docs/`.
@@ -20,7 +20,7 @@ Open `http://localhost:<port>/docs/`.
 
 ```js
 apiDocs({
-  collectionUrl: './api-collection',
+  collectionPath: './api-collection',
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
@@ -29,7 +29,9 @@ apiDocs({
 })
 ```
 
-`collectionUrl` is the path to a Bruno folder (`bruno.json` and `.bru` files), an OpenCollection yml folder or one bundled `.yml` file. The path is relative to your app's entry file.
+`collectionPath` is the path to a Bruno folder (`bruno.json` and `.bru` files), an OpenCollection yml folder or one bundled `.yml` file. The path is relative to your app's entry file.
+
+`content` is the document itself as a string, instead of a path. When both are set, `content` wins.
 
 `environments` and `tags` take `{ include, exclude }`, where `include` is a list of names or `'*'`. Leave `environments` out and none are published. Excluded tags drop their requests from the served collection.
 
@@ -38,7 +40,7 @@ apiDocs({
 Put your guard in front of the mount. It covers the collection file too.
 
 ```js
-app.use('/docs', requireLogin, apiDocs({ collectionUrl: './api-collection' }));
+app.use('/docs', requireLogin, apiDocs({ collectionPath: './api-collection' }));
 ```
 
 ## Content Security Policy
@@ -58,7 +60,7 @@ connect-src 'self' data: https://cdn.jsdelivr.net
 ```js
 const { apiDocs, embed } = require('@usebruno/api-docs-express');
 
-app.use('/docs', apiDocs({ collectionUrl: './api-collection' }));
+app.use('/docs', apiDocs({ collectionPath: './api-collection' }));
 app.get('/', (req, res) => res.type('html').send(`<h1>Acme</h1>${embed({ base: '/docs' })}`));
 ```
 

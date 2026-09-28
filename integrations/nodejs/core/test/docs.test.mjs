@@ -42,7 +42,7 @@ const call = (handler, method, mount, sub, headers = {}) => {
   return res;
 };
 
-const docs = quiet(() => createDocs({ collectionUrl: collection, pageTitle: 'Fixture API' }));
+const docs = quiet(() => createDocs({ collectionPath: collection, pageTitle: 'Fixture API' }));
 const handler = docs.handler();
 
 // --- the routes, as the contract states them
@@ -123,7 +123,7 @@ const handler = docs.handler();
   const missing = path.join(os.tmpdir(), 'bruno-docs-absent-' + Date.now());
   let broken;
   assert.doesNotThrow(() => {
-    broken = quiet(() => createDocs({ collectionUrl: missing }));
+    broken = quiet(() => createDocs({ collectionPath: missing }));
   }, 'createDocs never throws: a docs page cannot take down the API it documents');
 
   const brokenHandler = broken.handler();
@@ -134,14 +134,14 @@ const handler = docs.handler();
   }
 
   const overCap = quiet(() => createDocs({
-    collectionUrl: path.join(here, '..', '..', '..', 'contract-tests', 'fixtures', 'walk-oversize')
+    collectionPath: path.join(here, '..', '..', '..', 'contract-tests', 'fixtures', 'walk-oversize')
   }));
   assert.equal(overCap.collection().status, 413, 'a collection over the caps is a 413 at the mount');
 
-  const badOptions = quiet(() => createDocs({ collectionUrl: collection, environments: { exclude: ['Prod'] } }));
+  const badOptions = quiet(() => createDocs({ collectionPath: collection, environments: { exclude: ['Prod'] } }));
   assert.equal(badOptions.collection().status, 500, 'a config error reaches the mount too, not the boot');
 
-  const typo = quiet(() => createDocs({ collectionUrl: collection, theme: 'dark' }));
+  const typo = quiet(() => createDocs({ collectionPath: collection, theme: 'dark' }));
   assert.equal(typo.collection().status, 500, 'an option we do not know is an error, not silently forwarded');
   assert.match(String(typo.collection().body), /unknown option theme/);
 }

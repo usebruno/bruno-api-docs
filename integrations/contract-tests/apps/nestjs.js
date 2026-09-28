@@ -1,6 +1,8 @@
 'use strict';
 
 require('reflect-metadata');
+const fs = require('node:fs');
+const path = require('node:path');
 const { Module } = require('@nestjs/common');
 const { NestFactory } = require('@nestjs/core');
 const helmet = require('helmet');
@@ -14,6 +16,7 @@ const ADAPTER = process.env.ADAPTER || 'express';
 const COLLECTION = '../fixtures/api-collection';
 const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
+const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
 
 // plain JS, so the decorator is applied as the function it is. The real Nest examples live in
 // nodejs/nestjs/examples and are TypeScript.
@@ -22,7 +25,7 @@ Module({
   imports: [
     ApiDocsModule.forRoot({
       mountPath: '/docs',
-      collectionUrl: COLLECTION,
+      collectionPath: COLLECTION,
       environments: { include: ['Local'] },
       tags: { exclude: ['internal'] },
       pageTitle: 'Acme API',
@@ -31,15 +34,17 @@ Module({
     }),
     ApiDocsModule.forRoot({
       mountPath: '/api/v2/docs',
-      collectionUrl: COLLECTION,
+      collectionPath: COLLECTION,
       environments: { include: '*', exclude: ['Prod'] }
     }),
-    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collectionUrl: COLLECTION }),
-    ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collectionUrl: BUNDLED }),
-    ApiDocsModule.forRoot({ mountPath: '/bru/docs', collectionUrl: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }),
-    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collectionUrl: './there-is-no-collection-here' }),
-    ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collectionUrl: '../fixtures/walk-oversize' }),
-    ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collectionUrl: COLLECTION, theme: 'dark' })
+    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collectionPath: COLLECTION }),
+    ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collectionPath: BUNDLED }),
+    ApiDocsModule.forRoot({ mountPath: '/content/docs', content: CONTENT }),
+    ApiDocsModule.forRoot({ mountPath: '/priority/docs', content: CONTENT, collectionPath: COLLECTION }),
+    ApiDocsModule.forRoot({ mountPath: '/bru/docs', collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }),
+    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collectionPath: './there-is-no-collection-here' }),
+    ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' }),
+    ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collectionPath: COLLECTION, theme: 'dark' })
   ]
 })(AppModule);
 

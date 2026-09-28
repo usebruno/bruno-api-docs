@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const express = require('express');
 const helmet = require('helmet');
 const { apiDocs, embed } = require('@usebruno/api-docs-express');
@@ -10,6 +12,7 @@ const PORT = Number(process.env.PORT || 5456);
 const COLLECTION = '../fixtures/api-collection';
 const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
+const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
 
 const app = express();
 
@@ -32,7 +35,7 @@ app.use(
 app.get('/control', (req, res) => res.json({ ok: true, from: 'the app itself' }));
 
 app.use('/docs', apiDocs({
-  collectionUrl: COLLECTION,
+  collectionPath: COLLECTION,
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
@@ -40,23 +43,27 @@ app.use('/docs', apiDocs({
   gitCollectionUrl: 'https://token:secret@github.com/acme/api-collection'
 }));
 
-app.use('/api/v2/docs', apiDocs({ collectionUrl: COLLECTION, environments: { include: '*', exclude: ['Prod'] } }));
+app.use('/api/v2/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: '*', exclude: ['Prod'] } }));
 
-app.use('/internal/docs', apiDocs({ collectionUrl: COLLECTION }));
+app.use('/internal/docs', apiDocs({ collectionPath: COLLECTION }));
 
-app.use('/bundled/docs', apiDocs({ collectionUrl: BUNDLED }));
+app.use('/bundled/docs', apiDocs({ collectionPath: BUNDLED }));
 
-app.use('/bru/docs', apiDocs({ collectionUrl: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }));
+app.use('/content/docs', apiDocs({ content: CONTENT }));
 
-app.use('/broken/docs', apiDocs({ collectionUrl: './there-is-no-collection-here' }));
+app.use('/priority/docs', apiDocs({ content: CONTENT, collectionPath: COLLECTION }));
 
-app.use('/oversize/docs', apiDocs({ collectionUrl: '../fixtures/walk-oversize' }));
+app.use('/bru/docs', apiDocs({ collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }));
+
+app.use('/broken/docs', apiDocs({ collectionPath: './there-is-no-collection-here' }));
+
+app.use('/oversize/docs', apiDocs({ collectionPath: '../fixtures/walk-oversize' }));
 
 // theme is what the renderer will take next; until it does, passing it is a mistake we report
-app.use('/misconfigured/docs', apiDocs({ collectionUrl: COLLECTION, theme: 'dark' }));
+app.use('/misconfigured/docs', apiDocs({ collectionPath: COLLECTION, theme: 'dark' }));
 
 // the docs inside the host's own page: the mount serves, the block only points at it
-app.use('/portal/docs', apiDocs({ collectionUrl: COLLECTION, environments: { include: ['Local'] } }));
+app.use('/portal/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: ['Local'] } }));
 app.get('/portal', (req, res) => {
   res.type('html').send(`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Acme Developer Portal</title></head>

@@ -108,11 +108,13 @@ test('a .bru collection renders, and its filters hold', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('a bundled single file renders the same way', async ({ page }) => {
-  await page.goto('/bundled/docs/', { waitUntil: 'networkidle' });
-  await expect(page).toHaveTitle('API Documentation');
-  await expect(page.getByText('Catalog', { exact: true }).first()).toBeVisible();
-});
+for (const mount of ['/bundled/docs/', '/content/docs/']) {
+  test(`${mount} a bundled document renders the same way`, async ({ page }) => {
+    await page.goto(mount, { waitUntil: 'networkidle' });
+    await expect(page).toHaveTitle('API Documentation');
+    await expect(page.getByText('Catalog', { exact: true }).first()).toBeVisible();
+  });
+}
 
 test('a broken mount explains itself in the page, and the app is still up', async ({ page, request }) => {
   const response = await page.goto('/broken/docs/', { waitUntil: 'networkidle' });

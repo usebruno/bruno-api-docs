@@ -1,23 +1,53 @@
 // The collection layer's one entry point: where the document comes from is decided here, at startup.
 
-import { ConfigError, type CollectionOptions } from '../options';
+import { ConfigError, type CollectionOptions, type CollectionFilters } from '../options';
 import { log } from '../log';
 import type { SkippedFile } from './walk';
 import { resolveCollectionSource } from './source';
-import { fileProvider, dirProvider, type Provider, type BuiltProvider } from './providers';
+import { bundledProvider, fileProvider, dirProvider, type Provider, type BuiltProvider } from './providers';
+
+interface Built {
+  provider: BuiltProvider;
+  bundled: boolean;
+  label: string;
+}
+
+// in priority order: the first one set is used, the rest are ignored with a warning
+const SOURCES = [
+  { key: 'content', build: fromContent },
+  { key: 'collectionPath', build: fromPath }
+] as const;
 
 export function providerFor(options: CollectionOptions): Provider {
-  const source = resolveCollectionSource(options.collectionUrl);
-  const filters = { environments: options.environments, tags: options.tags };
+  const set = SOURCES.filter((source) => options[source.key]);
+  if (set.length === 0) {
+    throw new ConfigError(`apiDocs: one of ${SOURCES.map((source) => `\`${source.key}\``).join(', ')} is required`);
+  }
+  const [chosen, ...ignored] = set;
+  for (const source of ignored) {
+    log.warn(`${chosen.key} is set, ignoring ${source.key}`);
+  }
 
-  // built first: a path that is not there is reported as missing, not as a filter mistake
-  const built = source.mode === 'file' ? fileProvider(source.path) : dirProvider(source.path, filters);
-  if (source.mode === 'file' && (filters.environments || filters.tags)) {
+  const filters = { environments: options.environments, tags: options.tags };
+  const built = chosen.build(options[chosen.key] as string, filters);
+  if (built.bundled && (filters.environments || filters.tags)) {
     throw new ConfigError('apiDocs: `environments` / `tags` filtering needs a collection directory');
   }
-  report(source.path, built);
+  report(built.label, built.provider);
 
-  return built.serve;
+  return built.provider.serve;
+}
+
+function fromContent(text: string): Built {
+  return { provider: bundledProvider(text, 'content'), bundled: true, label: 'content' };
+}
+
+function fromPath(value: string, filters: CollectionFilters): Built {
+  const source = resolveCollectionSource(value);
+  // built first: a path that is not there is reported as missing, not as a filter mistake
+  const provider = source.mode === 'file' ? fileProvider(source.path) : dirProvider(source.path, filters);
+
+  return { provider, bundled: source.mode === 'file', label: source.path };
 }
 
 /**

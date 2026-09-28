@@ -105,16 +105,16 @@ const quiet = (fn) => {
 {
   const gone = path.join(tmp, 'not-here.yml');
   assert.equal(resolveCollectionSource(gone).mode, 'file', 'an unstattable path falls through to file mode');
-  assert.throws(() => quiet(() => providerFor({ collectionUrl: gone })), { code: 'ENOENT' });
-  assert.equal(errorProvider(thrownBy(() => providerFor({ collectionUrl: gone })))({}).status, 404);
-  assert.throws(() => quiet(() => providerFor({ collectionUrl: gone, tags: { exclude: ['x'] } })), { code: 'ENOENT' },
+  assert.throws(() => quiet(() => providerFor({ collectionPath: gone })), { code: 'ENOENT' });
+  assert.equal(errorProvider(thrownBy(() => providerFor({ collectionPath: gone })))({}).status, 404);
+  assert.throws(() => quiet(() => providerFor({ collectionPath: gone, tags: { exclude: ['x'] } })), { code: 'ENOENT' },
     'with filters set, a missing path is still reported as missing, not as a filter mistake');
 
   if (process.getuid?.() !== 0) {
     const locked = write('locked/opencollection.yml', 'opencollection: 1.0.0\nbundled: false\n');
     fs.chmodSync(locked, 0o000);
     assert.equal(resolveCollectionSource(locked).mode, 'file', 'an unreadable manifest falls through to file mode');
-    assert.equal(errorProvider(thrownBy(() => providerFor({ collectionUrl: locked })))({}).status, 500);
+    assert.equal(errorProvider(thrownBy(() => providerFor({ collectionPath: locked })))({}).status, 500);
     fs.chmodSync(locked, 0o644);
   }
 }
@@ -122,9 +122,34 @@ const quiet = (fn) => {
 // --- filters need a directory, and that is a startup failure
 {
   const single = write('solo/opencollection.yml', 'opencollection: 1.0.0\nbundled: true\n');
-  assert.throws(() => quiet(() => providerFor({ collectionUrl: single, tags: { exclude: ['internal'] } })), ConfigError);
-  assert.throws(() => quiet(() => providerFor({ collectionUrl: single, environments: { include: '*' } })), ConfigError);
-  assert.equal(quiet(() => providerFor({ collectionUrl: single }))({}).status, 200, 'without filters it serves');
+  assert.throws(() => quiet(() => providerFor({ collectionPath: single, tags: { exclude: ['internal'] } })), ConfigError);
+  assert.throws(() => quiet(() => providerFor({ collectionPath: single, environments: { include: '*' } })), ConfigError);
+  assert.equal(quiet(() => providerFor({ collectionPath: single }))({}).status, 200, 'without filters it serves');
+}
+
+// --- content: the document itself, served as a bundled file, and it wins over collectionPath
+{
+  const text = 'opencollection: 1.0.0\ninfo:\n  name: Inline\n';
+  const served = quiet(() => providerFor({ content: text }))({});
+  assert.equal(served.status, 200);
+  assert.equal(served.body, text, 'served as given, byte for byte');
+  assert.match(served.headers['Content-Type'], /yaml/);
+
+  const dir = path.dirname(write('prio/opencollection.yml', 'opencollection: 1.0.0\nbundled: false\n'));
+  const warned = [];
+  const { log, warn } = console;
+  console.log = () => {};
+  console.warn = (line) => warned.push(line);
+  try {
+    assert.equal(providerFor({ content: text, collectionPath: dir })({}).body, text, 'content wins');
+  } finally {
+    Object.assign(console, { log, warn });
+  }
+  assert.ok(warned.some((line) => line.includes('content is set, ignoring collectionPath')), 'and says what it ignored');
+
+  assert.throws(() => quiet(() => providerFor({ content: text, tags: { exclude: ['x'] } })), ConfigError, 'filters need a directory, as for a bundled file');
+  assert.throws(() => quiet(() => providerFor({})), /one of `content`, `collectionPath` is required/);
+  assert.throws(() => quiet(() => providerFor({ content: '' })), /is required/, 'an empty document is not a source');
 }
 
 // --- pointing at the manifest of an unbundled collection means the directory around it
@@ -144,7 +169,7 @@ const quiet = (fn) => {
   // so any caller that skipped the validator would walk it and serve whatever yml lives there
   for (const empty of ['', undefined, null]) {
     assert.throws(() => resolveCollectionPath(empty), ConfigError, `${JSON.stringify(empty)} is refused`);
-    assert.throws(() => quiet(() => providerFor({ collectionUrl: empty })), ConfigError, 'and refused through providerFor');
+    assert.throws(() => quiet(() => providerFor({ collectionPath: empty })), ConfigError, 'and refused through providerFor');
   }
 }
 

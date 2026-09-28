@@ -9,7 +9,9 @@ export interface CollectionFilters {
 }
 
 export interface CollectionOptions extends CollectionFilters {
-  collectionUrl: string;
+  collectionPath?: string;
+  /** The document itself, yml or JSON text. Set with `collectionPath`, it wins. */
+  content?: string;
 }
 
 export interface RendererOptions {
@@ -23,12 +25,16 @@ export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
 
 export class ConfigError extends Error {}
 
-const KNOWN_OPTIONS = new Set(['collectionUrl', 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
+const KNOWN_OPTIONS = new Set(['collectionPath', 'content', 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
 
 export function validateOptions(options: ApiDocsOptions): void {
   const unknown = Object.keys(options).filter((key) => !KNOWN_OPTIONS.has(key));
   if (unknown.length > 0) {
     throw new ConfigError(`apiDocs: unknown option ${unknown.join(', ')}`);
+  }
+
+  if (options.content !== undefined && typeof options.content !== 'string') {
+    throw new ConfigError('apiDocs: `content` takes the document as a string');
   }
 
   for (const name of ['environments', 'tags'] as const) {

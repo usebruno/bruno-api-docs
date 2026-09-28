@@ -13,6 +13,8 @@
 #   /api/v2/docs   environments all minus Prod
 #   /internal/docs no options
 #   /bundled/docs  a single bundled yml
+#   /content/docs  the same document given inline as `content`
+#   /priority/docs `content` and `collectionPath` both set: content wins
 #   /bru/docs      the same collection in Bruno's own format, same filters
 #   /broken/docs   a collection that is not there
 #   /oversize/docs a collection over the caps
@@ -125,6 +127,13 @@ check "/bundled/docs/ -> the page"              status_is 200 "$BASE/bundled/doc
 check "/bundled/docs/collection.yml -> yaml"    header_has Content-Type yaml "$BASE/bundled/docs/collection.yml"
 check "/bundled/docs/collection.yml -> ETag"    revalidates "$BASE/bundled/docs/collection.yml"
 check "/bundled/docs -> served as written"      body_has "$BASE/bundled/docs/collection.yml" 'Acme API (bundled)'
+
+describe "content: the document given inline, served as a bundled file"
+check "/content/docs/ -> the page"                status_is 200 "$BASE/content/docs/"
+check "/content/docs/collection.yml -> yaml"      header_has Content-Type yaml "$BASE/content/docs/collection.yml"
+check "/content/docs/collection.yml -> ETag"      revalidates "$BASE/content/docs/collection.yml"
+check "/content/docs -> the same bytes as the file" same_body "$BASE/content/docs/collection.yml" "$BASE/bundled/docs/collection.yml"
+check "/priority/docs -> content wins over the path" same_body "$BASE/priority/docs/collection.yml" "$BASE/bundled/docs/collection.yml"
 
 describe "a broken setup does not stop the app"
 check "the app's own route still answers"       body_has "$BASE/control" 'the app itself'

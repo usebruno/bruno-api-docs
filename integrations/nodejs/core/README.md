@@ -20,7 +20,7 @@ npm install @usebruno/api-docs-core
 const http = require('node:http');
 const { createDocs } = require('@usebruno/api-docs-core');
 
-const handler = createDocs({ collectionUrl: './api-collection' }).handler();
+const handler = createDocs({ collectionPath: './api-collection' }).handler();
 
 http.createServer((req, res) => {
   if (req.url.startsWith('/docs')) {
@@ -38,7 +38,7 @@ http.createServer((req, res) => {
 
 ```js
 createDocs({
-  collectionUrl: './api-collection',
+  collectionPath: './api-collection',
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
@@ -47,7 +47,9 @@ createDocs({
 })
 ```
 
-`collectionUrl` is the path to a Bruno folder (`bruno.json` and `.bru` files), an OpenCollection yml folder or one bundled `.yml` file. The path is relative to your app's entry file.
+`collectionPath` is the path to a Bruno folder (`bruno.json` and `.bru` files), an OpenCollection yml folder or one bundled `.yml` file. The path is relative to your app's entry file.
+
+`content` is the document itself as a string, instead of a path. When both are set, `content` wins.
 
 `environments` and `tags` take `{ include, exclude }`, where `include` is a list of names or `'*'`. Leave `environments` out and none are published. Excluded tags drop their requests from the served collection.
 

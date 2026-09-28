@@ -1,5 +1,7 @@
 'use strict';
 
+const fs = require('node:fs');
+const path = require('node:path');
 const Fastify = require('fastify');
 const { apiDocs } = require('@usebruno/api-docs-fastify');
 
@@ -8,6 +10,7 @@ const PORT = Number(process.env.PORT || 5457);
 const COLLECTION = '../fixtures/api-collection';
 const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
+const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
 
 const app = Fastify({ logger: false });
 
@@ -37,7 +40,7 @@ async function main() {
 
   await app.register(apiDocs, {
     prefix: '/docs',
-    collectionUrl: COLLECTION,
+    collectionPath: COLLECTION,
     environments: { include: ['Local'] },
     tags: { exclude: ['internal'] },
     pageTitle: 'Acme API',
@@ -47,16 +50,18 @@ async function main() {
 
   await app.register(apiDocs, {
     prefix: '/api/v2/docs',
-    collectionUrl: COLLECTION,
+    collectionPath: COLLECTION,
     environments: { include: '*', exclude: ['Prod'] }
   });
 
-  await app.register(apiDocs, { prefix: '/internal/docs', collectionUrl: COLLECTION });
-  await app.register(apiDocs, { prefix: '/bundled/docs', collectionUrl: BUNDLED });
-  await app.register(apiDocs, { prefix: '/bru/docs', collectionUrl: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } });
-  await app.register(apiDocs, { prefix: '/broken/docs', collectionUrl: './there-is-no-collection-here' });
-  await app.register(apiDocs, { prefix: '/oversize/docs', collectionUrl: '../fixtures/walk-oversize' });
-  await app.register(apiDocs, { prefix: '/misconfigured/docs', collectionUrl: COLLECTION, theme: 'dark' });
+  await app.register(apiDocs, { prefix: '/internal/docs', collectionPath: COLLECTION });
+  await app.register(apiDocs, { prefix: '/bundled/docs', collectionPath: BUNDLED });
+  await app.register(apiDocs, { prefix: '/content/docs', content: CONTENT });
+  await app.register(apiDocs, { prefix: '/priority/docs', content: CONTENT, collectionPath: COLLECTION });
+  await app.register(apiDocs, { prefix: '/bru/docs', collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } });
+  await app.register(apiDocs, { prefix: '/broken/docs', collectionPath: './there-is-no-collection-here' });
+  await app.register(apiDocs, { prefix: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' });
+  await app.register(apiDocs, { prefix: '/misconfigured/docs', collectionPath: COLLECTION, theme: 'dark' });
 
   await app.listen({ port: PORT, host: '127.0.0.1' });
   console.log(`fastify rig on http://localhost:${PORT}`);

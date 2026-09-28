@@ -41,15 +41,16 @@ function serveFromMemory(body: string | Buffer, contentType: string): Provider {
   };
 }
 
-export function fileProvider(filePath: string): BuiltProvider {
-  const size = fs.statSync(filePath).size;
-  if (size > CAPS.totalBytes) {
-    throw new CapError('total size cap (5MB)', filePath);
+export function bundledProvider(body: string | Buffer, label: string): BuiltProvider {
+  if (Buffer.byteLength(body) > CAPS.totalBytes) {
+    throw new CapError('total size cap (5MB)', label);
   }
 
-  const body = fs.readFileSync(filePath);
-
   return { serve: serveFromMemory(body, 'text/yaml; charset=utf-8'), fileCount: 1, skipped: [], unknownEnvironments: [] };
+}
+
+export function fileProvider(filePath: string): BuiltProvider {
+  return bundledProvider(fs.readFileSync(filePath), filePath);
 }
 
 const formatOf = (rootDir: string): CollectionFormat =>

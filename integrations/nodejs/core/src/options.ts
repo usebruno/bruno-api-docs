@@ -8,11 +8,11 @@ export interface CollectionFilters {
   tags?: Filter;
 }
 
-export interface CollectionOptions extends CollectionFilters {
-  collectionPath?: string;
-  /** The document itself, yml or JSON text. Set with `collectionPath`, it wins. */
-  content?: string;
-}
+/** Where the collection comes from, in priority order: the first one set is used. */
+export const SOURCE_KEYS = ['content', 'collectionPath'] as const;
+export type SourceKey = typeof SOURCE_KEYS[number];
+
+export interface CollectionOptions extends CollectionFilters, Partial<Record<SourceKey, string>> {}
 
 export interface RendererOptions {
   logo?: string;
@@ -25,7 +25,7 @@ export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
 
 export class ConfigError extends Error {}
 
-const KNOWN_OPTIONS = new Set(['collectionPath', 'content', 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
+const KNOWN_OPTIONS = new Set<string>([...SOURCE_KEYS, 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
 
 export function validateOptions(options: ApiDocsOptions): void {
   const unknown = Object.keys(options).filter((key) => !KNOWN_OPTIONS.has(key));

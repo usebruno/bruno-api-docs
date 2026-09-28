@@ -53,7 +53,7 @@ See [Auto-generate documentation](https://docs.usebruno.com/api-docs/auto-genera
 | Path | What it is |
 |---|---|
 | [`packages/bruno-api-docs`](./packages/bruno-api-docs) | The renderer: a React app built as a library and as the **standalone bundle** (`dist-standalone/`), the artifact the Bruno app's generated HTML loads from the CDN. |
-| [`examples/`](./examples) | Runnable examples for the framework integrations, one folder per framework under `examples/integrations/nodejs`. |
+| [`examples/`](./examples) | `standalone-html`, how a generated HTML page uses the bundle. `integrations/nodejs`, runnable examples for the framework packages, one folder per framework. |
 
 ## Roadmap
 

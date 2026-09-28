@@ -45,11 +45,16 @@ export function bundledProvider(body: string | Buffer, label: string): BuiltProv
   if (Buffer.byteLength(body) > CAPS.totalBytes) {
     throw new CapError('total size cap (5MB)', label);
   }
+  const contentType = /^\s*[[{]/.test(String(body)) ? 'application/json; charset=utf-8' : 'text/yaml; charset=utf-8';
 
-  return { serve: serveFromMemory(body, 'text/yaml; charset=utf-8'), fileCount: 1, skipped: [], unknownEnvironments: [] };
+  return { serve: serveFromMemory(body, contentType), fileCount: 1, skipped: [], unknownEnvironments: [] };
 }
 
 export function fileProvider(filePath: string): BuiltProvider {
+  if (fs.statSync(filePath).size > CAPS.totalBytes) {
+    throw new CapError('total size cap (5MB)', filePath);
+  }
+
   return bundledProvider(fs.readFileSync(filePath), filePath);
 }
 

@@ -1,6 +1,6 @@
 // The collection layer's one entry point: where the document comes from is decided here, at startup.
 
-import { ConfigError, type CollectionOptions, type CollectionFilters } from '../options';
+import { ConfigError, SOURCE_KEYS, type SourceKey, type CollectionOptions, type CollectionFilters } from '../options';
 import { log } from '../log';
 import type { SkippedFile } from './walk';
 import { resolveCollectionSource } from './source';
@@ -12,24 +12,23 @@ interface Built {
   label: string;
 }
 
-// in priority order: the first one set is used, the rest are ignored with a warning
-const SOURCES = [
-  { key: 'content', build: fromContent },
-  { key: 'collectionPath', build: fromPath }
-] as const;
+const BUILD: Record<SourceKey, (value: string, filters: CollectionFilters) => Built> = {
+  content: fromContent,
+  collectionPath: fromPath
+};
 
 export function providerFor(options: CollectionOptions): Provider {
-  const set = SOURCES.filter((source) => options[source.key]);
+  const set = SOURCE_KEYS.filter((key) => options[key]);
   if (set.length === 0) {
-    throw new ConfigError(`apiDocs: one of ${SOURCES.map((source) => `\`${source.key}\``).join(', ')} is required`);
+    throw new ConfigError(`apiDocs: one of ${SOURCE_KEYS.map((key) => `\`${key}\``).join(', ')} is required`);
   }
   const [chosen, ...ignored] = set;
-  for (const source of ignored) {
-    log.warn(`${chosen.key} is set, ignoring ${source.key}`);
+  for (const key of ignored) {
+    log.warn(`${chosen} is set, ignoring ${key}`);
   }
 
   const filters = { environments: options.environments, tags: options.tags };
-  const built = chosen.build(options[chosen.key] as string, filters);
+  const built = BUILD[chosen](options[chosen] as string, filters);
   if (built.bundled && (filters.environments || filters.tags)) {
     throw new ConfigError('apiDocs: `environments` / `tags` filtering needs a collection directory');
   }

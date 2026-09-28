@@ -19,7 +19,7 @@ const BUNDLED = '../fixtures/bundled.yml';
 const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
 
 // plain JS, so the decorator is applied as the function it is. The real Nest examples live in
-// nodejs/nestjs/examples and are TypeScript.
+// examples/integrations/nodejs/nestjs and are TypeScript.
 class AppModule {}
 Module({
   imports: [

@@ -7,9 +7,9 @@
     "nodejs/*"
   ],
   "scripts": {
-    "build": "npm run build:shell && npm run build:core && npm run build:express && npm run build:fastify && npm run build:nestjs && npm run build:examples",
+    "build": "npm run build:shell && npm run build:core && npm run build:express && npm run build:fastify && npm run build:nestjs",
     "build:core": "tsc -p nodejs/core/tsconfig.json",
-    "build:examples": "tsc -p nodejs/nestjs/examples/tsconfig.json",
+    "build:examples": "tsc -p ../examples/integrations/nodejs/nestjs/tsconfig.json",
     "build:express": "tsc -p nodejs/express/tsconfig.json",
     "build:fastify": "tsc -p nodejs/fastify/tsconfig.json",
     "build:nestjs": "tsc -p nodejs/nestjs/tsconfig.json",
@@ -19,7 +19,7 @@
     "check:fastify": "npm run build && bash contract-tests/check.sh --app contract-tests/apps/fastify.js --port 5457",
     "check:nestjs": "npm run build && bash contract-tests/check.sh --app contract-tests/apps/nestjs.js --port 5458",
     "check:nestjs-fastify": "npm run build && ADAPTER=fastify bash contract-tests/check.sh --app contract-tests/apps/nestjs.js --port 5459",
-    "lint": "eslint",
+    "lint": "eslint . && cd ../examples/integrations && ../../integrations/node_modules/.bin/eslint .",
     "lint:fix": "eslint --fix",
     "matrix": "npm run build && bash nodejs/scripts/matrix.sh",
     "matrix:docker": "npm run build && bash nodejs/scripts/matrix.sh --docker",

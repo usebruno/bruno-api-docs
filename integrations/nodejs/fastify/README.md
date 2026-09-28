@@ -76,4 +76,4 @@ app.get('/', async (request, reply) => reply.type('text/html').send(`<h1>Acme</h
 
 Node 20 or later. Fastify 4 or 5.
 
-Examples: [`examples/`](https://github.com/usebruno/bruno-api-docs/tree/main/integrations/nodejs/fastify/examples)
+Examples: [`examples/`](https://github.com/usebruno/bruno-api-docs/tree/main/examples/integrations/nodejs/fastify)

@@ -68,4 +68,4 @@ app.get('/', (req, res) => res.type('html').send(`<h1>Acme</h1>${embed({ base: '
 
 Node 20 or later. Express 4 or 5.
 
-Examples: [`examples/`](https://github.com/usebruno/bruno-api-docs/tree/main/integrations/nodejs/express/examples)
+Examples: [`examples/`](https://github.com/usebruno/bruno-api-docs/tree/main/examples/integrations/nodejs/express)

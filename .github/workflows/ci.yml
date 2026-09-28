@@ -92,8 +92,10 @@ jobs:
           filters: |
             renderer:
               - '!integrations/**'
+              - '!examples/integrations/**'
             integrations:
               - 'integrations/**'
+              - 'examples/integrations/**'
               - '.github/workflows/ci.yml'
               - '.github/workflows/integrations-matrix.yml'
 

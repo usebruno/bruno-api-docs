@@ -83,4 +83,4 @@ portal(): string {
 
 Node 20 or later. NestJS 10, 11 or 12.
 
-Examples: [`examples/`](https://github.com/usebruno/bruno-api-docs/tree/main/integrations/nodejs/nestjs/examples)
+Examples: [`examples/`](https://github.com/usebruno/bruno-api-docs/tree/main/examples/integrations/nodejs/nestjs)

@@ -24,7 +24,7 @@ export default [
         ...globals.node
       }
     },
-    files: ['eslint.config.mjs', '**/src/**/*.ts', '**/test/**/*.{ts,mjs}', 'contract-tests/**/*.{js,mjs}', '**/examples/**/*.{js,ts}'],
+    files: ['eslint.config.mjs', '**/src/**/*.ts', '**/test/**/*.{ts,mjs}', 'contract-tests/**/*.{js,mjs}'],
     rules: {
       ...js.configs.recommended.rules,
       ...stylistic.configs.customize({
@@ -91,7 +91,7 @@ export default [
     }
   },
   {
-    files: ['contract-tests/apps/*.js', '**/examples/**/*.{js,ts}'],
+    files: ['contract-tests/apps/*.js'],
     rules: {
       'no-console': 'off'
     }

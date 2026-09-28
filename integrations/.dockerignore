@@ -5,6 +5,5 @@ nodejs/*/dist
 shell/shell.js
 nodejs/*/shell
 test-results
-nodejs/nestjs/examples/dist
 dist-tarballs
 shell/bru.js

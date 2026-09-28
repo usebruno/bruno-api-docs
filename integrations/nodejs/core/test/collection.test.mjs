@@ -134,6 +134,7 @@ const quiet = (fn) => {
   assert.equal(served.status, 200);
   assert.equal(served.body, text, 'served as given, byte for byte');
   assert.match(served.headers['Content-Type'], /yaml/);
+  assert.match(quiet(() => providerFor({ content: '{"opencollection":"1.0.0"}' }))({}).headers['Content-Type'], /json/, 'a JSON document is served as JSON');
 
   const dir = path.dirname(write('prio/opencollection.yml', 'opencollection: 1.0.0\nbundled: false\n'));
   const warned = [];

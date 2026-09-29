@@ -61,7 +61,7 @@ export const StyledWrapper = styled.div`
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
-    padding: 0.875rem 1.125rem;
+    padding: 0.5rem 1rem;
     border-bottom: 1px solid var(--border-color);
   }
   .modal-title {
@@ -99,6 +99,6 @@ export const StyledWrapper = styled.div`
   .modal-body {
     min-height: 0;
     overflow: auto;
-    padding: 1.125rem;
+    padding: 1rem;
   }
 `;

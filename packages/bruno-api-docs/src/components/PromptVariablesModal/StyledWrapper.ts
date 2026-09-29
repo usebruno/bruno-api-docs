@@ -60,9 +60,7 @@ export const StyledWrapper = styled(Modal)`
     align-items: center;
     justify-content: flex-end;
     gap: 0.5rem;
-    margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
 
     button {
       display: inline-flex;

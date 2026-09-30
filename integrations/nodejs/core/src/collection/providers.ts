@@ -5,6 +5,7 @@ import { etagOf, type HttpResponse, type Conditional } from '../http';
 import type { SkippedFile } from './walk';
 import { walkCollection, CAPS, CapError, type CollectionFormat } from './walk';
 import { applyFilters, isManifest } from './filter';
+import { RemoteError } from './remote';
 
 export type Provider = (conditional: Conditional) => HttpResponse;
 
@@ -87,7 +88,7 @@ export function errorProvider(err: unknown): Provider {
   if (err instanceof CapError) {
     return () => errorResponse(413, err.message);
   }
-  if (err instanceof ManifestError) {
+  if (err instanceof ManifestError || err instanceof RemoteError) {
     return () => errorResponse(404, err.message);
   }
   if (err instanceof ConfigError) {

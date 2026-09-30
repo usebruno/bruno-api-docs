@@ -5,6 +5,7 @@ import { log } from '../log';
 import type { SkippedFile } from './walk';
 import { resolveCollectionSource } from './source';
 import { bundledProvider, fileProvider, dirProvider, type Provider, type BuiltProvider } from './providers';
+import { parseCollectionUrl, fetchBundled } from './remote';
 
 interface Built {
   provider: BuiltProvider;
@@ -14,6 +15,7 @@ interface Built {
 
 const BUILD: Record<SourceKey, (value: string, filters: CollectionFilters) => Built> = {
   content: fromContent,
+  url: fromUrl,
   collectionPath: fromPath
 };
 
@@ -39,6 +41,12 @@ export function providerFor(options: CollectionOptions): Provider {
 
 function fromContent(text: string): Built {
   return { provider: bundledProvider(text, 'content'), bundled: true, label: 'content' };
+}
+
+function fromUrl(value: string): Built {
+  const url = parseCollectionUrl(value);
+
+  return { provider: bundledProvider(fetchBundled(url), url), bundled: true, label: url };
 }
 
 function fromPath(value: string, filters: CollectionFilters): Built {

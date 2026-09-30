@@ -9,7 +9,7 @@ export interface CollectionFilters {
 }
 
 /** Where the collection comes from, in priority order: the first one set is used. */
-export const SOURCE_KEYS = ['content', 'collectionPath'] as const;
+export const SOURCE_KEYS = ['content', 'url', 'collectionPath'] as const;
 export type SourceKey = typeof SOURCE_KEYS[number];
 
 export interface CollectionOptions extends CollectionFilters, Partial<Record<SourceKey, string>> {}
@@ -33,8 +33,10 @@ export function validateOptions(options: ApiDocsOptions): void {
     throw new ConfigError(`apiDocs: unknown option ${unknown.join(', ')}`);
   }
 
-  if (options.content !== undefined && typeof options.content !== 'string') {
-    throw new ConfigError('apiDocs: `content` takes the document as a string');
+  for (const key of SOURCE_KEYS) {
+    if (options[key] !== undefined && typeof options[key] !== 'string') {
+      throw new ConfigError(`apiDocs: \`${key}\` takes a string`);
+    }
   }
 
   for (const name of ['environments', 'tags'] as const) {

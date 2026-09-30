@@ -21,6 +21,7 @@ describe "core"
 check "walk: the safety rules and the caps"      runs node "$ROOT/nodejs/core/test/walk.test.mjs"
 check "filter: environments and tags by file"    runs node "$ROOT/nodejs/core/test/filter.test.mjs"
 check "collection: sources and providers"        runs node "$ROOT/nodejs/core/test/collection.test.mjs"
+check "remote: url parsing and the fetch"        runs node "$ROOT/nodejs/core/test/remote.test.mjs"
 check "shell: the page, the bundle, embed()"     runs node "$ROOT/nodejs/core/test/shell.test.mjs"
 check "docs: createDocs end to end"              runs node "$ROOT/nodejs/core/test/docs.test.mjs"
 

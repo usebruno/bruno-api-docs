@@ -1,6 +1,7 @@
 // The browser half as the core serves it: shell.html stamped per mount, shell.js static, embed() body-only.
 
 import fs from 'node:fs';
+import { stripGitCredentials } from '../url';
 import path from 'node:path';
 import { ConfigError, type RendererOptions, type ApiDocsOptions } from '../options';
 import { etagOf, type HttpResponse, type Conditional } from '../http';
@@ -16,19 +17,7 @@ const DEFAULT_TITLE = 'API Documentation';
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-export const stripGitCredentials = (url: string): string => {
-  try {
-    const parsed = new URL(url);
-    if ((parsed.protocol !== 'http:' && parsed.protocol !== 'https:') || (!parsed.username && !parsed.password)) {
-      return url;
-    }
-    parsed.username = '';
-    parsed.password = '';
-    return parsed.toString();
-  } catch {
-    return url;
-  }
-};
+export { stripGitCredentials };
 
 /** What the browser is allowed to see. Built from named fields, never copied from the input. */
 export function rendererConfig(options: RendererOptions): RendererOptions {

@@ -149,7 +149,7 @@ const quiet = (fn) => {
   assert.ok(warned.some((line) => line.includes('content is set, ignoring collectionPath')), 'and says what it ignored');
 
   assert.throws(() => quiet(() => providerFor({ content: text, tags: { exclude: ['x'] } })), ConfigError, 'filters need a directory, as for a bundled file');
-  assert.throws(() => quiet(() => providerFor({})), /one of `content`, `collectionPath` is required/);
+  assert.throws(() => quiet(() => providerFor({})), /one of `content`, `url`, `collectionPath` is required/);
   assert.throws(() => quiet(() => providerFor({ content: '' })), /is required/, 'an empty document is not a source');
 }
 

@@ -32,7 +32,9 @@ app.register(apiDocs, {
 
 `collectionPath` is the path to a Bruno folder (`bruno.json` and `.bru` files), an OpenCollection yml folder or one bundled `.yml` file. The path is relative to your app's entry file.
 
-`content` is the document itself as a string, instead of a path. When both are set, `content` wins.
+`url` is the public address of a bundled collection file, `https://example.com/api/opencollection.yml`, fetched once at start.
+
+`content` is the document itself as a string. When more than one source is set the first of `content`, `url`, `collectionPath` wins.
 
 `environments` and `tags` take `{ include, exclude }`, where `include` is a list of names or `'*'`. Leave `environments` out and none are published. Excluded tags drop their requests from the served collection.
 

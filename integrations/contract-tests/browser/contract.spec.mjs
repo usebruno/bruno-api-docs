@@ -108,7 +108,7 @@ test('a .bru collection renders, and its filters hold', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-for (const mount of ['/bundled/docs/', '/content/docs/']) {
+for (const mount of ['/bundled/docs/', '/content/docs/', '/url/docs/']) {
   test(`${mount} a bundled document renders the same way`, async ({ page }) => {
     await page.goto(mount, { waitUntil: 'networkidle' });
     await expect(page).toHaveTitle('API Documentation');

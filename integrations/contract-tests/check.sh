@@ -15,6 +15,8 @@
 #   /bundled/docs  a single bundled yml
 #   /content/docs  the same document given inline as `content`
 #   /priority/docs `content` and `collectionPath` both set: content wins
+#   /url/docs      the bundled yml fetched from a URL, served by serve-fixtures.js beside the rig
+#   /url-missing/docs  a URL that answers 404
 #   /bru/docs      the same collection in Bruno's own format, same filters
 #   /broken/docs   a collection that is not there
 #   /oversize/docs a collection over the caps
@@ -50,6 +52,7 @@ trap 'stop; rm -rf "$TMP"' EXIT
 # ---- boot, from a different cwd on purpose ---------------------------------
 
 port_is_free "$PORT"
+serve_fixtures $((PORT + 1000))
 boot "$APP" "$PORT"
 echo "${BOLD}$(basename "$APP")${RESET} on :$PORT ${DIM}(cwd $TMP)${RESET}"
 
@@ -134,6 +137,13 @@ check "/content/docs/collection.yml -> yaml"      header_has Content-Type yaml "
 check "/content/docs/collection.yml -> ETag"      revalidates "$BASE/content/docs/collection.yml"
 check "/content/docs -> the same bytes as the file" same_body "$BASE/content/docs/collection.yml" "$BASE/bundled/docs/collection.yml"
 check "/priority/docs -> content wins over the path" same_body "$BASE/priority/docs/collection.yml" "$BASE/bundled/docs/collection.yml"
+
+describe "url: a bundled document fetched once at start"
+check "/url/docs/ -> the page"                    status_is 200 "$BASE/url/docs/"
+check "/url/docs/collection.yml -> yaml"          header_has Content-Type yaml "$BASE/url/docs/collection.yml"
+check "/url/docs -> the same bytes as the file"   same_body "$BASE/url/docs/collection.yml" "$BASE/bundled/docs/collection.yml"
+check "/url-missing/docs/ -> 404"                 status_is 404 "$BASE/url-missing/docs/"
+check "naming the fetch"                          body_has "$BASE/url-missing/docs/" 'could not fetch'
 
 describe "a broken setup does not stop the app"
 check "the app's own route still answers"       body_has "$BASE/control" 'the app itself'

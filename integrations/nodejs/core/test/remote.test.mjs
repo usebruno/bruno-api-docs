@@ -41,6 +41,7 @@ const thrownBy = (fn) => {
   assert.ok(warned.some((line) => line.includes('credentials in `url` were ignored')), 'and it says so');
 
   assert.throws(() => parseCollectionUrl('http://example.com/c.yml'), /must be https/);
+  assert.equal(parseCollectionUrl('http://127.0.0.1:6456/bundled.yml'), 'http://127.0.0.1:6456/bundled.yml', 'plain http only to this machine');
   assert.throws(() => parseCollectionUrl('not a url'), /is not a URL/);
   assert.throws(() => parseCollectionUrl('https://github.com/acme/api'), /bundled collection file/, 'a repository is not a file');
   assert.throws(() => parseCollectionUrl('https://github.com/acme/api/tree/main/collection'), /bundled collection file/, 'nor is a folder in it');

@@ -13,6 +13,7 @@ const COLLECTION = '../fixtures/api-collection';
 const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
 const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
+const URL_FIXTURE = process.env.URL_FIXTURE;
 
 const app = express();
 
@@ -52,6 +53,11 @@ app.use('/bundled/docs', apiDocs({ collectionPath: BUNDLED }));
 app.use('/content/docs', apiDocs({ content: CONTENT }));
 
 app.use('/priority/docs', apiDocs({ content: CONTENT, collectionPath: COLLECTION }));
+
+if (URL_FIXTURE) {
+  app.use('/url/docs', apiDocs({ url: URL_FIXTURE }));
+  app.use('/url-missing/docs', apiDocs({ url: URL_FIXTURE.replace('bundled.yml', 'missing.yml') }));
+}
 
 app.use('/bru/docs', apiDocs({ collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }));
 

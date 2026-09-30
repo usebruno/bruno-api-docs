@@ -16,7 +16,8 @@ export function parseCollectionUrl(value: string): string {
   } catch {
     throw new ConfigError(`apiDocs: \`url\` is not a URL: ${value}`);
   }
-  if (parsed.protocol !== 'https:') {
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(parsed.hostname);
+  if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) {
     throw new ConfigError('apiDocs: `url` must be https');
   }
   if (parsed.username || parsed.password) {
@@ -31,12 +32,16 @@ export function parseCollectionUrl(value: string): string {
 
 // the boot is synchronous and fetch is not, so the one request runs in a child of this same node
 const FETCH = `
-const res = await fetch(process.argv[1], { redirect: 'follow', signal: AbortSignal.timeout(${FETCH_TIMEOUT_MS}) });
-if (!res.ok) {
-  console.error('HTTP ' + res.status);
+try {
+  const res = await fetch(process.argv[1], { redirect: 'follow', signal: AbortSignal.timeout(${FETCH_TIMEOUT_MS}) });
+  if (!res.ok) {
+    throw new Error('HTTP ' + res.status);
+  }
+  process.stdout.write(await res.text());
+} catch (err) {
+  console.error(err.name === 'TimeoutError' ? 'no answer in ${FETCH_TIMEOUT_MS / 1000}s' : (err.cause?.code ?? err.cause?.errors?.[0]?.code ?? err.cause?.message ?? err.message));
   process.exit(2);
 }
-process.stdout.write(await res.text());
 `;
 
 /** The document at a public address, fetched once at boot, under the same size cap as a file on disk. */

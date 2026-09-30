@@ -7,12 +7,12 @@ ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 source "$ROOT/contract-tests/lib.sh"
 JUNIT_NAME="${JUNIT_NAME:-unit}"
 
-# runs CMD...: passes when the command exits clean; otherwise the tail of its output is what we saw
+# runs CMD...: passes when the command exits clean; otherwise the error line and the tail are what we saw
 runs() {
   local out
   out="$("$@" 2>&1)" && return 0
   want="a clean exit"
-  got="$(tail -4 <<<"$out")"
+  got="$(grep -m1 -E '^[A-Za-z]*Error' <<<"$out"; tail -4 <<<"$out")"
 
   return 1
 }

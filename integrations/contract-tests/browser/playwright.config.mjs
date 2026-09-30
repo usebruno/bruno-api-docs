@@ -31,22 +31,12 @@ export default defineConfig({
     // layer needs the network. That is the trade for not shipping a self-hosted bundle yet.
     trace: 'retain-on-failure'
   },
-  webServer: [
-    {
-      command: 'node contract-tests/serve-fixtures.js',
-      cwd: ROOT,
-      env: { ...process.env, PORT: String(Number(PORT) + 1000) },
-      port: Number(PORT) + 1000,
-      reuseExistingServer: false,
-      timeout: 30_000
-    },
-    {
-      command: `node ${APP}`,
-      cwd: ROOT,
-      env: { ...process.env, PORT, URL_FIXTURE: `http://127.0.0.1:${Number(PORT) + 1000}/bundled.yml` },
-      port: Number(PORT),
-      reuseExistingServer: false,
-      timeout: 30_000
-    }
-  ]
+  webServer: {
+    command: `node ${APP}`,
+    cwd: ROOT,
+    env: { ...process.env, PORT },
+    port: Number(PORT),
+    reuseExistingServer: false,
+    timeout: 30_000
+  }
 });

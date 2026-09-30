@@ -124,25 +124,13 @@ boot() {
 
 # quietly: the shell announces a killed background job, and that reads like a failure
 stop() {
-  for pid in "${SERVER_PID:-}" "${FIXTURES_PID:-}"; do
-    [ -n "$pid" ] || continue
-    {
-      pkill -P "$pid" || true
-      kill "$pid" || true
-      wait "$pid" || true
-    } 2>/dev/null
-  done
+  [ -n "${SERVER_PID:-}" ] || return 0
+  {
+    pkill -P "$SERVER_PID" || true
+    kill "$SERVER_PID" || true
+    wait "$SERVER_PID" || true
+  } 2>/dev/null
   SERVER_PID=""
-  FIXTURES_PID=""
-}
-
-# serve_fixtures PORT: the fixtures over http, for the `url` mounts. Exported as URL_FIXTURE for the rig.
-serve_fixtures() {
-  port_is_free "$1"
-  PORT="$1" node "$ROOT/contract-tests/serve-fixtures.js" >/dev/null 2>&1 &
-  FIXTURES_PID=$!
-  for _ in $(seq 1 30); do curl -s -o /dev/null "http://127.0.0.1:$1/bundled.yml" && break; sleep 0.1; done
-  export URL_FIXTURE="http://127.0.0.1:$1/bundled.yml"
 }
 
 # ---- helpers: each asserts exactly one fact and records want and got -------------

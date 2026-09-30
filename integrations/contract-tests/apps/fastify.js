@@ -11,7 +11,7 @@ const COLLECTION = '../fixtures/api-collection';
 const BRU = '../fixtures/api-collection-bru';
 const BUNDLED = '../fixtures/bundled.yml';
 const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
-const URL_FIXTURE = process.env.URL_FIXTURE;
+const URL_FIXTURE = 'https://raw.githubusercontent.com/usebruno/bruno-api-docs/1aa76e1ad567b6e05e03e46ee53fb6bc1a66e7d5/integrations/contract-tests/fixtures/bundled.yml';
 
 const app = Fastify({ logger: false });
 
@@ -59,10 +59,8 @@ async function main() {
   await app.register(apiDocs, { prefix: '/bundled/docs', collectionPath: BUNDLED });
   await app.register(apiDocs, { prefix: '/content/docs', content: CONTENT });
   await app.register(apiDocs, { prefix: '/priority/docs', content: CONTENT, collectionPath: COLLECTION });
-  if (URL_FIXTURE) {
-    await app.register(apiDocs, { prefix: '/url/docs', url: URL_FIXTURE });
-    await app.register(apiDocs, { prefix: '/url-missing/docs', url: URL_FIXTURE.replace('bundled.yml', 'missing.yml') });
-  }
+  await app.register(apiDocs, { prefix: '/url/docs', url: URL_FIXTURE });
+  await app.register(apiDocs, { prefix: '/url-missing/docs', url: URL_FIXTURE.replace('bundled.yml', 'missing.yml') });
   await app.register(apiDocs, { prefix: '/bru/docs', collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } });
   await app.register(apiDocs, { prefix: '/broken/docs', collectionPath: './there-is-no-collection-here' });
   await app.register(apiDocs, { prefix: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' });

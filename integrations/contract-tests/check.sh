@@ -15,7 +15,7 @@
 #   /bundled/docs  a single bundled yml
 #   /content/docs  the same document given inline as `content`
 #   /priority/docs `content` and `collectionPath` both set: content wins
-#   /url/docs      the bundled yml fetched from a URL, served by serve-fixtures.js beside the rig
+#   /url/docs      the bundled yml fetched from its public URL, this repo on GitHub at a pinned commit
 #   /url-missing/docs  a URL that answers 404
 #   /bru/docs      the same collection in Bruno's own format, same filters
 #   /broken/docs   a collection that is not there
@@ -52,7 +52,6 @@ trap 'stop; rm -rf "$TMP"' EXIT
 # ---- boot, from a different cwd on purpose ---------------------------------
 
 port_is_free "$PORT"
-serve_fixtures $((PORT + 1000))
 boot "$APP" "$PORT"
 echo "${BOLD}$(basename "$APP")${RESET} on :$PORT ${DIM}(cwd $TMP)${RESET}"
 

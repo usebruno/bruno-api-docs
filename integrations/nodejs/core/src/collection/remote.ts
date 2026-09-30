@@ -16,8 +16,7 @@ export function parseCollectionUrl(value: string): string {
   } catch {
     throw new ConfigError(`apiDocs: \`url\` is not a URL: ${value}`);
   }
-  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(parsed.hostname);
-  if (parsed.protocol !== 'https:' && !(parsed.protocol === 'http:' && loopback)) {
+  if (parsed.protocol !== 'https:') {
     throw new ConfigError('apiDocs: `url` must be https');
   }
   if (parsed.username || parsed.password) {

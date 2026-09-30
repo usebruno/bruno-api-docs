@@ -22,6 +22,7 @@ export interface OpenCollectionOptions {
 
 export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | 'opencollection'> {
   content: OpenCollectionOptions['opencollection'];
+  repositoryUrl?: string;
 }
 
 export class OpenCollectionRenderer {
@@ -120,7 +121,12 @@ if (typeof window !== 'undefined') {
   globals.OpenCollection = OpenCollectionRenderer;
   globals.Bruno = {
     ...globals.Bruno,
-    apiDocs: (target: HTMLElement, { content, ...options }: ApiDocsOptions) =>
-      new OpenCollectionRenderer({ target, opencollection: content, ...options })
+    apiDocs: (target: HTMLElement, { content, repositoryUrl, gitCollectionUrl, ...options }: ApiDocsOptions) =>
+      new OpenCollectionRenderer({
+        target,
+        opencollection: content,
+        gitCollectionUrl: repositoryUrl ?? gitCollectionUrl,
+        ...options
+      })
   };
 }

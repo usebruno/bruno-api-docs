@@ -76,7 +76,8 @@ function resolveBoot() {
   }
   // until the CDN has deployed a bundle that carries the namespace
   if (typeof window.OpenCollection === 'function') {
-    return (target, config, doc) => new window.OpenCollection({ target, ...config, opencollection: doc });
+    return (target, { repositoryUrl, ...config }, doc) =>
+      new window.OpenCollection({ target, ...config, gitCollectionUrl: repositoryUrl, opencollection: doc });
   }
   return null;
 }

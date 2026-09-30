@@ -41,7 +41,7 @@ app.use('/docs', apiDocs({
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
   logo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Ccircle cx=%225%22 cy=%225%22 r=%225%22/%3E%3C/svg%3E',
-  gitCollectionUrl: 'https://token:secret@github.com/acme/api-collection'
+  repositoryUrl: 'https://token:secret@github.com/acme/api-collection'
 }));
 
 app.use('/api/v2/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: '*', exclude: ['Prod'] } }));

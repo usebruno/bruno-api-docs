@@ -26,7 +26,7 @@ app.register(apiDocs, {
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
   logo: 'https://acme.dev/logo.svg',
-  gitCollectionUrl: 'https://github.com/acme/api-collection'
+  repositoryUrl: 'https://github.com/acme/api-collection'
 });
 ```
 

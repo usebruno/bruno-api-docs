@@ -55,12 +55,12 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
     tags: { exclude: ['internal'] },
     pageTitle: 'Docs',
     logo: 'https://x.test/l.svg',
-    gitCollectionUrl: 'https://user:tok@github.com/acme/api-collection'
+    repositoryUrl: 'https://user:tok@github.com/acme/api-collection'
   });
 
-  assert.deepEqual(Object.keys(config).sort(), ['gitCollectionUrl', 'logo'],
+  assert.deepEqual(Object.keys(config).sort(), ['logo', 'repositoryUrl'],
     'only what the renderer reads is forwarded');
-  assert.equal(config.gitCollectionUrl, 'https://github.com/acme/api-collection', 'credentials stripped');
+  assert.equal(config.repositoryUrl, 'https://github.com/acme/api-collection', 'credentials stripped');
   assert.deepEqual(rendererConfig({}), {}, 'nothing set means nothing forwarded');
 
   const html = loadShell({
@@ -115,8 +115,8 @@ const { loadShell, embed, rendererConfig, stripGitCredentials, CDN } = require(p
   assert.ok(block.includes('id="bruno-docs"') && block.includes('src="/docs/shell.js"'), 'a base without a trailing slash still works');
   assert.ok(block.startsWith('<!-- embed:start -->') && block.endsWith('<!-- embed:end -->'));
   assert.equal(embed({ base: '/docs/' }), block, 'with or without the slash, the same block');
-  assert.ok(embed({ base: '/docs', gitCollectionUrl: 'https://u:p@github.com/acme/api' }).includes('github.com/acme/api'), 'renderer options reach the block');
-  assert.ok(!embed({ base: '/docs', gitCollectionUrl: 'https://u:p@github.com/acme/api' }).includes('u:p@'), 'with credentials stripped, as on the page');
+  assert.ok(embed({ base: '/docs', repositoryUrl: 'https://u:p@github.com/acme/api' }).includes('github.com/acme/api'), 'renderer options reach the block');
+  assert.ok(!embed({ base: '/docs', repositoryUrl: 'https://u:p@github.com/acme/api' }).includes('u:p@'), 'with credentials stripped, as on the page');
   assert.throws(() => embed({ base: '' }), /`base`/);
 }
 

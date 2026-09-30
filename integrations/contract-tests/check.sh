@@ -9,7 +9,7 @@
 # Every rig serves the same five mounts over the same fixture. That convention is what makes one
 # script cover the whole matrix: a cell is an invocation, not an edit.
 #
-#   /docs          environments include Local, tags exclude internal, pageTitle, gitCollectionUrl
+#   /docs          environments include Local, tags exclude internal, pageTitle, repositoryUrl
 #   /api/v2/docs   environments all minus Prod
 #   /internal/docs no options
 #   /bundled/docs  a single bundled yml

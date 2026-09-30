@@ -37,6 +37,13 @@ test('the renderer booted, from the CDN, with our shell from our own origin', as
   expect(await page.evaluate(() => typeof window.OpenCollection), 'the entry the deployed bundle still carries').toBe('function');
 });
 
+test('the repository link reaches the page, with its credentials stripped', async ({ page }) => {
+  await page.goto('/docs/', { waitUntil: 'networkidle' });
+  const href = await page.locator('a[href^="https://fetch.usebruno.com"]').first().getAttribute('href');
+  expect(href).toContain(encodeURIComponent('https://github.com/acme/api-collection'));
+  expect(href).not.toContain('secret');
+});
+
 test('the filters hold all the way to the page', async ({ page }) => {
   await page.goto('/docs/', { waitUntil: 'networkidle' });
   const text = await page.evaluate(() => document.body.innerText);

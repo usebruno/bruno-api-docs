@@ -25,8 +25,8 @@ export function rendererConfig(options: RendererOptions): RendererOptions {
   if (options.logo) {
     config.logo = options.logo;
   }
-  if (options.gitCollectionUrl) {
-    config.gitCollectionUrl = stripGitCredentials(options.gitCollectionUrl);
+  if (options.repositoryUrl) {
+    config.repositoryUrl = stripGitCredentials(options.repositoryUrl);
   }
 
   return config;

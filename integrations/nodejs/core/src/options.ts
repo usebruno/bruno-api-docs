@@ -16,7 +16,7 @@ export interface CollectionOptions extends CollectionFilters, Partial<Record<Sou
 
 export interface RendererOptions {
   logo?: string;
-  gitCollectionUrl?: string;
+  repositoryUrl?: string;
 }
 
 export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
@@ -25,7 +25,7 @@ export interface ApiDocsOptions extends CollectionOptions, RendererOptions {
 
 export class ConfigError extends Error {}
 
-const KNOWN_OPTIONS = new Set<string>([...SOURCE_KEYS, 'environments', 'tags', 'logo', 'gitCollectionUrl', 'pageTitle']);
+const KNOWN_OPTIONS = new Set<string>([...SOURCE_KEYS, 'environments', 'tags', 'logo', 'repositoryUrl', 'pageTitle']);
 
 export function validateOptions(options: ApiDocsOptions): void {
   const unknown = Object.keys(options).filter((key) => !KNOWN_OPTIONS.has(key));

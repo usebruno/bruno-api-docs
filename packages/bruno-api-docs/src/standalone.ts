@@ -121,6 +121,7 @@ if (typeof window !== 'undefined') {
   globals.OpenCollection = OpenCollectionRenderer;
   globals.Bruno = {
     ...globals.Bruno,
+    build: __BRUNO_BUILD__,
     apiDocs: (target: HTMLElement, { content, repositoryUrl, gitCollectionUrl, ...options }: ApiDocsOptions) =>
       new OpenCollectionRenderer({
         target,

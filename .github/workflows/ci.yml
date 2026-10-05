@@ -25,11 +25,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # eslint-plugin-diff needs the base branch present to diff against.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -57,9 +57,9 @@ jobs:
       run:
         working-directory: packages/bruno-api-docs
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -71,7 +71,7 @@ jobs:
 
       - run: npm run test:e2e
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
@@ -86,8 +86,8 @@ jobs:
       renderer: ${{ steps.renderer.outputs.renderer }}
       integrations: ${{ steps.integrations.outputs.integrations }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: renderer
         with:
           predicate-quantifier: 'every'
@@ -100,7 +100,7 @@ jobs:
               - '!.gitignore'
               - '!.github/workflows/changeset.yml'
               - '!.github/workflows/integrations-matrix.yml'
-      - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: integrations
         with:
           filters: |
@@ -126,13 +126,13 @@ jobs:
       FORCE_COLOR: 1
       JUNIT_DIR: results
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v4
         with:
           working_directory: integrations
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.npm
           key: npm-integrations-${{ hashFiles('integrations/package-lock.json') }}

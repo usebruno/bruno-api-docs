@@ -51,7 +51,7 @@ export default [
     ],
     // Lint only changed lines. `diff/ci` diffs against the PR base but no-ops
     // when CI is unset, so it cannot replace `diff/diff` locally.
-    processor: process.env.CI ? 'diff/ci' : 'diff/diff',
+    ...(!process.env.LINT_ALL && { processor: process.env.CI ? 'diff/ci' : 'diff/diff' }),
     rules: {
       ...js.configs.recommended.rules,
       ...stylistic.configs.customize({

@@ -9,6 +9,7 @@
     "prepare": "husky",
     "setup": "sh scripts/setup.sh",
     "lint": "eslint",
+    "lint:all": "LINT_ALL=1 eslint",
     "lint:fix": "eslint --fix",
     "lint:verbose": "eslint --debug",
     "changeset": "sh scripts/changeset.sh",

@@ -5,7 +5,13 @@ import { useMarkdownRenderer } from '@/hooks';
 import { AUTH_MODE_LABELS } from '@/constants';
 import { getItemName, getItemDocs, getItemDescription, getItemTags } from '@/utils/schemaHelpers';
 import { buildBreadcrumbSegments } from '@/utils/common';
-import { getFolderConfig, hasFolderConfig, countFolderRequests, requestCountLabel } from '@/utils/folder';
+import {
+  getFolderConfig,
+  hasFolderExecutionContext,
+  hasFolderRequestConfig,
+  countFolderRequests,
+  requestCountLabel
+} from '@/utils/folder';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
 import { Heading } from '../../components/Heading/Heading';
 import { Section } from '../../components/Section/Section';
@@ -14,8 +20,9 @@ import { ViewMore } from '../../components/ViewMore/ViewMore';
 import { EmptyState } from '@/ui/EmptyState/EmptyState';
 import { FolderConfiguration } from '../../components/FolderConfiguration/FolderConfiguration';
 import { Tags } from '@/components/Tags/Tags';
-import { FolderIcon } from '@/assets/icons';
+import { FolderIcon, RefreshIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 interface FolderProps {
   item: FolderItem;
@@ -31,7 +38,8 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
   const tags = getItemTags(item);
   const requestCount = useMemo(() => countFolderRequests(item), [item]);
   const config = useMemo(() => getFolderConfig(collection, ancestry, item), [collection, ancestry, item]);
-  const showConfig = useMemo(() => hasFolderConfig(config), [config]);
+  const showRequestConfig = useMemo(() => hasFolderRequestConfig(config), [config]);
+  const showExecutionContext = useMemo(() => hasFolderExecutionContext(config), [config]);
 
   const docsHtml = useMemo(() => {
     const content = getItemDocs(item) || getItemDescription(item);
@@ -69,30 +77,59 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
         {docsHtml && (
           <Section label="Documentation" testId="folder-section-documentation" className="folder-fullwidth" labelClassName="section-label-muted">
             <ViewMore collapsedHeight="4.5rem" testId="folder-docs">
-              <div
+              <MarkdownContent
                 className="markdown-documentation"
-                data-nav-headings
-                data-nav-level={2}
-                dangerouslySetInnerHTML={{ __html: docsHtml }}
+                navHeadings
+                navLevel={2}
+                html={docsHtml}
               />
             </ViewMore>
           </Section>
         )}
 
-        <Section label="Folder Configuration" testId="folder-section-configuration" className="folder-fullwidth" labelClassName="section-label-muted">
-          {showConfig ? (
+        {(showRequestConfig || !showExecutionContext) && (
+          <Section label="Folder Configuration" testId="folder-section-configuration" className="folder-fullwidth" labelClassName="section-label-muted">
+            {showRequestConfig ? (
+              <FolderConfiguration
+                config={config}
+                sectionType="request"
+                authModeLabels={AUTH_MODE_LABELS}
+                onNavigate={onBreadcrumbClick}
+                testId="folder-config"
+              />
+            ) : (
+              <EmptyState
+                testId="folder-config-empty"
+                icon={<FolderIcon />}
+                heading="No folder configuration"
+                subheading="This folder has no headers or auth set. Requests inside it inherit configuration from the collection."
+              />
+            )}
+          </Section>
+        )}
+
+        <Section
+          label="Execution Context"
+          testId="folder-section-execution-context"
+          className="folder-fullwidth"
+          labelClassName="section-label-muted"
+          collapsible={showExecutionContext}
+          storageKey="folder-execution-context"
+        >
+          {showExecutionContext ? (
             <FolderConfiguration
               config={config}
+              sectionType="execution"
               authModeLabels={AUTH_MODE_LABELS}
               onNavigate={onBreadcrumbClick}
-              testId="folder-config"
+              testId="folder-execution-context"
             />
           ) : (
             <EmptyState
-              testId="folder-config-empty"
-              icon={<FolderIcon />}
-              heading="No folder configuration"
-              subheading="This folder has no headers, auth, scripts, vars, or tests set. Requests inside it inherit configuration from the collection."
+              testId="folder-execution-context-empty"
+              icon={<RefreshIcon />}
+              heading="No execution context"
+              subheading="This folder has no scripts, variables, or tests configured."
             />
           )}
         </Section>

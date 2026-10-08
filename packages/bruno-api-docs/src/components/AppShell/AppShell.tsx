@@ -14,10 +14,12 @@ import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
-import { selectGitCollectionUrl } from '@/store/slices/app';
+import { selectGitCollectionUrl, selectCollectionSourceText } from '@/store/slices/app';
 import { useActiveResolution } from '@/routing/hooks';
 import { layoutModeForWidth } from '@/hooks/useTopbarLayout';
 import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
+import { collectionFilename, downloadTextFile, resolveDownloadYaml } from '@/utils/collectionExport';
+import OpenInBrunoModal from '@/components/OpenInBrunoModal/OpenInBrunoModal';
 import { StyledWrapper } from './StyledWrapper';
 
 interface AppShellProps {
@@ -28,6 +30,15 @@ interface AppShellProps {
 const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   const collection = useAppSelector(selectDocsCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
+  const collectionSourceText = useAppSelector(selectCollectionSourceText);
+  const openInBrunoHref = buildFetchInBrunoUrl(gitCollectionUrl);
+  const [openInBrunoOpen, setOpenInBrunoOpen] = useState(false);
+  const closeOpenInBruno = useCallback(() => setOpenInBrunoOpen(false), []);
+  const collectionFile = collectionFilename(collection);
+  const downloadCollection = () => {
+    if (!collection) return;
+    downloadTextFile(collectionFile, resolveDownloadYaml(collectionSourceText, collection));
+  };
   const resolution = useActiveResolution();
 
   // Single source of truth for search-open, shared by the Topbar (icon + row)
@@ -43,10 +54,6 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   }, []);
   useSearchHotkey(openSearch);
 
-  // Responsive mode follows the docs area width, not the window: when the inline
-  // playground takes part of the row, the docs column (`.appshell-body`) shrinks
-  // and the docs chrome (topbar + sidebar) should go tablet/mobile accordingly.
-  // In the other docks the shell is a column, so this equals the window width.
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
   const bodyWidth = useElementWidth(bodyRef);
@@ -62,8 +69,6 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   const { pathname } = useLocation();
 
   const { open: playgroundOpen, dock: playgroundDock, openPlayground } = usePlaygroundUrlState();
-  // Bumped on every Try click so the bottom sheet re-expands from collapsed even
-  // when the requested slug is unchanged (a slug change alone wouldn't signal it).
   const [playgroundOpenNonce, setPlaygroundOpenNonce] = useState(0);
 
   useEffect(() => {
@@ -122,11 +127,18 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
           envSwitcherSlot={(
             <>
               <ShowVarsToggle />
-              <EnvSwitcher />
+              <EnvSwitcher hideWhenEmpty />
             </>
           )}
-          openInBrunoHref={buildFetchInBrunoUrl(gitCollectionUrl)}
+          openInBrunoHref={openInBrunoHref}
+          onOpenInBruno={openInBrunoHref ? undefined : () => setOpenInBrunoOpen(true)}
           themeToggleSlot={<ThemeToggle />}
+        />
+        <OpenInBrunoModal
+          open={openInBrunoOpen}
+          onClose={closeOpenInBruno}
+          filename={collectionFile}
+          onDownload={downloadCollection}
         />
 
         <div className="appshell-main">

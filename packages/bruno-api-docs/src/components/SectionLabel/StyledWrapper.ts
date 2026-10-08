@@ -6,7 +6,6 @@ export const StyledWrapper = styled.h2`
   font-weight: 600;
   font-size: 0.75rem;
   line-height: 1;
-  letter-spacing: 1.4px;
   text-transform: uppercase;
   color: var(--oc-text);
 

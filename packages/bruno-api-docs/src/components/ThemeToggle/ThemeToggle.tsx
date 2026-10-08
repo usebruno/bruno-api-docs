@@ -2,6 +2,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleTheme } from '@/store/slices/theme';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
 
 const Button = styled.button`
   display: inline-flex;
@@ -45,17 +46,14 @@ const ThemeToggle: React.FC<{ testId?: string }> = ({ testId = 'theme-toggle' })
   const dispatch = useAppDispatch();
   const mode = useAppSelector((s) => s.theme.mode);
   const isDark = mode === 'dark';
+  const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
 
   return (
-    <Button
-      type="button"
-      data-testid={testId}
-      aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-      title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-      onClick={() => dispatch(toggleTheme())}
-    >
-      {isDark ? <SunIcon /> : <MoonIcon />}
-    </Button>
+    <Tooltip content={label} touch={false} testId={`${testId}-tooltip`}>
+      <Button data-testid={testId} aria-label={label} onClick={() => dispatch(toggleTheme())}>
+        {isDark ? <SunIcon /> : <MoonIcon />}
+      </Button>
+    </Tooltip>
   );
 };
 

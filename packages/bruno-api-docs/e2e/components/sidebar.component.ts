@@ -3,6 +3,7 @@ import { BaseComponent } from './base.component';
 
 export class SidebarComponent extends BaseComponent {
   readonly items = this.page.getByTestId('sidebar-item');
+  readonly active = this.items.and(this.page.locator('.active'));
   readonly inline = this.page.getByTestId('app-sidebar');
   readonly overview = this.page.getByTestId('sidebar-overview');
   readonly environments = this.page.getByTestId('sidebar-environments');
@@ -15,6 +16,10 @@ export class SidebarComponent extends BaseComponent {
 
   item(name: string): Locator {
     return this.items.filter({ hasText: name });
+  }
+
+  itemBySlug(slug: string): Locator {
+    return this.items.and(this.page.locator(`[data-slug="${slug}"]`));
   }
 
   folderChevron(name: string): Locator {

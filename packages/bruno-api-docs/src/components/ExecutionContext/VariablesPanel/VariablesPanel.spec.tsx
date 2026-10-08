@@ -110,22 +110,22 @@ describe('VariablesPanel', () => {
       expect(html).toContain('vars-stacked');
     });
 
-    it('omits the empty side entirely (no Post-Response table / "None." placeholder)', () => {
+    it('still shows the Post-Response side, as "None.", when no captures are set', () => {
       const html = renderToStaticMarkup(
         <VariablesPanel preVars={[{ name: 'token', value: 'x' }]} postVars={[]} variant="stacked" />
       );
       expect(html).toContain('Pre-Request');
-      expect(html).not.toContain('Post-Response');
-      expect(html).not.toContain('None.');
+      expect(html).toContain('Post-Response');
+      expect(html).toContain('None.');
     });
 
-    it('omits the Pre-Request side when only post-response captures exist', () => {
+    it('still shows the Pre-Request side, as "None.", when only post-response captures exist', () => {
       const html = renderToStaticMarkup(
         <VariablesPanel preVars={[]} postVars={[{ name: 'sessionId', expression: 'res.body.id' }]} variant="stacked" />
       );
+      expect(html).toContain('Pre-Request');
       expect(html).toContain('Post-Response');
-      expect(html).not.toContain('Pre-Request');
-      expect(html).not.toContain('None.');
+      expect(html).toContain('None.');
     });
 
     it('shows both tables, labelled "Pre-Request" / "Post-Response" in the overview page', () => {

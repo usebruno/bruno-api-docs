@@ -10,6 +10,8 @@ import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { usePromptVariables } from './usePromptVariables';
+import { PromptVariablesModal } from '@/components/PromptVariablesModal/PromptVariablesModal';
 import {
   updatePlaygroundItem,
   setPlaygroundResponse,
@@ -37,6 +39,8 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   const itemUuid = (item as any).uuid;
   const response = useAppSelector((state) => selectPlaygroundResponse(state, itemUuid));
   const [isLoading, setIsLoading] = useState(false);
+  const promptVariablesController = usePromptVariables();
+  const { collect: collectPromptVariables } = promptVariablesController;
   // The request/response split is one draggable divider whose axis follows the
   // orientation: horizontal layout resizes width, vertical layout resizes height.
   const { size: paneSize, isResizing, containerRef, startResize } = useSplitPane(orientation);
@@ -71,6 +75,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
 
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSaveRef = useRef<{ uuid: string; item: HttpRequest } | null>(null);
+  const sendInFlightRef = useRef(false);
 
   useEffect(() => {
     setEditableItem(item);
@@ -104,7 +109,9 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   }, [dispatch]);
 
   const handleSendRequest = useCallback(async () => {
-    setIsLoading(true);
+    if (sendInFlightRef.current) return;
+    sendInFlightRef.current = true;
+
     try {
       // Check both root level and config level for environments
       // TODO: Remove this
@@ -113,11 +120,22 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
         (env: any) => env.name === selectedEnvironment
       );
       const { requestRunner } = await import('@/runner');
+
+      const prepared = await requestRunner.prepareRequest(editableItem, collection);
+      const promptNames = await requestRunner.collectPromptVariableNames({
+        item: editableItem, collection, environment, prepared
+      });
+      const promptVariables = await collectPromptVariables(promptNames);
+      if (!promptVariables) return;
+
+      setIsLoading(true);
       const result = await requestRunner.runRequest({
         item: editableItem,
         collection,
         environment,
-        runtimeVariables: {}
+        runtimeVariables: {},
+        promptVariables,
+        prepared
       });
 
       dispatch(setPlaygroundResponse({ uuid: itemUuid, response: result }));
@@ -136,9 +154,10 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
         }
       }));
     } finally {
+      sendInFlightRef.current = false;
       setIsLoading(false);
     }
-  }, [collection, editableItem, selectedEnvironment, itemUuid, dispatch]);
+  }, [collection, editableItem, selectedEnvironment, itemUuid, dispatch, collectPromptVariables]);
 
   return (
     <ItemVariableResolverProvider
@@ -148,6 +167,16 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
       writable
     >
       <div className="request-runner-container h-full flex flex-col px-5" style={{ backgroundColor: 'var(--bg-primary)' }}>
+        {promptVariablesController.pending && (
+          <PromptVariablesModal
+            key={promptVariablesController.pending.names.join('\u0000')}
+            open
+            names={promptVariablesController.pending.names}
+            onSubmit={promptVariablesController.submit}
+            onCancel={promptVariablesController.cancel}
+          />
+        )}
+
         <TitleLabel className="truncate mb-2 mt-5">{itemName}</TitleLabel>
 
         <QueryBar

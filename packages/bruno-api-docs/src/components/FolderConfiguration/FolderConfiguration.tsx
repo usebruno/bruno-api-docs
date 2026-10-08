@@ -14,6 +14,7 @@ interface FolderConfigurationProps {
   config: FolderConfig;
   authModeLabels?: Record<string, string>;
   onNavigate?: (uuid: string) => void;
+  sectionType: 'request' | 'execution';
   testId?: string;
 }
 
@@ -21,19 +22,22 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
   config,
   authModeLabels = {},
   onNavigate,
+  sectionType,
   testId
 }) => {
+  const showRequestGroups = sectionType === 'request';
+  const showExecutionGroups = sectionType === 'execution';
   const hasInheritedHeaders = config.inheritedHeaders.length > 0;
-  const hasHeaders = config.headers.length > 0 || hasInheritedHeaders;
-  const hasAuth = Boolean(config.auth);
-  const hasScripts = Boolean(config.preRequest || config.postResponse);
+  const hasHeaders = showRequestGroups && (config.headers.length > 0 || hasInheritedHeaders);
+  const hasAuth = showRequestGroups && Boolean(config.auth);
+  const hasScripts = showExecutionGroups && Boolean(config.preRequest || config.postResponse);
   const inheritedPreVars = config.inheritedPreVariables;
   const inheritedPostVars = config.inheritedPostVariables;
-  const showPreVars = config.variables.length > 0 || inheritedPreVars.length > 0;
-  const showPostVars = config.postVariables.length > 0 || inheritedPostVars.length > 0;
-  const hasVariables = showPreVars || showPostVars;
+  const hasPreVars = config.variables.length > 0 || inheritedPreVars.length > 0;
+  const hasPostVars = config.postVariables.length > 0 || inheritedPostVars.length > 0;
+  const hasVariables = showExecutionGroups && (hasPreVars || hasPostVars);
   const inheritedVarCount = inheritedPreVars.length + inheritedPostVars.length;
-  const hasTests = Boolean(config.tests);
+  const hasTests = showExecutionGroups && Boolean(config.tests);
 
   const authSource = config.authSource;
   const authBadge = authSource ? (
@@ -80,18 +84,14 @@ export const FolderConfiguration: React.FC<FolderConfigurationProps> = ({
             {inheritedVarCount > 0 && <ContentTypeBadge label={inheritedCountLabel(inheritedVarCount, 'var')} />}
           </div>
           <div className="config-columns">
-            {showPreVars && (
-              <div className="config-column">
-                <p className="config-phase-label">Pre-Request</p>
-                <PropertyTable rows={preRows} onNavigate={onNavigate} />
-              </div>
-            )}
-            {showPostVars && (
-              <div className="config-column">
-                <p className="config-phase-label">Post-Response</p>
-                <PropertyTable rows={postRows} onNavigate={onNavigate} />
-              </div>
-            )}
+            <div className="config-column">
+              <p className="config-phase-label">Pre-Request</p>
+              <PropertyTable rows={preRows} emptyMessage="None." onNavigate={onNavigate} />
+            </div>
+            <div className="config-column">
+              <p className="config-phase-label">Post-Response</p>
+              <PropertyTable rows={postRows} emptyMessage="None." onNavigate={onNavigate} />
+            </div>
           </div>
         </div>
       )}

@@ -23,7 +23,7 @@ export const StyledWrapper = styled.div`
   .modal-dialog {
     display: flex;
     flex-direction: column;
-    width: min(60rem, 100%);
+    width: min(var(--modal-max-width), 100%);
     max-height: 88vh;
     background: var(--oc-background-base);
     border: 1px solid var(--border-color);
@@ -33,12 +33,35 @@ export const StyledWrapper = styled.div`
     outline: none;
   }
 
+  .modal-dialog.is-lg {
+    --modal-max-width: 60rem;
+  }
+
+  .modal-dialog.is-md {
+    --modal-max-width: 40rem;
+  }
+
+  .modal-dialog.is-md .modal-head,
+  .modal-dialog.is-md .modal-foot {
+    padding: 0.5rem 1rem;
+  }
+
+  .modal-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    padding: 0.875rem 1.125rem;
+    border-top: 1px solid var(--border-color);
+  }
+
   .modal-head {
     display: flex;
     align-items: center;
     gap: 0.75rem;
     flex-shrink: 0;
-    padding: 0.875rem 1.125rem;
+    padding: 0.5rem 1rem;
     border-bottom: 1px solid var(--border-color);
   }
   .modal-title {
@@ -76,6 +99,6 @@ export const StyledWrapper = styled.div`
   .modal-body {
     min-height: 0;
     overflow: auto;
-    padding: 1.125rem;
+    padding: 1rem;
   }
 `;

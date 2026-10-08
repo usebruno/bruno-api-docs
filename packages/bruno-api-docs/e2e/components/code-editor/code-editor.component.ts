@@ -9,6 +9,8 @@ import { BaseComponent } from '../base.component';
 export class CodeEditorComponent extends BaseComponent {
   readonly copyButton: Locator;
   readonly suggestions: Locator;
+  readonly searchBox: Locator;
+  readonly contextViewHover: Locator;
   private readonly surface: Locator;
   private readonly focused: Locator;
   private readonly lines: Locator;
@@ -21,6 +23,8 @@ export class CodeEditorComponent extends BaseComponent {
     this.focused = this.root.locator('.monaco-editor.focused');
     this.lines = this.root.locator('.view-lines');
     this.suggestions = page.locator('.suggest-widget.visible');
+    this.searchBox = this.root.locator('.find-widget.visible');
+    this.contextViewHover = page.getByTestId(`${testId}-context-view-host`).locator('.monaco-hover');
     this.ready = page.locator(`[data-testid="${testId}"][data-editor-ready="true"]`);
   }
 
@@ -37,5 +41,15 @@ export class CodeEditorComponent extends BaseComponent {
   async typeAndSuggest(text: string): Promise<void> {
     await this.page.keyboard.type(text, { delay: 30 });
     await this.page.keyboard.press('Control+Space');
+  }
+
+  async openSearchBox(): Promise<void> {
+    await this.focus();
+    await this.page.keyboard.press('Control+f');
+    await this.searchBox.waitFor({ state: 'visible' });
+  }
+
+  searchBoxButton(label: RegExp): Locator {
+    return this.searchBox.getByLabel(label);
   }
 }

@@ -17,7 +17,7 @@ You can also write the file by hand if you prefer:
 
 ```md
 ---
-"@opencollection/docs": patch
+"@usebruno/api-docs": patch
 ---
 
 Short, user-facing summary of what changed.

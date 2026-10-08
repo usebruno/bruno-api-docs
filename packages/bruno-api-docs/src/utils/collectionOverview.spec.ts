@@ -1,7 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
-import { countItems, getCollectionStats, hasCollectionConfiguration } from './collectionOverview';
+import type { HttpRequestHeader } from '@opencollection/types/requests/http';
+import type { Auth } from '@opencollection/types/common/auth';
+import {
+  countItems,
+  getCollectionStats,
+  hasCollectionExecutionContext,
+  hasCollectionRequestConfig,
+  type CollectionScripts
+} from './collectionOverview';
+
+const hasCollectionConfiguration = (
+  headers: HttpRequestHeader[] = [],
+  auth?: Auth,
+  scripts: CollectionScripts = {},
+  hasVars = false
+): boolean =>
+  hasCollectionRequestConfig(headers, auth) || hasCollectionExecutionContext(scripts, hasVars);
 
 describe('countItems', () => {
   it('counts requests and folders recursively at every depth', () => {
@@ -73,5 +89,36 @@ describe('hasCollectionConfiguration', () => {
     expect(hasCollectionConfiguration([], undefined, { preRequest: 'x' })).toBe(true);
     expect(hasCollectionConfiguration([], undefined, { postResponse: 'y' })).toBe(true);
     expect(hasCollectionConfiguration([], undefined, { tests: 'z' })).toBe(true);
+  });
+});
+
+describe('hasCollectionRequestConfig', () => {
+  it('is true for a named header', () => {
+    expect(hasCollectionRequestConfig([{ name: 'Accept', value: 'json' }])).toBe(true);
+  });
+
+  it('is true for configured auth', () => {
+    expect(hasCollectionRequestConfig([], { type: 'bearer', token: 't' })).toBe(true);
+  });
+
+  it('is false for no headers and no auth', () => {
+    expect(hasCollectionRequestConfig([], undefined)).toBe(false);
+    expect(hasCollectionRequestConfig([{ name: '', value: 'x' }], { type: 'none' })).toBe(false);
+  });
+});
+
+describe('hasCollectionExecutionContext', () => {
+  it('is true for variables', () => {
+    expect(hasCollectionExecutionContext({}, true)).toBe(true);
+  });
+
+  it('is true for any script', () => {
+    expect(hasCollectionExecutionContext({ preRequest: 'x' }, false)).toBe(true);
+    expect(hasCollectionExecutionContext({ postResponse: 'y' }, false)).toBe(true);
+    expect(hasCollectionExecutionContext({ tests: 'z' }, false)).toBe(true);
+  });
+
+  it('is false with neither variables nor scripts', () => {
+    expect(hasCollectionExecutionContext({}, false)).toBe(false);
   });
 });

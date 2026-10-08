@@ -1,6 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { query } from '@/test-utils/dom';
 import { EnvironmentLabel } from './EnvironmentLabel';
 
 describe('EnvironmentLabel', () => {
@@ -21,5 +22,22 @@ describe('EnvironmentLabel', () => {
     );
     expect(root.querySelector('.environment-label.env-tab')).toBeTruthy();
     expect(root.querySelector('.environment-label-name.env-tab-name')).toBeTruthy();
+  });
+});
+
+describe('EnvironmentLabel truncation', () => {
+  it('clamps the name and anchors a tooltip when truncate is set', () => {
+    const root = useRenderToDom(<EnvironmentLabel name="development-staging-area-1" truncate />);
+    const name = query(root, '.environment-label-name');
+    expect(name.classList.contains('environment-label-name--clamped')).toBe(true);
+    expect(name.getAttribute('data-testid')).toBe('truncated-text');
+    expect(name.text.trim()).toBe('development-staging-area-1');
+  });
+
+  it('renders a plain name by default, with no clamp and no tooltip anchor', () => {
+    const root = useRenderToDom(<EnvironmentLabel name="Development" />);
+    const name = query(root, '.environment-label-name');
+    expect(name.classList.contains('environment-label-name--clamped')).toBe(false);
+    expect(name.getAttribute('data-testid')).toBeFalsy();
   });
 });

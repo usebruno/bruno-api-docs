@@ -7,8 +7,9 @@ import { Portal } from '@/ui/Portal/Portal';
 import { ensureScriptApiCompletions, setModelHints } from './scriptApiCompletions';
 import { createVariableDecorator, type VariableDecorator } from './variableDecorations';
 import { createVariableHover, type VariableHover } from './variableHoverWidget';
+import { adoptContextView } from './contextViewPortal';
 import type { ScriptApiRoot } from '@/utils/scriptAutocomplete';
-import { StyledWrapper } from './StyledWrapper';
+import { ContextViewHost, StyledWrapper } from './StyledWrapper';
 
 type EditorInstance = Parameters<OnMount>[0];
 
@@ -71,6 +72,8 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   const hoverRef = useRef<VariableHover | null>(null);
   const isFoundRef = useRef(resolver.isFound);
   const [hoveredVariable, setHoveredVariable] = useState<{ name: string; node: HTMLElement } | null>(null);
+  const [editorContainer, setEditorContainer] = useState<HTMLElement | null>(null);
+  const [contextViewHost, setContextViewHost] = useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (active && editorRef.current) editorRef.current.layout();
@@ -85,6 +88,11 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
     decoratorRef.current?.refresh();
   }, [resolver.activeEnvName, variableSignature]);
 
+  useEffect(() => {
+    if (!editorContainer || !contextViewHost) return undefined;
+    return adoptContextView(editorContainer, contextViewHost);
+  }, [editorContainer, contextViewHost]);
+
   useEffect(
     () => () => {
       decoratorRef.current?.dispose();
@@ -97,6 +105,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
+    setEditorContainer(editor.getContainerDomNode());
 
     if (variableAware) {
       decoratorRef.current = createVariableDecorator(editor, monaco, () => isFoundRef.current);
@@ -193,6 +202,9 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
           testId={testId ? `${testId}-copy` : undefined}
         />
       ) : null}
+      <Portal>
+        <ContextViewHost ref={setContextViewHost} data-testid={testId ? `${testId}-context-view-host` : undefined} />
+      </Portal>
       {hoveredVariable && renderVariableCard ? (
         <Portal container={hoveredVariable.node}>
           <React.Fragment key={hoveredVariable.name}>{renderVariableCard(hoveredVariable.name)}</React.Fragment>

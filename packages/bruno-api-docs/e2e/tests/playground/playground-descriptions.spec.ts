@@ -1,6 +1,6 @@
 import { test, expect } from '../../playwright';
 
-// A request whose params, headers, variables and form body all carry authored descriptions.
+// A request whose params, headers, variables, assertions and form body all carry authored descriptions.
 const DESCRIBED = '/?fixture=descriptions#/?pg=1&dock=bottom';
 
 test.describe('Playground — field descriptions', () => {
@@ -27,6 +27,22 @@ test.describe('Playground — field descriptions', () => {
   test('pre-request variables show the authored description', async ({ playground }) => {
     await playground.selectTab('variables');
     await expect(playground.preRequestVars.descriptionInputs.first()).toHaveValue('The order identifier under test');
+  });
+
+  test('assertions show a Description column with the authored text', async ({ playground }) => {
+    await playground.selectTab('assertions');
+    await expect(playground.keyValueTable.descriptionHeader).toBeVisible();
+    await expect(playground.keyValueTable.descriptionInputs.first()).toHaveValue('Creating an order returns Created');
+  });
+
+  test('an assertion description is editable and the edit persists across a tab switch', async ({ playground }) => {
+    await playground.selectTab('assertions');
+    const descriptionInput = playground.keyValueTable.descriptionInputs.first();
+    await descriptionInput.fill('Created, with the new order in the body');
+    await expect(descriptionInput).toHaveValue('Created, with the new order in the body');
+    await playground.selectTab('headers');
+    await playground.selectTab('assertions');
+    await expect(playground.keyValueTable.descriptionInputs.first()).toHaveValue('Created, with the new order in the body');
   });
 
   test('form-urlencoded body fields show the authored description', async ({ playground }) => {

@@ -18,6 +18,14 @@ test.describe('Variable hover card', () => {
     await expect(variableCard.value).toHaveText('https://api.dev.example.com');
   });
 
+  test('shows the full height of the variable name, descenders included', async ({ requestPage }) => {
+    const { variableCard } = requestPage;
+    await variableCard.hoverToken('apiVersion');
+
+    await expect(variableCard.name).toBeVisible();
+    expect(await variableCard.hidesVerticalOverflow(variableCard.name)).toBe(false);
+  });
+
   test('badges collection, folder and request scopes correctly', async ({ page, requestPage }) => {
     const { variableCard } = requestPage;
     await variableCard.hoverToken('apiVersion');

@@ -44,13 +44,11 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   if (preTableRows.length === 0 && postTableRows.length === 0) return null;
 
   const stacked = variant === 'stacked';
-  const showPre = !stacked || preTableRows.length > 0;
-  const showPost = !stacked || postTableRows.length > 0;
 
   return (
     <StyledWrapper className={stacked ? 'vars-grid vars-stacked' : 'vars-grid'}>
-      {showPre && <Field label="Pre-Request" rows={preTableRows} onNavigate={onNavigate} />}
-      {showPost && <Field label="Post-Response" rows={postTableRows} onNavigate={onNavigate} />}
+      <Field label="Pre-Request" rows={preTableRows} onNavigate={onNavigate} />
+      <Field label="Post-Response" rows={postTableRows} onNavigate={onNavigate} />
     </StyledWrapper>
   );
 };

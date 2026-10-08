@@ -2,6 +2,7 @@ import type { HttpRequest, HttpRequestHeader, HttpRequestParam } from '@opencoll
 import { isPlainObject } from 'lodash-es';
 import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@/utils/schemaHelpers';
 import { templateVariableGlobalRegex } from '@/utils/common';
+import { isPromptVariableToken } from '@/utils/promptVariables';
 import { mockDataFunctions } from './faker-functions';
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
@@ -10,6 +11,8 @@ export type Variables = Record<string, JsonValue>;
 // for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.
 const MOCK_PATTERN = /\{\{\$(\w+)\}\}/g;
 const JSON_SPECIAL_CHARS = /[\\\n\r\t"]/;
+
+const MAX_RESOLUTION_DEPTH = 64;
 
 const escapeJSONString = (str: string): string => {
   if (!JSON_SPECIAL_CHARS.test(str)) {
@@ -70,53 +73,62 @@ export const interpolate = (
   const mocked = prepareMock(str, escapeJSONStrings);
   const preparedVars = isPlainObject(variables) ? prepareMockObj(variables, escapeJSONStrings) : variables;
 
-  return mocked.replace(templateVariableGlobalRegex(), (match, variableName) => {
-    const trimmedName = variableName.trim();
+  const resolving = new Set<string>();
 
-    // Handle nested object access (e.g., process.env.NODE_ENV)
-    const value = getNestedValue(preparedVars, trimmedName);
-
-    if (value === null) {
-      return match; // Keep original if variable not found
+  const expandInside = (name: string, value: string): string => {
+    if (resolving.size >= MAX_RESOLUTION_DEPTH) {
+      return value;
     }
 
-    // A typed object/array variable is inserted as raw JSON (never quote-escaped — that would
-    // corrupt a JSON body), and numbers/booleans bare. Only string values get JSON-escaped.
-    if (typeof value === 'object') {
-      return JSON.stringify(value);
-    }
+    resolving.add(name);
+    const expanded = substitute(value);
+    resolving.delete(name);
+    return expanded;
+  };
 
-    let result = String(value);
-    if (escapeJSONStrings && typeof value === 'string') {
-      result = result.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    }
+  const substitute = (input: string): string =>
+    input.replace(templateVariableGlobalRegex(), (match, variableName) => {
+      const trimmedName = variableName.trim();
 
-    return result;
-  });
+      if (resolving.has(trimmedName)) {
+        return match;
+      }
+
+      // Handle nested object access (e.g., process.env.NODE_ENV)
+      const value = getNestedValue(preparedVars, trimmedName);
+
+      if (value === null) {
+        return match; // Keep original if variable not found
+      }
+
+      if (typeof value === 'object') {
+        return expandInside(trimmedName, JSON.stringify(value));
+      }
+
+      let result = String(value);
+      if (escapeJSONStrings && typeof value === 'string' && !isPromptVariableToken(trimmedName)) {
+        result = result.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      }
+
+      return expandInside(trimmedName, result);
+    });
+
+  return substitute(mocked);
 };
 
 /**
  * Get nested value from object using dot notation
  */
 const getNestedValue = (obj: JsonValue, path: string): JsonValue => {
+  if (path.startsWith('?') && obj != null && typeof obj === 'object') {
+    return (obj as { [k: string]: JsonValue })[path] ?? null;
+  }
   return path.split('.').reduce<JsonValue>((current, key) => {
     if (current != null && typeof current === 'object') {
       return (current as { [k: string]: JsonValue })[key] ?? null;
     }
     return null;
   }, obj);
-};
-
-/**
- * Get content type from headers
- */
-const getContentType = (headers: Record<string, string> = {}): string => {
-  for (const [key, value] of Object.entries(headers)) {
-    if (key.toLowerCase() === 'content-type') {
-      return value;
-    }
-  }
-  return '';
 };
 
 /**
@@ -208,28 +220,18 @@ export const interpolateVars = (
     interpolatedRequest.http.headers = newHeaders;
   }
 
-  // Get content type for body interpolation
-  const headerMap: Record<string, string> = {};
-  const headersForContentType = getHttpHeaders(interpolatedRequest);
-  if (headersForContentType) {
-    headersForContentType.forEach((header: HttpRequestHeader) => {
-      headerMap[header.name] = header.value;
-    });
-  }
-  const contentType = getContentType(headerMap);
-
   // Interpolate body based on content type
   const currentBody = getHttpBody(interpolatedRequest);
   if (currentBody) {
     const body = currentBody;
 
     if ('type' in body && 'data' in body) {
-      if (contentType.includes('json') && body.type === 'json') {
+      if (body.type === 'json') {
         // Handle JSON body with proper escaping
         if (typeof body.data === 'string' && body.data.length > 0) {
           body.data = _interpolate(body.data, { escapeJSONStrings: true });
         }
-      } else if (contentType === 'application/x-www-form-urlencoded' && body.type === 'form-urlencoded') {
+      } else if (body.type === 'form-urlencoded') {
         // Handle form-urlencoded body
         if ('data' in body && Array.isArray(body.data)) {
           body.data = body.data.map((entry) => ({
@@ -237,7 +239,7 @@ export const interpolateVars = (
             value: _interpolate(entry.value)
           }));
         }
-      } else if (contentType === 'multipart/form-data' && body.type === 'multipart-form') {
+      } else if (body.type === 'multipart-form') {
         // Handle multipart form body
         if ('data' in body && Array.isArray(body.data)) {
           body.data = body.data.map((entry) => ({

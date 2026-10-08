@@ -6,8 +6,10 @@ export class KeyValueTableComponent extends BaseComponent {
   readonly container: Locator;
   readonly table: Locator;
   readonly nameInputs: Locator;
+  readonly nameTexts: Locator;
   readonly valueInputs: Locator;
   readonly descriptionInputs: Locator;
+  readonly nameHeader: Locator;
   readonly descriptionHeader: Locator;
   readonly cellErrors: Locator;
   readonly autocomplete: Locator;
@@ -18,8 +20,10 @@ export class KeyValueTableComponent extends BaseComponent {
     this.container = page.getByTestId(`${testId}-container`);
     this.table = page.getByTestId(`${testId}-table`);
     this.nameInputs = page.getByTestId(`${testId}-name-input`);
+    this.nameTexts = page.getByTestId(`${testId}-name-text`);
     this.valueInputs = page.getByTestId(`${testId}-value-input`);
     this.descriptionInputs = page.getByTestId(`${testId}-description-input`);
+    this.nameHeader = page.getByTestId(`${testId}-name-header`);
     this.descriptionHeader = page.getByTestId(`${testId}-description-header`);
     this.cellErrors = page.getByTestId(`${testId}-error`);
     this.autocomplete = page.getByTestId('variable-autocomplete');

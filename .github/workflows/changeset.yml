@@ -35,7 +35,7 @@ jobs:
             | sed -e 's#[^a-z0-9]#-#g' -e 's#--*#-#g' -e 's#^-##' -e 's#-$##')
 
           mkdir -p .changeset
-          printf -- '---\n"@opencollection/docs": %s\n---\n\n%s (#%s)\n' \
+          printf -- '---\n"@usebruno/api-docs": %s\n---\n\n%s (#%s)\n' \
             "$bump" "$TITLE" "$NUMBER" > ".changeset/${slug}.md"
 
           cat ".changeset/${slug}.md"

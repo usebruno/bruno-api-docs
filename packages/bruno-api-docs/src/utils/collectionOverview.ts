@@ -50,13 +50,8 @@ export interface CollectionScripts {
 export const hasConfiguredAuth = (auth?: Auth): boolean =>
   Boolean(auth) && (typeof auth !== 'object' || (auth as { type?: string }).type !== 'none');
 
-export const hasCollectionConfiguration = (
-  headers: HttpRequestHeader[] = [],
-  auth?: Auth,
-  scripts: CollectionScripts = {},
-  hasVars = false
-): boolean =>
-  headers.some((header) => header && header.name)
-  || hasConfiguredAuth(auth)
-  || hasVars
-  || Boolean(scripts.preRequest || scripts.postResponse || scripts.tests);
+export const hasCollectionRequestConfig = (headers: HttpRequestHeader[] = [], auth?: Auth): boolean =>
+  headers.some((header) => header && header.name) || hasConfiguredAuth(auth);
+
+export const hasCollectionExecutionContext = (scripts: CollectionScripts = {}, hasVars = false): boolean =>
+  hasVars || Boolean(scripts.preRequest || scripts.postResponse || scripts.tests);

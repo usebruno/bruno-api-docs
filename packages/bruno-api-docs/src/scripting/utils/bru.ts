@@ -26,6 +26,7 @@ interface BruVariables {
   collectionVariables?: VariableStore;
   folderVariables?: VariableStore;
   requestVariables?: VariableStore;
+  promptVariables?: VariableStore;
   processEnvVars?: VariableStore;
 }
 
@@ -109,6 +110,7 @@ class Bru {
   collectionVariables: VariableStore;
   folderVariables: VariableStore;
   requestVariables: VariableStore;
+  promptVariables: VariableStore;
   processEnvVars: VariableStore;
   collectionPath: string | undefined;
   collectionName: string | undefined;
@@ -136,6 +138,7 @@ class Bru {
     this.collectionVariables = vars.collectionVariables || {};
     this.folderVariables = vars.folderVariables || {};
     this.requestVariables = vars.requestVariables || {};
+    this.promptVariables = vars.promptVariables || {};
     this.processEnvVars = vars.processEnvVars || {};
     this.collectionPath = collectionPath;
     this.collectionName = collectionName;
@@ -191,6 +194,7 @@ class Bru {
       ...this.folderVariables,
       ...this.requestVariables,
       ...this.runtimeVariables,
+      ...this.promptVariables,
       process: { env: { ...this.processEnvVars } }
     };
   }

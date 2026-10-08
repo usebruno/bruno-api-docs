@@ -20,6 +20,24 @@ interface QueryBarProps {
   effectiveHeaders?: HttpRequestHeader[];
 }
 
+type RequestWithLegacyUrl = HttpRequest & { url?: string };
+
+export const applyUrlChange = (item: HttpRequest, newUrl: string): HttpRequest => {
+  const currentParams = getHttpParams(item);
+  const syncedParams = syncQueryParams(syncPathParams(currentParams, newUrl), newUrl);
+
+  const updated: RequestWithLegacyUrl = {
+    ...(item as RequestWithLegacyUrl),
+    http: {
+      ...item.http,
+      url: newUrl,
+      ...(syncedParams !== currentParams ? { params: syncedParams } : {})
+    }
+  };
+  delete updated.url;
+  return updated;
+};
+
 const QueryBar: React.FC<QueryBarProps> = ({
   item,
   onSendRequest,
@@ -39,19 +57,7 @@ const QueryBar: React.FC<QueryBarProps> = ({
 
   const handleUrlChange = (newUrl: string) => {
     setUrl(newUrl);
-
-    const currentParams = getHttpParams(item);
-    const syncedParams = syncQueryParams(syncPathParams(currentParams, newUrl), newUrl);
-
-    const updatedItem = {
-      ...item,
-      http: {
-        ...item.http,
-        url: newUrl,
-        ...(syncedParams !== currentParams ? { params: syncedParams } : {})
-      }
-    };
-    onItemChange(updatedItem);
+    onItemChange(applyUrlChange(item, newUrl));
   };
 
   const handleMethodChange = (newMethod: string) => {

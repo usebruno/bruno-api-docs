@@ -461,3 +461,96 @@ describe('setUrlQueryParams', () => {
     );
   });
 });
+
+describe('a prompt variable in the URL', () => {
+  it('does not invent a query parameter from the marker inside {{?Name}}', () => {
+    expect(syncQueryParams([], 'https://api.example.com/otp/{{?OTP}}')).toEqual([]);
+  });
+
+  it('still reads a real query string that follows a prompt token', () => {
+    expect(syncQueryParams([], 'https://api.example.com/{{?User}}?page=2')).toEqual([
+      { name: 'page', value: '2', type: 'query' }
+    ]);
+  });
+
+  it('leaves the token intact when the URL is rebuilt', () => {
+    expect(buildRequestUrl('https://api.example.com/otp/{{?OTP}}', [])).toBe(
+      'https://api.example.com/otp/{{?OTP}}'
+    );
+  });
+
+  it('appends a real parameter after a URL holding a prompt token', () => {
+    expect(
+      buildRequestUrl('https://api.example.com/otp/{{?OTP}}', [{ name: 'page', value: '2', type: 'query' }])
+    ).toBe('https://api.example.com/otp/{{?OTP}}?page=2');
+  });
+
+  it('is unaffected for an ordinary URL with a query string', () => {
+    expect(syncQueryParams([], 'https://api.example.com/x?a=1&b=2')).toEqual([
+      { name: 'a', value: '1', type: 'query' },
+      { name: 'b', value: '2', type: 'query' }
+    ]);
+  });
+
+  it('still finds a path parameter that sits after a prompt token', () => {
+    expect(parsePathParamNames('https://api.example.com/{{?tenant}}/posts/:postId')).toEqual(['postId']);
+  });
+
+  it('still finds a path parameter when a real query string follows the prompt token too', () => {
+    expect(parsePathParamNames('https://api.example.com/{{?tenant}}/posts/:postId?limit=5')).toEqual(['postId']);
+  });
+
+  it('offers the path parameter as a row even though the URL holds a prompt token', () => {
+    expect(syncPathParams([], 'https://api.example.com/{{?tenant}}/posts/:postId')).toEqual([
+      { name: 'postId', value: '', type: 'path' }
+    ]);
+  });
+
+  it('fills in a path parameter that sits after a prompt token', () => {
+    expect(
+      applyPathParams('https://api.example.com/{{?tenant}}/posts/:postId', [
+        { name: 'postId', value: '42', type: 'path' }
+      ])
+    ).toBe('https://api.example.com/{{?tenant}}/posts/42');
+  });
+
+  it('keeps the real query string while filling in a path parameter after a prompt token', () => {
+    expect(
+      applyPathParams('https://api.example.com/{{?tenant}}/posts/:postId?limit=5', [
+        { name: 'postId', value: '42', type: 'path' }
+      ])
+    ).toBe('https://api.example.com/{{?tenant}}/posts/42?limit=5');
+  });
+
+  it('keeps the whole URL when a query parameter is edited, rather than cutting it at the prompt token', () => {
+    expect(
+      setUrlQueryParams('https://api.example.com/{{?tenant}}/posts', [
+        { name: 'page', value: '2', type: 'query' }
+      ])
+    ).toBe('https://api.example.com/{{?tenant}}/posts?page=2');
+  });
+
+  it('replaces only the real query string when a query parameter is edited', () => {
+    expect(
+      setUrlQueryParams('https://api.example.com/{{?tenant}}/posts?page=1', [
+        { name: 'page', value: '2', type: 'query' }
+      ])
+    ).toBe('https://api.example.com/{{?tenant}}/posts?page=2');
+  });
+
+  it('drops the query string entirely when the last query parameter is removed', () => {
+    expect(setUrlQueryParams('https://api.example.com/{{?tenant}}/posts?page=1', [])).toBe(
+      'https://api.example.com/{{?tenant}}/posts'
+    );
+  });
+
+  it('treats a fragment after a prompt token as the end of the path', () => {
+    expect(parsePathParamNames('https://api.example.com/{{?tenant}}/posts/:postId#section')).toEqual(['postId']);
+  });
+
+  it('lists every path parameter when the URL holds more than one prompt token', () => {
+    expect(
+      parsePathParamNames('https://api.example.com/{{?tenant}}/:orgId/{{?region}}/posts/:postId')
+    ).toEqual(['orgId', 'postId']);
+  });
+});

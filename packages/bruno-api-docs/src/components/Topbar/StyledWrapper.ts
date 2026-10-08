@@ -63,10 +63,6 @@ export const StyledWrapper = styled.header`
     flex: 1 1 auto;
   }
 
-  /* Below desktop the SearchBar renders its own centered overlay when collapsed,
-     so this row is a zero-height mount point and click-outside boundary rather
-     than a visible strip; the inner stretches full-width (no cap) so that
-     overlay centers within the docs area, not on a left-aligned field. */
   .topbar-search-row {
     display: flex;
     align-items: center;

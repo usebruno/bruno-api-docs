@@ -16,6 +16,7 @@ import { EnvEditorComponent } from '../components/environments/env-editor.compon
 import { CollectionSettingsComponent } from '../components/collection-settings/collection-settings.component';
 import { ThemeToggleComponent } from '../components/layout/theme-toggle.component';
 import { PageHeaderComponent } from '../components/layout/page-header.component';
+import { OpenInBrunoModalComponent } from '../components/layout/open-in-bruno-modal.component';
 import { SearchComponent } from '../components/search/search.component';
 import { EnvSwitcherComponent } from '../components/layout/env-switcher.component';
 
@@ -36,6 +37,7 @@ type Fixtures = {
   envEditor: EnvEditorComponent;
   collectionSettings: CollectionSettingsComponent;
   pageHeader: PageHeaderComponent;
+  openInBrunoModal: OpenInBrunoModalComponent;
   envSwitcher: EnvSwitcherComponent;
   themeToggle: ThemeToggleComponent;
   search: SearchComponent;
@@ -74,6 +76,9 @@ export const test = base.extend<Fixtures>({
   },
   pageHeader: async ({ page }, use) => {
     await use(new PageHeaderComponent(page));
+  },
+  openInBrunoModal: async ({ page }, use) => {
+    await use(new OpenInBrunoModalComponent(page));
   },
   envSwitcher: async ({ page }, use) => {
     await use(new EnvSwitcherComponent(page));

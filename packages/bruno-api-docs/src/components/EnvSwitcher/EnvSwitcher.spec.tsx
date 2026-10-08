@@ -8,8 +8,8 @@ import type { Environment } from '@opencollection/types/config/environments';
 import { createOpenCollectionStore } from '@/store/store';
 import { setDocsCollection } from '@/store/slices/docs';
 import { setActiveEnv } from '@/store/slices/env';
-import { getByTestId } from '@/test-utils/dom';
-import EnvSwitcher from './EnvSwitcher';
+import { getByTestId, queryByTestId } from '@/test-utils/dom';
+import EnvSwitcher, { type EnvSwitcherProps } from './EnvSwitcher';
 
 const collectionWith = (environments: Environment[]): OpenCollection => ({ config: { environments } });
 
@@ -18,7 +18,7 @@ const withEnvs = collectionWith([{ name: 'Dev' }, { name: 'Prod' }]);
 const render = (
   collection: OpenCollection,
   configure?: (s: ReturnType<typeof createOpenCollectionStore>) => void,
-  props?: { testId?: string }
+  props?: Partial<EnvSwitcherProps>
 ) => {
   const store = createOpenCollectionStore();
   store.dispatch(setDocsCollection(collection));
@@ -63,11 +63,25 @@ describe('EnvSwitcher', () => {
     expect(trigger.text).not.toContain('Ghost');
   });
 
-  it('renders an empty state when there are no environments', () => {
-    const trigger = getByTestId(render(collectionWith([])), 'env-switcher');
+  it('renders the empty state as plain text, not a button, when there are no environments', () => {
+    const root = render(collectionWith([]));
+    const trigger = getByTestId(root, 'env-switcher');
     expect(trigger.text).toContain('No environments');
+    expect(trigger.tagName.toLowerCase()).toBe('span');
     expect(trigger.classList.contains('env-switcher-trigger--empty')).toBe(true);
     expect(trigger.getAttribute('title')).toBeFalsy();
+    expect(trigger.getAttribute('aria-label')).toBeFalsy();
+    expect(trigger.getAttribute('aria-haspopup')).toBeFalsy();
+    expect(root.querySelector('button')).toBeNull();
+    expect(root.querySelector('.env-switcher-chevron')).toBeFalsy();
+  });
+
+  it('keeps the caret and the menu affordance when there are environments', () => {
+    const root = render(withEnvs, (s) => s.dispatch(setActiveEnv('Dev')));
+    const trigger = getByTestId(root, 'env-switcher');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    expect(trigger.getAttribute('aria-disabled')).toBeFalsy();
+    expect(root.querySelector('.env-switcher-chevron')).toBeTruthy();
   });
 
   it('carries the empty modifier only when there are no environments', () => {
@@ -84,21 +98,42 @@ describe('EnvSwitcher', () => {
     expect(dot?.classList.contains('environment-label-dot--empty')).toBe(false);
   });
 
-  it('exposes the full env name in the trigger title (truncation is CSS)', () => {
+  it('renders the full env name in the trigger, clamped for the tooltip to reveal', () => {
     const long = 'development-staging-area-testing-qa-automation-local-setup-1';
-    const trigger = getByTestId(
-      render(collectionWith([{ name: long }]), (s) => s.dispatch(setActiveEnv(long))),
-      'env-switcher'
-    );
-    // The name renders in full in the DOM; the trigger button carries the full
-    // name as its title (CSS clamps the visible width with an ellipsis).
+    const root = render(collectionWith([{ name: long }]), (s) => s.dispatch(setActiveEnv(long)));
+    const trigger = getByTestId(root, 'env-switcher');
     expect(trigger.text).toContain(long);
-    expect(trigger.getAttribute('title')).toBe(long);
+    expect(getByTestId(root, 'truncated-text').classList.contains('environment-label-name--clamped')).toBe(true);
   });
 
   it('derives the root and trigger test ids from a custom testId', () => {
     const root = render(withEnvs, (s) => s.dispatch(setActiveEnv('Dev')), { testId: 'playground-env-switcher' });
     expect(getByTestId(root, 'playground-env-switcher-root')).toBeTruthy();
     expect(getByTestId(root, 'playground-env-switcher')).toBeTruthy();
+  });
+});
+
+describe('EnvSwitcher hideWhenEmpty', () => {
+  it('renders nothing when the collection has no environments', () => {
+    const root = render(collectionWith([]), undefined, { hideWhenEmpty: true });
+    expect(queryByTestId(root, 'env-switcher-root')).toBeNull();
+  });
+
+  it('still renders the switcher when the collection has environments', () => {
+    const root = render(withEnvs, undefined, { hideWhenEmpty: true });
+    expect(getByTestId(root, 'env-switcher').text).toContain('Dev');
+  });
+
+  it('keeps the empty state by default, for the playground sidebar', () => {
+    const trigger = getByTestId(render(collectionWith([])), 'env-switcher');
+    expect(trigger.text).toContain('No environments');
+  });
+});
+
+describe('EnvSwitcher name truncation', () => {
+  it('drops the native title in favour of the styled tooltip anchor', () => {
+    const root = render(withEnvs, (s) => s.dispatch(setActiveEnv('Dev')));
+    expect(getByTestId(root, 'env-switcher').getAttribute('title')).toBeFalsy();
+    expect(queryByTestId(root, 'truncated-text')).toBeTruthy();
   });
 });

@@ -391,6 +391,6 @@ describe('GrpcRequest — execution context', () => {
 
   it('labels the script-chain request marker as GRPC', () => {
     const root = useWithRuntime({ scripts: [{ type: 'before-request', code: 'bru.setVar(\'requestedAt\', Date.now());' }] });
-    expect(getByTestId(root, 'script-chain-request-label').text).toBe('GRPC');
+    expect(getByTestId(root, 'script-chain-request-label').text).toBe('GRPC Request');
   });
 });

@@ -2,7 +2,7 @@ import React from 'react';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { SecretValue } from '@/ui/SecretValue/SecretValue';
 import { TrashIcon } from '@/assets/icons';
-import { useEditableRows } from '@/hooks/useEditableRows';
+import { isBlankRow as isRowBlank, useEditableRows } from '@/hooks/useEditableRows';
 import { cx } from '@/utils/cx';
 import { toDataType } from '@/utils/variableDataType';
 import { VariableTypeControl } from '../../Common/VariableTypeControl/VariableTypeControl';
@@ -37,7 +37,7 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
   return (
     <StyledWrapper className="env-card-list" data-testid={testId}>
       {rows.map((row, index) => {
-        const isBlankRow = index === rows.length - 1 && (!row.name || row.name.trim() === '');
+        const isBlankRow = index === rows.length - 1 && isRowBlank(row);
         return (
           <div
             key={row.id}

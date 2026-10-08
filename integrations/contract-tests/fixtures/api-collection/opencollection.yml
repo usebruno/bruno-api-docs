@@ -1,0 +1,10 @@
+opencollection: 1.0.0
+info:
+  name: Acme API
+  version: 1.0.0
+  summary: The fixture every example serves and every contract run asserts against.
+bundled: false
+request:
+  auth:
+    type: bearer
+    token: "{{apiToken}}"

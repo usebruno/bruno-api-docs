@@ -189,7 +189,7 @@ export const StyledWrapper = styled.div`
   .tabs-right {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     flex-shrink: 0;
   }
 

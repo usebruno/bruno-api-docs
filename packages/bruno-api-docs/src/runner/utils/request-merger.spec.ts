@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { mergeAuth } from './request-merger';
-import { getRequestAuth } from '@/utils/schemaHelpers';
+import { mergeAuth, mergeHeaders } from './request-merger';
+import { getRequestAuth, getHttpHeaders } from '@/utils/schemaHelpers';
 
 // A playground request keeps its auth on the http protocol block; folders/collection nest
 // it under `request.auth`. Auth is either a concrete object, the string 'inherit', or
@@ -18,6 +18,63 @@ const resolve = (request: any, coll: any, path: any[] = []): unknown => {
   mergeAuth(coll, request, path);
   return getRequestAuth(request);
 };
+
+describe('mergeHeaders (which headers a request ends up sending)', () => {
+  type Row = { name: string; value: string; disabled?: boolean };
+
+  const requestWith = (headers: Row[]): any => ({ http: { method: 'GET', url: 'https://x', headers } });
+  const collectionWith = (headers: Row[]): any => ({ info: { name: 'C' }, request: { headers } });
+  const folderWith = (name: string, headers: Row[]): any => ({ info: { type: 'folder', name }, request: { headers } });
+
+  const sent = (request: any): Record<string, string> =>
+    Object.fromEntries(getHttpHeaders(request).map((header: Row) => [header.name.toLowerCase(), header.value]));
+
+  it('sends a header the request inherits from the collection', () => {
+    const request = requestWith([]);
+    mergeHeaders(collectionWith([{ name: 'X-Token', value: 'from-collection' }]), request);
+
+    expect(sent(request)['x-token']).toBe('from-collection');
+  });
+
+  it('lets the request override an inherited header of the same name', () => {
+    const request = requestWith([{ name: 'X-Token', value: 'mine' }]);
+    mergeHeaders(collectionWith([{ name: 'X-Token', value: 'from-collection' }]), request);
+
+    expect(sent(request)['x-token']).toBe('mine');
+  });
+
+  it('still sends the inherited header when the request has switched its own copy off', () => {
+    const request = requestWith([{ name: 'X-Token', value: 'mine', disabled: true }]);
+    mergeHeaders(collectionWith([{ name: 'X-Token', value: 'from-collection' }]), request);
+
+    expect(sent(request)['x-token']).toBe('from-collection');
+  });
+
+  it('does not send a header the collection has switched off', () => {
+    const request = requestWith([]);
+    mergeHeaders(collectionWith([{ name: 'X-Off', value: 'no', disabled: true }]), request);
+
+    expect(sent(request)['x-off']).toBeUndefined();
+  });
+
+  it('prefers the closest folder over the collection for the same header', () => {
+    const request = requestWith([]);
+    mergeHeaders(
+      collectionWith([{ name: 'X-Token', value: 'from-collection' }]),
+      request,
+      [folderWith('outer', [{ name: 'X-Token', value: 'from-outer' }]), folderWith('inner', [{ name: 'X-Token', value: 'from-inner' }])]
+    );
+
+    expect(sent(request)['x-token']).toBe('from-inner');
+  });
+
+  it('ignores a blank row rather than failing the whole merge', () => {
+    const request = requestWith([]);
+    mergeHeaders(collectionWith([{ name: '', value: 'nameless' }, { name: 'X-Keep', value: 'kept' }]), request);
+
+    expect(sent(request)['x-keep']).toBe('kept');
+  });
+});
 
 describe('mergeAuth (inherited-auth resolution for the playground send path)', () => {
   describe('acceptance #1 — a request set to inherit uses its nearest parent', () => {

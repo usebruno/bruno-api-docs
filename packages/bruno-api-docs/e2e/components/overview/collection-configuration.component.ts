@@ -1,25 +1,28 @@
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 import { SecretValueComponent } from '../secret-value.component';
 
+export type ConfigurationGroup = 'headers' | 'auth' | 'vars' | 'script' | 'tests';
+
 export class ConfigurationSection extends BaseComponent {
-  readonly root = this.page.getByTestId('collection-config');
+  readonly copyButton: Locator;
+  readonly secret: SecretValueComponent;
+  readonly disabledRows: Locator;
 
-  readonly copyButton = this.root.getByTestId('collection-config-tests-copy');
+  private readonly testId: string;
 
-  readonly secret = new SecretValueComponent(
-    this.page,
-    'collection-config-auth-secret'
-  );
+  constructor(page: Page, testId = 'collection-config') {
+    super(page, page.getByTestId(testId));
+    this.testId = testId;
+    this.copyButton = this.root.getByTestId(`${testId}-tests-copy`);
+    this.secret = new SecretValueComponent(page, `${testId}-auth-token-secret`);
+    this.disabledRows = this.root
+      .getByTestId('property-value-line')
+      .filter({ has: page.getByTestId('disabled-badge') });
+  }
 
-  readonly disabledRows = this.root
-    .getByTestId('property-value-line')
-    .filter({ has: this.page.getByTestId('disabled-badge') });
-
-  subHeading(name: string): Locator {
-    return this.root
-      .getByTestId('collection-config-subheading')
-      .filter({ hasText: name });
+  subHeading(group: ConfigurationGroup): Locator {
+    return this.root.getByTestId(`${this.testId}-${group}-subheading`);
   }
 
   async copyToClipboard(): Promise<void> {

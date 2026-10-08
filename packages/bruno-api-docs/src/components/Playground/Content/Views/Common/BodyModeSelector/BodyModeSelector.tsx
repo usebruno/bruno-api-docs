@@ -8,12 +8,14 @@ import {
   IconFileText,
   IconDatabase,
   IconFile,
+  IconWand,
   IconX
 } from '@tabler/icons';
 import MenuDropdown from '@/ui/MenuDropdown';
 import type { MenuDropdownGroup } from '@/ui/MenuDropdown';
+import { prettifyJsonString, prettifyXmlString } from '@/utils/dataFormatter';
 import type { RequestBody } from '@/utils/schemaHelpers';
-import { TriggerButton } from './StyledWrapper';
+import { BodyActionButton } from './StyledWrapper';
 
 interface BodyModeSelectorProps {
   body: RequestBody;
@@ -56,12 +58,9 @@ export const resolveBodyMode = (body: RequestBody): { type: string; label: strin
   return { type, label };
 };
 
-/**
- * The request body format dropdown. Rendered on the right side of the request
- * pane tabs (only while the Body tab is active).
- */
 export const BodyModeSelector: React.FC<BodyModeSelectorProps> = ({ body, onItemChange, item }) => {
   const { type: currentBodyType, label: currentBodyLabel } = resolveBodyMode(body);
+  const CurrentBodyIcon = ALL_BODY_TYPE_OPTIONS.find((option) => option.value === currentBodyType)?.icon;
 
   const handleBodyTypeChange = (bodyType: string) => {
     // getHttpBody falls back to a legacy root-level body, so clearing only
@@ -77,6 +76,25 @@ export const BodyModeSelector: React.FC<BodyModeSelectorProps> = ({ body, onItem
     else if (bodyType === 'multipart-form' || bodyType === 'file') applyBody({ type: bodyType, data: [] });
   };
 
+  const prettifiableData
+    = (currentBodyType === 'json' || currentBodyType === 'xml')
+      && body
+      && 'data' in body
+      && typeof body.data === 'string'
+      ? body.data
+      : null;
+
+  const handlePrettify = () => {
+    if (prettifiableData === null) return;
+    const formatted
+      = currentBodyType === 'json' ? prettifyJsonString(prettifiableData) : prettifyXmlString(prettifiableData);
+    if (formatted === prettifiableData) return;
+    onItemChange({
+      ...item,
+      http: { ...item.http, body: { ...body, data: formatted } as typeof body }
+    } as HttpRequest);
+  };
+
   const bodyMenuItems: MenuDropdownGroup[] = BODY_TYPE_GROUPS.map((group) => ({
     name: group.name,
     options: group.options.map((option) => ({
@@ -88,20 +106,30 @@ export const BodyModeSelector: React.FC<BodyModeSelectorProps> = ({ body, onItem
   }));
 
   return (
-    <MenuDropdown
-      selectedItemId={currentBodyType}
-      placement="bottom-end"
-      role="listbox"
-      testId="body-type-select"
-      items={bodyMenuItems}
-      groupStyle="select"
-      showGroupDividers={false}
-    >
-      <TriggerButton type="button" aria-label="Body Type">
-        {currentBodyLabel}
-        <IconCaretDown className="body-mode-caret" size={14} strokeWidth={2} aria-hidden />
-      </TriggerButton>
-    </MenuDropdown>
+    <>
+      <MenuDropdown
+        selectedItemId={currentBodyType}
+        placement="bottom-end"
+        role="listbox"
+        testId="body-type-select"
+        items={bodyMenuItems}
+        groupStyle="select"
+        showGroupDividers={false}
+        sticky="reference"
+      >
+        <BodyActionButton type="button" aria-label="Body Type">
+          {CurrentBodyIcon && <CurrentBodyIcon size={14} strokeWidth={2} aria-hidden />}
+          {currentBodyLabel}
+          <IconCaretDown className="body-mode-caret" size={14} strokeWidth={2} aria-hidden />
+        </BodyActionButton>
+      </MenuDropdown>
+      {prettifiableData !== null && (
+        <BodyActionButton type="button" onClick={handlePrettify} data-testid="body-prettify">
+          <IconWand size={14} strokeWidth={2} aria-hidden />
+          Prettify
+        </BodyActionButton>
+      )}
+    </>
   );
 };
 

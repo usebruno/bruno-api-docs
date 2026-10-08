@@ -1,0 +1,6 @@
+name: Prod
+variables:
+  - name: baseUrl
+    value: https://api.acme.test
+  - name: apiToken
+    value: prod-token-must-never-be-served

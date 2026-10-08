@@ -11,6 +11,47 @@ describe('PropertyTable', () => {
     expect(query(root, '.property-value-cell').text).toContain('application/json');
   });
 
+  it('keeps a very long name on one truncatable line, so it can ellipsise and show a tooltip', () => {
+    const longName = 'collection_pre_var'.repeat(8);
+    const root = useRenderToDom(<PropertyTable rows={[{ label: longName, value: 'v' }]} />);
+    const key = query(root, '.property-key');
+
+    expect(query(key, '.oc-truncate')).toBeTruthy();
+    expect(key.text).toContain(longName);
+  });
+
+  it('shows (empty) instead of a blank space when a row has no value', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'coll_empty_value', value: '' }]} />);
+    expect(query(root, '.property-value-placeholder').text).toBe('(empty)');
+  });
+
+  it('shows (empty) when the value is missing altogether', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'coll_empty_value' }]} />);
+    expect(query(root, '.property-value-placeholder').text).toBe('(empty)');
+  });
+
+  it('hides the data type label for a row with no value, since there is nothing to describe', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'coll_empty_value', value: '', type: 'string' }]} />);
+    expect(root.querySelector('.property-type')).toBeNull();
+    expect(query(root, '.property-value-cell').text).not.toContain('string');
+  });
+
+  it('still shows the data type once a row has a value', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'clientId', value: 'docs-qa', type: 'string' }]} />);
+    expect(query(root, '.property-type').text).toBe('string');
+  });
+
+  it('keeps a value of "0" rather than treating it as empty', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'retries', value: '0', type: 'number' }]} />);
+    expect(root.querySelector('.property-value-placeholder')).toBeNull();
+    expect(query(root, '.property-type').text).toBe('number');
+  });
+
+  it('leaves an empty secret masked rather than showing (empty)', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'Token', value: '', secret: true }]} />);
+    expect(root.querySelector('.property-value-placeholder')).toBeNull();
+  });
+
   it('masks secret values', () => {
     const root = useRenderToDom(<PropertyTable rows={[{ label: 'Token', value: 's3cr3t', secret: true }]} />);
     const value = query(root, '.property-value-cell');

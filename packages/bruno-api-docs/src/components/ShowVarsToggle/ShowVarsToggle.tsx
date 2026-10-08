@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectShowVars, toggleShowVars } from '@/store/slices/env';
+import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface ShowVarsToggleProps {
@@ -17,19 +18,20 @@ const ShowVarsToggle: React.FC<ShowVarsToggleProps> = ({ testId = 'show-vars-tog
   const showVars = useAppSelector(selectShowVars);
 
   return (
-    <StyledWrapper
-      type="button"
-      role="switch"
-      data-testid={testId}
-      aria-checked={showVars}
-      aria-label="Show variables"
-      onClick={() => dispatch(toggleShowVars())}
-    >
-      <span className="show-vars-track" aria-hidden="true">
-        <span className="show-vars-thumb" />
-      </span>
-      <span className="show-vars-label">Show vars</span>
-    </StyledWrapper>
+    <Tooltip content="Show resolved variable values" touch={false} testId={`${testId}-tooltip`}>
+      <StyledWrapper
+        role="switch"
+        data-testid={testId}
+        aria-checked={showVars}
+        aria-label="Show variables"
+        onClick={() => dispatch(toggleShowVars())}
+      >
+        <span className="show-vars-track" aria-hidden="true">
+          <span className="show-vars-thumb" />
+        </span>
+        <span className="show-vars-label">Show vars</span>
+      </StyledWrapper>
+    </Tooltip>
   );
 };
 

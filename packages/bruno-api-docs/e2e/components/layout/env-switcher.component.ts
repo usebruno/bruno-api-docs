@@ -12,10 +12,10 @@ import { BaseComponent } from '../base.component';
  */
 export class EnvSwitcherComponent extends BaseComponent {
   readonly showVarsToggle = this.page.getByTestId('show-vars-toggle');
+  readonly showVarsTooltip = this.page.getByTestId('show-vars-toggle-tooltip');
   readonly trigger: Locator;
   readonly menu: Locator;
   readonly surface: Locator;
-  readonly emptyOption: Locator;
 
   constructor(
     page: Page,
@@ -25,7 +25,6 @@ export class EnvSwitcherComponent extends BaseComponent {
     this.trigger = this.root.getByTestId(base);
     this.menu = this.page.getByTestId(`${base}-dropdown`);
     this.surface = this.menu.locator('xpath=ancestor::div[@data-tippy-root]');
-    this.emptyOption = this.option('no-environments');
   }
 
   option(name: string): Locator {

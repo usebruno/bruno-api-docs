@@ -198,6 +198,6 @@ describe('GraphQL request page', () => {
       </MemoryRouter>
     );
 
-    expect(getByTestId(root, 'script-chain-request-label').text).toBe('GQL');
+    expect(getByTestId(root, 'script-chain-request-label').text).toBe('GQL Request');
   });
 });

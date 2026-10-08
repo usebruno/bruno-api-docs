@@ -30,6 +30,7 @@ export type RequestBody = HttpRequestBody | HttpRequestBodyVariant[] | undefined
 export type InternalHttpRequest = HttpRequest & {
   __brunoDisableParsingResponseJson?: boolean;
   __bruno__executionMode?: string;
+  __brunoHeadersSetByScript?: string[];
   timeout?: number | 'inherit';
 };
 
@@ -107,10 +108,6 @@ export const getItemTags = (item: OpenCollectionItem | null | undefined): string
   if ('tags' in item) return normalizeTags((item as { tags?: string[] }).tags);
   return [];
 };
-
-/** Get the collection-level tags from the info block. */
-export const getCollectionTags = (collection: OpenCollection | null | undefined): string[] =>
-  normalizeTags((collection as { info?: { tags?: string[] } } | null | undefined)?.info?.tags);
 
 /** Tags carried by ancestor folders that the item does not carry itself. */
 export const getInheritedTags = (ancestry: OpenCollectionItem[], ownTags: string[]): string[] => {
@@ -621,8 +618,9 @@ export const getTestsScript = (scripts: Scripts | Record<string, string> | null 
   return (scripts as any).tests;
 };
 
-export const countEnabled = <T extends { disabled?: boolean }>(items: T[] | undefined): number | undefined =>
-  (items ?? []).filter((item) => !item.disabled).length || undefined;
+export const countEnabled = (
+  items: ReadonlyArray<{ enabled?: boolean; disabled?: boolean }> | undefined
+): number | undefined => (items ?? []).filter((item) => item.enabled ?? !item.disabled).length || undefined;
 
 /**
  * Get docs from an item (at root level in new schema)

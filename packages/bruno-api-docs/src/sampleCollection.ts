@@ -4,7 +4,6 @@ info:
   name: "Bruno Testbench"
   summary: "A comprehensive API collection for testing OpenCollection features"
   version: "1.0.0"
-  tags: ["testbench"]
 config:
   environments:
     - name: "Local"
@@ -59,6 +58,15 @@ config:
           - name: apiKey
             secretName: prod/payment-gateway/api-key
             enabled: true
+    - name: "staging-regression-automation-eu-west-1"
+      color: "#2563eb"
+      variables:
+        - name: "host"
+          value: "https://staging-eu-west-1.echo.usebruno.com"
+    - name: "Customer Sandbox (Partner Integrations, Asia Pacific)"
+      variables:
+        - name: "host"
+          value: "https://sandbox-apac.echo.usebruno.com"
 request:
   headers:
     - name: "collection-header"
@@ -606,12 +614,45 @@ items:
       seq: 4
       tags: ["billing"]
     docs: |
-      ## Billing
+      # Billing
 
       Endpoints for managing **customers** and their invoices.
 
+      ## Access
+
       - Auth is **inherited** from the collection.
       - Folder-level scripts record the execution chain for every request inside.
+
+      ### Rollout checklist
+
+      - [x] ~~Invoice export shipped~~
+      - [ ] Dunning emails
+      - Not a task item
+      - [ ] Review the **billing** guide and \`rate-limits\` doc
+      - [ ] Parent task
+        - [x] Nested done
+
+      #### Notes
+
+      - [ ] Multi-block item
+
+        A second paragraph inside the same task item.
+
+      #### Line breaks
+
+      Line one<br/>line two
+
+      #### Invoice fields
+
+      | Field | Example |
+      | --- | --- |
+      | idempotencyKey | inv_7f3a9c2e1b4d8f6a0c5e9b2d7f1a3c8e6b0d4f9a2c7e5b1d8f3a6c0e9b4d2f7a1c |
+      | currency | usd |
+
+      \`\`\`js
+      const invoice = await bru.get('/invoices/42');
+      const receipt = await bru.get('/invoices/42/receipt?include=lineItems,taxes,discounts,refunds,adjustments,credits&expand=customer,subscription,paymentMethod&currency=usd&locale=en-GB&format=pdf');
+      \`\`\`
     request:
       auth: inherit
       scripts:
@@ -2686,6 +2727,30 @@ items:
             type: "json"
             data: |
               {}
+
+  - name: "user options"
+    type: "http"
+    seq: 12
+    method: "OPTIONS"
+    url: "{{host}}/api/users"
+    headers:
+      - name: "Origin"
+        value: "https://docs.usebruno.com"
+      - name: "Access-Control-Request-Method"
+        value: "POST"
+    docs: "Ask the server which methods and headers the users endpoint accepts, the way a browser does before a cross-origin request."
+    examples:
+      - name: "Allowed"
+        response:
+          status: 204
+          statusText: "No Content"
+          headers:
+            - name: "Allow"
+              value: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+            - name: "Access-Control-Allow-Origin"
+              value: "https://docs.usebruno.com"
+            - name: "Access-Control-Allow-Methods"
+              value: "GET, POST, PUT, PATCH, DELETE, OPTIONS"
 
   - info:
       name: "GraphQL Fixtures"

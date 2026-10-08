@@ -25,7 +25,7 @@ export const StyledWrapper = styled.button`
   .search-result-method {
     flex-shrink: 0;
     display: inline-block;
-    width: 26px;
+    min-width: 1.625rem;
     margin-top: 1px;
     text-align: left;
     font-family: var(--font-mono);
@@ -33,8 +33,6 @@ export const StyledWrapper = styled.button`
     font-size: 10.5px;
     letter-spacing: 0.42px;
     color: var(--method-color);
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
@@ -117,7 +115,8 @@ export const StyledWrapper = styled.button`
     font-size: 11px;
     line-height: 1.2;
     color: var(--oc-colors-text-subtext1);
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

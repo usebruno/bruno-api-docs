@@ -1,6 +1,6 @@
 import React from 'react';
 import Tippy, { type TippyProps } from '@tippyjs/react';
-import type { Instance } from 'tippy.js';
+import { sticky, type Instance } from 'tippy.js';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface DropdownProps extends Omit<TippyProps, 'render' | 'children' | 'content' | 'ref'> {
@@ -67,11 +67,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
       }
     : props.popperOptions;
 
-  // When controlled (visible provided) Tippy must not also manage a trigger.
+  const resolvedPlugins = props.sticky ? [...(props.plugins ?? []), sticky] : props.plugins;
+
+  const sharedProps = {
+    interactive: true,
+    appendTo: resolvedAppendTo,
+    popperOptions: resolvedPopperOptions,
+    ...(resolvedPlugins ? { plugins: resolvedPlugins } : {})
+  };
+
   const tippyProps: Partial<TippyProps>
     = visible !== undefined
-      ? { ...props, visible, interactive: true, appendTo: resolvedAppendTo, popperOptions: resolvedPopperOptions }
-      : { ...props, trigger: 'click', interactive: true, appendTo: resolvedAppendTo, popperOptions: resolvedPopperOptions };
+      ? { ...props, visible, ...sharedProps }
+      : { ...props, trigger: 'click', ...sharedProps };
 
   return (
     <Tippy

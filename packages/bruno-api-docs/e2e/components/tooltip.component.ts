@@ -32,4 +32,21 @@ export class TooltipComponent extends BaseComponent {
   async hoverCell(index: number): Promise<void> {
     await this.truncatableCells.nth(index).hover();
   }
+
+  cellWithText(text: string): Locator {
+    return this.truncatableCells.filter({ hasText: text });
+  }
+
+  async popupColorsAgainstTheme(): Promise<{ popup: string[]; theme: string[] }> {
+    return this.popup.evaluate((el) => {
+      const probe = document.createElement('div');
+      probe.style.background = 'var(--oc-background-surface0)';
+      probe.style.color = 'var(--oc-text)';
+      document.body.appendChild(probe);
+      const theme = [getComputedStyle(probe).backgroundColor, getComputedStyle(probe).color];
+      probe.remove();
+      const style = getComputedStyle(el);
+      return { popup: [style.backgroundColor, style.color], theme };
+    });
+  }
 }

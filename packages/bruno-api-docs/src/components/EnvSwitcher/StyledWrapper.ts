@@ -28,9 +28,12 @@ export const StyledWrapper = styled.div`
     background: var(--oc-app-collection-toolbar-environment-selector-hover-bg);
   }
 
-  .env-switcher-trigger--empty {
+  .env-switcher-trigger--empty,
+  .env-switcher-trigger--empty:hover {
     color: var(--oc-app-collection-toolbar-environment-selector-no-environment-text);
     background: var(--oc-app-collection-toolbar-environment-selector-no-environment-bg);
+    border-color: var(--oc-border-border1);
+    cursor: default;
   }
 
   .env-switcher-chevron {
@@ -39,13 +42,4 @@ export const StyledWrapper = styled.div`
     flex: none;
   }
 
-  .env-switcher-trigger-name {
-    max-width: 10rem;
-  }
-
-  @media (max-width: 640px) {
-    .env-switcher-trigger-name {
-      max-width: 4.5rem;
-    }
-  }
 `;

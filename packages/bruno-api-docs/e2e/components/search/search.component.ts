@@ -48,4 +48,8 @@ export class SearchComponent extends BaseComponent {
   result(text: string): Locator {
     return this.results.filter({ hasText: text });
   }
+
+  resultMethod(text: string): Locator {
+    return this.result(text).getByTestId('search-result-method');
+  }
 }

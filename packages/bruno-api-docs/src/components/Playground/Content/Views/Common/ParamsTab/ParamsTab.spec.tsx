@@ -1,12 +1,10 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { headerTexts } from '@/test-utils/dom';
 import { ParamsTab } from './ParamsTab';
 
 const noop = () => {};
-
-const columnLabels = (root: ReturnType<typeof useRenderToDom>) =>
-  root.querySelectorAll('thead th').map((th) => th.text.trim());
 
 describe('ParamsTab — descriptions', () => {
   it('shows a Description column with authored query-param descriptions', () => {
@@ -16,7 +14,7 @@ describe('ParamsTab — descriptions', () => {
         onParamsChange={noop}
       />
     );
-    expect(columnLabels(root)).toContain('Description');
+    expect(headerTexts(root)).toContain('Description');
     expect(root.text).toContain('Page number, 1-based');
   });
 
@@ -28,5 +26,12 @@ describe('ParamsTab — descriptions', () => {
       />
     );
     expect(root.text).toContain('Search query');
+  });
+});
+
+describe('ParamsTab, column labels', () => {
+  it('labels the first query column Name, matching the app', () => {
+    const root = useRenderToDom(<ParamsTab params={[{ name: 'page', value: '1', type: 'query' }]} onParamsChange={noop} />);
+    expect(headerTexts(root)[0]).toBe('Name');
   });
 });

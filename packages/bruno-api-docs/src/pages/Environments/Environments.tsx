@@ -15,6 +15,7 @@ import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
 import { Heading } from '../../components/Heading/Heading';
 import { GlobeIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 const COLUMNS: TableColumn[] = [
   { key: 'name', header: 'Name', width: '13rem' },
@@ -191,7 +192,7 @@ export const Environments: React.FC<EnvironmentsProps> = ({ collection }) => {
             >
               {descriptionHtml && (
                 <ViewMore collapsedHeight="4.5rem" className="environment-description" testId="environment-description">
-                  <div className="markdown-documentation" dangerouslySetInnerHTML={{ __html: descriptionHtml }} />
+                  <MarkdownContent className="markdown-documentation" html={descriptionHtml} />
                 </ViewMore>
               )}
               <Table

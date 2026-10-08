@@ -28,15 +28,14 @@ describe('FolderConfiguration', () => {
       headers: [{ name: 'Accept', value: 'application/json' }],
       preRequest: 'console.log(1)'
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} />);
+    const requestRoot = useRenderToDom(<FolderConfiguration config={config} sectionType="request" />);
+    expect(query(requestRoot, '[data-testid="folder-config-headers"] .property-key').text.trim()).toBe('Accept');
+    expect(queryByTestId(requestRoot, 'folder-config-auth')).toBeNull();
 
-    expect(queryByTestId(root, 'folder-config-headers')).not.toBeNull();
-    expect(queryByTestId(root, 'folder-config-script')).not.toBeNull();
-    expect(query(root, '[data-testid="folder-config-headers"] .property-key').text.trim()).toBe('Accept');
-
-    expect(queryByTestId(root, 'folder-config-auth')).toBeNull();
-    expect(queryByTestId(root, 'folder-config-vars')).toBeNull();
-    expect(queryByTestId(root, 'folder-config-tests')).toBeNull();
+    const executionRoot = useRenderToDom(<FolderConfiguration config={config} sectionType="execution" />);
+    expect(queryByTestId(executionRoot, 'folder-config-script')).not.toBeNull();
+    expect(queryByTestId(executionRoot, 'folder-config-vars')).toBeNull();
+    expect(queryByTestId(executionRoot, 'folder-config-tests')).toBeNull();
   });
 
   it('labels the Auth group with an "Inherited from collection" badge when auth is inherited', () => {
@@ -45,7 +44,7 @@ describe('FolderConfiguration', () => {
       auth: { type: 'bearer', token: 't' } as any,
       authSource: { level: 'collection', name: 'API', uuid: '__collection_root__' }
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} authModeLabels={{ bearer: 'Bearer Token' }} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="request" authModeLabels={{ bearer: 'Bearer Token' }} />);
 
     const authGroup = getByTestId(root, 'folder-config-auth');
     expect(query(authGroup, '.config-group-head').text).toContain('Inherited from collection: API');
@@ -57,7 +56,7 @@ describe('FolderConfiguration', () => {
       auth: { type: 'bearer', token: 't' } as any,
       authSource: { level: 'folder', name: 'Parent', uuid: 'parent-uid' }
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} onNavigate={() => {}} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="request" onNavigate={() => {}} />);
     const chip = getByTestId(root, 'folder-config-auth-inherited');
     expect(chip.text).toContain('Inherited from folder: Parent');
     expect(chip.getAttribute('role')).toBe('button');
@@ -73,7 +72,7 @@ describe('FolderConfiguration', () => {
         { name: 'Authorization', value: 'Bearer x', source: folderSource }
       ]
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} onNavigate={() => {}} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="request" onNavigate={() => {}} />);
     const headers = getByTestId(root, 'folder-config-headers');
     expect(headers.text).toContain('Accept'); // own
     expect(headers.text).toContain('X-Api-Version'); // inherited
@@ -87,7 +86,7 @@ describe('FolderConfiguration', () => {
       ...baseConfig,
       inheritedHeaders: [{ name: 'X-Api-Version', value: 'v2', source: folderSource }]
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} onNavigate={() => {}} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="request" onNavigate={() => {}} />);
     const headers = getByTestId(root, 'folder-config-headers');
     expect(headers.text).toContain('X-Api-Version');
     expect(headers.text).toContain('1 header inherited');
@@ -100,7 +99,7 @@ describe('FolderConfiguration', () => {
       inheritedPreVariables: [{ name: 'baseUrl', value: '{{host}}', source: folderSource }],
       inheritedPostVariables: [{ name: 'sessionId', expression: 'res.body.id', source: folderSource }]
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} onNavigate={() => {}} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="execution" onNavigate={() => {}} />);
     const vars = getByTestId(root, 'folder-config-vars');
     expect(vars.text).toContain('ownPre');
     expect(vars.text).toContain('baseUrl');
@@ -116,7 +115,7 @@ describe('FolderConfiguration', () => {
       postResponse: 'post()',
       tests: 'test()'
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="execution" />);
 
     const phases = getByTestId(root, 'folder-config-script')
       .querySelectorAll('.config-phase-label')
@@ -130,7 +129,7 @@ describe('FolderConfiguration', () => {
       ...baseConfig,
       headers: [{ name: 'X-Debug', value: 'on', disabled: true, description: 'toggles debug logging' }]
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="request" />);
 
     const headers = getByTestId(root, 'folder-config-headers');
     expect(query(headers, '.property-key').text.trim()).toBe('X-Debug');
@@ -144,7 +143,7 @@ describe('FolderConfiguration', () => {
       variables: [{ name: 'baseUrl', value: 'https://api.example.com' }],
       postVariables: [{ name: 'token', expression: 'res.body.token', scope: 'runtime' }]
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="execution" />);
 
     const vars = getByTestId(root, 'folder-config-vars');
     const phases = vars.querySelectorAll('.config-phase-label').map((el) => el.text.trim());
@@ -154,15 +153,45 @@ describe('FolderConfiguration', () => {
     expect(vars.text).toContain('res.body.token');
   });
 
-  it('shows only the Post-Response column when there are no pre-request vars', () => {
+  it('keeps both phase columns when one of them is empty, showing "None." for the empty side', () => {
     const config: FolderConfig = {
       ...baseConfig,
       postVariables: [{ name: 'sessionId', expression: 'res.body.id', scope: 'runtime' }]
     };
-    const root = useRenderToDom(<FolderConfiguration config={config} />);
+    const root = useRenderToDom(<FolderConfiguration config={config} sectionType="execution" />);
 
     const vars = getByTestId(root, 'folder-config-vars');
     const phases = vars.querySelectorAll('.config-phase-label').map((el) => el.text.trim());
-    expect(phases).toEqual(['Post-Response']);
+    expect(phases).toEqual(['Pre-Request', 'Post-Response']);
+    expect(vars.text).toContain('None.');
+  });
+});
+
+describe('FolderConfiguration sectionType', () => {
+  const fullConfig: FolderConfig = {
+    ...baseConfig,
+    headers: [{ name: 'Accept', value: 'application/json' }],
+    auth: { type: 'basic', username: 'u' } as FolderConfig['auth'],
+    preRequest: 'console.log(1)',
+    tests: 'expect(1).to.equal(1)',
+    variables: [{ name: 'v', value: '1' }] as FolderConfig['variables']
+  };
+
+  it('renders only headers and auth for the request groups', () => {
+    const root = useRenderToDom(<FolderConfiguration config={fullConfig} sectionType="request" />);
+    expect(queryByTestId(root, 'folder-config-headers')).not.toBeNull();
+    expect(queryByTestId(root, 'folder-config-auth')).not.toBeNull();
+    expect(queryByTestId(root, 'folder-config-vars')).toBeNull();
+    expect(queryByTestId(root, 'folder-config-script')).toBeNull();
+    expect(queryByTestId(root, 'folder-config-tests')).toBeNull();
+  });
+
+  it('renders only vars, script and tests for the execution groups', () => {
+    const root = useRenderToDom(<FolderConfiguration config={fullConfig} sectionType="execution" />);
+    expect(queryByTestId(root, 'folder-config-vars')).not.toBeNull();
+    expect(queryByTestId(root, 'folder-config-script')).not.toBeNull();
+    expect(queryByTestId(root, 'folder-config-tests')).not.toBeNull();
+    expect(queryByTestId(root, 'folder-config-headers')).toBeNull();
+    expect(queryByTestId(root, 'folder-config-auth')).toBeNull();
   });
 });

@@ -1,0 +1,83 @@
+'use strict';
+
+const fs = require('node:fs');
+const path = require('node:path');
+const express = require('express');
+const helmet = require('helmet');
+const { apiDocs, embed } = require('@usebruno/api-docs-express');
+
+const PORT = Number(process.env.PORT || 5456);
+// relative on purpose: the core resolves it against this file, not the cwd, and check.sh boots
+// from a different directory to prove it
+const COLLECTION = '../fixtures/api-collection';
+const BRU = '../fixtures/api-collection-bru';
+const BUNDLED = '../fixtures/bundled.yml';
+const CONTENT = fs.readFileSync(path.join(__dirname, BUNDLED), 'utf8');
+const URL_FIXTURE = 'https://raw.githubusercontent.com/usebruno/bruno-api-docs/1aa76e1ad567b6e05e03e46ee53fb6bc1a66e7d5/integrations/contract-tests/fixtures/bundled.yml';
+
+const app = express();
+
+// the CSP the README documents: 'self' covers shell.js, the CDN serves the renderer, and the
+// renderer's wasm sandbox needs 'wasm-unsafe-eval' to instantiate and data: to be fetched
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        scriptSrc: ["'self'", 'https://cdn.usebruno.com', 'https://cdn.jsdelivr.net', "'wasm-unsafe-eval'"],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.usebruno.com', 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com'],
+        fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com'],
+        workerSrc: ["'self'", 'blob:', 'https://cdn.jsdelivr.net'],
+        connectSrc: ["'self'", 'data:', 'https://cdn.jsdelivr.net']
+      }
+    }
+  })
+);
+
+app.get('/control', (req, res) => res.json({ ok: true, from: 'the app itself' }));
+
+app.use('/docs', apiDocs({
+  collectionPath: COLLECTION,
+  environments: { include: ['Local'] },
+  tags: { exclude: ['internal'] },
+  pageTitle: 'Acme API',
+  logo: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 10 10%22%3E%3Ccircle cx=%225%22 cy=%225%22 r=%225%22/%3E%3C/svg%3E',
+  repositoryUrl: 'https://token:secret@github.com/acme/api-collection'
+}));
+
+app.use('/api/v2/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: '*', exclude: ['Prod'] } }));
+
+app.use('/internal/docs', apiDocs({ collectionPath: COLLECTION }));
+
+app.use('/bundled/docs', apiDocs({ collectionPath: BUNDLED }));
+
+app.use('/content/docs', apiDocs({ content: CONTENT }));
+
+app.use('/priority/docs', apiDocs({ content: CONTENT, collectionPath: COLLECTION }));
+
+app.use('/url/docs', apiDocs({ url: URL_FIXTURE }));
+
+app.use('/url-missing/docs', apiDocs({ url: URL_FIXTURE.replace('bundled.yml', 'missing.yml') }));
+
+app.use('/bru/docs', apiDocs({ collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }));
+
+app.use('/broken/docs', apiDocs({ collectionPath: './there-is-no-collection-here' }));
+
+app.use('/oversize/docs', apiDocs({ collectionPath: '../fixtures/walk-oversize' }));
+
+// theme is what the renderer will take next; until it does, passing it is a mistake we report
+app.use('/misconfigured/docs', apiDocs({ collectionPath: COLLECTION, theme: 'dark' }));
+
+// the docs inside the host's own page: the mount serves, the block only points at it
+app.use('/portal/docs', apiDocs({ collectionPath: COLLECTION, environments: { include: ['Local'] } }));
+app.get('/portal', (req, res) => {
+  res.type('html').send(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Acme Developer Portal</title></head>
+<body>
+  <h1>Acme Developer Portal</h1>
+  ${embed({ base: '/portal/docs' })}
+</body></html>`);
+});
+
+app.listen(PORT, () => {
+  console.log(`express rig on http://localhost:${PORT}`);
+});

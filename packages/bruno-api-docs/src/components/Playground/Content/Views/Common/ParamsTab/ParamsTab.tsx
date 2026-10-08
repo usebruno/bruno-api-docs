@@ -15,11 +15,11 @@ interface ParamsSectionProps {
   description?: string;
   data: KeyValueRow[];
   onChange: (rows: KeyValueRow[]) => void;
-  keyLabel?: string;
   showEnabled?: boolean;
   showActions?: boolean;
   disableNewRow?: boolean;
   readOnlyKey?: boolean;
+  testId?: string;
 }
 
 /**
@@ -32,11 +32,11 @@ const ParamsSection: React.FC<ParamsSectionProps> = React.memo(({
   description,
   data,
   onChange,
-  keyLabel = 'Key',
   showEnabled = true,
   showActions = true,
   disableNewRow = false,
-  readOnlyKey = false
+  readOnlyKey = false,
+  testId
 }) => (
   <div className="space-y-3">
     <div className="flex items-center justify-between mb-2">
@@ -52,12 +52,12 @@ const ParamsSection: React.FC<ParamsSectionProps> = React.memo(({
     <KeyValueTable
       data={data}
       onChange={onChange}
-      keyPlaceholder={keyLabel}
       showEnabled={showEnabled}
       showActions={showActions}
       disableNewRow={disableNewRow}
       readOnlyKey={readOnlyKey}
       showDescription
+      testId={testId}
     />
   </div>
 ));
@@ -128,11 +128,11 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
           title="Path"
           data={pathData}
           onChange={handlePathChange}
-          keyLabel="Name"
           showEnabled={false}
           showActions={false}
           disableNewRow={true}
           readOnlyKey={true}
+          testId="params-path"
         />
       )}
     </StyledWrapper>

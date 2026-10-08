@@ -1,0 +1,37 @@
+{
+  "name": "@usebruno/api-docs-core",
+  "version": "0.1.0",
+  "description": "Bruno API Docs core for Node: serves a Bruno collection's docs from inside your own app. Framework wrappers are one line over this.",
+  "keywords": [
+    "api-docs",
+    "bruno",
+    "opencollection",
+    "documentation"
+  ],
+  "homepage": "https://github.com/usebruno/bruno-api-docs/tree/main/integrations/nodejs/core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usebruno/bruno-api-docs.git",
+    "directory": "integrations/nodejs/core"
+  },
+  "bugs": {
+    "url": "https://github.com/usebruno/bruno-api-docs/issues"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "shell/shell.html",
+    "shell/shell.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

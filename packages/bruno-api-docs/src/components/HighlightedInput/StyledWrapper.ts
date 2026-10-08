@@ -19,7 +19,7 @@ export const StyledWrapper = styled.div`
     padding: 0.625rem 0;
     font-size: 0.8125rem;
     font-weight: 400;
-    line-height: 1;
+    line-height: 1.25;
     letter-spacing: 0;
     border-radius: 0.25rem;
     transition: all 0.15s ease;
@@ -52,7 +52,7 @@ export const StyledWrapper = styled.div`
     font-family: inherit;
     font-size: 0.8125rem;
     font-weight: 400;
-    line-height: 1;
+    line-height: 1.25;
     letter-spacing: 0;
     color: var(--oc-table-input-color);
   }
@@ -71,22 +71,13 @@ export const StyledWrapper = styled.div`
 
   &.highlight-input--multiline .text-input {
     resize: none;
-    overflow-x: hidden;
-    overflow-y: auto;
-    max-height: 12.5rem;
-    line-height: 1.4;
+    overflow: hidden;
     white-space: pre-wrap;
     overflow-wrap: break-word;
-    scrollbar-width: none;
-  }
-
-  &.highlight-input--multiline .text-input::-webkit-scrollbar {
-    display: none;
   }
 
   &.highlight-input--multiline .highlight-input-mirror {
     overflow: hidden;
-    line-height: 1.4;
     white-space: pre-wrap;
     overflow-wrap: break-word;
   }
@@ -95,6 +86,11 @@ export const StyledWrapper = styled.div`
     overflow-x: auto;
     white-space: pre;
     overflow-wrap: normal;
+    scrollbar-width: none;
+  }
+
+  &.highlight-input--nowrap .text-input::-webkit-scrollbar {
+    display: none;
   }
 
   &.highlight-input--nowrap .highlight-input-mirror {
@@ -117,6 +113,8 @@ export const Suggestions = styled.ul`
   list-style: none;
   max-height: 12.5rem;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--oc-scrollbar-color) transparent;
   background: var(--bg-primary);
   border: 0.0625rem solid var(--border-color);
   border-radius: var(--oc-radius);
@@ -124,6 +122,15 @@ export const Suggestions = styled.ul`
   font-family: var(--font-sans);
   font-size: 0.75rem;
   pointer-events: auto;
+
+  &::-webkit-scrollbar {
+    width: 0.375rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--oc-scrollbar-color);
+    border-radius: 0.375rem;
+  }
 
   .highlight-input-suggestion {
     padding: 0.25rem 0.5rem;

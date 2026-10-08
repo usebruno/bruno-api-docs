@@ -7,3 +7,7 @@ test.js
 # Claude Code
 .claude/
 CLAUDE.md
+test-results
+!integrations/contract-tests/fixtures/walk-safety/node_modules/
+integrations/dist-tarballs
+integrations/shell/bru.js

@@ -50,7 +50,7 @@ export const StyledWrapper = styled.div`
     border: 1px solid var(--oc-border-border0);
     border-radius: var(--oc-radius);
     color: var(--text-primary);
-    background-color: var(--oc-bg);
+    background-color: var(--oc-background-mantle);
     font-size: var(--oc-font-size-base);
     cursor: pointer;
     transition: color 0.15s ease, background-color 0.15s ease;
@@ -71,7 +71,7 @@ export const StyledWrapper = styled.div`
     cursor: not-allowed;
 
     &:hover {
-      background-color: var(--oc-bg);
+      background-color: var(--oc-background-mantle);
     }
   }
 `;

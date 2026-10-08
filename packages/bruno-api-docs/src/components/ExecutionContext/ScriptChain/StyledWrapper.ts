@@ -37,23 +37,11 @@ export const StyledWrapper = styled.div`
     font-weight: 600;
     color: var(--primary-text);
   }
-  .script-http-url {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 
   @container docs (max-width: 600px) {
     .script-line {
       gap: 0.5rem;
       padding: 0.375rem 0.75rem;
-    }
-    .script-http-url {
-      white-space: normal;
-      overflow-wrap: anywhere;
     }
     .script-http-main {
       flex-wrap: wrap;

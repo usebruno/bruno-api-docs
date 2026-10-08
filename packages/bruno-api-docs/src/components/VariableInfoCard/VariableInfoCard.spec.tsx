@@ -232,6 +232,13 @@ describe('VariableInfoCard (editable)', () => {
     expect(root.querySelector(selector('reveal'))).not.toBeNull();
   });
 
+  it('offers no copy on a prompt variable, even though it is editable and empty', () => {
+    const root = useRenderToDom(editableCardTree('?OTP'));
+    expect(part(root, 'scope').text).toBe('Prompt');
+    expect(part(root, 'value').text).toBe('(empty)');
+    expect(root.querySelector(selector('copy'))).toBeNull();
+  });
+
   it('never makes a read-only scope (process.env) editable', () => {
     const root = useRenderToDom(editableCardTree('process.env.HOME'));
     expect(part(root, 'note').text).toBe('read-only');

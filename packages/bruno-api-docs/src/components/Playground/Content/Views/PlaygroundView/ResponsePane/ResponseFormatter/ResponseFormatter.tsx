@@ -51,6 +51,7 @@ const ResponseFormatSelector: React.FC<ResponseFormatSelectorProps> = ({
       <MenuDropdown
         items={items}
         selectedItemId={selectedFormat}
+        sticky="reference"
         itemToText={(item: MenuDropdownItem) => (
           <span className="inline-flex items-center gap-1.5">
             {TriggerIcon && (

@@ -1,25 +1,34 @@
 import styled from '@emotion/styled';
 
-/**
- * Borderless brand-colored trigger + muted caret, ported from bruno-app's
- * RequestBodyMode (theme.primary.text label, muted caret).
- */
-export const TriggerButton = styled.button`
+export const BodyActionButton = styled.button`
   display: inline-flex;
   align-items: center;
-  padding: 0 0 0.25rem;
+  gap: 0.375rem;
+  box-sizing: border-box;
+  height: 1.53125rem;
+  padding: 0.25rem;
   background: transparent;
-  border: none;
+  border: 0.0625rem solid var(--oc-border-border1);
+  border-radius: var(--oc-border-radius-base);
   font-family: inherit;
   font-size: 0.75rem;
-  line-height: 1.125rem;
+  font-weight: 500;
+  line-height: 1;
   letter-spacing: 0;
-  color: var(--oc-primary-text);
+  color: var(--oc-colors-text-muted);
   cursor: pointer;
   user-select: none;
 
+  &:hover {
+    color: var(--oc-text);
+  }
+
+  &:focus-visible {
+    outline: 0.125rem solid var(--oc-accents-primary);
+    outline-offset: 0.0625rem;
+  }
+
   .body-mode-caret {
-    margin-left: 0.25rem;
-    color: var(--oc-colors-text-muted);
+    fill: currentColor;
   }
 `;

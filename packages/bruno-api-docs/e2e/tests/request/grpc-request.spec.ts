@@ -13,6 +13,20 @@ test.describe('Request page — gRPC requests', () => {
     await expect(grpcRequestPage.urlBar.tryButton).toHaveCount(0);
   });
 
+  test('keeps the URL bar pinned below the header while the page scrolls', async ({ page, grpcRequestPage }) => {
+    await page.setViewportSize({ width: 1280, height: 600 });
+    await grpcRequestPage.open([REALTIME, 'Order Service']);
+    const before = await grpcRequestPage.urlSticky.boundingBox();
+
+    await grpcRequestPage.urlSticky.hover();
+    await page.mouse.wheel(0, 900);
+
+    await expect(grpcRequestPage.title).not.toBeInViewport();
+    await expect(grpcRequestPage.urlSticky).toBeInViewport();
+    const after = await grpcRequestPage.urlSticky.boundingBox();
+    expect(after!.y).toBeLessThan(before!.y);
+  });
+
   test('marks the grpcurl command plaintext for an unencrypted environment', async ({ grpcRequestPage }) => {
     await grpcRequestPage.open([REALTIME, 'Order Service']);
 

@@ -16,13 +16,25 @@ export const StyledWrapper = styled.div`
   box-shadow: var(--oc-dropdown-shadow);
   border-radius: var(--oc-border-radius-base);
   border: 1px solid var(--oc-dropdown-border);
-  /* Cap the surface height so a long list (e.g. the assertion operators) scrolls
-     instead of spilling past the embedded component; min() keeps it within small
-     viewports too. */
-  max-height: min(20rem, 90vh);
+  max-height: min(24rem, 90vh);
   overflow-y: auto;
   max-width: unset !important;
   padding: 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
+
+  &::-webkit-scrollbar {
+    width: 0.5rem;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 64rem;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
   &.menu-dropdown-sm {
     min-width: 6.875rem;

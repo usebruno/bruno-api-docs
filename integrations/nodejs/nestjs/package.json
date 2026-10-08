@@ -1,0 +1,41 @@
+{
+  "name": "@usebruno/api-docs-nestjs",
+  "version": "0.1.0",
+  "description": "Serve a Bruno collection as API docs from inside your own NestJS app, behind your own auth.",
+  "keywords": [
+    "api-docs",
+    "bruno",
+    "opencollection",
+    "documentation",
+    "nestjs",
+    "nest"
+  ],
+  "homepage": "https://github.com/usebruno/bruno-api-docs/tree/main/integrations/nodejs/nestjs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usebruno/bruno-api-docs.git",
+    "directory": "integrations/nodejs/nestjs"
+  },
+  "bugs": {
+    "url": "https://github.com/usebruno/bruno-api-docs/issues"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^10.0.0 || ^11.0.0 || ^12.0.0",
+    "@nestjs/core": "^10.0.0 || ^11.0.0 || ^12.0.0"
+  },
+  "dependencies": {
+    "@usebruno/api-docs-core": "0.1.0"
+  }
+}

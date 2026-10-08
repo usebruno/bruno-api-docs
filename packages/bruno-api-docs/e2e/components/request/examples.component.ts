@@ -29,7 +29,9 @@ export class ExamplesComponent extends BaseComponent {
   }
 
   async open(name: string): Promise<void> {
-    await this.example(name).getByTestId('example-toggle').click();
+    const toggle = this.example(name).getByTestId('example-toggle');
+    if ((await toggle.getAttribute('aria-expanded')) === 'true') return;
+    await toggle.click();
   }
 
   // The snippet dialog is portalled to <body>, so it is scoped to the page, not the card.

@@ -69,3 +69,68 @@ test.describe('Folder page', () => {
     });
   });
 });
+
+test.describe('Folder page sections', () => {
+  test.beforeEach(async ({ folderPage }) => {
+    await folderPage.open(['billing', 'customers']);
+  });
+
+  test('Folder Configuration holds the headers and auth', async ({ folderPage }) => {
+    await expect(folderPage.configurationSection).toContainText('Folder Configuration');
+    await expect(folderPage.configurationGroup('headers')).toBeVisible();
+    await expect(folderPage.configurationGroup('auth')).toBeVisible();
+
+    await test.step('vars, script and tests are not under Folder Configuration', async () => {
+      await expect(folderPage.configurationGroup('vars')).toHaveCount(0);
+      await expect(folderPage.configurationGroup('script')).toHaveCount(0);
+      await expect(folderPage.configurationGroup('tests')).toHaveCount(0);
+    });
+  });
+
+  test('Execution Context holds the variables, script and tests', async ({ folderPage }) => {
+    await expect(folderPage.executionContextSection).toContainText('Execution Context');
+    await expect(folderPage.executionContextGroup('vars')).toBeVisible();
+    await expect(folderPage.executionContextGroup('script')).toBeVisible();
+    await expect(folderPage.executionContextGroup('tests')).toBeVisible();
+
+    await test.step('headers and auth are not under Execution Context', async () => {
+      await expect(folderPage.executionContextGroup('headers')).toHaveCount(0);
+      await expect(folderPage.executionContextGroup('auth')).toHaveCount(0);
+    });
+  });
+});
+
+test.describe('Folder page empty sections', () => {
+  test('shows an empty state in both sections when the folder has nothing configured', async ({ folderPage }) => {
+    await folderPage.open(['Authentication'], '/?fixture=folders');
+    await expect(folderPage.emptyState).toBeVisible();
+    await expect(folderPage.executionContextEmptyState).toBeVisible();
+    await expect(folderPage.executionContextEmptyState).toContainText('No execution context');
+  });
+});
+
+test.describe('Folder variable phases', () => {
+  test('shows both Pre-Request and Post-Response, marking the empty one "None."', async ({ folderPage }) => {
+    await folderPage.open(['Realtime']);
+    await expect(folderPage.configuration.vars).toContainText('Pre-Request');
+    await expect(folderPage.configuration.vars).toContainText('Post-Response');
+    await expect(folderPage.configuration.vars).toContainText('None.');
+  });
+});
+
+test.describe('Folder execution context accordion', () => {
+  test('collapses the Execution Context section and remembers it across a reload', async ({ folderPage, page }) => {
+    await folderPage.open(['Realtime']);
+    const toggle = folderPage.executionContextSection.getByRole('button', { name: /Execution Context/i });
+
+    await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    await expect(folderPage.configuration.vars).toBeVisible();
+
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await expect(folderPage.configuration.vars).toBeHidden();
+
+    await page.reload();
+    await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  });
+});

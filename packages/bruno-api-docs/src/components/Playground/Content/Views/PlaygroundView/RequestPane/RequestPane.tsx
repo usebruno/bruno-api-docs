@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
 import Tabs from '@/ui/Tabs/Tabs';
+import { useSessionStorage } from '@/hooks';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { rowToVariable } from '@/utils/variableDataType';
 import HeadersTab from '../../Common/HeadersTab/HeadersTab';
 import ParamsTab from '../../Common/ParamsTab/ParamsTab';
-import BodyTab from '../../Common/BodyTab';
+import BodyTab from '../../Common/BodyTab/BodyTab';
 import BodyModeSelector from '../../Common/BodyModeSelector/BodyModeSelector';
 import AuthTab from '../../Common/AuthTab/AuthTab';
 import ScriptsTab from '../../Common/ScriptsTab/ScriptsTab';
@@ -16,6 +17,7 @@ import VariablesTab from '../../Common/VariablesTab/VariablesTab';
 import OverviewTab from '../../Common/OverviewTab/OverviewTab';
 import { StyledWrapper } from './StyledWrapper';
 import {
+  countEnabled,
   getHttpParams,
   getHttpHeaders,
   getHttpBody,
@@ -39,7 +41,7 @@ interface RequestPaneProps {
 }
 
 const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inheritedAuth }) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundRequestTab', 'overview');
 
   const handleParamsChange = (params: KeyValueRow[]) => {
     const updatedParams = params.map((p) => ({ ...keyValueRowToEntry(p), type: p.type }));
@@ -213,19 +215,19 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
     {
       id: 'params',
       label: 'Params',
-      contentIndicator: params?.length || undefined,
+      contentIndicator: countEnabled(params),
       content: renderParams()
     },
     {
       id: 'variables',
       label: 'Variables',
-      contentIndicator: variables?.length || undefined,
+      contentIndicator: countEnabled([...variables, ...postResponseVars]),
       content: renderVariables()
     },
     {
       id: 'headers',
       label: 'Headers',
-      contentIndicator: headers?.length || undefined,
+      contentIndicator: countEnabled(headers),
       content: renderHeaders()
     },
     {
@@ -250,7 +252,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
     {
       id: 'assertions',
       label: 'Assertions',
-      contentIndicator: assertions?.length || undefined,
+      contentIndicator: countEnabled(assertions),
       content: renderAssertions()
     },
     {

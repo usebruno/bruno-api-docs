@@ -1,0 +1,6 @@
+name: Local
+variables:
+  - name: baseUrl
+    value: http://localhost:5456
+  - name: apiToken
+    value: local-token-safe-to-publish

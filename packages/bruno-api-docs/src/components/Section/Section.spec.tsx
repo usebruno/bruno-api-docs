@@ -13,4 +13,13 @@ describe('Section', () => {
     expect(html).toContain('Environments');
     expect(html).toContain('List content');
   });
+
+  it('gives the collapse toggle a test id derived from the section test id', () => {
+    const html = renderToStaticMarkup(
+      <Section label="Execution Context" collapsible testId="request-section-execution-context">
+        <p>Scripts</p>
+      </Section>
+    );
+    expect(html).toContain('data-testid="request-section-execution-context-toggle"');
+  });
 });

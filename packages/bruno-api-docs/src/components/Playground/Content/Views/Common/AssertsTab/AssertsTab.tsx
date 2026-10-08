@@ -3,6 +3,12 @@ import { IconCaretDown } from '@tabler/icons';
 import type { Assertion } from '@opencollection/types/common/assertions';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import MenuDropdown from '@/ui/MenuDropdown';
+import {
+  assertionsToRows,
+  rowsToAssertions,
+  DEFAULT_ASSERTION_OPERATOR,
+  UNARY_ASSERTION_OPERATORS
+} from '@/utils/assertionRows';
 import { StyledWrapper } from './StyledWrapper';
 
 /**
@@ -77,22 +83,8 @@ const ASSERTION_OPERATORS = [
   { value: 'isArray', label: 'is array' }
 ];
 
-const DEFAULT_OPERATOR = ASSERTION_OPERATORS[0].value;
-
-const UNARY_OPERATORS = new Set([
-  'isEmpty',
-  'isNotEmpty',
-  'isNull',
-  'isUndefined',
-  'isDefined',
-  'isTruthy',
-  'isFalsy',
-  'isJson',
-  'isNumber',
-  'isString',
-  'isBoolean',
-  'isArray'
-]);
+const DEFAULT_OPERATOR_OPTION
+  = ASSERTION_OPERATORS.find((op) => op.value === DEFAULT_ASSERTION_OPERATOR) ?? ASSERTION_OPERATORS[0];
 
 interface AssertsTabProps {
   assertions: Assertion[];
@@ -107,32 +99,16 @@ export const AssertsTab: React.FC<AssertsTabProps> = ({
   title,
   description
 }) => {
-  const assertionsData: KeyValueRow[] = (assertions || []).map((assertion, index) => ({
-    id: `assertion-${index}`,
-    name: assertion.expression || '',
-    value: assertion.value || '',
-    operator: assertion.operator || DEFAULT_OPERATOR,
-    enabled: !assertion.disabled
-  }));
+  const assertionsData = assertionsToRows(assertions || []);
 
   const handleAssertionsChange = (rows: KeyValueRow[]) => {
-    const updatedAssertions: Assertion[] = rows.map((row) => {
-      const operator = row.operator || DEFAULT_OPERATOR;
-      const isUnary = UNARY_OPERATORS.has(operator);
-      return {
-        expression: row.name,
-        operator,
-        value: isUnary ? undefined : row.value,
-        disabled: !row.enabled
-      };
-    });
-    onAssertionsChange(updatedAssertions);
+    onAssertionsChange(rowsToAssertions(rows));
   };
 
   const handleOperatorChange = (index: number, newOperator: string) => {
     const updatedRows = [...assertionsData];
     updatedRows[index] = { ...updatedRows[index], operator: newOperator };
-    if (UNARY_OPERATORS.has(newOperator)) {
+    if (UNARY_ASSERTION_OPERATORS.has(newOperator)) {
       updatedRows[index].value = '';
     }
     handleAssertionsChange(updatedRows);
@@ -149,16 +125,17 @@ export const AssertsTab: React.FC<AssertsTabProps> = ({
       <KeyValueTable
         data={assertionsData}
         onChange={handleAssertionsChange}
-        keyPlaceholder="Expression (e.g., res.status)"
-        valuePlaceholder="Expected value"
+        keyPlaceholder="Expr"
+        valuePlaceholder="Value"
         showEnabled={true}
+        showDescription
         additionalColumns={[
           {
             key: 'operator',
             label: 'Operator',
             render: (row, index) => {
               const currentOperator
-                = ASSERTION_OPERATORS.find((op) => op.value === row.operator) ?? ASSERTION_OPERATORS[0];
+                = ASSERTION_OPERATORS.find((op) => op.value === row.operator) ?? DEFAULT_OPERATOR_OPTION;
               return (
                 <MenuDropdown
                   selectedItemId={currentOperator.value}

@@ -21,7 +21,7 @@ import {
 } from '@/utils/schemaHelpers';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { getItemUuid } from '@/utils/itemUtils';
-import { getInheritedAuthSummary } from '@/utils/request';
+import { actionsToPostResponseVars, getInheritedAuthSummary, postResponseVarsToActions } from '@/utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
 
@@ -54,12 +54,21 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     onFolderChange(updatedFolder);
   };
 
+  const postResponseVars = actionsToPostResponseVars(folder.request?.actions);
+
   const handleHeadersChange = (headers: KeyValueRow[]) => {
     commitFolder({ ...folder, request: { ...folder.request, headers: headers.map(keyValueRowToEntry) } });
   };
 
   const handleVariablesChange = (variables: KeyValueRow[]) => {
     commitFolder({ ...folder, request: { ...folder.request, variables: variables.map(rowToVariable) } });
+  };
+
+  const handlePostResponseVarsChange = (rows: KeyValueRow[]) => {
+    commitFolder({
+      ...folder,
+      request: { ...folder.request, actions: postResponseVarsToActions(rows, folder.request?.actions) }
+    });
   };
 
   const handleScriptChange = (scriptType: 'preRequest' | 'postResponse' | 'tests', value: string) => {
@@ -99,6 +108,8 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     <VariablesTab
       variables={folder.request?.variables || []}
       onVariablesChange={handleVariablesChange}
+      postResponseVars={postResponseVars}
+      onPostResponseVarsChange={handlePostResponseVarsChange}
       description="Variables available to every request inside this folder."
     />
   );

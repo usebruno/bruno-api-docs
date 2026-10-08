@@ -7,7 +7,7 @@ test.describe('Environments page', () => {
 
   test('opens from the sidebar and shows a tab per environment', async ({ environmentsPage }) => {
     await expect(environmentsPage.title).toHaveText('Environments');
-    await expect(environmentsPage.tabs).toHaveCount(2);
+    await expect(environmentsPage.tabs).toHaveCount(4);
     await expect(environmentsPage.tab('Local')).toBeVisible();
     await expect(environmentsPage.tab('Prod')).toBeVisible();
   });

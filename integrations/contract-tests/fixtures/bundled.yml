@@ -1,0 +1,13 @@
+opencollection: 1.0.0
+info:
+  name: Acme API (bundled)
+  version: 1.0.0
+bundled: true
+items:
+  - type: folder
+    name: Catalog
+    items:
+      - type: http
+        name: List products
+        method: GET
+        url: https://api.acme.test/products

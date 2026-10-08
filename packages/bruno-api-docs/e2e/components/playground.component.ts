@@ -12,6 +12,8 @@ import type { DockMode } from '../../src/utils/playgroundDock';
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);
   readonly preRequestVars = new KeyValueTableComponent(this.page, 'variables-pre-request');
+  readonly postResponseVars = new KeyValueTableComponent(this.page, 'variables-post-response');
+  readonly pathParams = new KeyValueTableComponent(this.page, 'params-path');
   // The Auth tab lives inside the playground request pane; open it with selectTab('auth').
   readonly auth = new RequestAuthComponent(this.page);
   readonly methodSelector = new MethodSelectorComponent(this.page);
@@ -140,8 +142,13 @@ export class PlaygroundComponent extends BaseComponent {
   async selectTab(id: string): Promise<void> {
     const direct = this.tab(id);
     if ((await direct.count()) > 0 && (await direct.isVisible())) {
-      await direct.click();
-      return;
+      try {
+        await direct.click({ timeout: 1000 });
+        return;
+      } catch {
+        // The responsive tab bar re-measures a frame after a switch and may have just moved this
+        // tab into the overflow menu, detaching the button we resolved.
+      }
     }
     await this.page.getByTestId('tabs-more').click();
     await this.page.getByTestId(`tabs-more-${id}`).click();
@@ -180,5 +187,12 @@ export class PlaygroundComponent extends BaseComponent {
 
   async grabInlineResizer(): Promise<void> {
     await this.grabHandle(this.inlineResizer);
+  }
+
+  async storedItem(area: 'session' | 'local', key: string): Promise<string | null> {
+    return this.page.evaluate(
+      ([area, key]) => (area === 'local' ? localStorage : sessionStorage).getItem(key),
+      [area, key] as [typeof area, string]
+    );
   }
 }

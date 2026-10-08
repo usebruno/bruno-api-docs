@@ -31,6 +31,17 @@ export const StyledWrapper = styled.div`
     min-width: 0;
   }
 
+  .config-column .property-empty-message {
+    display: flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.5rem 0.875rem;
+    border-radius: var(--oc-radius);
+    background: var(--oc-background-base);
+    box-shadow: inset 0 0 0 0.0625rem var(--border-color);
+    color: var(--text-tertiary);
+  }
+
   .config-phase-label {
     margin: 0 0 0.375rem 0;
     font-family: var(--font-sans);

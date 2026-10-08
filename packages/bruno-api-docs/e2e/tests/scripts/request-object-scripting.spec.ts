@@ -13,33 +13,111 @@ test('req read methods return the right types', function () {
   expect(req.getHeaders()).to.be.an('object');
   expect(Array.isArray(req.getPathParams())).to.equal(true);
   expect(Array.isArray(req.getTags())).to.equal(true);
+  expect(req.getName()).to.be.a('string');
 });
 
-test('req.getUrl reflects the request URL', function () {
+test('req.getUrl and req.getName reflect the open request', function () {
   expect(req.getUrl()).to.contain('/api/users');
+  expect(req.getName()).to.equal('get users');
+  expect(req.getTags()).to.include('users');
 });
 
-test('req.headerList reads the header list: all, toObject, toString, count', function () {
+test('req.setUrl and req.setMethod write through and are readable back', function () {
+  req.setUrl('https://example.com/v2/items?x=1');
+  req.setMethod('PATCH');
+  expect(req.getUrl()).to.equal('https://example.com/v2/items?x=1');
+  expect(req.getMethod()).to.equal('PATCH');
+  expect(req.getHost()).to.equal('example.com');
+  expect(req.getPath()).to.equal('/v2/items');
+  expect(req.getQueryString()).to.equal('x=1');
+});
+
+test('req.setHeader, setHeaders, deleteHeader, and deleteHeaders mutate headers', function () {
+  req.setHeader('X-Script', 'yes');
+  expect(req.getHeader('X-Script')).to.equal('yes');
+
+  req.setHeaders({ 'X-Batch-A': '1', 'X-Batch-B': '2' });
+  expect(req.getHeader('X-Batch-A')).to.equal('1');
+  expect(req.getHeader('X-Batch-B')).to.equal('2');
+
+  req.deleteHeader('X-Batch-A');
+  expect(req.getHeader('X-Batch-A')).to.equal(undefined);
+
+  req.deleteHeaders(['X-Batch-B', 'X-Script']);
+  expect(req.getHeader('X-Batch-B')).to.equal(undefined);
+  expect(req.getHeader('X-Script')).to.equal(undefined);
+});
+
+test('req.setBody and req.getBody round-trip JSON payloads', function () {
+  req.setBody({ hello: 'world', n: 2 });
+  expect(req.getBody().hello).to.equal('world');
+  expect(req.getBody().n).to.equal(2);
+  expect(req.getBody({ raw: true })).to.be.a('string');
+});
+
+test('req.getTimeout, setTimeout, getExecutionMode, and disableParsingResponseJson run', function () {
+  var before = req.getTimeout();
+  req.setTimeout(1234);
+  expect(req.getTimeout()).to.equal(1234);
+  if (before !== undefined && before !== null) {
+    req.setTimeout(before);
+  }
+
+  expect(req.getExecutionMode()).to.equal('standalone');
+  req.disableParsingResponseJson();
+});
+
+test('req.headerList reads the header list: all, toObject, toString, toJSON, count', function () {
   expect(Array.isArray(req.headerList.all())).to.equal(true);
   expect(req.headerList.toObject()).to.be.an('object');
   expect(req.headerList.toString()).to.be.a('string');
+  expect(Array.isArray(req.headerList.toJSON())).to.equal(true);
   expect(req.headerList.count()).to.be.at.least(0);
 });
 
-test('req.setHeader and req.headerList add/remove a header, readable via getHeader and has', function () {
-  req.setHeader('X-Script', 'yes');
-  expect(req.getHeader('X-Script')).to.equal('yes');
+test('req.headerList add, upsert, remove, has, find, filter, and indexOf', function () {
   req.headerList.add('X-Added', '1');
   expect(req.headerList.has('x-added')).to.equal(true);
+  expect(req.headerList.get('X-Added')).to.equal('1');
+  expect(req.headerList.one('x-added').value).to.equal('1');
+
+  expect(req.headerList.upsert('x-added', '2')).to.equal(false);
+  expect(req.headerList.get('x-added')).to.equal('2');
+  expect(req.headerList.upsert('X-New', 'n')).to.equal(true);
+
+  expect(req.headerList.find(function (h) { return h.key === 'x-added'; }).value).to.equal('2');
+  expect(req.headerList.filter(function (h) { return h.key === 'x-added'; }).length).to.equal(1);
+  expect(req.headerList.indexOf('X-Added')).to.be.at.least(0);
+
   req.headerList.remove('x-added');
   expect(req.headerList.has('x-added')).to.equal(false);
 });
 
-test('req.headerList iterators run their callbacks across the sandbox', function () {
+test('req.headerList iterators and reduce run their callbacks across the sandbox', function () {
+  req.headerList.add('X-Iter', '1');
   expect(Array.isArray(req.headerList.map(function (h) { return h.key; }))).to.equal(true);
   var count = 0;
   req.headerList.each(function () { count++; });
   expect(count).to.equal(req.headerList.count());
+  var summed = req.headerList.reduce(function (acc) { return acc + 1; }, 0);
+  expect(summed).to.equal(req.headerList.count());
+});
+
+test('req.headerList populate, repopulate, assimilate, and clear rewrite the list', function () {
+  req.headerList.repopulate([{ key: 'X-Only', value: '1' }]);
+  expect(req.headerList.has('x-only')).to.equal(true);
+  expect(req.headerList.count()).to.equal(1);
+
+  req.headerList.populate([{ key: 'X-Pop', value: '2' }, { key: 'X-Only', value: 'ignored' }]);
+  expect(req.headerList.has('x-pop')).to.equal(true);
+  expect(req.headerList.get('x-only')).to.equal('1');
+
+  req.headerList.assimilate([{ key: 'X-Merged', value: '3' }], true);
+  expect(req.headerList.has('x-merged')).to.equal(true);
+  expect(req.headerList.has('x-only')).to.equal(false);
+
+  req.headerList.clear();
+  expect(req.headerList.count()).to.equal(0);
 });
 `;
 

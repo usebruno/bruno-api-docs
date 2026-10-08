@@ -21,23 +21,20 @@ import { resolveInheritedAuth } from '@/utils/request';
 export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, requestTreePath: Item[] = []): void => {
   const headers = new Map<string, HttpRequestHeader>();
 
-  // Start with collection-level headers
-  const collectionHeaders = collection.request?.headers || [];
-  collectionHeaders.forEach((header) => {
-    if (!header.disabled) {
-      headers.set(header.name.toLowerCase(), header);
-    }
-  });
+  const addLevel = (rows: HttpRequestHeader[] | undefined): void => {
+    (rows || []).forEach((header) => {
+      if (header.name && !header.disabled) {
+        headers.set(header.name.toLowerCase(), header);
+      }
+    });
+  };
+
+  addLevel(collection.request?.headers);
 
   // Apply folder-level headers in order (parent to child)
   for (const item of requestTreePath) {
     if (isFolder(item)) {
-      const folderHeaders = item.request?.headers || [];
-      folderHeaders.forEach((header) => {
-        if (!header.disabled) {
-          headers.set(header.name.toLowerCase(), header);
-        }
-      });
+      addLevel(item.request?.headers);
     }
   }
 
@@ -53,15 +50,14 @@ export const mergeHeaders = (collection: OpenCollection, request: HttpRequest, r
     request.http.headers = [...currentHeaders];
   }
 
-  // Merge with existing request headers (request headers take precedence)
-  const requestHeaderMap = new Map<string, HttpRequestHeader>();
-  currentHeaders.forEach((header) => {
-    requestHeaderMap.set(header.name.toLowerCase(), header);
-  });
+  const ownHeaderKeys = new Set(
+    currentHeaders
+      .filter((header) => header.name && !header.disabled)
+      .map((header) => header.name.toLowerCase())
+  );
 
-  // Add merged headers that don't exist in request
   headers.forEach((header, name) => {
-    if (!requestHeaderMap.has(name)) {
+    if (!ownHeaderKeys.has(name)) {
       request.http!.headers!.push({ ...header });
     }
   });

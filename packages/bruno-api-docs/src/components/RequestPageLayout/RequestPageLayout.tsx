@@ -20,6 +20,7 @@ import { Tags } from '@/components/Tags/Tags';
 import type { HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { RequestPageData } from '@/hooks/useRequestPageData';
 import { StyledWrapper } from './StyledWrapper';
+import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
 
 export const NAV_GROUP = { configuration: 'Configuration' } as const;
 export const NAV_LEVEL = { section: 1, configItem: 2 } as const;
@@ -100,15 +101,17 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
 
         <Heading size="md" style={{ marginTop: '0.25rem' }} testId="request-title">{name}</Heading>
 
-        <RequestUrlBar method={method} url={url} onTry={onTryClick} style={{ marginTop: '0.75rem' }} />
+        <div className="request-url-sticky">
+          <RequestUrlBar method={method} url={url} onTry={onTryClick} />
+        </div>
 
         {descHtml && (
           <ViewMore collapsedHeight="4.5rem" style={{ marginTop: '1.5rem' }} testId="request-description">
-            <div
+            <MarkdownContent
               className="markdown-documentation"
-              data-nav-headings
-              data-nav-level={NAV_LEVEL.section}
-              dangerouslySetInnerHTML={{ __html: descHtml }}
+              navHeadings
+              navLevel={NAV_LEVEL.section}
+              html={descHtml}
             />
           </ViewMore>
         )}
@@ -159,7 +162,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
           </div>
 
           <div className="request-col-right">
-            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav labelClassName="section-label-lower">
+            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>
               <CodeSnippetTabs
                 method={method}
                 url={url}
@@ -173,7 +176,6 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
                 label="Tags"
                 testId="request-section-tags"
                 hideFromNav
-                labelClassName="section-label-lower"
                 badge={
                   inheritedTags.length > 0 ? (
                     <ContentTypeBadge label={inheritedCountLabel(inheritedTags.length, 'tag')} />
@@ -207,7 +209,6 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
               testScripts={testScripts}
               flow={scriptFlow}
               requestLabel={requestLabel}
-              url={url}
               onNavigate={onBreadcrumbClick}
             />
           ) : (

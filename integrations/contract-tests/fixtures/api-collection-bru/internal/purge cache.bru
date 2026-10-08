@@ -1,0 +1,18 @@
+meta {
+  name: Purge cache
+  type: http
+  seq: 1
+  tags: [
+    internal
+  ]
+}
+
+post {
+  url: {{baseUrl}}/admin/purge-cache
+  body: none
+  auth: inherit
+}
+
+headers {
+  X-Admin-Key: {{adminKey}}
+}

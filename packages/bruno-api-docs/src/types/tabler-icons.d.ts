@@ -40,4 +40,5 @@ declare module '@tabler/icons' {
   export const IconBinaryTree: TablerIcon;
   export const IconAlertTriangle: TablerIcon;
   export const IconEye: TablerIcon;
+  export const IconWand: TablerIcon;
 }

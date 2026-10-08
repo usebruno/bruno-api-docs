@@ -1,0 +1,10 @@
+info:
+  name: Reindex catalog
+  type: http
+  seq: 3
+  tags:
+    - internal
+http:
+  method: POST
+  url: "{{baseUrl}}/admin/reindex-catalog"
+  auth: inherit

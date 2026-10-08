@@ -100,7 +100,7 @@ export const SnippetTabs: React.FC<SnippetTabsProps> = ({
               <ExpandIcon />
             </button>
           ) : (
-            <CopyButton text={copyText} label="Copy code" className="snippet-copy" />
+            <CopyButton text={copyText} label="Copy code" className="snippet-copy" testId={`${testId}-copy`} />
           )}
         </div>
         <Code

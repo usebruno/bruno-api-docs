@@ -15,6 +15,7 @@ import { GlobeIcon } from '@/assets/icons';
 import { useAppDispatch } from '@/store/hooks';
 import { cx } from '@/utils/cx';
 import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
+import { countEnabled } from '@/utils/schemaHelpers';
 import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@/utils/variableResolution';
 import { updateCollectionEnvironments } from '@/store/slices/playground';
 
@@ -171,16 +172,16 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
       />
     );
 
-  const panels: Record<EnvTabId, { contentIndicator: number; content: React.ReactNode }> = {
+  const panels: Record<EnvTabId, { contentIndicator: number | undefined; content: React.ReactNode }> = {
     variables: {
-      contentIndicator: plainRows.length,
+      contentIndicator: countEnabled(plainRows),
       content: renderVars(plainRows, (rows) => commit(rows, secretRows), {
         editableDataType: true,
         showDescription: true
       })
     },
     secrets: {
-      contentIndicator: secretRows.length,
+      contentIndicator: countEnabled(secretRows),
       content: renderVars(secretRows, (rows) => commit(plainRows, rows), {
         makeNewRow: () => ({ secret: true }),
         editableDataType: true,
@@ -188,7 +189,7 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
       })
     },
     external: {
-      contentIndicator: externalRows.length,
+      contentIndicator: countEnabled(externalRows),
       content: (
         <TabPanel isEmpty={!externalRows.length} heading="No external secrets" subheading="This environment has no external secrets configured.">
           {renderVars(externalRows, commitExternal, { disableNewRow: true })}

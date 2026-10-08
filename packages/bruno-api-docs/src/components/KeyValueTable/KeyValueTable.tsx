@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
-import { useEditableRows } from '@/hooks/useEditableRows';
+import { isBlankRow, useEditableRows } from '@/hooks/useEditableRows';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { WarningIcon } from '@/assets/icons';
 import HighlightedInput from '../HighlightedInput/HighlightedInput';
 import { SecretValue } from '@/ui/SecretValue/SecretValue';
-import './KeyValueTable.css';
 import Checkbox from '@/ui/Checkbox/Checkbox';
+import { StyledWrapper } from './StyledWrapper';
 
 // Smallest a column may be dragged to; the neighbour it trades width with is held to the same floor.
 const MIN_COLUMN_WIDTH = 60;
@@ -221,9 +221,13 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
   };
 
   return (
-    <div className={`key-value-table-wrapper ${className}${resizingKey ? ' is-resizing' : ''}`} data-testid={testId}>
+    <StyledWrapper className={`${className}${resizingKey ? ' is-resizing' : ''}`} data-testid={testId}>
       <div className="key-value-table-container" data-testid={`${testId}-container`}>
-        <table ref={tableRef} className="key-value-table" data-testid={`${testId}-table`}>
+        <table
+          ref={tableRef}
+          className={`key-value-table${showEnabled ? ' key-value-table--with-toggle' : ''}`}
+          data-testid={`${testId}-table`}
+        >
           <colgroup>
             <col className="col-key" style={{ width: columnWidths.key }} />
             <col className="col-value" style={{ width: columnWidths.value }} />
@@ -236,7 +240,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
           </colgroup>
           <thead>
             <tr>
-              <th className="col-key">
+              <th className="col-key" data-testid={`${testId}-name-header`}>
                 {keyPlaceholder}
                 {resizeHandle('key')}
               </th>
@@ -263,7 +267,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
           <tbody>
             {rows.map((row, index) => {
               const isLastRow = index === rows.length - 1;
-              const isEmptyRow = !row.name || row.name.trim() === '';
+              const isEmptyRow = isBlankRow(row);
               const isLastEmptyRow = isLastRow && isEmptyRow;
               const updateCell = (field: string, value: unknown) => updateField(index, field, value);
 
@@ -332,7 +336,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                         </span>
                       )}
                       {readOnlyKey ? (
-                        <span className="text-readonly" title={row.name}>
+                        <span className="text-readonly" title={row.name} data-testid={`${testId}-name-text`}>
                           {row.name}
                         </span>
                       ) : (
@@ -399,7 +403,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
           </tbody>
         </table>
       </div>
-    </div>
+    </StyledWrapper>
   );
 };
 

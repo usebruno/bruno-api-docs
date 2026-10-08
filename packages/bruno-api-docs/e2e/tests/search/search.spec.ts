@@ -76,6 +76,22 @@ test.describe('Search palette', () => {
     await expect(search.panel).toContainText('Login');
   });
 
+  test('shows a five-letter method in full and shortens a longer one to three letters, never with an ellipsis', async ({ page, search }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(FIXTURE);
+    await search.field.click();
+
+    await search.field.fill('confirm booking');
+    const patch = search.resultMethod('Confirm Booking');
+    await expect(patch).toHaveText('PATCH');
+    expect(await search.isContentWiderThanBox(patch)).toBe(false);
+
+    await search.field.fill('cancel booking');
+    const del = search.resultMethod('Cancel Booking');
+    await expect(del).toHaveText('DEL');
+    expect(await search.isContentWiderThanBox(del)).toBe(false);
+  });
+
   test('corrects a typo (adjacent letter swap) to the intended request', async ({ page, search }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto(FIXTURE);

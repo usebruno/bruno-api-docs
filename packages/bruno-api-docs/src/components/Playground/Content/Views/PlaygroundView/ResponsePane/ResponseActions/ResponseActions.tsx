@@ -104,7 +104,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
   return (
     <StyledWrapper className="response-pane-actions-wrapper" data-testid="response-pane-actions-wrapper">
       <div className="actions-dropdown" data-testid="actions-dropdown">
-        <MenuDropdown items={menuItems} placement="bottom-end" testId="response-actions-menu">
+        <MenuDropdown items={menuItems} placement="bottom-end" testId="response-actions-menu" sticky="reference">
           <ActionIconButton label="More actions" showTooltip={false} className="p-1 more-actions-button">
             <IconDots size={16} stroke={1.5} style={{ color: 'var(--text-muted)' }} />
           </ActionIconButton>

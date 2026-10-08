@@ -1,0 +1,40 @@
+{
+  "name": "@usebruno/api-docs-fastify",
+  "version": "0.1.0",
+  "description": "Serve a Bruno collection as API docs from inside your own Fastify app, behind your own auth.",
+  "keywords": [
+    "api-docs",
+    "bruno",
+    "opencollection",
+    "documentation",
+    "fastify",
+    "fastify-plugin"
+  ],
+  "homepage": "https://github.com/usebruno/bruno-api-docs/tree/main/integrations/nodejs/fastify#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/usebruno/bruno-api-docs.git",
+    "directory": "integrations/nodejs/fastify"
+  },
+  "bugs": {
+    "url": "https://github.com/usebruno/bruno-api-docs/issues"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "peerDependencies": {
+    "fastify": "^4.0.0 || ^5.0.0"
+  },
+  "dependencies": {
+    "@usebruno/api-docs-core": "0.1.0"
+  }
+}

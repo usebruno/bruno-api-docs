@@ -41,20 +41,23 @@ describe('ScriptChain', () => {
   });
 
   it('numbers every row 1..N in display order, including the HTTP marker', () => {
-    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" url="http://x" />);
+    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" />);
     expect(html).toContain('HTTP');
     // 3 post-response steps + 1 marker → positions 1..4 are present.
     ['>1<', '>2<', '>3<', '>4<'].forEach((n) => expect(html).toContain(n));
   });
 
-  it('shows the request URL beside the HTTP marker when provided', () => {
-    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" url="{{baseUrl}}/login" />);
-    expect(html).toContain('/login');
+  it('names the request row after the protocol, without repeating the url from the top of the page', () => {
+    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" />);
+    expect(html).toContain('HTTP Request');
+    expect(html).not.toContain('/login');
   });
 
-  it('shows the HTTP marker label even when no URL is given', () => {
-    const html = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" />);
-    expect(html).toContain('HTTP');
+  it('names the row for the protocol it was given', () => {
+    const gql = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" requestLabel="GQL" />);
+    const grpc = renderToStaticMarkup(<ScriptChain steps={postChain} flow="sandwich" requestLabel="GRPC" />);
+    expect(gql).toContain('GQL Request');
+    expect(grpc).toContain('GRPC Request');
   });
 
   it('numbers pre-request steps, the HTTP marker, then post-response steps consecutively', () => {
@@ -63,7 +66,7 @@ describe('ScriptChain', () => {
       { level: 'request', phase: 'before-request', label: 'Request Pre-Request', code: 'b', order: 1 },
       { level: 'request', phase: 'after-response', label: 'Request Post-Response', code: 'c', order: 1 }
     ];
-    const html = renderToStaticMarkup(<ScriptChain steps={mixed} flow="sandwich" url="http://x" />);
+    const html = renderToStaticMarkup(<ScriptChain steps={mixed} flow="sandwich" />);
     // 2 pre-request steps + 1 marker + 1 post-response step → positions 1..4.
     ['>1<', '>2<', '>3<', '>4<'].forEach((n) => expect(html).toContain(n));
     // The marker sits between the pre-request and post-response steps.

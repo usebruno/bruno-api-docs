@@ -23,7 +23,8 @@ import {
   setCollectionSucceeded,
   setCollectionFailed,
   resetCollectionState,
-  setGitCollectionUrl
+  setGitCollectionUrl,
+  setCollectionSourceText
 } from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
@@ -47,12 +48,17 @@ const parseCollectionContent = (content: string): OpenCollectionCollection => {
   }
 };
 
+interface ResolvedCollection {
+  collection: OpenCollectionCollection;
+  sourceText: string | null;
+}
+
 const resolveCollectionSource = async (
   source: OpenCollectionCollection | string | File
-): Promise<OpenCollectionCollection> => {
+): Promise<ResolvedCollection> => {
   if (isFileInstance(source)) {
     const text = await source.text();
-    return parseCollectionContent(text);
+    return { collection: parseCollectionContent(text), sourceText: text };
   }
 
   if (typeof source === 'string') {
@@ -62,13 +68,13 @@ const resolveCollectionSource = async (
         throw new Error(`Failed to fetch collection: ${response.statusText}`);
       }
       const text = await response.text();
-      return parseCollectionContent(text);
+      return { collection: parseCollectionContent(text), sourceText: text };
     }
 
-    return parseCollectionContent(source);
+    return { collection: parseCollectionContent(source), sourceText: source };
   }
 
-  return source;
+  return { collection: source, sourceText: null };
 };
 
 export interface OpenCollectionProps {
@@ -88,7 +94,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   const collectionError = useAppSelector(selectCollectionError);
 
   useEffect(() => {
-    gitCollectionUrl && dispatch(setGitCollectionUrl(gitCollectionUrl));
+    dispatch(setGitCollectionUrl(gitCollectionUrl ?? null));
   }, [gitCollectionUrl, dispatch]);
 
   useEffect(() => {
@@ -98,8 +104,9 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
       dispatch(setCollectionLoading());
 
       try {
-        const resolved = await resolveCollectionSource(collection);
+        const { collection: resolved, sourceText } = await resolveCollectionSource(collection);
         if (!isActive) return;
+        dispatch(setCollectionSourceText(sourceText));
         const hydrated = hydrateWithUUIDs(resolved);
         dispatch(setDocsCollection(hydrated));
         dispatch(setPlaygroundCollection(hydrated));
@@ -109,12 +116,14 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
         dispatch(setCollectionFailed(message));
         dispatch(clearDocsCollection());
+        dispatch(setCollectionSourceText(null));
         dispatch(clearPlaygroundCollection());
       }
     };
 
     if (collection == null) {
       dispatch(clearDocsCollection());
+      dispatch(setCollectionSourceText(null));
       dispatch(clearPlaygroundCollection());
       dispatch(resetCollectionState());
       return () => { isActive = false; };
@@ -125,6 +134,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
       dispatch(setDocsCollection(hydrated));
+      dispatch(setCollectionSourceText(null));
       dispatch(setPlaygroundCollection(hydrated));
       dispatch(setCollectionSucceeded());
     }

@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { BodyModeSelector, resolveBodyMode } from './BodyModeSelector';
 import type { RequestBody } from '@/utils/schemaHelpers';
-import { getByTestId } from '@/test-utils/dom';
+import { getByTestId, query, queryByTestId } from '@/test-utils/dom';
 
 const noop = () => {};
 
@@ -69,5 +69,39 @@ describe('BodyModeSelector', () => {
   it('renders a caret icon on the trigger', () => {
     const root = renderSelector(undefined);
     expect(getByTestId(root, 'body-type-select').querySelector('svg')).toBeTruthy();
+  });
+
+  it('shows the icon for the body type the user has selected', () => {
+    const trigger = getByTestId(renderSelector({ type: 'json', data: '' } as RequestBody), 'body-type-select');
+    const icons = trigger.querySelectorAll('svg');
+    expect(icons.length).toBe(2);
+    expect(query(trigger, 'svg').getAttribute('class')).toContain('icon-tabler-braces');
+  });
+
+  it('shows a different icon when a different body type is selected', () => {
+    const trigger = getByTestId(renderSelector({ type: 'xml', data: '' } as RequestBody), 'body-type-select');
+    const icons = trigger.querySelectorAll('svg');
+    expect(icons.length).toBe(2);
+    expect(query(trigger, 'svg').getAttribute('class')).toContain('icon-tabler-code');
+  });
+
+  it('offers the Prettify button for a JSON body', () => {
+    const root = renderSelector({ type: 'json', data: '{"a":1}' } as RequestBody);
+    expect(getByTestId(root, 'body-prettify').text).toContain('Prettify');
+  });
+
+  it('offers the Prettify button for an XML body', () => {
+    const root = renderSelector({ type: 'xml', data: '<a/>' } as RequestBody);
+    expect(queryByTestId(root, 'body-prettify')).toBeTruthy();
+  });
+
+  it('hides the Prettify button for body types that cannot be tidied up', () => {
+    expect(queryByTestId(renderSelector(undefined), 'body-prettify')).toBeNull();
+    expect(queryByTestId(renderSelector({ type: 'text', data: 'hi' } as RequestBody), 'body-prettify')).toBeNull();
+    expect(queryByTestId(renderSelector({ type: 'sparql', data: '{}' } as RequestBody), 'body-prettify')).toBeNull();
+    expect(queryByTestId(renderSelector([] as RequestBody), 'body-prettify')).toBeNull();
+    expect(
+      queryByTestId(renderSelector({ type: 'multipart-form', data: [] } as RequestBody), 'body-prettify')
+    ).toBeNull();
   });
 });

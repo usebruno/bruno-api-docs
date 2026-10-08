@@ -24,6 +24,7 @@ interface VariableInfoCardProps {
  * from the playground, so it is not. `canEdit` is what tells them apart.
  */
 const getReadOnlyNote = (scope: VariableScope, activeEnvName: string | null, canEdit: boolean): string | null => {
+  if (scope === 'prompt') return 'asked for on each send';
   if (scope === 'process.env' || scope === 'oauth2') return 'read-only';
   if (scope === '$secrets' && !canEdit) return 'read-only';
   if (scope === 'undefined') return activeEnvName ? 'Variable is not defined' : 'No active environment';
@@ -213,7 +214,7 @@ export const VariableInfoCard: React.FC<VariableInfoCardProps> = ({
 
   // The playground always offers copy, matching the app, even with nothing yet to
   // copy. The docs keep their original rule: a value, and never for a secret.
-  const showCopy = editable || (info.value !== '' && !info.secret);
+  const showCopy = info.scope !== 'prompt' && (editable || (info.value !== '' && !info.secret));
 
   const icons = showCopy && (
     <div className="var-icons">

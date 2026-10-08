@@ -1,0 +1,14 @@
+{
+  "extends": "../../../../integrations/tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": { "*": ["../../../../integrations/node_modules/*"] },
+    "typeRoots": ["../../../../integrations/node_modules/@types"],
+    "declaration": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["0*/*.ts"]
+}

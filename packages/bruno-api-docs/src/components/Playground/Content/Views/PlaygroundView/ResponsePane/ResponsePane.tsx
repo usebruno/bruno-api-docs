@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Tabs from '@/ui/Tabs/Tabs';
+import { useSessionStorage } from '@/hooks';
 import ResponseBodyTab from '../../Common/ResponseBodyTab';
 import ResponseHeadersTab from '../../Common/ResponseHeadersTab';
 import TestResultsTab from '../../Common/TestResultsTab';
@@ -26,8 +27,8 @@ interface ResponsePaneProps {
 }
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
-  const [activeTab, setActiveTab] = useState('response');
-  const [dismissedScriptErrorsRequestId, setDismissedScriptErrorsRequestId] = useState<string | undefined>();
+  const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundResponseTab', 'response');
+  const [dismissedScriptErrorKeys, setDismissedScriptErrorKeys] = useState<string[]>([]);
   const { actionsExpandedWidth, measureActions } = useResponseActions();
 
   const {
@@ -73,8 +74,10 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
     </div>
   );
 
-  const scriptErrorsDismissed = dismissedScriptErrorsRequestId === response.requestId;
-  const scriptErrors = scriptErrorsDismissed ? [] : (response.scriptErrors ?? []);
+  const scriptErrorKey = (phase: string) => `${response.requestId}:${phase}`;
+  const scriptErrors = (response.scriptErrors ?? []).filter(
+    (scriptError) => !dismissedScriptErrorKeys.includes(scriptErrorKey(scriptError.phase))
+  );
   const renderScriptErrors = (testId: string) =>
     scriptErrors.length ? (
       <div className="pb-4 space-y-3" data-testid={testId}>
@@ -83,7 +86,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
             key={scriptError.phase}
             title={SCRIPT_ERROR_TITLES[scriptError.phase]}
             message={scriptError.message}
-            onDismiss={() => setDismissedScriptErrorsRequestId(response.requestId)}
+            onDismiss={() => setDismissedScriptErrorKeys((keys) => [...keys, scriptErrorKey(scriptError.phase)])}
           />
         ))}
       </div>
@@ -97,24 +100,28 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
           <WarningBanner warnings={response.warnings} />
         </div>
       ) : null}
-      {response.error ? renderErrorBanner() : (
-        <ResponseBodyTab
-          response={response}
-          selectedFormat={selectedFormat}
-          showPreview={showPreview}
-          contentType={contentType}
-        />
-      )}
+      <div className="tab-panel-content">
+        {response.error ? renderErrorBanner() : (
+          <ResponseBodyTab
+            response={response}
+            selectedFormat={selectedFormat}
+            showPreview={showPreview}
+            contentType={contentType}
+          />
+        )}
+      </div>
     </div>
   );
   const renderHeaders = () => <ResponseHeadersTab headers={response.headers} />;
   const renderTestResults = () => (
     <div className="flex flex-col h-full">
       {renderScriptErrors('tests-script-errors')}
-      <TestResultsTab
-        testResults={response.testResults}
-        assertionResults={response.assertionResults}
-      />
+      <div className="tab-panel-content">
+        <TestResultsTab
+          testResults={response.testResults}
+          assertionResults={response.assertionResults}
+        />
+      </div>
     </div>
   );
 

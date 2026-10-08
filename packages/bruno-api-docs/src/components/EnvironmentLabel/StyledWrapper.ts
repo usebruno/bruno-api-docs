@@ -26,4 +26,14 @@ export const StyledWrapper = styled.span`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .environment-label-name--clamped {
+    max-width: 10rem;
+  }
+
+  @media (max-width: 640px) {
+    .environment-label-name--clamped {
+      max-width: 4.5rem;
+    }
+  }
 `;

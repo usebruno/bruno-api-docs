@@ -141,13 +141,7 @@ class BrunoRequest {
   }
 
   setHeader(name: string, value: string) {
-    const list = this.headersArray();
-    const existing = list.find((h) => !h.disabled && sameName(h.name, name));
-    if (existing) {
-      existing.value = String(value ?? '');
-    } else {
-      list.push({ name, value: String(value ?? '') });
-    }
+    this.headerList.upsert(name, value);
   }
 
   deleteHeader(name: string) {

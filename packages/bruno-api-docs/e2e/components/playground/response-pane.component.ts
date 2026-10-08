@@ -54,6 +54,11 @@ export class ResponsePaneComponent extends BaseComponent {
    * host = http://localhost:8081 in the Local env) with a canned JSON body so a send
    * lands a response in the pane without any live network.
    */
+  /** Resolves with the next request the playground sends to the `get users` URL. */
+  waitForUsersRequest(): Promise<Request> {
+    return this.page.waitForRequest('**/api/users**');
+  }
+
   async mockUsersResponse(body: string): Promise<void> {
     await this.page.route('**/api/users**', (route) =>
       route.fulfill({
@@ -101,6 +106,10 @@ export class ResponsePaneComponent extends BaseComponent {
    * switch to settle (the target becomes the selected tab) so a following switch never races the
    * layout mid-transition.
    */
+  tab(id: string): Locator {
+    return this.page.getByTestId(`response-tabs-tab-${id}`);
+  }
+
   async switchToTab(id: string): Promise<void> {
     const inlineTab = this.page.getByTestId(`response-tabs-tab-${id}`);
     if (await inlineTab.isVisible()) {

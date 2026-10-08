@@ -3,6 +3,8 @@ import { JSONPath } from 'jsonpath-plus';
 import type { XMLFormatterOptions } from 'xml-formatter';
 import xmlFormat from 'xml-formatter';
 import fastJsonFormat from 'fast-json-format';
+import type { Edit } from 'jsonc-parser';
+import { format as formatJsonc } from 'jsonc-parser';
 import prettierFormat from 'prettier/standalone';
 import parserBabel from 'prettier/parser-babel';
 import type { RunRequestResponse } from '@/runner';
@@ -54,6 +56,75 @@ export const prettifyHtmlString = (htmlString: string): string => {
   } catch (error) {
     console.error(error);
     return htmlString;
+  }
+};
+
+const BRUNO_VARIABLE_PATTERN = /\{\{[^{}]*\}\}/g;
+
+const BRUNO_VARIABLE_STEM = '__bruno_var';
+
+const BRUNO_VARIABLE_STEM_RUN = /(?=__bruno_var(_*))/g;
+
+const unusedVariablePrefix = (input: string) => {
+  const shortest = `${BRUNO_VARIABLE_STEM}_`;
+  if (!input.includes(shortest)) return shortest;
+
+  let longestRun = 0;
+  for (const [, run] of input.matchAll(BRUNO_VARIABLE_STEM_RUN)) {
+    longestRun = Math.max(longestRun, run.length);
+  }
+  return `${BRUNO_VARIABLE_STEM}${'_'.repeat(longestRun + 1)}`;
+};
+
+const hashBrunoVariables = (input: string) => {
+  const prefix = unusedVariablePrefix(input);
+
+  const variables: string[] = [];
+  const hashed = input.replace(BRUNO_VARIABLE_PATTERN, (match) => {
+    variables.push(match);
+    return `${prefix}${variables.length - 1}__`;
+  });
+
+  return {
+    hashed,
+    restore: (formatted: string) =>
+      formatted.replace(new RegExp(`${prefix}(\\d+)__`, 'g'), (match, index) => variables[Number(index)] ?? match)
+  };
+};
+
+const applyFormattingEdits = (text: string, edits: Edit[]): string => {
+  const ordered = [...edits].sort((a, b) => a.offset - b.offset || a.length - b.length);
+  const chunks: string[] = [];
+  let cursor = 0;
+
+  for (const { offset, length, content } of ordered) {
+    if (offset < cursor) throw new Error('Overlapping edit');
+    chunks.push(text.slice(cursor, offset), content);
+    cursor = offset + length;
+  }
+  chunks.push(text.slice(cursor));
+
+  return chunks.join('');
+};
+
+export const prettifyJsonString = (jsonString: string): string => {
+  if (typeof jsonString !== 'string' || !jsonString.trim()) return jsonString;
+
+  try {
+    const { hashed, restore } = hashBrunoVariables(jsonString);
+    return restore(applyFormattingEdits(hashed, formatJsonc(hashed, undefined, { tabSize: 2, insertSpaces: true })));
+  } catch {
+    return jsonString;
+  }
+};
+
+export const prettifyXmlString = (xmlString: string): string => {
+  if (typeof xmlString !== 'string' || !xmlString.trim()) return xmlString;
+
+  try {
+    return xmlFormat(xmlString, { collapseContent: true, lineSeparator: '\n', strictMode: true });
+  } catch {
+    return xmlString;
   }
 };
 

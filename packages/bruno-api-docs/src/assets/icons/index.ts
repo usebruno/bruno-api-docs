@@ -36,3 +36,4 @@ export * from './UnaryIcon';
 export * from './ServerStreamingIcon';
 export * from './ClientStreamingIcon';
 export * from './BidiStreamingIcon';
+export * from './DownloadIcon';

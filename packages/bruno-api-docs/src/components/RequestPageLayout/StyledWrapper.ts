@@ -6,6 +6,16 @@ export const StyledWrapper = styled.div`
   color: var(--text-primary);
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
+  --sticky-url-clearance: 4.25rem;
+
+  .request-url-sticky {
+    position: sticky;
+    top: 1rem;
+    z-index: 2;
+    margin-top: 0.75rem;
+    background: var(--content-bg);
+    box-shadow: 0 0 0 1rem var(--content-bg);
+  }
 
   .request-columns {
     display: grid;
@@ -28,7 +38,7 @@ export const StyledWrapper = styled.div`
     flex-direction: column;
     gap: 1.5rem;
     position: sticky;
-    top: 1.25rem;
+    top: var(--sticky-url-clearance);
     align-self: start;
   }
 

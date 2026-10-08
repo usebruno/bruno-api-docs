@@ -38,7 +38,8 @@ export const StyledWrapper = styled.div`
     font-weight: 600;
     color: var(--oc-text);
     white-space: nowrap;
-    overflow: hidden;
+    overflow-x: clip;
+    overflow-y: visible;
     text-overflow: ellipsis;
   }
 

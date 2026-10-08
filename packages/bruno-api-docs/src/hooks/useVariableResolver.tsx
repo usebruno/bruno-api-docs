@@ -6,13 +6,14 @@ import type { Variable, SecretVariable } from '@opencollection/types/common/vari
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
 import { setPlaygroundVariable } from '@/store/slices/playground';
+import { promptVariableName } from '@/utils/promptVariables';
 import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
 import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
 import {
   buildScopedVariableModel,
-  resolveVariables,
+  resolveValueDeep,
   singleReferenceName,
   detectSpecialScope,
   isValidVariableName,
@@ -74,6 +75,10 @@ const lookupVariable = (rawName: string, model: ScopedVariableModel): VariableLo
   const name = (rawName ?? '').trim();
   const base = { name, value: '', rawValue: '', secret: false, simpleString: false };
 
+  if (promptVariableName(rawName ?? '') !== null) {
+    return { ...base, name: rawName, scope: 'prompt', valid: true };
+  }
+
   const special = detectSpecialScope(name);
   if (special === 'dynamic') return { ...base, scope: 'dynamic', valid: true, dynamicKind: classifyDynamic(name) };
   if (special) return { ...base, scope: special, valid: true };
@@ -95,7 +100,7 @@ const makeResolver = (
   activeEnvName: string | null
 ): VariableResolver => {
   const isSecret = (name: string) => model.secretNames.has(name.trim());
-  const interpolate = (raw: string) => resolveVariables(raw, model.values);
+  const interpolate = (raw: string) => resolveValueDeep(raw, model.values);
   return {
     showVars,
     activeEnvName,
@@ -263,7 +268,7 @@ export const ItemVariableResolverProvider: React.FC<{
   );
 
   const interpolateWithSecrets = useCallback(
-    (raw: string) => resolveVariables(raw, model.fullValues),
+    (raw: string) => resolveValueDeep(raw, model.fullValues),
     [model]
   );
 

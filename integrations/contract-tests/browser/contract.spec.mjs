@@ -34,7 +34,7 @@ test('the renderer booted, from the CDN, with our shell from our own origin', as
 
   expect(sources.some((u) => u.endsWith('/docs/shell.js')), 'shell.js is same-origin').toBe(true);
   expect(sources.some((u) => u.startsWith('https://cdn.usebruno.com/')), 'the renderer is the CDN bundle').toBe(true);
-  expect(await page.evaluate(() => typeof window.OpenCollection), 'the entry the deployed bundle still carries').toBe('function');
+  expect(await page.evaluate(() => typeof window.Bruno?.apiDocs), 'booted through the renderer entry').toBe('function');
 });
 
 test('the repository link reaches the page, with its credentials stripped', async ({ page }) => {

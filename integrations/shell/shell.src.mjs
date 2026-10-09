@@ -29,6 +29,12 @@ import { toOpenCollection } from './assemble.mjs';
   }
 
   const boot = resolveBoot();
+  if (!boot && typeof window.OpenCollection === 'function') {
+    return fail(
+      'The renderer loaded from ' + cdn + ' is an older build that these docs cannot start with.\n'
+      + 'A hard reload usually fixes it, the browser was holding an old copy.'
+    );
+  }
   if (!boot) {
     return fail(
       'The renderer bundle did not load or did not execute.\n'
@@ -73,11 +79,6 @@ import { toOpenCollection } from './assemble.mjs';
 function resolveBoot() {
   if (typeof window.Bruno?.apiDocs === 'function') {
     return (target, config, doc) => window.Bruno.apiDocs(target, { ...config, content: doc });
-  }
-  // until the CDN has deployed a bundle that carries the namespace
-  if (typeof window.OpenCollection === 'function') {
-    return (target, { repositoryUrl, ...config }, doc) =>
-      new window.OpenCollection({ target, ...config, gitCollectionUrl: repositoryUrl, opencollection: doc });
   }
   return null;
 }

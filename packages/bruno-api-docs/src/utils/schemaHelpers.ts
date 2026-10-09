@@ -16,7 +16,7 @@ import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollec
 import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
-import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
+import type { WebSocketRequest, WebSocketMessageType } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
 import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
@@ -263,6 +263,27 @@ export const getGrpcMessages = (item: OpenCollectionItem | null | undefined): Gr
   }
 
   return [];
+};
+
+export interface WebSocketMessageEntry {
+  title: string;
+  type: WebSocketMessageType;
+  data: string;
+}
+
+export const getWebSocketMessages = (item: OpenCollectionItem | null | undefined): WebSocketMessageEntry[] => {
+  const payload = item && 'websocket' in item ? (item as WebSocketRequest).websocket?.message : undefined;
+  if (!payload) return [];
+
+  const variants = Array.isArray(payload) ? payload : [{ title: '', message: payload }];
+
+  return variants
+    .map((variant, index) => ({
+      title: variant.title || `Message ${index + 1}`,
+      type: variant.message?.type ?? 'text',
+      data: variant.message?.data ?? ''
+    }))
+    .filter((entry) => entry.data.trim().length > 0);
 };
 
 export const getGrpcProtoFilePath = (item: OpenCollectionItem | null | undefined): string | undefined =>

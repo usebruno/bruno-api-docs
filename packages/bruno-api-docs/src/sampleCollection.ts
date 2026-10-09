@@ -144,11 +144,42 @@ items:
   - name: "Realtime"
     type: "folder"
     items:
-      - name: "Live Updates"
-        description: "Streams live order updates over a WebSocket connection."
-        type: "websocket"
-        tags: ["realtime"]
-        url: "{{host}}/ws/updates"
+      - info:
+          name: "Live Updates"
+          description: "Streams live order updates over a WebSocket connection."
+          type: "websocket"
+          tags: ["realtime"]
+        websocket:
+          url: "{{host}}/ws/updates"
+          headers:
+            - name: "Accept"
+              value: "application/json"
+            - name: "X-Trace-Id"
+              value: "{{$randomUUID}}"
+              description: "Correlates the stream with server logs"
+          message:
+            - title: "Subscribe"
+              selected: true
+              message:
+                type: "json"
+                data: '{"action":"subscribe","channel":"orders"}'
+            - title: "Ping"
+              message:
+                type: "text"
+                data: "ping"
+            - title: "Order Snapshot"
+              message:
+                type: "xml"
+                data: '<snapshot><channel>orders</channel><status>packed</status></snapshot>'
+            - title: "Unsubscribe"
+              message:
+                type: "json"
+                data: '{"action":"unsubscribe","channel":"orders"}'
+            - title: "Heartbeat"
+              message:
+                type: "text"
+                data: "heartbeat"
+          auth: inherit
         docs: |
           # Websockets
           WebSockets provide a persistent, full-duplex communication channel over a single, long-lived TCP connection. Unlike standard HTTP request-response cycles, they enable real-time, low-latency data transfer.

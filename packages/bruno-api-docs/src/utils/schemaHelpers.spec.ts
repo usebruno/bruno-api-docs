@@ -18,6 +18,7 @@ import {
   getGrpcMethodType,
   getGrpcMetadata,
   getGrpcProtoFileName,
+  getWebSocketMessages,
   getItemTags,
   getInheritedTags,
   type RequestItem
@@ -281,6 +282,67 @@ describe('getGrpcMessages', () => {
     expect(getGrpcMessages(item({ grpc: {} }))).toEqual([]);
     expect(getGrpcMessages(item({ type: 'grpc' }))).toEqual([]);
     expect(getGrpcMessages(null)).toEqual([]);
+  });
+});
+
+describe('getWebSocketMessages', () => {
+  it('lists a single message as "Message 1" with its format', () => {
+    expect(getWebSocketMessages(item({ websocket: { message: { type: 'json', data: '{"a":1}' } } }))).toEqual([
+      { title: 'Message 1', type: 'json', data: '{"a":1}' }
+    ]);
+  });
+
+  it('keeps the title, format and order of every message in a list', () => {
+    expect(
+      getWebSocketMessages(
+        item({
+          websocket: {
+            message: [
+              { title: 'Subscribe', message: { type: 'json', data: '{"channel":"orders"}' } },
+              { title: 'Ping', selected: true, message: { type: 'text', data: 'ping' } }
+            ]
+          }
+        })
+      )
+    ).toEqual([
+      { title: 'Subscribe', type: 'json', data: '{"channel":"orders"}' },
+      { title: 'Ping', type: 'text', data: 'ping' }
+    ]);
+  });
+
+  it('numbers untitled messages by their position', () => {
+    const messages = getWebSocketMessages(
+      item({
+        websocket: {
+          message: [
+            { title: 'First', message: { type: 'text', data: 'a' } },
+            { title: '', message: { type: 'xml', data: '<b/>' } }
+          ]
+        }
+      })
+    );
+    expect(messages[1].title).toBe('Message 2');
+  });
+
+  it('drops blank messages', () => {
+    expect(
+      getWebSocketMessages(
+        item({
+          websocket: {
+            message: [
+              { title: 'Empty', message: { type: 'text', data: '  ' } },
+              { title: 'Ping', message: { type: 'text', data: 'ping' } }
+            ]
+          }
+        })
+      )
+    ).toEqual([{ title: 'Ping', type: 'text', data: 'ping' }]);
+  });
+
+  it('returns no messages when the request defines none', () => {
+    expect(getWebSocketMessages(item({ websocket: { url: 'wss://x' } }))).toEqual([]);
+    expect(getWebSocketMessages(item({ type: 'websocket', url: 'wss://x' }))).toEqual([]);
+    expect(getWebSocketMessages(null)).toEqual([]);
   });
 });
 

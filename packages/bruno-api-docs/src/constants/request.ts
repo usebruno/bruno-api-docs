@@ -44,6 +44,12 @@ export const GRPC_METHOD_TYPE_LABELS: Record<string, string> = {
   'bidi-streaming': 'Bidirectional Streaming'
 };
 
+export const WEBSOCKET_MESSAGE_TYPE_LABELS: Record<string, string> = {
+  text: 'Text',
+  json: 'JSON',
+  xml: 'XML'
+};
+
 export const PROTOCOL_BADGE_LABELS: Record<string, string> = {
   GRAPHQL: 'GQL',
   GRPC: 'GRPC',

@@ -4,7 +4,6 @@ import reducer, {
   updatePlaygroundItem,
   updatePlaygroundScriptFile,
   selectHydratedCollection,
-  selectPlaygroundCollection,
   setViewMode,
   setSelectedItemId,
   setSelectedExampleIndex,
@@ -49,8 +48,6 @@ describe('playground edits', () => {
     store.dispatch(setViewMode('playground'));
 
     expect(envVariables(store)).toEqual([{ name: 'a', value: 'edited' }, { name: 'b', value: '2' }]);
-    expect(selectPlaygroundCollection(store.getState())!.config!.environments![0].variables![0])
-      .toMatchObject({ value: 'edited' });
   });
 });
 
@@ -78,7 +75,7 @@ describe('updatePlaygroundItem', () => {
   const firstItem = (store: ReturnType<typeof createOpenCollectionStore>, select: typeof selectHydratedCollection) =>
     select(store.getState())!.items![0] as unknown as { uuid: string; http: { url: string } };
 
-  it('updates the item in the hydrated collection (what the UI renders) as well as the base collection', () => {
+  it('updates the item in the hydrated collection (what the UI renders)', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(withRequest()));
 
@@ -88,7 +85,6 @@ describe('updatePlaygroundItem', () => {
     // The tree the UI reads must reflect the edit, with the uuid preserved so findItemByUuid resolves.
     expect(firstItem(store, selectHydratedCollection).http.url).toBe('new');
     expect(firstItem(store, selectHydratedCollection).uuid).toBe('r1');
-    expect(firstItem(store, selectPlaygroundCollection).http.url).toBe('new');
   });
 });
 
@@ -102,14 +98,13 @@ describe('updatePlaygroundScriptFile', () => {
   const scriptSource = (store: ReturnType<typeof createOpenCollectionStore>, select: typeof selectHydratedCollection) =>
     (select(store.getState())!.items![0] as unknown as { script: string }).script;
 
-  it('edits the script in both the hydrated and base collections', () => {
+  it('edits the script in the hydrated collection', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(withScript()));
 
     store.dispatch(updatePlaygroundScriptFile({ uuid: 's1', script: 'const a = 2;' }));
 
     expect(scriptSource(store, selectHydratedCollection)).toBe('const a = 2;');
-    expect(scriptSource(store, selectPlaygroundCollection)).toBe('const a = 2;');
   });
 
   it('restores the original source when the collection is loaded again', () => {
@@ -125,15 +120,13 @@ describe('updatePlaygroundScriptFile', () => {
 });
 
 describe('setPlaygroundVariable', () => {
-  it('edits an environment variable in both the hydrated and base collections', () => {
+  it('edits an environment variable in the hydrated collection', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(makeCollection()));
 
     store.dispatch(setPlaygroundVariable({ scope: 'environment', name: 'a', value: '99', envName: 'Dev' }));
 
     expect((envVariables(store).find((v) => v.name === 'a') as unknown as { value: string }).value).toBe('99');
-    const base = selectPlaygroundCollection(store.getState())!.config!.environments![0].variables!;
-    expect((base.find((v) => v.name === 'a') as unknown as { value: string }).value).toBe('99');
   });
 
   it('edits the last enabled duplicate, matching the resolver', () => {

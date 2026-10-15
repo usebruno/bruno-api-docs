@@ -90,7 +90,10 @@ describe('looking a prompt up through the variable resolver', () => {
 
     (box.current as VariableResolver).updateVariable('OTP', 'changed');
 
-    const variables = store.getState().playground.collection?.request?.variables as { value: string }[];
+    const variables = store.getState().playground.hydratedCollection?.request?.variables as {
+      value: string;
+    }[];
+
     expect(variables[0].value).toBe('changed');
   });
 });

@@ -23,6 +23,7 @@ Two rules shape every test here:
 | Request page — Execution Context (scripts, variables, asserts, tests) | `tests/request/request-execution-context.spec.ts` |
 | Script page — title, breadcrumb, source code | `tests/script/script.spec.ts` |
 | Light/dark theme switch | `tests/theming/theme-toggle.spec.ts` |
+| Playground requests on the wire — headers sent, CORS-blocked requests | `tests/playground/request-on-the-wire.spec.ts` |
 
 ## Running the tests
 
@@ -31,7 +32,25 @@ npm run test:e2e       # run headless
 npm run test:e2e:ui    # run in Playwright's interactive UI
 ```
 
-Playwright starts the dev server for you (see `webServer` in `playwright.config.ts`).
+Playwright starts the dev server and the test server for you (see `webServer` in
+`playwright.config.ts`).
+
+## Test server
+
+`server/test-server.mjs` is a small Node server with no dependencies, on
+`http://127.0.0.1:3900` (`testServerURL` in `config/app.config.ts`). It is a different
+origin from the app, so the browser applies real CORS rules to every request the
+playground sends to it.
+
+| Route | Returns |
+|-------|---------|
+| `/echo` | 200, JSON of the method, path, query, headers and body it received |
+| `/cors/deny` | 200 with no CORS headers, so the browser blocks it |
+| `/health` | 200 `ok`, used by Playwright to know the server is up |
+
+Every route except `/cors/deny` answers CORS and preflight requests. Use it for what the
+playground sends over the network; keep `page.route` stubs for tests about how a response
+is shown. Run it on its own with `node e2e/server/test-server.mjs`.
 
 ## Folder layout
 
@@ -76,7 +95,8 @@ e2e/
 ├── playwright/                     # the test harness
 │   ├── pages.fixture.ts            #   defines the fixtures
 │   └── index.ts                    #   merges them; the single import for specs
-├── config/app.config.ts            # base URL + how to start the app
+├── server/test-server.mjs          # local HTTP server for network tests
+├── config/app.config.ts            # base URL, test server URL + how to start the app
 └── tsconfig.json                   # TypeScript settings for this folder
 ```
 

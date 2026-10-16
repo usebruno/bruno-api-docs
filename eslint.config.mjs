@@ -47,7 +47,7 @@ export default [
     files: [
       'eslint.config.mjs',
       'packages/**/src/**/*.{ts,tsx}',
-      'packages/**/e2e/**/*.{ts,tsx}'
+      'packages/**/e2e/**/*.{ts,tsx,mjs}'
     ],
     // Lint only changed lines. `diff/ci` diffs against the PR base but no-ops
     // when CI is unset, so it cannot replace `diff/diff` locally.
@@ -145,7 +145,7 @@ export default [
     // Tests and dev scripts legitimately log.
     files: [
       'packages/**/*.{test,spec}.{ts,tsx}',
-      'packages/**/e2e/**/*.{ts,tsx}'
+      'packages/**/e2e/**/*.{ts,tsx,mjs}'
     ],
     rules: {
       'no-console': 'off'

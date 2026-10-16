@@ -21,7 +21,7 @@ const send = (res, status, headers, body = '') => {
   res.end(body);
 };
 
-createServer(async (req, res) => {
+const handle = async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
   if (url.pathname === '/cors/deny') return send(res, 200, { 'Content-Type': 'text/plain' }, 'denied');
@@ -43,4 +43,7 @@ createServer(async (req, res) => {
   }
 
   send(res, 404, { ...cors, 'Content-Type': 'text/plain' }, 'not found');
-}).listen(port, '127.0.0.1', () => console.log(`test server on http://127.0.0.1:${port}`));
+};
+
+createServer((req, res) => handle(req, res).catch(() => res.destroy()))
+  .listen(port, '127.0.0.1', () => console.log(`test server on http://127.0.0.1:${port}`));

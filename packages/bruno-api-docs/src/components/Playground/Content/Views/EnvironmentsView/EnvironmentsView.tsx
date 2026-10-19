@@ -27,12 +27,16 @@ const ENV_TABS = [
 
 type EnvTabId = (typeof ENV_TABS)[number]['id'];
 
-const SECRET_POINTER_FIELD: Record<SecretProviderType | 'gcp-secrets-manager', 'path' | 'secretName' | 'vaultName' | 'projectId'> = {
+const SECRET_POINTER_FIELD: Record<
+  SecretProviderType,
+  'path' | 'secretName' | 'vaultName' | 'projectId' | 'secretReference'
+> = {
   'hashicorp-vault-cloud': 'path',
   'hashicorp-vault-server': 'path',
   'aws-secrets-manager': 'secretName',
   'azure-key-vault': 'vaultName',
-  'gcp-secrets-manager': 'projectId'
+  'gcp-secrets-manager': 'projectId',
+  'one-password': 'secretReference'
 };
 
 interface TabPanelProps {

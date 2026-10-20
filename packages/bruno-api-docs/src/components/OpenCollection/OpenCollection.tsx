@@ -29,6 +29,8 @@ import {
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { applyTheme } from '@/theme/applyTheme';
+import { setTheme } from '@/store/slices/theme';
+import type { ThemeMode } from '@/theme/types';
 
 // Set data-theme on the root element before the component first paints to avoid a flash.
 applyTheme();
@@ -81,12 +83,16 @@ export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
+  theme?: ThemeMode;
+  hideThemeSwitcher: boolean;
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
-  gitCollectionUrl
+  gitCollectionUrl,
+  theme: defaultTheme,
+  hideThemeSwitcher
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);
@@ -142,6 +148,12 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     return () => { isActive = false; };
   }, [collection, dispatch]);
 
+  useEffect(() => {
+    if (defaultTheme) {
+      dispatch(setTheme(defaultTheme));
+    }
+  }, [defaultTheme, dispatch]);
+
   const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
 
@@ -155,7 +167,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className="oc-playground">
-      <AppShell logo={logo} />
+      <AppShell logo={logo} hideThemeSwitcher={hideThemeSwitcher} />
     </div>
   );
 };

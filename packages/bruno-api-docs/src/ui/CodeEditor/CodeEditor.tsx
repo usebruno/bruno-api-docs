@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react';
 import { useAppSelector } from '@/store/hooks';
+import { isDarkMode } from '@/theme/mode';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { Portal } from '@/ui/Portal/Portal';
@@ -155,7 +156,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         onChange={(next) => onChange(next || '')}
         beforeMount={defineThemes}
         onMount={handleMount}
-        theme={mode === 'dark' ? DARK_THEME : LIGHT_THEME}
+        theme={isDarkMode(mode) ? DARK_THEME : LIGHT_THEME}
         options={{
           readOnly,
           minimap: { enabled: false },

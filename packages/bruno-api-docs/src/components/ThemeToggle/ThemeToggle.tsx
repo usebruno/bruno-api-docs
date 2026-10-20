@@ -2,6 +2,7 @@ import React from 'react';
 import styled from '@emotion/styled';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleTheme } from '@/store/slices/theme';
+import { isDarkMode } from '@/theme/mode';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
 
 const Button = styled.button`
@@ -45,7 +46,7 @@ const MoonIcon = () => (
 const ThemeToggle: React.FC<{ testId?: string }> = ({ testId = 'theme-toggle' }) => {
   const dispatch = useAppDispatch();
   const mode = useAppSelector((s) => s.theme.mode);
-  const isDark = mode === 'dark';
+  const isDark = isDarkMode(mode);
   const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
 
   return (

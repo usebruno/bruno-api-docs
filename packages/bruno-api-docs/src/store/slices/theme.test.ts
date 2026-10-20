@@ -35,6 +35,11 @@ describe('themeSlice', () => {
     expect(reducer({ mode: 'dark' }, toggleTheme()).mode).toBe('light');
   });
 
+  it('toggle stays within the backstage family', () => {
+    expect(reducer({ mode: 'backstage-light' }, toggleTheme()).mode).toBe('backstage-dark');
+    expect(reducer({ mode: 'backstage-dark' }, toggleTheme()).mode).toBe('backstage-light');
+  });
+
   it('persistThemeMode writes the mode to localStorage', () => {
     persistThemeMode('dark');
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
@@ -45,6 +50,8 @@ describe('themeSlice', () => {
     expect(readPersistedMode()).toBe('dark');
     localStorage.setItem(THEME_STORAGE_KEY, 'light');
     expect(readPersistedMode()).toBe('light');
+    localStorage.setItem(THEME_STORAGE_KEY, 'backstage-dark');
+    expect(readPersistedMode()).toBe('backstage-dark');
   });
 
   it('falls back to the OS preference when nothing is persisted', () => {

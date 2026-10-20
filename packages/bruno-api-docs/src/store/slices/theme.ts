@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ThemeMode } from '@/theme/types';
+import { COUNTERPART_MODE, isThemeMode } from '@/theme/mode';
 
 export const THEME_STORAGE_KEY = 'oc-docs.theme';
 
@@ -19,7 +20,7 @@ export const readPersistedMode = (): ThemeMode => {
   // An explicit user choice always wins.
   try {
     const v = localStorage.getItem(THEME_STORAGE_KEY);
-    if (v === 'dark' || v === 'light') return v;
+    if (isThemeMode(v)) return v;
   } catch {
     /* ignore */
   }
@@ -59,7 +60,7 @@ const themeSlice = createSlice({
       state.mode = action.payload;
     },
     toggleTheme(state) {
-      state.mode = state.mode === 'light' ? 'dark' : 'light';
+      state.mode = COUNTERPART_MODE[state.mode];
     }
   }
 });

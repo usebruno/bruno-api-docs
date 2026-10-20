@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import { useAppSelector } from '@/store/hooks';
+import { isDarkMode } from '@/theme/mode';
 import { StyledWrapper } from './StyledWrapper';
 
 // react-json-view touches browser globals at module load, so a static import
@@ -66,7 +67,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
       <StyledWrapper data-testid="response-preview-json">
         <ReactJson
           src={value}
-          theme={themeMode === 'dark' ? 'monokai' : 'rjv-default'}
+          theme={isDarkMode(themeMode) ? 'monokai' : 'rjv-default'}
           collapsed={2}
           groupArraysAfterLength={10}
           displayDataTypes={false}

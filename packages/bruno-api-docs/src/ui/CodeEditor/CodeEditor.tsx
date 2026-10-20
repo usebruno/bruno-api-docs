@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react';
 import { useAppSelector } from '@/store/hooks';
-import { isDarkMode } from '@/theme/mode';
+import { selectTheme } from '@/store/slices/docs';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { Portal } from '@/ui/Portal/Portal';
@@ -65,7 +65,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   renderVariableCard,
   testId
 }) => {
-  const mode = useAppSelector((s) => s.theme.mode);
+  const { isDarkMode } = useAppSelector(selectTheme);
   const resolver = useResolvedVariables();
   const editorRef = useRef<EditorInstance | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -156,7 +156,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
         onChange={(next) => onChange(next || '')}
         beforeMount={defineThemes}
         onMount={handleMount}
-        theme={isDarkMode(mode) ? DARK_THEME : LIGHT_THEME}
+        theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
         options={{
           readOnly,
           minimap: { enabled: false },

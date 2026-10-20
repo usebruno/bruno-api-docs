@@ -1,8 +1,10 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ThemeMode } from '@/theme/types';
-import { COUNTERPART_MODE, isThemeMode } from '@/theme/mode';
+import type { ThemeInfo } from '@/theme/mode';
+import { isThemeMode, THEME_INFO } from '@/theme/mode';
 
 export const THEME_STORAGE_KEY = 'oc-docs.theme';
+export type ThemeState = ThemeInfo;
 
 const systemPrefersDark = (): boolean => {
   try {
@@ -16,17 +18,26 @@ const systemPrefersDark = (): boolean => {
   }
 };
 
-export const readPersistedMode = (): ThemeMode => {
+export function getDefaultThemeState() {
+  return systemPrefersDark() ? THEME_INFO['dark'] : THEME_INFO['light'];
+}
+
+export const readPersistedMode = (): ThemeState => {
   // An explicit user choice always wins.
   try {
     const v = localStorage.getItem(THEME_STORAGE_KEY);
-    if (isThemeMode(v)) return v;
+    return getStateForMode(v);
   } catch {
     /* ignore */
   }
   // Nothing persisted yet -> follow the OS preference, default light.
-  return systemPrefersDark() ? 'dark' : 'light';
+  return getDefaultThemeState();
 };
+
+export function getStateForMode(mode: unknown): ThemeState {
+  if (isThemeMode(mode)) return THEME_INFO[mode];
+  return getDefaultThemeState();
+}
 
 /**
  * Side effect: mirror the active mode to localStorage + the root `data-theme`
@@ -44,23 +55,19 @@ export const persistThemeMode = (mode: ThemeMode) => {
   }
 };
 
-export interface ThemeState {
-  mode: ThemeMode;
-}
-
 // Seed from the persisted value so the very first render (Monaco theme, toggle
 // icon, anything reading s.theme.mode) is already correct — no light->dark flash.
-const initialState: ThemeState = { mode: readPersistedMode() };
+const initialState: ThemeState = readPersistedMode();
 
 const themeSlice = createSlice({
   name: 'theme',
   initialState,
   reducers: {
     setTheme(state, action: PayloadAction<ThemeMode>) {
-      state.mode = action.payload;
+      state = getStateForMode(action.payload);
     },
     toggleTheme(state) {
-      state.mode = COUNTERPART_MODE[state.mode];
+      state = getStateForMode(state.counterpart);
     }
   }
 });

@@ -84,7 +84,7 @@ export interface OpenCollectionProps {
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
   theme?: ThemeMode;
-  hideThemeSwitcher: boolean;
+  hideThemeSwitcher?: boolean;
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({

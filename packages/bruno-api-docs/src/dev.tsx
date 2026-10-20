@@ -7,6 +7,7 @@ import './styles/index.css';
 import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import { createOpenCollectionStore } from './store/store';
+import { isThemeMode } from './theme/mode';
 import { sampleCollectionYaml } from './sampleCollection';
 import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
@@ -38,6 +39,8 @@ const fixtures = {
 const params = new URLSearchParams(window.location.search);
 const fixture = params.get('fixture');
 const noGit = params.get('nogit') === '1';
+const themeParam = params.get('theme');
+const theme = isThemeMode(themeParam) ? themeParam : undefined;
 const unknownFixture = fixture != null && !(fixture in fixtures);
 const devCollection = unknownFixture || fixture == null
   ? sampleCollectionYaml
@@ -66,6 +69,7 @@ const DevApp: React.FC = () => {
         <OpenCollection
           collection={devCollection}
           gitCollectionUrl={noGit ? undefined : 'https://github.com/usebruno/bruno-testbench.git'}
+          theme={theme}
         />
       </div>
     </Provider>

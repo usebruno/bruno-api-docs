@@ -28,12 +28,8 @@ import {
 } from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
-import { applyTheme } from '@/theme/applyTheme';
 import { setTheme } from '@/store/slices/theme';
 import type { ThemeMode } from '@/theme/types';
-
-// Set data-theme on the root element before the component first paints to avoid a flash.
-applyTheme();
 
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== 'undefined' && value instanceof File;
@@ -91,7 +87,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
   gitCollectionUrl,
-  theme: defaultTheme,
+  theme,
   hideThemeSwitcher
 }) => {
   const dispatch = useAppDispatch();
@@ -148,11 +144,14 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     return () => { isActive = false; };
   }, [collection, dispatch]);
 
+  // The initial theme seeds the store (see OpenCollection below); only a later
+  // change of the prop — e.g. the host's own light/dark switch — is dispatched.
+  const lastThemeProp = useRef(theme);
   useEffect(() => {
-    if (defaultTheme) {
-      dispatch(setTheme(defaultTheme));
-    }
-  }, [defaultTheme, dispatch]);
+    if (theme === lastThemeProp.current) return;
+    lastThemeProp.current = theme;
+    if (theme) dispatch(setTheme(theme));
+  }, [theme, dispatch]);
 
   const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
@@ -176,7 +175,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
   const storeRef = useRef<AppStore | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore();
+    storeRef.current = createOpenCollectionStore({ theme: props.theme });
   }
 
   return (

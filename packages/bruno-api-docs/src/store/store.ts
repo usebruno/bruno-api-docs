@@ -3,9 +3,15 @@ import appReducer from '@/store/slices/app';
 import docsReducer from '@/store/slices/docs';
 import envReducer, { persistEnv } from '@/store/slices/env';
 import playgroundReducer from '@/store/slices/playground';
-import themeReducer, { persistThemeMode } from '@/store/slices/theme';
+import themeReducer, { getInitialThemeState, persistThemeMode } from '@/store/slices/theme';
+import { applyTheme } from '@/theme/applyTheme';
+import type { ThemeMode } from '@/theme/types';
 
-export const createOpenCollectionStore = () => {
+export interface CreateOpenCollectionStoreOptions {
+  theme?: ThemeMode;
+}
+
+export const createOpenCollectionStore = ({ theme }: CreateOpenCollectionStoreOptions = {}) => {
   const store = configureStore({
     reducer: {
       app: appReducer,
@@ -13,12 +19,13 @@ export const createOpenCollectionStore = () => {
       env: envReducer,
       playground: playgroundReducer,
       theme: themeReducer
-    }
+    },
+    preloadedState: { theme: getInitialThemeState(theme) }
   });
 
   // Persist theme changes (localStorage + root data-theme) outside the reducer.
   let lastMode = store.getState().theme.mode;
-  // Persist the environment selection (sessionStorage) outside the reducer.
+  applyTheme(lastMode);// Persist the environment selection (sessionStorage) outside the reducer.
   let lastEnv = store.getState().env;
   store.subscribe(() => {
     const state = store.getState();

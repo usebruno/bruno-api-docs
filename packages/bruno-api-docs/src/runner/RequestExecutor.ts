@@ -53,8 +53,23 @@ const removeHeader = (headers: Record<string, string>, name: string): void => {
   });
 };
 
+const anySignal = (signals: AbortSignal[]): AbortSignal => {
+  const controller = new AbortController();
+  for (const signal of signals) {
+    if (signal.aborted) {
+      controller.abort(signal.reason);
+      break;
+    }
+    signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true });
+  }
+  return controller.signal;
+};
+
 export class RequestExecutor {
-  async executeRequest(request: InternalHttpRequest, options: { timeout?: number } = {}): Promise<RunRequestResponse> {
+  async executeRequest(
+    request: InternalHttpRequest,
+    options: { timeout?: number; signal?: AbortSignal } = {}
+  ): Promise<RunRequestResponse> {
     const startTime = Date.now();
     const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
     const requestUrl = applyApiKeyToUrl(
@@ -63,7 +78,7 @@ export class RequestExecutor {
     );
 
     try {
-      const fetchOptions = await this.buildFetchOptions(request, timeoutMs);
+      const fetchOptions = await this.buildFetchOptions(request, timeoutMs, options.signal);
       const response = await this.performFetch(requestUrl, fetchOptions, request);
       const endTime = Date.now();
 
@@ -87,7 +102,8 @@ export class RequestExecutor {
       const classified = classifyRequestError(error, {
         timeoutMs,
         requestUrl,
-        pageUrl: pageHref() ?? undefined
+        pageUrl: pageHref() ?? undefined,
+        cancelled: options.signal?.aborted
       });
 
       return {
@@ -99,7 +115,11 @@ export class RequestExecutor {
     }
   }
 
-  private async buildFetchOptions(request: InternalHttpRequest, timeout = DEFAULT_TIMEOUT_MS): Promise<RequestInit> {
+  private async buildFetchOptions(
+    request: InternalHttpRequest,
+    timeout = DEFAULT_TIMEOUT_MS,
+    cancelSignal?: AbortSignal
+  ): Promise<RequestInit> {
     // `fetch` upper-cases only the methods it knows, so a collection storing
     // `purge` would go out lower-cased while the badge shows PURGE.
     const method = getHttpMethod(request).trim().toUpperCase();
@@ -108,9 +128,22 @@ export class RequestExecutor {
     const effectiveTimeout = typeof configuredTimeout === 'number' ? configuredTimeout : timeout;
     const options: RequestInit = {
       method,
-      headers: this.buildHeaders(request),
-      ...(effectiveTimeout > 0 ? { signal: AbortSignal.timeout(effectiveTimeout) } : {})
+      headers: this.buildHeaders(request)
     };
+
+    const signals: AbortSignal[] = [];
+    if (effectiveTimeout > 0) {
+      signals.push(AbortSignal.timeout(effectiveTimeout));
+    }
+    if (cancelSignal) {
+      signals.push(cancelSignal);
+    }
+
+    if (signals.length === 1) {
+      options.signal = signals[0];
+    } else if (signals.length > 1) {
+      options.signal = anySignal(signals);
+    }
 
     const body = getHttpBody(request);
     if (body && !BODYLESS_METHODS.includes(method)) {

@@ -15,6 +15,7 @@ import { PromptVariablesModal } from '@/components/PromptVariablesModal/PromptVa
 import {
   updatePlaygroundItem,
   setPlaygroundResponse,
+  clearPlaygroundResponse,
   selectPlaygroundResponse,
   applyScriptVariableChanges
 } from '@/store/slices/playground';
@@ -39,6 +40,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   const itemUuid = (item as any).uuid;
   const response = useAppSelector((state) => selectPlaygroundResponse(state, itemUuid));
   const [isLoading, setIsLoading] = useState(false);
+  const [requestStartedAt, setRequestStartedAt] = useState<number | null>(null);
   const promptVariablesController = usePromptVariables();
   const { collect: collectPromptVariables } = promptVariablesController;
   // The request/response split is one draggable divider whose axis follows the
@@ -76,6 +78,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const pendingSaveRef = useRef<{ uuid: string; item: HttpRequest } | null>(null);
   const sendInFlightRef = useRef(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setEditableItem(item);
@@ -128,6 +131,9 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
       const promptVariables = await collectPromptVariables(promptNames);
       if (!promptVariables) return;
 
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setRequestStartedAt(Date.now());
       setIsLoading(true);
       const result = await requestRunner.runRequest({
         item: editableItem,
@@ -135,8 +141,14 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
         environment,
         runtimeVariables: {},
         promptVariables,
-        prepared
+        prepared,
+        signal: controller.signal
       });
+
+      if (controller.signal.aborted) {
+        dispatch(clearPlaygroundResponse(itemUuid));
+        return;
+      }
 
       dispatch(setPlaygroundResponse({ uuid: itemUuid, response: result }));
 
@@ -155,9 +167,15 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
       }));
     } finally {
       sendInFlightRef.current = false;
+      abortControllerRef.current = null;
+      setRequestStartedAt(null);
       setIsLoading(false);
     }
   }, [collection, editableItem, selectedEnvironment, itemUuid, dispatch, collectPromptVariables]);
+
+  const handleCancelRequest = useCallback(() => {
+    abortControllerRef.current?.abort();
+  }, []);
 
   return (
     <ItemVariableResolverProvider
@@ -182,6 +200,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
         <QueryBar
           item={editableItem}
           onSendRequest={handleSendRequest}
+          onCancelRequest={handleCancelRequest}
           isLoading={isLoading}
           onItemChange={handleItemChange}
           effectiveAuth={effectiveAuth}
@@ -207,7 +226,14 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
           <SplitDivider orientation={orientation} onPointerDown={startResize} active={isResizing} testId="playground-divider" />
 
           <div className="flex-1 overflow-hidden min-h-0">
-            <ResponsePane response={response} isLoading={isLoading} orientation={orientation} itemUuid={itemUuid} />
+            <ResponsePane
+              response={response}
+              isLoading={isLoading}
+              requestStartedAt={requestStartedAt}
+              onCancelRequest={handleCancelRequest}
+              orientation={orientation}
+              itemUuid={itemUuid}
+            />
           </div>
         </div>
       </div>

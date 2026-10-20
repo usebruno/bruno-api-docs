@@ -39,8 +39,41 @@ export const StyledWrapper = styled.div`
     background: var(--oc-background-mantle);
   }
 
-  .loading-text {
+  .stopwatch {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .loading-icon {
+    display: inline-flex;
     color: var(--text-secondary);
+    animation: rotateCounterClockwise 1s linear infinite;
+  }
+
+  @keyframes rotateCounterClockwise {
+    to {
+      transform: rotate(-360deg);
+    }
+  }
+
+  button.cancel-request {
+    height: 1.75rem;
+    padding: 0 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--oc-radius);
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text-primary);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
   }
 
   .empty-hint {

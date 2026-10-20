@@ -31,6 +31,11 @@ const handle = async (req, res) => {
 
   if (url.pathname === '/health') return send(res, 200, { ...cors, 'Content-Type': 'text/plain' }, 'ok');
 
+  if (url.pathname === '/delay') {
+    await new Promise((resolve) => setTimeout(resolve, Number(url.searchParams.get('ms') ?? 5000)));
+    return send(res, 200, { ...cors, 'Content-Type': 'text/plain' }, 'done');
+  }
+
   if (url.pathname === '/echo') {
     const echoed = {
       method: req.method,

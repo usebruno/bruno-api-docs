@@ -16,7 +16,9 @@ const item: HttpRequest = {
   }
 } as HttpRequest;
 
-const queryBar = <QueryBar item={item} onSendRequest={() => {}} isLoading={false} onItemChange={() => {}} />;
+const queryBar = (
+  <QueryBar item={item} onSendRequest={() => {}} onCancelRequest={() => {}} isLoading={false} onItemChange={() => {}} />
+);
 
 describe('Playground QueryBar: code snippet', () => {
   it('offers the code-snippet control alongside the copy-url action', () => {

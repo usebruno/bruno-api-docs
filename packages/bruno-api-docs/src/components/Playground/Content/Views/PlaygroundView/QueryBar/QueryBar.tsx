@@ -14,6 +14,7 @@ import { CodeSnippetTabs } from '@/components/CodeSnippetTabs/CodeSnippetTabs';
 interface QueryBarProps {
   item: HttpRequest;
   onSendRequest: () => void;
+  onCancelRequest: () => void;
   isLoading: boolean;
   onItemChange: (item: HttpRequest) => void;
   effectiveAuth?: Auth;
@@ -41,6 +42,7 @@ export const applyUrlChange = (item: HttpRequest, newUrl: string): HttpRequest =
 const QueryBar: React.FC<QueryBarProps> = ({
   item,
   onSendRequest,
+  onCancelRequest,
   isLoading,
   onItemChange,
   effectiveAuth,
@@ -107,20 +109,22 @@ const QueryBar: React.FC<QueryBarProps> = ({
           testId="query-bar-code-snippet"
         />
         <CopyButton text={url} label="Copy URL" copiedLabel="Copied" testId="query-bar-copy-url" />
-        <button
-          type="button"
-          onClick={onSendRequest}
-          disabled={isLoading || !url.trim()}
-          className="send"
-          data-testid="query-bar-send"
-        >
-          {isLoading ? (
-            <div className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          ) : (
+        {isLoading ? (
+          <button type="button" onClick={onCancelRequest} className="send cancel" data-testid="query-bar-cancel">
+            Cancel
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onSendRequest}
+            disabled={!url.trim()}
+            className="send"
+            data-testid="query-bar-send"
+          >
             <SendIcon />
-          )}
-          {isLoading ? 'Sending' : 'Send'}
-        </button>
+            Send
+          </button>
+        )}
       </div>
     </StyledWrapper>
   );

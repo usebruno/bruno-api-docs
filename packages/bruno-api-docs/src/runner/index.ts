@@ -36,6 +36,7 @@ interface RunContext {
   promptVariables: Variables;
   processEnvVars: Variables;
   timeout: number;
+  signal?: AbortSignal;
   warnings: string[];
 }
 
@@ -75,6 +76,7 @@ export interface RunRequestOptions {
   runtimeVariables?: Variables;
   promptVariables?: Variables;
   timeout?: number;
+  signal?: AbortSignal;
   validateSSL?: boolean;
   prepared?: HttpRequest;
 }
@@ -150,7 +152,7 @@ export class RequestRunner {
 
   async runRequest(options: RunRequestOptions): Promise<RunRequestResponse> {
     const {
-      item, collection, environment, runtimeVariables = {}, promptVariables = {}, timeout = 30000, prepared
+      item, collection, environment, runtimeVariables = {}, promptVariables = {}, timeout = 30000, signal, prepared
     } = options;
     const context: RunContext = {
       collection,
@@ -161,6 +163,7 @@ export class RequestRunner {
       runtimeVariables,
       promptVariables,
       timeout,
+      signal,
       warnings: []
     };
 
@@ -246,7 +249,7 @@ export class RequestRunner {
   ): Promise<RunRequestResponse> {
     const {
       collection, environmentVariables, collectionVariables, runtimeVariables, promptVariables,
-      processEnvVars, timeout, warnings
+      processEnvVars, timeout, signal, warnings
     } = context;
     const requestId = this.generateRequestId();
 
@@ -304,7 +307,10 @@ export class RequestRunner {
 
       const interpolatedRequest = interpolateVars(processedRequest, allVariables);
 
-      const response = await this.executor.executeRequest(interpolatedRequest, { timeout });
+      const response = await this.executor.executeRequest(interpolatedRequest, { timeout, signal });
+      if (signal?.aborted) {
+        return { ...response, requestId };
+      }
 
       // Post-response script
       if (scriptsObj.postResponse) {

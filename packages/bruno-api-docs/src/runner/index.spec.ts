@@ -528,6 +528,35 @@ items:
       global.fetch = originalFetch;
     });
 
+    it('returns a cancelled response and skips the scripts after the request when the signal aborts', async () => {
+      const abortError = new DOMException('The operation was aborted', 'AbortError');
+      global.fetch = vi.fn().mockRejectedValue(abortError);
+      const collection = parseYaml(`
+opencollection: "1.0.0"
+info:
+  name: "Cancel"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com/"
+    scripts:
+      tests: |
+        test("never runs", function () { expect(1).to.equal(1); });
+`);
+      const controller = new AbortController();
+      controller.abort();
+
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0], collection, runtimeVariables: {}, signal: controller.signal
+      });
+
+      expect(response.errorType).toBe('cancelled');
+      expect(response.testResults).toBeUndefined();
+      expect((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].signal.aborted).toBe(true);
+      global.fetch = originalFetch;
+    });
+
     describe('script errors after the response arrived', () => {
       const scriptErrorCollection = (scripts: string) => parseYaml(`
 opencollection: "1.0.0"

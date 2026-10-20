@@ -29,8 +29,16 @@ describe('classifyRequestError', () => {
       expect(result.message).toBe('Request timed out. The server didn\'t respond in time.');
     });
 
-    it('classifies a manual AbortError', () => {
+    it('classifies an AbortError as a timeout when the caller did not cancel', () => {
       expect(classifyRequestError(abortError()).type).toBe('timeout');
+    });
+  });
+
+  describe('cancelled', () => {
+    it('classifies the error as cancelled when the caller cancelled', () => {
+      const result = classifyRequestError(abortError(), { cancelled: true });
+      expect(result.type).toBe('cancelled');
+      expect(result.title).toBe('Request cancelled');
     });
   });
 

@@ -7,7 +7,7 @@ import TestResultsTab from '../../Common/TestResultsTab';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import WarningBanner from '@/ui/WarningBanner/WarningBanner';
 import { SendIconWrapper, StyledWrapper } from './StyledWrapper';
-import { SendIcon } from '@/assets/icons';
+import { RefreshIcon, SendIcon } from '@/assets/icons';
 import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
 import type { ResponseBodyFormat } from '@/constants';
@@ -18,15 +18,25 @@ import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';
 import ResponseActions from './ResponseActions/ResponseActions';
 import useResponseActions from './ResponseActions/hooks/useResponseActions';
+import StopWatch from './StopWatch/StopWatch';
 
 interface ResponsePaneProps {
   response: RunRequestResponse;
   isLoading: boolean;
+  requestStartedAt: number | null;
+  onCancelRequest: () => void;
   orientation: 'vertical' | 'horizontal';
   itemUuid: string;
 }
 
-const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orientation, itemUuid }) => {
+const ResponsePane: React.FC<ResponsePaneProps> = ({
+  response,
+  isLoading,
+  requestStartedAt,
+  onCancelRequest,
+  orientation,
+  itemUuid
+}) => {
   const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundResponseTab', 'response');
   const [dismissedScriptErrorKeys, setDismissedScriptErrorKeys] = useState<string[]>([]);
   const { actionsExpandedWidth, measureActions } = useResponseActions();
@@ -43,11 +53,19 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({ response, isLoading, orient
   // Handle loading, empty, and error states
   if (isLoading) {
     return (
-      <StyledWrapper className="flex items-center justify-center">
-        <div className="flex items-center gap-3">
-          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span className="loading-text">Sending request...</span>
-        </div>
+      <StyledWrapper className="flex flex-col items-center justify-center align-items:center gap-4" data-testid="response-loading">
+        <StopWatch startTime={requestStartedAt} />
+        <span className="loading-icon">
+          <RefreshIcon />
+        </span>
+        <button
+          type="button"
+          className="cancel-request"
+          onClick={onCancelRequest}
+          data-testid="response-cancel-request"
+        >
+          Cancel Request
+        </button>
       </StyledWrapper>
     );
   }

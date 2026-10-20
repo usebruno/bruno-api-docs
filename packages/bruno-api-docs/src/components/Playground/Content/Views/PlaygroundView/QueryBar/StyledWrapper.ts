@@ -68,4 +68,9 @@ export const StyledWrapper = styled.div`
       cursor: not-allowed;
     }
   }
+
+  button.send.cancel {
+    background-color: transparent;
+    color: var(--oc-brand);
+  }
 `;

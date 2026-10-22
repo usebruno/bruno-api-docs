@@ -9,6 +9,7 @@ describe('SidebarNavLink', () => {
     expect(html).toContain('Overview');
     expect(html).toContain('<button');
     expect(html).toContain('navlink-main');
+    expect(html).toContain('data-testid="sidebar-label"');
   });
 
   it('applies the active class when active', () => {
@@ -19,7 +20,7 @@ describe('SidebarNavLink', () => {
     const html = renderToStaticMarkup(<SidebarNavLink label="Cancel Booking" method="DELETE" />);
     expect(html).toContain('DEL');
     expect(html).toContain('var(--oc-request-methods-delete)');
-    expect(html).toContain('navlink-method');
+    expect(html).toContain('data-testid="sidebar-method"');
   });
 
   it('renders an icon slot when given an icon', () => {
@@ -47,7 +48,7 @@ describe('SidebarNavLink', () => {
 
   it('renders a JS badge in the method column for script rows, label stays default font', () => {
     const html = renderToStaticMarkup(<SidebarNavLink label="setup.js" script />);
-    expect(html).toContain('navlink-method');
+    expect(html).toContain('data-testid="sidebar-method"');
     expect(html).toContain('>JS<');
     expect(html).not.toContain('navlink-label mono');
   });

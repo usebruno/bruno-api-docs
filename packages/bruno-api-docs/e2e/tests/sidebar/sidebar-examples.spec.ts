@@ -6,6 +6,7 @@ const BAD_REQUEST_EXAMPLE = '400 Bad Request - invalid per_page';
 const REQUEST_PATH = '#/billing/customers/get-all-customers';
 const OK_EXAMPLE_SLUG = '200-ok-first-page';
 const OK_EXAMPLE_URL = `/${REQUEST_PATH}/${OK_EXAMPLE_SLUG}`;
+const DRAWER = { width: 1023, height: 900 };
 
 test.describe('Sidebar - Examples (docs)', () => {
   test.beforeEach(async ({ requestPage }) => {
@@ -55,32 +56,68 @@ test.describe('Sidebar - Examples (docs)', () => {
 
   test('deep-links the example: opening its url (share) and reloading restore the highlight', async ({
     page,
-    requestPage
+    requestPage,
+    sidebar
   }) => {
     await page.goto(OK_EXAMPLE_URL);
     await expect(page.getByTestId('page')).toHaveAttribute('data-page-type', 'request');
     await expect(requestPage.examples.activeCard).toContainText(OK_EXAMPLE);
+    await expect(sidebar.exampleRow(OK_EXAMPLE)).toHaveClass(/active/);
 
     await page.reload();
     await expect(requestPage.examples.activeCard).toContainText(OK_EXAMPLE);
+    await expect(sidebar.exampleRow(OK_EXAMPLE)).toHaveClass(/active/);
   });
 
   test('browser back and forward move the highlight between examples', async ({ sidebar, requestPage, page }) => {
     await sidebar.toggleExamples('Get All Customers');
     await sidebar.exampleRow(OK_EXAMPLE).click();
     await expect(requestPage.examples.activeCard).toContainText(OK_EXAMPLE);
+    await expect(sidebar.exampleRow(OK_EXAMPLE)).toHaveClass(/active/);
     await sidebar.exampleRow(BAD_REQUEST_EXAMPLE).click();
     await expect(requestPage.examples.activeCard).toContainText(BAD_REQUEST_EXAMPLE);
+    await expect(sidebar.exampleRow(BAD_REQUEST_EXAMPLE)).toHaveClass(/active/);
 
     await page.goBack();
     await expect(requestPage.examples.activeCard).toContainText(OK_EXAMPLE);
+    await expect(sidebar.exampleRow(OK_EXAMPLE)).toHaveClass(/active/);
+    await expect(sidebar.exampleRow(BAD_REQUEST_EXAMPLE)).not.toHaveClass(/active/);
     await page.goForward();
     await expect(requestPage.examples.activeCard).toContainText(BAD_REQUEST_EXAMPLE);
+    await expect(sidebar.exampleRow(BAD_REQUEST_EXAMPLE)).toHaveClass(/active/);
+    await expect(sidebar.exampleRow(OK_EXAMPLE)).not.toHaveClass(/active/);
   });
 
   test('an unknown example slug falls back to the request page with no highlight', async ({ page, requestPage }) => {
     await page.goto(`/${REQUEST_PATH}/does-not-exist`);
     await expect(page.getByTestId('page')).toHaveAttribute('data-page-type', 'request');
     await expect(requestPage.examples.activeCard).toHaveCount(0);
+  });
+});
+
+test.describe('Sidebar - Examples (just below desktop, drawer)', () => {
+  test.use({ viewport: DRAWER });
+
+  test('opens a saved example from the drawer and keeps pagination usable', async ({ page, sidebar, requestPage }) => {
+    await page.goto(`/${REQUEST_PATH}`);
+    await sidebar.openDrawer();
+    await sidebar.toggleExamples('Get All Customers');
+    await sidebar.exampleRow(OK_EXAMPLE).click();
+
+    await expect(sidebar.backdrop).toBeHidden();
+    await expect(page).toHaveURL(/#\/billing\/customers\/get-all-customers\/200-ok-first-page$/);
+    await expect(requestPage.examples.activeCard).toContainText(OK_EXAMPLE);
+
+    await sidebar.openDrawer();
+    await expect(sidebar.exampleRow(OK_EXAMPLE)).toHaveClass(/active/);
+    await sidebar.closeDrawerViaBackdrop();
+
+    await page.getByTestId('next-link').click();
+    await expect(page).not.toHaveURL(/200-ok-first-page/);
+    await expect(page.getByTestId('page')).toBeVisible();
+    await expect(sidebar.inline).toHaveCount(0);
+
+    await page.goBack();
+    await expect(requestPage.examples.activeCard).toContainText(OK_EXAMPLE);
   });
 });

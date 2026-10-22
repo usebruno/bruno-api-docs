@@ -23,20 +23,20 @@ test.describe('Playground method selector', () => {
   test('spells the method out in full, unlike the abbreviated sidebar', async ({ playground }) => {
     await playground.methodSelector.select('DELETE');
     await expect(playground.methodSelector.trigger).toHaveText('DELETE');
-    await expect(playground.sidebarItem('get users').locator('.navlink-method')).toHaveText('DEL');
+    await expect(playground.sidebarItem('get users').getByTestId('sidebar-method')).toHaveText('DEL');
 
     await playground.methodSelector.select('CONNECT');
     await expect(playground.methodSelector.trigger).toHaveText('CONNECT');
-    await expect(playground.sidebarItem('get users').locator('.navlink-method')).toHaveText('CON');
+    await expect(playground.sidebarItem('get users').getByTestId('sidebar-method')).toHaveText('CON');
   });
 
   test('keeps TRACE unabbreviated in the sidebar', async ({ playground }) => {
     await playground.methodSelector.select('TRACE');
-    await expect(playground.sidebarItem('get users').locator('.navlink-method')).toHaveText('TRACE');
+    await expect(playground.sidebarItem('get users').getByTestId('sidebar-method')).toHaveText('TRACE');
   });
 
   test('abbreviates a custom method only when it is longer than five characters', async ({ playground }) => {
-    const badge = playground.sidebarItem('get users').locator('.navlink-method');
+    const badge = playground.sidebarItem('get users').getByTestId('sidebar-method');
 
     await playground.methodSelector.enterCustom('PURGE');
     await expect(badge).toHaveText('PURGE');

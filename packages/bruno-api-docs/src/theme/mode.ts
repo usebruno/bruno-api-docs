@@ -36,4 +36,3 @@ export const THEME_INFO: Record<ThemeMode, ThemeInfo> = {
 
 export const isThemeMode = (value: unknown): value is ThemeMode =>
   typeof value === 'string' && Object.prototype.hasOwnProperty.call(THEME_INFO, value);
-

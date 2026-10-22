@@ -25,9 +25,10 @@ import { StyledWrapper } from './StyledWrapper';
 interface AppShellProps {
   logo?: React.ReactNode;
   testId?: string;
+  hideThemeSwitcher?: boolean;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
+const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', hideThemeSwitcher }) => {
   const collection = useAppSelector(selectDocsCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const collectionSourceText = useAppSelector(selectCollectionSourceText);
@@ -132,7 +133,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
           )}
           openInBrunoHref={openInBrunoHref}
           onOpenInBruno={openInBrunoHref ? undefined : () => setOpenInBrunoOpen(true)}
-          themeToggleSlot={<ThemeToggle />}
+          themeToggleSlot={!hideThemeSwitcher && <ThemeToggle />}
         />
         <OpenInBrunoModal
           open={openInBrunoOpen}

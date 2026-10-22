@@ -1,7 +1,11 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ThemeMode } from '@/theme/types';
+import type { ThemeInfo } from '@/theme/mode';
+import { isThemeMode, THEME_INFO } from '@/theme/mode';
+import { applyTheme } from '@/theme/applyTheme';
 
 export const THEME_STORAGE_KEY = 'oc-docs.theme';
+export type ThemeState = ThemeInfo;
 
 const systemPrefersDark = (): boolean => {
   try {
@@ -15,17 +19,30 @@ const systemPrefersDark = (): boolean => {
   }
 };
 
-export const readPersistedMode = (): ThemeMode => {
-  // An explicit user choice always wins.
+export function getDefaultThemeState() {
+  return systemPrefersDark() ? THEME_INFO['dark'] : THEME_INFO['light'];
+}
+
+const readStoredMode = (): ThemeMode | null => {
   try {
     const v = localStorage.getItem(THEME_STORAGE_KEY);
-    if (v === 'dark' || v === 'light') return v;
+    return isThemeMode(v) ? v : null;
   } catch {
-    /* ignore */
+    return null;
   }
-  // Nothing persisted yet -> follow the OS preference, default light.
-  return systemPrefersDark() ? 'dark' : 'light';
 };
+
+export const getInitialThemeState = (requested?: ThemeMode): ThemeState => {
+  const family = requested ? THEME_INFO[requested].family : 'default';
+  const stored = readStoredMode();
+  if (stored && THEME_INFO[stored].family === family) return THEME_INFO[stored];
+  return requested ? THEME_INFO[requested] : getDefaultThemeState();
+};
+
+export function getStateForMode(mode: unknown): ThemeState {
+  if (isThemeMode(mode)) return THEME_INFO[mode];
+  return getDefaultThemeState();
+}
 
 /**
  * Side effect: mirror the active mode to localStorage + the root `data-theme`
@@ -33,33 +50,26 @@ export const readPersistedMode = (): ThemeMode => {
  * the store subscription instead (see store.ts).
  */
 export const persistThemeMode = (mode: ThemeMode) => {
+  if (!isThemeMode(mode)) {
+    return;
+  }
   try {
     localStorage.setItem(THEME_STORAGE_KEY, mode);
   } catch {
     /* ignore */
   }
-  if (typeof document !== 'undefined') {
-    document.documentElement.setAttribute('data-theme', mode);
-  }
+  applyTheme(mode);
 };
-
-export interface ThemeState {
-  mode: ThemeMode;
-}
-
-// Seed from the persisted value so the very first render (Monaco theme, toggle
-// icon, anything reading s.theme.mode) is already correct — no light->dark flash.
-const initialState: ThemeState = { mode: readPersistedMode() };
 
 const themeSlice = createSlice({
   name: 'theme',
-  initialState,
+  initialState: () => getInitialThemeState(),
   reducers: {
-    setTheme(state, action: PayloadAction<ThemeMode>) {
-      state.mode = action.payload;
+    setTheme(_state, action: PayloadAction<ThemeMode>) {
+      return getStateForMode(action.payload);
     },
     toggleTheme(state) {
-      state.mode = state.mode === 'light' ? 'dark' : 'light';
+      return getStateForMode(state.counterpart);
     }
   }
 });

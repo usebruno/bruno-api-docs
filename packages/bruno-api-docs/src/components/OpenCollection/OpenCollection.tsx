@@ -28,10 +28,8 @@ import {
 } from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
-import { applyTheme } from '@/theme/applyTheme';
-
-// Set data-theme on the root element before the component first paints to avoid a flash.
-applyTheme();
+import { setTheme } from '@/store/slices/theme';
+import type { ThemeMode } from '@/theme/types';
 
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== 'undefined' && value instanceof File;
@@ -81,12 +79,16 @@ export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
+  theme?: ThemeMode;
+  hideThemeSwitcher?: boolean;
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
-  gitCollectionUrl
+  gitCollectionUrl,
+  theme,
+  hideThemeSwitcher
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);
@@ -142,6 +144,15 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     return () => { isActive = false; };
   }, [collection, dispatch]);
 
+  // The initial theme seeds the store (see OpenCollection below); only a later
+  // change of the prop — e.g. the host's own light/dark switch — is dispatched.
+  const lastThemeProp = useRef(theme);
+  useEffect(() => {
+    if (theme === lastThemeProp.current) return;
+    lastThemeProp.current = theme;
+    if (theme) dispatch(setTheme(theme));
+  }, [theme, dispatch]);
+
   const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
 
@@ -155,7 +166,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className="oc-playground">
-      <AppShell logo={logo} />
+      <AppShell logo={logo} hideThemeSwitcher={hideThemeSwitcher} />
     </div>
   );
 };
@@ -164,7 +175,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
   const storeRef = useRef<AppStore | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore();
+    storeRef.current = createOpenCollectionStore({ theme: props.theme });
   }
 
   return (

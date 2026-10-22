@@ -7,6 +7,7 @@ import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import { parseCollectionContent } from './utils/yamlUtils';
+import type { ThemeMode } from './theme/types';
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {
@@ -18,6 +19,8 @@ export interface OpenCollectionOptions {
   opencollection: any;
   logo?: string;
   gitCollectionUrl?: string;
+  theme?: ThemeMode;
+  hideThemeSwitcher?: boolean;
 }
 
 export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | 'opencollection'> {
@@ -97,7 +100,9 @@ export class OpenCollectionRenderer {
     this.root.render(React.createElement(OpenCollection, {
       collection,
       logo: this.createLogoElement(),
-      gitCollectionUrl: this.options.gitCollectionUrl
+      gitCollectionUrl: this.options.gitCollectionUrl,
+      theme: this.options.theme,
+      hideThemeSwitcher: Boolean(this.options.hideThemeSwitcher)
     }));
   }
 

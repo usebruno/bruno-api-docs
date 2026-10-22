@@ -1,4 +1,5 @@
-export type ThemeMode = 'light' | 'dark';
+export type ThemeFamily = 'default' | 'backstage';
+export type ThemeMode = 'light' | 'dark' | 'backstage-light' | 'backstage-dark';
 
 export interface Theme {
   mode: ThemeMode;

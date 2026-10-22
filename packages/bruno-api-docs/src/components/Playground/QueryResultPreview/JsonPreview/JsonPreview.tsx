@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import { useAppSelector } from '@/store/hooks';
+import { selectTheme } from '@/store/slices/docs';
 import { StyledWrapper } from './StyledWrapper';
 
 // react-json-view touches browser globals at module load, so a static import
@@ -45,7 +46,7 @@ const parseJson = (input: unknown): ParsedJson => {
 
 /** Renders response data as an interactive, collapsible JSON tree. */
 const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
-  const themeMode = useAppSelector((s) => s.theme.mode);
+  const { isDarkMode } = useAppSelector(selectTheme);
   const { value, error } = parseJson(data);
 
   if (error || value === null) {
@@ -66,7 +67,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
       <StyledWrapper data-testid="response-preview-json">
         <ReactJson
           src={value}
-          theme={themeMode === 'dark' ? 'monokai' : 'rjv-default'}
+          theme={isDarkMode ? 'monokai' : 'rjv-default'}
           collapsed={2}
           groupArraysAfterLength={10}
           displayDataTypes={false}

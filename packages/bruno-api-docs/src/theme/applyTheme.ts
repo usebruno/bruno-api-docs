@@ -1,7 +1,7 @@
-import { readPersistedMode } from '@/store/slices/theme';
+import type { ThemeMode } from '@/theme/types';
 
-/** Set data-theme on the root element before first paint to avoid a flash. */
-export function applyTheme(): void {
+/** Mirror the active mode to the root element's data-theme attribute. */
+export function applyTheme(mode: ThemeMode): void {
   if (typeof document === 'undefined') return;
-  document.documentElement.setAttribute('data-theme', readPersistedMode());
+  document.documentElement.setAttribute('data-theme', mode);
 }

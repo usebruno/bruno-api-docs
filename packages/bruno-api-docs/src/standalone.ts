@@ -122,7 +122,8 @@ class DeprecatedOpenCollection extends OpenCollectionRenderer {
   constructor(options: OpenCollectionOptions) {
     if (!warnedDeprecated) {
       warnedDeprecated = true;
-      console.warn('[Bruno API Docs] window.OpenCollection is deprecated and will be removed in a future release. Use Bruno.apiDocs(target, { content }) instead.');
+      // window.console: the standalone build drops bare console.* calls (terser drop_console)
+      window.console.warn('[Bruno API Docs] window.OpenCollection is deprecated and will be removed in a future release. Use Bruno.apiDocs(target, { content }) instead.');
     }
     super(options);
   }

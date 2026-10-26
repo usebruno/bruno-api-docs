@@ -83,6 +83,5 @@ const docsSlice = createSlice({
 export const { setDocsCollection, clearDocsCollection, toggleItem, selectItem, expandFolders } = docsSlice.actions;
 export default docsSlice.reducer;
 
-export const selectTheme = (state: RootState) => state.theme;
 export const selectDocsCollection = (state: RootState) => state.docs.collection;
 export const selectSelectedItemId = (state: RootState) => state.docs.selectedItemId;

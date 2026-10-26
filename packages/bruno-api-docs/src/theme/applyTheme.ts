@@ -1,7 +1,12 @@
-import type { ThemeMode } from '@/theme/types';
+import { getAppThemeMode } from '@/utils/theme';
+import type { ThemeState } from './types';
+
 
 /** Mirror the active mode to the root element's data-theme attribute. */
-export function applyTheme(mode: ThemeMode): void {
+export function applyTheme({ family, mode }: ThemeState): void {
   if (typeof document === 'undefined') return;
-  document.documentElement.setAttribute('data-theme', mode);
+  document.documentElement.setAttribute(
+    'data-theme',
+    `${family}-${getAppThemeMode(mode)}`
+  );
 }

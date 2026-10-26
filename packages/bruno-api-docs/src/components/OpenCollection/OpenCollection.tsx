@@ -29,7 +29,9 @@ import {
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { setTheme } from '@/store/slices/theme';
-import type { ThemeMode } from '@/theme/types';
+import type { ThemeState } from '@/theme/types';
+import { isEqual } from 'lodash-es';
+import { getApiDocsTheme } from '@/utils/theme';
 
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== 'undefined' && value instanceof File;
@@ -79,7 +81,7 @@ export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
-  theme?: ThemeMode;
+  theme?: Partial<ThemeState>;
   hideThemeSwitcher?: boolean;
 }
 
@@ -148,9 +150,9 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   // change of the prop — e.g. the host's own light/dark switch — is dispatched.
   const lastThemeProp = useRef(theme);
   useEffect(() => {
-    if (theme === lastThemeProp.current) return;
+    if (isEqual(theme, lastThemeProp.current)) return;
     lastThemeProp.current = theme;
-    if (theme) dispatch(setTheme(theme));
+    if (theme) dispatch(setTheme(getApiDocsTheme(theme)));
   }, [theme, dispatch]);
 
   const isInitialLoad = collectionStatus === 'idle' && !docsCollection;

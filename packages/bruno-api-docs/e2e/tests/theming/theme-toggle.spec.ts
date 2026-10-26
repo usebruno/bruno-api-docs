@@ -13,7 +13,7 @@ test.describe('Theme switcher', () => {
     });
 
     test('starts in light mode, with the toggle offering "Switch to dark theme"', async ({ themeToggle }) => {
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'light');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-light');
       await expect(themeToggle.button).toHaveAccessibleName('Switch to dark theme');
     });
 
@@ -26,7 +26,7 @@ test.describe('Theme switcher', () => {
     test('switches the whole app to dark mode when the toggle is clicked', async ({ themeToggle }) => {
       await themeToggle.toggle();
 
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
 
       await expect(themeToggle.button).toHaveAccessibleName('Switch to light theme');
     });
@@ -35,14 +35,14 @@ test.describe('Theme switcher', () => {
       await themeToggle.toggle();
       await themeToggle.toggle();
 
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'light');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-light');
     });
 
     test('remembers the chosen theme across a page reload', async ({ page, themeToggle }) => {
       await themeToggle.toggle();
       await page.reload();
 
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
     });
 
     test('keeps the chosen theme while moving between Overview, Environments, and a request', async ({
@@ -53,19 +53,19 @@ test.describe('Theme switcher', () => {
       requestPage
     }) => {
       await themeToggle.toggle();
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
 
       await sidebar.overview.click();
       await expect(overviewPage.root).toBeVisible();
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
 
       await sidebar.environments.click();
       await expect(environmentsPage.root).toBeVisible();
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
 
       await sidebar.open(['echo json']);
       await expect(requestPage.root).toBeVisible();
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
       await expect(themeToggle.button).toHaveAccessibleName('Switch to light theme');
     });
 
@@ -74,13 +74,13 @@ test.describe('Theme switcher', () => {
       themeToggle
     }) => {
       await themeToggle.toggle();
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
 
       const reopened = await context.newPage();
       await reopened.goto('/');
       const reopenedToggle = new ThemeToggleComponent(reopened);
 
-      await expect(reopenedToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(reopenedToggle.html).toHaveAttribute('data-theme', 'default-dark');
       await expect(reopenedToggle.button).toHaveAccessibleName('Switch to light theme');
     });
   });
@@ -93,17 +93,17 @@ test.describe('Theme switcher', () => {
     });
 
     test('starts in dark mode, with the toggle offering "Switch to light theme"', async ({ themeToggle }) => {
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'dark');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
       await expect(themeToggle.button).toHaveAccessibleName('Switch to light theme');
     });
 
     test('keeps an explicit light choice after reload, even though the OS prefers dark', async ({ page, themeToggle }) => {
       await themeToggle.toggle();
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'light');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-light');
 
       await page.reload();
 
-      await expect(themeToggle.html).toHaveAttribute('data-theme', 'light');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-light');
       await expect(themeToggle.button).toHaveAccessibleName('Switch to dark theme');
     });
   });

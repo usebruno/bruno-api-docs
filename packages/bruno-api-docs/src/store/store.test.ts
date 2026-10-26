@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
-import { THEME_INFO } from '@/theme/mode';
-import { setTheme, toggleTheme, THEME_STORAGE_KEY } from '@/store/slices/theme';
+import { setTheme, setThemeMode } from '@/store/slices/theme';
+import { THEME_STORAGE_KEY } from '@/constants/theme';
 import { createOpenCollectionStore } from './store';
 
 const root = { attrs: {} as Record<string, string>, setAttribute(k: string, v: string) { this.attrs[k] = v; } };
@@ -24,40 +24,39 @@ describe('createOpenCollectionStore theme seeding', () => {
   afterEach(() => vi.stubGlobal('document', undefined));
 
   it('starts in the requested theme with no dispatch', () => {
-    const store = createOpenCollectionStore({ theme: 'backstage-dark' });
-    expect(store.getState().theme).toEqual(THEME_INFO['backstage-dark']);
+    const store = createOpenCollectionStore({ theme: { family: 'backstage', mode: 'dark' } });
+    expect(store.getState().theme).toEqual({ family: 'backstage', mode: 'dark' });
   });
 
-  it('starts in the stored choice when it belongs to the requested family', () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'backstage-dark');
-    const store = createOpenCollectionStore({ theme: 'backstage-light' });
-    expect(store.getState().theme.mode).toBe('backstage-dark');
+  it('a stored mode wins over the requested one, but the family comes from the request', () => {
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'default', mode: 'dark' }));
+    const store = createOpenCollectionStore({ theme: { family: 'backstage', mode: 'light' } });
+    expect(store.getState().theme).toEqual({ family: 'backstage', mode: 'dark' });
   });
 
-  it('defaults to the default family when no theme is requested', () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'backstage-dark');
-    expect(createOpenCollectionStore().getState().theme).toEqual(THEME_INFO.light);
+  it('defaults to the default family following the system mode', () => {
+    expect(createOpenCollectionStore().getState().theme).toEqual({ family: 'default', mode: 'system' });
   });
 
-  it('sets data-theme to the initial mode on creation', () => {
-    createOpenCollectionStore({ theme: 'backstage-light' });
+  it('sets data-theme to the initial theme on creation', () => {
+    createOpenCollectionStore({ theme: { family: 'backstage', mode: 'light' } });
     expect(root.attrs['data-theme']).toBe('backstage-light');
   });
 
   it('does not persist the initial theme over the stored choice', () => {
     localStorage.setItem(THEME_STORAGE_KEY, 'dark');
-    createOpenCollectionStore({ theme: 'backstage-light' });
+    createOpenCollectionStore({ theme: { family: 'backstage', mode: 'light' } });
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
   });
 
   it('persists and applies a theme change', () => {
-    const store = createOpenCollectionStore({ theme: 'backstage-light' });
-    store.dispatch(toggleTheme());
-    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('backstage-dark');
+    const store = createOpenCollectionStore({ theme: { family: 'backstage', mode: 'light' } });
+    store.dispatch(setThemeMode('dark'));
+    expect(JSON.parse(localStorage.getItem(THEME_STORAGE_KEY)!)).toEqual({ family: 'backstage', mode: 'dark' });
     expect(root.attrs['data-theme']).toBe('backstage-dark');
 
-    store.dispatch(setTheme('light'));
-    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('light');
-    expect(root.attrs['data-theme']).toBe('light');
+    store.dispatch(setTheme({ family: 'default', mode: 'light' }));
+    expect(JSON.parse(localStorage.getItem(THEME_STORAGE_KEY)!)).toEqual({ family: 'default', mode: 'light' });
+    expect(root.attrs['data-theme']).toBe('default-light');
   });
 });

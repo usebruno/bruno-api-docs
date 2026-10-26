@@ -14,7 +14,7 @@
 }
 
 :root,
-[data-theme="light"] {
+[data-theme="default-light"] {
   --oc-mode: light;
   --oc-brand: hsl(33, 80%, 46%);
   --oc-text: #343434;
@@ -337,7 +337,7 @@
   --oc-app-collection-toolbar-sandbox-mode-developer-mode-color: hsl(45,  75%, 42%);
 }
 
-[data-theme="dark"] {
+[data-theme="default-dark"] {
   --oc-mode: dark;
   --oc-brand: hsl(39, 74%, 59%);
   --oc-text: hsl(0deg 0% 80%);
@@ -661,7 +661,7 @@
 }
 
 [data-theme="backstage-light"] {
-  --oc-mode: backstage-light;
+  --oc-mode: light;
   --oc-brand: hsl(33, 80%, 46%);
   --oc-text: #212121;
   --oc-text-link: #0A6EBE;
@@ -984,7 +984,7 @@
 }
 
 [data-theme="backstage-dark"] {
-  --oc-mode: backstage-dark;
+  --oc-mode: dark;
   --oc-brand: hsl(39, 74%, 59%);
   --oc-text: #FFFFFF;
   --oc-text-link: #9CC9FF;

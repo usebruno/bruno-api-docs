@@ -1,5 +1,9 @@
 export type ThemeFamily = 'default' | 'backstage';
-export type ThemeMode = 'light' | 'dark' | 'backstage-light' | 'backstage-dark';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ThemeState = {
+  family: ThemeFamily;
+  mode: ThemeMode;
+};
 
 export interface Theme {
   mode: ThemeMode;

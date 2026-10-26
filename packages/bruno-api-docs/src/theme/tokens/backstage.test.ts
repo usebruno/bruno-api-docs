@@ -13,13 +13,13 @@ describe('backstage tokens', () => {
   });
 
   it('keeps the Bruno brand and uses the @backstage/theme backgrounds', () => {
-    expect(backstageLight.mode).toBe('backstage-light');
+    expect(backstageLight.mode).toBe('light');
     expect(backstageLight.brand).toBe(light.brand);
     expect(backstageLight.primary).toEqual(light.primary);
     expect(backstageLight.background.base).toBe('#FFFFFF');
     expect(backstageLight.background.mantle).toBe('#F8F8F8');
 
-    expect(backstageDark.mode).toBe('backstage-dark');
+    expect(backstageDark.mode).toBe('dark');
     expect(backstageDark.brand).toBe(dark.brand);
     expect(backstageDark.primary).toEqual(dark.primary);
     expect(backstageDark.background.base).toBe('#424242');

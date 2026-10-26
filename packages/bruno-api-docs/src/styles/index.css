@@ -957,7 +957,7 @@ tr.themed-row:nth-child(even) {
   color-scheme: light;
 }
 
-[data-theme="dark"] .markdown-documentation .task-list-item-checkbox,
+[data-theme="default-dark"] .markdown-documentation .task-list-item-checkbox,
 [data-theme="backstage-dark"] .markdown-documentation .task-list-item-checkbox {
   color-scheme: dark;
 }

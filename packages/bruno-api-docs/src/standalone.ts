@@ -7,7 +7,7 @@ import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import { parseCollectionContent } from './utils/yamlUtils';
-import type { ThemeMode } from './theme/types';
+import type { ThemeState } from './theme/types';
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {
@@ -19,7 +19,7 @@ export interface OpenCollectionOptions {
   opencollection: any;
   logo?: string;
   gitCollectionUrl?: string;
-  theme?: ThemeMode;
+  theme?: Partial<ThemeState>;
   hideThemeSwitcher?: boolean;
 }
 

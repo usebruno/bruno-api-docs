@@ -273,5 +273,5 @@ const createBackstageTheme = (base: Theme, mode: ThemeMode, p: BackstagePalette)
   }
 });
 
-export const backstageLight = createBackstageTheme(light, 'backstage-light', backstageLightPalette);
-export const backstageDark = createBackstageTheme(dark, 'backstage-dark', backstageDarkPalette);
+export const backstageLight = createBackstageTheme(light, 'light', backstageLightPalette);
+export const backstageDark = createBackstageTheme(dark, 'dark', backstageDarkPalette);

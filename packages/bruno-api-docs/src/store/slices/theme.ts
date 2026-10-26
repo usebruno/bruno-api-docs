@@ -1,11 +1,14 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type { ThemeMode, ThemeState } from '@/theme/types';
-import { getApiDocsTheme } from '@/utils/theme';
-import { RootState } from '../store';
+import { DEFAULT_THEME_FAMILY, DEFAULT_THEME_MODE } from '@/constants/theme';
+import type { RootState } from '@/store/store';
 
 const themeSlice = createSlice({
   name: 'theme',
-  initialState: () => getApiDocsTheme(),
+  initialState: {
+    family: DEFAULT_THEME_FAMILY,
+    mode: DEFAULT_THEME_MODE
+  },
   reducers: {
     setTheme(_state, action: PayloadAction<ThemeState>) {
       return action.payload;

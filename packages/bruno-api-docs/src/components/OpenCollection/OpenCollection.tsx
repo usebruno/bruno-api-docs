@@ -101,6 +101,15 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     dispatch(setGitCollectionUrl(gitCollectionUrl ?? null));
   }, [gitCollectionUrl, dispatch]);
 
+  const lastThemeProp = useRef(theme);
+  const lastHideThemeSwitcherProp = useRef(hideThemeSwitcher);
+  useEffect(() => {
+    if (isEqual(theme, lastThemeProp.current) && hideThemeSwitcher === lastHideThemeSwitcherProp.current) return;
+    lastThemeProp.current = theme;
+    lastHideThemeSwitcherProp.current = hideThemeSwitcher;
+    dispatch(setTheme(getApiDocsTheme(theme, hideThemeSwitcher)));
+  }, [theme, dispatch, hideThemeSwitcher]);
+
   useEffect(() => {
     let isActive = true;
 
@@ -146,15 +155,6 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     return () => { isActive = false; };
   }, [collection, dispatch]);
 
-  // The initial theme seeds the store (see OpenCollection below); only a later
-  // change of the prop — e.g. the host's own light/dark switch — is dispatched.
-  const lastThemeProp = useRef(theme);
-  useEffect(() => {
-    if (isEqual(theme, lastThemeProp.current)) return;
-    lastThemeProp.current = theme;
-    if (theme) dispatch(setTheme(getApiDocsTheme(theme)));
-  }, [theme, dispatch]);
-
   const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
 
@@ -177,7 +177,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
   const storeRef = useRef<AppStore | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore({ theme: props.theme });
+    storeRef.current = createOpenCollectionStore({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
   }
 
   return (

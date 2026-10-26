@@ -1,6 +1,9 @@
 import { test, expect } from '../../playwright';
 import { ThemeToggleComponent } from '../../components/layout/theme-toggle.component';
 
+const THEME_STORAGE_KEY = 'oc-docs.theme';
+const SAVED_DARK = JSON.stringify({ family: 'default', mode: 'dark' });
+
 /**
  * The header has one button that flips the whole app between light and dark.
  */
@@ -105,6 +108,58 @@ test.describe('Theme switcher', () => {
 
       await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-light');
       await expect(themeToggle.button).toHaveAccessibleName('Switch to dark theme');
+    });
+  });
+
+  test.describe('when the host passes a theme', () => {
+    test('uses the requested mode when nothing is saved', async ({ page, themeToggle }) => {
+      await page.goto('/?themeMode=dark');
+
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
+    });
+
+    test('a saved reader choice wins over the host mode', async ({ page, themeToggle }) => {
+      await page.addInitScript(({ key, value }) => {
+        localStorage.setItem(key, value);
+      }, { key: THEME_STORAGE_KEY, value: SAVED_DARK });
+      await page.goto('/?themeMode=light');
+
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
+    });
+
+    test('uses the Backstage family and toggles within it', async ({ page, themeToggle }) => {
+      await page.goto('/?themeFamily=backstage');
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'backstage-light');
+
+      await themeToggle.toggle();
+
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'backstage-dark');
+    });
+  });
+
+  test.describe('when the host hides the theme switcher', () => {
+    test.beforeEach(async ({ page }) => {
+      await page.addInitScript(({ key, value }) => {
+        localStorage.setItem(key, value);
+      }, { key: THEME_STORAGE_KEY, value: SAVED_DARK });
+    });
+
+    test('does not show the toggle', async ({ page, themeToggle }) => {
+      await page.goto('/?hideThemeSwitcher=1');
+
+      await expect(themeToggle.button).toHaveCount(0);
+    });
+
+    test('uses the host mode, ignoring a saved choice', async ({ page, themeToggle }) => {
+      await page.goto('/?hideThemeSwitcher=1&themeFamily=backstage&themeMode=light');
+
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'backstage-light');
+    });
+
+    test('follows the OS when the host gives no mode, ignoring a saved choice', async ({ page, themeToggle }) => {
+      await page.goto('/?hideThemeSwitcher=1');
+
+      await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-light');
     });
   });
 });

@@ -133,7 +133,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', hideThe
           )}
           openInBrunoHref={openInBrunoHref}
           onOpenInBruno={openInBrunoHref ? undefined : () => setOpenInBrunoOpen(true)}
-          themeToggleSlot={!hideThemeSwitcher && <ThemeToggle />}
+          themeToggleSlot={hideThemeSwitcher ? null : <ThemeToggle />}
         />
         <OpenInBrunoModal
           open={openInBrunoOpen}

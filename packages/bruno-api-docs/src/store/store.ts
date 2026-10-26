@@ -6,11 +6,10 @@ import playgroundReducer from '@/store/slices/playground';
 import themeReducer from '@/store/slices/theme';
 import { applyTheme } from '@/theme/applyTheme';
 import type { ThemeState } from '@/theme/types';
-import { getApiDocsTheme, persistThemeMode } from '@/utils/theme';
 import { isEqual } from 'lodash-es';
 
 export interface CreateOpenCollectionStoreOptions {
-  theme?: Partial<ThemeState>;
+  theme?: ThemeState;
 }
 
 export const createOpenCollectionStore = ({ theme }: CreateOpenCollectionStoreOptions = {}) => {
@@ -22,10 +21,10 @@ export const createOpenCollectionStore = ({ theme }: CreateOpenCollectionStoreOp
       playground: playgroundReducer,
       theme: themeReducer
     },
-    preloadedState: { theme: getApiDocsTheme(theme) }
+    ...(theme ? { preloadedState: { theme } } : {})
   });
 
-  // Persist theme changes (localStorage + root data-theme) outside the reducer.
+  // Mirror theme changes to the root data-theme attribute outside the reducer.
   let lastStateTheme = store.getState().theme;
   applyTheme(lastStateTheme);
   let lastEnv = store.getState().env;
@@ -34,7 +33,7 @@ export const createOpenCollectionStore = ({ theme }: CreateOpenCollectionStoreOp
     const themeState = state.theme;
     if (!isEqual(lastStateTheme, themeState)) {
       lastStateTheme = themeState;
-      persistThemeMode(themeState);
+      applyTheme(themeState);
     }
     if (state.env !== lastEnv) {
       lastEnv = state.env;

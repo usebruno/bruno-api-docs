@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 import reducer, { setTheme, setThemeMode, selectTheme } from './theme';
 import { THEME_STORAGE_KEY } from '@/constants/theme';
-import type { RootState } from '../store';
+import type { RootState } from '@/store/store';
 
 beforeAll(() => {
   let store: Record<string, string> = {};
@@ -20,9 +20,9 @@ describe('themeSlice', () => {
     expect(reducer(undefined, { type: '@@INIT' })).toEqual({ family: 'default', mode: 'system' });
   });
 
-  it('seeds the initial mode from localStorage', () => {
+  it('does not read localStorage for its fallback initial state', () => {
     localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'default', mode: 'dark' }));
-    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ family: 'default', mode: 'dark' });
+    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ family: 'default', mode: 'system' });
   });
 
   it('setTheme replaces the whole state (pure, no side effects)', () => {

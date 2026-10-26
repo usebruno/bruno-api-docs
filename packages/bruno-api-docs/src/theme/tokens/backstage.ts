@@ -1,5 +1,5 @@
 import { merge } from 'lodash-es';
-import type { Theme, ThemeMode } from '@/theme/types';
+import type { ResolvedThemeMode, Theme } from '@/theme/types';
 import { light } from './light';
 import { dark } from './dark';
 
@@ -78,7 +78,7 @@ const statusColors = (color: string) => ({
   border: color
 });
 
-const createBackstageTheme = (base: Theme, mode: ThemeMode, p: BackstagePalette): Theme => merge({}, base, {
+const createBackstageTheme = (base: Theme, mode: ResolvedThemeMode, p: BackstagePalette): Theme => merge({}, base, {
   mode,
   text: p.text.primary,
   textLink: p.link,

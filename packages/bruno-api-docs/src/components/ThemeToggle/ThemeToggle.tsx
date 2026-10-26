@@ -1,10 +1,9 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setThemeMode } from '@/store/slices/theme';
-import { selectTheme } from '@/store/slices/theme';
+import { selectTheme, setThemeMode } from '@/store/slices/theme';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
-import { isDarkMode } from '@/utils/theme';
+import { isDarkMode, persistThemeState } from '@/utils/theme';
 
 const Button = styled.button`
   display: inline-flex;
@@ -46,20 +45,26 @@ const MoonIcon = () => (
 
 const ThemeToggle: React.FC<{ testId?: string }> = ({ testId = 'theme-toggle' }) => {
   const dispatch = useAppDispatch();
-  const { mode } = useAppSelector(selectTheme);
-  const label = isDarkMode(mode) ? 'Switch to light theme' : 'Switch to dark theme';
+  const theme = useAppSelector(selectTheme);
+  const isDark = isDarkMode(theme.mode);
+  const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
+
+  const toggleTheme = () => {
+    const nextMode = isDark ? 'light' : 'dark';
+    dispatch(setThemeMode(nextMode));
+    persistThemeState({ ...theme, mode: nextMode });
+  };
 
   return (
     <Tooltip content={label} touch={false} testId={`${testId}-tooltip`}>
-      {isDarkMode(mode) ? (
-        <Button data-testid={testId} aria-label="Switch to light theme" onClick={() => dispatch(setThemeMode('light'))}>
-          <SunIcon />
+      <Button
+        type="button"
+        data-testid={testId}
+        aria-label={label}
+        onClick={toggleTheme}
+      >
+        {isDark ? <SunIcon /> : <MoonIcon />}
       </Button>
-      ) : (
-        <Button data-testid={testId} aria-label="Switch to dark theme" onClick={() => dispatch(setThemeMode('dark'))}>
-          <MoonIcon />
-        </Button>
-      )}
     </Tooltip>
   );
 };

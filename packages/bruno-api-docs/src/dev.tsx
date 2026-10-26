@@ -40,7 +40,7 @@ const params = new URLSearchParams(window.location.search);
 const fixture = params.get('fixture');
 const noGit = params.get('nogit') === '1';
 const theme = getThemeStateFrom({
-  family: params.get('themeFamily') ?? undefined,
+  variant: params.get('themeVariant') ?? undefined,
   mode: params.get('themeMode') ?? undefined
 });
 const hideThemeSwitcher = params.get('hideThemeSwitcher') === '1';

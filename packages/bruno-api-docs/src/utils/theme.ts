@@ -1,9 +1,9 @@
-import type { ResolvedThemeMode, ThemeFamily, ThemeMode, ThemeState } from '@/theme/types';
+import type { ResolvedThemeMode, ThemeVariant, ThemeMode, ThemeState } from '@/theme/types';
 import { isPlainObject } from 'lodash-es';
-import { DEFAULT_THEME_FAMILY, DEFAULT_THEME_MODE, SUPPORTED_THEME_FAMILIES, SUPPORTED_THEME_MODES, THEME_STORAGE_KEY } from '@/constants/theme';
+import { DEFAULT_THEME_VARIANT, DEFAULT_THEME_MODE, SUPPORTED_THEME_VARIANTS, SUPPORTED_THEME_MODES, THEME_STORAGE_KEY } from '@/constants/theme';
 
-export const isThemeFamily = (value: unknown): value is ThemeFamily =>
-  typeof value === 'string' && SUPPORTED_THEME_FAMILIES.has(value as ThemeFamily);
+export const isThemeVariant = (value: unknown): value is ThemeVariant =>
+  typeof value === 'string' && SUPPORTED_THEME_VARIANTS.has(value as ThemeVariant);
 
 export const isThemeMode = (value: unknown): value is ThemeMode =>
   typeof value === 'string' && SUPPORTED_THEME_MODES.has(value as ThemeMode);
@@ -25,23 +25,23 @@ export function getAppThemeMode(mode: ThemeMode): ResolvedThemeMode {
 }
 
 /**
- * The theme to start with. The family always comes from the host. The mode is
+ * The theme to start with. The variant always comes from the host. The mode is
  * the reader's saved choice, then the host's, then `'system'`, except with the
  * theme switcher hidden, where the reader can't change it, so storage is never
  * read and the host's mode (or `'system'`) is used.
  */
 export function getApiDocsTheme(
-  initializerThemeValues?: Partial<ThemeState>,
+  hostThemeValues?: Partial<ThemeState>,
   themeSwitcherHidden: boolean = false
 ): ThemeState {
   const {
-    family: initializerThemeFamily,
-    mode: initializerThemeMode
-  } = getThemeStateFrom(initializerThemeValues);
+    variant: hostThemeVariant,
+    mode: hostThemeMode
+  } = getThemeStateFrom(hostThemeValues);
   const { mode: localStorageThemeMode } = getThemeValuesFromLocalStorage(themeSwitcherHidden);
   return {
-    family: initializerThemeFamily ?? DEFAULT_THEME_FAMILY,
-    mode: localStorageThemeMode ?? initializerThemeMode ?? DEFAULT_THEME_MODE
+    variant: hostThemeVariant ?? DEFAULT_THEME_VARIANT,
+    mode: (themeSwitcherHidden ? undefined : localStorageThemeMode) ?? hostThemeMode ?? DEFAULT_THEME_MODE
   };
 }
 
@@ -50,17 +50,17 @@ export function getThemeStateFrom(value: unknown): Partial<ThemeState> {
     return {};
   }
 
-  const { family: familyValue, mode: modeValue } = value as Partial<ThemeState>;
+  const { variant: variantValue, mode: modeValue } = value as Partial<ThemeState>;
 
   return {
-    family: isThemeFamily(familyValue) ? familyValue : undefined,
+    variant: isThemeVariant(variantValue) ? variantValue : undefined,
     mode: isThemeMode(modeValue) ? modeValue : undefined
   };
 }
 
 export function getThemeValuesFromLocalStorage(themeSwitcherHidden: boolean): Partial<ThemeState> {
   if (themeSwitcherHidden) {
-    return {};
+    return {}
   }
   let value;
   try {

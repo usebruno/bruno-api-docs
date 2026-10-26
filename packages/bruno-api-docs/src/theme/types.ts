@@ -1,8 +1,8 @@
-export type ThemeFamily = 'default' | 'backstage';
+export type ThemeVariant = 'default' | 'backstage';
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ResolvedThemeMode = Exclude<ThemeMode, 'system'>;
 export type ThemeState = {
-  family: ThemeFamily;
+  variant: ThemeVariant;
   mode: ThemeMode;
 };
 

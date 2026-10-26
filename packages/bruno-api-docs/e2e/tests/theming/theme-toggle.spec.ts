@@ -128,7 +128,7 @@ test.describe('Theme switcher', () => {
     });
 
     test('uses the Backstage family and toggles within it', async ({ page, themeToggle }) => {
-      await page.goto('/?themeFamily=backstage');
+      await page.goto('/?themeVariant=backstage');
       await expect(themeToggle.html).toHaveAttribute('data-theme', 'backstage-light');
 
       await themeToggle.toggle();
@@ -151,7 +151,7 @@ test.describe('Theme switcher', () => {
     });
 
     test('uses the host mode, ignoring a saved choice', async ({ page, themeToggle }) => {
-      await page.goto('/?hideThemeSwitcher=1&themeFamily=backstage&themeMode=light');
+      await page.goto('/?hideThemeSwitcher=1&themeVariant=backstage&themeMode=light');
 
       await expect(themeToggle.html).toHaveAttribute('data-theme', 'backstage-light');
     });

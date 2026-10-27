@@ -1,4 +1,4 @@
-import React, { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Topbar from '../Topbar/Topbar';
 import EnvSwitcher from '../EnvSwitcher/EnvSwitcher';
@@ -20,8 +20,7 @@ import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
 import { collectionFilename, downloadTextFile, resolveDownloadYaml } from '@/utils/collectionExport';
 import OpenInBrunoModal from '@/components/OpenInBrunoModal/OpenInBrunoModal';
 import { StyledWrapper } from './StyledWrapper';
-
-const Playground = React.lazy(() => import('../Playground/Playground'));
+import Playground from '../Playground/Playground';
 
 interface AppShellProps {
   logo?: React.ReactNode;
@@ -202,11 +201,7 @@ const AppShell: React.FC<AppShellProps> = ({
         </div>
       </div>
 
-      {playgroundOpen && (
-        <Suspense name="playground">
-          <Playground openNonce={playgroundOpenNonce} />
-        </Suspense>
-      )}
+      {playgroundOpen && <Playground openNonce={playgroundOpenNonce} />}
 
       {!isDesktop && (
         <SidebarDrawer open={drawerOpen} onClose={closeDrawer}>

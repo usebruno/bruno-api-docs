@@ -41,7 +41,7 @@ export function getApiDocsTheme(
   const { mode: localStorageThemeMode } = getThemeValuesFromLocalStorage(themeSwitcherHidden);
   return {
     variant: hostThemeVariant ?? DEFAULT_THEME_VARIANT,
-    mode: (themeSwitcherHidden ? undefined : localStorageThemeMode) ?? hostThemeMode ?? DEFAULT_THEME_MODE
+    mode: localStorageThemeMode ?? hostThemeMode ?? DEFAULT_THEME_MODE
   };
 }
 

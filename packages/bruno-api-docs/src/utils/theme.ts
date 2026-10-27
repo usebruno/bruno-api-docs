@@ -60,7 +60,7 @@ export function getThemeStateFrom(value: unknown): Partial<ThemeState> {
 
 export function getThemeValuesFromLocalStorage(themeSwitcherHidden: boolean): Partial<ThemeState> {
   if (themeSwitcherHidden) {
-    return {}
+    return {};
   }
   let value;
   try {

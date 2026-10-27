@@ -16,30 +16,30 @@ beforeAll(() => {
 describe('themeSlice', () => {
   beforeEach(() => localStorage.clear());
 
-  it('defaults to the default family following the system mode', () => {
-    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ family: 'default', mode: 'system' });
+  it('defaults to the default variant following the system mode', () => {
+    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ variant: 'default', mode: 'system' });
   });
 
   it('does not read localStorage for its fallback initial state', () => {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'default', mode: 'dark' }));
-    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ family: 'default', mode: 'system' });
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'default', mode: 'dark' }));
+    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ variant: 'default', mode: 'system' });
   });
 
   it('setTheme replaces the whole state (pure, no side effects)', () => {
-    const next = reducer({ family: 'default', mode: 'light' }, setTheme({ family: 'backstage', mode: 'dark' }));
-    expect(next).toEqual({ family: 'backstage', mode: 'dark' });
+    const next = reducer({ variant: 'default', mode: 'light' }, setTheme({ variant: 'backstage', mode: 'dark' }));
+    expect(next).toEqual({ variant: 'backstage', mode: 'dark' });
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
   });
 
-  it('setThemeMode changes the mode and keeps the family', () => {
-    expect(reducer({ family: 'backstage', mode: 'light' }, setThemeMode('dark')))
-      .toEqual({ family: 'backstage', mode: 'dark' });
-    expect(reducer({ family: 'default', mode: 'dark' }, setThemeMode('system')))
-      .toEqual({ family: 'default', mode: 'system' });
+  it('setThemeMode changes the mode and keeps the variant', () => {
+    expect(reducer({ variant: 'backstage', mode: 'light' }, setThemeMode('dark')))
+      .toEqual({ variant: 'backstage', mode: 'dark' });
+    expect(reducer({ variant: 'default', mode: 'dark' }, setThemeMode('system')))
+      .toEqual({ variant: 'default', mode: 'system' });
   });
 
   it('selectTheme exposes the theme slice', () => {
-    const state = { theme: { family: 'backstage', mode: 'dark' } } as unknown as RootState;
-    expect(selectTheme(state)).toEqual({ family: 'backstage', mode: 'dark' });
+    const state = { theme: { variant: 'backstage', mode: 'dark' } } as unknown as RootState;
+    expect(selectTheme(state)).toEqual({ variant: 'backstage', mode: 'dark' });
   });
 });

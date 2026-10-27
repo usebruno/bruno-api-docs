@@ -25,9 +25,9 @@ describe('theme utils', () => {
   afterEach(() => vi.stubGlobal('window', undefined));
 
   describe('getThemeStateFrom', () => {
-    it('keeps only supported family and mode values', () => {
-      expect(getThemeStateFrom({ family: 'backstage', mode: 'dark' })).toEqual({ family: 'backstage', mode: 'dark' });
-      expect(getThemeStateFrom({ family: 'sepia', mode: 'dim' })).toEqual({ family: undefined, mode: undefined });
+    it('keeps only supported variant and mode values', () => {
+      expect(getThemeStateFrom({ variant: 'backstage', mode: 'dark' })).toEqual({ variant: 'backstage', mode: 'dark' });
+      expect(getThemeStateFrom({ variant: 'sepia', mode: 'dim' })).toEqual({ variant: undefined, mode: undefined });
     });
 
     it('ignores anything that is not a plain object', () => {
@@ -43,8 +43,8 @@ describe('theme utils', () => {
     });
 
     it('reads the stored JSON theme state', () => {
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'backstage', mode: 'dark' }));
-      expect(getThemeValuesFromLocalStorage(false)).toEqual({ family: 'backstage', mode: 'dark' });
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'backstage', mode: 'dark' }));
+      expect(getThemeValuesFromLocalStorage(false)).toEqual({ variant: 'backstage', mode: 'dark' });
     });
 
     it('reads the legacy bare mode string', () => {
@@ -53,8 +53,8 @@ describe('theme utils', () => {
     });
 
     it('drops unrecognised or malformed stored values', () => {
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'default', mode: 'sepia' }));
-      expect(getThemeValuesFromLocalStorage(false)).toEqual({ family: 'default', mode: undefined });
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'default', mode: 'sepia' }));
+      expect(getThemeValuesFromLocalStorage(false)).toEqual({ variant: 'default', mode: undefined });
       localStorage.setItem(THEME_STORAGE_KEY, 'null');
       expect(getThemeValuesFromLocalStorage(false)).toEqual({});
       localStorage.setItem(THEME_STORAGE_KEY, 'backstage-dark');
@@ -67,29 +67,29 @@ describe('theme utils', () => {
     });
 
     it('ignores the stored choice when the theme switcher is hidden', () => {
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'default', mode: 'dark' }));
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'default', mode: 'dark' }));
       expect(getThemeValuesFromLocalStorage(true)).toEqual({});
     });
   });
 
   describe('getApiDocsTheme', () => {
-    it('defaults to the default family following the system mode', () => {
-      expect(getApiDocsTheme()).toEqual({ family: 'default', mode: 'system' });
+    it('defaults to the default variant following the system mode', () => {
+      expect(getApiDocsTheme()).toEqual({ variant: 'default', mode: 'system' });
     });
 
     it('uses the requested theme when nothing is stored', () => {
-      expect(getApiDocsTheme({ family: 'backstage', mode: 'light' })).toEqual({ family: 'backstage', mode: 'light' });
+      expect(getApiDocsTheme({ variant: 'backstage', mode: 'light' })).toEqual({ variant: 'backstage', mode: 'light' });
     });
 
-    it('a stored mode wins over the requested mode; the stored family is ignored', () => {
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'backstage', mode: 'dark' }));
-      expect(getApiDocsTheme({ mode: 'light' })).toEqual({ family: 'default', mode: 'dark' });
+    it('a stored mode wins over the requested mode; the stored variant is ignored', () => {
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'backstage', mode: 'dark' }));
+      expect(getApiDocsTheme({ mode: 'light' })).toEqual({ variant: 'default', mode: 'dark' });
     });
 
     it('uses the requested mode over a stored one when the theme switcher is hidden', () => {
-      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ family: 'default', mode: 'dark' }));
-      expect(getApiDocsTheme({ mode: 'light' }, true)).toEqual({ family: 'default', mode: 'light' });
-      expect(getApiDocsTheme(undefined, true)).toEqual({ family: 'default', mode: 'system' });
+      localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'default', mode: 'dark' }));
+      expect(getApiDocsTheme({ mode: 'light' }, true)).toEqual({ variant: 'default', mode: 'light' });
+      expect(getApiDocsTheme(undefined, true)).toEqual({ variant: 'default', mode: 'system' });
     });
   });
 

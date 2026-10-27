@@ -2,7 +2,7 @@ import { test, expect } from '../../playwright';
 import { ThemeToggleComponent } from '../../components/layout/theme-toggle.component';
 
 const THEME_STORAGE_KEY = 'oc-docs.theme';
-const SAVED_DARK = JSON.stringify({ family: 'default', mode: 'dark' });
+const SAVED_DARK = JSON.stringify({ variant: 'default', mode: 'dark' });
 
 /**
  * The header has one button that flips the whole app between light and dark.
@@ -127,7 +127,7 @@ test.describe('Theme switcher', () => {
       await expect(themeToggle.html).toHaveAttribute('data-theme', 'default-dark');
     });
 
-    test('uses the Backstage family and toggles within it', async ({ page, themeToggle }) => {
+    test('uses the Backstage variant and toggles within it', async ({ page, themeToggle }) => {
       await page.goto('/?themeVariant=backstage');
       await expect(themeToggle.html).toHaveAttribute('data-theme', 'backstage-light');
 

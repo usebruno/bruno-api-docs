@@ -81,12 +81,14 @@ export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
+  hidePlayground?: boolean;
 }
 
 const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
-  gitCollectionUrl
+  gitCollectionUrl,
+  hidePlayground = false
 }) => {
   const dispatch = useAppDispatch();
   const docsCollection = useAppSelector(selectDocsCollection);
@@ -155,7 +157,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className="oc-playground">
-      <AppShell logo={logo} />
+      <AppShell logo={logo} hidePlayground={hidePlayground} />
     </div>
   );
 };

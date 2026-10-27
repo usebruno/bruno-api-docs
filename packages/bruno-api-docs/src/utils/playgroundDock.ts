@@ -7,6 +7,7 @@ export const PARAM_OPEN = 'pg';
 export const PARAM_DOCK = 'dock';
 export const PARAM_REQUEST = 'pgReq';
 export const PARAM_EXAMPLE = 'pgEx';
+export const PLAYGROUND_HIDDEN = 'hidePlayground';
 
 export const isDockMode = (value: string | null | undefined): value is DockMode =>
   value === 'inline' || value === 'bottom' || value === 'modal';
@@ -39,18 +40,20 @@ export interface PlaygroundUrlState {
   dock: DockMode;
   requestSlug: string | null;
   exampleSlug: string | null;
+  disabled: boolean;
 }
 
 // The URL is the source of truth for the dock (a shared link reproduces the
 // sender's dock). sessionStorage remembers the last dock only as the fallback
 // for a fresh open with no `dock` param (see usePlaygroundUrlState).
-export const readPlaygroundParams = (params: URLSearchParams): PlaygroundUrlState => {
-  const open = params.get(PARAM_OPEN) === '1';
+export const readPlaygroundParams = (params: URLSearchParams, hidePlayground: boolean): PlaygroundUrlState => {
+  const disabled = hidePlayground || params.get(PLAYGROUND_HIDDEN) === '1';
+  const open = !disabled && params.get(PARAM_OPEN) === '1';
   const dockParam = params.get(PARAM_DOCK);
   const dock = isDockMode(dockParam) ? dockParam : DEFAULT_DOCK;
   const requestSlug = params.get(PARAM_REQUEST);
   const exampleSlug = requestSlug ? params.get(PARAM_EXAMPLE) : null;
-  return { open, dock, requestSlug, exampleSlug };
+  return { open, dock, requestSlug, exampleSlug, disabled };
 };
 
 interface WriteInput {

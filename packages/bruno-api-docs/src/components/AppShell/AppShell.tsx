@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { Suspense, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Topbar from '../Topbar/Topbar';
 import EnvSwitcher from '../EnvSwitcher/EnvSwitcher';
@@ -9,7 +9,6 @@ import SidebarDrawer from '../SidebarDrawer/SidebarDrawer';
 import IconButton from '@/ui/IconButton/IconButton';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
 import PageRouter from '../PageRouter/PageRouter';
-import Playground from '../Playground/Playground';
 import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
@@ -22,12 +21,15 @@ import { collectionFilename, downloadTextFile, resolveDownloadYaml } from '@/uti
 import OpenInBrunoModal from '@/components/OpenInBrunoModal/OpenInBrunoModal';
 import { StyledWrapper } from './StyledWrapper';
 
+const Playground = React.lazy(() => import('../Playground/Playground'));
+
 interface AppShellProps {
   logo?: React.ReactNode;
   testId?: string;
+  hidePlayground?: boolean;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
+const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', hidePlayground = false }) => {
   const collection = useAppSelector(selectDocsCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const collectionSourceText = useAppSelector(selectCollectionSourceText);
@@ -68,7 +70,12 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   );
   const { pathname } = useLocation();
 
-  const { open: playgroundOpen, dock: playgroundDock, openPlayground } = usePlaygroundUrlState();
+  const {
+    open: playgroundOpen,
+    disabled: playgroundDisabled,
+    dock: playgroundDock,
+    openPlayground
+  } = usePlaygroundUrlState(hidePlayground);
   const [playgroundOpenNonce, setPlaygroundOpenNonce] = useState(0);
 
   useEffect(() => {
@@ -93,9 +100,12 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   }, [mode]);
 
   const handleOpenPlayground = useCallback(() => {
+    if (playgroundDisabled) {
+      return;
+    }
     openPlayground(resolution?.entry.slug);
     setPlaygroundOpenNonce((nonce) => nonce + 1);
-  }, [openPlayground, resolution]);
+  }, [openPlayground, resolution, playgroundDisabled]);
 
   return (
     <StyledWrapper
@@ -180,13 +190,17 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
               </IconButton>
             )}
             <main className="appshell-content" ref={contentRef}>
-              <PageRouter onOpenPlayground={handleOpenPlayground} />
+              <PageRouter onOpenPlayground={playgroundDisabled ? undefined : handleOpenPlayground} />
             </main>
           </div>
         </div>
       </div>
 
-      {playgroundOpen && <Playground openNonce={playgroundOpenNonce} />}
+      {playgroundOpen && (
+        <Suspense name="playground">
+          <Playground openNonce={playgroundOpenNonce} />
+        </Suspense>
+      )}
 
       {!isDesktop && (
         <SidebarDrawer open={drawerOpen} onClose={closeDrawer}>

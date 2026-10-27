@@ -38,6 +38,7 @@ const fixtures = {
 const params = new URLSearchParams(window.location.search);
 const fixture = params.get('fixture');
 const noGit = params.get('nogit') === '1';
+const hidePlayground = params.get('hidePlayground') === '1';
 const unknownFixture = fixture != null && !(fixture in fixtures);
 const devCollection = unknownFixture || fixture == null
   ? sampleCollectionYaml
@@ -66,6 +67,7 @@ const DevApp: React.FC = () => {
         <OpenCollection
           collection={devCollection}
           gitCollectionUrl={noGit ? undefined : 'https://github.com/usebruno/bruno-testbench.git'}
+          hidePlayground={hidePlayground}
         />
       </div>
     </Provider>

@@ -18,6 +18,7 @@ export interface OpenCollectionOptions {
   opencollection: any;
   logo?: string;
   gitCollectionUrl?: string;
+  hidePlayground?: boolean;
 }
 
 export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | 'opencollection'> {
@@ -97,7 +98,8 @@ export class OpenCollectionRenderer {
     this.root.render(React.createElement(OpenCollection, {
       collection,
       logo: this.createLogoElement(),
-      gitCollectionUrl: this.options.gitCollectionUrl
+      gitCollectionUrl: this.options.gitCollectionUrl,
+      hidePlayground: this.options.hidePlayground
     }));
   }
 

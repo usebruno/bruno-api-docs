@@ -7,6 +7,8 @@ import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import { parseCollectionContent } from './utils/yamlUtils';
+import type { ThemeState } from './theme/types';
+import { isEmpty, isPlainObject } from 'lodash-es';
 
 // Ensure Prism is available globally for any code that might access it
 if (typeof window !== 'undefined') {
@@ -18,6 +20,8 @@ export interface OpenCollectionOptions {
   opencollection: any;
   logo?: string;
   gitCollectionUrl?: string;
+  theme?: Partial<ThemeState>;
+  hideThemeSwitcher?: boolean;
   hidePlayground?: boolean;
 }
 
@@ -99,6 +103,8 @@ export class OpenCollectionRenderer {
       collection,
       logo: this.createLogoElement(),
       gitCollectionUrl: this.options.gitCollectionUrl,
+      theme: this.options.theme,
+      hideThemeSwitcher: this.options.hideThemeSwitcher,
       hidePlayground: this.options.hidePlayground
     }));
   }
@@ -106,6 +112,16 @@ export class OpenCollectionRenderer {
   public updateCollection(opencollection: any) {
     this.options.opencollection = opencollection;
     this.render();
+  }
+
+  public updateOptions(options: Partial<Omit<OpenCollectionOptions, 'target'>> = {}) {
+    if (isPlainObject(options) && !isEmpty(options)) {
+      this.options = {
+        ...this.options,
+        ...options
+      };
+      this.render();
+    }
   }
 
   public destroy() {

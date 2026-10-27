@@ -7,6 +7,7 @@ import './styles/index.css';
 import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import { createOpenCollectionStore } from './store/store';
+import { getThemeStateFrom } from './utils/theme';
 import { sampleCollectionYaml } from './sampleCollection';
 import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';
@@ -38,6 +39,11 @@ const fixtures = {
 const params = new URLSearchParams(window.location.search);
 const fixture = params.get('fixture');
 const noGit = params.get('nogit') === '1';
+const theme = getThemeStateFrom({
+  variant: params.get('themeVariant') ?? undefined,
+  mode: params.get('themeMode') ?? undefined
+});
+const hideThemeSwitcher = params.get('hideThemeSwitcher') === '1';
 const hidePlayground = params.get('hidePlayground') === '1';
 const unknownFixture = fixture != null && !(fixture in fixtures);
 const devCollection = unknownFixture || fixture == null
@@ -67,6 +73,8 @@ const DevApp: React.FC = () => {
         <OpenCollection
           collection={devCollection}
           gitCollectionUrl={noGit ? undefined : 'https://github.com/usebruno/bruno-testbench.git'}
+          theme={theme}
+          hideThemeSwitcher={hideThemeSwitcher}
           hidePlayground={hidePlayground}
         />
       </div>

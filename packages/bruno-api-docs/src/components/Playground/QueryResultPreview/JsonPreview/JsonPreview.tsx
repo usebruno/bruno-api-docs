@@ -1,7 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
 import { useAppSelector } from '@/store/hooks';
+import { selectTheme } from '@/store/slices/theme';
 import { StyledWrapper } from './StyledWrapper';
+import { isDarkMode } from '@/utils/theme';
 
 // react-json-view touches browser globals at module load, so a static import
 // crashes under SSR (the server bundle and the renderToStaticMarkup unit tests).
@@ -45,7 +47,7 @@ const parseJson = (input: unknown): ParsedJson => {
 
 /** Renders response data as an interactive, collapsible JSON tree. */
 const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
-  const themeMode = useAppSelector((s) => s.theme.mode);
+  const { mode } = useAppSelector(selectTheme);
   const { value, error } = parseJson(data);
 
   if (error || value === null) {
@@ -66,7 +68,7 @@ const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
       <StyledWrapper data-testid="response-preview-json">
         <ReactJson
           src={value}
-          theme={themeMode === 'dark' ? 'monokai' : 'rjv-default'}
+          theme={isDarkMode(mode) ? 'monokai' : 'rjv-default'}
           collapsed={2}
           groupArraysAfterLength={10}
           displayDataTypes={false}

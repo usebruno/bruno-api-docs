@@ -28,10 +28,10 @@ import {
 } from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
-import { applyTheme } from '@/theme/applyTheme';
-
-// Set data-theme on the root element before the component first paints to avoid a flash.
-applyTheme();
+import { setTheme } from '@/store/slices/theme';
+import type { ThemeState } from '@/theme/types';
+import { isEqual } from 'lodash-es';
+import { getApiDocsTheme } from '@/utils/theme';
 
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== 'undefined' && value instanceof File;
@@ -81,6 +81,8 @@ export interface OpenCollectionProps {
   collection: IOpenCollection | string | File;
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
+  theme?: Partial<ThemeState>;
+  hideThemeSwitcher?: boolean;
   hidePlayground?: boolean;
 }
 
@@ -88,6 +90,8 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   collection,
   logo,
   gitCollectionUrl,
+  theme,
+  hideThemeSwitcher,
   hidePlayground = false
 }) => {
   const dispatch = useAppDispatch();
@@ -98,6 +102,15 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   useEffect(() => {
     dispatch(setGitCollectionUrl(gitCollectionUrl ?? null));
   }, [gitCollectionUrl, dispatch]);
+
+  const lastThemeProp = useRef(theme);
+  const lastHideThemeSwitcherProp = useRef(hideThemeSwitcher);
+  useEffect(() => {
+    if (isEqual(theme, lastThemeProp.current) && hideThemeSwitcher === lastHideThemeSwitcherProp.current) return;
+    lastThemeProp.current = theme;
+    lastHideThemeSwitcherProp.current = hideThemeSwitcher;
+    dispatch(setTheme(getApiDocsTheme(theme, hideThemeSwitcher)));
+  }, [theme, dispatch, hideThemeSwitcher]);
 
   useEffect(() => {
     let isActive = true;
@@ -157,7 +170,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className="oc-playground">
-      <AppShell logo={logo} hidePlayground={hidePlayground} />
+      <AppShell logo={logo} hidePlayground={hidePlayground} hideThemeSwitcher={hideThemeSwitcher} />
     </div>
   );
 };
@@ -166,7 +179,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
   const storeRef = useRef<AppStore | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore();
+    storeRef.current = createOpenCollectionStore({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
   }
 
   return (

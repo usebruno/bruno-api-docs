@@ -5,6 +5,7 @@ import { flattenTheme } from '../src/theme/flatten';
 import { breakpoints } from '../src/theme/tokens/breakpoints';
 import { light } from '../src/theme/tokens/light';
 import { dark } from '../src/theme/tokens/dark';
+import { backstageLight, backstageDark } from '../src/theme/tokens/backstage';
 
 const block = (selector: string, vars: Record<string, string>) =>
   `${selector} {\n${Object.entries(vars).map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}\n`;
@@ -25,8 +26,12 @@ const css = [
   // Light is also the :root default, so colours resolve even if the root has no
   // data-theme attribute (e.g. applyTheme() never ran) — degrades to light
   // instead of unstyled.
-  block(':root,\n[data-theme="light"]', flattenTheme(light as unknown as Record<string, unknown>)),
-  block('[data-theme="dark"]', flattenTheme(dark as unknown as Record<string, unknown>)),
+  block(':root,\n[data-theme="default-light"]', flattenTheme(light as unknown as Record<string, unknown>)),
+  block('[data-theme="default-dark"]', flattenTheme(dark as unknown as Record<string, unknown>)),
+  // Backstage variants (src/theme/tokens/backstage.ts) remap the consumed
+  // tokens onto the @backstage/theme palettes.
+  block('[data-theme="backstage-light"]', flattenTheme(backstageLight as unknown as Record<string, unknown>)),
+  block('[data-theme="backstage-dark"]', flattenTheme(backstageDark as unknown as Record<string, unknown>))
 ].join('\n');
 
 const __dirname = dirname(fileURLToPath(import.meta.url));

@@ -1,7 +1,13 @@
-export type ThemeMode = 'light' | 'dark';
+export type ThemeVariant = 'default' | 'backstage';
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ResolvedThemeMode = Exclude<ThemeMode, 'system'>;
+export type ThemeState = {
+  variant: ThemeVariant;
+  mode: ThemeMode;
+};
 
 export interface Theme {
-  mode: ThemeMode;
+  mode: ResolvedThemeMode;
   brand: string;
   text: string;
   textLink: string;

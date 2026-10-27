@@ -3,9 +3,16 @@ import appReducer from '@/store/slices/app';
 import docsReducer from '@/store/slices/docs';
 import envReducer, { persistEnv } from '@/store/slices/env';
 import playgroundReducer from '@/store/slices/playground';
-import themeReducer, { persistThemeMode } from '@/store/slices/theme';
+import themeReducer from '@/store/slices/theme';
+import { applyTheme } from '@/theme/applyTheme';
+import type { ThemeState } from '@/theme/types';
+import { isEqual } from 'lodash-es';
 
-export const createOpenCollectionStore = () => {
+export interface CreateOpenCollectionStoreOptions {
+  theme?: ThemeState;
+}
+
+export const createOpenCollectionStore = ({ theme }: CreateOpenCollectionStoreOptions = {}) => {
   const store = configureStore({
     reducer: {
       app: appReducer,
@@ -13,19 +20,20 @@ export const createOpenCollectionStore = () => {
       env: envReducer,
       playground: playgroundReducer,
       theme: themeReducer
-    }
+    },
+    ...(theme ? { preloadedState: { theme } } : {})
   });
 
-  // Persist theme changes (localStorage + root data-theme) outside the reducer.
-  let lastMode = store.getState().theme.mode;
-  // Persist the environment selection (sessionStorage) outside the reducer.
+  // Mirror theme changes to the root data-theme attribute outside the reducer.
+  let lastStateTheme = store.getState().theme;
+  applyTheme(lastStateTheme);
   let lastEnv = store.getState().env;
   store.subscribe(() => {
     const state = store.getState();
-    const mode = state.theme.mode;
-    if (mode !== lastMode) {
-      lastMode = mode;
-      persistThemeMode(mode);
+    const themeState = state.theme;
+    if (!isEqual(lastStateTheme, themeState)) {
+      lastStateTheme = themeState;
+      applyTheme(themeState);
     }
     if (state.env !== lastEnv) {
       lastEnv = state.env;

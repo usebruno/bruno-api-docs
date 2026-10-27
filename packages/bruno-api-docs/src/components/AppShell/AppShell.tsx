@@ -26,10 +26,16 @@ const Playground = React.lazy(() => import('../Playground/Playground'));
 interface AppShellProps {
   logo?: React.ReactNode;
   testId?: string;
+  hideThemeSwitcher?: boolean;
   hidePlayground?: boolean;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', hidePlayground = false }) => {
+const AppShell: React.FC<AppShellProps> = ({
+  logo,
+  testId = 'app-shell',
+  hideThemeSwitcher = false,
+  hidePlayground = false
+}) => {
   const collection = useAppSelector(selectDocsCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const collectionSourceText = useAppSelector(selectCollectionSourceText);
@@ -142,7 +148,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell', hidePla
           )}
           openInBrunoHref={openInBrunoHref}
           onOpenInBruno={openInBrunoHref ? undefined : () => setOpenInBrunoOpen(true)}
-          themeToggleSlot={<ThemeToggle />}
+          themeToggleSlot={hideThemeSwitcher ? null : <ThemeToggle />}
         />
         <OpenInBrunoModal
           open={openInBrunoOpen}

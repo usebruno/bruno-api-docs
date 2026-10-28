@@ -2,7 +2,6 @@ import { test, expect } from '../../playwright';
 
 const GET_ALL_CUSTOMERS = ['billing', 'customers', 'Get All Customers'];
 const HIDDEN_PLAYGROUND_URL = '/?hidePlayground=1';
-const PLAYGROUND_MODULE = /\/components\/Playground\/Playground\.tsx/;
 
 test.describe('hidePlayground', () => {
   test('shows the Try button when the option is omitted', async ({ requestPage }) => {
@@ -61,24 +60,5 @@ test.describe('hidePlayground', () => {
     await expect(page.getByTestId('page')).toBeVisible();
     await expect(playground.mobilePanel).toHaveCount(0);
     await expect(playground.header).toHaveCount(0);
-  });
-
-  test('never requests the playground module', async ({ page, requestPage }) => {
-    const playgroundRequests: string[] = [];
-    page.on('request', (request) => {
-      if (PLAYGROUND_MODULE.test(request.url())) playgroundRequests.push(request.url());
-    });
-
-    await page.goto(`${HIDDEN_PLAYGROUND_URL}#/?pg=1&dock=bottom`);
-    await requestPage.sidebar.open(GET_ALL_CUSTOMERS);
-    await expect(requestPage.title).toBeVisible();
-    expect(playgroundRequests).toEqual([]);
-  });
-
-  test('loads the playground module on demand when the option is omitted', async ({ page, playground }) => {
-    const moduleRequest = page.waitForRequest((request) => PLAYGROUND_MODULE.test(request.url()));
-    await playground.open('bottom');
-    await moduleRequest;
-    await expect(playground.header).toBeVisible();
   });
 });

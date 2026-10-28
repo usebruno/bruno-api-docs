@@ -1,7 +1,7 @@
 import { test, expect } from '../../playwright';
 
 const GET_ALL_CUSTOMERS = ['billing', 'customers', 'Get All Customers'];
-const HIDDEN = '/?hidePlayground=1';
+const HIDDEN_PLAYGROUND_URL = '/?hidePlayground=1';
 const PLAYGROUND_MODULE = /\/components\/Playground\/Playground\.tsx/;
 
 test.describe('hidePlayground', () => {
@@ -11,7 +11,7 @@ test.describe('hidePlayground', () => {
   });
 
   test('removes the Try button from request pages', async ({ page, requestPage }) => {
-    await page.goto(HIDDEN);
+    await page.goto(HIDDEN_PLAYGROUND_URL);
     await requestPage.sidebar.open(GET_ALL_CUSTOMERS);
     await expect(requestPage.title).toBeVisible();
     await expect(requestPage.urlBar.url).toBeVisible();
@@ -19,12 +19,12 @@ test.describe('hidePlayground', () => {
   });
 
   test('renders the request docs page for a playground deep link', async ({ page, requestPage, playground }) => {
-    await page.goto(HIDDEN);
+    await page.goto(HIDDEN_PLAYGROUND_URL);
     await requestPage.sidebar.open(GET_ALL_CUSTOMERS);
     const slug = await page.getByTestId('page').getAttribute('data-page-slug');
     expect(slug).toBeTruthy();
 
-    await page.goto(`${HIDDEN}#/${slug}?pg=1&dock=bottom&pgReq=${slug}`);
+    await page.goto(`${HIDDEN_PLAYGROUND_URL}#/${slug}?pg=1&dock=bottom&pgReq=${slug}`);
     await expect(requestPage.title).toHaveText('Get All Customers');
     await expect(playground.header).toHaveCount(0);
     await expect(page.getByTestId('app-shell')).toHaveAttribute('data-dock', 'none');
@@ -37,7 +37,7 @@ test.describe('hidePlayground', () => {
 
   for (const dock of ['bottom', 'inline', 'modal']) {
     test(`keeps the playground closed for pg=1&dock=${dock}`, async ({ page, playground }) => {
-      await page.goto(`${HIDDEN}#/?pg=1&dock=${dock}`);
+      await page.goto(`${HIDDEN_PLAYGROUND_URL}#/?pg=1&dock=${dock}`);
       await expect(page.getByTestId('page')).toBeVisible();
       await expect(playground.header).toHaveCount(0);
       await expect(page.getByTestId(`playground-dock-${dock}-panel`)).toHaveCount(0);
@@ -57,7 +57,7 @@ test.describe('hidePlayground', () => {
 
   test('keeps the playground closed for a pg=1 link on a mobile viewport', async ({ page, playground }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`${HIDDEN}#/?pg=1&dock=bottom`);
+    await page.goto(`${HIDDEN_PLAYGROUND_URL}#/?pg=1&dock=bottom`);
     await expect(page.getByTestId('page')).toBeVisible();
     await expect(playground.mobilePanel).toHaveCount(0);
     await expect(playground.header).toHaveCount(0);
@@ -69,7 +69,7 @@ test.describe('hidePlayground', () => {
       if (PLAYGROUND_MODULE.test(request.url())) playgroundRequests.push(request.url());
     });
 
-    await page.goto(`${HIDDEN}#/?pg=1&dock=bottom`);
+    await page.goto(`${HIDDEN_PLAYGROUND_URL}#/?pg=1&dock=bottom`);
     await requestPage.sidebar.open(GET_ALL_CUSTOMERS);
     await expect(requestPage.title).toBeVisible();
     expect(playgroundRequests).toEqual([]);

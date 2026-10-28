@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   type DockMode,
@@ -21,16 +21,12 @@ export interface PlaygroundUrlApi extends PlaygroundUrlState {
 
 export const usePlaygroundUrlState = (hidePlayground = false): PlaygroundUrlApi => {
   const [params, setParams] = useSearchParams();
-  const state = useMemo(() => readPlaygroundParams(params, hidePlayground), [params, hidePlayground]);
-  const { disabled } = state;
+  const state = readPlaygroundParams(params, hidePlayground);
 
   const openPlayground = useCallback(
     (requestSlug?: string | null) => {
-      if (disabled) {
-        return;
-      }
       setParams((prev) => {
-        const current = readPlaygroundParams(prev, hidePlayground);
+        const current = readPlaygroundParams(prev);
         return writePlaygroundParams(prev, {
           open: true,
           dock: current.open ? current.dock : readStoredDock(areaFor('session')) ?? DEFAULT_DOCK,
@@ -38,7 +34,7 @@ export const usePlaygroundUrlState = (hidePlayground = false): PlaygroundUrlApi 
         });
       });
     },
-    [disabled, hidePlayground, setParams]
+    [setParams]
   );
 
   const closePlayground = useCallback(() => {
@@ -47,13 +43,10 @@ export const usePlaygroundUrlState = (hidePlayground = false): PlaygroundUrlApi 
 
   const setDock = useCallback(
     (dock: DockMode) => {
-      if (disabled) {
-        return;
-      }
       writeStoredDock(areaFor('session'), dock);
       setParams(
         (prev) => {
-          const current = readPlaygroundParams(prev, hidePlayground);
+          const current = readPlaygroundParams(prev);
           return writePlaygroundParams(prev, {
             open: true,
             dock,
@@ -64,33 +57,27 @@ export const usePlaygroundUrlState = (hidePlayground = false): PlaygroundUrlApi 
         { replace: true }
       );
     },
-    [disabled, hidePlayground, setParams]
+    [setParams]
   );
 
   const setRequestSlug = useCallback(
     (requestSlug?: string | null) => {
-      if (disabled) {
-        return;
-      }
       setParams((prev) => {
-        const current = readPlaygroundParams(prev, hidePlayground);
+        const current = readPlaygroundParams(prev);
         return writePlaygroundParams(prev, { open: true, dock: current.dock, requestSlug });
       });
     },
-    [disabled, hidePlayground, setParams]
+    [setParams]
   );
 
   const setRequestExample = useCallback(
     (requestSlug?: string | null, exampleSlug?: string | null) => {
-      if (disabled) {
-        return;
-      }
       setParams((prev) => {
-        const current = readPlaygroundParams(prev, hidePlayground);
+        const current = readPlaygroundParams(prev);
         return writePlaygroundParams(prev, { open: true, dock: current.dock, requestSlug, exampleSlug });
       });
     },
-    [disabled, hidePlayground, setParams]
+    [setParams]
   );
 
   return {

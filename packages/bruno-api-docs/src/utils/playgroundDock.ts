@@ -46,7 +46,7 @@ export interface PlaygroundUrlState {
 // The URL is the source of truth for the dock (a shared link reproduces the
 // sender's dock). sessionStorage remembers the last dock only as the fallback
 // for a fresh open with no `dock` param (see usePlaygroundUrlState).
-export const readPlaygroundParams = (params: URLSearchParams, hidePlayground: boolean): PlaygroundUrlState => {
+export const readPlaygroundParams = (params: URLSearchParams, hidePlayground = false): PlaygroundUrlState => {
   const disabled = hidePlayground || params.get(PLAYGROUND_HIDDEN) === '1';
   const open = !disabled && params.get(PARAM_OPEN) === '1';
   const dockParam = params.get(PARAM_DOCK);

@@ -22,8 +22,8 @@ interface BackstagePalette {
 
 const backstageLightPalette: BackstagePalette = {
   background: {
-    paper: '#FFFFFF',
-    default: '#F8F8F8',
+    paper: '#F5F5F5',
+    default: '#F0F0F0',
     bright: '#FAFAFA',
     crust: '#F5F5F5',
     surface0: '#F0F0F0',
@@ -48,8 +48,8 @@ const backstageLightPalette: BackstagePalette = {
 
 const backstageDarkPalette: BackstagePalette = {
   background: {
-    paper: '#424242',
-    default: '#333333',
+    paper: '#333333',
+    default: '#424242',
     bright: '#4A4A4A',
     crust: '#3A3A3A',
     surface0: '#4A4A4A',

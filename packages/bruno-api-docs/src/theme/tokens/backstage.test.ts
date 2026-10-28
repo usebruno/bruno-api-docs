@@ -16,14 +16,14 @@ describe('backstage tokens', () => {
     expect(backstageLight.mode).toBe('light');
     expect(backstageLight.brand).toBe(light.brand);
     expect(backstageLight.primary).toEqual(light.primary);
-    expect(backstageLight.background.base).toBe('#FFFFFF');
-    expect(backstageLight.background.mantle).toBe('#F8F8F8');
+    expect(backstageLight.background.base).toBe('#F5F5F5');
+    expect(backstageLight.background.mantle).toBe('#F0F0F0');
 
     expect(backstageDark.mode).toBe('dark');
     expect(backstageDark.brand).toBe(dark.brand);
     expect(backstageDark.primary).toEqual(dark.primary);
-    expect(backstageDark.background.base).toBe('#424242');
-    expect(backstageDark.background.mantle).toBe('#333333');
+    expect(backstageDark.background.base).toBe('#333333');
+    expect(backstageDark.background.mantle).toBe('#424242');
   });
 
   it('does not mutate the base themes', () => {

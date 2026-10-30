@@ -6,10 +6,12 @@ import { createOpenCollectionStore } from '@/store/store';
 import type { RunRequestResponse } from '@/runner';
 import ResponsePane from './ResponsePane';
 
-const pane = (isLoading: boolean) => (
+const previousResponse = { status: 200, headers: {}, data: { ok: true } } as unknown as RunRequestResponse;
+
+const pane = (isLoading: boolean, response?: RunRequestResponse) => (
   <Provider store={createOpenCollectionStore()}>
     <ResponsePane
-      response={undefined as unknown as RunRequestResponse}
+      response={response as RunRequestResponse}
       isLoading={isLoading}
       requestStartedAt={isLoading ? Date.now() : null}
       onCancelRequest={() => {}}
@@ -27,6 +29,14 @@ describe('Playground ResponsePane: loading state', () => {
     expect(getByTestId(root, 'response-stopwatch').text).toBe('Loading...');
     expect(getByTestId(root, 'response-cancel-request').text.trim()).toBe('Cancel Request');
     expect(root.text).not.toContain('Click Send to make a request');
+  });
+
+  it('keeps the previous response under the loading overlay while a new request runs', () => {
+    const root = useRenderToDom(pane(true, previousResponse));
+
+    expect(queryByTestId(root, 'response-loading')).not.toBeNull();
+    expect(queryByTestId(root, 'response-tabs')).not.toBeNull();
+    expect(queryByTestId(root, 'response-status')).toBeNull();
   });
 
   it('shows the empty hint, not the loading view, when nothing is running', () => {

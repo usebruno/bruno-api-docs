@@ -70,6 +70,13 @@ describe('Tabs', () => {
     expect(panel.getAttribute('aria-labelledby')).toBe(tab.getAttribute('id'));
   });
 
+  it('layers panelOverlay over the panels only, leaving the tab bar uncovered', () => {
+    const panels = query(useRenderToDom(<Tabs tabs={tabs} panelOverlay={<div data-testid="overlay" />} />), '.tab-panels');
+    expect(panels.querySelector('[data-testid="overlay"]')).not.toBeNull();
+    expect(panels.querySelector('[role="tabpanel"]')).not.toBeNull();
+    expect(panels.querySelector('[role="tablist"]')).toBeNull();
+  });
+
   it('defaults to the underline variant', () => {
     const root = useRenderToDom(<Tabs tabs={tabs} testId="example" />);
     const wrapper = getByTestId(root, 'example');

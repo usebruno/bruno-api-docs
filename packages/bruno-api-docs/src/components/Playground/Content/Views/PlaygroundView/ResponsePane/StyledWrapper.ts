@@ -51,6 +51,13 @@ export const StyledWrapper = styled.div`
     animation: rotateCounterClockwise 1s linear infinite;
   }
 
+  .response-loading-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background-color: var(--oc-request-tab-panel-response-overlay-bg);
+  }
+
   .loading-text {
     color: var(--text-secondary);
     font-weight: 500;

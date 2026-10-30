@@ -70,3 +70,6 @@ export const templateVariableSplitRegex = (): RegExp => new RegExp(`(${TEMPLATE_
 
 /** Fresh global regex whose capture group 1 is the variable NAME, for `String.replace` masking/interpolation. New instance per call → stateless. */
 export const templateVariableGlobalRegex = (): RegExp => new RegExp(`\\{\\{(${TEMPLATE_VARIABLE_BODY_PATTERN})\\}\\}`, 'g');
+
+export const sanitizeName = (name: string): string =>
+  name.replace(/[<>:"/\\|?*]/g, '-').replace(/^[\s-]+/, '').replace(/[.\s]+$/, '');

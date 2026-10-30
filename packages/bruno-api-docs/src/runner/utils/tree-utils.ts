@@ -1,9 +1,10 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { Item, Folder } from '@opencollection/types/collection/item';
-import { getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest } from '@/utils/schemaHelpers';
+import type { Item, Folder, ScriptFile } from '@opencollection/types/collection/item';
+import { getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest, isScriptFile } from '@/utils/schemaHelpers';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { getItemUuid } from '@/utils/itemUtils';
+import { sanitizeName } from '@/utils/common';
 
 /**
  * Find the folder ancestors from the collection root to a specific item (the item excluded).
@@ -70,6 +71,49 @@ export const findItemByPath = (collection: OpenCollection, requestPath: string):
   };
 
   return walk(collection.items, segments);
+};
+
+export type ScriptFileLookup
+  = | { found: true; code: string }
+    | { found: false; reason: 'not-found' | 'outside-collection' };
+
+const findFolderByName = (items: Item[] | undefined, segment: string) => {
+  const folders = items?.filter(isFolder) as Folder[] | undefined;
+  const namesOf = (folder: Folder) => [getItemName(folder) ?? '', sanitizeName(getItemName(folder) ?? '')];
+  return folders?.find((folder) => getItemName(folder) === segment)
+    ?? folders?.find((folder) => sanitizeName(getItemName(folder) ?? '') === segment)
+    ?? folders?.find((folder) => namesOf(folder).some((name) => name.toLowerCase() === segment.toLowerCase()));
+};
+
+const findScriptByName = (items: Item[] | undefined, fileName: string) => {
+  const scripts = items?.filter(isScriptFile) as ScriptFile[] | undefined;
+  const nameOf = (script: ScriptFile) => getItemName(script)?.replace(/\.js$/i, '');
+  return scripts?.find((script) => nameOf(script) === fileName)
+    ?? scripts?.find((script) => nameOf(script)?.toLowerCase() === fileName.toLowerCase());
+};
+
+export const findScriptFileByPath = (collection: OpenCollection, modulePath: string): ScriptFileLookup => {
+  if (typeof modulePath !== 'string') return { found: false, reason: 'not-found' };
+
+  const segments: string[] = [];
+  for (const segment of modulePath.split('/')) {
+    if (segment === '' || segment === '.') continue;
+    if (segment === '..') {
+      if (!segments.length) return { found: false, reason: 'outside-collection' };
+      segments.pop();
+      continue;
+    }
+    segments.push(segment);
+  }
+
+  const fileName = segments.pop()?.replace(/\.js$/i, '');
+  if (!fileName) return { found: false, reason: 'not-found' };
+  let items = collection.items;
+  for (const segment of segments) {
+    items = findFolderByName(items, segment)?.items;
+  }
+  const script = findScriptByName(items, fileName);
+  return script ? { found: true, code: script.script ?? '' } : { found: false, reason: 'not-found' };
 };
 
 /**

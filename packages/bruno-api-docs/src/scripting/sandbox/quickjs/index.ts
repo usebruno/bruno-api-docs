@@ -8,7 +8,8 @@ import addAxiosShimToContext from './shims/lib/axios';
 import { newQuickJSWASMModule, memoizePromiseFactory } from 'quickjs-emscripten';
 import { marshallToVm } from './utils';
 import { getBundledCode } from './bundled-libraries.iife.js';
-import { getRequireCode } from './shims/require';
+import { addRequireShimToContext } from './shims/require';
+import type { OpenCollection } from '@opencollection/types';
 
 let QuickJSSyncContext: any;
 const loader = memoizePromiseFactory(() => newQuickJSWASMModule());
@@ -90,8 +91,9 @@ const executeQuickJsVm = ({ script: externalScript, context: externalContext, sc
 const executeQuickJsVmAsync = async ({
   script: externalScript,
   context: externalContext,
-  collectionPath: _collectionPath
-}: { script: any; context: any; collectionPath: any }) => {
+  collectionPath: _collectionPath,
+  collection
+}: { script: any; context: any; collectionPath: any; collection?: OpenCollection }) => {
   if (!externalScript?.length || typeof externalScript !== 'string') {
     return externalScript;
   }
@@ -112,7 +114,6 @@ const executeQuickJsVmAsync = async ({
     const bootResult = vm.evalCode(
       `
         (${bundledCode})();
-        ${getRequireCode()}
       `
     );
     if (bootResult.error) {
@@ -121,6 +122,7 @@ const executeQuickJsVmAsync = async ({
       throw new Error(`Failed to load sandbox libraries: ${bootError?.message || String(bootError)}`);
     }
     bootResult.value.dispose();
+    addRequireShimToContext(vm, collection);
 
     const { bru, req, res, test, __brunoTestResults, console: consoleFn } = externalContext;
 

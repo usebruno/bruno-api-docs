@@ -703,10 +703,10 @@ items:
           type: script
           seq: 0
         script: |
-          {
-            "email": "user@example.com",
-            "password": "password123"
-          }
+          module.exports = {
+            email: 'user@example.com',
+            password: 'password123'
+          };
       - info:
           name: customers
           type: folder

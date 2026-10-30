@@ -288,6 +288,7 @@ export class RequestRunner {
             variables: allVariables,
             collectionName: collection.info?.name || '',
             collectionPath: '',
+            collection,
             warnings,
             runRequest
           });
@@ -322,6 +323,7 @@ export class RequestRunner {
             variables: allVariables,
             collectionName: collection.info?.name || '',
             collectionPath: '',
+            collection,
             warnings,
             runRequest
           });
@@ -359,6 +361,7 @@ export class RequestRunner {
             variables: allVariables,
             collectionName: collection.info?.name || '',
             collectionPath: '',
+            collection,
             assertionResults,
             warnings,
             runRequest

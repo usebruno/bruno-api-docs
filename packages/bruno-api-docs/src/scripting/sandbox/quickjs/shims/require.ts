@@ -1,3 +1,6 @@
+import type { OpenCollection } from '@opencollection/types';
+import { findScriptFileByPath } from '@/runner/utils/tree-utils';
+
 const NODE_BUILTIN_MODULES = [
   'assert', 'buffer', 'child_process', 'cluster', 'crypto', 'dgram', 'dns', 'events',
   'fs', 'http', 'http2', 'https', 'net', 'os', 'path', 'perf_hooks', 'process', 'querystring',
@@ -12,7 +15,28 @@ const DEVELOPER_MODE_LIBRARIES = [
 
 const UNSUPPORTED_LIBRARIES = ['jsonwebtoken'];
 
-export const getRequireCode = () => `
+const getLocalRequireCode = () => `
+  const { dirname, join, normalize } = globalThis.path;
+  const localModules = {};
+  const requireLocal = (modulePath, requested) => {
+    if (!Object.prototype.hasOwnProperty.call(localModules, modulePath)) {
+      const module = { exports: {} };
+      localModules[modulePath] = module;
+      const requireFromFile = (subModule) => (subModule?.startsWith?.('.')
+        ? requireLocal(join(dirname(modulePath), subModule), subModule)
+        : globalThis.require(subModule));
+      try {
+        new Function('module', 'exports', 'require', loadLocalModule(modulePath, requested))(module, module.exports, requireFromFile);
+      } catch (error) {
+        delete localModules[modulePath];
+        throw error;
+      }
+    }
+    return localModules[modulePath].exports;
+  };
+`;
+
+const getRequireCode = () => `
   globalThis.require = (mod) => {
     const hasOwn = (name) => Object.prototype.hasOwnProperty.call(globalThis.requireObject, name);
     if (hasOwn(mod)) {
@@ -20,10 +44,7 @@ export const getRequireCode = () => `
     }
 
     if (mod?.startsWith?.('.') || mod?.startsWith?.('/')) {
-      throw new Error(
-        "Local file require ('" + mod + "') is not available in the docs playground; " +
-        'only the built-in safe-mode libraries can be required here.'
-      );
+      return requireLocal(normalize(mod), mod);
     }
 
     const bareName = mod?.startsWith?.('node:') ? mod.slice(5) : mod;
@@ -53,3 +74,33 @@ export const getRequireCode = () => `
     throw new Error(\`Cannot find module \${mod}\`);
   }
 `;
+
+const createLocalModuleLoader = (vm: any, collection?: OpenCollection) =>
+  vm.newFunction('loadLocalModule', (pathHandle: any, requestedHandle: any) => {
+    const modulePath = vm.dump(pathHandle);
+    const requested = vm.dump(requestedHandle);
+    if (!collection) {
+      throw new Error(
+        `Local file require ('${requested}') is not available in the docs playground; `
+        + 'only the built-in safe-mode libraries can be required here.'
+      );
+    }
+    const result = findScriptFileByPath(collection, modulePath);
+    if (!result.found) {
+      throw new Error(result.reason === 'outside-collection'
+        ? 'Access to files outside of the collectionPath is not allowed.'
+        : `Cannot find module ${requested}`);
+    }
+    return vm.newString(result.code);
+  });
+
+export const addRequireShimToContext = (vm: any, collection?: OpenCollection) => {
+  const install = vm.unwrapResult(vm.evalCode(`(loadLocalModule) => { ${getLocalRequireCode()} ${getRequireCode()} }`));
+  const loader = createLocalModuleLoader(vm, collection);
+  try {
+    vm.unwrapResult(vm.callFunction(install, vm.undefined, loader)).dispose();
+  } finally {
+    loader.dispose();
+    install.dispose();
+  }
+};

@@ -34,13 +34,18 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
   testId
 }) => {
   const classes = [active ? 'active' : '', muted ? 'muted' : ''].filter(Boolean).join(' ');
+  const partTestId = (part: string) => (testId ? `${testId}-${part}` : undefined);
 
   const leading = method ? (
-    <span className="navlink-leading navlink-method" style={{ color: getMethodColorVar(method) }}>
+    <span
+      className="navlink-leading navlink-method"
+      data-testid={partTestId('method')}
+      style={{ color: getMethodColorVar(method) }}
+    >
       {getShortMethod(method)}
     </span>
   ) : script ? (
-    <span className="navlink-leading navlink-method" style={{ color: 'var(--oc-colors-accent)' }}>
+    <span className="navlink-leading navlink-method" data-testid={partTestId('method')} style={{ color: 'var(--oc-colors-accent)' }}>
       JS
     </span>
   ) : icon ? (
@@ -69,7 +74,7 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
       {chevron}
       <button type="button" className="navlink-main" title={title ?? label} onClick={onClick}>
         {leading}
-        <span className="navlink-label">{label}</span>
+        <span className="navlink-label" data-testid={partTestId('label')}>{label}</span>
       </button>
     </StyledWrapper>
   );

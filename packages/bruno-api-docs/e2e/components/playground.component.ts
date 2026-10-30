@@ -83,6 +83,10 @@ export class PlaygroundComponent extends BaseComponent {
     return this.treeItems.filter({ hasText: name }).first();
   }
 
+  sidebarMethodBadge(name: string): Locator {
+    return this.sidebarItem(name).getByTestId('sidebar-item-method');
+  }
+
   async openSidebarItem(name: string): Promise<void> {
     await this.ensureSidebarOpen();
     await this.sidebarItem(name).click();

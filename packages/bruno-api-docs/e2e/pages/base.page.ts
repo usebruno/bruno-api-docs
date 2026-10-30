@@ -2,6 +2,8 @@ import type { Page } from '@playwright/test';
 
 export abstract class BasePage {
   readonly root = this.page.locator('#root');
+  /** The AppShell content area, the `<main>` beside the sidebar. */
+  readonly main = this.page.getByRole('main');
 
   constructor(protected readonly page: Page) {}
 

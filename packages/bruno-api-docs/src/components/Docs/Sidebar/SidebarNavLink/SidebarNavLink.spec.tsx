@@ -16,10 +16,20 @@ describe('SidebarNavLink', () => {
   });
 
   it('renders a text-only method label colored by the shared method var (DELETE to DEL)', () => {
-    const html = renderToStaticMarkup(<SidebarNavLink label="Cancel Booking" method="DELETE" />);
+    const html = renderToStaticMarkup(
+      <SidebarNavLink label="Cancel Booking" method="DELETE" testId="sidebar-item" />
+    );
     expect(html).toContain('DEL');
     expect(html).toContain('var(--oc-request-methods-delete)');
     expect(html).toContain('navlink-method');
+    expect(html).toContain('data-testid="sidebar-item-label"');
+    expect(html).toContain('data-testid="sidebar-item-method"');
+  });
+
+  it('omits the label and method test ids when no testId is passed', () => {
+    const html = renderToStaticMarkup(<SidebarNavLink label="Cancel Booking" method="DELETE" />);
+    expect(html).not.toMatch(/data-testid="[^"]*-label"/);
+    expect(html).not.toMatch(/data-testid="[^"]*-method"/);
   });
 
   it('renders an icon slot when given an icon', () => {
@@ -46,8 +56,9 @@ describe('SidebarNavLink', () => {
   });
 
   it('renders a JS badge in the method column for script rows, label stays default font', () => {
-    const html = renderToStaticMarkup(<SidebarNavLink label="setup.js" script />);
+    const html = renderToStaticMarkup(<SidebarNavLink label="setup.js" script testId="sidebar-item" />);
     expect(html).toContain('navlink-method');
+    expect(html).toContain('data-testid="sidebar-item-method"');
     expect(html).toContain('>JS<');
     expect(html).not.toContain('navlink-label mono');
   });

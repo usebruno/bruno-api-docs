@@ -97,6 +97,12 @@ describe('findScriptFileByPath', () => {
     expect(findScriptFileByPath(withColon, './Auth: Login/token.js')).toEqual({ found: true, code: 'module.exports = 3;' });
   });
 
+  it('finds a script by the file name Bruno desktop gives it on disk', () => {
+    const withColon = { items: [folderOf('billing', [scriptOf('token: v1', 'module.exports = 4;')])] } as OpenCollection;
+    expect(findScriptFileByPath(withColon, './billing/token- v1.js')).toEqual({ found: true, code: 'module.exports = 4;' });
+    expect(findScriptFileByPath(withColon, './billing/token: v1.js')).toEqual({ found: true, code: 'module.exports = 4;' });
+  });
+
   it('ignores letter case only when no exact name matches', () => {
     const cased = {
       items: [

@@ -87,9 +87,11 @@ const findFolderByName = (items: Item[] | undefined, segment: string) => {
 
 const findScriptByName = (items: Item[] | undefined, fileName: string) => {
   const scripts = items?.filter(isScriptFile) as ScriptFile[] | undefined;
-  const nameOf = (script: ScriptFile) => getItemName(script)?.replace(/\.js$/i, '');
+  const nameOf = (script: ScriptFile) => (getItemName(script) ?? '').replace(/\.js$/i, '');
+  const namesOf = (script: ScriptFile) => [nameOf(script), sanitizeName(nameOf(script))];
   return scripts?.find((script) => nameOf(script) === fileName)
-    ?? scripts?.find((script) => nameOf(script)?.toLowerCase() === fileName.toLowerCase());
+    ?? scripts?.find((script) => sanitizeName(nameOf(script)) === fileName)
+    ?? scripts?.find((script) => namesOf(script).some((name) => name.toLowerCase() === fileName.toLowerCase()));
 };
 
 export const findScriptFileByPath = (collection: OpenCollection, modulePath: string): ScriptFileLookup => {

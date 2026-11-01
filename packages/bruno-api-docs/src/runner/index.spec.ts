@@ -1465,3 +1465,41 @@ items:
     expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { shared: 'fromScript' }, deleted: [] });
   });
 });
+
+describe('RequestRunner - require() of a .js file in the collection', () => {
+  it('lets a request script use a .js file from the collection', async () => {
+    const originalFetch = global.fetch;
+    let headers: Record<string, string> = {};
+    global.fetch = vi.fn().mockImplementation((url: string, init: RequestInit) => {
+      headers = init.headers as Record<string, string>;
+      return okFetch()(url, init);
+    });
+    const collection = parseYaml(`
+opencollection: "1.0.0"
+info:
+  name: "require"
+items:
+  - name: "lib"
+    type: "folder"
+    items:
+      - name: "helpers"
+        type: "script"
+        script: |
+          module.exports = { token: () => 'from-helpers' };
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com/"
+    scripts:
+      preRequest: |
+        const { token } = require('./lib/helpers.js');
+        req.setHeader('X-Token', token());
+`);
+
+    const response = await new RequestRunner().runRequest({ item: collection.items[1], collection, timeout: 5000 });
+    global.fetch = originalFetch;
+
+    expect(response.error).toBeUndefined();
+    expect(headers['X-Token']).toBe('from-helpers');
+  });
+});

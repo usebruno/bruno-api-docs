@@ -21,6 +21,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly postResponseScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-post-response');
   readonly bodyEditor = new CodeEditorComponent(this.page, 'body-editor');
   readonly testsEditor = new CodeEditorComponent(this.page, 'tests-editor');
+  readonly scriptFileEditor = new CodeEditorComponent(this.page, 'playground-script-file-editor');
   readonly variable = new PlaygroundVariableComponent(this.page);
   readonly envSwitcher = new EnvSwitcherComponent(this.page, 'playground-env-switcher');
   readonly codeSnippet = new CodeSnippetComponent(this.page, 'query-bar-code-snippet');
@@ -60,6 +61,8 @@ export class PlaygroundComponent extends BaseComponent {
   readonly unsupportedTitle = this.view.getByTestId('unsupported-request-title');
   readonly unsupportedMessage = this.view.getByTestId('unsupported-request-empty');
   readonly unsupportedIcon = this.view.getByTestId('file-not-found-icon');
+  readonly scriptFile = this.view.getByTestId('playground-script-file');
+  readonly scriptFileTitle = this.view.getByTestId('playground-script-file-title');
   readonly exampleView = this.page.getByTestId('example-view');
   readonly exampleViewRequest = this.page.getByTestId('example-view-request');
   readonly exampleViewResponse = this.page.getByTestId('example-view-response');

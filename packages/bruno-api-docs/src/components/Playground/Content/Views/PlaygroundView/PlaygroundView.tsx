@@ -15,7 +15,6 @@ import { PromptVariablesModal } from '@/components/PromptVariablesModal/PromptVa
 import {
   updatePlaygroundItem,
   setPlaygroundResponse,
-  clearPlaygroundResponse,
   selectPlaygroundResponse,
   setPlaygroundRequestStarted,
   clearPlaygroundRequestStarted,
@@ -179,7 +178,6 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   const handleCancelRequest = useCallback(() => {
     if (!playgroundRuns.cancel(itemUuid)) return;
     dispatch(clearPlaygroundRequestStarted(itemUuid));
-    dispatch(clearPlaygroundResponse(itemUuid));
   }, [dispatch, itemUuid]);
 
   return (

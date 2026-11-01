@@ -101,7 +101,10 @@ test.describe('cancelling an in-flight playground request', () => {
     expect(await responsePane.bodyText()).toContain('"run": "second"');
   });
 
-  test('cancelling a second send clears the response from the first one', async ({ playground, responsePane }) => {
+  test('a second send shows the overlay over the first response, and cancelling it brings that response back', async ({
+    playground,
+    responsePane
+  }) => {
     await playground.urlInput.fill(`${appConfig.testServerURL}/echo`);
     await responsePane.send();
     await expect(responsePane.status).toContainText('200');
@@ -109,11 +112,16 @@ test.describe('cancelling an in-flight playground request', () => {
     await playground.urlInput.fill(SLOW_URL);
     await responsePane.send();
     await expect(responsePane.loadingView).toBeVisible();
+    await expect(responsePane.bodyPanel).toBeVisible();
+
+    await responsePane.switchToTab('headers');
+    await expect(responsePane.loadingView).toBeVisible();
+    await responsePane.switchToTab('response');
     await responsePane.cancelButton.click();
 
     await expect(responsePane.loadingView).toBeHidden();
-    await expect(responsePane.status).toBeHidden();
-    await expect(responsePane.emptyHint).toBeVisible();
+    await expect(responsePane.status).toContainText('200');
+    await expect.poll(() => responsePane.bodyText()).toContain('"method": "GET"');
   });
 
   test('opening another request while one is running does not show the loading view there', async ({

@@ -29,6 +29,7 @@ interface TabsProps {
   ariaLabel?: string;
   keepMounted?: boolean;
   rightContentExpandedWidth?: number;
+  panelOverlay?: ReactNode;
 }
 
 const renderIndicator = (tab: Tab): ReactNode => {
@@ -53,7 +54,8 @@ export const Tabs: React.FC<TabsProps> = ({
   testId = 'tabs',
   ariaLabel,
   keepMounted = false,
-  rightContentExpandedWidth
+  rightContentExpandedWidth,
+  panelOverlay
 }) => {
   const [internalActive, setInternalActive] = useState(defaultActiveTab ?? tabs[0]?.id ?? '');
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -160,6 +162,13 @@ export const Tabs: React.FC<TabsProps> = ({
     }
   }));
 
+  const wrapPanels = (panels: ReactNode) => (panelOverlay === undefined ? panels : (
+    <div className="tab-panels">
+      {panels}
+      {panelOverlay}
+    </div>
+  ));
+
   return (
     <StyledWrapper
       className={['oc-tabs', className, `tabs-variant-${variant}`].filter(Boolean).join(' ')}
@@ -211,7 +220,7 @@ export const Tabs: React.FC<TabsProps> = ({
           </div>
         )}
       </div>
-      {keepMounted
+      {wrapPanels(keepMounted
         ? tabs.map((tab) => (
             <div
               key={tab.id}
@@ -239,7 +248,7 @@ export const Tabs: React.FC<TabsProps> = ({
           >
             {activeTabData.content}
           </div>
-        )}
+        ))}
     </StyledWrapper>
   );
 };

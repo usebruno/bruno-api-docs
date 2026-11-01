@@ -50,23 +50,28 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({
     allowedFormats
   } = useResponseFormatter(response);
 
-  // Handle loading, empty, and error states
-  if (isLoading) {
+  const loadingContent = (
+    <>
+      <StopWatch startTime={requestStartedAt} testId="response-stopwatch" />
+      <span className="loading-icon">
+        <RefreshIcon />
+      </span>
+      <span className="loading-text" data-testid="response-loading-text">Sending request...</span>
+      <button
+        type="button"
+        className="cancel-request"
+        onClick={onCancelRequest}
+        data-testid="response-cancel-request"
+      >
+        Cancel Request
+      </button>
+    </>
+  );
+
+  if (isLoading && !response) {
     return (
       <StyledWrapper className="flex flex-col items-center justify-center gap-4" data-testid="response-loading">
-        <StopWatch startTime={requestStartedAt} testId="response-stopwatch" />
-        <span className="loading-icon">
-          <RefreshIcon />
-        </span>
-        <span className="loading-text" data-testid="response-loading-text">Sending request...</span>
-        <button
-          type="button"
-          className="cancel-request"
-          onClick={onCancelRequest}
-          data-testid="response-cancel-request"
-        >
-          Cancel Request
-        </button>
+        {loadingContent}
       </StyledWrapper>
     );
   }
@@ -222,8 +227,13 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        rightElement={response.error ? undefined : statusInfo}
+        rightElement={response.error || isLoading ? undefined : statusInfo}
         rightContentExpandedWidth={actionsExpandedWidth}
+        panelOverlay={isLoading ? (
+          <div className="response-loading-overlay flex flex-col items-center justify-center gap-4" data-testid="response-loading">
+            {loadingContent}
+          </div>
+        ) : null}
       />
 
     </StyledWrapper>

@@ -160,6 +160,48 @@ describe('getEnvironmentVariables', () => {
     );
     expect(getEnvironmentVariables(withType('one-password')).externalSecrets?.typeLabel).toBe('1Password');
   });
+
+  it('reads the pointer field for each manager and falls back to secretName', () => {
+    const shown = (type: string, variable: Record<string, string | boolean> = {}) => {
+      const environment = {
+        name: 'Prod',
+        externalSecrets: {
+          type,
+          variables: [{ name: 'dbPassword', type: 'string', enabled: true, ...variable }]
+        }
+      } as Environment;
+      return getEnvironmentVariables(environment).externalSecrets;
+    };
+
+    const group = (type: string, typeLabel: string, secretName: string, disabled = false) => ({
+      type,
+      typeLabel,
+      variables: [{ name: 'dbPassword', secretName, dataType: 'string', disabled }]
+    });
+
+    expect(shown('one-password', { secretReference: 'op://vault/db/password' })).toEqual(
+      group('one-password', '1Password', 'op://vault/db/password')
+    );
+    expect(shown('hashicorp-vault-cloud', { path: 'secret/data/token' })).toEqual(
+      group('hashicorp-vault-cloud', 'Hashicorp Vault Cloud', 'secret/data/token')
+    );
+    expect(shown('hashicorp-vault-server', { path: 'secret/data/server', enabled: false })).toEqual(
+      group('hashicorp-vault-server', 'Hashicorp Vault Server', 'secret/data/server', true)
+    );
+    expect(shown('aws-secrets-manager', { secretName: 'prod/db/credentials' })).toEqual(
+      group('aws-secrets-manager', 'AWS Secrets Manager', 'prod/db/credentials')
+    );
+    expect(shown('azure-key-vault', { vaultName: 'prod-vault' })).toEqual(
+      group('azure-key-vault', 'Azure Key Vault', 'prod-vault')
+    );
+    expect(shown('gcp-secrets-manager', { projectId: 'prod-project' })).toEqual(
+      group('gcp-secrets-manager', 'GCP Secrets Manager', 'prod-project')
+    );
+    expect(shown('my-custom-vault', { secretName: 'y' })).toEqual(
+      group('my-custom-vault', 'My Custom Vault', 'y')
+    );
+    expect(shown('one-password')).toEqual(group('one-password', '1Password', ''));
+  });
 });
 
 describe('envVariableToRow / envRowToVariable round-trip', () => {

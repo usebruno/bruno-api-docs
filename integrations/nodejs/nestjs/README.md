@@ -19,14 +19,14 @@ export class AppModule {}
 
 Open `http://localhost:<port>/docs/`. The path counts from `dist/main.js`, so a collection beside `src/` is `'../api-collection'`.
 
-`mountPath` defaults to `'/docs'`. A global prefix moves the docs with everything else. Both adapters work.
+`route` defaults to `'/docs'`. A global prefix moves the docs with everything else. Both adapters work.
 
 ## Options
 
 ```ts
 ApiDocsModule.forRoot({
   collectionPath: '../api-collection',
-  mountPath: '/docs',
+  route: '/docs',
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',

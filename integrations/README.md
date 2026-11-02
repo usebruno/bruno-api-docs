@@ -7,3 +7,5 @@ cd integrations
 npm ci
 npm run lint
 ```
+
+A framework that can mount natively takes no path option: the path is its own, like the Express `app.use` path or the Fastify `prefix`. A framework that cannot takes `route`, default `/docs`.

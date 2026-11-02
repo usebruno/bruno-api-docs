@@ -9,11 +9,10 @@ export type { ApiDocsOptions, CollectionOptions, CollectionFilters, Filter, Rend
   from '@usebruno/api-docs-core';
 
 export interface ApiDocsModuleOptions extends ApiDocsOptions {
-  /** Where the docs mount. Nest gives no way to mount a module from outside, so it is an option. */
-  mountPath?: string;
+  route?: string;
 }
 
-const DEFAULT_MOUNT_PATH = '/docs';
+const DEFAULT_ROUTE = '/docs';
 
 /**
  * Nest 10 routes `/*` and its fastify adapter throws on `/*splat`; Nest 11 and 12 route both but log
@@ -31,23 +30,23 @@ export function wildcard(): string {
 }
 
 /** Searched for, not stripped: `setGlobalPrefix('api')` moves a `/docs` mount to `/api/docs`. */
-export function subPathOf(fullUrl: string, mountPath: string): string {
-  const at = fullUrl.indexOf(mountPath);
+export function subPathOf(fullUrl: string, route: string): string {
+  const at = fullUrl.indexOf(route);
   if (at === -1) {
     return fullUrl;
   }
 
-  return fullUrl.slice(at + mountPath.length) || '/';
+  return fullUrl.slice(at + route.length) || '/';
 }
 
 /**
- * `ApiDocsModule.forRoot({ collectionPath: '../api-collection', mountPath: '/docs' })`. The path counts
+ * `ApiDocsModule.forRoot({ collectionPath: '../api-collection', route: '/docs' })`. The path counts
  * from the built entry file, `dist/main.js`, so a collection beside `src/` is one level up.
  */
 export class ApiDocsModule {
   static forRoot(options: ApiDocsModuleOptions): DynamicModule {
-    const { mountPath: mountOption, ...docsOptions } = options;
-    const mountPath = (mountOption ?? DEFAULT_MOUNT_PATH).replace(/\/+$/, '');
+    const { route: routeOption, ...docsOptions } = options;
+    const route = (routeOption ?? DEFAULT_ROUTE).replace(/\/+$/, '');
     const handler = createDocs(docsOptions).handler();
 
     @Module({})
@@ -56,13 +55,13 @@ export class ApiDocsModule {
         consumer
           .apply((req: Request, res: ServerResponse) => {
             const originalUrl = req.originalUrl ?? req.url ?? '/';
-            const url = subPathOf(originalUrl, mountPath);
+            const url = subPathOf(originalUrl, route);
             handler({ method: req.method, url, originalUrl, headers: req.headers }, res);
           })
           // the mount alone is enough on platform-express, which matches by prefix. On
           // platform-fastify it matches only the mount itself, so the wildcard is what serves
           // shell.js and every deep link
-          .forRoutes(mountPath, `${mountPath}/${wildcard()}`);
+          .forRoutes(route, `${route}/${wildcard()}`);
       }
     }
 

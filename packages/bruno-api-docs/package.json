@@ -63,7 +63,7 @@
     "@microlink/react-json-view": "^1.31.22",
     "@mintlify/httpsnippet": "^1.0.10",
     "@monaco-editor/react": "^4.7.0",
-    "@opencollection/types": "0.13.0",
+    "@opencollection/types": "0.15.0",
     "@prantlf/jsonlint": "^16.0.0",
     "@reduxjs/toolkit": "^2.10.1",
     "@tabler/icons": "^1.46.0",

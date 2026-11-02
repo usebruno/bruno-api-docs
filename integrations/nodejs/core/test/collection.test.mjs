@@ -143,13 +143,16 @@ const quiet = (fn) => {
   console.warn = (line) => warned.push(line);
   try {
     assert.equal(providerFor({ content: text, collectionPath: dir })({}).body, text, 'content wins');
+    assert.equal(providerFor({ content: text, url: 'https://acme.test/c.yml' })({}).body, text, 'content wins over url');
+    assert.match(String(providerFor({ collectionPath: dir, url: 'https://acme.test/c.yml' })({}).body), /bundled: false/, 'collectionPath wins over url');
   } finally {
     Object.assign(console, { log, warn });
   }
   assert.ok(warned.some((line) => line.includes('content is set, ignoring collectionPath')), 'and says what it ignored');
+  assert.ok(warned.some((line) => line.includes('collectionPath is set, ignoring url')), 'and says what it ignored');
 
   assert.throws(() => quiet(() => providerFor({ content: text, tags: { exclude: ['x'] } })), ConfigError, 'filters need a directory, as for a bundled file');
-  assert.throws(() => quiet(() => providerFor({})), /one of `content`, `url`, `collectionPath` is required/);
+  assert.throws(() => quiet(() => providerFor({})), /one of `content`, `collectionPath`, `url` is required/);
   assert.throws(() => quiet(() => providerFor({ content: '' })), /is required/, 'an empty document is not a source');
 }
 

@@ -120,6 +120,21 @@ assert.throws(() => validateOptions({ environments: { include: 'Local' } }), /`e
   'a string that is not the wildcard is named, not silently read as no names');
 assert.throws(() => validateOptions({ tags: { include: 'internal' } }), /`tags.include` takes a list/);
 validateOptions({ environments: { include: '*' }, tags: { include: '*' } });
+validateOptions({ environments: '*', tags: '*' });
+assert.deepEqual(served({ environments: '*' }), served({ environments: { include: '*' } }), "'*' publishes every environment");
+assert.deepEqual(served({ tags: '*' }), served({}), "'*' keeps every request");
+for (const shape of [['Local'], true, 'Local', null]) {
+  assert.throws(() => validateOptions({ environments: shape }), /`environments` takes '\*' or \{ include, exclude \}/);
+}
+for (const shape of [['public'], true, 'public', null]) {
+  assert.throws(() => validateOptions({ tags: shape }), /`tags` takes '\*' or \{ include, exclude \}/);
+}
+assert.throws(() => validateOptions({ environments: { includes: ['Local'] } }), /unknown key in `environments`: includes/);
+assert.throws(() => validateOptions({ tags: { excludes: ['internal'] } }), /unknown key in `tags`: excludes/);
+assert.throws(() => validateOptions({ environments: { include: '*', exclude: 'Prod' } }), /`environments.exclude` takes a list of names/);
+assert.throws(() => validateOptions({ tags: { exclude: 'internal' } }), /`tags.exclude` takes a list of names/);
+assert.throws(() => validateOptions({ environments: { include: [1] } }), /`environments.include` takes a list/);
+assert.throws(() => validateOptions({ tags: { exclude: [1] } }), /`tags.exclude` takes a list/);
 assert.throws(() => validateOptions({ collectionPath: './c', theme: 'dark', favicon: 'x' }), /unknown option theme, favicon/, 'every unknown key, named');
 assert.throws(() => validateOptions({ content: { info: {} } }), /`content` takes a string/);
 assert.throws(() => validateOptions({ url: 42 }), /`url` takes a string/);

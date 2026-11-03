@@ -14,4 +14,9 @@ export const StyledWrapper = styled.div`
     flex: 1;
     min-height: 0;
   }
+
+  .script-file-editor .code-editor-copy {
+    top: 0.90rem;
+    right: 1.25rem;
+  }
 `;

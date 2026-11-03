@@ -3,7 +3,7 @@ import type { Variable, SecretVariable, VariableValueType } from '@opencollectio
 import { MANAGER_LABELS, externalSecretPointer } from '@/constants';
 import { getDescription, getVariableTypeLabel } from './request';
 import { descriptionText, resolveDescription } from './description';
-import { isSecretVariable, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
+import { isSecretVariable, isExternalSecretActive, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
 import { reconcileScriptVariables } from './scriptVariables';
 import type { JsonValue } from '@/runner/utils/variable-interpolator';
@@ -78,6 +78,7 @@ interface ExternalSecretsConfig {
   variables?: {
     name?: string;
     enabled?: boolean;
+    disabled?: boolean;
     type?: VariableValueType;
     path?: string;
     secretName?: string;
@@ -149,7 +150,7 @@ const getExternalSecrets = (environment: Environment): EnvironmentExternalSecret
       name: variable.name ?? '',
       secretName: variable[externalSecretPointer(config?.type)] ?? '',
       dataType: variable.type ?? '',
-      disabled: variable.enabled === false
+      disabled: !isExternalSecretActive(variable)
     }));
 
   if (!variables.length) return null;

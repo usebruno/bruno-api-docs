@@ -202,6 +202,19 @@ describe('getEnvironmentVariables', () => {
     );
     expect(shown('one-password')).toEqual(group('one-password', '1Password', ''));
   });
+
+  it('reads either spelling of the external secret toggle', () => {
+    const withToggle = (toggle: Record<string, boolean>) =>
+      getEnvironmentVariables({
+        name: 'Prod',
+        externalSecrets: { type: 'aws-secrets-manager', variables: [{ name: 'x', secretName: 'y', ...toggle }] }
+      } as any).externalSecrets?.variables[0].disabled;
+
+    expect(withToggle({ disabled: true })).toBe(true);
+    expect(withToggle({ enabled: false })).toBe(true);
+    expect(withToggle({ disabled: false })).toBe(false);
+    expect(withToggle({})).toBe(false);
+  });
 });
 
 describe('envVariableToRow / envRowToVariable round-trip', () => {

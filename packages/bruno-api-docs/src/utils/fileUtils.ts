@@ -3,6 +3,7 @@ import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { Scripts } from '@opencollection/types/common/scripts';
 import { getItemName, getRequestScripts, scriptsArrayToObject, isFolder, type SupportedRequestItem } from './schemaHelpers';
 import { isYamlFile, parseYaml } from './yamlUtils';
+import { uuid as generateUuid } from './common';
 import type { ScriptFlow } from './request';
 
 const loadOpenCollectionData = async (source: string | File): Promise<any> => {
@@ -160,7 +161,7 @@ export const findAndUpdateItem = (
 
 export const hydrateWithUUIDs = (collection: OpenCollection): OpenCollection => {
   const assignUUID = (item: Item): Item => {
-    const uuid = (item as any).uuid || crypto.randomUUID();
+    const uuid = (item as any).uuid || generateUuid();
 
     const hydratedItem = { ...item, uuid } as any;
 

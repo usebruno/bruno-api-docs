@@ -1,4 +1,5 @@
 import * as chai from 'chai';
+import type { OpenCollection } from '@opencollection/types';
 import Bru, { type RunRequestCallback } from '@/scripting/utils/bru';
 import BrunoRequest from '@/scripting/utils/bruno-request';
 import BrunoResponse from '@/scripting/utils/bruno-response';
@@ -12,6 +13,7 @@ interface RunScriptOptions {
   response?: any;
   collectionName?: string;
   collectionPath?: string;
+  collection?: OpenCollection;
   variables?: any;
   assertionResults?: AssertionResult[];
   warnings?: string[];
@@ -31,6 +33,7 @@ class ScriptRuntime {
     response,
     collectionName,
     collectionPath,
+    collection,
     variables,
     assertionResults,
     warnings,
@@ -82,7 +85,8 @@ class ScriptRuntime {
       await executeQuickJsVmAsync({
         script: script,
         context: context,
-        collectionPath
+        collectionPath,
+        collection
       });
     } catch (error) {
       const scriptError: ScriptRunError = error instanceof Error ? error : new Error(String(error));

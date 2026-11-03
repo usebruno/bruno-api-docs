@@ -1,5 +1,16 @@
 # @usebruno/api-docs
 
+## 0.4.1
+
+### Minor Changes
+
+- d3e9a32: Allow hiding playground in api-docs by host
+
+### Patch Changes
+
+- cb6ccb6: Fix docs failing to load on plain http origins (crypto.randomUUID is not available outside secure contexts).
+- 61540ac: feat: Add a Backstage theme and an option to hide the theme switcher.
+
 ## 0.4.0
 
 ### Minor Changes

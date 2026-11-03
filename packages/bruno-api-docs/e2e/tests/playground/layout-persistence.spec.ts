@@ -25,6 +25,24 @@ test.describe('playground layout persistence (desktop)', () => {
     expect(Math.abs((await playground.bottomPanelHeight()) - resized)).toBeLessThan(5);
   });
 
+  test('keeps the request/response divider where it was dragged when another request is opened', async ({
+    playground
+  }) => {
+    await playground.open('bottom');
+    await playground.openRequest('get users');
+    const startX = await playground.dividerX();
+
+    await playground.grabDivider();
+    await playground.movePointerToX(startX - 200);
+    await playground.releasePointer();
+    const draggedX = await playground.dividerX();
+    expect(startX - draggedX).toBeGreaterThan(100);
+
+    await playground.openRequest('echo json');
+
+    await expect.poll(() => playground.dividerX()).toBeCloseTo(draggedX, 0);
+  });
+
   test('restores the inline panel width across a reload', async ({ page, playground }) => {
     await playground.open('inline');
     await expect(playground.inlinePanel).toBeVisible();

@@ -25,7 +25,7 @@ class AppModule {}
 Module({
   imports: [
     ApiDocsModule.forRoot({
-      mountPath: '/docs',
+      route: '/docs',
       collectionPath: COLLECTION,
       environments: { include: ['Local'] },
       tags: { exclude: ['internal'] },
@@ -34,20 +34,20 @@ Module({
       repositoryUrl: 'https://token:secret@github.com/acme/api-collection'
     }),
     ApiDocsModule.forRoot({
-      mountPath: '/api/v2/docs',
+      route: '/api/v2/docs',
       collectionPath: COLLECTION,
       environments: { include: '*', exclude: ['Prod'] }
     }),
-    ApiDocsModule.forRoot({ mountPath: '/internal/docs', collectionPath: COLLECTION }),
-    ApiDocsModule.forRoot({ mountPath: '/bundled/docs', collectionPath: BUNDLED }),
-    ApiDocsModule.forRoot({ mountPath: '/content/docs', content: CONTENT }),
-    ApiDocsModule.forRoot({ mountPath: '/priority/docs', content: CONTENT, collectionPath: COLLECTION }),
-    ApiDocsModule.forRoot({ mountPath: '/url/docs', url: URL_FIXTURE }),
-    ApiDocsModule.forRoot({ mountPath: '/url-missing/docs', url: URL_FIXTURE.replace('bundled.yml', 'missing.yml') }),
-    ApiDocsModule.forRoot({ mountPath: '/bru/docs', collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }),
-    ApiDocsModule.forRoot({ mountPath: '/broken/docs', collectionPath: './there-is-no-collection-here' }),
-    ApiDocsModule.forRoot({ mountPath: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' }),
-    ApiDocsModule.forRoot({ mountPath: '/misconfigured/docs', collectionPath: COLLECTION, theme: 'dark' })
+    ApiDocsModule.forRoot({ route: '/internal/docs', collectionPath: COLLECTION }),
+    ApiDocsModule.forRoot({ route: '/bundled/docs', collectionPath: BUNDLED }),
+    ApiDocsModule.forRoot({ route: '/content/docs', content: CONTENT }),
+    ApiDocsModule.forRoot({ route: '/priority/docs', content: CONTENT, collectionPath: COLLECTION }),
+    ApiDocsModule.forRoot({ route: '/url/docs', url: URL_FIXTURE }),
+    ApiDocsModule.forRoot({ route: '/url-missing/docs', url: URL_FIXTURE.replace('bundled.yml', 'missing.yml') }),
+    ApiDocsModule.forRoot({ route: '/bru/docs', collectionPath: BRU, environments: { include: ['Local'] }, tags: { exclude: ['internal'] } }),
+    ApiDocsModule.forRoot({ route: '/broken/docs', collectionPath: './there-is-no-collection-here' }),
+    ApiDocsModule.forRoot({ route: '/oversize/docs', collectionPath: '../fixtures/walk-oversize' }),
+    ApiDocsModule.forRoot({ route: '/misconfigured/docs', collectionPath: COLLECTION, theme: 'dark' })
   ]
 })(AppModule);
 

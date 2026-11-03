@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import reducer, {
   setPlaygroundCollection,
   updatePlaygroundItem,
+  updatePlaygroundScriptFile,
   selectHydratedCollection,
   selectPlaygroundCollection,
   setViewMode,
@@ -88,6 +89,38 @@ describe('updatePlaygroundItem', () => {
     expect(firstItem(store, selectHydratedCollection).http.url).toBe('new');
     expect(firstItem(store, selectHydratedCollection).uuid).toBe('r1');
     expect(firstItem(store, selectPlaygroundCollection).http.url).toBe('new');
+  });
+});
+
+describe('updatePlaygroundScriptFile', () => {
+  const withScript = () =>
+    ({
+      info: { name: 'Test', version: '1.0.0' },
+      items: [{ info: { name: 'helpers', type: 'script' }, uuid: 's1', script: 'const a = 1;' }]
+    }) as unknown as OpenCollectionCollection;
+
+  const scriptSource = (store: ReturnType<typeof createOpenCollectionStore>, select: typeof selectHydratedCollection) =>
+    (select(store.getState())!.items![0] as unknown as { script: string }).script;
+
+  it('edits the script in both the hydrated and base collections', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withScript()));
+
+    store.dispatch(updatePlaygroundScriptFile({ uuid: 's1', script: 'const a = 2;' }));
+
+    expect(scriptSource(store, selectHydratedCollection)).toBe('const a = 2;');
+    expect(scriptSource(store, selectPlaygroundCollection)).toBe('const a = 2;');
+  });
+
+  it('restores the original source when the collection is loaded again', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withScript()));
+    store.dispatch(updatePlaygroundScriptFile({ uuid: 's1', script: 'const a = 2;' }));
+
+    // what updateCollection (and a reload) dispatches
+    store.dispatch(setPlaygroundCollection(withScript()));
+
+    expect(scriptSource(store, selectHydratedCollection)).toBe('const a = 1;');
   });
 });
 

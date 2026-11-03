@@ -9,7 +9,6 @@ import SidebarDrawer from '../SidebarDrawer/SidebarDrawer';
 import IconButton from '@/ui/IconButton/IconButton';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
 import PageRouter from '../PageRouter/PageRouter';
-import Playground from '../Playground/Playground';
 import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
@@ -21,13 +20,21 @@ import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
 import { collectionFilename, downloadTextFile, resolveDownloadYaml } from '@/utils/collectionExport';
 import OpenInBrunoModal from '@/components/OpenInBrunoModal/OpenInBrunoModal';
 import { StyledWrapper } from './StyledWrapper';
+import Playground from '../Playground/Playground';
 
 interface AppShellProps {
   logo?: React.ReactNode;
   testId?: string;
+  hideThemeSwitcher?: boolean;
+  hidePlayground?: boolean;
 }
 
-const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
+const AppShell: React.FC<AppShellProps> = ({
+  logo,
+  testId = 'app-shell',
+  hideThemeSwitcher = false,
+  hidePlayground = false
+}) => {
   const collection = useAppSelector(selectDocsCollection);
   const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
   const collectionSourceText = useAppSelector(selectCollectionSourceText);
@@ -68,7 +75,12 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   );
   const { pathname } = useLocation();
 
-  const { open: playgroundOpen, dock: playgroundDock, openPlayground } = usePlaygroundUrlState();
+  const {
+    open: playgroundOpen,
+    disabled: playgroundDisabled,
+    dock: playgroundDock,
+    openPlayground
+  } = usePlaygroundUrlState(hidePlayground);
   const [playgroundOpenNonce, setPlaygroundOpenNonce] = useState(0);
 
   useEffect(() => {
@@ -93,9 +105,12 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
   }, [mode]);
 
   const handleOpenPlayground = useCallback(() => {
+    if (playgroundDisabled) {
+      return;
+    }
     openPlayground(resolution?.entry.slug);
     setPlaygroundOpenNonce((nonce) => nonce + 1);
-  }, [openPlayground, resolution]);
+  }, [openPlayground, resolution, playgroundDisabled]);
 
   return (
     <StyledWrapper
@@ -132,7 +147,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
           )}
           openInBrunoHref={openInBrunoHref}
           onOpenInBruno={openInBrunoHref ? undefined : () => setOpenInBrunoOpen(true)}
-          themeToggleSlot={<ThemeToggle />}
+          themeToggleSlot={hideThemeSwitcher ? null : <ThemeToggle />}
         />
         <OpenInBrunoModal
           open={openInBrunoOpen}
@@ -180,7 +195,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
               </IconButton>
             )}
             <main className="appshell-content" ref={contentRef} data-testid={`${testId}-content`}>
-              <PageRouter onOpenPlayground={handleOpenPlayground} />
+              <PageRouter onOpenPlayground={playgroundOpenDisabled ? undefined : handleOpenPlayground} />
             </main>
           </div>
         </div>

@@ -91,9 +91,12 @@ function partitionFiles(files: WalkedFile[], skipReason: SkipReason): FilterStag
   return { files: kept, skipped };
 }
 
+const expandWildcard = (option: Filter | '*' | undefined): Filter | undefined =>
+  option === '*' ? { include: '*' } : option;
+
 export function applyFilters(files: WalkedFile[], filters: CollectionFilters): FilterResult {
-  const environments = filterEnvironments(files, filters.environments);
-  const tags = filterTags(environments.files, filters.tags);
+  const environments = filterEnvironments(files, expandWildcard(filters.environments));
+  const tags = filterTags(environments.files, expandWildcard(filters.tags));
 
   return {
     files: tags.files,

@@ -6,6 +6,9 @@ import type { DockMode } from '@/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 const WIDTH_STORAGE_KEY = 'oc-docs:playgroundInlineWidth';
+const SSR_VIEWPORT_WIDTH = 1024;
+
+const getViewportWidth = () => (typeof window !== 'undefined' ? window.innerWidth : SSR_VIEWPORT_WIDTH);
 
 interface InlineDockProps {
   dock: DockMode;
@@ -18,14 +21,14 @@ interface InlineDockProps {
 
 const InlineDock: React.FC<InlineDockProps> = ({ dock, onDockChange, sidebarOpen, onToggleSidebar, onClose, children }) => {
   const initialWidth = useMemo(
-    () => readStoredNumber(areaFor('session'), WIDTH_STORAGE_KEY, Math.round(window.innerWidth * 0.4)),
+    () => readStoredNumber(areaFor('session'), WIDTH_STORAGE_KEY, Math.round(getViewportWidth() * 0.4)),
     []
   );
   const { size, dragging, startDrag } = useDockResize({
     axis: 'x',
     initial: initialWidth,
     min: 360,
-    max: () => Math.round(window.innerWidth * 0.7)
+    max: () => Math.round(getViewportWidth() * 0.7)
   });
 
   useEffect(() => {

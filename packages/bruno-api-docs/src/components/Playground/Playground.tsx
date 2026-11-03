@@ -5,6 +5,9 @@ import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
 import ModalDock from './docks/ModalDock/ModalDock';
 import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
+import { playgroundRuns, PLAYGROUND_CLOSED } from './Content/Views/PlaygroundView/playgroundRuns';
+import { useAppDispatch } from '@/store/hooks';
+import { clearAllPlaygroundRequestsStarted } from '@/store/slices/playground';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
 const PlaygroundBody = lazy(() => import('./PlaygroundBody/PlaygroundBody'));
@@ -33,6 +36,7 @@ interface PlaygroundProps {
 }
 
 const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
+  const dispatch = useAppDispatch();
   const { open, dock, requestSlug, exampleSlug, setDock, closePlayground } = usePlaygroundUrlState();
   const isPhone = useIsMobilePhone();
   // On a phone the playground is always the fullscreen MobileDock, and its
@@ -54,6 +58,11 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
   // request when the user is on the gear/a folder), while close -> reopen resets
   // it so re-opening a request re-applies it.
   const appliedSlugRef = useRef<string | null>(null);
+
+  useEffect(() => () => {
+    playgroundRuns.abortAll(PLAYGROUND_CLOSED);
+    dispatch(clearAllPlaygroundRequestsStarted());
+  }, [dispatch]);
 
   if (!open) return null;
 

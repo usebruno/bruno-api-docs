@@ -31,41 +31,62 @@ describe('isDockMode', () => {
 
 describe('readPlaygroundParams', () => {
   it('defaults to closed with the default dock and no request', () => {
-    expect(readPlaygroundParams(new URLSearchParams())).toEqual({
+    expect(readPlaygroundParams(new URLSearchParams(), false)).toEqual({
       open: false,
       dock: DEFAULT_DOCK,
       requestSlug: null,
-      exampleSlug: null
+      exampleSlug: null,
+      disabled: false
     });
   });
 
   it('reads open, dock and request slug from the query', () => {
-    expect(readPlaygroundParams(new URLSearchParams('pg=1&dock=inline&pgReq=users/get'))).toEqual({
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&dock=inline&pgReq=users/get'), false)).toEqual({
       open: true,
       dock: 'inline',
       requestSlug: 'users/get',
-      exampleSlug: null
+      exampleSlug: null,
+      disabled: false
     });
   });
 
   it('reads the example slug when a request slug is present', () => {
-    expect(readPlaygroundParams(new URLSearchParams('pg=1&pgReq=users/get&pgEx=list-users'))).toMatchObject({
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&pgReq=users/get&pgEx=list-users'), false)).toMatchObject({
       requestSlug: 'users/get',
       exampleSlug: 'list-users'
     });
   });
 
   it('ignores an example slug when no request slug is present', () => {
-    expect(readPlaygroundParams(new URLSearchParams('pg=1&pgEx=orphan')).exampleSlug).toBeNull();
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&pgEx=orphan'), false).exampleSlug).toBeNull();
   });
 
   it('falls back to the default dock for an invalid dock param', () => {
-    expect(readPlaygroundParams(new URLSearchParams('pg=1&dock=nope')).dock).toBe(DEFAULT_DOCK);
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&dock=nope'), false).dock).toBe(DEFAULT_DOCK);
   });
 
   it('treats any pg value other than 1 as closed', () => {
-    expect(readPlaygroundParams(new URLSearchParams('pg=0')).open).toBe(false);
-    expect(readPlaygroundParams(new URLSearchParams('pg=true')).open).toBe(false);
+    expect(readPlaygroundParams(new URLSearchParams('pg=0'), false).open).toBe(false);
+    expect(readPlaygroundParams(new URLSearchParams('pg=true'), false).open).toBe(false);
+  });
+
+  it('reports closed for pg=1 when the playground is disabled, keeping the other params', () => {
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&dock=inline&pgReq=users/get'), true)).toEqual({
+      open: false,
+      dock: 'inline',
+      requestSlug: 'users/get',
+      exampleSlug: null,
+      disabled: true
+    });
+  });
+
+  it('reports closed for pg=1 when the hidePlayground param is 1', () => {
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&dock=modal&hidePlayground=1'), false).open).toBe(false);
+  });
+
+  it('treats any hidePlayground value other than 1 as not hidden', () => {
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&hidePlayground=0'), false).open).toBe(true);
+    expect(readPlaygroundParams(new URLSearchParams('pg=1&hidePlayground=true'), false).open).toBe(true);
   });
 });
 
@@ -101,11 +122,12 @@ describe('writePlaygroundParams', () => {
       dock: 'inline',
       requestSlug: 'x'
     });
-    expect(readPlaygroundParams(next)).toEqual({
+    expect(readPlaygroundParams(next, false)).toEqual({
       open: true,
       dock: 'inline',
       requestSlug: 'x',
-      exampleSlug: null
+      exampleSlug: null,
+      disabled: false
     });
   });
 
@@ -117,7 +139,7 @@ describe('writePlaygroundParams', () => {
       exampleSlug: 'list-users'
     });
     expect(next.get(PARAM_EXAMPLE)).toBe('list-users');
-    expect(readPlaygroundParams(next)).toMatchObject({ requestSlug: 'users/get', exampleSlug: 'list-users' });
+    expect(readPlaygroundParams(next, false)).toMatchObject({ requestSlug: 'users/get', exampleSlug: 'list-users' });
   });
 
   it('drops pgEx when the request slug is cleared', () => {
@@ -134,7 +156,7 @@ describe('writePlaygroundParams', () => {
   });
 
   it('defaults the dock when the param is missing (no persistence)', () => {
-    expect(readPlaygroundParams(new URLSearchParams('pg=1')).dock).toBe(DEFAULT_DOCK);
+    expect(readPlaygroundParams(new URLSearchParams('pg=1'), false).dock).toBe(DEFAULT_DOCK);
   });
 });
 

@@ -68,4 +68,17 @@ export const StyledWrapper = styled.div`
       cursor: not-allowed;
     }
   }
+
+  button.send.cancel {
+    background-color: transparent;
+    color: var(--oc-brand);
+
+    &:hover:not(:disabled) {
+      opacity: 1;
+      background-color: color-mix(in srgb, var(--oc-button2-color-primary-bg) 5%, transparent);
+    }
+    &:active:not(:disabled) {
+      background-color: color-mix(in srgb, var(--oc-button2-color-primary-bg) 10%, transparent);
+    }
+  }
 `;

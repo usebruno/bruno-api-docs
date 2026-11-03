@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { Folder } from '@opencollection/types/collection/item';
+import type { Folder, ScriptFile } from '@opencollection/types/collection/item';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectHydratedCollection,
@@ -19,13 +19,14 @@ import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTre
 import { useNavModel } from '@/routing/hooks';
 import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
 import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
-import { isFolder } from '@/utils/schemaHelpers';
+import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
 import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
 import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
 import FolderSettingsView from '../Content/Views/FolderSettingsView/FolderSettingsView';
 import EnvironmentsView from '../Content/Views/EnvironmentsView/EnvironmentsView';
 import CollectionSettingsView from '../Content/Views/CollectionSettingsView/CollectionSettingsView';
 import ExampleView from '../Content/Views/ExampleView/ExampleView';
+import ScriptFileView from '../Content/Views/ScriptFileView/ScriptFileView';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 import type { DockMode } from '@/utils/playgroundDock';
 import {
@@ -200,6 +201,9 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
       if (example) {
         return <ExampleView request={selectedItem as HttpRequest} example={example} orientation={orientation} />;
       }
+    }
+    if (viewMode === 'playground' && selectedItem && isScriptFile(selectedItem)) {
+      return <ScriptFileView key={getItemUuid(selectedItem)} item={selectedItem as ScriptFile} />;
     }
     if ((viewMode === 'playground' || viewMode === 'example') && selectedItem && !isFolder(selectedItem) && collection) {
       return (

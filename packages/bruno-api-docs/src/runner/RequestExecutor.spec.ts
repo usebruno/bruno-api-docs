@@ -157,6 +157,48 @@ describe('RequestExecutor', () => {
     });
   });
 
+  describe('cancel', () => {
+    const hangingFetch = () =>
+      vi.fn((_url: string, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          if (init.signal?.aborted) reject(init.signal.reason);
+          init.signal?.addEventListener('abort', () => reject(init.signal?.reason));
+        }));
+    const request = { type: 'http', http: { method: 'GET', url: 'https://api.example.com/slow' } };
+
+    it('reports a request cancelled through the caller signal as cancelled', async () => {
+      vi.stubGlobal('fetch', hangingFetch());
+      const controller = new AbortController();
+
+      const pending = new RequestExecutor().executeRequest(request, { timeout: 30000, signal: controller.signal });
+      controller.abort();
+
+      expect((await pending).errorType).toBe('cancelled');
+    });
+
+    it('still reports a timeout when a cancel signal is passed but never fired', async () => {
+      vi.stubGlobal('fetch', hangingFetch());
+
+      const result = await new RequestExecutor().executeRequest(request, {
+        timeout: 10,
+        signal: new AbortController().signal
+      });
+
+      expect(result.errorType).toBe('timeout');
+    });
+
+    it('reports a timeout when the engine rejects it with an AbortError and the caller did not cancel', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new DOMException('The operation was aborted', 'AbortError')));
+
+      const result = await new RequestExecutor().executeRequest(request, {
+        timeout: 30000,
+        signal: new AbortController().signal
+      });
+
+      expect(result.errorType).toBe('timeout');
+    });
+  });
+
   describe('disableParsingResponseJson', () => {
     const runJson = async (
       request: Parameters<RequestExecutor['executeRequest']>[0] & { __brunoDisableParsingResponseJson?: boolean }
@@ -237,6 +279,25 @@ describe('RequestExecutor digest auth', () => {
     expect(responseMatch).not.toBeNull();
     const expected = md5(`${md5('user:digest-lab:pass')}:abc123def:00000001:${cnonceMatch![1]}:auth:${md5('GET:/data?x=1')}`);
     expect(responseMatch![1]).toBe(expected);
+  });
+
+  it('cancels the signed retry when the caller aborts', async () => {
+    const controller = new AbortController();
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(response(401, { 'www-authenticate': CHALLENGE }))
+      .mockImplementationOnce((_url: string, init: RequestInit) => new Promise((_resolve, reject) => {
+        init.signal?.addEventListener('abort', () => reject(init.signal?.reason));
+        controller.abort();
+      }));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const result = await new RequestExecutor().executeRequest(
+      digestRequest({ type: 'digest', username: 'user', password: 'pass' }),
+      { signal: controller.signal }
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.errorType).toBe('cancelled');
   });
 
   it('sends both digest legs with credentials omitted', async () => {

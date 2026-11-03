@@ -1,11 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   extractTests,
   extractTestNames,
   collectTests,
   collectRawTestScripts,
   findItemByUuid,
-  getAncestorsByUuid
+  getAncestorsByUuid,
+  hydrateWithUUIDs
 } from './fileUtils';
 
 describe('extractTestNames', () => {
@@ -117,5 +118,25 @@ describe('itemTree', () => {
     expect(getAncestorsByUuid(collection, 'r2').map((f: any) => f.info.name)).toEqual(['Auth', 'Sub']);
     expect(getAncestorsByUuid(collection, 'r1').map((f: any) => f.info.name)).toEqual(['Auth']);
     expect(getAncestorsByUuid(collection, 'r3')).toEqual([]);
+  });
+});
+
+describe('hydrateWithUUIDs', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('works without crypto.randomUUID, as on a plain http origin', () => {
+    vi.stubGlobal('crypto', {});
+    const hydrated: any = hydrateWithUUIDs({
+      items: [
+        { info: { type: 'folder', name: 'F' }, items: [{ info: { type: 'http', name: 'A' } }] },
+        { uuid: 'kept', info: { type: 'http', name: 'B' } }
+      ]
+    } as any);
+
+    const [folder, request] = hydrated.items;
+    expect(folder.uuid).toEqual(expect.any(String));
+    expect(folder.items[0].uuid).toEqual(expect.any(String));
+    expect(folder.uuid).not.toBe(folder.items[0].uuid);
+    expect(request.uuid).toBe('kept');
   });
 });

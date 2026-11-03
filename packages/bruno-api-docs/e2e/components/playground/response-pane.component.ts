@@ -11,6 +11,11 @@ import type { ResponseBodyFormat } from '../../../src/utils/response';
 export class ResponsePaneComponent extends BaseComponent {
   readonly bodyEditor = new CodeEditorComponent(this.page, 'response-body-editor');
   readonly sendButton = this.page.getByTestId('query-bar-send');
+  readonly queryBarCancelButton = this.page.getByTestId('query-bar-cancel');
+  readonly loadingView = this.page.getByTestId('response-loading');
+  readonly stopwatch = this.loadingView.getByTestId('response-stopwatch');
+  readonly loadingText = this.loadingView.getByTestId('response-loading-text');
+  readonly cancelButton = this.loadingView.getByTestId('response-cancel-request');
   readonly status = this.page.getByTestId('response-status');
   readonly bodyPanel = this.page.getByTestId('response-tabs-panel-response');
   readonly errorBanner = this.bodyPanel.getByTestId('error-banner');

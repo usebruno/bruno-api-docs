@@ -19,9 +19,9 @@ export interface PlaygroundUrlApi extends PlaygroundUrlState {
   setRequestExample: (requestSlug?: string | null, exampleSlug?: string | null) => void;
 }
 
-export const usePlaygroundUrlState = (): PlaygroundUrlApi => {
+export const usePlaygroundUrlState = (hidePlayground = false): PlaygroundUrlApi => {
   const [params, setParams] = useSearchParams();
-  const state = readPlaygroundParams(params);
+  const state = readPlaygroundParams(params, hidePlayground);
 
   const openPlayground = useCallback(
     (requestSlug?: string | null) => {
@@ -80,5 +80,12 @@ export const usePlaygroundUrlState = (): PlaygroundUrlApi => {
     [setParams]
   );
 
-  return { ...state, openPlayground, closePlayground, setDock, setRequestSlug, setRequestExample };
+  return {
+    ...state,
+    openPlayground,
+    closePlayground,
+    setDock,
+    setRequestSlug,
+    setRequestExample
+  };
 };

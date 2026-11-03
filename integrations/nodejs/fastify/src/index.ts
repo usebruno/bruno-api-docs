@@ -19,10 +19,8 @@ const send = (reply: FastifyReply, response: HttpResponse): FastifyReply => {
 };
 
 /**
- * `app.register(apiDocs, { collectionPath: './api-collection', prefix: '/docs' })`. The mount is
- * Fastify's own `prefix`, so there is no `mountPath`. Deliberately not wrapped in `fastify-plugin`:
- * staying encapsulated is what keeps the 405 off the host's routes and lets an adopter put auth in
- * front with `child.addHook('onRequest', ...)`.
+ * Deliberately not wrapped in `fastify-plugin`: staying encapsulated is what keeps the 405 off the
+ * host's routes and lets an adopter put auth in front with `child.addHook('onRequest', ...)`.
  */
 export const apiDocs: FastifyPluginAsync<ApiDocsOptions> = async (fastify, options) => {
   // Fastify hands its own register options (prefix, logLevel, ...) to the plugin with ours

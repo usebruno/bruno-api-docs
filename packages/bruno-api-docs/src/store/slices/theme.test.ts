@@ -1,11 +1,7 @@
 import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
-import reducer, {
-  setTheme,
-  toggleTheme,
-  readPersistedMode,
-  persistThemeMode,
-  THEME_STORAGE_KEY
-} from './theme';
+import reducer, { setTheme, setThemeMode, selectTheme } from './theme';
+import { THEME_STORAGE_KEY } from '@/constants/theme';
+import type { RootState } from '@/store/store';
 
 beforeAll(() => {
   let store: Record<string, string> = {};
@@ -20,42 +16,30 @@ beforeAll(() => {
 describe('themeSlice', () => {
   beforeEach(() => localStorage.clear());
 
-  it('defaults to light when nothing persisted', () => {
-    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ mode: 'light' });
+  it('defaults to the default variant following the system mode', () => {
+    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ variant: 'default', mode: 'system' });
   });
 
-  it('setTheme sets the mode (pure, no side effects)', () => {
-    expect(reducer({ mode: 'light' }, setTheme('dark')).mode).toBe('dark');
-    // reducer must not touch localStorage
+  it('does not read localStorage for its fallback initial state', () => {
+    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify({ variant: 'default', mode: 'dark' }));
+    expect(reducer(undefined, { type: '@@INIT' })).toEqual({ variant: 'default', mode: 'system' });
+  });
+
+  it('setTheme replaces the whole state (pure, no side effects)', () => {
+    const next = reducer({ variant: 'default', mode: 'light' }, setTheme({ variant: 'backstage', mode: 'dark' }));
+    expect(next).toEqual({ variant: 'backstage', mode: 'dark' });
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBeNull();
   });
 
-  it('toggle flips mode', () => {
-    expect(reducer({ mode: 'light' }, toggleTheme()).mode).toBe('dark');
-    expect(reducer({ mode: 'dark' }, toggleTheme()).mode).toBe('light');
+  it('setThemeMode changes the mode and keeps the variant', () => {
+    expect(reducer({ variant: 'backstage', mode: 'light' }, setThemeMode('dark')))
+      .toEqual({ variant: 'backstage', mode: 'dark' });
+    expect(reducer({ variant: 'default', mode: 'dark' }, setThemeMode('system')))
+      .toEqual({ variant: 'default', mode: 'system' });
   });
 
-  it('persistThemeMode writes the mode to localStorage', () => {
-    persistThemeMode('dark');
-    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe('dark');
-  });
-
-  it('readPersistedMode returns the explicitly stored value', () => {
-    localStorage.setItem(THEME_STORAGE_KEY, 'dark');
-    expect(readPersistedMode()).toBe('dark');
-    localStorage.setItem(THEME_STORAGE_KEY, 'light');
-    expect(readPersistedMode()).toBe('light');
-  });
-
-  it('falls back to the OS preference when nothing is persisted', () => {
-    // No window/matchMedia (node) -> default light.
-    expect(readPersistedMode()).toBe('light');
-
-    // OS prefers dark -> dark.
-    vi.stubGlobal('window', { matchMedia: (q: string) => ({ matches: q.includes('dark'), media: q }) });
-    expect(readPersistedMode()).toBe('dark');
-
-    // Restore (leave the localStorage stub from beforeAll intact).
-    vi.stubGlobal('window', undefined);
+  it('selectTheme exposes the theme slice', () => {
+    const state = { theme: { variant: 'backstage', mode: 'dark' } } as unknown as RootState;
+    expect(selectTheme(state)).toEqual({ variant: 'backstage', mode: 'dark' });
   });
 });

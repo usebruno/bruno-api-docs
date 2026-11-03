@@ -559,7 +559,7 @@ export const scriptsArrayToObject = (scripts: Scripts | null | undefined): Scrip
   const result: ScriptsObject = {};
 
   // Map new type names to old property names for UI compatibility
-  const typeMap: Record<ScriptType, keyof ScriptsObject> = {
+  const typeMap: Partial<Record<ScriptType, keyof ScriptsObject>> = {
     'before-request': 'preRequest',
     'after-response': 'postResponse',
     'tests': 'tests',
@@ -588,14 +588,14 @@ export const getScriptByType = (scripts: Scripts | null | undefined, type: Scrip
   }
 
   // Handle old object format
-  const typeMap: Record<ScriptType, string> = {
+  const typeMap: Partial<Record<ScriptType, string>> = {
     'before-request': 'preRequest',
     'after-response': 'postResponse',
     'tests': 'tests',
     'hooks': 'hooks'
   };
 
-  return (scripts as any)[typeMap[type]];
+  return typeMap[type] ? (scripts as any)[typeMap[type]] : undefined;
 };
 
 /**

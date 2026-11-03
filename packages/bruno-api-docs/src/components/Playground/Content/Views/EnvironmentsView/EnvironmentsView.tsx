@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import type { Variable, SecretProviderType } from '@opencollection/types/common/variables';
+import type { Variable } from '@opencollection/types/common/variables';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import KeyValueTable from '@/components/KeyValueTable/KeyValueTable';
 import Tabs from '@/ui/Tabs/Tabs';
@@ -14,6 +14,7 @@ import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeCo
 import { GlobeIcon } from '@/assets/icons';
 import { useAppDispatch } from '@/store/hooks';
 import { cx } from '@/utils/cx';
+import { externalSecretPointer } from '@/constants';
 import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
 import { countEnabled } from '@/utils/schemaHelpers';
 import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@/utils/variableResolution';
@@ -26,14 +27,6 @@ const ENV_TABS = [
 ] as const;
 
 type EnvTabId = (typeof ENV_TABS)[number]['id'];
-
-const SECRET_POINTER_FIELD: Record<SecretProviderType | 'gcp-secrets-manager', 'path' | 'secretName' | 'vaultName' | 'projectId'> = {
-  'hashicorp-vault-cloud': 'path',
-  'hashicorp-vault-server': 'path',
-  'aws-secrets-manager': 'secretName',
-  'azure-key-vault': 'vaultName',
-  'gcp-secrets-manager': 'projectId'
-};
 
 interface TabPanelProps {
   isEmpty: boolean;
@@ -62,8 +55,7 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
   const plainRows = allVariables.filter((v) => !isSecretVariable(v)).map(envVariableToRow);
   const secretRows = allVariables.filter((v) => isSecretVariable(v)).map(envVariableToRow);
 
-  const secretProviderType = selectedEnvironment?.externalSecrets?.type as SecretProviderType | undefined;
-  const secretPointerField = (secretProviderType && SECRET_POINTER_FIELD[secretProviderType]) || 'secretName';
+  const secretPointerField = externalSecretPointer(selectedEnvironment?.externalSecrets?.type);
 
   // Same predicate the resolver uses, so the checkbox and the request agree on
   // which entries are live.

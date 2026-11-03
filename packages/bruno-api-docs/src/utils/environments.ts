@@ -1,9 +1,9 @@
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable, SecretVariable, VariableValueType } from '@opencollection/types/common/variables';
-import { MANAGER_LABELS } from '@/constants';
+import { MANAGER_LABELS, externalSecretPointer } from '@/constants';
 import { getDescription, getVariableTypeLabel } from './request';
 import { descriptionText, resolveDescription } from './description';
-import { isSecretVariable, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
+import { isSecretVariable, isExternalSecretActive, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
 import { reconcileScriptVariables } from './scriptVariables';
 import type { JsonValue } from '@/runner/utils/variable-interpolator';
@@ -75,7 +75,17 @@ export const envRowToVariable = (row: EnvVarRow): Variable => {
 
 interface ExternalSecretsConfig {
   type?: string;
-  variables?: { name?: string; secretName?: string; enabled?: boolean; type?: VariableValueType }[];
+  variables?: {
+    name?: string;
+    enabled?: boolean;
+    disabled?: boolean;
+    type?: VariableValueType;
+    path?: string;
+    secretName?: string;
+    vaultName?: string;
+    projectId?: string;
+    secretReference?: string;
+  }[];
 }
 
 /**
@@ -138,9 +148,9 @@ const getExternalSecrets = (environment: Environment): EnvironmentExternalSecret
     .filter((variable) => variable && variable.name)
     .map((variable) => ({
       name: variable.name ?? '',
-      secretName: variable.secretName ?? '',
+      secretName: variable[externalSecretPointer(config?.type)] ?? '',
       dataType: variable.type ?? '',
-      disabled: variable.enabled === false
+      disabled: !isExternalSecretActive(variable)
     }));
 
   if (!variables.length) return null;

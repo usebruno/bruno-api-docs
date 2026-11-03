@@ -58,6 +58,8 @@ describe('SidebarNavLink', () => {
   it('renders a JS badge in the method column for script rows, label stays default font', () => {
     const html = renderToStaticMarkup(<SidebarNavLink label="setup.js" script testId="sidebar-item" />);
     expect(html).toContain('navlink-method');
+    expect(html).toContain('navlink-script');
+    expect(html).not.toMatch(/<span class="[^"]*navlink-script[^"]*"[^>]*style=/);
     expect(html).toContain('data-testid="sidebar-item-method"');
     expect(html).toContain('>JS<');
     expect(html).not.toContain('navlink-label mono');

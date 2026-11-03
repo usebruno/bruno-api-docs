@@ -179,7 +179,7 @@ const AppShell: React.FC<AppShellProps> = ({ logo, testId = 'app-shell' }) => {
                 <ChevronRightIcon />
               </IconButton>
             )}
-            <main className="appshell-content" ref={contentRef}>
+            <main className="appshell-content" ref={contentRef} data-testid={`${testId}-content`}>
               <PageRouter onOpenPlayground={handleOpenPlayground} />
             </main>
           </div>

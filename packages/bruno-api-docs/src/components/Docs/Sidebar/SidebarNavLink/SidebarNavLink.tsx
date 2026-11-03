@@ -45,7 +45,7 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
       {getShortMethod(method)}
     </span>
   ) : script ? (
-    <span className="navlink-leading navlink-method" data-testid={partTestId('method')} style={{ color: 'var(--oc-colors-accent)' }}>
+    <span className="navlink-leading navlink-method navlink-script" data-testid={partTestId('method')}>
       JS
     </span>
   ) : icon ? (

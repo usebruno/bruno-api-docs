@@ -1,15 +1,19 @@
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from './base.component';
 
 const exactText = (value: string) => new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 
 export class SidebarComponent extends BaseComponent {
-  readonly items = this.page.getByTestId('sidebar-item');
-  readonly active = this.items.and(this.page.locator('.active'));
+  constructor(page: Page, root: Locator = page.getByTestId('sidebar')) {
+    super(page, root);
+  }
+
+  readonly items = this.root.getByTestId('sidebar-item');
+  readonly active = this.items.and(this.root.locator('.active'));
   readonly labels = this.items.getByTestId('sidebar-item-label');
   readonly inline = this.page.getByTestId('app-sidebar');
-  readonly overview = this.page.getByTestId('sidebar-overview');
-  readonly environments = this.page.getByTestId('sidebar-environments');
+  readonly overview = this.root.getByTestId('sidebar-overview');
+  readonly environments = this.root.getByTestId('sidebar-environments');
   readonly collapseButton = this.page.getByTestId('sidebar-collapse');
   readonly expandButton = this.page.getByTestId('sidebar-expand');
   readonly resizer = this.page.getByTestId('sidebar-resizer');
@@ -24,11 +28,15 @@ export class SidebarComponent extends BaseComponent {
   }
 
   itemBySlug(slug: string): Locator {
-    return this.items.and(this.page.locator(`[data-slug="${slug}"]`));
+    return this.items.and(this.root.locator(`[data-slug="${slug}"]`));
   }
 
   methodBadge(name: string): Locator {
     return this.item(name).getByTestId('sidebar-item-method');
+  }
+
+  itemLabel(name: string): Locator {
+    return this.item(name).getByTestId('sidebar-item-label');
   }
 
   /** Folder arrow. Named from its accessible label, which flips between Expand and Collapse. */
@@ -45,7 +53,7 @@ export class SidebarComponent extends BaseComponent {
   }
 
   exampleRow(exampleName: string): Locator {
-    return this.page.getByTestId('sidebar-example').filter({
+    return this.root.getByTestId('sidebar-example').filter({
       has: this.page.getByTestId('sidebar-example-label').filter({ hasText: exactText(exampleName) })
     });
   }

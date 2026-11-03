@@ -46,15 +46,15 @@ test.describe('sidebar - desktop (inline, collapsible)', () => {
     await expect(sidebar.collapseButton).toHaveCSS('opacity', '1');
   });
 
-  test('collapses the whole panel and re-opens it', async ({ page, sidebar, overviewPage }) => {
+  test('collapses the whole panel and re-opens it', async ({ page, sidebar, appShell }) => {
     await page.goto(FOLDERS);
-    const before = await overviewPage.main.boundingBox();
+    const before = await appShell.content.boundingBox();
 
     await sidebar.collapse();
     await expect(sidebar.inline).toHaveCount(0);
     await expect(sidebar.expandButton).toBeVisible();
 
-    const after = await overviewPage.main.boundingBox();
+    const after = await appShell.content.boundingBox();
     expect(after!.x).toBeLessThan(before!.x);
     expect(after!.width).toBeGreaterThan(before!.width);
 
@@ -140,9 +140,9 @@ test.describe('sidebar - desktop (inline, collapsible)', () => {
     const longRow = await sidebar.item(longName).boundingBox();
     expect(longRow!.x + longRow!.width).toBeLessThanOrEqual(sidebarBox!.x + sidebarBox!.width + 1);
 
-    const label = sidebar.item(longName).getByTestId('sidebar-item-label');
-    const truncated = await label.evaluate((el) => el.scrollWidth > el.clientWidth);
-    expect(truncated).toBe(true);
+    const longLabel = sidebar.itemLabel(longName);
+    expect(await sidebar.isContentWiderThanBox(longLabel)).toBe(true);
+    await expect(longLabel).toHaveCSS('text-overflow', 'ellipsis');
   });
 
   test('expands ancestor folders when a nested request is opened from search', async ({

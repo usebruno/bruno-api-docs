@@ -17,6 +17,7 @@ import { CollectionSettingsComponent } from '../components/collection-settings/c
 import { ThemeToggleComponent } from '../components/layout/theme-toggle.component';
 import { PageHeaderComponent } from '../components/layout/page-header.component';
 import { PrevNextComponent } from '../components/layout/prev-next.component';
+import { AppShellComponent } from '../components/layout/app-shell.component';
 import { OpenInBrunoModalComponent } from '../components/layout/open-in-bruno-modal.component';
 import { SearchComponent } from '../components/search/search.component';
 import { EnvSwitcherComponent } from '../components/layout/env-switcher.component';
@@ -39,6 +40,7 @@ type Fixtures = {
   collectionSettings: CollectionSettingsComponent;
   pageHeader: PageHeaderComponent;
   prevNext: PrevNextComponent;
+  appShell: AppShellComponent;
   openInBrunoModal: OpenInBrunoModalComponent;
   envSwitcher: EnvSwitcherComponent;
   themeToggle: ThemeToggleComponent;
@@ -81,6 +83,9 @@ export const test = base.extend<Fixtures>({
   },
   prevNext: async ({ page }, use) => {
     await use(new PrevNextComponent(page));
+  },
+  appShell: async ({ page }, use) => {
+    await use(new AppShellComponent(page));
   },
   openInBrunoModal: async ({ page }, use) => {
     await use(new OpenInBrunoModalComponent(page));

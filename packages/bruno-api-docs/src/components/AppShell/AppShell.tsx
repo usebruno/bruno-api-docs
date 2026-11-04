@@ -194,8 +194,8 @@ const AppShell: React.FC<AppShellProps> = ({
                 <ChevronRightIcon />
               </IconButton>
             )}
-            <main className="appshell-content" ref={contentRef}>
-              <PageRouter onOpenPlayground={playgroundDisabled ? undefined : handleOpenPlayground} />
+            <main className="appshell-content" ref={contentRef} data-testid={`${testId}-content`}>
+              <PageRouter onOpenPlayground={playgroundOpenDisabled ? undefined : handleOpenPlayground} />
             </main>
           </div>
         </div>

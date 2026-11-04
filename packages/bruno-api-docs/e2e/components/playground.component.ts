@@ -8,6 +8,7 @@ import { PlaygroundVariableComponent } from './playground/playground-variable.co
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import { CodeSnippetComponent } from './request/code-snippet.component';
 import type { DockMode } from '../../src/utils/playgroundDock';
+import { SidebarComponent } from './sidebar.component';
 
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);
@@ -33,6 +34,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly runner = this.page.getByTestId('playground-runner');
   readonly loadError = this.page.getByTestId('playground-load-error');
   readonly sidebarPanel = this.page.getByTestId('playground-sidebar-panel');
+  readonly sidebarTree = new SidebarComponent(this.page, this.sidebarPanel);
   readonly sidebarResizer = this.page.getByTestId('playground-sidebar-resizer');
   readonly sidebarBackdrop = this.page.getByTestId('playground-sidebar-backdrop');
   readonly collectionNode = this.page.getByTestId('sidebar-collection-root');
@@ -84,6 +86,10 @@ export class PlaygroundComponent extends BaseComponent {
 
   sidebarItem(name: string): Locator {
     return this.treeItems.filter({ hasText: name }).first();
+  }
+
+  sidebarMethodBadge(name: string): Locator {
+    return this.sidebarTree.methodBadge(name);
   }
 
   async openSidebarItem(name: string): Promise<void> {

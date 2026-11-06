@@ -79,8 +79,8 @@ test.describe('playground docks (desktop)', () => {
     await requestPage.urlBar.tryButton.click();
     await expect(playground.view).toContainText('Get Customers');
 
-    // Leave it: open the Environments view via the gear.
-    await playground.gear.click();
+    // Leave it: open the Environments view via Configure.
+    await playground.openEnvironments();
     await expect(playground.view).toContainText('Environments');
 
     // Close, then reopen the SAME request in-session (no reload) via Try.
@@ -94,13 +94,12 @@ test.describe('playground docks (desktop)', () => {
     await expect(playground.view).not.toContainText('Environments');
   });
 
-  test('sidebar shows the collection node, env switcher, gear and tree', async ({ page, playground }) => {
+  test('sidebar shows the collection node and tree, env switcher sits in the header', async ({ page, playground }) => {
     await page.goto(openAt('bottom'));
     await expect(playground.sidebarPanel).toBeVisible();
     await expect(playground.collectionNode).toBeVisible();
-    await expect(playground.envSwitcher.trigger).toBeVisible();
-    await expect(playground.gear).toBeVisible();
     await expect(playground.treeItems.first()).toBeVisible();
+    await expect(playground.header.getByTestId('playground-env-switcher')).toBeVisible();
   });
 
   test('header toggle hides and restores the playground sidebar', async ({ page, playground }) => {
@@ -115,13 +114,13 @@ test.describe('playground docks (desktop)', () => {
     await expect(playground.sidebarToggle).toHaveAttribute('aria-pressed', 'true');
   });
 
-  test('clicking a request in the sidebar loads it, gear opens environments', async ({ page, playground }) => {
+  test('clicking a request in the sidebar loads it, Configure opens environments', async ({ page, playground }) => {
     await page.goto(openAt('bottom'));
     await playground.treeItems.filter({ hasText: 'get users' }).first().click();
     await expect(page).toHaveURL(/pgReq=/);
     await expect(playground.view).toContainText('get users');
 
-    await playground.gear.click();
+    await playground.openEnvironments();
     await expect(playground.view).toContainText('Environments');
   });
 
@@ -269,9 +268,20 @@ test.describe('playground docks (desktop)', () => {
     await expect(playground.view).toBeVisible();
   });
 
+  test('switching environments in the header while on Configure opens that environment', async ({ page, playground }) => {
+    await page.goto(openAt('bottom'));
+    await playground.envSwitcher.selectEnvironment('Local');
+    await playground.openEnvironments();
+    await expect(page.getByTestId('env-pill-Local')).toHaveClass(/active/);
+
+    await playground.envSwitcher.selectEnvironment('Prod');
+    await expect(page.getByTestId('env-pill-Prod')).toHaveClass(/active/);
+    await expect(page.getByTestId('env-pill-Local')).not.toHaveClass(/active/);
+  });
+
   test('opening environments persists in the url and survives reload', async ({ page, playground }) => {
     await page.goto(openAt('bottom', 'billing/customers/get-all-customers'));
-    await playground.gear.click();
+    await playground.openEnvironments();
     await expect(page).toHaveURL(/pgReq=(~|%7E)environments/);
     await page.reload();
     await expect(page).toHaveURL(/pgReq=(~|%7E)environments/);

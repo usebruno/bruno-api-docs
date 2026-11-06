@@ -9,16 +9,14 @@ test.describe('Environment switcher with no environments', () => {
     await expect(envSwitcher.root).toHaveCount(0);
   });
 
-  test('still shows its empty state in the playground sidebar', async ({ page, playground }) => {
+  test('still shows its empty state in the playground header', async ({ page, playground }) => {
     await page.goto(`${NO_ENVIRONMENTS}#/?pg=1&dock=bottom`);
-    await playground.ensureSidebarOpen();
     await expect(playground.envSwitcher.trigger).toBeVisible();
     await expect(playground.envSwitcher.trigger).toContainText('No environments');
   });
 
   test('shows plain text in the playground, with no caret and nothing to open', async ({ page, playground }) => {
     await page.goto(`${NO_ENVIRONMENTS}#/?pg=1&dock=bottom`);
-    await playground.ensureSidebarOpen();
     const { trigger } = playground.envSwitcher;
 
     await expect(trigger).toContainText('No environments');

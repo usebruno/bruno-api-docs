@@ -12,7 +12,8 @@ import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel
 import EnvVarCards from './EnvVarCards/EnvVarCards';
 import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
 import { GlobeIcon } from '@/assets/icons';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectActiveEnvName } from '@/store/slices/env';
 import { cx } from '@/utils/cx';
 import { externalSecretPointer } from '@/constants';
 import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
@@ -45,6 +46,7 @@ interface EnvironmentsViewProps {
 
 const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false }) => {
   const dispatch = useAppDispatch();
+  const activeEnvName = useAppSelector(selectActiveEnvName);
   const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
 
   const environments = (collection as any)?.environments || collection?.config?.environments || [];
@@ -99,11 +101,12 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
       }
     });
 
+  const activeIndex = environments.findIndex((environment: Environment) => environment.name === activeEnvName);
+
   useEffect(() => {
-    if (selectedEnvironmentIndex === null && environments.length > 0) {
-      setSelectedEnvironmentIndex(0);
-    }
-  }, [environments.length, selectedEnvironmentIndex]);
+    if (activeIndex >= 0) setSelectedEnvironmentIndex(activeIndex);
+    else setSelectedEnvironmentIndex((current) => current ?? (environments.length > 0 ? 0 : null));
+  }, [activeIndex, environments.length]);
 
   useEffect(() => {
     if (selectedEnvironmentIndex !== null && selectedEnvironmentIndex >= environments.length) {

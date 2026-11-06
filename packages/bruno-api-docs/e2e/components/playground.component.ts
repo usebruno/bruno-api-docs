@@ -44,7 +44,6 @@ export class PlaygroundComponent extends BaseComponent {
     name: /Bruno Testbench|Collection/
   });
 
-  readonly gear = this.page.getByTestId('playground-env-settings');
   readonly view = this.page.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
@@ -130,8 +129,8 @@ export class PlaygroundComponent extends BaseComponent {
   }
 
   async openEnvironments(): Promise<void> {
-    await this.ensureSidebarOpen();
-    await this.gear.click();
+    await this.envSwitcher.open();
+    await this.envSwitcher.option('configure').click();
   }
 
   async selectDock(mode: DockMode): Promise<void> {

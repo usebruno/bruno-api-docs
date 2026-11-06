@@ -7,7 +7,7 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import { createOpenCollectionStore } from '@/store/store';
 import { setDocsCollection } from '@/store/slices/docs';
-import { setActiveEnv } from '@/store/slices/env';
+import { setActiveEnv, NO_ENVIRONMENT } from '@/store/slices/env';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import EnvSwitcher, { type EnvSwitcherProps } from './EnvSwitcher';
 
@@ -127,6 +127,14 @@ describe('EnvSwitcher hideWhenEmpty', () => {
   it('keeps the empty state by default, for the playground sidebar', () => {
     const trigger = getByTestId(render(collectionWith([])), 'env-switcher');
     expect(trigger.text).toContain('No environments');
+  });
+});
+
+describe('EnvSwitcher No environment', () => {
+  it('keeps "No environment" instead of falling back to the first environment', () => {
+    const trigger = getByTestId(render(withEnvs, (s) => s.dispatch(setActiveEnv(NO_ENVIRONMENT))), 'env-switcher');
+    expect(trigger.text).toContain('No environment');
+    expect(trigger.text).not.toContain('Dev');
   });
 });
 

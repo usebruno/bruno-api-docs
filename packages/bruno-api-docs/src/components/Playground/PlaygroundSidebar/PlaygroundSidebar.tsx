@@ -1,13 +1,9 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
 import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import IconButton from '@/ui/IconButton/IconButton';
-import { SettingsIcon } from '@/assets/icons';
 import { useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { StyledWrapper } from './StyledWrapper';
-import Tooltip from '@/ui/Tooltip/Tooltip';
 
 interface PlaygroundSidebarProps {
   collection: OpenCollectionCollection | null;
@@ -16,8 +12,6 @@ interface PlaygroundSidebarProps {
   onNavigate: (slug: string) => void;
   onToggleFolder: (uuid: string) => void;
   onExpandFolder: (uuid: string) => void;
-  onOpenEnvironments: () => void;
-  environmentsActive: boolean;
   onOpenCollection: () => void;
   collectionActive: boolean;
   testId?: string;
@@ -32,8 +26,6 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   onNavigate,
   onToggleFolder,
   onExpandFolder,
-  onOpenEnvironments,
-  environmentsActive,
   onOpenCollection,
   collectionActive,
   testId = 'playground-sidebar',
@@ -52,23 +44,6 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
 
   return (
     <StyledWrapper className={isMobileDevice ? 'mobile' : undefined} data-testid={testId}>
-      <div className="controls">
-        <EnvSwitcher testId="playground-env-switcher" />
-        <Tooltip
-          content="Configure Environments"
-        >
-          <IconButton
-            className={`env-settings${environmentsActive ? ' active' : ''}`}
-            label="Environment settings"
-            aria-label="Environment settings"
-            data-testid="playground-env-settings"
-            onClick={onOpenEnvironments}
-          >
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
-      </div>
-
       <div className="tree" ref={treeRef}>
         {collection?.items ? (
           <SidebarTree

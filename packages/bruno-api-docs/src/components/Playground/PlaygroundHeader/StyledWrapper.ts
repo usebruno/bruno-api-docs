@@ -18,6 +18,25 @@ export const StyledWrapper = styled.div`
     gap: 8px;
   }
 
+  .header-left,
+  .header-right > * {
+    flex-shrink: 0;
+  }
+
+  .header-right {
+    min-width: 0;
+  }
+
+  .header-right > [data-testid='playground-env-switcher-root'] {
+    flex-shrink: 1;
+    min-width: 87px;
+  }
+
+  .header-right .env-switcher-trigger {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .header-brand {
     display: inline-flex;
     align-items: center;
@@ -33,6 +52,7 @@ export const StyledWrapper = styled.div`
     font-size: 14px;
     font-weight: 600;
     color: var(--text-primary);
+    white-space: nowrap;
   }
 
   /* Muted grey for the sidebar-toggle + collapse + close controls (Figma:

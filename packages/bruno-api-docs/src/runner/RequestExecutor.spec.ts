@@ -79,6 +79,17 @@ describe('RequestExecutor', () => {
       expect(result.error).toContain('{{host}}');
     });
 
+    it('does not send a request with a {{variable}} left in the host', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const result = await send('https://{{host}}/api/users');
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(result.errorType).toBe('unresolved-variable');
+      expect(result.error).toContain('{{host}}');
+    });
+
     it('still sends a request with an unresolved variable later in the URL', async () => {
       const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 404 }));
       global.fetch = fetchMock as unknown as typeof fetch;

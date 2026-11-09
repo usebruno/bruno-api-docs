@@ -136,7 +136,7 @@ export class PlaygroundComponent extends BaseComponent {
 
   async openEnvironments(): Promise<void> {
     await this.envSwitcher.open();
-    await this.envSwitcher.option('configure').click();
+    await this.envSwitcher.option('~configure').click();
   }
 
   async selectDock(mode: DockMode): Promise<void> {

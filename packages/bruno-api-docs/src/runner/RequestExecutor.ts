@@ -78,7 +78,7 @@ export class RequestExecutor {
     );
 
     try {
-      const unresolved = requestUrl.match(/^\{\{([^}]+)\}\}/);
+      const unresolved = requestUrl.match(/^(?:[a-z][a-z0-9+.-]*:\/\/)?[^/?#]*?\{\{([^}]+)\}\}/i);
       if (unresolved) throw new UnresolvedVariableError(unresolved[1]);
 
       const fetchOptions = await this.buildFetchOptions(request, timeoutMs, options.signal);

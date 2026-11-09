@@ -14,9 +14,9 @@ test.describe('Environment switcher with no environments', () => {
     await expect(playground.envSwitcher.trigger).toContainText('No environment');
 
     await playground.envSwitcher.open();
-    await expect(playground.envSwitcher.option('no-environment')).toBeVisible();
+    await expect(playground.envSwitcher.option('~no-environment')).toBeVisible();
 
-    await playground.envSwitcher.option('configure').click();
+    await playground.envSwitcher.option('~configure').click();
     await expect(playground.view.getByText('No environments found in this collection')).toBeVisible();
   });
 });

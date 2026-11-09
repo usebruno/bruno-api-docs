@@ -17,8 +17,7 @@ export interface EnvState {
 
 export const ENV_STORAGE_KEY = 'oc-docs.env';
 
-// To check if the user has picked No Environment.
-//  Variable info card and env switcher use this to show the "no environment" state.
+// "No environment" picked by the user. null means nothing picked yet (the first environment is used).
 export const NO_ENVIRONMENT = '';
 
 const defaultState: EnvState = {

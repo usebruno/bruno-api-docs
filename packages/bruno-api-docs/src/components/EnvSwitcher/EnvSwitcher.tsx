@@ -77,7 +77,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
 
   const items: MenuDropdownItem[] = [
     {
-      id: 'no-environment',
+      id: '~no-environment',
       label: 'No environment',
       className: 'dropdown-item-muted',
       onClick: () => dispatch(setActiveEnv(NO_ENVIRONMENT))
@@ -85,9 +85,9 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
     ...environmentItems,
     ...(onConfigure
       ? [
-          { type: 'divider' as const, id: 'configure-divider' },
+          { type: 'divider' as const, id: '~configure-divider' },
           {
-            id: 'configure',
+            id: '~configure',
             label: 'Configure',
             leftSection: IconSettings,
             className: 'dropdown-item-centered',
@@ -101,7 +101,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
     <StyledWrapper data-testid={`${testId}-root`}>
       <MenuDropdown
         items={items}
-        selectedItemId={activeEnv ? activeEnv.name : 'no-environment'}
+        selectedItemId={activeEnv ? activeEnv.name : '~no-environment'}
         showTickMark={false}
         placement="bottom-end"
         matchTriggerWidth

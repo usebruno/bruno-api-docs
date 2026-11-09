@@ -80,7 +80,7 @@ export const StyledWrapper = styled.div`
     min-width: 0;
     font-family: var(--font-mono);
     font-size: var(--oc-font-size-sm);
-    line-height: 1.125rem;
+    line-height: 1.5;
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -91,7 +91,7 @@ export const StyledWrapper = styled.div`
     flex-shrink: 0;
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-sm);
-    line-height: 1.125rem;
+    line-height: 1.5;
     color: var(--text-tertiary);
   }
 

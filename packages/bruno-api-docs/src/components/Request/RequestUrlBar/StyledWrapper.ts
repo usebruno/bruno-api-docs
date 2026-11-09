@@ -14,7 +14,7 @@ export const StyledWrapper = styled.div`
   }
   .request-url-bar-method .method-badge {
     font-size: var(--oc-font-size-sm);
-    line-height: 1.125rem;
+    line-height: 1.5;
     letter-spacing: 0.04em;
     min-width: unset;
     padding: 0;
@@ -26,7 +26,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-mono);
     font-weight: 400;
     font-size: var(--oc-font-size-sm);
-    line-height: 1.125rem;
+    line-height: 1.5;
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;

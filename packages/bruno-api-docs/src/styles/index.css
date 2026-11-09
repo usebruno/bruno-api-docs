@@ -687,7 +687,7 @@ tr.themed-row:nth-child(even) {
   font-family: var(--font-sans) !important;
   font-weight: 400 !important;
   font-size: var(--oc-font-size-sm) !important;
-  line-height: 1.125rem !important;
+  line-height: 1.5 !important;
   letter-spacing: normal !important;
 }
 

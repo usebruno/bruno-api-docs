@@ -136,7 +136,7 @@ export const Suggestions = styled.ul`
     padding: 0.25rem 0.5rem;
     border-radius: var(--oc-radius);
     color: var(--text-primary);
-    line-height: 1.25rem;
+    line-height: 1.7;
     white-space: nowrap;
     cursor: pointer;
   }

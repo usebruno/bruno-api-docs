@@ -14,11 +14,11 @@ export const StyledWrapper = styled.div`
 
   .grpc-request-url-sticky {
     position: sticky;
-    top: 1rem;
+    top: 0.75rem;
     z-index: 2;
     margin-top: 0.75rem;
     background: var(--content-bg);
-    box-shadow: 0 0 0 1rem var(--content-bg);
+    box-shadow: 0 0 0 0.75rem var(--content-bg);
   }
 
   .grpc-request-description {

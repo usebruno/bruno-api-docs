@@ -44,7 +44,7 @@ export const StyledWrapper = styled.div`
 
   .grpc-message-title {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     color: var(--text-primary);
   }

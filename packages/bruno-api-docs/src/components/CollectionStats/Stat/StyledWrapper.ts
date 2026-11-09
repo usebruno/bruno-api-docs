@@ -8,7 +8,7 @@ export const StyledWrapper = styled.div`
   .stat-value {
     font-family: var(--font-sans);
     font-weight: 700;
-    font-size: 1.25rem;
+    font-size: var(--oc-font-size-xxl);
     line-height: 1;
     letter-spacing: normal;
     color: var(--text-primary);

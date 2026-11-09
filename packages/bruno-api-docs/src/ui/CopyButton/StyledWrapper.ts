@@ -4,7 +4,7 @@ export const StyledWrapper = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.875rem;
+  font-size: var(--oc-font-size-md);
   padding: 0.3rem;
   border: 1px solid var(--border-color);
   border-radius: var(--oc-radius);

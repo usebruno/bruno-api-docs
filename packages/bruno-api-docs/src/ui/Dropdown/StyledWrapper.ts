@@ -80,7 +80,7 @@ export const StyledWrapper = styled.div`
     box-sizing: border-box;
     cursor: pointer;
     font-family: var(--font-sans);
-    font-size: 12px;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     line-height: 1.4;
     text-align: left;

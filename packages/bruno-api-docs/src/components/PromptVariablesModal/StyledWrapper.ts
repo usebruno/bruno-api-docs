@@ -8,7 +8,7 @@ export const StyledWrapper = styled(Modal)`
 
   .prompt-variables-title {
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: var(--oc-font-size-md);
     color: var(--text-primary);
   }
 
@@ -27,7 +27,7 @@ export const StyledWrapper = styled(Modal)`
   .prompt-variable-label {
     display: block;
     font-weight: 500;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     color: var(--text-primary);
   }
 
@@ -42,7 +42,7 @@ export const StyledWrapper = styled(Modal)`
     border: 1px solid var(--border-color);
     color: var(--text-primary);
     font-family: var(--font-sans);
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
 
     &::placeholder {
       color: var(--text-secondary);
@@ -71,7 +71,7 @@ export const StyledWrapper = styled(Modal)`
       border-radius: var(--oc-radius);
       font-family: var(--font-sans);
       font-weight: 500;
-      font-size: 0.8125rem;
+      font-size: var(--oc-font-size-base);
       line-height: 1;
       white-space: nowrap;
       cursor: pointer;

@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.div`
   .table-cell {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.2;
   }
 

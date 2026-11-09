@@ -10,7 +10,7 @@ export const StyledWrapper = styled.button`
   cursor: pointer;
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
   line-height: 1;
   color: var(--primary-text);
 

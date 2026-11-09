@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 
 export const StyledWrapper = styled.span`
   font-family: var(--font-mono);
-  font-size: 0.625rem;
+  font-size: var(--oc-font-size-xxs);
   font-weight: 500;
   padding: 0.125rem 0.5rem;
   border-radius: var(--oc-radius);

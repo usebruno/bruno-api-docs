@@ -13,7 +13,7 @@ export const StyledWrapper = styled.div`
     flex-shrink: 0;
   }
   .request-url-bar-method .method-badge {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     letter-spacing: 0.04em;
     min-width: unset;
@@ -25,7 +25,7 @@ export const StyledWrapper = styled.div`
     min-width: 0;
     font-family: var(--font-mono);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     color: var(--text-primary);
     overflow: hidden;

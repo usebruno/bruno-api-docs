@@ -7,7 +7,7 @@ export const StyledWrapper = styled.span`
   border-radius: var(--oc-radius);
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 0.6875rem;
+  font-size: var(--oc-font-size-xs);
   line-height: 1;
   color: var(--oc-colors-text-muted);
   background-color: var(--badge-bg);

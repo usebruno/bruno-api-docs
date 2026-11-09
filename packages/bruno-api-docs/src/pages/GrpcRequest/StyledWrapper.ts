@@ -79,7 +79,7 @@ export const StyledWrapper = styled.div`
     flex: 1;
     min-width: 0;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     color: var(--text-primary);
     overflow: hidden;
@@ -90,7 +90,7 @@ export const StyledWrapper = styled.div`
   .grpc-field-meta {
     flex-shrink: 0;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     color: var(--text-tertiary);
   }

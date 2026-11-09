@@ -28,7 +28,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-weight: 500;
     font-style: italic;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1;
     letter-spacing: normal;
     color: var(--text-secondary);
@@ -74,7 +74,7 @@ export const StyledWrapper = styled.div`
   .property-key {
     font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.2;
     letter-spacing: normal;
     color: var(--text-primary);
@@ -92,7 +92,7 @@ export const StyledWrapper = styled.div`
     min-width: 0;
     font-family: 'Fira Code', var(--font-mono);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.2;
     letter-spacing: normal;
     color: var(--text-primary);
@@ -146,7 +146,7 @@ export const StyledWrapper = styled.div`
   .property-type {
     flex-shrink: 0;
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     line-height: 1.2;
     color: var(--text-muted);
   }

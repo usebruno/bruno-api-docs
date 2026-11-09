@@ -8,7 +8,7 @@ export const StyledWrapper = styled.div`
   padding: 0.35rem 0.625rem;
 
   .preview-toggle-label {
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     color: var(--oc-text);
   }
 

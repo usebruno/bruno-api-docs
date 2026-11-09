@@ -28,7 +28,7 @@ export const StyledWrapper = styled.div`
     border: none;
     border-radius: 0.3125rem;
     font: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.15rem;
     color: var(--text-secondary);
     cursor: pointer;

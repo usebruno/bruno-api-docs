@@ -41,7 +41,7 @@ export const StyledWrapper = styled.div`
   }
 
   &.mobile .navlink-main {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
   }
 
   .sidebar-items {

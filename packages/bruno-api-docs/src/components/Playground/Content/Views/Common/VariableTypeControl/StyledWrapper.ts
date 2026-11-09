@@ -31,7 +31,7 @@ export const StyledWrapper = styled.div`
 
   .var-type-label {
     font-family: inherit;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     line-height: 1;
     letter-spacing: 0;

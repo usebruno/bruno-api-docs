@@ -7,7 +7,7 @@ export const StyledWrapper = styled.div`
   gap: 0.75rem;
   padding: 1.5rem;
   color: var(--text-secondary);
-  font-size: 0.875rem;
+  font-size: var(--oc-font-size-md);
 
   .error-title {
     margin: 0;
@@ -16,7 +16,7 @@ export const StyledWrapper = styled.div`
 
   .error-retry {
     padding: 0.375rem 0.75rem;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 600;
     color: var(--text-primary);
     background-color: var(--bg-secondary);

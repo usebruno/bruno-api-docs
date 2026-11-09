@@ -16,7 +16,7 @@ export const StyledWrapper = styled.div`
 
   .description,
   .asserts-description {
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 400;
     line-height: 1;
     letter-spacing: 0;

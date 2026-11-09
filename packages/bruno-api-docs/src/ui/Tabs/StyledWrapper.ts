@@ -27,7 +27,7 @@ export const StyledWrapper = styled.div`
     background: none;
     color: var(--oc-colors-text-subtext1);
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     line-height: 1.125rem;
     letter-spacing: 0;
@@ -68,7 +68,7 @@ export const StyledWrapper = styled.div`
     align-items: center;
     vertical-align: baseline;
     margin-left: 0.125rem;
-    font-size: 0.625rem;
+    font-size: var(--oc-font-size-xxs);
     font-weight: 500;
     line-height: 1;
     letter-spacing: 0;
@@ -92,7 +92,7 @@ export const StyledWrapper = styled.div`
       border-radius: var(--oc-radius);
       background: transparent;
       color: var(--text-muted);
-      font-size: 0.8125rem;
+      font-size: var(--oc-font-size-base);
       font-weight: 400;
       line-height: 1;
 

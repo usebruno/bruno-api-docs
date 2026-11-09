@@ -7,13 +7,13 @@ export const StyledWrapper = styled.h1`
   color: var(--text-primary);
 
   &.heading--lg {
-    font-size: 1.25rem;
+    font-size: var(--oc-font-size-xxl);
     line-height: 1;
     letter-spacing: -0.5px;
   }
 
   &.heading--md {
-    font-size: 1rem;
+    font-size: var(--oc-font-size-lg);
     line-height: 1.5rem;
     letter-spacing: 0;
   }

@@ -14,7 +14,7 @@ export const StyledWrapper = styled.div`
 
   .collection-settings-version {
     color: var(--text-tertiary);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     line-height: 1;
     letter-spacing: 0;
@@ -34,7 +34,7 @@ export const StyledWrapper = styled.div`
     }
 
     .description {
-      font-size: 0.8125rem;
+      font-size: var(--oc-font-size-base);
       font-weight: 400;
       line-height: 1;
       letter-spacing: 0;

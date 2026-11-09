@@ -40,7 +40,7 @@ export const StyledWrapper = styled.div`
   }
 
   .stopwatch {
-    font-size: 1.25rem;
+    font-size: var(--oc-font-size-xxl);
     font-weight: 500;
     color: var(--text-primary);
   }

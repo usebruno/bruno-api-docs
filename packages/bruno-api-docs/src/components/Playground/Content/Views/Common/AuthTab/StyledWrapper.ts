@@ -25,7 +25,7 @@ export const StyledWrapper = styled.div`
   .auth-empty {
     margin: 0;
     font-style: italic;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     color: var(--text-muted);
   }
 

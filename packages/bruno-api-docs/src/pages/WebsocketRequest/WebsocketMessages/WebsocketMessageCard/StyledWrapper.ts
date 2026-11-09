@@ -45,7 +45,7 @@ export const StyledWrapper = styled.div`
 
   .websocket-message-title {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     color: var(--text-primary);
   }
@@ -75,7 +75,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-weight: 500;
     font-style: italic;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1;
     color: var(--text-secondary);
   }

@@ -18,13 +18,13 @@ export const StyledWrapper = styled.div`
 
   .highlight-input .text-input {
     padding: 0 !important;
-    font-size: 0.75rem !important;
+    font-size: var(--oc-font-size-sm) !important;
     line-height: 1.125rem !important;
   }
 
   .highlight-input .highlight-input-mirror {
     padding: 0;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.125rem;
     left: 0;
     right: 0;

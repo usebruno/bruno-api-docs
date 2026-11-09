@@ -97,21 +97,11 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
       : [])
   ];
 
-  if (!hasEnvironments) {
-    return (
-      <StyledWrapper data-testid={`${testId}-root`}>
-        <span className="env-switcher-trigger env-switcher-trigger--empty" data-testid={testId}>
-          <EnvironmentLabel name="No environments" truncate />
-        </span>
-      </StyledWrapper>
-    );
-  }
-
   return (
     <StyledWrapper data-testid={`${testId}-root`}>
       <MenuDropdown
         items={items}
-        selectedItemId={isNoEnvironment ? 'no-environment' : activeEnv?.name}
+        selectedItemId={activeEnv ? activeEnv.name : 'no-environment'}
         showTickMark={false}
         placement="bottom-end"
         matchTriggerWidth

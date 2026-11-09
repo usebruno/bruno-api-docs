@@ -2,7 +2,7 @@
  * Utility functions for handling OpenCollection items
  */
 
-import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import { getItemName, isFolder } from './schemaHelpers';
 
 /**
@@ -55,6 +55,34 @@ export const findItemByUuid = (
     }
   }
   return null;
+};
+
+export const filterItems = (
+  items: OpenCollectionItem[],
+  matchedIds: Set<string>,
+  closedIds: Set<string>,
+  keepAll = false
+): OpenCollectionItem[] => {
+  const result: OpenCollectionItem[] = [];
+  for (const item of items) {
+    const uuid = getItemUuid(item);
+    const matched = keepAll || (uuid !== undefined && matchedIds.has(uuid));
+
+    if (!isFolder(item)) {
+      if (matched) result.push(item);
+      continue;
+    }
+
+    const keptChildren = filterItems((item as Folder).items ?? [], matchedIds, closedIds, matched);
+    if (matched || keptChildren.length > 0) {
+      result.push({
+        ...item,
+        items: keptChildren,
+        isCollapsed: uuid !== undefined && closedIds.has(uuid)
+      } as OpenCollectionItem);
+    }
+  }
+  return result;
 };
 
 /**

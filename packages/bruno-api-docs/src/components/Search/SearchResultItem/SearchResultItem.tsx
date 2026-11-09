@@ -33,7 +33,7 @@ const isClipped = (el: HTMLElement): boolean => el.scrollWidth > el.clientWidth 
  * field's own colour (weight is the only highlight signal). No ranges leaves
  * the text plain.
  */
-const highlightRanges = (text: string, ranges?: Array<[number, number]>): React.ReactNode => {
+export const highlightRanges = (text: string, ranges?: Array<[number, number]>): React.ReactNode => {
   if (!ranges || ranges.length === 0) return text;
   const sorted = [...ranges].sort((a, b) => a[0] - b[0]);
   const nodes: React.ReactNode[] = [];

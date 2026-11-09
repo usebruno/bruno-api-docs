@@ -195,7 +195,6 @@ export const StyledWrapper = styled.div`
   .search-empty-text {
     font-size: 0.78125rem;
     color: var(--oc-colors-text-subtext1);
-    line-height: 1.5;
     max-width: 20rem;
   }
   .search-empty-text b {

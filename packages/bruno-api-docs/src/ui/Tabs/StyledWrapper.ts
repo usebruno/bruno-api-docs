@@ -29,7 +29,6 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-sm);
     font-weight: 400;
-    line-height: 1.5;
     letter-spacing: 0;
     cursor: pointer;
     transition: color 0.15s ease;
@@ -151,7 +150,6 @@ export const StyledWrapper = styled.div`
     color: var(--oc-colors-text-subtext0);
     font-size: var(--oc-font-size-sm);
     font-weight: 400;
-    line-height: 1.5;
     transition: color 0.15s ease, border-color 0.15s ease;
   }
   &.tabs-variant-responsive .tab::after {

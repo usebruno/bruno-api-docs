@@ -16,7 +16,6 @@ export const StyledWrapper = styled.div`
   .warning-message {
     font-family: var(--font-mono);
     font-size: var(--oc-font-size-base);
-    line-height: 1.6;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     color: var(--text-primary);

@@ -22,7 +22,6 @@ export const StyledWrapper = styled.div`
   .large-response-description {
     color: var(--text-secondary);
     font-size: var(--oc-font-size-base);
-    line-height: 1.5;
   }
 
   .large-response-threshold {

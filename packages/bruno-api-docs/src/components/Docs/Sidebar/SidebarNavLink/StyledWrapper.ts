@@ -47,7 +47,6 @@ export const StyledWrapper = styled.div`
     cursor: pointer;
     text-align: left;
     font-size: var(--font-size-base);
-    line-height: 1.25;
     font-weight: inherit;
     color: inherit;
   }

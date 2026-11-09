@@ -19,7 +19,6 @@ export const StyledWrapper = styled.div`
     font-family: 'Fira Code', var(--font-mono);
     font-size: var(--oc-font-size-xxs);
     font-weight: 500;
-    line-height: 1.3;
     letter-spacing: 0;
     padding: 4px 8px;
     cursor: pointer;

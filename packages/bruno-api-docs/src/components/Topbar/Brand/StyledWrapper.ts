@@ -29,7 +29,6 @@ export const StyledWrapper = styled.div`
     display: flex;
     flex-direction: column;
     min-width: 0;
-    line-height: 1.1;
     gap: 2px;
   }
 

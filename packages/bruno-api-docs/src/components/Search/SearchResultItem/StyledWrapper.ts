@@ -82,7 +82,6 @@ export const StyledWrapper = styled.button`
     min-width: 0;
     font-size: var(--oc-font-size-base);
     font-weight: 400;
-    line-height: 1.3;
     color: var(--oc-text);
     white-space: nowrap;
     overflow: hidden;
@@ -97,7 +96,6 @@ export const StyledWrapper = styled.button`
     flex: 0 100 auto;
     min-width: 0;
     font-size: var(--oc-font-size-xs);
-    line-height: 1.3;
     color: var(--oc-colors-text-subtext1);
     white-space: nowrap;
     overflow: hidden;
@@ -106,14 +104,12 @@ export const StyledWrapper = styled.button`
 
   .search-result-count {
     font-size: var(--oc-font-size-xs);
-    line-height: 1.2;
     color: var(--oc-colors-text-subtext1);
   }
 
   .search-result-url {
     font-family: var(--font-mono);
     font-size: var(--oc-font-size-xs);
-    line-height: 1.2;
     color: var(--oc-colors-text-subtext1);
     overflow-x: clip;
     overflow-y: visible;

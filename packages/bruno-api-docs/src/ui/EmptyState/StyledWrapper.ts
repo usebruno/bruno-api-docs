@@ -28,7 +28,6 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-weight: 600;
     font-size: 0.9375rem;
-    line-height: 1.3;
     color: var(--text-primary);
   }
 
@@ -38,7 +37,6 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: var(--oc-font-size-base);
-    line-height: 1.5;
     color: var(--text-secondary);
   }
 `;

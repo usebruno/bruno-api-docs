@@ -191,7 +191,6 @@ export const StyledWrapper = styled.div`
     border: 0.0625rem solid transparent;
     padding: 0.625rem;
     font-size: var(--oc-font-size-base);
-    line-height: 1.25;
     color: var(--text-primary);
     font-family: inherit;
     white-space: nowrap;

@@ -21,7 +21,6 @@ export const StyledWrapper = styled.span`
 
   .environment-label-name {
     color: inherit;
-    line-height: 1.4;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

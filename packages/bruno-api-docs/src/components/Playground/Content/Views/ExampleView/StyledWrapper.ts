@@ -18,7 +18,6 @@ export const StyledWrapper = styled.div`
   }
   .example-view-name {
     font-size: var(--oc-font-size-md);
-    line-height: 1.4;
     font-weight: 600;
     color: var(--text-primary);
   }
@@ -29,7 +28,6 @@ export const StyledWrapper = styled.div`
   .example-view-empty {
     color: var(--text-secondary);
     font-size: var(--oc-font-size-base);
-    line-height: 1.4;
   }
   .example-view-urlbar {
     flex: 0 0 auto;
@@ -47,7 +45,6 @@ export const StyledWrapper = styled.div`
     min-width: 0;
     font-family: var(--font-mono);
     font-size: var(--oc-font-size-sm);
-    line-height: 1.5;
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;

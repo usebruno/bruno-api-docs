@@ -289,3 +289,16 @@ test.describe('Playground variables: highlight, hover card and inline edit', () 
     expect(sent[0]).toContain('k=vault-value');
   });
 });
+
+test.describe('Playground variables: undefined variable in the URL', () => {
+  test('shows "Variable not found" instead of sending when "No environment" leaves {{host}} undefined', async ({ playground, responsePane }) => {
+    await playground.open('bottom');
+    await playground.openRequest('get users');
+    await playground.envSwitcher.selectEnvironment('no-environment');
+
+    await responsePane.send();
+
+    await expect(responsePane.errorTitle).toHaveText('Variable not found');
+    await expect(responsePane.errorMessage).toContainText('{{host}} is not defined');
+  });
+});

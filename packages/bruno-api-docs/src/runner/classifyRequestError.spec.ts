@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { classifyRequestError } from './classifyRequestError';
+import { classifyRequestError, UnresolvedVariableError } from './classifyRequestError';
 
 // Helpers to build the exact error shapes the browser throws.
 const timeoutError = () => {
@@ -156,5 +156,12 @@ describe('classifyRequestError', () => {
       expect(result.type).toBe('unknown');
       expect(result.message).toBe(message);
     });
+  });
+
+  it('names the missing variable when the URL starts with an unresolved {{variable}}', () => {
+    const result = classifyRequestError(new UnresolvedVariableError('host'));
+    expect(result.type).toBe('unresolved-variable');
+    expect(result.title).toBe('Variable not found');
+    expect(result.message).toContain('{{host}} is not defined');
   });
 });

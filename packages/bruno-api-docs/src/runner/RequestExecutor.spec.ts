@@ -64,6 +64,32 @@ describe('RequestExecutor', () => {
     expect(fetchMock.mock.calls[0][0]).toBe('https://api.example.com/data?api_key=secret123');
   });
 
+  describe('unresolved variable', () => {
+    const send = (url: string) =>
+      new RequestExecutor().executeRequest({ name: 'r', type: 'http', http: { method: 'GET', url } } as HttpRequest as InternalHttpRequest);
+
+    it('does not send a request whose URL still starts with a {{variable}}', async () => {
+      const fetchMock = vi.fn();
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const result = await send('{{host}}/api/users');
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(result.errorType).toBe('unresolved-variable');
+      expect(result.error).toContain('{{host}}');
+    });
+
+    it('still sends a request with an unresolved variable later in the URL', async () => {
+      const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 404 }));
+      global.fetch = fetchMock as unknown as typeof fetch;
+
+      const result = await send('https://api.example.com/users/{{id}}');
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(result.status).toBe(404);
+    });
+  });
+
   describe('request body', () => {
     const sendWithBody = async (method: string) => {
       const fetchMock = vi.fn().mockResolvedValue({

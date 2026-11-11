@@ -9,6 +9,11 @@ import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
 import MenuDropdown, { type MenuDropdownItem } from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 
+const NO_ENVIRONMENT_LABEL = 'No Environment';
+const NO_ENVIRONMENT_OPTION = { name: NO_ENVIRONMENT } as Environment;
+
+const menuItemId = (environment: Environment) => environment.name || '~no-environment';
+
 export interface EnvSwitcherProps {
   hideWhenEmpty?: boolean;
   onConfigure?: () => void;
@@ -40,49 +45,40 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
   );
   const hasEnvironments = environments.length > 0;
 
-  const isNoEnvironment = activeEnvName === NO_ENVIRONMENT;
+  const options = useMemo(() => [NO_ENVIRONMENT_OPTION, ...environments], [environments]);
 
   // The active env, resolving a null or stale (no longer present) selection to
   // the first environment. Single source for both the render and the effect.
-  const activeEnv = isNoEnvironment
-    ? undefined
-    : environments.find((environment) => environment.name === activeEnvName)
-      ?? (hasEnvironments ? environments[0] : undefined);
+  const activeEnv
+    = options.find((environment) => environment.name === activeEnvName) ?? environments[0] ?? NO_ENVIRONMENT_OPTION;
 
   // Sync the store when the stored name isn't the resolved one (null or stale),
   // so the persisted selection self-heals to a real environment.
   useEffect(() => {
-    if (activeEnv && activeEnv.name !== activeEnvName) {
+    if (activeEnv.name && activeEnv.name !== activeEnvName) {
       dispatch(setActiveEnv(activeEnv.name));
     }
   }, [activeEnv, activeEnvName, dispatch]);
 
   if (hideWhenEmpty && !hasEnvironments) return null;
 
-  const environmentItems: MenuDropdownItem[] = hasEnvironments
-    ? environments.map((environment) => ({
-        id: environment.name,
-        label: (
-          <EnvironmentLabel
-            name={environment.name}
-            color={environment.color}
-            nameClassName="environment-label-name--clamped"
-          />
-        ),
-        ariaLabel: environment.name,
-        title: environment.name,
-        onClick: () => dispatch(setActiveEnv(environment.name))
-      }))
-    : [];
-
   const items: MenuDropdownItem[] = [
-    {
-      id: '~no-environment',
-      label: 'No environment',
-      className: 'dropdown-item-muted',
-      onClick: () => dispatch(setActiveEnv(NO_ENVIRONMENT))
-    },
-    ...environmentItems,
+    ...options.map((environment) => ({
+      id: menuItemId(environment),
+      label: environment.name ? (
+        <EnvironmentLabel
+          name={environment.name}
+          color={environment.color}
+          nameClassName="environment-label-name--clamped"
+        />
+      ) : (
+        NO_ENVIRONMENT_LABEL
+      ),
+      ariaLabel: environment.name || undefined,
+      title: environment.name || undefined,
+      className: environment.name ? undefined : 'dropdown-item-muted',
+      onClick: () => dispatch(setActiveEnv(environment.name))
+    })),
     ...(onConfigure
       ? [
           { type: 'divider' as const, id: '~configure-divider' },
@@ -101,7 +97,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
     <StyledWrapper data-testid={`${testId}-root`}>
       <MenuDropdown
         items={items}
-        selectedItemId={activeEnv ? activeEnv.name : '~no-environment'}
+        selectedItemId={menuItemId(activeEnv)}
         showTickMark={false}
         placement="bottom-end"
         matchTriggerWidth
@@ -109,11 +105,11 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
       >
         <button
           type="button"
-          className="env-switcher-trigger"
+          className={activeEnv.name ? 'env-switcher-trigger' : 'env-switcher-trigger env-switcher-trigger--none'}
           aria-haspopup="menu"
           aria-label="Select environment"
         >
-          <EnvironmentLabel name={activeEnv?.name ?? 'No environment'} color={activeEnv?.color} truncate />
+          <EnvironmentLabel name={activeEnv.name || NO_ENVIRONMENT_LABEL} color={activeEnv.color} truncate />
           <span className="env-switcher-chevron">
             <ChevronDownIcon />
           </span>

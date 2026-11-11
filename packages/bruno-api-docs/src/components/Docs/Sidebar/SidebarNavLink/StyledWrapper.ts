@@ -160,7 +160,7 @@ export const StyledWrapper = styled.div`
 
   .navlink-sublabel {
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: var(--oc-font-size-xs);
     line-height: 1.2;
     color: var(--oc-colors-text-subtext1);
     overflow: hidden;

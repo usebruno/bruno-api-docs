@@ -231,7 +231,7 @@ test.describe('Header behavior', () => {
 
     await expect(envSwitcher.trigger).toContainText('Dev');
     await envSwitcher.open();
-    // "No environment" + the two included environments.
+    // "No Environment" + the two included environments.
     await expect(envSwitcher.menu.getByRole('menuitem')).toHaveCount(3);
     await expect(envSwitcher.option('~no-environment')).toBeVisible();
     await expect(envSwitcher.option('Dev')).toBeVisible();
@@ -294,7 +294,7 @@ test.describe('Header behavior', () => {
 
     await expect(envSwitcher.trigger).toContainText('Staging');
     await envSwitcher.open();
-    // "No environment" + the single environment.
+    // "No Environment" + the single environment.
     await expect(envSwitcher.menu.getByRole('menuitem')).toHaveCount(2);
     await expect(envSwitcher.option('~no-environment')).toBeVisible();
     await expect(envSwitcher.option('Staging')).toBeVisible();

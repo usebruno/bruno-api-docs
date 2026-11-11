@@ -63,10 +63,10 @@ describe('EnvSwitcher', () => {
     expect(trigger.text).not.toContain('Ghost');
   });
 
-  it('still opens a menu showing "No environment" when there are no environments', () => {
+  it('still opens a menu showing "No Environment" when there are no environments', () => {
     const root = render(collectionWith([]));
     const trigger = getByTestId(root, 'env-switcher');
-    expect(trigger.text).toContain('No environment');
+    expect(trigger.text).toContain('No Environment');
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     expect(root.querySelector('.env-switcher-chevron')).toBeTruthy();
   });
@@ -115,10 +115,10 @@ describe('EnvSwitcher hideWhenEmpty', () => {
   });
 });
 
-describe('EnvSwitcher No environment', () => {
-  it('keeps "No environment" instead of falling back to the first environment', () => {
+describe('EnvSwitcher No Environment', () => {
+  it('keeps "No Environment" instead of falling back to the first environment', () => {
     const trigger = getByTestId(render(withEnvs, (s) => s.dispatch(setActiveEnv(NO_ENVIRONMENT))), 'env-switcher');
-    expect(trigger.text).toContain('No environment');
+    expect(trigger.text).toContain('No Environment');
     expect(trigger.text).not.toContain('Dev');
   });
 });

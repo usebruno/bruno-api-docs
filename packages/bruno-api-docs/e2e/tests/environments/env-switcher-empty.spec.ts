@@ -9,9 +9,9 @@ test.describe('Environment switcher with no environments', () => {
     await expect(envSwitcher.root).toHaveCount(0);
   });
 
-  test('opens a menu with "No environment" and Configure in the playground header', async ({ page, playground }) => {
+  test('opens a menu with "No Environment" and Configure in the playground header', async ({ page, playground }) => {
     await page.goto(`${NO_ENVIRONMENTS}#/?pg=1&dock=bottom`);
-    await expect(playground.envSwitcher.trigger).toContainText('No environment');
+    await expect(playground.envSwitcher.trigger).toContainText('No Environment');
 
     await playground.envSwitcher.open();
     await expect(playground.envSwitcher.option('~no-environment')).toBeVisible();

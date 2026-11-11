@@ -148,7 +148,6 @@ export const StyledWrapper = styled.div`
     }
 
     &.dropdown-item-muted {
-      font-style: italic;
       color: var(--oc-colors-text-subtext0);
       padding-left: 1.625rem;
     }

@@ -29,7 +29,7 @@ export const StyledWrapper = styled.div`
 
   .header-right > [data-testid='playground-env-switcher-root'] {
     flex-shrink: 1;
-    min-width: 87px;
+    min-width: 5.4375rem;
   }
 
   .header-right .env-switcher-trigger {

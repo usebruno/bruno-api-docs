@@ -268,13 +268,13 @@ test.describe('playground docks (desktop)', () => {
     await expect(playground.view).toBeVisible();
   });
 
-  test('switching environments in the header while on Configure opens that environment', async ({ page, playground }) => {
+  test('Configure opens the active environment, and switching environments afterwards keeps it open', async ({ page, playground }) => {
     await page.goto(openAt('bottom'));
-    await playground.envSwitcher.selectEnvironment('Local');
-    await playground.openEnvironments();
-    await expect(page.getByTestId('env-pill-Local')).toHaveClass(/active/);
-
     await playground.envSwitcher.selectEnvironment('Prod');
+    await playground.openEnvironments();
+    await expect(page.getByTestId('env-pill-Prod')).toHaveClass(/active/);
+
+    await playground.envSwitcher.selectEnvironment('Local');
     await expect(page.getByTestId('env-pill-Prod')).toHaveClass(/active/);
     await expect(page.getByTestId('env-pill-Local')).not.toHaveClass(/active/);
   });

@@ -294,7 +294,7 @@ test.describe('Playground variables: undefined variable in the URL', () => {
   test('shows "Variable not found" instead of sending when "No Environment" leaves {{host}} undefined', async ({ playground, responsePane }) => {
     await playground.open('bottom');
     await playground.openRequest('get users');
-    await playground.envSwitcher.selectEnvironment('~no-environment');
+    await playground.envSwitcher.selectEnvironment('no-environment');
 
     await responsePane.send();
 

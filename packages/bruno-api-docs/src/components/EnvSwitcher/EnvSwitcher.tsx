@@ -12,7 +12,7 @@ import { StyledWrapper } from './StyledWrapper';
 const NO_ENVIRONMENT_LABEL = 'No Environment';
 const NO_ENVIRONMENT_OPTION = { name: NO_ENVIRONMENT } as Environment;
 
-const menuItemId = (environment: Environment) => environment.name || '~no-environment';
+const menuItemId = (environment: Environment) => environment.name || 'no-environment';
 
 export interface EnvSwitcherProps {
   hideWhenEmpty?: boolean;
@@ -81,9 +81,9 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
     })),
     ...(onConfigure
       ? [
-          { type: 'divider' as const, id: '~configure-divider' },
+          { type: 'divider' as const, id: 'configure-actions-divider' },
           {
-            id: '~configure',
+            id: 'configure-actions',
             label: 'Configure',
             leftSection: IconSettings,
             className: 'dropdown-item-centered',

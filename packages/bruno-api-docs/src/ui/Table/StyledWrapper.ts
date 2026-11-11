@@ -96,6 +96,7 @@ export const StyledWrapper = styled.div`
     align-items: center;
     gap: 0.5rem;
     font-size: var(--oc-font-size-base);
+    line-height: 1.2;
     color: var(--text-primary);
   }
 
@@ -153,6 +154,7 @@ export const StyledWrapper = styled.div`
   .table-cell {
     padding: 0.5rem 0.875rem; /* 8px 14px */
     font-size: var(--oc-font-size-base);
+    line-height: 1.3;
     color: var(--text-primary);
     text-align: left;
     vertical-align: middle;

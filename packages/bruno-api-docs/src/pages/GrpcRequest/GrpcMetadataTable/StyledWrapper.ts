@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 export const StyledWrapper = styled.div`
   .table-cell {
     font-size: var(--oc-font-size-sm);
+    line-height: 1.2;
   }
 
   .grpc-metadata-value {

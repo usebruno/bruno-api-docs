@@ -75,6 +75,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: var(--oc-font-size-sm);
+    line-height: 1.2;
     letter-spacing: normal;
     color: var(--text-primary);
     white-space: nowrap;
@@ -92,6 +93,7 @@ export const StyledWrapper = styled.div`
     font-family: 'Fira Code', var(--font-mono);
     font-weight: 400;
     font-size: var(--oc-font-size-sm);
+    line-height: 1.2;
     letter-spacing: normal;
     color: var(--text-primary);
   }
@@ -145,6 +147,7 @@ export const StyledWrapper = styled.div`
     flex-shrink: 0;
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-xs);
+    line-height: 1.2;
     color: var(--text-muted);
   }
   .property-value-cell .secret-value-text {

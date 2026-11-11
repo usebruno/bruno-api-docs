@@ -33,6 +33,7 @@ export const StyledWrapper = styled.div`
 
   .tag-chip-label {
     min-width: 0;
+    line-height: 1.15;
     overflow-wrap: anywhere;
   }
 `;

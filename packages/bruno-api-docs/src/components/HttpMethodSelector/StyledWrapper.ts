@@ -26,6 +26,7 @@ export const StyledWrapper = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: var(--oc-font-size-sm);
+    line-height: 1.5;
     letter-spacing: 0.04em;
     min-width: unset;
     padding: 0;

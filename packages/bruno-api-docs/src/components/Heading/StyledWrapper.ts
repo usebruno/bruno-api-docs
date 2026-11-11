@@ -14,6 +14,7 @@ export const StyledWrapper = styled.h1`
 
   &.heading--md {
     font-size: var(--oc-font-size-lg);
+    line-height: 1.5;
     letter-spacing: 0;
   }
 `;

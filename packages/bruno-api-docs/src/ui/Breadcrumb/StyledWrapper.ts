@@ -12,6 +12,7 @@ export const StyledWrapper = styled.nav`
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: var(--oc-font-size-sm);
+    line-height: 1.2;
     letter-spacing: 0;
   }
   li {

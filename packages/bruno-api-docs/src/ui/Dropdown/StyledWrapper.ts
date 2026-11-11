@@ -82,6 +82,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-sm);
     font-weight: 400;
+    line-height: 1.4;
     text-align: left;
     color: var(--oc-text);
     background: transparent;

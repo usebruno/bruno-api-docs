@@ -74,6 +74,7 @@ export const StyledWrapper = styled.nav`
     max-width: 100%;
     min-width: 0;
     font-size: var(--oc-font-size-base);
+    line-height: 1.4;
     font-weight: 600;
     color: var(--oc-text);
   }

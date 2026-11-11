@@ -8,6 +8,7 @@ export const StyledWrapper = styled.div`
   padding: 0.5rem;
   font-family: var(--font-sans);
   font-size: var(--oc-font-size-base);
+  line-height: 1.5;
   color: var(--text-primary);
   background: var(--bg-primary);
   border: 0.0625rem solid var(--border-color);
@@ -71,6 +72,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-base);
     font-weight: 400;
+    line-height: 1.5;
     color: var(--text-primary);
     word-break: break-all;
     overflow-wrap: break-word;
@@ -99,6 +101,7 @@ export const StyledWrapper = styled.div`
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-base);
     font-weight: 400;
+    line-height: 1.5;
     color: var(--text-primary);
     background: transparent;
     border: none;
@@ -172,6 +175,7 @@ export const StyledWrapper = styled.div`
   .var-warning-note {
     margin-top: 0.375rem;
     font-size: var(--oc-font-size-sm);
+    line-height: 1.7;
     color: var(--oc-status-danger-text);
   }
 `;

@@ -11,6 +11,7 @@ export const StyledWrapper = styled.div`
   font-family: var(--font-sans);
   font-size: var(--oc-font-size-sm);
   font-weight: 400;
+  line-height: 1.35;
   white-space: normal;
   overflow-wrap: anywhere;
   box-shadow: 0 2px 6px var(--oc-info-tip-box-shadow);

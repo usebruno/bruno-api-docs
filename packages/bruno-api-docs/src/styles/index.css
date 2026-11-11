@@ -110,7 +110,6 @@ html, body {
 
 body {
   font-size: var(--font-size-base);
-  line-height: 1.5;
 }
 
 /* Main playground container */
@@ -128,6 +127,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: var(--oc-font-size-md);
+  line-height: 1.6;
   letter-spacing: -0.011em;
 }
 
@@ -1057,6 +1057,7 @@ tr.themed-row:nth-child(even) {
 
 .endpoint-description {
   margin-top: 0.75rem;
+  line-height: 1.6;
 }
 
 .endpoint-grid {

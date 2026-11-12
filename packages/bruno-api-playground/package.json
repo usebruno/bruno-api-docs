@@ -13,6 +13,7 @@
     "test": "vitest",
     "pretest:run": "npm run build:lib-bundle",
     "test:run": "vitest run",
+    "prebuild:cdn": "npm run build:lib-bundle",
     "build:cdn": "vite build --config vite.config.cdn.ts"
   },
   "dependencies": {

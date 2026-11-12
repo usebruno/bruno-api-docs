@@ -67,6 +67,9 @@ if it fails you see `playground-load-error`.
   `<script>` for the playground file next to the bundle (`new URL(file, import.meta.url)`), and
   resolves with `window.__brunoApiPlayground`. It loads once per page, even with two instances.
   A classic script works cross-origin and from `file://`, which is how exported HTML loads it.
+  The script carries the nonce of the `api-docs.js` tag, so a nonce-only CSP allows it. A failed
+  load removes the script and clears the memo, and `Playground.tsx` swaps in a fresh `lazy`, so
+  the next open retries.
 - `bruno-api-playground/vite.config.cdn.ts` builds the playground as an IIFE named
   `__brunoApiPlayground`. Its externals are read from `Bruno.__rt`: react, react-dom,
   react/jsx-runtime, react-router-dom, and these files from `bruno-shared/src/`:
@@ -79,10 +82,23 @@ Why externals: a React context only works if provider and consumer use the same 
 object, and module state (in-flight runs, Monaco completions, Prism grammars) only works if
 there is one copy. So React, the router and the shared modules that hold contexts or page-wide
 state must be the instance already in `api-docs.js`. Everything else from shared is bundled into
-the playground file again. That costs bytes, not correctness.
+the playground file again. That costs bytes, not correctness, unless the module touches the page
+when it loads: a second `prismjs` runs its auto-highlight and rewrites React-owned docs DOM. So
+shared code imports Prism only through `bruno-shared/src/utils/prism.ts`, and the standalone e2e
+fails if the playground file contains Prism's core.
 
 A shared module that starts holding a context or module state, and that the playground uses,
 must be added to both the externals in `vite.config.cdn.ts` and `Bruno.__rt` in `loadCdn.ts`.
+
+Known limits:
+
+- `api-docs.esm.js` imported through a bundler resolves `import.meta.url` at the chunk's location,
+  so the playground file must sit next to that chunk. Nothing consumes it that way today.
+- Two different copies of `api-docs.js` on one page share `window.Bruno.__rt` and
+  `window.__brunoApiPlayground`, so one copy's playground can bind to the other's React and
+  shared modules.
+- Under an AMD loader `document.currentScript` is null, so the playground URL falls back to
+  `document.baseURI`.
 
 ## Load pipeline
 

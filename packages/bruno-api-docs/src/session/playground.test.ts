@@ -36,3 +36,23 @@ describe('playground selection', () => {
     expect(selectedUuid(null)).toBeNull();
   });
 });
+
+describe('playground response format and preview', () => {
+  it('stores a value per request and ignores a missing request', () => {
+    const { responseFormat } = createPlayground();
+    responseFormat.setEntry('a', 'raw');
+    responseFormat.setEntry(null, 'json');
+    expect(responseFormat.get()).toEqual({ a: 'raw' });
+  });
+
+  it('does not notify when a request gets the value it already has', () => {
+    const { responsePreview } = createPlayground();
+    responsePreview.setEntry('a', true);
+    const listener = vi.fn();
+    responsePreview.subscribe(listener);
+
+    responsePreview.setEntry('a', true);
+
+    expect(listener).not.toHaveBeenCalled();
+  });
+});

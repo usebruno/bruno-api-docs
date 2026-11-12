@@ -11,7 +11,8 @@ import ActionIconButton from './ActionIconButton/ActionIconButton';
 import type { RunRequestResponse } from '@/runner';
 import type { ResponseBodyFormat } from '@/constants';
 import { useAppDispatch } from '@/store/hooks';
-import { clearPlaygroundResponse, setResponsePaneOrientation } from '@/store/slices/playground';
+import { clearPlaygroundResponse } from '@/store/slices/playground';
+import { useSession } from '@/session/session';
 import { downloadResponse } from '@/utils/downloadResponse';
 import useCopy from '@/hooks/useCopy';
 import { formatResponse } from '@/utils/dataFormatter';
@@ -51,12 +52,13 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
     disabled: copyDisabled
   });
   const dispatch = useAppDispatch();
+  const { orientation: orientationState } = useSession().playground;
 
   const downloadDisabled = !response?.base64Data;
   const onDownload = () => downloadResponse(response);
   const onClear = () => dispatch(clearPlaygroundResponse(itemUuid));
   const onToggleLayout = () =>
-    dispatch(setResponsePaneOrientation(orientation === 'horizontal' ? 'vertical' : 'horizontal'));
+    orientationState.set(orientation === 'horizontal' ? 'vertical' : 'horizontal');
 
   const menuItems: MenuDropdownItem[] = [
     { id: 'copy', label: 'Copy Response', leftSection: IconCopy, disabled: copyDisabled, onClick: copyResponse },

@@ -2,10 +2,11 @@ import React, { useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectHydratedCollection,
-  selectResponsePaneOrientation,
   toggleFolderCollapse,
   expandFolders
 } from '@/store/slices/playground';
+import { useSession } from '@/session/session';
+import { useObservable } from '@/observable/observable';
 import { useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 import type { DockMode } from '@/utils/playgroundDock';
@@ -38,7 +39,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
 }) => {
   const dispatch = useAppDispatch();
   const collection = useAppSelector(selectHydratedCollection);
-  const orientationOverride = useAppSelector(selectResponsePaneOrientation);
+  const orientationOverride = useObservable(useSession().playground.orientation);
 
   const viewRef = useRef<HTMLDivElement>(null);
   const viewWidth = useElementWidth(viewRef);

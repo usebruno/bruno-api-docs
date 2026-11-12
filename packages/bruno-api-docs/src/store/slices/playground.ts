@@ -10,26 +10,17 @@ import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
 import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
 import type { Variables } from '@/runner/utils/variable-interpolator';
-import type { ResponseBodyFormat } from '@/constants';
 
 export interface PlaygroundState {
   hydratedCollection: OpenCollectionCollection | null;
   responses: Record<string, any>; // Store responses by item UUID
   requestStartedAt: Record<string, number>; // When each running request started, by item UUID
-  // UI State
-  responsePaneOrientation: 'horizontal' | 'vertical' | null;
-  selectedResponseFormat: Record<string, ResponseBodyFormat>;
-  showResponsePreview: Record<string, boolean>;
 }
 
 const initialState: PlaygroundState = {
   hydratedCollection: null,
   responses: {},
-  requestStartedAt: {},
-  // UI State
-  responsePaneOrientation: null,
-  selectedResponseFormat: {},
-  showResponsePreview: {}
+  requestStartedAt: {}
 };
 
 const readEnvironments = (collection: OpenCollectionCollection): Environment[] | null =>
@@ -166,9 +157,6 @@ const playgroundSlice = createSlice({
       state.requestStartedAt = {};
     },
     // UI State Actions
-    setResponsePaneOrientation: (state: PlaygroundState, action: PayloadAction<'horizontal' | 'vertical' | null>) => {
-      state.responsePaneOrientation = action.payload;
-    },
     // Collection Mutation Actions
     toggleFolderCollapse: (state: PlaygroundState, action: PayloadAction<string>) => {
       if (!state.hydratedCollection?.items) return;
@@ -273,24 +261,6 @@ const playgroundSlice = createSlice({
         }
       };
       apply(state.hydratedCollection);
-    },
-    setResponseFormat: (state: PlaygroundState, action: PayloadAction<{
-      uuid: string | null;
-      format: ResponseBodyFormat;
-    }>) => {
-      if (action.payload.uuid != null)
-        state.selectedResponseFormat[action.payload.uuid] = action.payload.format;
-    },
-    setShowResponsePreview: (
-      state: PlaygroundState,
-      action: PayloadAction<{
-        uuid: string | null;
-        showResponsePreview: boolean;
-      }>
-    ) => {
-      const { uuid, showResponsePreview } = action.payload;
-      if (uuid != null)
-        state.showResponsePreview[uuid] = showResponsePreview;
     }
   }
 });
@@ -305,16 +275,13 @@ export const {
   setPlaygroundRequestStarted,
   clearPlaygroundRequestStarted,
   clearAllPlaygroundRequestsStarted,
-  setResponsePaneOrientation,
   toggleFolderCollapse,
   expandFolders,
   updateCollectionSettings,
   updateCollectionEnvironments,
   applyScriptVariableChanges,
   updateFolderInCollection,
-  setPlaygroundVariable,
-  setResponseFormat,
-  setShowResponsePreview
+  setPlaygroundVariable
 } = playgroundSlice.actions;
 
 // Selectors
@@ -323,12 +290,5 @@ export const selectPlaygroundResponses = (state: RootState) => state.playground.
 export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
 export const selectPlaygroundRequestStartedAt = (state: RootState, uuid: string): number | null =>
   state.playground.requestStartedAt[uuid] ?? null;
-export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;
-export const selectResponseFormat
-  = (uuid: string | null) =>
-    (state: RootState) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
-export const selectShowResponsePreview
-  = (uuid: string | null) =>
-    (state: RootState) => uuid ? state.playground.showResponsePreview[uuid] : null;
 
 export default playgroundSlice.reducer;

@@ -3,13 +3,6 @@ import type { ResponseBodyFormat } from '@/constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
 import type { RunRequestResponse } from '@/runner';
 import { getResponseFormatOptions } from '@/utils/response';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import {
-  selectResponseFormat,
-  selectShowResponsePreview,
-  setResponseFormat,
-  setShowResponsePreview
-} from '@/store/slices/playground';
 import { useSession } from '@/session/session';
 import { useObservable } from '@/observable/observable';
 import { selectedUuid } from '@/session/playground';
@@ -17,10 +10,11 @@ import { selectedUuid } from '@/session/playground';
 export function useResponseFormatter(
   response: RunRequestResponse
 ) {
-  const selectedItemId = useObservable(useSession().playground.selection, selectedUuid);
-  const selectedResponseFormat = useAppSelector(selectResponseFormat(selectedItemId));
-  const showResponsePreview = useAppSelector(selectShowResponsePreview(selectedItemId));
-  const dispatch = useAppDispatch();
+  const { selection, responseFormat, responsePreview } = useSession().playground;
+  const selectedItemId = useObservable(selection, selectedUuid);
+  const forSelected = <V>(byUuid: Record<string, V>) => (selectedItemId ? byUuid[selectedItemId] : null);
+  const selectedResponseFormat = useObservable(responseFormat, forSelected);
+  const showResponsePreview = useObservable(responsePreview, forSelected);
   const { format, view, detectedContentType, headerContentType, contentType } = useInitialResponseFormat(response);
 
   const allowedFormats = useMemo(
@@ -29,19 +23,13 @@ export function useResponseFormatter(
   );
 
   const handleFormatChange = useCallback((format: ResponseBodyFormat) => {
-    dispatch(setResponseFormat({
-      uuid: selectedItemId,
-      format
-    }));
-  }, [dispatch, selectedItemId]);
+    responseFormat.setEntry(selectedItemId, format);
+  }, [responseFormat, selectedItemId]);
 
   const toggleView = useCallback(() => {
     const currentlyPreview = showResponsePreview != null ? showResponsePreview : view === 'preview';
-    dispatch(setShowResponsePreview({
-      uuid: selectedItemId,
-      showResponsePreview: !currentlyPreview
-    }));
-  }, [dispatch, selectedItemId, view, showResponsePreview]);
+    responsePreview.setEntry(selectedItemId, !currentlyPreview);
+  }, [responsePreview, selectedItemId, view, showResponsePreview]);
 
   return useMemo(() => {
     // A user's chosen format wins, but a stale choice that no longer applies to the current

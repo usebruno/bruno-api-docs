@@ -1,10 +1,9 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import type { RunRequestResponse } from '@/runner';
-import { createOpenCollectionStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
 import { query, getByTestId } from '@/test-utils/dom';
 import ResponseActions from './ResponseActions';
 
@@ -17,10 +16,9 @@ const baseResponse: RunRequestResponse = {
 };
 
 const render = (props: Partial<React.ComponentProps<typeof ResponseActions>> = {}) => {
-  const store = createOpenCollectionStore();
   const root = parse(
     renderToStaticMarkup(
-      <Provider store={store}>
+      <TestProviders>
         <ResponseActions
           orientation="horizontal"
           itemUuid="item-1"
@@ -29,7 +27,7 @@ const render = (props: Partial<React.ComponentProps<typeof ResponseActions>> = {
           showPreview={false}
           {...props}
         />
-      </Provider>
+      </TestProviders>
     )
   );
   root.querySelectorAll('style').forEach((style) => style.remove());

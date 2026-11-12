@@ -1,4 +1,5 @@
 import { createObservable } from '@/observable/observable';
+import type { ResponseBodyFormat } from '@/constants';
 
 export type PlaygroundSelection
   = | { uuid: string; exampleIndex: number | null }
@@ -14,6 +15,20 @@ const sameSelection = (a: PlaygroundSelection, b: PlaygroundSelection): boolean 
 export const selectedUuid = (selection: PlaygroundSelection): string | null =>
   typeof selection === 'object' && selection !== null ? selection.uuid : null;
 
+export type ResponsePaneOrientation = 'horizontal' | 'vertical';
+
+const createKeyed = <V>() => {
+  const state = createObservable<Record<string, V>>({ initial: {} });
+  return {
+    get: state.get,
+    subscribe: state.subscribe,
+    setEntry: (key: string | null, value: V) => {
+      if (key == null || state.get()[key] === value) return;
+      state.set({ ...state.get(), [key]: value });
+    }
+  };
+};
+
 export const createPlayground = () => {
   const selection = createObservable<PlaygroundSelection>({ initial: null });
   return {
@@ -23,6 +38,9 @@ export const createPlayground = () => {
       set: (next: PlaygroundSelection) => {
         if (!sameSelection(selection.get(), next)) selection.set(next);
       }
-    }
+    },
+    orientation: createObservable<ResponsePaneOrientation | null>({ initial: null }),
+    responseFormat: createKeyed<ResponseBodyFormat>(),
+    responsePreview: createKeyed<boolean>()
   };
 };

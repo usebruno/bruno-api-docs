@@ -28,10 +28,11 @@ reviews:
   path_filters:
     - '!**/dist/**'
     - '!**/dist-standalone/**'
+    - '!**/dist-cdn/**'
     - '!**/playwright-report/**'
     - '!**/test-results/**'
     - '!**/package-lock.json'
-    - '!packages/bruno-api-docs/src/styles/theme.generated.css'
+    - '!packages/bruno-shared/src/styles/theme.generated.css'
   path_instructions:
     - path: '**/*'
       instructions: |
@@ -42,7 +43,46 @@ reviews:
         abstractions only when required. Don't restate ESLint style; the pre-commit hook fixes
         it. Focus on correctness, root cause over symptom, the simplicity smells, missing
         tests, dead code left behind and comments that narrate the change.
-    - path: 'packages/bruno-api-docs/src/{session,observable,document}/**'
+        Three packages: bruno-shared, bruno-api-playground, bruno-api-docs. Boundary: shared
+        imports neither of the others; playground imports only shared; docs only type-imports
+        the playground, apart from the one lazy import() in
+        packages/bruno-api-docs/src/components/Playground/load.ts. Cross-package imports use
+        package names; `@/` exists only in docs. Flag code placed in the wrong package: if
+        both need it, shared; anything that runs requests or scripts, playground.
+    - path: 'packages/bruno-shared/**'
+      instructions: |
+        Shared code used by docs and the playground (session, document, routing, theme, ui,
+        shared components, test utils). Flag:
+        - Any import from @usebruno/api-docs or @usebruno/api-playground, or a relative path
+          into their folders.
+        - An `@/` import; shared uses relative imports or its own package name.
+        - Code only one package uses; it belongs in that package.
+        - A new React context or module-level state the playground reads, without adding it to
+          the externals in packages/bruno-api-playground/vite.config.cdn.ts and Bruno.__rt in
+          packages/bruno-api-docs/src/components/Playground/loadCdn.ts. Without that the CDN
+          build gets a second copy and the playground reads a different context.
+        - A single barrel that re-exports everything; it makes Monaco load eagerly.
+    - path: 'packages/bruno-api-playground/**'
+      instructions: |
+        The playground: PlaygroundBody and below, the runner and QuickJS scripting. It is
+        loaded lazily, as an ES module in dev and as the classic script
+        api-playground-<hash>.js in the CDN build. Flag:
+        - Any import from @usebruno/api-docs or a relative path into packages/bruno-api-docs.
+        - An `@/` import; the playground uses relative imports or package names.
+        - A change to the externals in vite.config.cdn.ts without the matching Bruno.__rt
+          entry in packages/bruno-api-docs/src/components/Playground/loadCdn.ts, or the other
+          way round.
+        - State that must outlive the playground kept inside it instead of in the shared
+          session or workspace.
+    - path: 'packages/bruno-api-docs/**'
+      instructions: |
+        Docs view, the playground dock shell, the standalone CDN entry and all e2e. Flag:
+        - A value import of @usebruno/api-playground. Only types may be imported; the one
+          value import is the lazy import() in src/components/Playground/load.ts.
+        - Anything that makes the playground load before Try or a deep link.
+        - Changes to the public Bruno.apiDocs API or the bundle file names.
+        - Docs code that runs requests or scripts; that belongs in the playground.
+    - path: 'packages/bruno-shared/src/{session,observable,document}/**'
       instructions: |
         State rules from CODING_STANDARDS.md §State. Flag:
         - A fact with two owners, or a copy of state that could be derived during render.
@@ -51,14 +91,15 @@ reviews:
         - A storage key written outside the owner that persists it, or a renamed key.
         - Anything that makes the document writable after load.
         - A new store library, generic store layer or option nobody passes.
-    - path: 'packages/bruno-api-docs/src/components/**'
+    - path: 'packages/*/src/components/**'
       instructions: |
         React rules from CODING_STANDARDS.md §React and §Styling. Flag:
         - A leaf reading the session or workspace directly instead of taking props and callbacks.
         - An effect that computes something derivable during render.
         - A handler reading live state at click time instead of a value from render.
         - A context hook that doesn't throw outside its provider.
-        - A component doing two jobs, or a near-duplicate of something in src/ui or src/components.
+        - A component doing two jobs, or a near-duplicate of something in a ui or components
+          folder of any package.
         - Compound components where there are no real slots.
         - Colours or fonts not from `--oc-*` CSS variables.
     - path: 'packages/bruno-api-docs/e2e/**'
@@ -69,7 +110,7 @@ reviews:
         - `page.waitForTimeout`, `page.pause()`, `test.only`.
         - Serial mode without a stated reason.
         - Assertions that are conditional or check a substring the fixture already has.
-    - path: 'packages/bruno-api-docs/src/{runner,scripting}/**'
+    - path: 'packages/bruno-api-playground/src/{runner,scripting}/**'
       instructions: |
         This code builds real HTTP requests and runs user scripts in a QuickJS sandbox. Check
         it against what the Bruno desktop app does for the same request. Remember:
@@ -92,8 +133,8 @@ reviews:
       - name: 'Package change has a changeset'
         mode: 'warning'
         instructions: |
-          If the PR changes files under packages/bruno-api-docs/src, it must add a markdown
-          file under .changeset/. Fail if it doesn't. Pass for PRs that only touch docs, tests,
+          If the PR changes files under packages/*/src, it must add a markdown file under
+          .changeset/ for @usebruno/api-docs. Fail if it doesn't. Pass for PRs that only touch docs, tests,
           CI or tooling.
       - name: 'Behaviour change has a test'
         mode: 'warning'

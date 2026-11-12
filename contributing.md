@@ -17,14 +17,22 @@ npm install
 
 ## Development
 
-Run these from `packages/bruno-api-docs`:
+The code lives in three workspaces: `packages/bruno-api-docs` (the docs and the shipped bundle), `packages/bruno-api-playground` (the playground, runner and scripting) and `packages/bruno-shared` (code both use). [ARCHITECTURE.md](./ARCHITECTURE.md) says what goes where.
+
+From the repo root:
+
+| Task | Command |
+|------|---------|
+| Unit tests, all packages | `npm run test:run` |
+| Lint | `npm run lint` |
+
+From `packages/bruno-api-docs`:
 
 | Task | Command |
 |------|---------|
 | Dev server | `npm run dev` |
-| Unit tests | `npm run test:run` (watch: `npm test`) |
+| Unit tests, this package | `npm run test:run` (watch: `npm test`) |
 | E2E tests | `npm run test:e2e` |
-| Lint | `npm run lint` |
 | Build | `npm run build` (CDN bundle: `npm run build:standalone`) |
 
 ## Making changes

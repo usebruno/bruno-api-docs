@@ -1,10 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession, type Session } from '@/session/session';
-import { setDocsCollection } from '@/store/slices/docs';
 import { useVariableResolver, useResolvedVariables, ItemVariableResolverProvider } from './useVariableResolver';
 
 const collection: any = {
@@ -36,12 +34,10 @@ const Probe: React.FC = () => {
 };
 
 const render = (configure: (session: Session) => void): string => {
-  const store = createOpenCollectionStore();
   const session = createSession();
-  store.dispatch(setDocsCollection(collection));
   configure(session);
   return renderToStaticMarkup(
-    <TestProviders store={store} session={session}>
+    <TestProviders document={collection} session={session}>
       <Probe />
     </TestProviders>
   );
@@ -98,13 +94,11 @@ describe('lookup (variable hover card)', () => {
   const requestItem: any = { type: 'http', name: 'R', runtime: { variables: [{ name: 'reqScope', value: 'from-req' }, { name: 'shared', value: 'reqVal' }] } };
 
   const renderLookup = (name: string, showVars = false): string => {
-    const store = createOpenCollectionStore();
     const session = createSession();
-    store.dispatch(setDocsCollection(collection));
     session.env.setActiveEnv('Dev');
     if (showVars) session.env.toggleShowVars();
     return renderToStaticMarkup(
-      <TestProviders store={store} session={session}>
+      <TestProviders document={collection} session={session}>
         <ItemVariableResolverProvider collection={collection} ancestry={[folder]} item={requestItem}>
           <LookupProbe name={name} />
         </ItemVariableResolverProvider>
@@ -166,14 +160,12 @@ describe('nested variable resolution', () => {
   } as unknown as typeof collection;
 
   it('follows a variable that points at another variable, for display and for interpolation', () => {
-    const store = createOpenCollectionStore();
     const session = createSession();
-    store.dispatch(setDocsCollection(nested));
     session.env.setActiveEnv('Dev');
     session.env.toggleShowVars();
 
     const html = renderToStaticMarkup(
-      <TestProviders store={store} session={session}>
+      <TestProviders document={nested} session={session}>
         <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
           <NestedProbe />
         </ItemVariableResolverProvider>
@@ -185,13 +177,11 @@ describe('nested variable resolution', () => {
   });
 
   it('gates resolve on showVars but never interpolate', () => {
-    const store = createOpenCollectionStore();
     const session = createSession();
-    store.dispatch(setDocsCollection(nested));
     session.env.setActiveEnv('Dev');
 
     const html = renderToStaticMarkup(
-      <TestProviders store={store} session={session}>
+      <TestProviders document={nested} session={session}>
         <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
           <NestedProbe />
         </ItemVariableResolverProvider>

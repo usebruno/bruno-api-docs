@@ -3,7 +3,6 @@ import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession } from '@/session/session';
-import { setDocsCollection } from '@/store/slices/docs';
 import { VariableResolverProvider, ItemVariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
@@ -44,12 +43,10 @@ const collection: any = {
 };
 
 const cardTree = (name: string) => {
-  const store = createOpenCollectionStore();
   const session = createSession();
-  store.dispatch(setDocsCollection(collection));
   session.env.setActiveEnv('Dev');
   return (
-    <TestProviders store={store} session={session}>
+    <TestProviders document={collection} session={session}>
       <VariableResolverProvider>
         <VariableInfoCard name={name} />
       </VariableResolverProvider>
@@ -187,12 +184,10 @@ describe('VariableInfoCard (editable)', () => {
   });
 
   it('stays read-only when the resolver cannot write, even with editable set', () => {
-    const store = createOpenCollectionStore();
     const session = createSession();
-    store.dispatch(setDocsCollection(collection));
     session.env.setActiveEnv('Dev');
     const tree = (
-      <TestProviders store={store} session={session}>
+      <TestProviders document={collection} session={session}>
         <VariableResolverProvider>
           <VariableInfoCard name="host" editable />
         </VariableResolverProvider>

@@ -2,9 +2,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
-import { setDocsCollection } from '@/store/slices/docs';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
@@ -21,10 +19,8 @@ const collection = {
 } as unknown as OpenCollection;
 
 const useAppShellAt = (url: string, hidePlayground: boolean) => {
-  const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(hydrateWithUUIDs(collection)));
   return useRenderToDom(
-    <TestProviders store={store}>
+    <TestProviders document={hydrateWithUUIDs(collection)}>
       <MemoryRouter initialEntries={[url]}>
         <AppShell hidePlayground={hidePlayground} />
       </MemoryRouter>

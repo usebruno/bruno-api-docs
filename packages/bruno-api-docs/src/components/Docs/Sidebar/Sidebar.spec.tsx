@@ -1,10 +1,9 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection } from '@/store/slices/docs';
+import { TestProviders } from '@/test-utils/providers';
+import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
 
@@ -19,14 +18,12 @@ const collection = {
 // (<request-slug>/<example-slug>) - exactly the URL a sidebar example click
 // navigates to.
 const buildSidebar = () => {
-  const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
   return (
-    <Provider store={store}>
+    <TestProviders document={hydrateWithUUIDs(collection)}>
       <MemoryRouter initialEntries={['/login/ok']}>
         <Sidebar folders={{ isCollapsed: () => true, toggle: () => {}, expand: () => {} }} />
       </MemoryRouter>
-    </Provider>
+    </TestProviders>
   );
 };
 

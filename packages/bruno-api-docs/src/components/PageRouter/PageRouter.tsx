@@ -4,8 +4,7 @@ import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { ScriptFile, Folder as FolderItem } from '@opencollection/types/collection/item';
 import type { RequestItem } from '@/utils/schemaHelpers';
 import { useActiveResolution, useNavModel } from '@/routing/hooks';
-import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
+import { useDocument } from '@/document/document';
 import { getItemUuid } from '@/utils/itemUtils';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { ItemVariableResolverProvider } from '@/hooks';
@@ -35,7 +34,7 @@ const PAGES_WITHOUT_SECTION_NAV = new Set<PageType>(['environments']);
 const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'page' }) => {
   const resolution = useActiveResolution();
   const model = useNavModel();
-  const collection = useAppSelector(selectDocsCollection);
+  const collection = useDocument();
   const docsNavigate = useDocsNavigate();
   const pageBodyRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +45,6 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   );
 
   if (!resolution) return <Navigate to="/" replace />;
-  if (!collection) return null;
 
   const { entry, prev, next } = resolution;
   const pageProps: PageProps = { node: entry, prev, next, collection, onOpenPlayground };

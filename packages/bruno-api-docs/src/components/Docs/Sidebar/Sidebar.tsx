@@ -5,8 +5,7 @@ import SidebarTree from './SidebarTree/SidebarTree';
 import { CubeIcon, GlobeIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 import { computeAutoReveal } from './autoReveal';
-import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
+import { useDocument } from '@/document/document';
 import { useNavModel } from '@/routing/hooks';
 import { normalizeSlug, resolveSlug } from '@/routing/resolve';
 import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@/routing/navModel';
@@ -21,7 +20,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ folders, onNavigate, testId = 'sidebar' }) => {
-  const collection = useAppSelector(selectDocsCollection);
+  const collection = useDocument();
   const model = useNavModel();
   const docsNavigate = useDocsNavigate();
   const { pathname } = useLocation();

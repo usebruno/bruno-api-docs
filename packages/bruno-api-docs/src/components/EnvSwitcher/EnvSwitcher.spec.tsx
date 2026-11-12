@@ -4,10 +4,8 @@ import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession, type Session } from '@/session/session';
-import { setDocsCollection } from '@/store/slices/docs';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import EnvSwitcher, { type EnvSwitcherProps } from './EnvSwitcher';
 
@@ -20,13 +18,11 @@ const render = (
   configure?: (s: Session) => void,
   props?: Partial<EnvSwitcherProps>
 ) => {
-  const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
   const session = createSession();
   configure?.(session);
   const root = parse(
     renderToStaticMarkup(
-      <TestProviders store={store} session={session}>
+      <TestProviders document={collection} session={session}>
         <EnvSwitcher {...props} />
       </TestProviders>
     )

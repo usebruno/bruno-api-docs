@@ -8,15 +8,12 @@ import { parseYaml } from '@/utils/yamlUtils';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { useAppDispatch } from '@/store/hooks';
 import {
-  setDocsCollection,
-  clearDocsCollection
-} from '@/store/slices/docs';
-import {
   setPlaygroundCollection,
   clearPlaygroundCollection
 } from '@/store/slices/playground';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
+import { DocumentProvider } from '@/document/document';
 import { createObservable, useObservable } from '@/observable/observable';
 import { createSession, SessionProvider, useSession, type Session } from '@/session/session';
 import type { ThemeState } from '@/theme/types';
@@ -99,20 +96,17 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
         const { collection: resolved, sourceText } = await resolveCollectionSource(collection);
         if (!isActive) return;
         const hydrated = hydrateWithUUIDs(resolved);
-        dispatch(setDocsCollection(hydrated));
         dispatch(setPlaygroundCollection(hydrated));
         loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrated });
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
-        dispatch(clearDocsCollection());
         dispatch(clearPlaygroundCollection());
         loadState.set({ ...IDLE, status: 'failed', error: message });
       }
     };
 
     if (collection == null) {
-      dispatch(clearDocsCollection());
       dispatch(clearPlaygroundCollection());
       loadState.set(IDLE);
       return () => { isActive = false; };
@@ -122,7 +116,6 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
       void load();
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
-      dispatch(setDocsCollection(hydrated));
       dispatch(setPlaygroundCollection(hydrated));
       loadState.set({ status: 'succeeded', error: null, sourceText: null, document: hydrated });
     }
@@ -161,20 +154,24 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  if (collectionError) {
+  if (collectionError || !document) {
     return <div className="flex items-center justify-center h-screen text-red-500">Error: {collectionError}</div>;
   }
 
   return (
-    <div className="oc-playground">
-      <AppShell
-        logo={logo}
-        hidePlayground={hidePlayground}
-        hideThemeSwitcher={hideThemeSwitcher}
-        gitCollectionUrl={gitCollectionUrl}
-        collectionSourceText={sourceText}
-      />
-    </div>
+    <DocumentProvider document={document}>
+      <VariableResolverProvider>
+        <div className="oc-playground">
+          <AppShell
+            logo={logo}
+            hidePlayground={hidePlayground}
+            hideThemeSwitcher={hideThemeSwitcher}
+            gitCollectionUrl={gitCollectionUrl}
+            collectionSourceText={sourceText}
+          />
+        </div>
+      </VariableResolverProvider>
+    </DocumentProvider>
   );
 };
 
@@ -191,9 +188,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
     <HashRouter useTransitions={false}>
       <Provider store={storeRef.current!}>
         <SessionProvider session={sessionRef.current!}>
-          <VariableResolverProvider>
-            <OpenCollectionContent {...props} />
-          </VariableResolverProvider>
+          <OpenCollectionContent {...props} />
         </SessionProvider>
       </Provider>
     </HashRouter>

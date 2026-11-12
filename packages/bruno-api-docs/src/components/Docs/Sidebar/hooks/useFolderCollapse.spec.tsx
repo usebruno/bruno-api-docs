@@ -1,11 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
-import { Provider } from 'react-redux';
 import type { OpenCollection } from '@opencollection/types';
-import { createOpenCollectionStore } from '@/store/store';
-import { setDocsCollection, selectDocsCollection } from '@/store/slices/docs';
-import { useNavModel } from '@/routing/hooks';
+import { DocumentProvider, useDocument, useNavModel } from '@/document/document';
 import * as navModel from '@/routing/navModel';
 import { useFolderCollapse } from './useFolderCollapse';
 
@@ -20,22 +17,20 @@ const collection = {
 } as unknown as OpenCollection;
 
 const renderToggling = (toggles: number) => {
-  const store = createOpenCollectionStore();
-  store.dispatch(setDocsCollection(collection));
-  const document = selectDocsCollection(store.getState());
   const seen: boolean[] = [];
 
   // A state update during render re-renders the same component with its hooks
   // kept, so each toggle here is a real re-render in which memos survive.
   const Probe = () => {
     useNavModel();
+    const document = useDocument();
     const folders = useFolderCollapse(document);
-    seen.push(folders.isCollapsed(document!.items![0]));
+    seen.push(folders.isCollapsed(document.items![0]));
     if (seen.length <= toggles) folders.toggle('f1');
     return null;
   };
 
-  renderToStaticMarkup(<Provider store={store}><Probe /></Provider>);
+  renderToStaticMarkup(<DocumentProvider document={collection}><Probe /></DocumentProvider>);
   return seen;
 };
 

@@ -1,9 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession, type Session } from '@/session/session';
-import { setDocsCollection } from '@/store/slices/docs';
 import { VariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { VariableText } from './VariableText';
@@ -13,12 +11,10 @@ const collection: any = {
 };
 
 const tree = (value: string, configure?: (session: Session) => void) => {
-  const store = createOpenCollectionStore();
   const session = createSession();
-  store.dispatch(setDocsCollection(collection));
   configure?.(session);
   return (
-    <TestProviders store={store} session={session}>
+    <TestProviders document={collection} session={session}>
       <VariableResolverProvider>
         <VariableText value={value} />
       </VariableResolverProvider>

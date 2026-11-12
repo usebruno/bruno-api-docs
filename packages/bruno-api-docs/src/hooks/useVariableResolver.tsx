@@ -3,8 +3,8 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
+import { useAppDispatch } from '@/store/hooks';
+import { useDocument } from '@/document/document';
 import { setPlaygroundVariable } from '@/store/slices/playground';
 import { promptVariableName } from '@/utils/promptVariables';
 import { useEnvState } from '@/session/session';
@@ -150,7 +150,7 @@ const itemSource = (item: Item): VariableSource =>
     : { scope: 'request', variables: getRequestVariables(item as never) as (Variable | SecretVariable)[] };
 
 export const useVariableResolver = (): VariableResolver => {
-  const collection = useAppSelector(selectDocsCollection) as OpenCollection | null;
+  const collection = useDocument();
   const { activeEnvName, showVars } = useEnvState();
 
   const model = useMemo(

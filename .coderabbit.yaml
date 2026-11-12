@@ -1,0 +1,119 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: 'en-US'
+early_access: false
+tone_instructions: 'Expert reviewer in TypeScript, React, Emotion, Vite, Vitest and Playwright. Be concise. Favour the simplest code that works; flag abstractions without a second user. Explain more only when asked.'
+
+knowledge_base:
+  opt_out: false
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - '**/CODING_STANDARDS.md'
+  learnings:
+    scope: 'local'
+  jira:
+    usage: 'disabled'
+
+reviews:
+  profile: 'chill'
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches: ['main', 'release/.*']
+  path_filters:
+    - '!**/dist/**'
+    - '!**/dist-standalone/**'
+    - '!**/playwright-report/**'
+    - '!**/test-results/**'
+    - '!**/package-lock.json'
+    - '!packages/bruno-api-docs/src/styles/theme.generated.css'
+  path_instructions:
+    - path: '**/*'
+      instructions: |
+        This repo renders a Bruno API collection as docs with a playground that sends real
+        requests. Reason as an API client would (requests, responses, auth, headers, bodies,
+        environments), not as a document viewer. CODING_STANDARDS.md is the source of truth
+        and ARCHITECTURE.md says who owns what. Its core rule: the simplest code that works,
+        abstractions only when required. Don't restate ESLint style; the pre-commit hook fixes
+        it. Focus on correctness, root cause over symptom, the simplicity smells, missing
+        tests, dead code left behind and comments that narrate the change.
+    - path: 'packages/bruno-api-docs/src/{session,observable,document}/**'
+      instructions: |
+        State rules from CODING_STANDARDS.md §State. Flag:
+        - A fact with two owners, or a copy of state that could be derived during render.
+        - An updater that mutates, rebuilds untouched branches, or returns a new object on a
+          no-op. Updaters are pure `(state, payload) => state`.
+        - A storage key written outside the owner that persists it, or a renamed key.
+        - Anything that makes the document writable after load.
+        - A new store library, generic store layer or option nobody passes.
+    - path: 'packages/bruno-api-docs/src/components/**'
+      instructions: |
+        React rules from CODING_STANDARDS.md §React and §Styling. Flag:
+        - A leaf reading the session or workspace directly instead of taking props and callbacks.
+        - An effect that computes something derivable during render.
+        - A handler reading live state at click time instead of a value from render.
+        - A context hook that doesn't throw outside its provider.
+        - A component doing two jobs, or a near-duplicate of something in src/ui or src/components.
+        - Compound components where there are no real slots.
+        - Colours or fonts not from `--oc-*` CSS variables.
+    - path: 'packages/bruno-api-docs/e2e/**'
+      instructions: |
+        Follow packages/bruno-api-docs/e2e/README.md and CODING_STANDARDS.md §E2E. Flag:
+        - Locators not by data-testid, or selectors inlined in specs instead of page objects.
+        - `new` in specs; expects inside page objects or components.
+        - `page.waitForTimeout`, `page.pause()`, `test.only`.
+        - Serial mode without a stated reason.
+        - Assertions that are conditional or check a substring the fixture already has.
+    - path: 'packages/bruno-api-docs/src/{runner,scripting}/**'
+      instructions: |
+        This code builds real HTTP requests and runs user scripts in a QuickJS sandbox. Check
+        it against what the Bruno desktop app does for the same request. Remember:
+        - Interpolation and auth are separate stages; a change to one doesn't cover the other.
+        - Only basic, bearer, apikey and digest reach the wire. awsv4, ntlm and wsse are
+          silently dropped. Flag code or tests that assume otherwise.
+        - HTTP is plain browser fetch; every network failure is one TypeError.
+        - Treat interpolated values, headers, URLs and script output as untrusted: header or
+          URL injection, new host capabilities exposed to scripts, secrets in logs or errors.
+        - `x || default` where an empty token, header or param is a real state.
+  pre_merge_checks:
+    custom_checks:
+      - name: 'No abstraction without a second user'
+        mode: 'warning'
+        instructions: |
+          Fail if the PR adds an interface or factory with one implementation, a wrapper that
+          only forwards, a helper with one caller, an option no caller passes, or an export
+          nothing imports. Pass if each new abstraction has at least two real users in the
+          code after this PR.
+      - name: 'Package change has a changeset'
+        mode: 'warning'
+        instructions: |
+          If the PR changes files under packages/bruno-api-docs/src, it must add a markdown
+          file under .changeset/. Fail if it doesn't. Pass for PRs that only touch docs, tests,
+          CI or tooling.
+      - name: 'Behaviour change has a test'
+        mode: 'warning'
+        instructions: |
+          If the PR changes what the app does (new branch, default, UI state, bug fix), it must
+          add or change a unit spec or an e2e spec that would fail without the change. Fail if
+          a behaviour change has no test. Pass for pure refactors with existing coverage.
+      - name: 'No renamed storage keys or public names'
+        mode: 'warning'
+        instructions: |
+          Fail if the PR renames or removes the storage keys oc-docs.theme, oc-docs.env,
+          oc-docs:docsSidebarWidth, oc-docs:playgroundSidebarWidth or any other oc-docs key,
+          the .oc-playground class, the dist bundle file names, or the Bruno.apiDocs API
+          (updateCollection, updateOptions, destroy).
+      - name: 'E2E conventions'
+        mode: 'warning'
+        instructions: |
+          For changed files under packages/bruno-api-docs/e2e: fail on page.waitForTimeout,
+          test.only, page.pause, locators not by data-testid, expects outside specs, or serial
+          mode without a comment saying why.
+
+chat:
+  auto_reply: true

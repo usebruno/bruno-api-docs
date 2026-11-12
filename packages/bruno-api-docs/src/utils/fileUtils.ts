@@ -6,7 +6,7 @@ import { isYamlFile, parseYaml } from './yamlUtils';
 import { uuid as generateUuid } from './common';
 import type { ScriptFlow } from './request';
 
-const loadOpenCollectionData = async (source: string | File): Promise<any> => {
+const loadOpenCollectionData = async (source: string | File): Promise<unknown> => {
   let content: string;
 
   if (source instanceof File) {
@@ -27,16 +27,16 @@ const loadOpenCollectionData = async (source: string | File): Promise<any> => {
 
   try {
     return parseYaml(content);
-  } catch (yamlError) {
+  } catch {
     try {
       return JSON.parse(content);
-    } catch (jsonError) {
+    } catch {
       throw new Error('Failed to parse collection as YAML or JSON');
     }
   }
 };
 
-export const loadCollectionFromUrl = async (source: string | File): Promise<any> => {
+export const loadCollectionFromUrl = async (source: string | File): Promise<unknown> => {
   try {
     if (source instanceof File) {
       const fileName = source.name.toLowerCase();
@@ -125,12 +125,12 @@ export const getAncestorsByUuid = (collection: OpenCollection | null | undefined
 export const findAndUpdateItem = (
   items: Item[] | undefined,
   uuid: string,
-  updater: (item: any) => void
+  updater: (item: Item) => void
 ): boolean => {
   if (!items) return false;
 
   for (const item of items) {
-    const itemUuid = (item as any).uuid;
+    const itemUuid = (item as { uuid?: string }).uuid;
     if (itemUuid === uuid) {
       updater(item);
       return true;
@@ -149,9 +149,9 @@ export const findAndUpdateItem = (
 
 export const hydrateWithUUIDs = (collection: OpenCollection): OpenCollection => {
   const assignUUID = (item: Item): Item => {
-    const uuid = (item as any).uuid || generateUuid();
+    const uuid = (item as { uuid?: string }).uuid || generateUuid();
 
-    const hydratedItem = { ...item, uuid } as any;
+    const hydratedItem: Item & { uuid: string; items?: Item[] } = { ...item, uuid };
 
     if (isFolder(item)) {
       const folder = item as Folder;
@@ -182,12 +182,14 @@ export const generateSafeId = (input: string): string => {
     .replace(/^-|-$/g, '');
 };
 
-export const getItemId = (item: any): string => {
+type IdentifiableItem = Item & { id?: string; uid?: string; name?: string };
+
+export const getItemId = (item: IdentifiableItem | null | undefined): string => {
   if (!item) return 'unnamed-item';
   return item.id || item.uid || getItemName(item) || item.name || 'unnamed-item';
 };
 
-export const generateSectionId = (item: any, parentPath?: string): string => {
+export const generateSectionId = (item: IdentifiableItem | null | undefined, parentPath?: string): string => {
   const itemId = getItemId(item);
   const safeItemId = generateSafeId(itemId);
 

@@ -24,7 +24,8 @@
   },
   "include": [
     "src",
-    "../bruno-shared/src/types/*.d.ts"
+    "../bruno-shared/src/types/*.d.ts",
+    "../bruno-api-playground/src/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

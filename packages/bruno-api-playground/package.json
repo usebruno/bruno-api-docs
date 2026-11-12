@@ -7,7 +7,15 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "build:lib-bundle": "vite build --config vite.config.libraries-bundle.ts",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build:lib-bundle",
+    "test": "vitest",
+    "pretest:run": "npm run build:lib-bundle",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "ajv-formats": "^2.1.1"
   },
   "devDependencies": {
     "@usebruno/api-shared": "*"

@@ -7,9 +7,10 @@ import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { playgroundRuns, PLAYGROUND_CLOSED } from '@usebruno/api-shared/session/playgroundRuns';
 import { useSession } from '@usebruno/api-shared/session/session';
+import { loadPlayground } from './load';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
-const PlaygroundBody = lazy(() => import('./PlaygroundBody/PlaygroundBody'));
+const PlaygroundBody = lazy(() => loadPlayground());
 
 const playgroundLoadError = (
   <div

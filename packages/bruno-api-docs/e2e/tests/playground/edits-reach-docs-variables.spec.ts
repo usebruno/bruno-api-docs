@@ -113,21 +113,49 @@ test.describe('Docs variables resolve against the playground working copy', () =
     await expect(requestPage.variableCard.value).toHaveText('req-99');
   });
 
-  test('the docs page keeps showing the loaded request URL after a playground edit', async ({
-    page,
+  test('a request variable edited in the playground shows in the docs page Variables table', async ({
     playground,
     requestPage
   }) => {
+    await expect(requestPage.executionContext.variableValue('userId')).toHaveText('req-42');
+    await playground.selectTab('variables');
+    await expect(playground.preRequestVars.nameInputs.first()).toHaveValue('userId');
+    await playground.preRequestVars.valueInputs.first().fill('req-99');
+    await playground.close();
+
+    await expect(requestPage.executionContext.variableValue('userId')).toHaveText('req-99');
+  });
+
+  test('a folder variable edited in folder settings shows on the docs folder page', async ({
+    playground,
+    folderPage
+  }) => {
+    await playground.openTreeItem(['Customers']);
+    await playground.folderSettingsTab('variables').click();
+    await expect(playground.preRequestVars.nameInputs.first()).toHaveValue('folderScope');
+    await playground.preRequestVars.valueInputs.first().fill('edited-folder');
+    await playground.close();
+
+    await folderPage.sidebar.open(['Customers']);
+    await folderPage.root.waitFor({ state: 'visible' });
+    await expect(folderPage.configuration.varValue('folderScope')).toHaveText('edited-folder');
+  });
+
+  test('a playground URL edit shows on the docs page until reload', async ({ page, playground, requestPage }) => {
+    const original = '{{host}}/customers/{{userId}}?v={{apiVersion}}&k={{vaultKey}}&s={{unsetSecret}}';
     await playground.urlInput.click();
     await page.keyboard.press('End');
     await page.keyboard.type('&edited=1');
-    await expect(playground.urlInput).toHaveValue(/&edited=1$/);
+    await expect(playground.urlInput).toHaveValue(`${original}&edited=1`);
     await playground.close();
 
-    await expect(requestPage.urlBar.url).toContainText('{{unsetSecret}}');
-    await expect(requestPage.urlBar.url).not.toContainText('edited=1');
+    await expect(requestPage.urlBar.url).toHaveText(`${original}&edited=1`);
+
+    await page.reload();
+    await requestPage.root.waitFor({ state: 'visible' });
+    await expect(requestPage.urlBar.url).toHaveText(original);
 
     await requestPage.urlBar.tryButton.click();
-    await expect(playground.urlInput).toHaveValue(/&edited=1$/);
+    await expect(playground.urlInput).toHaveValue(original);
   });
 });

@@ -71,7 +71,7 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
         {rows.map((row, index) => {
           const rowTestId = testId && row.testId ? `${testId}-${row.testId}` : undefined;
           return (
-            <div className="property-row" key={`${row.label}-${index}`}>
+            <div className="property-row" data-testid="property-row" key={`${row.label}-${index}`}>
               <dt className="property-key"><TruncatedText text={row.label} /></dt>
               <dd className="property-value-cell" data-testid={rowTestId}>
                 <div className="property-value-line" data-testid="property-value-line">

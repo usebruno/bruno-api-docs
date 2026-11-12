@@ -6,16 +6,7 @@ export interface Observable<T> {
   subscribe: (listener: () => void) => () => void;
 }
 
-export interface Persisted<T> {
-  read: () => T | undefined;
-  write: (value: T) => void;
-}
-
-export const createObservable = <T>({ initial, persist, onChange }: {
-  initial: T;
-  persist?: Pick<Persisted<T>, 'write'>;
-  onChange?: (value: T) => void;
-}): Observable<T> => {
+export const createObservable = <T>({ initial }: { initial: T }): Observable<T> => {
   let value = initial;
   const listeners = new Set<() => void>();
   return {
@@ -23,8 +14,6 @@ export const createObservable = <T>({ initial, persist, onChange }: {
     set: (next) => {
       if (Object.is(next, value)) return;
       value = next;
-      persist?.write(value);
-      onChange?.(value);
       listeners.forEach((listener) => listener());
     },
     subscribe: (listener) => {
@@ -44,8 +33,8 @@ export const useObservable = <T, S = T>(
   return useSyncExternalStore(observable.subscribe, get, get);
 };
 
-export const persisted = <T>(storage: 'localStorage' | 'sessionStorage', key: string): Persisted<T> => ({
-  read: () => {
+export const persisted = <T>(storage: 'localStorage' | 'sessionStorage', key: string) => ({
+  read: (): T | undefined => {
     try {
       const raw = globalThis[storage].getItem(key);
       return raw === null ? undefined : (JSON.parse(raw) as T);
@@ -53,7 +42,7 @@ export const persisted = <T>(storage: 'localStorage' | 'sessionStorage', key: st
       return undefined;
     }
   },
-  write: (value) => {
+  write: (value: T) => {
     try {
       globalThis[storage].setItem(key, JSON.stringify(value));
     } catch {

@@ -12,17 +12,13 @@ describe('createObservable', () => {
     expect(obs.get()).toBe(2);
   });
 
-  it('notifies subscribers, persists and calls onChange on a change, until unsubscribed', () => {
-    const write = vi.fn();
-    const onChange = vi.fn();
+  it('notifies subscribers on a change, until unsubscribed', () => {
     const listener = vi.fn();
-    const obs = createObservable({ initial: 'a', persist: { write }, onChange });
+    const obs = createObservable({ initial: 'a' });
     const unsubscribe = obs.subscribe(listener);
 
     obs.set('b');
     expect(listener).toHaveBeenCalledTimes(1);
-    expect(write).toHaveBeenCalledWith('b');
-    expect(onChange).toHaveBeenCalledWith('b');
 
     unsubscribe();
     obs.set('c');
@@ -30,19 +26,11 @@ describe('createObservable', () => {
   });
 
   it('does nothing when set to the same value', () => {
-    const write = vi.fn();
     const listener = vi.fn();
-    const obs = createObservable({ initial: 'a', persist: { write } });
+    const obs = createObservable({ initial: 'a' });
     obs.subscribe(listener);
     obs.set('a');
-    expect(write).not.toHaveBeenCalled();
     expect(listener).not.toHaveBeenCalled();
-  });
-
-  it('does not persist the initial value', () => {
-    const write = vi.fn();
-    createObservable({ initial: 'a', persist: { write } });
-    expect(write).not.toHaveBeenCalled();
   });
 });
 

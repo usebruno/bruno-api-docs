@@ -65,18 +65,18 @@ describe('createThemeMode', () => {
   it('toggle flips light and dark, keeps the variant, applies it and saves the whole theme', () => {
     const theme = createThemeMode({ variant: 'backstage', mode: 'light' });
 
-    theme.toggle();
+    theme.toggle(false);
     expect(theme.get()).toEqual({ variant: 'backstage', mode: 'dark' });
     expect(root.attrs['data-theme']).toBe('backstage-dark');
     expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe(JSON.stringify({ variant: 'backstage', mode: 'dark' }));
 
-    theme.toggle();
+    theme.toggle(true);
     expect(theme.get()).toEqual({ variant: 'backstage', mode: 'light' });
   });
 
   it('toggle from system goes to the opposite of what the system shows', () => {
     const theme = createThemeMode({ variant: 'default', mode: 'system' });
-    theme.toggle();
+    theme.toggle(false);
     expect(theme.get().mode).toBe('dark');
   });
 

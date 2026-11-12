@@ -20,14 +20,16 @@ export const readPersistedEnv = (): EnvState => {
 const startingEnv = readPersistedEnv();
 
 export const createEnv = (initial: EnvState = startingEnv) => {
-  const state = createObservable({ initial, persist: saved });
+  const state = createObservable({ initial });
   const setField = <K extends keyof EnvState>(key: K, value: EnvState[K]) => {
-    if (state.get()[key] !== value) state.set({ ...state.get(), [key]: value });
+    if (state.get()[key] === value) return;
+    const next = { ...state.get(), [key]: value };
+    state.set(next);
+    saved.write(next);
   };
 
   return {
     get: state.get,
-    set: state.set,
     subscribe: state.subscribe,
     setActiveEnv: (name: string | null) => setField('activeEnvName', name),
     toggleShowVars: () => setField('showVars', !state.get().showVars)

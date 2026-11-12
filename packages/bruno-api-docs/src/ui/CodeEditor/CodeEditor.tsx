@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Editor, { type Monaco, type OnMount } from '@monaco-editor/react';
-import { useAppSelector } from '@/store/hooks';
-import { selectTheme } from '@/store/slices/theme';
+import { useThemeState } from '@/session/session';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { Portal } from '@/ui/Portal/Portal';
@@ -66,7 +65,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   renderVariableCard,
   testId
 }) => {
-  const { mode } = useAppSelector(selectTheme);
+  const { mode } = useThemeState();
   const resolver = useResolvedVariables();
   const editorRef = useRef<EditorInstance | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);

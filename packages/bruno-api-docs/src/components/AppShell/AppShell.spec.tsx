@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import { createOpenCollectionStore } from '@/store/store';
+import { createSession, SessionProvider } from '@/session/session';
 import { setDocsCollection } from '@/store/slices/docs';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
@@ -25,9 +26,11 @@ const useAppShellAt = (url: string, hidePlayground: boolean) => {
   store.dispatch(setDocsCollection(hydrateWithUUIDs(collection)));
   return useRenderToDom(
     <Provider store={store}>
-      <MemoryRouter initialEntries={[url]}>
-        <AppShell hidePlayground={hidePlayground} />
-      </MemoryRouter>
+      <SessionProvider session={createSession()}>
+        <MemoryRouter initialEntries={[url]}>
+          <AppShell hidePlayground={hidePlayground} />
+        </MemoryRouter>
+      </SessionProvider>
     </Provider>
   );
 };

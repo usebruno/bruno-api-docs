@@ -81,12 +81,4 @@ export function getThemeValuesFromLocalStorage(themeSwitcherHidden: boolean): Pa
   return getThemeStateFrom(parsed);
 }
 
-export const persistThemeState = (themeState: ThemeState) => {
-  try {
-    localStorage.setItem(THEME_STORAGE_KEY, JSON.stringify(themeState));
-  } catch {
-    /* ignore */
-  }
-};
-
 export const isDarkMode = (themeMode: ThemeMode) => getAppThemeMode(themeMode) === 'dark';

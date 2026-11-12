@@ -1,7 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
-import { useAppSelector } from '@/store/hooks';
-import { selectTheme } from '@/store/slices/theme';
+import { useThemeState } from '@/session/session';
 import { StyledWrapper } from './StyledWrapper';
 import { isDarkMode } from '@/utils/theme';
 
@@ -47,7 +46,7 @@ const parseJson = (input: unknown): ParsedJson => {
 
 /** Renders response data as an interactive, collapsible JSON tree. */
 const JsonPreview: React.FC<JsonPreviewProps> = ({ data }) => {
-  const { mode } = useAppSelector(selectTheme);
+  const { mode } = useThemeState();
   const { value, error } = parseJson(data);
 
   if (error || value === null) {

@@ -28,7 +28,7 @@ import {
 } from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
-import { setTheme } from '@/store/slices/theme';
+import { createSession, SessionProvider, useSession, type Session } from '@/session/session';
 import type { ThemeState } from '@/theme/types';
 import { isEqual } from 'lodash-es';
 import { getApiDocsTheme } from '@/utils/theme';
@@ -95,6 +95,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   hidePlayground = false
 }) => {
   const dispatch = useAppDispatch();
+  const session = useSession();
   const docsCollection = useAppSelector(selectDocsCollection);
   const collectionStatus = useAppSelector(selectCollectionStatus);
   const collectionError = useAppSelector(selectCollectionError);
@@ -109,8 +110,8 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     if (isEqual(theme, lastThemeProp.current) && hideThemeSwitcher === lastHideThemeSwitcherProp.current) return;
     lastThemeProp.current = theme;
     lastHideThemeSwitcherProp.current = hideThemeSwitcher;
-    dispatch(setTheme(getApiDocsTheme(theme, hideThemeSwitcher)));
-  }, [theme, dispatch, hideThemeSwitcher]);
+    session.theme.set(getApiDocsTheme(theme, hideThemeSwitcher));
+  }, [theme, session, hideThemeSwitcher]);
 
   useEffect(() => {
     let isActive = true;
@@ -177,17 +178,21 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
 const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
   const storeRef = useRef<AppStore | null>(null);
+  const sessionRef = useRef<Session | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
+    storeRef.current = createOpenCollectionStore();
+    sessionRef.current = createSession({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
   }
 
   return (
     <HashRouter useTransitions={false}>
       <Provider store={storeRef.current!}>
-        <VariableResolverProvider>
-          <OpenCollectionContent {...props} />
-        </VariableResolverProvider>
+        <SessionProvider session={sessionRef.current!}>
+          <VariableResolverProvider>
+            <OpenCollectionContent {...props} />
+          </VariableResolverProvider>
+        </SessionProvider>
       </Provider>
     </HashRouter>
   );

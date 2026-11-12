@@ -67,4 +67,27 @@ test.describe('The playground after updateCollection', () => {
 
     await expect(playground.urlInput).toHaveValue('{{host}}/rooms');
   });
+
+  test('the environments view comes back on reopen after the collection is cleared and loaded again', async ({
+    standalonePage,
+    playground,
+    page
+  }) => {
+    await standalonePage.mount('first', { content: foldersFixtureCollection });
+    await playground.gear.click();
+    await expect(playground.view).toContainText('Environments');
+    await playground.closeButton.click();
+    await expect(playground.view).toHaveCount(0);
+
+    await standalonePage.updateCollection('first', null);
+    await expect(standalonePage.root).toContainText('Loading...');
+    await standalonePage.updateCollection('first', foldersFixtureCollection);
+    await expect(standalonePage.root).not.toContainText('Loading...');
+
+    await page.evaluate(() => {
+      window.location.hash = '#/?pg=1&dock=bottom';
+    });
+    await expect(playground.view).toContainText('Environments');
+    await expect(playground.view.locator('.prompt')).toHaveCount(0);
+  });
 });

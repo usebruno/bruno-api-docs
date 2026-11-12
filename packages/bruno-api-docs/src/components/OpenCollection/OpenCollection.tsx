@@ -105,7 +105,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
         folders.seed(undefined);
         dispatch(clearPlaygroundCollection());
-        selection.set(null);
+        selection.clearRequest();
         loadState.set({ ...IDLE, status: 'failed', error: message });
       }
     };
@@ -113,7 +113,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
     if (collection == null) {
       folders.seed(undefined);
       dispatch(clearPlaygroundCollection());
-      selection.set(null);
+      selection.clearRequest();
       loadState.set(IDLE);
       return () => { isActive = false; };
     }

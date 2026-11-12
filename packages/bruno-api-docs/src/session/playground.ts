@@ -38,6 +38,9 @@ export const createPlayground = () => {
       subscribe: selection.subscribe,
       set: (next: PlaygroundSelection) => {
         if (!sameSelection(selection.get(), next)) selection.set(next);
+      },
+      clearRequest: () => {
+        if (selectedUuid(selection.get()) !== null) selection.set(null);
       }
     },
     orientation: createObservable<ResponsePaneOrientation | null>({ initial: null }),

@@ -37,6 +37,23 @@ describe('playground selection', () => {
   });
 });
 
+describe('playground selection clearRequest', () => {
+  it('drops a selected request but keeps the environments and collection settings views', () => {
+    const { selection } = createPlayground();
+    selection.set({ uuid: 'r1', exampleIndex: null });
+    selection.clearRequest();
+    expect(selection.get()).toBeNull();
+
+    selection.set('environments');
+    selection.clearRequest();
+    expect(selection.get()).toBe('environments');
+
+    selection.set('collection-settings');
+    selection.clearRequest();
+    expect(selection.get()).toBe('collection-settings');
+  });
+});
+
 describe('playground response format and preview', () => {
   it('stores a value per request and ignores a missing request', () => {
     const { responseFormat } = createPlayground();

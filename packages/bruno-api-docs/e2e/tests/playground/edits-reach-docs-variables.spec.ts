@@ -126,5 +126,8 @@ test.describe('Docs variables resolve against the playground working copy', () =
 
     await expect(requestPage.urlBar.url).toContainText('{{unsetSecret}}');
     await expect(requestPage.urlBar.url).not.toContainText('edited=1');
+
+    await requestPage.urlBar.tryButton.click();
+    await expect(playground.urlInput).toHaveValue(/&edited=1$/);
   });
 });

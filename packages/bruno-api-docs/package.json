@@ -131,6 +131,7 @@
     "@types/react-dom": "^19.0.4",
     "@types/tv4": "^1.2.33",
     "@types/uuid": "^10.0.0",
+    "@usebruno/api-shared": "*",
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.2",

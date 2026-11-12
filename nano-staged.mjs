@@ -6,6 +6,7 @@
 export default {
   'packages/**/*.{ts,tsx}': () => 'npm run lint:fix',
 
-  'packages/bruno-api-docs/src/**/*.{test,spec}.{ts,tsx}': ({ filenames }) =>
-    `npm run test:run -w packages/bruno-api-docs -- ${filenames.map((f) => JSON.stringify(f)).join(' ')}`
+  'packages/*/src/**/*.{test,spec}.{ts,tsx}': ({ filenames }) =>
+    Object.entries(Object.groupBy(filenames, (f) => f.match(/packages\/[^/]+/)[0])).map(([pkg, files]) =>
+      `npm run test:run -w ${pkg} -- ${files.map((f) => JSON.stringify(f)).join(' ')}`)
 };

@@ -103,7 +103,7 @@ export default [
       // be a real dependency — a devDependency would break consumers the moment
       // a dep stops being bundled.
       'import/no-extraneous-dependencies': ['error', {
-        packageDir: ['.', './packages/bruno-api-docs'],
+        packageDir: ['.', './packages/bruno-api-docs', './packages/bruno-shared', './packages/bruno-api-playground'],
         devDependencies: [
           '**/*.{test,spec}.{ts,tsx}',
           '**/e2e/**',

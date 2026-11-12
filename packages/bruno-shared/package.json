@@ -1,0 +1,20 @@
+{
+  "name": "@usebruno/api-shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./hooks": "./src/hooks/index.ts",
+    "./constants": "./src/constants/index.ts",
+    "./routing": "./src/routing/index.ts",
+    "./ui/MenuDropdown": "./src/ui/MenuDropdown/index.ts",
+    "./assets/icons": "./src/assets/icons/index.ts",
+    "./*": {
+      "types": ["./src/*.ts", "./src/*.tsx"],
+      "default": "./src/*"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  }
+}

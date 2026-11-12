@@ -31,3 +31,5 @@ From the repo root: `npm run lint` (changed lines only), `npm run changeset`.
 5. Never rename storage keys (`oc-docs.theme`, `oc-docs.env`, `oc-docs:*`), the
    `.oc-playground` class or bundle names.
 6. Zero comments by default. Only what the code cannot say.
+7. New files: components `PascalCase.tsx`, everything else in `src` `camelCase.ts`, e2e `kebab-case`.
+   Don't copy a neighbouring file's naming.

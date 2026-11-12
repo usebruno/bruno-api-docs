@@ -83,6 +83,15 @@ These are the smells we reject in review. Each line says how to spot it.
 - `===` only `(lint)`. No `console.log` `(lint)`; `console.warn` and `console.error` are fine.
 - Runtime code imports only from `dependencies`, not `devDependencies` `(lint)`.
 
+## File naming
+
+- Components: `PascalCase.tsx`, named after the component. see: `src/components/Playground/PlaygroundBody/PlaygroundViewSwitch.tsx`
+- Hooks and everything else in `src`: `camelCase.ts`. see: `src/components/Docs/Sidebar/hooks/useFolderCollapse.ts`, `src/session/workspace.ts`
+- Specs sit next to the file with the same name: `workspace.ts` and `workspace.test.ts`.
+- E2E specs and page objects: `kebab-case`. see: `e2e/tests/playground/edits-reach-docs-variables.spec.ts`
+- `src/runner/` and `src/scripting/` still have older kebab-case files. Leave them until a
+  rename-only PR; new files there follow the rule above. Don't copy the neighbouring file's style.
+
 ## Styling
 
 - Colours and fonts come from `--oc-*` CSS variables only. Hex literals fail lint outside

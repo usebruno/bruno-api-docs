@@ -6,7 +6,6 @@ import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import {
   EMPTY_WORKSPACE,
   setCollection,
-  clearCollection,
   updateRequestItem,
   updateScriptFile,
   updateFolder,
@@ -351,7 +350,7 @@ describe('updateFolder', () => {
   });
 });
 
-describe('setCollection and clearCollection', () => {
+describe('setCollection', () => {
   it('swaps in the edited collection and bails out when it is the same one', () => {
     const state = seeded(makeCollection());
     const edited = { ...state.collection!, request: { headers: [] } } as OpenCollectionCollection;
@@ -374,10 +373,6 @@ describe('setCollection and clearCollection', () => {
   it('a null collection empties it, and is a no-op when already empty', () => {
     expect(setCollection(seeded(makeCollection()), null).collection).toBeNull();
     expect(setCollection(EMPTY_WORKSPACE, null)).toBe(EMPTY_WORKSPACE);
-  });
-
-  it('clearing drops the collection, responses and run starts', () => {
-    expect(clearCollection()).toBe(EMPTY_WORKSPACE);
   });
 });
 
@@ -460,7 +455,7 @@ describe('createWorkspace', () => {
     expect(workspace.get().responses).toEqual({ r1: { status: 200 } });
 
     workspace.clear();
-    expect(workspace.get()).toEqual(EMPTY_WORKSPACE);
+    expect(workspace.get()).toBe(EMPTY_WORKSPACE);
   });
 
   it('two workspaces do not share state', () => {

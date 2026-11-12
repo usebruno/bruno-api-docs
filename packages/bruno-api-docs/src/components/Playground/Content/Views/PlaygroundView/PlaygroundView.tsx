@@ -11,7 +11,7 @@ import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
 import { usePromptVariables } from './usePromptVariables';
 import { PromptVariablesModal } from '@/components/PromptVariablesModal/PromptVariablesModal';
-import type { WorkspaceActions } from '@/session/workspace';
+import type { Workspace } from '@/session/workspace';
 import { getItemName, isPlaygroundUnsupported, getRequestAuth, getRequestHeaders } from '@/utils/schemaHelpers';
 import { getInheritedAuthSummary, resolveInheritedAuth, getInheritedHeaders } from '@/utils/request';
 import UnsupportedRequest from '@/components/UnsupportedRequest/UnsupportedRequest';
@@ -28,7 +28,7 @@ interface PlaygroundViewProps {
   orientation?: 'horizontal' | 'vertical';
   response: any;
   requestStartedAt: number | null;
-  actions: WorkspaceActions;
+  actions: Workspace;
 }
 
 const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({

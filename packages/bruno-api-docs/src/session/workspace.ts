@@ -3,6 +3,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
+import { findLastIndex, omit } from 'lodash-es';
 import { createObservable } from '@/observable/observable';
 import { deepFreeze } from '@/utils/deepFreeze';
 import { isFolder } from '@/utils/schemaHelpers';
@@ -97,10 +98,7 @@ const updateEnvironment = (
 
 const setInList = (list: VariableList | undefined, name: string, value: string): VariableList | undefined => {
   if (!list) return list;
-  let index = -1;
-  list.forEach((v, i) => {
-    if (v.name === name && !v.disabled) index = i;
-  });
+  const index = findLastIndex(list, (v) => v.name === name && !v.disabled);
   if (index < 0 || (list[index] as { value?: unknown }).value === value) return list;
   const copy = list.slice();
   copy[index] = { ...list[index], value } as Variable;
@@ -123,8 +121,6 @@ const setFolderVariable = (item: AnyItem, name: string, value: string): AnyItem 
   const variables = setInList(item.request?.variables, name, value);
   return variables === item.request?.variables ? item : { ...item, request: { ...item.request, variables } };
 };
-
-export const clearCollection = (): WorkspaceState => EMPTY_WORKSPACE;
 
 export const updateRequestItem = (
   state: WorkspaceState,
@@ -216,13 +212,8 @@ export const setResponse = (
     ? state
     : { ...state, responses: { ...state.responses, [uuid]: response } };
 
-const without = <V>(record: Record<string, V>, key: string): Record<string, V> => {
-  const { [key]: _removed, ...rest } = record;
-  return rest;
-};
-
 export const clearResponse = (state: WorkspaceState, uuid: string): WorkspaceState =>
-  uuid in state.responses ? { ...state, responses: without(state.responses, uuid) } : state;
+  uuid in state.responses ? { ...state, responses: omit(state.responses, uuid) } : state;
 
 export const startRequest = (
   state: WorkspaceState,
@@ -233,29 +224,20 @@ export const startRequest = (
     : { ...state, requestStartedAt: { ...state.requestStartedAt, [uuid]: startedAt } };
 
 export const finishRequest = (state: WorkspaceState, uuid: string): WorkspaceState =>
-  uuid in state.requestStartedAt ? { ...state, requestStartedAt: without(state.requestStartedAt, uuid) } : state;
+  uuid in state.requestStartedAt ? { ...state, requestStartedAt: omit(state.requestStartedAt, uuid) } : state;
 
 export const clearAllRequests = (state: WorkspaceState): WorkspaceState => ({ ...state, requestStartedAt: {} });
-
-export interface WorkspaceActions {
-  replaceCollection: (collection: OpenCollection) => void;
-  updateRequestItem: (payload: { uuid: string; item: HttpRequest }) => void;
-  updateScriptFile: (payload: { uuid: string; script: string }) => void;
-  updateFolder: (payload: { uuid: string; folder: Folder }) => void;
-  setVariable: (write: VariableWrite) => void;
-  applyScriptVariableChanges: (changes: ScriptVariableChanges) => void;
-  setResponse: (payload: { uuid: string; response: any }) => void;
-  clearResponse: (uuid: string) => void;
-  startRequest: (payload: { uuid: string; startedAt: number }) => void;
-  finishRequest: (uuid: string) => void;
-}
 
 export const createWorkspace = () => {
   const observable = createObservable<WorkspaceState>({ initial: EMPTY_WORKSPACE });
   const state = { ...observable, set: (next: WorkspaceState) => observable.set(deepFreeze(next)) };
   const apply = <P>(update: (current: WorkspaceState, payload: P) => WorkspaceState) =>
     (payload: P) => state.set(update(state.get(), payload));
-  const actions: WorkspaceActions = {
+  return {
+    get: state.get,
+    subscribe: state.subscribe,
+    clear: () => state.set(EMPTY_WORKSPACE),
+    clearAllRequests: () => state.set(clearAllRequests(state.get())),
     replaceCollection: apply(setCollection),
     updateRequestItem: apply(updateRequestItem),
     updateScriptFile: apply(updateScriptFile),
@@ -266,13 +248,6 @@ export const createWorkspace = () => {
     clearResponse: apply(clearResponse),
     startRequest: apply(startRequest),
     finishRequest: apply(finishRequest)
-  };
-  return {
-    get: state.get,
-    subscribe: state.subscribe,
-    clear: () => state.set(clearCollection()),
-    clearAllRequests: () => state.set(clearAllRequests(state.get())),
-    ...actions
   };
 };
 

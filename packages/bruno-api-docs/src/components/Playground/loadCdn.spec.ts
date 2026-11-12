@@ -1,8 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type * as LoadCdn from './loadCdn';
+// Loaded before document is stubbed: prism touches the DOM on load when a document exists.
+import 'prismjs';
 
 interface FakeScript {
   src?: string;
+  nonce?: string;
   onload?: () => void;
   onerror?: () => void;
   remove: () => void;
@@ -15,19 +18,20 @@ describe('loadPlayground from the CDN', () => {
 
   beforeEach(async () => {
     vi.resetModules();
-    ({ loadPlayground } = await import('./loadCdn'));
     scripts = [];
-    globals = { Bruno: {} };
-    vi.stubGlobal('window', globals);
     vi.stubGlobal('document', {
       createElement: () => {
         const script: FakeScript = { remove: vi.fn() };
         scripts.push(script);
         return script;
       },
-      head: { appendChild: () => {} }
+      head: { appendChild: () => {} },
+      currentScript: { nonce: 'n1' }
     });
     vi.stubGlobal('__API_PLAYGROUND_FILE__', 'api-playground-abc.js');
+    ({ loadPlayground } = await import('./loadCdn'));
+    globals = { Bruno: {} };
+    vi.stubGlobal('window', globals);
   });
 
   afterEach(() => {
@@ -44,6 +48,7 @@ describe('loadPlayground from the CDN', () => {
     expect(second).toBe(first);
     expect(scripts).toHaveLength(1);
     expect(scripts[0].src).toMatch(/\/api-playground-abc\.js$/);
+    expect(scripts[0].nonce).toBe('n1');
     expect(await first).toEqual({ default: Body });
   });
 

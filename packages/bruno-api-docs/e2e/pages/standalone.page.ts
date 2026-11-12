@@ -58,6 +58,15 @@ export class StandalonePage extends BasePage {
     await this.navigate(this.url(hash));
   }
 
+  async gotoUnderCsp(policy: string, hash = ''): Promise<void> {
+    const url = `${appConfig.standaloneURL}/csp-nonce.html`;
+    await this.page.route(url, async (route) => {
+      const response = await route.fetch();
+      await route.fulfill({ response, headers: { ...response.headers(), 'content-security-policy': policy } });
+    });
+    await this.navigate(`${url}${hash}`);
+  }
+
   async mount(id: StandaloneTarget, options: ApiDocsOptions): Promise<void> {
     await this.page.evaluate(({ id, options }) => {
       const w = window as unknown as StandaloneWindow;

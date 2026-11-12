@@ -20,6 +20,7 @@ type CdnWindow = Window & {
 };
 
 const bundleUrl = import.meta.url;
+const bundleNonce = (document.currentScript as HTMLScriptElement | null)?.nonce ?? '';
 let loading: Promise<PlaygroundModule> | undefined;
 
 export const loadPlayground = (): Promise<PlaygroundModule> =>
@@ -41,6 +42,7 @@ export const loadPlayground = (): Promise<PlaygroundModule> =>
     };
     const script = document.createElement('script');
     script.src = new URL(__API_PLAYGROUND_FILE__, bundleUrl).href;
+    script.nonce = bundleNonce;
     script.onload = () => resolve({ default: w.__brunoApiPlayground! });
     script.onerror = () => {
       loading = undefined;

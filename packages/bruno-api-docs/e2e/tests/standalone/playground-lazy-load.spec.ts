@@ -4,6 +4,14 @@ import { appConfig } from '../../config/app.config';
 import { generalFixtureCollection } from '../../../src/e2eFixtures/generalCollection';
 
 const PROD_HOST = 'https://api.prod.example.com';
+const NONCE_CSP = [
+  'script-src \'nonce-n1\' https://cdn.jsdelivr.net \'wasm-unsafe-eval\'',
+  'style-src \'self\' \'unsafe-inline\' https://cdn.jsdelivr.net https://fonts.googleapis.com',
+  'worker-src \'self\' blob: https://cdn.jsdelivr.net',
+  'connect-src \'self\' data: https://cdn.jsdelivr.net https:',
+  'font-src *',
+  'img-src * data:'
+].join('; ');
 
 const playgroundFileRequests = (page: Page): string[] => {
   const urls: string[] = [];
@@ -126,6 +134,24 @@ test.describe('The playground file on a host page', () => {
     await first.responsePane.sendButton.click();
     await expect(first.responsePane.status).toHaveText('200 OK');
     expect(loads).toHaveLength(2);
+  });
+
+  test('loads on a page whose CSP allows scripts only by nonce', async ({ page, standalonePage }) => {
+    const violations: string[] = [];
+    page.on('console', (message) => {
+      if (/Content Security Policy/.test(message.text())) violations.push(message.text());
+    });
+    await page.route('**/alpha**', (route) =>
+      route.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: '{"ok":1}' })
+    );
+    await standalonePage.gotoUnderCsp(NONCE_CSP, '#/alpha');
+    await standalonePage.mount('first', { content: generalFixtureCollection });
+    const first = standalonePage.instance('first');
+
+    await first.requestPage.urlBar.tryButton.click();
+    await first.responsePane.sendButton.click();
+    await expect(first.responsePane.status).toHaveText('200 OK');
+    expect(violations).toEqual([]);
   });
 
   test('leaves the docs snippet highlighting alone when it loads', async ({ page, standalonePage }) => {

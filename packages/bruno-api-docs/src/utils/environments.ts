@@ -6,7 +6,7 @@ import { descriptionText, resolveDescription } from './description';
 import { isSecretVariable, isExternalSecretActive, unwrapVariableValue, type ExternalSecretEntry } from './variableResolution';
 import { rowToVariable, toDataType } from './variableDataType';
 import { reconcileScriptVariables } from './scriptVariables';
-import type { JsonValue } from '@/runner/utils/variable-interpolator';
+import type { JsonValue } from '@/types/run';
 
 const humanizeManager = (type: string | undefined): string => {
   if (!type) return 'External';

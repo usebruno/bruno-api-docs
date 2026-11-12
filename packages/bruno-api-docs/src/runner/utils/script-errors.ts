@@ -1,11 +1,6 @@
 import type { TestResultsResponse } from '@/scripting/utils/test';
+import type { ScriptErrorPhase } from '@/types/run';
 
-export type ScriptErrorPhase = 'pre-request' | 'post-response' | 'tests';
-
-export interface ScriptError {
-  phase: Exclude<ScriptErrorPhase, 'pre-request'>;
-  message: string;
-}
 
 export const SCRIPT_ERROR_TITLES: Record<ScriptErrorPhase, string> = {
   'pre-request': 'Pre-Request Script Error',

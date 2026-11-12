@@ -19,7 +19,7 @@ import { FileNotFoundIcon } from '@/assets/icons';
 import { useSplitPane } from '@/hooks/useSplitPane';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import { SplitDivider } from '@/components/SplitDivider/SplitDivider';
-import { playgroundRuns, PLAYGROUND_CLOSED } from './playgroundRuns';
+import { playgroundRuns, PLAYGROUND_CLOSED } from '@/session/playgroundRuns';
 
 interface PlaygroundViewProps {
   item: HttpRequest;

@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { formatBytes } from '@/utils/exampleResponse';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { downloadResponse } from '@/utils/downloadResponse';
 import { StyledWrapper } from './StyledWrapper';
 import { IconAlertTriangle, IconCheck, IconCopy, IconDownload, IconEye } from '@tabler/icons';

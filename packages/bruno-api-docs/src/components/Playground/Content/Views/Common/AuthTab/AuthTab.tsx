@@ -1,5 +1,6 @@
 import React from 'react';
-import { Field, type SelectOption } from '@/ui/Field';
+import { Field } from '@/ui/Field';
+import type { SelectOption } from '@/types/selectOption';
 import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
 import { REQUEST_PROTOCOL_KEYS } from '@/utils/schemaHelpers';
 import type { InheritedAuthSummary } from '@/utils/request';

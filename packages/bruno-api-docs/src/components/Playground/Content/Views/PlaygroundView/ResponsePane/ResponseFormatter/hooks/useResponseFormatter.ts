@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import type { ResponseBodyFormat } from '@/constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { getResponseFormatOptions } from '@/utils/response';
 import { useSession } from '@/session/session';
 import { useObservable } from '@/observable/observable';

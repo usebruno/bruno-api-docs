@@ -52,7 +52,7 @@ One owner per fact. Everything else reads it or derives it.
 | Docs folder collapse | `src/components/Docs/Sidebar/hooks/useFolderCollapse.ts` (AppShell local state) | yes | no | reset |
 | Working copy (playground edits) | workspace, `src/session/workspace.ts` | yes | no | replaced, edits dropped |
 | Responses | workspace | yes | no | stay, but keyed by old uuids |
-| Run starts | workspace + `src/components/Playground/Content/Views/PlaygroundView/playgroundRuns.ts` | no, close aborts runs | no | n/a |
+| Run starts | workspace + `src/session/playgroundRuns.ts` | no, close aborts runs | no | n/a |
 | Playground deep link: `pg`, `dock`, `pgReq`, `pgEx` | URL query, `src/utils/playgroundDock.ts` | no, close clears all four | yes | kept |
 
 The session is created once per `<OpenCollection>` mount (`src/session/session.tsx`), so two
@@ -85,7 +85,7 @@ updaters plus one observable, and deep-freezes its state.
 ## Request execution
 
 1. `PlaygroundView` (`src/components/Playground/Content/Views/PlaygroundView/PlaygroundView.tsx`)
-   handles Send. `src/components/Playground/Content/Views/PlaygroundView/playgroundRuns.ts` tracks in-flight runs and their abort controllers.
+   handles Send. `src/session/playgroundRuns.ts` tracks in-flight runs and their abort controllers.
 2. `src/runner/index.ts` (`RequestRunner`) merges headers, scripts and auth from the
    collection → folder → request tree, runs the pre-request script, interpolates `{{vars}}`,
    executes, runs the post-response script, then tests and assertions.

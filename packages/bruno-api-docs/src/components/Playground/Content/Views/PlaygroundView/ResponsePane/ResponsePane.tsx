@@ -12,7 +12,7 @@ import ResponseFormatSelector from './ResponseFormatter/ResponseFormatter';
 import { useResponseFormatter } from './ResponseFormatter/hooks/useResponseFormatter';
 import type { ResponseBodyFormat } from '@/constants';
 import ResponseDuration from './ResponseInfo/ResponseDuration/ResponseDuration';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { SCRIPT_ERROR_TITLES } from '@/runner/utils/script-errors';
 import ResponseStatus from './ResponseInfo/ResponseStatus/ResponseStatus';
 import ResponseSize from './ResponseInfo/ResponseSize/ResponseSize';

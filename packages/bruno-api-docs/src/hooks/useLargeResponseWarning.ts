@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { getResponseSize } from '@/utils/response';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB

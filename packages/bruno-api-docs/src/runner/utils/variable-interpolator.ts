@@ -3,10 +3,9 @@ import { isPlainObject } from 'lodash-es';
 import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@/utils/schemaHelpers';
 import { templateVariableGlobalRegex } from '@/utils/common';
 import { isPromptVariableToken } from '@/utils/promptVariables';
-import { mockDataFunctions } from './faker-functions';
+import { mockDataFunctions } from '@/utils/fakerFunctions';
+import type { JsonValue, Variables } from '@/types/run';
 
-export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
-export type Variables = Record<string, JsonValue>;
 
 // for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.
 const MOCK_PATTERN = /\{\{\$(\w+)\}\}/g;

@@ -3,7 +3,7 @@ import type { OpenCollection as OpenCollectionCollection } from '@opencollection
 import type { Environment } from '@opencollection/types/config/environments';
 import { RequestExecutor } from './RequestExecutor';
 import ScriptRuntime, { type ScriptRunError } from '@/scripting/runtime/script-runtime';
-import { appendScriptErrorResult, SCRIPT_ERROR_TITLES, type ScriptError } from './utils/script-errors';
+import { appendScriptErrorResult, SCRIPT_ERROR_TITLES } from './utils/script-errors';
 import type { RunRequestCallback } from '@/scripting/utils/bru';
 import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-runtime';
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
@@ -11,7 +11,9 @@ import { getCollectionFolderRequestVariables, getCollectionVariables } from './u
 import { snapshotEnabledHeaders, getHeaderNamesChangedByScript } from './utils/script-headers';
 import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
 import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
-import type { Variables, JsonValue } from './utils/variable-interpolator';
+import type {
+  Variables, JsonValue, RunRequestResponse, ScriptError, AssertionResultsResponse, TestResultsResponse
+} from '@/types/run';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
@@ -79,64 +81,6 @@ export interface RunRequestOptions {
   signal?: AbortSignal;
   validateSSL?: boolean;
   prepared?: HttpRequest;
-}
-
-export interface TestResultsResponse {
-  summary: {
-    total: number;
-    passed: number;
-    failed: number;
-    skipped: number;
-  };
-  results: Array<{
-    status: string;
-    description: string;
-    expected?: JsonValue;
-    actual?: JsonValue;
-    error?: string;
-  }>;
-}
-
-export interface AssertionResultsResponse {
-  summary: {
-    total: number;
-    passed: number;
-    failed: number;
-    skipped: number;
-  };
-  results: Array<{
-    status: string;
-    lhsExpr?: string;
-    rhsExpr?: string;
-    operator?: string;
-    rhsOperand?: JsonValue;
-    error?: string;
-  }>;
-}
-
-export interface RunRequestResponse {
-  status?: number;
-  statusText?: string;
-  headers?: Record<string, string>;
-  data?: JsonValue;
-  /** Present only when needed downstream — binary previews, byte views, or an unreconstructable body. */
-  base64Data?: string;
-  /** Content type sniffed from the response bytes at parse time (magic numbers → SVG → text), or null. */
-  detectedContentType?: string | null;
-  size?: number;
-  duration?: number;
-  url?: string;
-  error?: string;
-  errorType?: string;
-  errorTitle?: string;
-  isCancel?: boolean;
-  requestId?: string;
-  assertionResults?: AssertionResultsResponse;
-  testResults?: TestResultsResponse;
-  scriptErrors?: ScriptError[];
-  warnings?: string[] | null;
-  environmentVariables?: { envName: string; variables: Variables; deleted: string[] };
-  collectionVariables?: { variables: Variables; deleted: string[] };
 }
 
 export class RequestRunner {

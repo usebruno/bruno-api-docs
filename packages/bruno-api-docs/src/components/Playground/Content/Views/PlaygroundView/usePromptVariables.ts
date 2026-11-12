@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { buildPromptVariableMap } from '@/utils/promptVariables';
-import type { Variables } from '@/runner/utils/variable-interpolator';
+import type { Variables } from '@/types/run';
 
 interface PendingPrompt {
   names: string[];

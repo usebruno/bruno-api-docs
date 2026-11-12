@@ -5,7 +5,7 @@ import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
 import ModalDock from './docks/ModalDock/ModalDock';
 import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
-import { playgroundRuns, PLAYGROUND_CLOSED } from './Content/Views/PlaygroundView/playgroundRuns';
+import { playgroundRuns, PLAYGROUND_CLOSED } from '@/session/playgroundRuns';
 import { useSession } from '@/session/session';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.

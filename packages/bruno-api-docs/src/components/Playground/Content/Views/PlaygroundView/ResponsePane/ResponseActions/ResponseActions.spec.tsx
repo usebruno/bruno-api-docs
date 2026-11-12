@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { TestProviders } from '@/test-utils/providers';
 import { query, getByTestId } from '@/test-utils/dom';
 import ResponseActions from './ResponseActions';

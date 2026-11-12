@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import { TestProviders } from '@/test-utils/providers';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import ResponsePane from './ResponsePane';
 
 const previousResponse = { status: 200, headers: {}, data: { ok: true } } as unknown as RunRequestResponse;

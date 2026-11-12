@@ -8,7 +8,7 @@ import { StyledWrapper } from './StyledWrapper';
 import MenuDropdown from '@/ui/MenuDropdown';
 import type { MenuDropdownItem } from '@/ui/MenuDropdown';
 import ActionIconButton from './ActionIconButton/ActionIconButton';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import type { ResponseBodyFormat } from '@/constants';
 import { useSession } from '@/session/session';
 import { downloadResponse } from '@/utils/downloadResponse';

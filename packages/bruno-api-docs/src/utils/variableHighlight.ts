@@ -1,4 +1,4 @@
-import { mockDataFunctions } from '@/runner/utils/faker-functions';
+import { mockDataFunctions } from '@/utils/fakerFunctions';
 import { isPromptVariableToken } from '@/utils/promptVariables';
 
 export type VariableTokenClass = 'variable-valid' | 'variable-invalid' | 'variable-prompt';

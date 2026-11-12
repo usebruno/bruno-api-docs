@@ -8,7 +8,7 @@ import { promptVariableName } from '@/utils/promptVariables';
 import { useEnvState, useWorkingCollection } from '@/session/session';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
-import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
+import { mockDataFunctions, timeBasedDynamicVars } from '@/utils/fakerFunctions';
 import {
   buildScopedVariableModel,
   resolveValueDeep,

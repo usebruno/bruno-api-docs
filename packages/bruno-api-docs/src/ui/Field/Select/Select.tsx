@@ -2,11 +2,8 @@ import React from 'react';
 import { CaretIcon } from '@/assets/icons';
 import MenuDropdown from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
+import type { SelectOption } from '@/types/selectOption';
 
-export interface SelectOption {
-  value: string;
-  label: string;
-}
 
 interface SelectProps {
   value: string;

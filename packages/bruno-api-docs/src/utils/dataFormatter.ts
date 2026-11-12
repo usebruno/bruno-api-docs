@@ -7,7 +7,7 @@ import type { Edit } from 'jsonc-parser';
 import { format as formatJsonc } from 'jsonc-parser';
 import prettierFormat from 'prettier/standalone';
 import parserBabel from 'prettier/parser-babel';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { getResponseSize } from './response';
 
 const applyJSONPathFilter = (data: RunRequestResponse['data'], filter: string): unknown => {

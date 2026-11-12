@@ -4,7 +4,7 @@ import type { Variable } from '@opencollection/types/common/variables';
 import { getTreePathFromCollectionToItem } from './tree-utils';
 import { isFolder, getRequestVariables } from '@/utils/schemaHelpers';
 import { coerceVariableValue } from '@/utils/variableDataType';
-import type { Variables, JsonValue } from './variable-interpolator';
+import type { Variables, JsonValue } from '@/types/run';
 
 export const getCollectionVariables = (collection: OpenCollection): Variables => {
   const result: Variables = {};

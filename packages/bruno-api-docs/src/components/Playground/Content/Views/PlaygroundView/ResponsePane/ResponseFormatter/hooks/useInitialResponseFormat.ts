@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import type { ResponseBodyFormatViewData } from '@/constants';
 import { detectContentTypeFromBase64, getDefaultResponseFormat, getContentType } from '@/utils/response';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 
 interface InitialResponseFormatData extends ResponseBodyFormatViewData {
   detectedContentType: string | null;

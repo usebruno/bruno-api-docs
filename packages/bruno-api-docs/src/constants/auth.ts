@@ -1,4 +1,4 @@
-import type { SelectOption } from '@/ui/Field';
+import type { SelectOption } from '@/types/selectOption';
 
 export const AUTH_TYPES = {
   BASIC: 'basic',

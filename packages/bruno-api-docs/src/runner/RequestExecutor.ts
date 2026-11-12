@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { RunRequestResponse } from './index';
+import type { RunRequestResponse } from '@/types/run';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
 import { buildRequestUrl } from '@/utils/pathParams';
 import { buildDigestAuthorization, findDigestChallenge, getDigestCredentials } from './utils/digest-auth';

@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import {
   type ResponseBodyFormat,
   type ResponseBodyFormatViewData,

@@ -1,4 +1,4 @@
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { getContentType } from './response';
 
 // Minimal MIME -> extension map for the common API response types. Falls back to '' (no extension).

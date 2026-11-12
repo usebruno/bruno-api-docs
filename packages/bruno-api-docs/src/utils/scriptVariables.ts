@@ -1,5 +1,5 @@
 import type { Variable, SecretVariable, VariableValueOrVariants, VariableValueType, VariableValueVariant } from '@opencollection/types/common/variables';
-import type { JsonValue } from '@/runner/utils/variable-interpolator';
+import type { JsonValue } from '@/types/run';
 import { unwrapVariableTyped, isSecretVariable } from './variableResolution';
 import { toDataType, type VariableDataType } from './variableDataType';
 

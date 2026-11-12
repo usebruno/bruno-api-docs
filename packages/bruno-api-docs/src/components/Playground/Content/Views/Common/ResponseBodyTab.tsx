@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import type { ResponseBodyFormat } from '@/constants';
 import { FORMAT_TO_MONACO } from '@/constants';
 import { formatResponse } from '@/utils/dataFormatter';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
 import useLargeResponse from '@/hooks/useLargeResponseWarning';
 import QueryResultPreview from '@/components/Playground/QueryResultPreview/QueryResultPreview';

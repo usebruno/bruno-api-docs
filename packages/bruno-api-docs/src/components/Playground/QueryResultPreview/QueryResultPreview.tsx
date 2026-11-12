@@ -3,7 +3,7 @@ import HtmlPreview from './HtmlPreview/HtmlPreview';
 import JsonPreview from './JsonPreview/JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
-import type { RunRequestResponse } from '@/runner';
+import type { RunRequestResponse } from '@/types/run';
 import { StyledWrapper } from './StyledWrapper';
 import type { ResponseBodyFormat } from '@/constants';
 import { formatToPreviewMode } from '@/constants';

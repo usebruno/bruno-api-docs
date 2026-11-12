@@ -9,7 +9,7 @@ import { deepFreeze } from '@/utils/deepFreeze';
 import { isFolder } from '@/utils/schemaHelpers';
 import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
-import type { Variables } from '@/runner/utils/variable-interpolator';
+import type { Variables } from '@/types/run';
 
 export interface WorkspaceState {
   collection: OpenCollection | null;

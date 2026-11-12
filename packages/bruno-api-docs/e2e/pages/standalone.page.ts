@@ -28,8 +28,12 @@ export class StandalonePage extends BasePage {
     return this.page.getByTestId(`standalone-${id}`);
   }
 
-  async goto(): Promise<void> {
-    await this.navigate(`${appConfig.standaloneURL}/index.html`);
+  url(hash = ''): string {
+    return `${appConfig.standaloneURL}/index.html${hash}`;
+  }
+
+  async goto(hash = ''): Promise<void> {
+    await this.navigate(this.url(hash));
   }
 
   async mount(id: StandaloneTarget, options: ApiDocsOptions): Promise<void> {

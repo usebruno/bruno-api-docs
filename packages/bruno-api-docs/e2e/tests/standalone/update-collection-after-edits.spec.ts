@@ -30,7 +30,7 @@ test.describe('updateCollection after playground edits', () => {
 
     await expect(playground.view.getByText('Select an endpoint from the sidebar to get started.')).toBeVisible();
     await expect(playground.urlInput).toHaveCount(0);
-    expect(new URL(page.url()).hash).toBe('#/alpha?pg=1&dock=bottom&pgReq=alpha');
+    await expect(page).toHaveURL(standalonePage.url('#/alpha?pg=1&dock=bottom&pgReq=alpha'));
     await expect(requestPage.title).toHaveText('Alpha');
     await expect(envSwitcher.trigger).toHaveText('Prod');
     await expect(playground.envSwitcher.trigger).toHaveText('Prod');

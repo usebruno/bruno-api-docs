@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
+import type { Item } from '@opencollection/types/collection/item';
 import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
 import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import IconButton from '@/ui/IconButton/IconButton';
@@ -16,6 +17,7 @@ interface PlaygroundSidebarProps {
   onNavigate: (slug: string) => void;
   onToggleFolder: (uuid: string) => void;
   onExpandFolder: (uuid: string) => void;
+  isFolderCollapsed: (folder: Item) => boolean;
   onOpenEnvironments: () => void;
   environmentsActive: boolean;
   onOpenCollection: () => void;
@@ -32,6 +34,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   onNavigate,
   onToggleFolder,
   onExpandFolder,
+  isFolderCollapsed,
   onOpenEnvironments,
   environmentsActive,
   onOpenCollection,
@@ -78,6 +81,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
             onNavigate={onNavigate}
             onToggleFolder={onToggleFolder}
             onExpandFolder={onExpandFolder}
+            isFolderCollapsed={isFolderCollapsed}
             activeExample={activeExample}
             onExampleClick={onExampleClick}
             collectionRoot={{

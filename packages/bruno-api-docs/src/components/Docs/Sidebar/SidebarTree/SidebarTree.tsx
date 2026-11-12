@@ -34,7 +34,7 @@ interface SidebarTreeProps {
   onNavigate: (slug: string) => void;
   onToggleFolder: (uuid: string) => void;
   onExpandFolder: (uuid: string) => void;
-  isFolderCollapsed?: (folder: OpenCollectionItem) => boolean;
+  isFolderCollapsed: (folder: OpenCollectionItem) => boolean;
   collectionRoot?: CollectionRoot;
   activeExample: ExampleHighlight | null;
   onExampleClick?: (requestUuid: string, index: number) => void;
@@ -48,7 +48,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
   onNavigate,
   onToggleFolder,
   onExpandFolder,
-  isFolderCollapsed = (folder) => (folder as { isCollapsed?: boolean }).isCollapsed ?? true,
+  isFolderCollapsed,
   collectionRoot,
   activeExample,
   onExampleClick

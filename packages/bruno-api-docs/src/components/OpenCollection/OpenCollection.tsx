@@ -84,7 +84,7 @@ export interface OpenCollectionProps {
 
 const useCollectionLoader = (collection: OpenCollectionProps['collection']): LoadState => {
   const dispatch = useAppDispatch();
-  const { selection } = useSession().playground;
+  const { selection, folders } = useSession().playground;
   const [loadState] = useState(() => createObservable<LoadState>({ initial: IDLE }));
 
   useEffect(() => {
@@ -97,11 +97,13 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
         const { collection: resolved, sourceText } = await resolveCollectionSource(collection);
         if (!isActive) return;
         const hydrated = hydrateWithUUIDs(resolved);
+        folders.seed(hydrated.items);
         dispatch(setPlaygroundCollection(hydrated));
         loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrated });
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
+        folders.seed(undefined);
         dispatch(clearPlaygroundCollection());
         selection.set(null);
         loadState.set({ ...IDLE, status: 'failed', error: message });
@@ -109,6 +111,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
     };
 
     if (collection == null) {
+      folders.seed(undefined);
       dispatch(clearPlaygroundCollection());
       selection.set(null);
       loadState.set(IDLE);
@@ -119,12 +122,13 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
       void load();
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
+      folders.seed(hydrated.items);
       dispatch(setPlaygroundCollection(hydrated));
       loadState.set({ status: 'succeeded', error: null, sourceText: null, document: hydrated });
     }
 
     return () => { isActive = false; };
-  }, [collection, dispatch, loadState, selection]);
+  }, [collection, dispatch, loadState, selection, folders]);
 
   return useObservable(loadState);
 };

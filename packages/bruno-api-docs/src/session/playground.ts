@@ -1,5 +1,6 @@
 import { createObservable } from '@/observable/observable';
 import type { ResponseBodyFormat } from '@/constants';
+import { createPlaygroundFolders } from './playgroundFolders';
 
 export type PlaygroundSelection
   = | { uuid: string; exampleIndex: number | null }
@@ -41,6 +42,7 @@ export const createPlayground = () => {
     },
     orientation: createObservable<ResponsePaneOrientation | null>({ initial: null }),
     responseFormat: createKeyed<ResponseBodyFormat>(),
-    responsePreview: createKeyed<boolean>()
+    responsePreview: createKeyed<boolean>(),
+    folders: createPlaygroundFolders()
   };
 };

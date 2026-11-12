@@ -1,8 +1,6 @@
 import { useEffect, useMemo, type MutableRefObject } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { useAppDispatch } from '@/store/hooks';
-import { expandFolders } from '@/store/slices/playground';
 import { useSession } from '@/session/session';
 import { useObservable } from '@/observable/observable';
 import { selectedUuid, type PlaygroundSelection } from '@/session/playground';
@@ -38,10 +36,9 @@ export const usePlaygroundSelection = ({
   appliedSlugRef,
   onSelected
 }: Options) => {
-  const dispatch = useAppDispatch();
   const model = useNavModel();
   const { setRequestSlug, setRequestExample } = usePlaygroundUrlState();
-  const { selection: selectionState } = useSession().playground;
+  const { selection: selectionState, folders } = useSession().playground;
   const selection = useObservable(selectionState);
   const selectedItemId = selectedUuid(selection);
   const selectedExampleIndex = typeof selection === 'object' && selection ? selection.exampleIndex : null;
@@ -84,14 +81,14 @@ export const usePlaygroundSelection = ({
       = exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
     appliedSlugRef.current = key;
     selectionState.set(target.uuid ? { uuid: target.uuid, exampleIndex } : target.view as PlaygroundSelection);
-    if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
-  }, [requestSlug, exampleSlug, model, collection, dispatch, appliedSlugRef, selectionState]);
+    folders.expand(target.expandUuids);
+  }, [requestSlug, exampleSlug, model, collection, appliedSlugRef, selectionState, folders]);
 
   const navigate = (slug: string) => {
     const target = resolvePlaygroundTarget(slug, model);
     if (!target || !target.uuid) return;
     selectionState.set({ uuid: target.uuid, exampleIndex: null });
-    if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
+    folders.expand(target.expandUuids);
     appliedSlugRef.current = slug;
     setRequestSlug(slug);
     onSelected();

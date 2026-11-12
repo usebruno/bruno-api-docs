@@ -54,50 +54,6 @@ const findAndUpdateItemInCollection = (
   return false;
 };
 
-const initializeCollapsedState = (items: OpenCollectionItem[] | undefined): void => {
-  if (!items) return;
-
-  for (const item of items) {
-    if (isFolder(item)) {
-      // Initialize isCollapsed to true (collapsed) if not already set
-      if ((item as any).isCollapsed === undefined) {
-        (item as any).isCollapsed = true;
-      }
-      const folder = item as Folder;
-      if (folder.items) {
-        initializeCollapsedState(folder.items);
-      }
-    }
-  }
-};
-
-const preserveCollapsedState = (
-  newItems: OpenCollectionItem[],
-  oldItems: OpenCollectionItem[]
-): void => {
-  for (const newItem of newItems) {
-    const newUuid = (newItem as any).uuid;
-
-    const oldItem = oldItems.find((old: any) => old.uuid === newUuid);
-
-    if (isFolder(newItem)) {
-      if (oldItem && isFolder(oldItem)) {
-        (newItem as any).isCollapsed = (oldItem as any).isCollapsed;
-
-        const newFolder = newItem as Folder;
-        const oldFolder = oldItem as Folder;
-        if (newFolder.items && oldFolder.items) {
-          preserveCollapsedState(newFolder.items, oldFolder.items);
-        }
-      } else {
-        if ((newItem as any).isCollapsed === undefined) {
-          (newItem as any).isCollapsed = true;
-        }
-      }
-    }
-  }
-};
-
 const playgroundSlice = createSlice({
   name: 'playground',
   initialState,
@@ -108,16 +64,7 @@ const playgroundSlice = createSlice({
         return;
       }
 
-      const hydrated = hydrateWithUUIDs(action.payload);
-
-      // Preserve existing collapsed states from previous hydrated collection
-      if (state.hydratedCollection?.items && hydrated.items) {
-        preserveCollapsedState(hydrated.items, state.hydratedCollection.items);
-      } else if (hydrated.items) {
-        initializeCollapsedState(hydrated.items);
-      }
-
-      state.hydratedCollection = hydrated;
+      state.hydratedCollection = hydrateWithUUIDs(action.payload);
     },
     clearPlaygroundCollection: (state: PlaygroundState) => {
       state.hydratedCollection = null;
@@ -157,28 +104,6 @@ const playgroundSlice = createSlice({
       state.requestStartedAt = {};
     },
     // UI State Actions
-    // Collection Mutation Actions
-    toggleFolderCollapse: (state: PlaygroundState, action: PayloadAction<string>) => {
-      if (!state.hydratedCollection?.items) return;
-
-      const uuid = action.payload;
-      findAndUpdateItem(state.hydratedCollection.items, uuid, (item) => {
-        const currentCollapsed = (item as any).isCollapsed ?? true;
-        (item as any).isCollapsed = !currentCollapsed;
-      });
-    },
-    // Opens the given folders in the sidebar tree so the selected item shows up
-    // inside them. Only ever opens, never closes, so a folder the user collapsed
-    // by hand stays closed.
-    expandFolders: (state: PlaygroundState, action: PayloadAction<string[]>) => {
-      if (!state.hydratedCollection?.items || action.payload.length === 0) return;
-      const targets = new Set(action.payload);
-      for (const uuid of targets) {
-        findAndUpdateItem(state.hydratedCollection.items, uuid, (item) => {
-          (item as { isCollapsed?: boolean }).isCollapsed = false;
-        });
-      }
-    },
     updateCollectionSettings: (state: PlaygroundState, action: PayloadAction<OpenCollectionCollection>) => {
       state.hydratedCollection = action.payload;
     },
@@ -275,8 +200,6 @@ export const {
   setPlaygroundRequestStarted,
   clearPlaygroundRequestStarted,
   clearAllPlaygroundRequestsStarted,
-  toggleFolderCollapse,
-  expandFolders,
   updateCollectionSettings,
   updateCollectionEnvironments,
   applyScriptVariableChanges,

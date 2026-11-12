@@ -1,10 +1,8 @@
-import React, { useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import {
-  selectHydratedCollection,
-  toggleFolderCollapse,
-  expandFolders
-} from '@/store/slices/playground';
+import React, { useCallback, useRef } from 'react';
+import type { Item } from '@opencollection/types/collection/item';
+import { useAppSelector } from '@/store/hooks';
+import { selectHydratedCollection } from '@/store/slices/playground';
+import { isFolderCollapsed } from '@/session/playgroundFolders';
 import { useSession } from '@/session/session';
 import { useObservable } from '@/observable/observable';
 import { useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
@@ -37,9 +35,11 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   onOpenSidebar,
   appliedSlugRef
 }) => {
-  const dispatch = useAppDispatch();
   const collection = useAppSelector(selectHydratedCollection);
-  const orientationOverride = useObservable(useSession().playground.orientation);
+  const { orientation: orientationState, folders } = useSession().playground;
+  const orientationOverride = useObservable(orientationState);
+  const folderState = useObservable(folders);
+  const isCollapsed = useCallback((folder: Item) => isFolderCollapsed(folderState, folder), [folderState]);
 
   const viewRef = useRef<HTMLDivElement>(null);
   const viewWidth = useElementWidth(viewRef);
@@ -65,9 +65,6 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     }
   });
 
-  const handleToggleFolder = (uuid: string) => dispatch(toggleFolderCollapse(uuid));
-  const handleExpandFolder = (uuid: string) => dispatch(expandFolders([uuid]));
-
   return (
     <StyledWrapper
       data-testid="playground-runner"
@@ -90,8 +87,9 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
               activeSlug={selection.activeSlug}
               uuidToSlug={selection.uuidToSlug}
               onNavigate={selection.navigate}
-              onToggleFolder={handleToggleFolder}
-              onExpandFolder={handleExpandFolder}
+              onToggleFolder={folders.toggle}
+              onExpandFolder={(uuid) => folders.expand([uuid])}
+              isFolderCollapsed={isCollapsed}
               onOpenEnvironments={selection.openEnvironments}
               environmentsActive={selection.viewMode === 'environments'}
               onOpenCollection={selection.openCollection}

@@ -4,8 +4,6 @@ import {
   updatePlaygroundItem,
   updatePlaygroundScriptFile,
   selectHydratedCollection,
-  toggleFolderCollapse,
-  expandFolders,
   setPlaygroundVariable,
   applyScriptVariableChanges
 } from './playground';
@@ -168,33 +166,6 @@ describe('setPlaygroundVariable', () => {
     const [vaultKey] = envExternalSecrets(store);
     expect(vaultKey.value).toBe('typed');
     expect(vaultKey.secretName).toBe('prod/api-key');
-  });
-});
-
-describe('playground folder collapse', () => {
-  const withFolder = () =>
-    ({
-      info: { name: 'Test', version: '1.0.0' },
-      items: [{ type: 'folder', uuid: 'f1', name: 'Folder', isCollapsed: false, items: [] }]
-    }) as unknown as OpenCollectionCollection;
-  const folder = (store: ReturnType<typeof createOpenCollectionStore>) =>
-    selectHydratedCollection(store.getState())!.items![0] as { isCollapsed?: boolean };
-
-  it('expandFolders reveals a collapsed folder', () => {
-    const store = createOpenCollectionStore();
-    store.dispatch(setPlaygroundCollection(withFolder()));
-    store.dispatch(toggleFolderCollapse('f1'));
-    expect(folder(store).isCollapsed).toBe(true);
-
-    store.dispatch(expandFolders(['f1']));
-    expect(folder(store).isCollapsed).toBe(false);
-  });
-
-  it('expandFolders keeps an already-open folder open (never collapses)', () => {
-    const store = createOpenCollectionStore();
-    store.dispatch(setPlaygroundCollection(withFolder()));
-    store.dispatch(expandFolders(['f1']));
-    expect(folder(store).isCollapsed).toBe(false);
   });
 });
 

@@ -7,8 +7,8 @@ import { useRenderToDom } from '@/hooks/useRenderToDom';
 
 const req = (uuid: string, name: string, method: string): OpenCollectionItem =>
   ({ type: 'http', uuid, name, method }) as unknown as OpenCollectionItem;
-const folder = (uuid: string, name: string, items: OpenCollectionItem[], isCollapsed = false): OpenCollectionItem =>
-  ({ type: 'folder', uuid, name, items, isCollapsed }) as unknown as OpenCollectionItem;
+const folder = (uuid: string, name: string, items: OpenCollectionItem[]): OpenCollectionItem =>
+  ({ type: 'folder', uuid, name, items }) as unknown as OpenCollectionItem;
 
 const uuidToSlug = new Map<string, string>([
   ['f-auth', 'authentication'],
@@ -26,6 +26,7 @@ const render = (props: Partial<React.ComponentProps<typeof SidebarTree>> = {}) =
       onNavigate={noop}
       onToggleFolder={noop}
       onExpandFolder={noop}
+      isFolderCollapsed={() => false}
       {...props}
     />
   );
@@ -39,9 +40,7 @@ describe('SidebarTree', () => {
   });
 
   it('hides children of a collapsed folder', () => {
-    const html = render({
-      items: [folder('f-auth', 'Authentication', [req('r-login', 'Login', 'POST')], true)]
-    });
+    const html = render({ isFolderCollapsed: () => true });
     expect(html).toContain('Authentication');
     expect(html).not.toContain('Login');
   });
@@ -65,6 +64,7 @@ describe('SidebarTree', () => {
         onNavigate={noop}
         onToggleFolder={noop}
         onExpandFolder={noop}
+        isFolderCollapsed={() => true}
       />
     );
     expect(html).toContain('WS');
@@ -83,6 +83,7 @@ describe('SidebarTree', () => {
         onNavigate={noop}
         onToggleFolder={noop}
         onExpandFolder={noop}
+        isFolderCollapsed={() => true}
       />
     );
     expect(html).toContain('setup.js');
@@ -100,6 +101,7 @@ describe('SidebarTree collectionRoot', () => {
     onNavigate: noop,
     onToggleFolder: noop,
     onExpandFolder: noop,
+    isFolderCollapsed: () => true,
     activeExample: null
   };
 
@@ -167,6 +169,7 @@ const baseProps = {
   onNavigate: () => {},
   onToggleFolder: () => {},
   onExpandFolder: () => {},
+  isFolderCollapsed: () => true,
   activeExample: null
 };
 

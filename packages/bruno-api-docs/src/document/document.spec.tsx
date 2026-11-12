@@ -5,7 +5,6 @@ import type { OpenCollection } from '@opencollection/types';
 import { createOpenCollectionStore } from '@/store/store';
 import {
   setPlaygroundCollection,
-  toggleFolderCollapse,
   updatePlaygroundItem,
   updateCollectionEnvironments,
   selectHydratedCollection
@@ -50,12 +49,10 @@ describe('document', () => {
   it('stays as loaded while the playground seeded from it is edited', () => {
     const document = hydrateWithUUIDs(raw);
     const before = structuredClone(document);
-    const folderUuid = (document.items![0] as { uuid: string }).uuid;
     const request = (document.items![0] as { items: { uuid: string }[] }).items[0];
     const store = createOpenCollectionStore();
 
     store.dispatch(setPlaygroundCollection(document));
-    store.dispatch(toggleFolderCollapse(folderUuid));
     store.dispatch(updatePlaygroundItem({ uuid: request.uuid, item: { ...request, http: { method: 'POST' } } as never }));
     const working = selectHydratedCollection(store.getState())!;
     store.dispatch(updateCollectionEnvironments({ ...working, config: { environments: [] } }));

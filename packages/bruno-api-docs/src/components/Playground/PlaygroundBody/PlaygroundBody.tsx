@@ -1,6 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { Folder, ScriptFile } from '@opencollection/types/collection/item';
+import React, { useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectHydratedCollection,
@@ -8,34 +6,14 @@ import {
   toggleFolderCollapse,
   expandFolders
 } from '@/store/slices/playground';
-import { useEnvState, useSession } from '@/session/session';
-import { useObservable } from '@/observable/observable';
-import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import { useNavModel } from '@/routing/hooks';
-import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
-import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
-import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
-import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
-import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
-import FolderSettingsView from '../Content/Views/FolderSettingsView/FolderSettingsView';
-import EnvironmentsView from '../Content/Views/EnvironmentsView/EnvironmentsView';
-import CollectionSettingsView from '../Content/Views/CollectionSettingsView/CollectionSettingsView';
-import ExampleView from '../Content/Views/ExampleView/ExampleView';
-import ScriptFileView from '../Content/Views/ScriptFileView/ScriptFileView';
+import { useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 import type { DockMode } from '@/utils/playgroundDock';
-import {
-  resolvePlaygroundTarget,
-  PLAYGROUND_ENVIRONMENTS_SLUG,
-  PLAYGROUND_COLLECTION_SLUG
-} from './resolvePlaygroundTarget';
+import { usePlaygroundSelection } from './usePlaygroundSelection';
+import PlaygroundViewSwitch from './PlaygroundViewSwitch';
 import { StyledWrapper } from './StyledWrapper';
-import { selectedUuid, type PlaygroundSelection } from '@/session/playground';
 
 const ORIENTATION_BREAKPOINT = 640;
-
-const applyKey = (requestSlug: string | null, exampleSlug: string | null): string =>
-  exampleSlug ? `${requestSlug} ${exampleSlug}` : requestSlug ?? '';
 
 interface PlaygroundBodyProps {
   requestSlug: string | null;
@@ -59,40 +37,8 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   appliedSlugRef
 }) => {
   const dispatch = useAppDispatch();
-  const model = useNavModel();
-  const { setRequestSlug, setRequestExample } = usePlaygroundUrlState();
   const collection = useAppSelector(selectHydratedCollection);
-  const { selection: selectionState } = useSession().playground;
-  const selection = useObservable(selectionState);
-  const selectedItemId = selectedUuid(selection);
-  const selectedExampleIndex = typeof selection === 'object' && selection ? selection.exampleIndex : null;
-  const { activeEnvName } = useEnvState();
   const orientationOverride = useAppSelector(selectResponsePaneOrientation);
-
-  const uuidToSlug = model.slugByUuid;
-
-  const selectedItem = useMemo(
-    () => findItemByUuid(collection?.items, selectedItemId),
-    [collection, selectedItemId]
-  );
-
-  const viewMode = typeof selection === 'string'
-    ? selection
-    : selectedExampleIndex != null
-      ? 'example'
-      : selectedItem && isFolder(selectedItem) ? 'folder-settings' : 'playground';
-
-  const activeSlug = viewMode !== 'example' && selectedItemId ? uuidToSlug.get(selectedItemId) ?? '' : '';
-
-  const exampleCount
-    = selectedItem && !isFolder(selectedItem) ? ((selectedItem as HttpRequest).examples?.length ?? 0) : 0;
-  const activeExample: ExampleHighlight | null
-    = viewMode === 'example'
-      && selectedItemId != null
-      && selectedExampleIndex != null
-      && selectedExampleIndex < exampleCount
-      ? { requestUuid: selectedItemId, index: selectedExampleIndex }
-      : null;
 
   const viewRef = useRef<HTMLDivElement>(null);
   const viewWidth = useElementWidth(viewRef);
@@ -108,101 +54,18 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     '[data-testid="playground-sidebar-toggle"], [data-testid="playground-sidebar-resizer"], [data-tippy-root]'
   );
 
-  // Reopen whatever the URL says was last open. `pgReq` holds a request, a
-  // folder, or the environments / collection-settings view, so a deep link, a
-  // Try, or a reload all bring back the same thing. Runs once per URL value.
-  useEffect(() => {
-    const key = applyKey(requestSlug, exampleSlug);
-    if (!requestSlug || appliedSlugRef.current === key) return;
-    const target = resolvePlaygroundTarget(requestSlug, model);
-    if (!target) return;
-    if (target.uuid && !collection?.items) return;
-    const item = target.uuid ? findItemByUuid(collection?.items, target.uuid) : undefined;
-    const exampleIndex
-      = exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
-    appliedSlugRef.current = key;
-    selectionState.set(target.uuid ? { uuid: target.uuid, exampleIndex } : target.view as PlaygroundSelection);
-    if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
-  }, [requestSlug, exampleSlug, model, collection, dispatch, appliedSlugRef, selectionState]);
-
-  const closeSidebarIfInline = () => {
-    if (dock === 'inline') onCloseSidebar();
-  };
-
-  const handleNavigate = (slug: string) => {
-    const target = resolvePlaygroundTarget(slug, model);
-    if (!target || !target.uuid) return;
-    selectionState.set({ uuid: target.uuid, exampleIndex: null });
-    if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
-    appliedSlugRef.current = slug;
-    setRequestSlug(slug);
-    closeSidebarIfInline();
-  };
+  const selection = usePlaygroundSelection({
+    requestSlug,
+    exampleSlug,
+    collection,
+    appliedSlugRef,
+    onSelected: () => {
+      if (dock === 'inline') onCloseSidebar();
+    }
+  });
 
   const handleToggleFolder = (uuid: string) => dispatch(toggleFolderCollapse(uuid));
   const handleExpandFolder = (uuid: string) => dispatch(expandFolders([uuid]));
-
-  const handleExampleClick = (requestUuid: string, index: number) => {
-    selectionState.set({ uuid: requestUuid, exampleIndex: index });
-    const slug = uuidToSlug.get(requestUuid);
-    if (slug) {
-      const item = findItemByUuid(collection?.items, requestUuid);
-      const request = item && !isFolder(item) ? (item as HttpRequest) : null;
-      const nextExampleSlug = exampleSlugForIndex(request, index);
-      appliedSlugRef.current = applyKey(slug, nextExampleSlug);
-      setRequestExample(slug, nextExampleSlug);
-    }
-    closeSidebarIfInline();
-  };
-
-  const openEnvironments = () => {
-    selectionState.set('environments');
-    appliedSlugRef.current = PLAYGROUND_ENVIRONMENTS_SLUG;
-    setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG); // persist so a reload restores it
-    closeSidebarIfInline();
-  };
-
-  const openCollection = () => {
-    selectionState.set('collection-settings');
-    appliedSlugRef.current = PLAYGROUND_COLLECTION_SLUG;
-    setRequestSlug(PLAYGROUND_COLLECTION_SLUG); // persist so a reload restores it
-    closeSidebarIfInline();
-  };
-
-  const view = (() => {
-    if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} />;
-    if (viewMode === 'environments' && collection) return <EnvironmentsView collection={collection} compact={dock === 'inline'} />;
-    if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
-      return (
-        <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={() => undefined} />
-      );
-    }
-    if (
-      viewMode === 'example'
-      && selectedItem
-      && !isFolder(selectedItem)
-      && selectedExampleIndex != null
-    ) {
-      const example = ((selectedItem as HttpRequest).examples ?? [])[selectedExampleIndex];
-      if (example) {
-        return <ExampleView request={selectedItem as HttpRequest} example={example} orientation={orientation} />;
-      }
-    }
-    if (viewMode === 'playground' && selectedItem && isScriptFile(selectedItem)) {
-      return <ScriptFileView key={getItemUuid(selectedItem)} item={selectedItem as ScriptFile} />;
-    }
-    if ((viewMode === 'playground' || viewMode === 'example') && selectedItem && !isFolder(selectedItem) && collection) {
-      return (
-        <PlaygroundView
-          item={selectedItem as HttpRequest}
-          collection={collection}
-          selectedEnvironment={activeEnvName ?? ''}
-          orientation={orientation}
-        />
-      );
-    }
-    return <div className="prompt">Select an endpoint from the sidebar to get started.</div>;
-  })();
 
   return (
     <StyledWrapper
@@ -223,17 +86,17 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
           <aside className="sidebar" data-testid="playground-sidebar-panel" ref={sidebarRef}>
             <PlaygroundSidebar
               collection={collection}
-              activeSlug={activeSlug}
-              uuidToSlug={uuidToSlug}
-              onNavigate={handleNavigate}
+              activeSlug={selection.activeSlug}
+              uuidToSlug={selection.uuidToSlug}
+              onNavigate={selection.navigate}
               onToggleFolder={handleToggleFolder}
               onExpandFolder={handleExpandFolder}
-              onOpenEnvironments={openEnvironments}
-              environmentsActive={viewMode === 'environments'}
-              onOpenCollection={openCollection}
-              collectionActive={viewMode === 'collection-settings'}
-              activeExample={activeExample}
-              onExampleClick={handleExampleClick}
+              onOpenEnvironments={selection.openEnvironments}
+              environmentsActive={selection.viewMode === 'environments'}
+              onOpenCollection={selection.openCollection}
+              collectionActive={selection.viewMode === 'collection-settings'}
+              activeExample={selection.activeExample}
+              onExampleClick={selection.selectExample}
             />
           </aside>
           <div
@@ -248,7 +111,14 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
         </>
       )}
       <div className="view" data-testid="playground-view" ref={viewRef}>
-        {view}
+        <PlaygroundViewSwitch
+          viewMode={selection.viewMode}
+          selectedItem={selection.selectedItem}
+          selectedExampleIndex={selection.selectedExampleIndex}
+          collection={collection}
+          dock={dock}
+          orientation={orientation}
+        />
       </div>
     </StyledWrapper>
   );

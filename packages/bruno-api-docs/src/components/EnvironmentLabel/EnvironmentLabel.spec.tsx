@@ -12,8 +12,8 @@ describe('EnvironmentLabel', () => {
   });
 
   it('applies the environment color to the dot', () => {
-    const root = useRenderToDom(<EnvironmentLabel name="Prod" color="#dc2626" />);
-    expect(root.querySelector('.environment-label-dot')?.getAttribute('style')).toContain('#dc2626');
+    const root = useRenderToDom(<EnvironmentLabel name="Prod" color="rgb(220, 38, 38)" />);
+    expect(root.querySelector('.environment-label-dot')?.getAttribute('style')).toContain('rgb(220, 38, 38)');
   });
 
   it('forwards custom class names to the root and the name', () => {

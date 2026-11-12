@@ -88,11 +88,10 @@ describe('EnvSwitcher', () => {
 
   it('paints the trigger dot with the active env color', () => {
     const dot = getByTestId(
-      // eslint-disable-next-line no-restricted-syntax
-      render(collectionWith([{ name: 'Dev', color: '#ff0000' }]), (s) => s.env.setActiveEnv('Dev')),
+      render(collectionWith([{ name: 'Dev', color: 'rgb(255, 0, 0)' }]), (s) => s.env.setActiveEnv('Dev')),
       'env-switcher'
     ).querySelector('.environment-label-dot');
-    expect(dot?.getAttribute('style')).toContain('#ff0000');
+    expect(dot?.getAttribute('style')).toContain('rgb(255, 0, 0)');
     expect(dot?.classList.contains('environment-label-dot--empty')).toBe(false);
   });
 

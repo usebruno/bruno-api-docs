@@ -11,6 +11,7 @@ import { adoptContextView } from './contextViewPortal';
 import type { ScriptApiRoot } from '@/utils/scriptAutocomplete';
 import { ContextViewHost, StyledWrapper } from './StyledWrapper';
 import { isDarkMode } from '@/utils/theme';
+import { MONACO_EDITOR_COLORS } from '@/theme/monacoColors';
 
 type EditorInstance = Parameters<OnMount>[0];
 
@@ -41,13 +42,13 @@ const defineThemes = (monaco: Monaco) => {
     base: 'vs',
     inherit: true,
     rules: [],
-    colors: { 'editor.background': '#00000000', 'editorGutter.background': '#00000000' }
+    colors: MONACO_EDITOR_COLORS
   });
   monaco.editor.defineTheme(DARK_THEME, {
     base: 'vs-dark',
     inherit: true,
     rules: [],
-    colors: { 'editor.background': '#00000000', 'editorGutter.background': '#00000000' }
+    colors: MONACO_EDITOR_COLORS
   });
 };
 

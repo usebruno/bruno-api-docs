@@ -18,7 +18,9 @@ It is not published to npm. It ships as a standalone CDN bundle built by
 ## Packages
 
 Three npm workspaces. Only `@usebruno/api-docs` ships; the other two are private and end up
-inside its build.
+inside its build. Each package declares the dependencies its own code imports, and docs depends
+on the other two as workspace packages (`"*"`). Changesets' `bumpVersionsWithWorkspaceProtocolOnly`
+keeps that dependency from tripping its ignored-package check.
 
 | Package | Folder | What lives there |
 |---|---|---|

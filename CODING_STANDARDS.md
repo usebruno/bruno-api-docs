@@ -102,7 +102,8 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
 - `x ?? fallback`, not `x || fallback`, when an empty string, `0` or `false` is a real value.
   An empty header or auth token is a real state in an API client.
 - `===` only `(lint)`. No `console.log` `(lint)`; `console.warn` and `console.error` are fine.
-- Runtime code imports only from `dependencies`, not `devDependencies` `(lint)`.
+- Runtime code imports only from its own package's `dependencies`, not `devDependencies` and not
+  another package's `(lint)`. Each package declares what its own code imports.
 
 ## File naming
 

@@ -12,6 +12,22 @@ import tsParser from '@typescript-eslint/parser';
 // tokens and reach components as CSS custom properties.
 const HEX_COLOUR = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 
+// Each package declares what its own runtime code imports, so a dep used by
+// shared or playground cannot hide behind docs' package.json.
+const noExtraneousDependencies = (packageDir) => ({
+  'import/no-extraneous-dependencies': ['error', {
+    packageDir,
+    devDependencies: [
+      '**/*.{test,spec}.{ts,tsx}',
+      '**/e2e/**',
+      '**/test-utils/**',
+      '**/*.config.{ts,mts,js,mjs,cjs}'
+    ]
+  }]
+});
+
+const packages = ['bruno-api-docs', 'bruno-api-playground', 'bruno-shared'];
+
 export default [
   {
     ignores: [
@@ -99,18 +115,7 @@ export default [
       'prefer-const': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
 
-      // This package is published, so anything imported by runtime code has to
-      // be a real dependency — a devDependency would break consumers the moment
-      // a dep stops being bundled.
-      'import/no-extraneous-dependencies': ['error', {
-        packageDir: ['.', './packages/bruno-api-docs', './packages/bruno-shared', './packages/bruno-api-playground'],
-        devDependencies: [
-          '**/*.{test,spec}.{ts,tsx}',
-          '**/e2e/**',
-          '**/test-utils/**',
-          '**/*.config.{ts,mts,js,mjs,cjs}'
-        ]
-      }],
+      ...noExtraneousDependencies('.'),
 
       'no-restricted-syntax': ['error',
         {
@@ -127,6 +132,10 @@ export default [
       'react-hooks/exhaustive-deps': 'warn'
     }
   },
+  ...packages.map((name) => ({
+    files: [`packages/${name}/src/**/*.{ts,tsx}`, `packages/${name}/e2e/**/*.{ts,tsx,mjs}`],
+    rules: noExtraneousDependencies(`./packages/${name}`)
+  })),
   {
     // The theme tokens are where colours are allowed to be literal — everything
     // else consumes them as CSS custom properties.

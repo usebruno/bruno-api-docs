@@ -50,7 +50,7 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
 - `@/` points at `src/` in docs only. Shared and playground use relative imports or their own
   package name. Sibling files stay relative.
 - A shared module that holds a React context or module state and is used by the playground must
-  be in the CDN externals. see: `bruno-api-playground/vite.config.cdn.ts`,
+  be in the CDN externals. see: `bruno-shared/src/utils/cdnExternals.ts`,
   `bruno-api-docs/src/components/Playground/loadCdn.ts`
 
 ## State

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type * as LoadCdn from './loadCdn';
+import { cdnExternals } from '@usebruno/api-shared/utils/cdnExternals';
 // Loaded before document is stubbed: prism touches the DOM on load when a document exists.
 import 'prismjs';
 
@@ -52,11 +53,13 @@ describe('loadPlayground from the CDN', () => {
     expect(await first).toEqual({ default: Body });
   });
 
-  it('hands the playground the same shared modules the docs use', async () => {
+  it('hands the playground every CDN external as the module the docs use', async () => {
     void loadPlayground();
 
-    expect(globals.Bruno.__rt!.react).toBe(await import('react'));
-    expect(globals.Bruno.__rt!.session).toBe(await import('@usebruno/api-shared/session/session'));
+    expect(Object.keys(globals.Bruno.__rt!).sort()).toEqual(Object.keys(cdnExternals).sort());
+    for (const [name, specifier] of Object.entries(cdnExternals)) {
+      expect(globals.Bruno.__rt![name], name).toBe(await import(/* @vite-ignore */ specifier));
+    }
   });
 
   it('rejects when the script fails to load', async () => {

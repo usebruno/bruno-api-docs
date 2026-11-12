@@ -73,12 +73,10 @@ if it fails you see `playground-load-error`.
   load removes the script and clears the memo, and `Playground.tsx` swaps in a fresh `lazy`, so
   the next open retries.
 - `bruno-api-playground/vite.config.cdn.ts` builds the playground as an IIFE named
-  `__brunoApiPlayground`. Its externals are read from `Bruno.__rt`: react, react-dom,
-  react/jsx-runtime, react-router-dom, and these files from `bruno-shared/src/`:
-  `bruno-shared/src/session/session.tsx`, `bruno-shared/src/document/document.tsx`,
-  `bruno-shared/src/hooks/useVariableResolver.tsx`, `bruno-shared/src/session/playgroundRuns.ts`,
-  `bruno-shared/src/ui/CodeEditor/CodeEditor.tsx`, `bruno-shared/src/utils/prism.ts`,
-  `bruno-shared/src/utils/fakerFunctions.ts` and `bruno-shared/src/utils/dataFormatter.ts`.
+  `__brunoApiPlayground`. Its externals are read from `Bruno.__rt`. The one list of them, name to
+  import specifier, is `bruno-shared/src/utils/cdnExternals.ts`: react, react-dom,
+  react/jsx-runtime, react-router-dom, and the shared session, document, variable resolver,
+  playground runs, code editor, prism, faker functions and data formatter modules.
 
 Why externals: a React context only works if provider and consumer use the same context
 object, and module state (in-flight runs, Monaco completions, Prism grammars) only works if
@@ -89,8 +87,12 @@ when it loads: a second `prismjs` runs its auto-highlight and rewrites React-own
 shared code imports Prism only through `bruno-shared/src/utils/prism.ts`, and the standalone e2e
 fails if the playground file contains Prism's core.
 
+`fakerFunctions` and `dataFormatter` hold no context or state; they are externals only to avoid
+shipping them twice.
+
 A shared module that starts holding a context or module state, and that the playground uses,
-must be added to both the externals in `vite.config.cdn.ts` and `Bruno.__rt` in `loadCdn.ts`.
+must be added to `cdnExternals.ts` and to `Bruno.__rt` in `loadCdn.ts`. `loadCdn.spec.ts` fails
+if the two differ.
 
 Known limits:
 

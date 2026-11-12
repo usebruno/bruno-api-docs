@@ -5,6 +5,7 @@ interface FakeScript {
   src?: string;
   onload?: () => void;
   onerror?: () => void;
+  remove: () => void;
 }
 
 describe('loadPlayground from the CDN', () => {
@@ -20,7 +21,7 @@ describe('loadPlayground from the CDN', () => {
     vi.stubGlobal('window', globals);
     vi.stubGlobal('document', {
       createElement: () => {
-        const script: FakeScript = {};
+        const script: FakeScript = { remove: vi.fn() };
         scripts.push(script);
         return script;
       },
@@ -58,5 +59,21 @@ describe('loadPlayground from the CDN', () => {
     scripts[0].onerror!();
 
     await expect(loading).rejects.toThrow('api-playground-abc.js');
+  });
+
+  it('injects a fresh script on the next call after a failed load', async () => {
+    const failed = loadPlayground();
+    scripts[0].onerror!();
+    await expect(failed).rejects.toThrow('api-playground-abc.js');
+
+    const retried = loadPlayground();
+    const Body = () => null;
+    globals.__brunoApiPlayground = Body;
+    scripts[1].onload!();
+
+    expect(scripts).toHaveLength(2);
+    expect(scripts[0].remove).toHaveBeenCalledOnce();
+    expect(scripts[1].remove).not.toHaveBeenCalled();
+    expect(await retried).toEqual({ default: Body });
   });
 });

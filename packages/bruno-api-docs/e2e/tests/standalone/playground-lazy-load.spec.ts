@@ -104,6 +104,30 @@ test.describe('The playground file on a host page', () => {
     await expect(first.requestPage.title).toHaveText('Beta');
   });
 
+  test('retries the file on the next open after a failed load', async ({ page, standalonePage }) => {
+    const loads = playgroundFileRequests(page);
+    let failures = 1;
+    await page.route('**/api-playground-*', (route) =>
+      failures-- > 0 ? route.fulfill({ status: 503, body: 'unavailable' }) : route.continue()
+    );
+    await page.route('**/alpha**', (route) =>
+      route.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: '{"ok":1}' })
+    );
+    await standalonePage.goto('#/alpha');
+    await standalonePage.mount('first', { content: generalFixtureCollection });
+    const first = standalonePage.instance('first');
+
+    await first.requestPage.urlBar.tryButton.click();
+    await expect(first.playground.loadError).toBeVisible();
+    await first.playground.closeButton.click();
+    await expect(first.playground.view).toHaveCount(0);
+
+    await first.requestPage.urlBar.tryButton.click();
+    await first.responsePane.sendButton.click();
+    await expect(first.responsePane.status).toHaveText('200 OK');
+    expect(loads).toHaveLength(2);
+  });
+
   test('leaves the docs snippet highlighting alone when it loads', async ({ page, standalonePage }) => {
     await page.route('**/alpha**', (route) =>
       route.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: '{"ok":1}' })

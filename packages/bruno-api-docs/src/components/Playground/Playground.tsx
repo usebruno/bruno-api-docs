@@ -10,7 +10,15 @@ import { useSession } from '@usebruno/api-shared/session/session';
 import { loadPlayground } from './load';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
-const PlaygroundBody = lazy(() => loadPlayground());
+// A failed load swaps in a fresh lazy, since React caches the rejection, so the next open retries.
+const lazyBody = () =>
+  lazy(() =>
+    loadPlayground().catch((error: unknown) => {
+      PlaygroundBody = lazyBody();
+      throw error;
+    })
+  );
+let PlaygroundBody = lazyBody();
 
 const playgroundLoadError = (
   <div

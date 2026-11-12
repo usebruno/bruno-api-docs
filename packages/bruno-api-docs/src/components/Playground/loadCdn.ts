@@ -42,6 +42,10 @@ export const loadPlayground = (): Promise<PlaygroundModule> =>
     const script = document.createElement('script');
     script.src = new URL(__API_PLAYGROUND_FILE__, bundleUrl).href;
     script.onload = () => resolve({ default: w.__brunoApiPlayground! });
-    script.onerror = () => reject(new Error(`Failed to load ${script.src}`));
+    script.onerror = () => {
+      loading = undefined;
+      script.remove();
+      reject(new Error(`Failed to load ${script.src}`));
+    };
     document.head.appendChild(script);
   }));

@@ -18,6 +18,9 @@ import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest, WebSocketMessageType } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
+import type { Auth } from '@opencollection/types/common/auth';
+import type { Variable } from '@opencollection/types/common/variables';
+import type { Assertion } from '@opencollection/types/common/assertions';
 import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
 export type SupportedRequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;
@@ -47,7 +50,7 @@ export const getItemType = (item: OpenCollectionItem | null | undefined): string
 
   // Backwards compatibility: type at root level
   if ('type' in item) {
-    return (item as any).type;
+    return (item as { type?: string }).type;
   }
 
   return undefined;
@@ -60,13 +63,13 @@ export const getItemName = (item: OpenCollectionItem | null | undefined): string
   if (!item) return undefined;
 
   // New schema: name is in info block
-  if ('info' in item && (item as any).info?.name) {
-    return (item as any).info.name;
+  if ('info' in item && (item as { info?: { name?: string } }).info?.name) {
+    return (item as { info: { name: string } }).info.name;
   }
 
   // Backwards compatibility: name at root level
   if ('name' in item) {
-    return (item as any).name;
+    return (item as { name?: string }).name;
   }
 
   return undefined;
@@ -181,8 +184,8 @@ export const getHttpMethod = (item: HttpRequest | null | undefined): string => {
   }
 
   // Backwards compatibility: method at root level
-  if ('method' in item && (item as any).method) {
-    return (item as any).method;
+  if ('method' in item && (item as { method?: string }).method) {
+    return (item as { method: string }).method;
   }
 
   return 'GET';
@@ -223,7 +226,7 @@ export const getRequestUrl = (item: RequestItem | null | undefined): string => {
 
   // Backwards compatibility: url at root level
   if ('url' in item) {
-    return (item as any).url || '';
+    return (item as { url?: string }).url || '';
   }
 
   return '';
@@ -306,8 +309,8 @@ export const getHttpHeaders = (item: HttpRequest | null | undefined): HttpReques
   }
 
   // Backwards compatibility: headers at root level
-  if ('headers' in item && Array.isArray((item as any).headers)) {
-    return (item as any).headers;
+  if ('headers' in item && Array.isArray((item as { headers?: unknown }).headers)) {
+    return (item as { headers: HttpRequestHeader[] }).headers;
   }
 
   return [];
@@ -326,7 +329,7 @@ export const getHttpBody = (item: HttpRequest | null | undefined): RequestBody =
 
   // Backwards compatibility: body at root level
   if ('body' in item) {
-    return (item as any).body;
+    return (item as { body?: RequestBody }).body;
   }
 
   return undefined;
@@ -335,7 +338,7 @@ export const getHttpBody = (item: HttpRequest | null | undefined): RequestBody =
 /**
  * Get params from an HTTP request (from http block or root)
  */
-export const getHttpParams = (item: HttpRequest | null | undefined): HttpRequest['http'] extends { params?: infer P } ? P : any => {
+export const getHttpParams = (item: HttpRequest | null | undefined): HttpRequestParam[] => {
   if (!item) return [];
 
   // New schema: params in http block
@@ -344,8 +347,8 @@ export const getHttpParams = (item: HttpRequest | null | undefined): HttpRequest
   }
 
   // Backwards compatibility: params at root level
-  if ('params' in item && Array.isArray((item as any).params)) {
-    return (item as any).params;
+  if ('params' in item && Array.isArray((item as { params?: unknown }).params)) {
+    return (item as { params: HttpRequestParam[] }).params;
   }
 
   return [];
@@ -355,30 +358,30 @@ export const getHttpParams = (item: HttpRequest | null | undefined): HttpRequest
 // and writes (AuthTab) share this list so the two can't drift.
 export const REQUEST_PROTOCOL_KEYS = ['http', 'graphql', 'grpc', 'websocket'] as const;
 
-export const getRequestAuth = (item: RequestItem | null | undefined): any => {
+export const getRequestAuth = (item: RequestItem | null | undefined): Auth | undefined => {
   if (!item) return undefined;
 
   // Current schema: auth is part of the protocol-detail block.
   const blocks = item as Record<string, { auth?: unknown } | undefined>;
   for (const key of REQUEST_PROTOCOL_KEYS) {
     if (blocks[key]?.auth !== undefined) {
-      return blocks[key]?.auth;
+      return blocks[key]?.auth as Auth;
     }
   }
 
   // Nested request shape (also Collection/Folder): auth under a `request` block.
-  if ((item as any).request?.auth != null) {
-    return (item as any).request.auth;
+  if ((item as { request?: { auth?: Auth } }).request?.auth != null) {
+    return (item as { request: { auth: Auth } }).request.auth;
   }
 
   // Legacy: auth grouped under a runtime block.
-  if ('runtime' in item && (item as any).runtime?.auth) {
-    return (item as any).runtime.auth;
+  if ('runtime' in item && (item as { runtime?: { auth?: Auth } }).runtime?.auth) {
+    return (item as { runtime: { auth: Auth } }).runtime.auth;
   }
 
   // Backwards compatibility: auth at root level.
   if ('auth' in item) {
-    return (item as any).auth;
+    return (item as { auth?: Auth }).auth;
   }
 
   return undefined;
@@ -442,17 +445,17 @@ export const getGraphqlMethod = (item: RequestItem | null | undefined): string =
 /**
  * Get variables from a request (from runtime block or root)
  */
-export const getRequestVariables = (item: RequestItem | null | undefined): any[] => {
+export const getRequestVariables = (item: RequestItem | null | undefined): Variable[] => {
   if (!item) return [];
 
   // New schema: variables in runtime block
-  if ('runtime' in item && (item as any).runtime?.variables) {
-    return (item as any).runtime.variables;
+  if ('runtime' in item && (item as { runtime?: { variables?: Variable[] } }).runtime?.variables) {
+    return (item as { runtime: { variables: Variable[] } }).runtime.variables;
   }
 
   // Backwards compatibility: variables at root level
-  if ('variables' in item && Array.isArray((item as any).variables)) {
-    return (item as any).variables;
+  if ('variables' in item && Array.isArray((item as { variables?: unknown }).variables)) {
+    return (item as { variables: Variable[] }).variables;
   }
 
   return [];
@@ -461,17 +464,17 @@ export const getRequestVariables = (item: RequestItem | null | undefined): any[]
 /**
  * Get assertions from a request (from runtime block or root)
  */
-export const getRequestAssertions = (item: RequestItem | null | undefined): any[] => {
+export const getRequestAssertions = (item: RequestItem | null | undefined): Assertion[] => {
   if (!item) return [];
 
   // New schema: assertions in runtime block
-  if ('runtime' in item && (item as any).runtime?.assertions) {
-    return (item as any).runtime.assertions;
+  if ('runtime' in item && (item as { runtime?: { assertions?: Assertion[] } }).runtime?.assertions) {
+    return (item as { runtime: { assertions: Assertion[] } }).runtime.assertions;
   }
 
   // Backwards compatibility: assertions at root level
-  if ('assertions' in item && Array.isArray((item as any).assertions)) {
-    return (item as any).assertions;
+  if ('assertions' in item && Array.isArray((item as { assertions?: unknown }).assertions)) {
+    return (item as { assertions: Assertion[] }).assertions;
   }
 
   return [];
@@ -485,8 +488,8 @@ export const getRequestScripts = (item: RequestItem | null | undefined): Scripts
   if (!item) return [];
 
   // New schema: scripts in runtime block
-  if ('runtime' in item && (item as any).runtime?.scripts) {
-    const scripts = (item as any).runtime.scripts;
+  if ('runtime' in item && (item as { runtime?: { scripts?: unknown } }).runtime?.scripts) {
+    const scripts = (item as { runtime: { scripts: Scripts | ScriptsObject } }).runtime.scripts;
     // If already an array, return as-is
     if (Array.isArray(scripts)) {
       return scripts;
@@ -497,7 +500,7 @@ export const getRequestScripts = (item: RequestItem | null | undefined): Scripts
 
   // Backwards compatibility: scripts at root level
   if ('scripts' in item) {
-    const scripts = (item as any).scripts;
+    const scripts = (item as { scripts?: Scripts | ScriptsObject }).scripts;
     if (Array.isArray(scripts)) {
       return scripts;
     }
@@ -510,7 +513,9 @@ export const getRequestScripts = (item: RequestItem | null | undefined): Scripts
 /**
  * Convert old scripts object format to new array format
  */
-export const scriptsObjectToArray = (scripts: ScriptsObject | Record<string, string | undefined> | null | undefined): Script[] => {
+export const scriptsObjectToArray = (
+  scripts: ScriptsObject | Record<string, string | undefined> | null | undefined
+): Script[] => {
   if (!scripts) return [];
 
   const result: Script[] = [];
@@ -595,46 +600,52 @@ export const getScriptByType = (scripts: Scripts | null | undefined, type: Scrip
     'hooks': 'hooks'
   };
 
-  return typeMap[type] ? (scripts as any)[typeMap[type]] : undefined;
+  return typeMap[type] ? (scripts as Record<string, string | undefined>)[typeMap[type]] : undefined;
 };
 
 /**
  * Get pre-request script from scripts (handles both array and object format)
  */
-export const getPreRequestScript = (scripts: Scripts | Record<string, string> | null | undefined): string | undefined => {
+export const getPreRequestScript = (
+  scripts: Scripts | Record<string, string> | null | undefined
+): string | undefined => {
   if (!scripts) return undefined;
 
   if (Array.isArray(scripts)) {
     return getScriptByType(scripts, 'before-request');
   }
 
-  return (scripts as any).preRequest;
+  return scripts.preRequest;
 };
 
 /**
  * Get post-response script from scripts (handles both array and object format)
  */
-export const getPostResponseScript = (scripts: Scripts | Record<string, string> | null | undefined): string | undefined => {
+export const getPostResponseScript = (
+  scripts: Scripts | Record<string, string> | null | undefined
+): string | undefined => {
   if (!scripts) return undefined;
 
   if (Array.isArray(scripts)) {
     return getScriptByType(scripts, 'after-response');
   }
 
-  return (scripts as any).postResponse;
+  return scripts.postResponse;
 };
 
 /**
  * Get tests script from scripts (handles both array and object format)
  */
-export const getTestsScript = (scripts: Scripts | Record<string, string> | null | undefined): string | undefined => {
+export const getTestsScript = (
+  scripts: Scripts | Record<string, string> | null | undefined
+): string | undefined => {
   if (!scripts) return undefined;
 
   if (Array.isArray(scripts)) {
     return getScriptByType(scripts, 'tests');
   }
 
-  return (scripts as any).tests;
+  return scripts.tests;
 };
 
 export const countEnabled = (
@@ -649,7 +660,7 @@ export const getItemDocs = (item: OpenCollectionItem | OpenCollection | null | u
   if (!item) return undefined;
 
   if ('docs' in item) {
-    const docs = (item as any).docs;
+    const docs = (item as { docs?: string | { content?: string } }).docs;
 
     // Handle object format: { content: string, type: string }
     if (docs && typeof docs === 'object' && 'content' in docs) {
@@ -681,21 +692,21 @@ export const getItemDescription = (item: OpenCollectionItem | null | undefined):
 /**
  * Get settings from a request (from settings block or root)
  */
-export const getRequestSettings = (item: RequestItem | null | undefined): any => {
+export const getRequestSettings = (item: RequestItem | null | undefined): Record<string, unknown> => {
   if (!item) return {};
 
   // New schema: settings block
-  if ('settings' in item && (item as any).settings) {
-    return (item as any).settings;
+  if ('settings' in item && item.settings) {
+    return item.settings as Record<string, unknown>;
   }
 
   // Backwards compatibility: pick settings fields from root
-  const settings: any = {};
+  const settings: Record<string, unknown> = {};
   const settingsFields = ['timeout', 'followRedirects', 'forwardAuthorizationHeader', 'maxRedirects', 'encodeUrl'];
 
   for (const field of settingsFields) {
-    if (field in item && (item as any)[field] !== undefined) {
-      settings[field] = (item as any)[field];
+    if (field in item && (item as Record<string, unknown>)[field] !== undefined) {
+      settings[field] = (item as Record<string, unknown>)[field];
     }
   }
 

@@ -65,10 +65,16 @@ const TEMPLATE_VARIABLE_EXACT_REGEX = new RegExp(`^${TEMPLATE_VARIABLE_SOURCE_PA
 /** True when the whole string is exactly one `{{var}}` token. */
 export const isTemplateVariable = (value: string): boolean => TEMPLATE_VARIABLE_EXACT_REGEX.test(value);
 
-/** Fresh global regex capturing the WHOLE `{{var}}` token, for `String.split` tokenizing (delimiter kept). New instance per call → no shared `lastIndex`. */
+/**
+ * Fresh global regex capturing the WHOLE `{{var}}` token, for `String.split` tokenizing (delimiter kept).
+ * New instance per call → no shared `lastIndex`.
+ */
 export const templateVariableSplitRegex = (): RegExp => new RegExp(`(${TEMPLATE_VARIABLE_SOURCE_PATTERN})`, 'g');
 
-/** Fresh global regex whose capture group 1 is the variable NAME, for `String.replace` masking/interpolation. New instance per call → stateless. */
+/**
+ * Fresh global regex whose capture group 1 is the variable NAME, for `String.replace` masking/interpolation.
+ * New instance per call → stateless.
+ */
 export const templateVariableGlobalRegex = (): RegExp => new RegExp(`\\{\\{(${TEMPLATE_VARIABLE_BODY_PATTERN})\\}\\}`, 'g');
 
 export const sanitizeName = (name: string): string =>

@@ -53,7 +53,10 @@ export const envRowToVariable = (row: EnvVarRow): Variable => {
   const source = row.source ?? ({} as Variable);
   const description = rowDescription(row);
   if (row.secret) {
-    const secret = { ...source, name: row.name, disabled: !row.enabled, secret: true } as Variable & { value?: string; type?: VariableValueType };
+    const secret = { ...source, name: row.name, disabled: !row.enabled, secret: true } as Variable & {
+      value?: string;
+      type?: VariableValueType;
+    };
     const dataType = toDataType(row.dataType);
     if (dataType !== 'string') secret.type = dataType;
     else delete secret.type;

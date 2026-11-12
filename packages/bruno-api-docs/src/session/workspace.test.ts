@@ -28,10 +28,23 @@ const deepFreeze = <T>(value: T): T => {
   return value;
 };
 
-const seeded = (collection: OpenCollectionCollection): WorkspaceState =>
-  deepFreeze(setCollection(EMPTY_WORKSPACE, hydrateWithUUIDs(collection)));
+type TestEnvironment = {
+  name: string;
+  variables: Record<string, unknown>[];
+  externalSecrets?: Record<string, unknown>;
+};
+type TestCollection = {
+  info: { name: string; version: string };
+  config: { environments: TestEnvironment[] };
+  items: unknown[];
+  request?: Record<string, unknown>;
+};
+type ValueRow = { name: string; value: string };
 
-const makeCollection = () =>
+const seeded = (collection: object): WorkspaceState =>
+  deepFreeze(setCollection(EMPTY_WORKSPACE, hydrateWithUUIDs(collection as OpenCollectionCollection)));
+
+const makeCollection = (): TestCollection =>
   ({
     info: { name: 'Test', version: '1.0.0' },
     config: {
@@ -40,7 +53,7 @@ const makeCollection = () =>
       ]
     },
     items: []
-  }) as any;
+  });
 
 const envVariables = (state: WorkspaceState) => state.collection!.config!.environments![0].variables!;
 
@@ -121,8 +134,8 @@ describe('setVariable', () => {
     const next = setVariable(seeded(collection), { scope: 'environment', name: 'dup', value: 'edited', envName: 'Dev' });
 
     const values = envVariables(next)
-      .filter((v: any) => v.name === 'dup')
-      .map((v: any) => v.value);
+      .filter((v) => v.name === 'dup')
+      .map((v) => (v as ValueRow).value);
     expect(values).toEqual(['first', 'shadowed', 'edited']);
   });
 
@@ -132,7 +145,7 @@ describe('setVariable', () => {
 
     const next = setVariable(seeded(collection), { scope: 'collection', name: 'cv', value: 'y' });
 
-    expect((next.collection!.request!.variables as any).find((v: any) => v.name === 'cv').value).toBe('y');
+    expect((next.collection!.request!.variables as ValueRow[]).find((v) => v.name === 'cv')!.value).toBe('y');
   });
 
   it('edits a request variable located by item uuid', () => {
@@ -145,8 +158,8 @@ describe('setVariable', () => {
 
     const next = setVariable(seeded(collection), { scope: 'request', name: 'rv', value: '2', itemUuid: 'r1' });
 
-    const item = next.collection!.items![0] as unknown as { variables: any[] };
-    expect(item.variables.find((v) => v.name === 'rv').value).toBe('2');
+    const item = next.collection!.items![0] as unknown as { variables: ValueRow[] };
+    expect(item.variables.find((v) => v.name === 'rv')!.value).toBe('2');
   });
 
   it('edits a request variable in the runtime block', () => {
@@ -157,7 +170,8 @@ describe('setVariable', () => {
 
     const next = setVariable(seeded(collection), { scope: 'request', name: 'rv', value: '2', itemUuid: 'r1' });
 
-    expect((next.collection!.items![0] as any).runtime.variables[0].value).toBe('2');
+    const item = next.collection!.items![0] as unknown as { runtime: { variables: ValueRow[] } };
+    expect(item.runtime.variables[0].value).toBe('2');
   });
 
   it('edits a folder variable on the folder request', () => {
@@ -168,7 +182,8 @@ describe('setVariable', () => {
 
     const next = setVariable(seeded(collection), { scope: 'folder', name: 'fv', value: '2', itemUuid: 'f1' });
 
-    expect((next.collection!.items![0] as any).request.variables[0].value).toBe('2');
+    const folder = next.collection!.items![0] as unknown as { request: { variables: ValueRow[] } };
+    expect(folder.request.variables[0].value).toBe('2');
   });
 
   it('writes a session value to a secret variable, keeping it marked secret', () => {
@@ -197,12 +212,13 @@ describe('setVariable', () => {
   });
 
   it('writes root-level environments where they live', () => {
-    const collection = { info: { name: 'T' }, environments: [{ name: 'Dev', variables: [{ name: 'a', value: '1' }] }] } as any;
+    const collection = { info: { name: 'T' }, environments: [{ name: 'Dev', variables: [{ name: 'a', value: '1' }] }] };
 
     const next = setVariable(seeded(collection), { scope: 'environment', name: 'a', value: '2', envName: 'Dev' });
 
-    expect((next.collection as any).environments[0].variables[0].value).toBe('2');
-    expect((next.collection as any).config).toBeUndefined();
+    const root = next.collection as unknown as { environments: { variables: ValueRow[] }[]; config?: unknown };
+    expect(root.environments[0].variables[0].value).toBe('2');
+    expect(root.config).toBeUndefined();
   });
 
   it('returns the same state when the value, variable, env or item is not there to change', () => {
@@ -330,12 +346,13 @@ describe('updateFolder', () => {
 
   it('merges the folder into the one with the uuid and copies only its path', () => {
     const state = seeded(withNested());
-    const [outer, sibling] = state.collection!.items as any[];
+    type TestFolder = { items: { request: { headers: ValueRow[] } }[] };
+    const [outer, sibling] = state.collection!.items as unknown as TestFolder[];
     const folder = { ...outer.items[0], request: { headers: [{ name: 'h', value: '1' }] } } as Folder;
 
     const next = updateFolder(state, { uuid: 'f2', folder });
 
-    const [nextOuter, nextSibling] = next.collection!.items as any[];
+    const [nextOuter, nextSibling] = next.collection!.items as unknown as TestFolder[];
     expect(nextOuter.items[0].request.headers).toEqual([{ name: 'h', value: '1' }]);
     expect(nextOuter).not.toBe(outer);
     expect(nextOuter.items[1]).toBe(outer.items[1]);
@@ -345,7 +362,7 @@ describe('updateFolder', () => {
 
   it('returns the same state when every field is already the same', () => {
     const state = seeded(withNested());
-    const inner = (state.collection!.items![0] as any).items[0];
+    const inner = (state.collection!.items![0] as Folder).items![0] as Folder;
     expect(updateFolder(state, { uuid: 'f2', folder: { ...inner } })).toBe(state);
   });
 });
@@ -364,7 +381,7 @@ describe('setCollection', () => {
       uuid: 'r1',
       startedAt: 1
     });
-    const next = setCollection(state, hydrateWithUUIDs(makeCollection()));
+    const next = setCollection(state, hydrateWithUUIDs(makeCollection() as unknown as OpenCollectionCollection));
 
     expect(next.responses).toBe(state.responses);
     expect(next.requestStartedAt).toBe(state.requestStartedAt);
@@ -412,12 +429,12 @@ describe('purity', () => {
     }) as unknown as OpenCollectionCollection;
     const before = structuredClone(collection);
     const state = seeded(collection);
-    const [folder, request] = state.collection!.items as any[];
+    const [folder, request] = state.collection!.items!;
 
     const edited = setVariable(state, { scope: 'request', name: 'rv', value: '2', itemUuid: 'r1' });
     expect((edited.collection!.items![1])).toBe(request);
     expect(edited.collection!.config).toBe(state.collection!.config);
-    expect((edited.collection!.items![0] as any)).not.toBe(folder);
+    expect(edited.collection!.items![0]).not.toBe(folder);
 
     const env = setVariable(edited, { scope: 'environment', name: 'a', value: '2', envName: 'Dev' });
     expect(env.collection!.items).toBe(edited.collection!.items);
@@ -440,7 +457,7 @@ describe('createWorkspace', () => {
     const listener = vi.fn();
     workspace.subscribe(listener);
 
-    workspace.replaceCollection(hydrateWithUUIDs({ info: { name: 'T' }, items: [{ type: 'http', uuid: 'r1' }] } as any));
+    workspace.replaceCollection(hydrateWithUUIDs({ info: { name: 'T' }, items: [{ type: 'http', uuid: 'r1' }] } as unknown as OpenCollectionCollection));
     workspace.setResponse({ uuid: 'r1', response: { status: 200 } });
     workspace.startRequest({ uuid: 'r1', startedAt: 1 });
     expect(listener).toHaveBeenCalledTimes(3);
@@ -461,7 +478,7 @@ describe('createWorkspace', () => {
   it('two workspaces do not share state', () => {
     const a = createWorkspace();
     const b = createWorkspace();
-    a.setResponse({ uuid: 'r1', response: 1 });
+    a.setResponse({ uuid: 'r1', response: { status: 1 } });
     expect(b.get().responses).toEqual({});
   });
 });

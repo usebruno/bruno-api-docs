@@ -2,6 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { RequestBody } from './RequestBody';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
+import type { HttpRequestBody } from '@opencollection/types/requests/http';
 
 describe('RequestBody', () => {
   it('renders a JSON body as a labelled code block', () => {
@@ -79,7 +80,7 @@ describe('RequestBody', () => {
             data: [
               { filePath: '/payload.json', contentType: 'application/json', selected: true, description: 'Primary upload payload' }
             ]
-          } as any
+          } as HttpRequestBody
         }
       />
     );

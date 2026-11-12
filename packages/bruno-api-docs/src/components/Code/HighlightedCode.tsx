@@ -33,7 +33,9 @@ const tokenClassName = (token: Prism.Token): string => {
 
 const renderNode = (node: PrismNode, key: string): React.ReactNode => {
   if (typeof node === 'string') return renderText(node, key);
-  if (node.type === TEMPLATE_TOKEN_TYPE) return <VariableToken key={key} token={String(node.content)} highlighted={false} />;
+  if (node.type === TEMPLATE_TOKEN_TYPE) {
+    return <VariableToken key={key} token={String(node.content)} highlighted={false} />;
+  }
   const { content } = node;
   const children = Array.isArray(content)
     ? content.map((child, index) => renderNode(child, `${key}.${index}`))

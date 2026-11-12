@@ -6,8 +6,9 @@ import { VariableResolverProvider, ItemVariableResolverProvider } from '@/hooks'
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
 import { VariableInfoCard } from './VariableInfoCard';
+import type { OpenCollection } from '@opencollection/types';
 
-const collection: any = {
+const collection = {
   request: {
     variables: [
       { name: 'apiVersion', value: '2024-01' },
@@ -39,7 +40,7 @@ const collection: any = {
       }
     ]
   }
-};
+} as OpenCollection;
 
 const cardTree = (name: string) => {
   const session = createSession();

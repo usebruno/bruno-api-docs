@@ -84,7 +84,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
     if (bubbleHeight > roomAbove && (roomBelow >= bubbleHeight || roomBelow >= roomAbove)) {
       top = rect.bottom + GAP;
     }
-    top = Math.min(Math.max(top, VIEWPORT_MARGIN), Math.max(VIEWPORT_MARGIN, viewportHeight - VIEWPORT_MARGIN - bubbleHeight));
+    top = Math.min(
+      Math.max(top, VIEWPORT_MARGIN),
+      Math.max(VIEWPORT_MARGIN, viewportHeight - VIEWPORT_MARGIN - bubbleHeight)
+    );
 
     let left = rect.left + rect.width / 2 - bubbleWidth / 2;
     const maxLeft = Math.max(VIEWPORT_MARGIN, window.innerWidth - VIEWPORT_MARGIN - bubbleWidth);

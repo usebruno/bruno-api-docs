@@ -40,8 +40,8 @@ const toBase64 = (input: string): string => {
   } catch {
     /* non-latin1 — fall through */
   }
-  const nodeBuffer = (globalThis as { Buffer?: { from: (s: string, e: string) => { toString: (e: string) => string } } })
-    .Buffer;
+  type NodeBuffer = { from: (s: string, e: string) => { toString: (e: string) => string } };
+  const nodeBuffer = (globalThis as { Buffer?: NodeBuffer }).Buffer;
   return nodeBuffer ? nodeBuffer.from(input, 'utf-8').toString('base64') : input;
 };
 
@@ -60,7 +60,9 @@ const normalizeBody = (raw: SnippetInput['body']): NormalizedBody => {
     case BODY_TYPES.FORM_URLENCODED:
       return {
         kind: 'urlencoded',
-        params: (body.data || []).filter((entry) => entry.disabled !== true).map((entry) => ({ name: entry.name, value: entry.value }))
+        params: (body.data || [])
+          .filter((entry) => entry.disabled !== true)
+          .map((entry) => ({ name: entry.name, value: entry.value }))
       };
     case BODY_TYPES.MULTIPART_FORM:
       return {

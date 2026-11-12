@@ -26,7 +26,12 @@ const BodyPartValue: React.FC<{ row: BodyTableRow }> = ({ row }) => (
   </span>
 );
 
-export const RequestBody: React.FC<RequestBodyProps> = ({ body, showContentType = true, className, hideRowBorders = false }) => {
+export const RequestBody: React.FC<RequestBodyProps> = ({
+  body,
+  showContentType = true,
+  className,
+  hideRowBorders = false
+}) => {
   const view = getBodyView(body);
   if (view.render === 'none') return null;
 

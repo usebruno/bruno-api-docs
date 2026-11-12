@@ -4,8 +4,10 @@ import { describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession, type Session } from '@/session/session';
 import { useVariableResolver, useResolvedVariables, ItemVariableResolverProvider } from './useVariableResolver';
+import type { OpenCollection } from '@opencollection/types';
+import type { Item } from '@opencollection/types/collection/item';
 
-const collection: any = {
+const collection = {
   request: { variables: [{ name: 'collectionVar', value: 'cval' }] },
   config: {
     environments: [
@@ -19,7 +21,7 @@ const collection: any = {
       { name: 'Prod', variables: [{ name: 'baseUrl', value: 'https://prod.test' }] }
     ]
   }
-};
+} as OpenCollection;
 
 const Probe: React.FC = () => {
   const r = useVariableResolver();
@@ -102,8 +104,8 @@ const LookupProbe: React.FC<{ name: string }> = ({ name }) => {
 };
 
 describe('lookup (variable hover card)', () => {
-  const folder: any = { type: 'folder', name: 'F', request: { variables: [{ name: 'folderScope', value: 'from-folder' }, { name: 'shared', value: 'folderVal' }] } };
-  const requestItem: any = { type: 'http', name: 'R', runtime: { variables: [{ name: 'reqScope', value: 'from-req' }, { name: 'shared', value: 'reqVal' }] } };
+  const folder = { type: 'folder', name: 'F', request: { variables: [{ name: 'folderScope', value: 'from-folder' }, { name: 'shared', value: 'folderVal' }] } } as unknown as Item;
+  const requestItem = { type: 'http', name: 'R', runtime: { variables: [{ name: 'reqScope', value: 'from-req' }, { name: 'shared', value: 'reqVal' }] } } as unknown as Item;
 
   const renderLookup = (name: string, showVars = false): string => {
     const session = createSession();

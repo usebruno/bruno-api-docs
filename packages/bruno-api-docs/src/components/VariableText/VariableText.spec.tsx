@@ -5,10 +5,11 @@ import { createSession, type Session } from '@/session/session';
 import { VariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { VariableText } from './VariableText';
+import type { OpenCollection } from '@opencollection/types';
 
-const collection: any = {
+const collection = {
   config: { environments: [{ name: 'Dev', variables: [{ name: 'baseUrl', value: 'https://dev.test' }] }] }
-};
+} as OpenCollection;
 
 const tree = (value: string, configure?: (session: Session) => void) => {
   const session = createSession();

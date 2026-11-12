@@ -9,11 +9,11 @@ import { deepFreeze } from '@/utils/deepFreeze';
 import { isFolder } from '@/utils/schemaHelpers';
 import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
-import type { Variables } from '@/types/run';
+import type { RunRequestResponse, Variables } from '@/types/run';
 
 export interface WorkspaceState {
   collection: OpenCollection | null;
-  responses: Record<string, any>;
+  responses: Record<string, RunRequestResponse>;
   requestStartedAt: Record<string, number>;
 }
 
@@ -34,8 +34,14 @@ export interface ScriptVariableChanges {
   collectionVariables?: { variables: Variables; deleted: string[] };
 }
 
-type AnyItem = Item & { uuid?: string; [key: string]: any };
 type VariableList = (Variable | SecretVariable)[];
+type ExternalSecretVariables = NonNullable<Environment['externalSecrets']>['variables'];
+type AnyItem = Item & {
+  uuid?: string;
+  runtime?: { variables?: VariableList };
+  request?: { variables?: VariableList };
+  [key: string]: unknown;
+};
 
 export const setCollection = (state: WorkspaceState, collection: OpenCollection | null): WorkspaceState =>
   collection === state.collection ? state : { ...state, collection };
@@ -108,7 +114,9 @@ const setInList = (list: VariableList | undefined, name: string, value: string):
 const setRequestVariable = (item: AnyItem, name: string, value: string): AnyItem => {
   if ('runtime' in item && item.runtime?.variables) {
     const variables = setInList(item.runtime.variables, name, value);
-    return variables === item.runtime.variables ? item : { ...item, runtime: { ...item.runtime, variables } };
+    return variables === item.runtime.variables
+      ? item
+      : ({ ...item, runtime: { ...item.runtime, variables } } as AnyItem);
   }
   if ('variables' in item && Array.isArray(item.variables)) {
     const variables = setInList(item.variables, name, value);
@@ -119,7 +127,9 @@ const setRequestVariable = (item: AnyItem, name: string, value: string): AnyItem
 
 const setFolderVariable = (item: AnyItem, name: string, value: string): AnyItem => {
   const variables = setInList(item.request?.variables, name, value);
-  return variables === item.request?.variables ? item : { ...item, request: { ...item.request, variables } };
+  return variables === item.request?.variables
+    ? item
+    : ({ ...item, request: { ...item.request, variables } } as AnyItem);
 };
 
 export const updateRequestItem = (
@@ -154,7 +164,7 @@ export const setVariable = (
       const variables = setInList(env.externalSecrets?.variables as VariableList | undefined, name, value);
       return variables === env.externalSecrets?.variables
         ? env
-        : { ...env, externalSecrets: { ...env.externalSecrets!, variables: variables as any } };
+        : { ...env, externalSecrets: { ...env.externalSecrets!, variables: variables as ExternalSecretVariables } };
     }));
   }
   if (scope === 'environment') {
@@ -206,7 +216,7 @@ export const applyScriptVariableChanges = (
 
 export const setResponse = (
   state: WorkspaceState,
-  { uuid, response }: { uuid: string; response: any }
+  { uuid, response }: { uuid: string; response: RunRequestResponse }
 ): WorkspaceState =>
   uuid in state.responses && state.responses[uuid] === response
     ? state

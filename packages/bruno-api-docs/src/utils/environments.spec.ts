@@ -9,7 +9,7 @@ import type { Variable, SecretVariable } from '@opencollection/types/common/vari
 
 describe('getEnvironmentVariables', () => {
   it('splits regular and secret variables', () => {
-    const env: any = {
+    const env: Environment = {
       name: 'Dev',
       variables: [
         { name: 'baseUrl', value: 'https://api.test' },
@@ -26,7 +26,7 @@ describe('getEnvironmentVariables', () => {
   });
 
   it('carries plain and secret variable descriptions through, flattening string and { content }', () => {
-    const env: any = {
+    const env: Environment = {
       name: 'Dev',
       variables: [
         { name: 'baseUrl', value: 'https://api.test', description: 'API base URL' },
@@ -39,7 +39,7 @@ describe('getEnvironmentVariables', () => {
   });
 
   it('humanizes typed values and reads the typed data', () => {
-    const env: any = {
+    const env: Environment = {
       name: 'Dev',
       variables: [
         { name: 'count', value: { type: 'number', data: '8842' } },
@@ -55,7 +55,7 @@ describe('getEnvironmentVariables', () => {
   });
 
   it('resolves the selected value from variants', () => {
-    const env: any = {
+    const env: Environment = {
       name: 'Dev',
       variables: [
         {
@@ -71,7 +71,7 @@ describe('getEnvironmentVariables', () => {
   });
 
   it('leaves an untyped secret data type empty and marks disabled rows', () => {
-    const env: any = {
+    const env: Environment = {
       name: 'Dev',
       variables: [
         { name: 'token', secret: true },
@@ -84,7 +84,7 @@ describe('getEnvironmentVariables', () => {
   });
 
   it('leaves the data type empty for a variable with no value', () => {
-    const env: any = { name: 'Dev', variables: [{ name: 'transactionId', value: '' }, { name: 'reviewId' }] };
+    const env: Environment = { name: 'Dev', variables: [{ name: 'transactionId', value: '' }, { name: 'reviewId' }] };
     expect(getEnvironmentVariables(env).variables.map((v) => `${v.name}:${v.value}:${v.dataType}`)).toEqual([
       'transactionId::',
       'reviewId::'
@@ -95,11 +95,11 @@ describe('getEnvironmentVariables', () => {
     const empty = { variables: [], secretVariables: [], externalSecrets: null };
     expect(getEnvironmentVariables(null)).toEqual(empty);
     expect(getEnvironmentVariables(undefined)).toEqual(empty);
-    expect(getEnvironmentVariables({ name: 'Empty' } as any)).toEqual(empty);
+    expect(getEnvironmentVariables({ name: 'Empty' } as Environment)).toEqual(empty);
   });
 
   it('extracts external secrets and humanizes the manager type', () => {
-    const env: any = {
+    const env = {
       name: 'Prod',
       externalSecrets: {
         type: 'aws-secrets-manager',
@@ -108,7 +108,7 @@ describe('getEnvironmentVariables', () => {
           { name: 'apiKey', secretName: 'prod/payment/api-key', enabled: false }
         ]
       }
-    };
+    } as unknown as Environment;
     const { externalSecrets } = getEnvironmentVariables(env);
     expect(externalSecrets?.typeLabel).toBe('AWS Secrets Manager');
     expect(externalSecrets?.variables).toEqual([
@@ -118,7 +118,7 @@ describe('getEnvironmentVariables', () => {
   });
 
   it('reads a data type for external secret variables when present', () => {
-    const env: any = {
+    const env = {
       name: 'Prod',
       externalSecrets: {
         type: 'aws-secrets-manager',
@@ -127,29 +127,29 @@ describe('getEnvironmentVariables', () => {
           { name: 'apiKey', secretName: 'q' }
         ]
       }
-    };
+    } as unknown as Environment;
     expect(getEnvironmentVariables(env).externalSecrets?.variables.map((v) => v.dataType)).toEqual(['string', '']);
   });
 
   it('is null when there are no external secret variables', () => {
-    expect(getEnvironmentVariables({ name: 'Dev' } as any).externalSecrets).toBeNull();
+    expect(getEnvironmentVariables({ name: 'Dev' } as Environment).externalSecrets).toBeNull();
     expect(
-      getEnvironmentVariables({ name: 'Dev', externalSecrets: { type: 'aws-secrets-manager', variables: [] } } as any)
+      getEnvironmentVariables({ name: 'Dev', externalSecrets: { type: 'aws-secrets-manager', variables: [] } } as Environment)
         .externalSecrets
     ).toBeNull();
   });
 
   it('title-cases an unknown manager type', () => {
-    const env: any = {
+    const env = {
       name: 'Prod',
       externalSecrets: { type: 'my-custom-vault', variables: [{ name: 'x', secretName: 'y' }] }
-    };
+    } as unknown as Environment;
     expect(getEnvironmentVariables(env).externalSecrets?.typeLabel).toBe('My Custom Vault');
   });
 
   it('labels the Bruno secret manager types (vault / aws / azure / gcp / 1password)', () => {
     const withType = (type: string) =>
-      ({ name: 'Prod', externalSecrets: { type, variables: [{ name: 'x', secretName: 'y' }] } }) as any;
+      ({ name: 'Prod', externalSecrets: { type, variables: [{ name: 'x', secretName: 'y' }] } }) as Environment;
     expect(getEnvironmentVariables(withType('vault')).externalSecrets?.typeLabel).toBe('Vault');
     expect(getEnvironmentVariables(withType('aws-secrets-manager')).externalSecrets?.typeLabel).toBe(
       'AWS Secrets Manager'
@@ -169,7 +169,7 @@ describe('getEnvironmentVariables', () => {
           type,
           variables: [{ name: 'dbPassword', type: 'string', enabled: true, ...variable }]
         }
-      } as Environment;
+      } as unknown as Environment;
       return getEnvironmentVariables(environment).externalSecrets;
     };
 
@@ -208,7 +208,7 @@ describe('getEnvironmentVariables', () => {
       getEnvironmentVariables({
         name: 'Prod',
         externalSecrets: { type: 'aws-secrets-manager', variables: [{ name: 'x', secretName: 'y', ...toggle }] }
-      } as any).externalSecrets?.variables[0].disabled;
+      } as Environment).externalSecrets?.variables[0].disabled;
 
     expect(withToggle({ disabled: true })).toBe(true);
     expect(withToggle({ enabled: false })).toBe(true);
@@ -218,7 +218,9 @@ describe('getEnvironmentVariables', () => {
 });
 
 describe('envVariableToRow / envRowToVariable round-trip', () => {
-  const roundTrip = (variable: any, index = 0) => envRowToVariable(envVariableToRow(variable, index)) as any;
+  type VariableOut = Variable & { [key: string]: unknown };
+  const roundTrip = (variable: object, index = 0) =>
+    envRowToVariable(envVariableToRow(variable as Variable, index)) as VariableOut;
 
   it('keeps a plain string variable', () => {
     const out = roundTrip({ name: 'host', value: 'http://localhost:8081' });
@@ -262,8 +264,8 @@ describe('envVariableToRow / envRowToVariable round-trip', () => {
       value: 'real-token',
       enabled: true,
       secret: true,
-      source: { name: 'bearer_auth_token', secret: true, type: 'string' } as any
-    }) as any;
+      source: { name: 'bearer_auth_token', secret: true, type: 'string' } as Variable
+    }) as VariableOut;
     expect(out.secret).toBe(true);
     expect(out.value).toBe('real-token');
   });
@@ -289,52 +291,52 @@ describe('envVariableToRow / envRowToVariable round-trip', () => {
   });
 
   it('carries a plain variable description into the row and writes back the edited text', () => {
-    const row = envVariableToRow({ name: 'host', value: 'localhost', description: 'The API host' } as any, 0);
+    const row = envVariableToRow({ name: 'host', value: 'localhost', description: 'The API host' } as Variable, 0);
     expect(row.description).toBe('The API host');
 
     row.description = 'Updated host';
-    expect((envRowToVariable(row) as any).description).toBe('Updated host');
+    expect((envRowToVariable(row) as VariableOut).description).toBe('Updated host');
 
     // Clearing the description drops the field entirely, matching how the app omits empty descriptions.
     row.description = '';
-    expect('description' in (envRowToVariable(row) as any)).toBe(false);
+    expect('description' in (envRowToVariable(row) as VariableOut)).toBe(false);
   });
 
   it('carries and writes a secret variable description without emitting a value', () => {
-    const row = envVariableToRow({ name: 'token', secret: true, type: 'string', description: 'Bearer token' } as any, 0);
+    const row = envVariableToRow({ name: 'token', secret: true, type: 'string', description: 'Bearer token' } as Variable, 0);
     expect(row.description).toBe('Bearer token');
 
     row.description = 'Rotated token';
-    const out = envRowToVariable(row) as any;
+    const out = envRowToVariable(row) as VariableOut;
     expect(out.description).toBe('Rotated token');
     expect('value' in out).toBe(false);
 
     row.description = '';
-    expect('description' in (envRowToVariable(row) as any)).toBe(false);
+    expect('description' in (envRowToVariable(row) as VariableOut)).toBe(false);
   });
 
   it('preserves a { content, type } description verbatim when another field is edited', () => {
     const source = { name: 'host', value: 'localhost', description: { content: 'The **API** host', type: 'text/markdown' } };
-    const row = envVariableToRow(source as any, 0);
+    const row = envVariableToRow(source as Variable, 0);
     expect(row.description).toBe('The **API** host'); // flattened to text for the editor
 
     // Editing the value (not the description) must not flatten the typed description to a bare string.
     row.value = 'example.com';
-    expect((envRowToVariable(row) as any).description).toEqual({ content: 'The **API** host', type: 'text/markdown' });
+    expect((envRowToVariable(row) as VariableOut).description).toEqual({ content: 'The **API** host', type: 'text/markdown' });
   });
 
   it('flattens a { content, type } description to a plain string only when its text is actually edited', () => {
     const source = { name: 'host', value: 'localhost', description: { content: 'Original', type: 'text/markdown' } };
-    const row = envVariableToRow(source as any, 0);
+    const row = envVariableToRow(source as Variable, 0);
     row.description = 'Rewritten as plain text';
-    expect((envRowToVariable(row) as any).description).toBe('Rewritten as plain text');
+    expect((envRowToVariable(row) as VariableOut).description).toBe('Rewritten as plain text');
   });
 
   it('preserves a { content, type } description on a secret when another field is edited', () => {
     const source = { name: 'token', secret: true, type: 'string', description: { content: 'Bearer *token*', type: 'text/markdown' } };
-    const row = envVariableToRow(source as any, 0);
+    const row = envVariableToRow(source as Variable, 0);
     row.value = 'new-token';
-    const out = envRowToVariable(row) as any;
+    const out = envRowToVariable(row) as VariableOut;
     expect(out.description).toEqual({ content: 'Bearer *token*', type: 'text/markdown' });
     expect(out.value).toBe('new-token');
   });

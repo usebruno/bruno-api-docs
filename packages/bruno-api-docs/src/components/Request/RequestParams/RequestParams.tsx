@@ -21,7 +21,12 @@ interface RequestParamsProps {
   hideRowBorders?: boolean;
 }
 
-export const RequestParams: React.FC<RequestParamsProps> = ({ path = [], query = [], className, hideRowBorders = false }) => {
+export const RequestParams: React.FC<RequestParamsProps> = ({
+  path = [],
+  query = [],
+  className,
+  hideRowBorders = false
+}) => {
   if (path.length === 0 && query.length === 0) return null;
 
   const headingClass = cx('request-params-heading', { 'request-params-heading--inset': hideRowBorders });

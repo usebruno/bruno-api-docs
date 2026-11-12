@@ -10,12 +10,13 @@ import {
   type VariableResolver
 } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
+import type { OpenCollection } from '@opencollection/types';
 
-const collection: any = {
+const collection = {
   request: { variables: [{ name: 'OTP', value: 'a-real-variable' }] },
   config: { environments: [] },
   items: []
-};
+} as OpenCollection;
 
 const probeTree = (session: Session) => {
   const box: { current: VariableResolver | null } = { current: null };

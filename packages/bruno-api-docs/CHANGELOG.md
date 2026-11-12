@@ -1,5 +1,25 @@
 # @usebruno/api-docs
 
+## 0.5.0
+
+### Minor Changes
+
+- b6c0aad: Show 1Password external secrets in the playground: the secret reference and a "1Password" label
+- 056b42b: WebSocket requests now render as a read-only docs page instead of "Preview not available". The page shows the connection URL, the request docs, every message with its name and format (JSON and XML are pretty-printed), headers including inherited ones, and auth including inherited auth.
+- 2ab1fef: In the Playground, .js script files now open as editable code instead of an empty request, and request scripts can require() .js files from the collection.
+- d2db2d9: feat(api-docs): adds cancel request and live timer to the playground
+
+### Patch Changes
+
+- 7a49de2: fix:add Sending request text
+- c6528e2: Expose the build's commit, branch, version and environment as `Bruno.build` in the browser console
+- 6ef4c46: Using `window.OpenCollection` now logs a one-time console warning that it is deprecated in favour of `Bruno.apiDocs`. Pages render exactly as before.
+- cf6dd6f: test(e2e): assert exact pass counts in the playground scripting specs
+- 11b6919: fix:copy button in JS files
+- 78e6d80: The playground keeps your edits when you close and reopen it. Environment values (secrets included), and request, folder and collection edits stay until the page is reloaded, and a reload restores the collection's original values. The selected environment is remembered for the tab, as before.
+- 472a328: feat(api-docs): show loading overlay over the previous response
+- 918aca3: fix:spinner rotation
+
 ## 0.4.1
 
 ### Minor Changes

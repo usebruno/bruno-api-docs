@@ -1,9 +1,25 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
+import { readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
+
+const playgroundDir = resolve(__dirname, '../bruno-api-playground/dist-cdn');
+const playgroundFile = readdirSync(playgroundDir).find((name) => /^api-playground-.+\.js$/.test(name));
+if (!playgroundFile) throw new Error(`No api-playground-*.js in ${playgroundDir}; run build:cdn in bruno-api-playground`);
+
+const playgroundCdn = (): Plugin => ({
+  name: 'playground-cdn',
+  enforce: 'pre',
+  resolveId(id, importer) {
+    if (id === './load' && importer?.endsWith('/Playground/Playground.tsx')) return this.resolve('./loadCdn', importer);
+  },
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: playgroundFile, source: readFileSync(resolve(playgroundDir, playgroundFile)) });
+  }
+});
 
 const build = {
   sha: process.env.BUILD_SHA ?? null,
@@ -22,11 +38,13 @@ export default defineConfig({
     }
   },
   plugins: [
-    react()
+    react(),
+    playgroundCdn()
   ],
   define: {
     'process.env.NODE_ENV': '"production"',
-    '__BRUNO_BUILD__': JSON.stringify(build)
+    '__BRUNO_BUILD__': JSON.stringify(build),
+    '__API_PLAYGROUND_FILE__': JSON.stringify(playgroundFile)
   },
   build: {
     lib: {

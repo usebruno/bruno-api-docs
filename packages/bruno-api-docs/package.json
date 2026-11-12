@@ -42,7 +42,7 @@
     "build:lib-bundle": "npm run build:lib-bundle -w @usebruno/api-playground",
     "prebuild": "npm run gen:theme && npm run build:lib-bundle",
     "build": "npm run clean && tsc -p tsconfig.build.json --noEmit && vite build",
-    "build:standalone": "npm run clean:standalone && vite build --config vite.config.standalone.ts",
+    "build:standalone": "npm run clean:standalone && npm run build:cdn -w @usebruno/api-playground && vite build --config vite.config.standalone.ts",
     "build:all": "npm run build && npm run build:standalone",
     "prepublishOnly": "npm run build:all",
     "preview": "vite preview",

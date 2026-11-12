@@ -18,18 +18,18 @@ describe('createEnv', () => {
     expect(env.get().activeEnvName).toBeNull();
   });
 
-  it('setShowVars sets the flag explicitly', () => {
+  it('toggleShowVars flips the flag', () => {
     const env = createEnv();
-    env.setShowVars(true);
+    env.toggleShowVars();
     expect(env.get().showVars).toBe(true);
-    env.setShowVars(false);
+    env.toggleShowVars();
     expect(env.get().showVars).toBe(false);
   });
 
   it('keeps the two fields independent', () => {
     const env = createEnv();
     env.setActiveEnv('Dev');
-    env.setShowVars(true);
+    env.toggleShowVars();
     expect(env.get()).toEqual({ activeEnvName: 'Dev', showVars: true });
   });
 
@@ -39,12 +39,11 @@ describe('createEnv', () => {
     expect(sessionStorage.getItem(ENV_STORAGE_KEY)).toBe(JSON.stringify({ activeEnvName: 'Prod', showVars: false }));
   });
 
-  it('neither saves nor notifies when a field is set to what it already is', () => {
+  it('neither saves nor notifies when the active env is set to what it already is', () => {
     const env = createEnv({ activeEnvName: 'Dev', showVars: false });
     const listener = vi.fn();
     env.subscribe(listener);
     env.setActiveEnv('Dev');
-    env.setShowVars(false);
     expect(listener).not.toHaveBeenCalled();
     expect(sessionStorage.getItem(ENV_STORAGE_KEY)).toBeNull();
   });
@@ -65,7 +64,7 @@ describe('readPersistedEnv', () => {
   it('round-trips what an env saved', () => {
     const env = createEnv();
     env.setActiveEnv('Prod');
-    env.setShowVars(true);
+    env.toggleShowVars();
     expect(readPersistedEnv()).toEqual({ activeEnvName: 'Prod', showVars: true });
   });
 

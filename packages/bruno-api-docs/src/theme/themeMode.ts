@@ -26,5 +26,3 @@ export const createThemeMode = (initial: ThemeState = { variant: DEFAULT_THEME_V
     }
   };
 };
-
-export type ThemeModeStore = ReturnType<typeof createThemeMode>;

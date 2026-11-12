@@ -15,7 +15,7 @@ export interface EnvSwitcherProps {
 
 /**
  * Environment switcher for the docs: lets the reader pick which environment's
- * values are shown, storing the choice in the env slice. Self-contained (no
+ * values are shown, storing the choice in the session env. Self-contained (no
  * layout assumptions) so it can sit in the topbar or elsewhere. The dot + name
  * reuse `EnvironmentLabel`. The menu renders through `MenuDropdown` (Tippy),
  * which portals to <body>, positions against the trigger, tracks scroll/resize,

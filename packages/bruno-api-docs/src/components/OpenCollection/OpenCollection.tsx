@@ -182,7 +182,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
 
   if (!storeRef.current) {
     sessionRef.current = createSession({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
-    storeRef.current = createOpenCollectionStore({ env: sessionRef.current.env });
+    storeRef.current = createOpenCollectionStore();
   }
 
   return (

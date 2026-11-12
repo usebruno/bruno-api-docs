@@ -7,7 +7,6 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
 import { setPlaygroundVariable } from '@/store/slices/playground';
 import { promptVariableName } from '@/utils/promptVariables';
-import { selectShowVars } from '@/store/slices/env';
 import { useEnvState } from '@/session/session';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
@@ -48,7 +47,7 @@ const classifyDynamic = (name: string): DynamicVariableKind => {
 
 /**
  * Shared variable resolution hook, the contract redesigned doc sections
- * consume. It resolves `{{var}}` against the active environment (the env slice),
+ * consume. It resolves `{{var}}` against the active environment (the session env),
  * gated by the show-variables flag, with secret variables always masked.
  *
  * - showVars off → `resolve()` returns the raw string (`{{baseUrl}}`).
@@ -152,8 +151,7 @@ const itemSource = (item: Item): VariableSource =>
 
 export const useVariableResolver = (): VariableResolver => {
   const collection = useAppSelector(selectDocsCollection) as OpenCollection | null;
-  const { activeEnvName } = useEnvState();
-  const showVars = useAppSelector(selectShowVars);
+  const { activeEnvName, showVars } = useEnvState();
 
   const model = useMemo(
     () => buildScopedVariableModel(collectionAndEnvSources(collection, activeEnvName)),
@@ -231,8 +229,7 @@ export const ItemVariableResolverProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ collection, ancestry, item, writable = false, children }) => {
   const dispatch = useAppDispatch();
-  const { activeEnvName } = useEnvState();
-  const showVars = useAppSelector(selectShowVars);
+  const { activeEnvName, showVars } = useEnvState();
 
   // Both the docs pages and the playground mount this provider; only the
   // playground passes `writable`, and only it can supply an external secret.

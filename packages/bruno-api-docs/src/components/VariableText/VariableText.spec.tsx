@@ -1,10 +1,9 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore, type AppStore } from '@/store/store';
+import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession, type Session } from '@/session/session';
 import { setDocsCollection } from '@/store/slices/docs';
-import { setShowVars } from '@/store/slices/env';
 import { VariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { VariableText } from './VariableText';
@@ -13,11 +12,11 @@ const collection: any = {
   config: { environments: [{ name: 'Dev', variables: [{ name: 'baseUrl', value: 'https://dev.test' }] }] }
 };
 
-const tree = (value: string, configure?: (session: Session, store: AppStore) => void) => {
+const tree = (value: string, configure?: (session: Session) => void) => {
   const store = createOpenCollectionStore();
   const session = createSession();
   store.dispatch(setDocsCollection(collection));
-  configure?.(session, store);
+  configure?.(session);
   return (
     <TestProviders store={store} session={session}>
       <VariableResolverProvider>
@@ -27,9 +26,9 @@ const tree = (value: string, configure?: (session: Session, store: AppStore) => 
   );
 };
 
-const withShowVars = (session: Session, store: AppStore) => {
+const withShowVars = (session: Session) => {
   session.env.setActiveEnv('Dev');
-  store.dispatch(setShowVars(true));
+  session.env.toggleShowVars();
 };
 
 describe('VariableText', () => {

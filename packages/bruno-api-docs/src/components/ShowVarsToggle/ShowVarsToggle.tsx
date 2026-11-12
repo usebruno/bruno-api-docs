@@ -1,6 +1,5 @@
 import React from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { selectShowVars, toggleShowVars } from '@/store/slices/env';
+import { useEnvState, useSession } from '@/session/session';
 import { Tooltip } from '@/ui/Tooltip/Tooltip';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -9,13 +8,13 @@ export interface ShowVarsToggleProps {
 }
 
 /**
- * Placement-agnostic show-variables toggle. Bound to the single global
- * `showVars` flag in the env slice, so it flips the same state from any
+ * Placement-agnostic show-variables toggle. Bound to the instance's
+ * `showVars` flag in the session env, so it flips the same state from any
  * container alongside the environment switcher.
  */
 const ShowVarsToggle: React.FC<ShowVarsToggleProps> = ({ testId = 'show-vars-toggle' }) => {
-  const dispatch = useAppDispatch();
-  const showVars = useAppSelector(selectShowVars);
+  const { env } = useSession();
+  const { showVars } = useEnvState();
 
   return (
     <Tooltip content="Show resolved variable values" touch={false} testId={`${testId}-tooltip`}>
@@ -24,7 +23,7 @@ const ShowVarsToggle: React.FC<ShowVarsToggleProps> = ({ testId = 'show-vars-tog
         data-testid={testId}
         aria-checked={showVars}
         aria-label="Show variables"
-        onClick={() => dispatch(toggleShowVars())}
+        onClick={env.toggleShowVars}
       >
         <span className="show-vars-track" aria-hidden="true">
           <span className="show-vars-thumb" />

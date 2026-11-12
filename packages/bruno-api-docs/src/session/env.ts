@@ -30,8 +30,6 @@ export const createEnv = (initial: EnvState = startingEnv) => {
     set: state.set,
     subscribe: state.subscribe,
     setActiveEnv: (name: string | null) => setField('activeEnvName', name),
-    setShowVars: (on: boolean) => setField('showVars', on)
+    toggleShowVars: () => setField('showVars', !state.get().showVars)
   };
 };
-
-export type EnvSession = ReturnType<typeof createEnv>;

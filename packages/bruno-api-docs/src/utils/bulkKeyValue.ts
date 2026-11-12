@@ -44,7 +44,7 @@ export function preserveDescriptions(
   original: KeyValueRow[],
   idPrefix: string
 ): KeyValueRow[] {
-  const descriptionsByName = new Map<string, unknown[]>();
+  const descriptionsByName = new Map<string, (string | undefined)[]>();
   original.forEach((row) => {
     const name = row.name || '';
     const list = descriptionsByName.get(name) ?? [];

@@ -16,7 +16,11 @@ export interface KeyValueRow {
   name: string;
   value: string;
   enabled: boolean;
-  [key: string]: any;
+  type?: string;
+  dataType?: string;
+  operator?: string;
+  description?: string;
+  secret?: boolean;
 }
 
 export interface AdditionalColumn {
@@ -87,7 +91,11 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
   testId = 'key-value-table'
 }) => {
   const { isFound, names } = useResolvedVariables();
-  const { rows, updateField, removeRow } = useEditableRows(data, onChange, { disableNewRow, makeNewRow, addWhenComplete });
+  const { rows, updateField, removeRow } = useEditableRows(data, onChange, {
+    disableNewRow,
+    makeNewRow,
+    addWhenComplete
+  });
 
   // With a description column the delete action must sit in its own trailing column (after
   // Description) rather than inline in the value cell, so any inline extras (e.g. the variable

@@ -1,20 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { mergeAuth, mergeHeaders } from './request-merger';
+import type { OpenCollection } from '@opencollection/types';
+import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { Folder, Item } from '@opencollection/types/collection/item';
 import { getRequestAuth, getHttpHeaders } from '@/utils/schemaHelpers';
 
 // A playground request keeps its auth on the http protocol block; folders/collection nest
 // it under `request.auth`. Auth is either a concrete object, the string 'inherit', or
 // undefined (= No Auth).
-const httpRequest = (auth: unknown): any => ({ http: { method: 'GET', url: 'https://x', auth } });
-const folder = (name: string, auth: unknown): any => ({ info: { type: 'folder', name }, request: { auth } });
-const collection = (auth: unknown): any => ({ info: { name: 'C' }, request: { auth } });
+const httpRequest = (auth: unknown) => ({ http: { method: 'GET', url: 'https://x', auth } }) as unknown as HttpRequest;
+const folder = (name: string, auth: unknown) => ({ info: { type: 'folder', name }, request: { auth } }) as unknown as Folder;
+const collection = (auth: unknown) => ({ info: { name: 'C' }, request: { auth } }) as unknown as OpenCollection;
 
 const BASIC = { type: 'basic', username: 'u', password: 'p' };
 const BEARER = { type: 'bearer', token: 't' };
 const APIKEY = { type: 'apikey', key: 'k', value: 'v', placement: 'header' };
 
 // mergeAuth mutates the request; read back the effective auth the executor will use.
-const resolve = (request: any, coll: any, path: any[] = []): unknown => {
+const resolve = (request: HttpRequest, coll: OpenCollection, path: Item[] = []): unknown => {
   mergeAuth(coll, request, path);
   return getRequestAuth(request);
 };
@@ -22,11 +25,12 @@ const resolve = (request: any, coll: any, path: any[] = []): unknown => {
 describe('mergeHeaders (which headers a request ends up sending)', () => {
   type Row = { name: string; value: string; disabled?: boolean };
 
-  const requestWith = (headers: Row[]): any => ({ http: { method: 'GET', url: 'https://x', headers } });
-  const collectionWith = (headers: Row[]): any => ({ info: { name: 'C' }, request: { headers } });
-  const folderWith = (name: string, headers: Row[]): any => ({ info: { type: 'folder', name }, request: { headers } });
+  const requestWith = (headers: Row[]) => ({ http: { method: 'GET', url: 'https://x', headers } }) as HttpRequest;
+  const collectionWith = (headers: Row[]) => ({ info: { name: 'C' }, request: { headers } }) as OpenCollection;
+  const folderWith = (name: string, headers: Row[]) =>
+    ({ info: { type: 'folder', name }, request: { headers } }) as Folder;
 
-  const sent = (request: any): Record<string, string> =>
+  const sent = (request: HttpRequest): Record<string, string> =>
     Object.fromEntries(getHttpHeaders(request).map((header: Row) => [header.name.toLowerCase(), header.value]));
 
   it('sends a header the request inherits from the collection', () => {
@@ -136,11 +140,11 @@ describe('mergeAuth (inherited-auth resolution for the playground send path)', (
       const coll = collection(BEARER);
       const request = httpRequest('inherit');
       mergeAuth(coll, request, []);
-      const applied = getRequestAuth(request) as any;
+      const applied = getRequestAuth(request) as unknown as typeof BEARER;
       expect(applied).toMatchObject(BEARER);
-      expect(applied).not.toBe(coll.request.auth); // cloned, not the same reference
+      expect(applied).not.toBe(BEARER); // cloned, not the same reference
       applied.token = 'mutated';
-      expect(coll.request.auth.token).toBe('t'); // mutation does not leak back to the collection
+      expect(BEARER.token).toBe('t'); // mutation does not leak back to the collection
     });
   });
 
@@ -149,30 +153,31 @@ describe('mergeAuth (inherited-auth resolution for the playground send path)', (
   // no change here, and so nobody re-introduces a per-type branch that would break new types.
   describe('scalability — any auth type inherits without changes to the resolver', () => {
     it('resolves an unknown/future auth type through the chain, untouched', () => {
-      const future: any = { type: 'future-scheme-v9', apiToken: 't', nested: { region: 'us' } };
+      const future = { type: 'future-scheme-v9', apiToken: 't', nested: { region: 'us' } };
       expect(resolve(httpRequest('inherit'), collection(future))).toMatchObject(future);
     });
 
     it('applies closest-folder-wins for an unknown type just like a known one', () => {
-      const outer: any = { type: 'scheme-a', k: '1' };
-      const inner: any = { type: 'scheme-b', k: '2' };
+      const outer = { type: 'scheme-a', k: '1' };
+      const inner = { type: 'scheme-b', k: '2' };
       const path = [folder('outer', outer), folder('inner', inner)];
       expect(resolve(httpRequest('inherit'), collection(undefined), path)).toMatchObject(inner);
     });
 
     it('deep-clones a nested auth shape so nothing aliases the shared source', () => {
-      const coll = collection({
+      const source = {
         type: 'oauth2',
         grantType: 'client_credentials',
         additionalParameters: [{ name: 'scope', value: 'read' }]
-      });
+      };
+      const coll = collection(source);
       const request = httpRequest('inherit');
       mergeAuth(coll, request, []);
-      const applied = getRequestAuth(request) as any;
+      const applied = getRequestAuth(request) as unknown as typeof source;
       expect(applied).toMatchObject({ type: 'oauth2', grantType: 'client_credentials' });
-      expect(applied.additionalParameters).not.toBe(coll.request.auth.additionalParameters); // nested array cloned
+      expect(applied.additionalParameters).not.toBe(source.additionalParameters); // nested array cloned
       applied.additionalParameters[0].value = 'mutated';
-      expect(coll.request.auth.additionalParameters[0].value).toBe('read'); // no leak into the collection
+      expect(source.additionalParameters[0].value).toBe('read'); // no leak into the collection
     });
   });
 });

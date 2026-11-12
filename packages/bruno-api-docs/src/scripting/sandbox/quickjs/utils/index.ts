@@ -1,4 +1,6 @@
-const marshallToVm = (value: any, vm: any) => {
+import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
+
+const marshallToVm = (value: unknown, vm: QuickJSContext): QuickJSHandle => {
   if (value === undefined) {
     return vm.undefined;
   }
@@ -24,7 +26,7 @@ const marshallToVm = (value: any, vm: any) => {
         if (key === '__proto__') {
           continue;
         }
-        vm.setProp(obj, key, marshallToVm(value[key], vm));
+        vm.setProp(obj, key, marshallToVm((value as Record<string, unknown>)[key], vm));
       }
       return obj;
     }

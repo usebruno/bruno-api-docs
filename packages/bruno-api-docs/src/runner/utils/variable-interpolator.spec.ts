@@ -4,7 +4,7 @@ import { interpolateVars } from './variable-interpolator';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
-const req = (http: Record<string, any>): HttpRequest => ({ http: { method: 'GET', ...http } as any });
+const req = (http: Record<string, unknown>): HttpRequest => ({ http: { method: 'GET', ...http } as HttpRequest['http'] });
 
 describe('interpolateVars — built-in dynamic variables', () => {
   it('resolves {{$randomUUID}} in the URL', () => {

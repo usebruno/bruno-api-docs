@@ -4,7 +4,6 @@ import MenuDropdown from '@/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 import type { SelectOption } from '@/types/selectOption';
 
-
 interface SelectProps {
   value: string;
   options: SelectOption[];

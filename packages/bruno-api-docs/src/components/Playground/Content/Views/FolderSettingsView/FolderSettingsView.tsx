@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import type { Folder } from '@opencollection/types/collection/item';
 import type { OpenCollection } from '@opencollection/types';
+import type { Auth } from '@opencollection/types/common/auth';
 import Tabs from '@/ui/Tabs/Tabs';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
@@ -67,9 +68,9 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
   };
 
   const handleAuthChange = (authType: string) => {
-    let auth: any = 'inherit';
+    let auth: Auth | undefined = 'inherit';
     if (authType !== 'none' && authType !== 'inherit') {
-      auth = { type: authType };
+      auth = { type: authType } as Auth;
     } else if (authType === 'none') {
       auth = undefined;
     }

@@ -42,14 +42,16 @@ interface EnvironmentsViewProps {
   onCollectionChange: (collection: OpenCollection) => void;
 }
 
+type LegacyCollection = OpenCollection & { environments?: Environment[] };
+
 const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false, onCollectionChange }) => {
   const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
 
-  const environments = (collection as any)?.environments || collection?.config?.environments || [];
+  const environments = (collection as LegacyCollection | null)?.environments || collection?.config?.environments || [];
   const selectedEnvironment
     = selectedEnvironmentIndex !== null ? environments[selectedEnvironmentIndex] ?? null : null;
 
-  const allVariables: Variable[] = selectedEnvironment?.variables ?? [];
+  const allVariables = (selectedEnvironment?.variables ?? []) as Variable[];
   const plainRows = allVariables.filter((v) => !isSecretVariable(v)).map(envVariableToRow);
   const secretRows = allVariables.filter((v) => isSecretVariable(v)).map(envVariableToRow);
 
@@ -79,8 +81,8 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
         ? { ...collection.config, environments: updatedEnvironments }
         : { environments: updatedEnvironments }
     };
-    if ((collection as any).environments) {
-      (updatedCollection as any).environments = updatedEnvironments;
+    if ((collection as LegacyCollection).environments) {
+      (updatedCollection as LegacyCollection).environments = updatedEnvironments;
     }
 
     onCollectionChange(updatedCollection);

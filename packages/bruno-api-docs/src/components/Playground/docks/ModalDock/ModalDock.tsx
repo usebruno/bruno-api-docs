@@ -14,7 +14,14 @@ interface ModalDockProps {
   children: React.ReactNode;
 }
 
-const ModalDock: React.FC<ModalDockProps> = ({ dock, onDockChange, sidebarOpen, onToggleSidebar, onClose, children }) => {
+const ModalDock: React.FC<ModalDockProps> = ({
+  dock,
+  onDockChange,
+  sidebarOpen,
+  onToggleSidebar,
+  onClose,
+  children
+}) => {
   // Modal is a true full-screen overlay: lock the docs body scroll behind it and
   // close on Escape (the inline/bottom docks are persistent panels, so they get
   // neither). Focus containment / focus-return is a tracked follow-up.

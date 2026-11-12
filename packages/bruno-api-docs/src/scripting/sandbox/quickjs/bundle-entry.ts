@@ -22,21 +22,23 @@ const path = {
     browserPath.relative(browserPath.resolve('/', from), browserPath.resolve('/', to))
 };
 
-(globalThis as any).expect = expect;
-(globalThis as any).assert = assert;
-(globalThis as any).moment = moment;
-(globalThis as any).btoa = btoa;
-(globalThis as any).atob = atob;
-(globalThis as any).Buffer = Buffer;
-(globalThis as any).tv4 = tv4;
-(globalThis as any).Ajv = Ajv;
-(globalThis as any).addFormats = addFormats;
-(globalThis as any).uuid = uuid;
-(globalThis as any).nanoid = nanoid;
-(globalThis as any).path = path;
+const sandboxGlobal = globalThis as unknown as Record<string, unknown>;
 
-(globalThis as any).requireObject = {
-  ...((globalThis as any).requireObject || {}),
+sandboxGlobal.expect = expect;
+sandboxGlobal.assert = assert;
+sandboxGlobal.moment = moment;
+sandboxGlobal.btoa = btoa;
+sandboxGlobal.atob = atob;
+sandboxGlobal.Buffer = Buffer;
+sandboxGlobal.tv4 = tv4;
+sandboxGlobal.Ajv = Ajv;
+sandboxGlobal.addFormats = addFormats;
+sandboxGlobal.uuid = uuid;
+sandboxGlobal.nanoid = nanoid;
+sandboxGlobal.path = path;
+
+sandboxGlobal.requireObject = {
+  ...((sandboxGlobal.requireObject as Record<string, unknown> | undefined) || {}),
   'chai': { expect, assert },
   'moment': moment,
   'buffer': { Buffer },

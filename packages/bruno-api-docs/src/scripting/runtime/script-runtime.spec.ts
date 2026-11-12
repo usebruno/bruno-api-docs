@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
+import type { InternalHttpRequest } from '@/utils/schemaHelpers';
+import type { JsonValue } from '@/scripting/utils/bruno-response';
 import ScriptRuntime from './script-runtime';
 
 describe('ScriptRuntime', () => {
@@ -53,7 +55,7 @@ describe('ScriptRuntime', () => {
       url: 'https://echo.usebruno.com',
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
-    };
+    } as unknown as InternalHttpRequest;
 
     const mockResponse = {
       status: 200,
@@ -222,7 +224,7 @@ describe('ScriptRuntime', () => {
         auth: { type: 'bearer', token: 'xyz' }
       },
       settings: { timeout: 5000 }
-    };
+    } satisfies InternalHttpRequest;
 
     const script = `
       await test('req reads url/method/name/auth and derives host/path from the nested shape', () => {
@@ -325,7 +327,7 @@ describe('ScriptRuntime', () => {
         auth: { type: 'bearer', token: 'xyz' }
       },
       settings: { timeout: 5000 }
-    };
+    } satisfies InternalHttpRequest;
 
     const script = `
       await test('req reads url/method/name/auth and derives host/path from the nested shape', () => {
@@ -465,7 +467,7 @@ describe('ScriptRuntime', () => {
 
   describe('bru.getTestResults inside a tests script', () => {
     const runTests = async (script: string) => {
-      const runtimeVariables: Record<string, unknown> = {};
+      const runtimeVariables: Record<string, JsonValue> = {};
       const bru = await new ScriptRuntime().runScript({ script, variables: { runtimeVariables } });
       return { runtimeVariables, results: await bru.getTestResults!() };
     };

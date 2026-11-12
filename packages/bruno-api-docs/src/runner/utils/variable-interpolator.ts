@@ -6,7 +6,6 @@ import { isPromptVariableToken } from '@/utils/promptVariables';
 import { mockDataFunctions } from '@/utils/fakerFunctions';
 import type { JsonValue, Variables } from '@/types/run';
 
-
 // for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.
 const MOCK_PATTERN = /\{\{\$(\w+)\}\}/g;
 const JSON_SPECIAL_CHARS = /[\\\n\r\t"]/;

@@ -12,7 +12,13 @@ interface TestsTabProps {
   fillHeight?: boolean;
 }
 
-export const TestsTab: React.FC<TestsTabProps> = ({ scripts, onScriptChange, title, description, fillHeight = false }) => {
+export const TestsTab: React.FC<TestsTabProps> = ({
+  scripts,
+  onScriptChange,
+  title,
+  description,
+  fillHeight = false
+}) => {
   return (
     <StyledWrapper className={`space-y-3${fillHeight ? ' h-full flex flex-col' : ''}`}>
       {(Boolean(title) || Boolean(description)) && (

@@ -102,7 +102,7 @@ class BrunoRequest {
 
   getAuthMode(): string {
     const auth = getRequestAuth(this.req);
-    if (auth && typeof auth === 'object' && typeof auth.type === 'string' && auth.type !== 'none') {
+    if (auth && typeof auth === 'object' && typeof auth.type === 'string' && (auth.type as string) !== 'none') {
       return auth.type;
     }
     const authHeader = this.getHeader('Authorization');

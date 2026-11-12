@@ -1,6 +1,6 @@
 import { Buffer } from 'buffer';
-import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { RunRequestResponse } from '@/types/run';
+import type { FormUrlEncodedEntry, HttpRequest, MultipartFormEntry } from '@opencollection/types/requests/http';
+import type { JsonValue, RunRequestResponse } from '@/types/run';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
 import { buildRequestUrl } from '@/utils/pathParams';
 import { buildDigestAuthorization, findDigestChallenge, getDigestCredentials } from './utils/digest-auth';
@@ -9,6 +9,8 @@ import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/res
 import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
 import stripJsonComments from 'strip-json-comments';
 import { statusCodePhrase } from '@/utils/exampleResponse';
+
+type LegacyFormRow = { name: string; value?: string | File; type?: string; disabled?: boolean };
 
 /** Methods `fetch` refuses to attach a request body to. */
 const BODYLESS_METHODS = ['GET', 'HEAD'];
@@ -74,7 +76,7 @@ export class RequestExecutor {
     const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
     const requestUrl = applyApiKeyToUrl(
       buildRequestUrl(getRequestUrl(request), getHttpParams(request)),
-      getRequestAuth(request)
+      getRequestAuth(request) as Record<string, unknown> | undefined
     );
 
     try {
@@ -152,7 +154,7 @@ export class RequestExecutor {
   }
 
   private async performFetch(url: string, fetchOptions: RequestInit, request: HttpRequest): Promise<Response> {
-    const credentials = getDigestCredentials(getRequestAuth(request));
+    const credentials = getDigestCredentials(getRequestAuth(request) as Record<string, unknown> | undefined);
     const headers = fetchOptions.headers as Record<string, string>;
 
     if (credentials === null || hasHeader(headers, 'Authorization')) {
@@ -207,7 +209,7 @@ export class RequestExecutor {
     const headers: Record<string, string> = {};
     const requestHeaders = getHttpHeaders(request);
     const body = getHttpBody(request);
-    const auth = getRequestAuth(request);
+    const auth = getRequestAuth(request) as HeaderAuthConfig | undefined;
 
     if (requestHeaders) {
       requestHeaders.forEach((header) => {
@@ -303,16 +305,16 @@ export class RequestExecutor {
       }
     } else if (Array.isArray(body)) {
       if (headers?.some((h) => h.name.toLowerCase() === 'content-type' && h.value === 'application/x-www-form-urlencoded')) {
-        return this.buildUrlEncodedBody(body);
+        return this.buildUrlEncodedBody(body as unknown as FormUrlEncodedEntry[]);
       } else {
-        return this.buildFormDataBody(body);
+        return this.buildFormDataBody(body as unknown as LegacyFormRow[]);
       }
     }
 
     return null;
   }
 
-  private buildUrlEncodedBody(data: any[]): string {
+  private buildUrlEncodedBody(data: FormUrlEncodedEntry[]): string {
     const params = new URLSearchParams();
     data.forEach((item) => {
       if (item.disabled !== true && item.name) {
@@ -322,7 +324,7 @@ export class RequestExecutor {
     return params.toString();
   }
 
-  private buildFormDataBody(data: any[]): FormData {
+  private buildFormDataBody(data: LegacyFormRow[]): FormData {
     const formData = new FormData();
     data.forEach((item) => {
       if (item.disabled !== true && item.name) {
@@ -336,13 +338,13 @@ export class RequestExecutor {
     return formData;
   }
 
-  private buildMultipartBody(entries: any[]): FormData {
+  private buildMultipartBody(entries: MultipartFormEntry[]): FormData {
     const formData = new FormData();
     entries.forEach((entry) => {
       // File fields only carry a local path the browser can't read — omit them.
       if (entry.disabled === true || !entry.name || entry.type === 'file') return;
       const values = Array.isArray(entry.value) ? entry.value : [entry.value];
-      values.forEach((value: any) => formData.append(entry.name, value ?? ''));
+      values.forEach((value: string) => formData.append(entry.name, value ?? ''));
     });
     return formData;
   }
@@ -360,7 +362,7 @@ export class RequestExecutor {
     const isLarge = size > RESPONSE_LARGE_THRESHOLD;
 
     // Binary bytes don't decode to meaningful text — previews read `base64Data` instead.
-    let data: any;
+    let data: JsonValue | undefined;
     if (!isBinary) {
       const text = buffer.toString('utf-8');
       if (!disableJsonParsing && contentType.includes('application/json')) {
@@ -385,8 +387,8 @@ export class RequestExecutor {
     return { data, size, base64Data, detectedContentType };
   }
 
-  private parseHeaders(headers: Headers): Record<string, any> {
-    const result: Record<string, any> = {};
+  private parseHeaders(headers: Headers): Record<string, string> {
+    const result: Record<string, string> = {};
     headers.forEach((value, key) => {
       result[key] = value;
     });

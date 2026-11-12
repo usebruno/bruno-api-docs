@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { newQuickJSWASMModule } from 'quickjs-emscripten';
+import { newQuickJSWASMModule, type QuickJSContext, type QuickJSHandle } from 'quickjs-emscripten';
 import { marshallToVm } from './index';
 
-let vm: any;
+let vm: QuickJSContext;
 
-const dump = (handle: any) => {
+const dump = (handle: QuickJSHandle) => {
   const value = vm.dump(handle);
   handle.dispose();
   return value;
@@ -29,9 +29,9 @@ describe('marshallToVm', () => {
     vm.setProp(vm.global, 'marshalled', handle);
     handle.dispose();
 
-    expect(dump(vm.evalCode('marshalled.safe').value)).toBe(1);
-    expect(dump(vm.evalCode('marshalled.polluted').value)).toBeUndefined();
-    expect(dump(vm.evalCode('({}).polluted').value)).toBeUndefined();
+    expect(dump(vm.unwrapResult(vm.evalCode('marshalled.safe')))).toBe(1);
+    expect(dump(vm.unwrapResult(vm.evalCode('marshalled.polluted')))).toBeUndefined();
+    expect(dump(vm.unwrapResult(vm.evalCode('({}).polluted')))).toBeUndefined();
   });
 
   it('throws on unsupported value types instead of returning undefined', () => {

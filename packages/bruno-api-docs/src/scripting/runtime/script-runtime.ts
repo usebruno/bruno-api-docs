@@ -9,12 +9,12 @@ import { createBruTestResultMethods, type BruTestResultMethods, type TestResults
 
 interface RunScriptOptions {
   script: string;
-  request?: any;
-  response?: any;
+  request?: ConstructorParameters<typeof BrunoRequest>[0];
+  response?: ConstructorParameters<typeof BrunoResponse>[0];
   collectionName?: string;
   collectionPath?: string;
   collection?: OpenCollection;
-  variables?: any;
+  variables?: ConstructorParameters<typeof Bru>[0]['variables'];
   assertionResults?: AssertionResult[];
   warnings?: string[];
   runRequest?: RunRequestCallback;
@@ -49,14 +49,18 @@ class ScriptRuntime {
     }
 
     // extend bru with result getter methods
-    const { __brunoTestResults, test }: BruTestResultMethods = createBruTestResultMethods(bru, assertionResults || [], chai);
+    const { __brunoTestResults, test }: BruTestResultMethods = createBruTestResultMethods(
+      bru,
+      assertionResults || [],
+      chai
+    );
 
-    interface ScriptContext {
-      bru: any;
-      req?: any;
-      res?: any;
+    type ScriptContext = {
+      bru: Bru;
+      req?: BrunoRequest;
+      res?: BrunoResponse;
       test: (description: string, callback: () => Promise<void> | void) => Promise<void>;
-      __brunoTestResults: any;
+      __brunoTestResults: BruTestResultMethods['__brunoTestResults'];
       console: {
         log: typeof console.log;
         debug: typeof console.debug;
@@ -64,8 +68,9 @@ class ScriptRuntime {
         warn: typeof console.warn;
         error: typeof console.error;
       };
-    }
+    };
 
+    const { log, debug, info, warn, error } = console;
     const context: ScriptContext = {
       bru,
       req,
@@ -73,11 +78,11 @@ class ScriptRuntime {
       test,
       __brunoTestResults: __brunoTestResults,
       console: {
-        log: console.log,
-        debug: console.debug,
-        info: console.info,
-        warn: console.warn,
-        error: console.error
+        log,
+        debug,
+        info,
+        warn,
+        error
       }
     };
 

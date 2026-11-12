@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { newQuickJSWASMModule } from 'quickjs-emscripten';
+import { newQuickJSWASMModule, type QuickJSContext } from 'quickjs-emscripten';
 import addCryptoUtilsShimToContext from './shims/lib/crypto-utils';
 import addAxiosShimToContext from './shims/lib/axios';
 import { addRequireShimToContext } from './shims/require';
@@ -10,7 +10,7 @@ const SUPPORTED_MODULES = [
   'moment', 'nanoid', 'path', 'tv4', 'uuid'
 ];
 
-let vm: any;
+let vm: QuickJSContext;
 
 const inVm = (expression: string) => {
   const result = vm.evalCode(expression);
@@ -37,7 +37,7 @@ describe('sandbox library parity with desktop safe mode', () => {
       + `globalThis.console = { log() {}, debug() {}, info() {}, warn() {}, error() {} };`
     );
     expect(boot.error).toBeUndefined();
-    boot.value.dispose();
+    vm.unwrapResult(boot).dispose();
     addRequireShimToContext(vm);
     addAxiosShimToContext(vm);
   });

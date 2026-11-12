@@ -1,3 +1,4 @@
+import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
 import type { OpenCollection } from '@opencollection/types';
 import { findScriptFileByPath } from '@/runner/utils/tree-utils';
 
@@ -75,8 +76,8 @@ const getRequireCode = () => `
   }
 `;
 
-const createLocalModuleLoader = (vm: any, collection?: OpenCollection) =>
-  vm.newFunction('loadLocalModule', (pathHandle: any, requestedHandle: any) => {
+const createLocalModuleLoader = (vm: QuickJSContext, collection?: OpenCollection) =>
+  vm.newFunction('loadLocalModule', (pathHandle: QuickJSHandle, requestedHandle: QuickJSHandle) => {
     const modulePath = vm.dump(pathHandle);
     const requested = vm.dump(requestedHandle);
     if (!collection) {
@@ -94,7 +95,7 @@ const createLocalModuleLoader = (vm: any, collection?: OpenCollection) =>
     return vm.newString(result.code);
   });
 
-export const addRequireShimToContext = (vm: any, collection?: OpenCollection) => {
+export const addRequireShimToContext = (vm: QuickJSContext, collection?: OpenCollection) => {
   const install = vm.unwrapResult(vm.evalCode(`(loadLocalModule) => { ${getLocalRequireCode()} ${getRequireCode()} }`));
   const loader = createLocalModuleLoader(vm, collection);
   try {

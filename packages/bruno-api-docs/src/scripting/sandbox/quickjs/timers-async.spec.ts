@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import ScriptRuntime from '@/scripting/runtime/script-runtime';
+import type { JsonValue } from '@/scripting/utils/bruno-response';
 
 const runScript = async (script: string) => {
-  const runtimeVariables: Record<string, any> = {};
+  const runtimeVariables: Record<string, JsonValue> = {};
   await new ScriptRuntime().runScript({ script, variables: { runtimeVariables } });
   return runtimeVariables;
 };

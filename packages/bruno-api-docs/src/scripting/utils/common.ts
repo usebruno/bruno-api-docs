@@ -1,4 +1,4 @@
-const cleanJson = (data: any) => {
+const cleanJson = (data: unknown) => {
   try {
     return JSON.parse(JSON.stringify(data));
   } catch {
@@ -6,12 +6,12 @@ const cleanJson = (data: any) => {
   }
 };
 
-const cleanCircularJson = (data: any) => {
+const cleanCircularJson = (data: unknown) => {
   try {
     // Handle circular references by keeping track of seen objects
     const seen = new WeakSet();
 
-    const replacer = (_key: string, value: any) => {
+    const replacer = (_key: string, value: unknown) => {
       // Skip non-objects and null
       if (typeof value !== 'object' || value === null) {
         return value;

@@ -66,7 +66,7 @@ export const BodyModeSelector: React.FC<BodyModeSelectorProps> = ({ body, onItem
     // getHttpBody falls back to a legacy root-level body, so clearing only
     // http.body lets the old body resurface — drop the root shadow too.
     const applyBody = (body: unknown) => {
-      const next = { ...item, http: { ...item.http, body } } as any;
+      const next = { ...item, http: { ...item.http, body } } as HttpRequest & { body?: unknown };
       delete next.body;
       onItemChange(next as HttpRequest);
     };

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, beforeEach, afterEach } from 'vitest';
-import { newQuickJSWASMModule } from 'quickjs-emscripten';
+import { newQuickJSWASMModule, type QuickJSContext } from 'quickjs-emscripten';
 import type { OpenCollection } from '@opencollection/types';
 import addCryptoUtilsShimToContext from './shims/lib/crypto-utils';
 import { addRequireShimToContext } from './shims/require';
@@ -20,7 +20,7 @@ const collection = {
 } as unknown as OpenCollection;
 
 let quickjs: Awaited<ReturnType<typeof newQuickJSWASMModule>>;
-let vm: any;
+let vm: QuickJSContext;
 
 const inVm = (expression: string) => {
   const result = vm.evalCode(expression);
@@ -47,7 +47,7 @@ describe('require() of a .js file from the collection', () => {
     addCryptoUtilsShimToContext(vm);
     const boot = vm.evalCode(`(${getBundledCode.toString()})();`);
     expect(boot.error).toBeUndefined();
-    boot.value.dispose();
+    vm.unwrapResult(boot).dispose();
     addRequireShimToContext(vm, collection);
   });
 

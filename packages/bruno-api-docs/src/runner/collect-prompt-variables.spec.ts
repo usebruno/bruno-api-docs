@@ -1,5 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
+import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
+import type { Folder } from '@opencollection/types/collection/item';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RequestRunner } from './index';
 import { parseYaml } from '@/utils/yamlUtils';
 
@@ -97,13 +100,14 @@ items:
                   value: "{{?Other Variant}}"
 `;
 
-const collection = parseYaml(collectionYaml) as any;
-const folder = collection.items[0];
-const promptedRequest = folder.items[0];
-const plainRequest = folder.items[1];
-const formRequest = folder.items[2];
-const multipartRequest = folder.items[3];
-const variantRequest = folder.items[4];
+const collection = parseYaml(collectionYaml) as OpenCollection;
+const folder = collection.items![0] as Folder;
+const requests = folder.items as HttpRequest[];
+const promptedRequest = requests[0];
+const plainRequest = requests[1];
+const formRequest = requests[2];
+const multipartRequest = requests[3];
+const variantRequest = requests[4];
 
 const environment = {
   name: 'Local',
@@ -180,7 +184,10 @@ describe('working out which prompts a request needs', () => {
   });
 
   it('asks for nothing when a request uses no prompts', async () => {
-    const names = await runner.collectPromptVariableNames({ item: plainRequest, collection: { info: {} } as any });
+    const names = await runner.collectPromptVariableNames({
+      item: plainRequest,
+      collection: { info: {} } as OpenCollection
+    });
 
     expect(names).toEqual([]);
   });
@@ -223,7 +230,7 @@ describe('a header the request has switched off', () => {
         headers: [{ name: 'X-Token', value: 'mine', disabled: true }]
       }
     ]
-  } as any;
+  } as unknown as OpenCollection & { items: HttpRequest[] };
 
   it('still asks for a value the inherited header needs', async () => {
     const names = await runner.collectPromptVariableNames({

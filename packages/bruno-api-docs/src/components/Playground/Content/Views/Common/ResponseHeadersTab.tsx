@@ -2,7 +2,7 @@ import React from 'react';
 import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface ResponseHeadersTabProps {
-  headers?: Record<string, any>;
+  headers?: Record<string, unknown>;
 }
 
 const ResponseHeadersTab: React.FC<ResponseHeadersTabProps> = ({ headers }) => {

@@ -1,10 +1,11 @@
+import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
 import { marshallToVm } from '../../utils';
 import { serializeTypedArray, deserializeTypedArray, SUPPORTED_TYPED_ARRAYS } from './utils';
 
 const MAX_RANDOM_BYTES_PER_CALL = 65536;
 
-const addCryptoUtilsShimToContext = (vm: any) => {
-  const randomBytesHandle = vm.newFunction('randomBytes', (sizeHandle: any) => {
+const addCryptoUtilsShimToContext = (vm: QuickJSContext) => {
+  const randomBytesHandle = vm.newFunction('randomBytes', (sizeHandle: QuickJSHandle) => {
     try {
       let size = vm.dump(sizeHandle);
       if (typeof size !== 'number') {
@@ -29,14 +30,15 @@ const addCryptoUtilsShimToContext = (vm: any) => {
       globalThis.crypto.getRandomValues(bytes);
 
       return marshallToVm(Array.from(bytes), vm);
-    } catch (error: any) {
+    } catch (caught) {
+      const error = caught as Error;
       const vmError = vm.newError(error.message);
       vm.setProp(vmError, 'name', vm.newString(error.name));
       throw vmError;
     }
   });
 
-  const getRandomValuesHandle = vm.newFunction('getRandomValues', (arrayHandle: any) => {
+  const getRandomValuesHandle = vm.newFunction('getRandomValues', (arrayHandle: QuickJSHandle) => {
     try {
       const serializedArray = vm.dump(arrayHandle);
       const typedArray = deserializeTypedArray(serializedArray);
@@ -52,7 +54,8 @@ const addCryptoUtilsShimToContext = (vm: any) => {
       globalThis.crypto.getRandomValues(typedArray);
 
       return marshallToVm(Array.from(typedArray), vm);
-    } catch (error: any) {
+    } catch (caught) {
+      const error = caught as Error;
       const vmError = vm.newError(error.message);
       vm.setProp(vmError, 'name', vm.newString(error.name));
       throw vmError;

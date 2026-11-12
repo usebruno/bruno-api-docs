@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Environment } from '@opencollection/types/config/environments';
+import type { AssertionResultsResponse, JsonValue } from '@/types/run';
+import type { InternalHttpRequest } from '@/utils/schemaHelpers';
 import { RequestRunner } from './index';
 import { parseYaml } from '@/utils/yamlUtils';
 
@@ -104,7 +106,7 @@ describe('RequestRunner', () => {
       // Get the first request item
       const request = collection.items[0];
 
-      const runtimeVariables: Record<string, any> = {};
+      const runtimeVariables: Record<string, JsonValue> = {};
 
       const response = await runner.runRequest({
         item: request,
@@ -124,28 +126,29 @@ describe('RequestRunner', () => {
 
       // Verify assertion results were captured
       expect(runtimeVariables.assertionResults).toBeDefined();
-      expect(runtimeVariables.assertionResults.summary).toEqual({
+      const assertionResults = runtimeVariables.assertionResults as unknown as AssertionResultsResponse;
+      expect(assertionResults.summary).toEqual({
         total: 3,
         passed: 3,
         failed: 0,
         skipped: 0
       });
-      expect(runtimeVariables.assertionResults.results).toHaveLength(3);
+      expect(assertionResults.results).toHaveLength(3);
 
       // Check first assertion (res.status eq 200)
-      expect(runtimeVariables.assertionResults.results[0]).toMatchObject({
+      expect(assertionResults.results[0]).toMatchObject({
         status: 'pass',
         operator: 'eq'
       });
 
       // Check second assertion (res.body.title isString)
-      expect(runtimeVariables.assertionResults.results[1]).toMatchObject({
+      expect(assertionResults.results[1]).toMatchObject({
         status: 'pass',
         operator: 'isString'
       });
 
       // Check third assertion (res.headers['content-type'] contains application/json)
-      expect(runtimeVariables.assertionResults.results[2]).toMatchObject({
+      expect(assertionResults.results[2]).toMatchObject({
         status: 'pass',
         operator: 'contains'
       });
@@ -670,7 +673,7 @@ ${scripts}
       const { RequestExecutor } = await import('./RequestExecutor');
       const executor = new RequestExecutor();
 
-      const requestWithComments: any = {
+      const requestWithComments: InternalHttpRequest = {
         http: {
           method: 'POST',
           url: 'https://example.com/api',
@@ -720,7 +723,7 @@ ${scripts}
       const { RequestExecutor } = await import('./RequestExecutor');
       const executor = new RequestExecutor();
 
-      const requestWithTrailingComma: any = {
+      const requestWithTrailingComma: InternalHttpRequest = {
         http: {
           method: 'POST',
           url: 'https://example.com/api',
@@ -761,7 +764,7 @@ ${scripts}
       const { RequestExecutor } = await import('./RequestExecutor');
       const executor = new RequestExecutor();
 
-      const multipartRequest: any = {
+      const multipartRequest: InternalHttpRequest = {
         http: {
           method: 'POST',
           url: 'https://example.com/upload',
@@ -806,7 +809,7 @@ ${scripts}
       const { RequestExecutor } = await import('./RequestExecutor');
       const executor = new RequestExecutor();
 
-      const fileRequest: any = {
+      const fileRequest: InternalHttpRequest = {
         http: {
           method: 'POST',
           url: 'https://example.com/upload',
@@ -990,7 +993,7 @@ describe('RequestExecutor parseResponse — content-type handling', () => {
   const run = async () => {
     const { RequestExecutor } = await import('./RequestExecutor');
     return new RequestExecutor().executeRequest(
-      { http: { method: 'GET', url: 'https://example.com/data' } } as any,
+      { http: { method: 'GET', url: 'https://example.com/data' } },
       { timeout: 5000 }
     );
   };

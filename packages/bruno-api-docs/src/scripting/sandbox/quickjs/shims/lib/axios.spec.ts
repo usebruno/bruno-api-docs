@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, afterEach, beforeAll } from 'vitest';
-import { newQuickJSWASMModule } from 'quickjs-emscripten';
+import { newQuickJSWASMModule, type QuickJSContext } from 'quickjs-emscripten';
 import addAxiosShimToContext, { serializeAxiosParams, performAxiosRequest } from './axios';
 
-const CASES: [string, Record<string, any>, string][] = [
+const CASES: [string, Record<string, unknown>, string][] = [
   ['flat primitive array', { ids: [1, 2] }, 'ids%5B%5D=1&ids%5B%5D=2'],
   ['mixed flat with bool', { q: 'hi', ids: [1, 2], flag: true }, 'q=hi&ids%5B%5D=1&ids%5B%5D=2&flag=true'],
   ['flat object', { n: { a: 1, b: 2 } }, 'n%5Ba%5D=1&n%5Bb%5D=2'],
@@ -215,7 +215,7 @@ describe('performAxiosRequest — body and status handling', () => {
 });
 
 describe('validateStatus bridged through the QuickJS sandbox', () => {
-  let vm: any;
+  let vm: QuickJSContext;
 
   beforeAll(async () => {
     const module = await newQuickJSWASMModule();

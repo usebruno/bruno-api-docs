@@ -1,5 +1,5 @@
 import React from 'react';
-import type { HttpRequest } from '@opencollection/types/requests/http';
+import type { HttpRequest, HttpRequestParam } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
 import Tabs from '@/ui/Tabs/Tabs';
 import { useSessionStorage } from '@/hooks';
@@ -44,7 +44,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
   const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundRequestTab', 'overview');
 
   const handleParamsChange = (params: KeyValueRow[]) => {
-    const updatedParams = params.map((p) => ({ ...keyValueRowToEntry(p), type: p.type }));
+    const updatedParams = params.map((p) => ({ ...keyValueRowToEntry(p), type: p.type as HttpRequestParam['type'] }));
     const url = setUrlQueryParams(getRequestUrl(item), updatedParams);
     onItemChange({
       ...item,
@@ -191,7 +191,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
 
   // Calculate content indicators
   const hasBody = body && (
-    (body as any).data
+    (body as { data?: unknown }).data
     || (Array.isArray(body) && body.length > 0)
   );
   const hasScripts = scriptsObj && (

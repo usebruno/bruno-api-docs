@@ -14,7 +14,14 @@ interface MobileDockProps {
   children: React.ReactNode;
 }
 
-const MobileDock: React.FC<MobileDockProps> = ({ dock, onDockChange, sidebarOpen, onToggleSidebar, onClose, children }) => {
+const MobileDock: React.FC<MobileDockProps> = ({
+  dock,
+  onDockChange,
+  sidebarOpen,
+  onToggleSidebar,
+  onClose,
+  children
+}) => {
   // Full-screen phone presentation: lock the docs scroll behind it. No dock
   // switcher or collapse - there is nowhere to dock on a phone.
   useLockBodyScroll();

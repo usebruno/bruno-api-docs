@@ -1,7 +1,9 @@
+import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
+import type { BruTestResultMethods } from '@/scripting/utils/test';
 import { marshallToVm } from '@/scripting/sandbox/quickjs/utils';
 
-const addTestShimToContext = (vm: any, __brunoTestResults: any) => {
-  const addResult = vm.newFunction('addResult', function (v: any) {
+const addTestShimToContext = (vm: QuickJSContext, __brunoTestResults: BruTestResultMethods['__brunoTestResults']) => {
+  const addResult = vm.newFunction('addResult', function (v: QuickJSHandle) {
     __brunoTestResults.addResult(vm.dump(v));
   });
   vm.setProp(vm.global, '__bruno__addResult', addResult);

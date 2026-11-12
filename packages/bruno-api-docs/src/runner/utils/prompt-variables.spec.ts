@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { interpolateVars } from './variable-interpolator';
 
-const req = (http: Record<string, any>): HttpRequest => ({ http: { method: 'GET', ...http } as any });
+const req = (http: Record<string, unknown>): HttpRequest => ({ http: { method: 'GET', ...http } as HttpRequest['http'] });
 
 describe('sending a request with prompt answers', () => {
   it('puts the answer into the URL', () => {

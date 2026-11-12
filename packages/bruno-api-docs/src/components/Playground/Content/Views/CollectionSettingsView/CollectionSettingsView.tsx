@@ -55,7 +55,8 @@ const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection, onC
   const scripts = scriptsArrayToObject(collection.request?.scripts);
   const version = collection.info?.version;
 
-  const scriptCount = [scripts.preRequest, scripts.postResponse].filter((s) => Boolean(s && s.trim())).length || undefined;
+  const scriptCount
+    = [scripts.preRequest, scripts.postResponse].filter((s) => Boolean(s && s.trim())).length || undefined;
 
   const tabs = [
     {

@@ -1,3 +1,4 @@
+import type { QuickJSContext, QuickJSHandle } from 'quickjs-emscripten';
 import { cleanJson } from '@/scripting/utils/common';
 import { marshallToVm } from '../../utils';
 
@@ -9,25 +10,26 @@ interface AxiosShimConfig {
   url?: string;
   method?: string;
   headers?: Record<string, string>;
-  params?: Record<string, any>;
-  data?: any;
+  params?: Record<string, unknown>;
+  data?: unknown;
   timeout?: number;
   auth?: { username?: string; password?: string };
   validateStatus?: ((status: number) => boolean) | null;
 }
 
-const normalizeArgs = (method: string | null, args: any[]): AxiosShimConfig => {
+const normalizeArgs = (method: string | null, args: unknown[]): AxiosShimConfig => {
   if (method === null) {
     if (typeof args[0] === 'string') {
-      return { ...(args[1] || {}), url: args[0], method: (args[1]?.method || 'get') };
+      const config = args[1] as AxiosShimConfig | undefined;
+      return { ...(config || {}), url: args[0], method: (config?.method || 'get') };
     }
-    return { method: 'get', ...(args[0] || {}) };
+    return { method: 'get', ...((args[0] as AxiosShimConfig | undefined) || {}) };
   }
 
   if (METHODS_WITH_BODY.has(method)) {
-    return { ...(args[2] || {}), url: args[0], data: args[1], method };
+    return { ...((args[2] as AxiosShimConfig | undefined) || {}), url: args[0] as string, data: args[1], method };
   }
-  return { ...(args[1] || {}), url: args[0], method };
+  return { ...((args[1] as AxiosShimConfig | undefined) || {}), url: args[0] as string, method };
 };
 
 const encodeAxiosComponent = (value: string): string =>
@@ -37,12 +39,13 @@ const encodeAxiosComponent = (value: string): string =>
     .replace(/%2C/gi, ',')
     .replace(/%20/g, '+');
 
-const isPlainObject = (value: any): boolean =>
+const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   Object.prototype.toString.call(value) === '[object Object]';
 
-const isVisitable = (value: any): boolean => isPlainObject(value) || Array.isArray(value);
+const isVisitable = (value: unknown): value is Record<string, unknown> | unknown[] =>
+  isPlainObject(value) || Array.isArray(value);
 
-const isFlatArray = (value: any): boolean => Array.isArray(value) && !value.some(isVisitable);
+const isFlatArray = (value: unknown): boolean => Array.isArray(value) && !value.some(isVisitable);
 
 const removeBrackets = (key: string): string => (key.endsWith('[]') ? key.slice(0, -2) : key);
 
@@ -58,20 +61,20 @@ const renderParamKey = (path: (string | number)[], key: string | number): string
     .join('');
 };
 
-const convertParamValue = (value: any): string => {
+const convertParamValue = (value: unknown): string => {
   if (value === null) return '';
   if (value instanceof Date) return value.toISOString();
   if (typeof value === 'boolean') return value.toString();
   return String(value);
 };
 
-const serializeAxiosParams = (params: Record<string, any>): string => {
+const serializeAxiosParams = (params: Record<string, unknown>): string => {
   const pairs: [string, string][] = [];
 
-  const build = (value: any, path: (string | number)[]) => {
-    const entries: [string | number, any][] = Array.isArray(value)
-      ? value.map((element, index): [number, any] => [index, element])
-      : Object.keys(value).map((objectKey): [string, any] => [objectKey, value[objectKey]]);
+  const build = (value: Record<string, unknown> | unknown[], path: (string | number)[]) => {
+    const entries: [string | number, unknown][] = Array.isArray(value)
+      ? value.map((element, index): [number, unknown] => [index, element])
+      : Object.keys(value).map((objectKey): [string, unknown] => [objectKey, value[objectKey]]);
 
     entries.forEach(([key, element]) => {
       if (element === undefined || element === null) {
@@ -81,12 +84,12 @@ const serializeAxiosParams = (params: Record<string, any>): string => {
     });
   };
 
-  const visit = (value: any, key: string | number, path: (string | number)[]) => {
+  const visit = (value: unknown, key: string | number, path: (string | number)[]) => {
     if (path.length === 0 && Array.isArray(value)) {
       const keyIsBracketed = typeof key === 'string' && key.endsWith('[]');
       if (isFlatArray(value) || keyIsBracketed) {
         const baseKey = typeof key === 'string' ? removeBrackets(key) : key;
-        value.forEach((element: any) => {
+        value.forEach((element: unknown) => {
           if (element === undefined || element === null) {
             return;
           }
@@ -125,7 +128,7 @@ const buildRequestUrl = (config: AxiosShimConfig): string => {
   return url + (url.includes('?') ? '&' : '?') + queryString;
 };
 
-const buildAxiosError = (partial: Record<string, any>, config: AxiosShimConfig) => {
+const buildAxiosError = (partial: Record<string, unknown>, config: AxiosShimConfig) => {
   return {
     isAxiosError: true,
     ...partial,
@@ -192,7 +195,8 @@ const performAxiosRequest = async (config: AxiosShimConfig) => {
   let response: Response;
   try {
     response = await fetch(buildRequestUrl(config), fetchOptions);
-  } catch (err: any) {
+  } catch (caught) {
+    const err = caught as Error | undefined;
     if (err?.name === 'TimeoutError') {
       throw buildAxiosError({ message: `timeout of ${config.timeout}ms exceeded`, code: 'ECONNABORTED' }, config);
     }
@@ -248,15 +252,19 @@ const performAxiosRequest = async (config: AxiosShimConfig) => {
   };
 };
 
-const configArgIndex = (method: string | null, nativeArgs: any[]): number => {
+const configArgIndex = (method: string | null, nativeArgs: unknown[]): number => {
   if (method === null) {
     return typeof nativeArgs[0] === 'string' ? 1 : 0;
   }
   return METHODS_WITH_BODY.has(method) ? 2 : 1;
 };
 
-const addAxiosShimToContext = (vm: any) => {
-  const bridgeValidateStatus = (config: AxiosShimConfig, configHandle: any, nativeConfig: any): any => {
+const addAxiosShimToContext = (vm: QuickJSContext) => {
+  const bridgeValidateStatus = (
+    config: AxiosShimConfig,
+    configHandle: QuickJSHandle | undefined,
+    nativeConfig: unknown
+  ): QuickJSHandle | null => {
     if (!configHandle || !nativeConfig || typeof nativeConfig !== 'object') {
       return null;
     }
@@ -282,7 +290,7 @@ const addAxiosShimToContext = (vm: any) => {
   };
 
   const registerAxiosFunction = (name: string, method: string | null) => {
-    const fnHandle = vm.newFunction(name, (...args: any[]) => {
+    const fnHandle = vm.newFunction(name, (...args: QuickJSHandle[]) => {
       const nativeArgs = args.map(vm.dump);
       const config = normalizeArgs(method, nativeArgs);
       const configIndex = configArgIndex(method, nativeArgs);
@@ -303,7 +311,7 @@ const addAxiosShimToContext = (vm: any) => {
       promise.settled.then(vm.runtime.executePendingJobs);
       return promise.handle;
     });
-    fnHandle.consume((handle: any) => vm.setProp(vm.global, name, handle));
+    fnHandle.consume((handle: QuickJSHandle) => vm.setProp(vm.global, name, handle));
   };
 
   registerAxiosFunction('__bruno__axios', null);

@@ -38,8 +38,8 @@ export const getCollectionFolderRequestVariables = (
   // Folder-level variables, in order from parent to child.
   for (const item of requestTreePath) {
     if (isFolder(item)) {
-      const folderVars = (item as any).request?.variables || [];
-      folderVars.forEach((variable: any) => {
+      const folderVars = item.request?.variables || [];
+      folderVars.forEach((variable: Variable) => {
         if (!variable.disabled) {
           folderVariables[variable.name] = coerceVariableValue(variable.value) as JsonValue;
         }
@@ -49,7 +49,7 @@ export const getCollectionFolderRequestVariables = (
 
   // Request-level variables.
   const requestVars = getRequestVariables(request);
-  requestVars.forEach((variable: any) => {
+  requestVars.forEach((variable: Variable) => {
     if (!variable.disabled) {
       requestVariablesResult[variable.name] = coerceVariableValue(variable.value) as JsonValue;
     }

@@ -32,7 +32,11 @@ const EnvVarCards: React.FC<EnvVarCardsProps> = ({
   addWhenComplete = false,
   testId
 }) => {
-  const { rows, updateRow, removeRow } = useEditableRows(data, onChange, { makeNewRow, disableNewRow, addWhenComplete });
+  const { rows, updateRow, removeRow } = useEditableRows(data, onChange, {
+    makeNewRow,
+    disableNewRow,
+    addWhenComplete
+  });
 
   return (
     <StyledWrapper className="env-card-list" data-testid={testId}>

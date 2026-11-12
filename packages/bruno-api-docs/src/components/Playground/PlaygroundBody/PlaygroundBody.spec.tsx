@@ -6,6 +6,7 @@ vi.mock('@/ui/CodeEditor/CodeEditor', () => ({
   default: ({ value }: { value: string }) => <pre data-testid="code-editor">{value}</pre>
 }));
 
+import type { OpenCollection } from '@opencollection/types';
 import PlaygroundBody from './PlaygroundBody';
 import { TestProviders } from '@/test-utils/providers';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
@@ -25,16 +26,16 @@ const collection = {
       examples: [{ name: 'OK', response: { status: 200, body: { type: 'json', data: '{}' } } }]
     }
   ]
-} as any;
+} as unknown as OpenCollection;
 
 describe('PlaygroundBody example view', () => {
   it('renders ExampleView when viewMode is example', () => {
     const session = createSession();
     session.workspace.replaceCollection(hydrateWithUUIDs(collection));
-    const requestUuid = getItemUuid((session.workspace.get().collection as any).items[0])!;
+    const requestUuid = getItemUuid(session.workspace.get().collection!.items![0])!;
     session.playground.selection.set({ uuid: requestUuid, exampleIndex: 0 });
 
-    const ref = React.createRef<HTMLDivElement>();
+    const ref = React.createRef<string>();
     const root = useRenderToDom(
       <TestProviders session={session}>
         <MemoryRouter>
@@ -45,7 +46,7 @@ describe('PlaygroundBody example view', () => {
             dock="modal"
             onCloseSidebar={() => {}}
             onOpenSidebar={() => {}}
-            appliedSlugRef={ref as any}
+            appliedSlugRef={ref}
           />
         </MemoryRouter>
       </TestProviders>
@@ -58,15 +59,15 @@ describe('PlaygroundBody script file view', () => {
   const withScript = {
     info: { name: 'C' },
     items: [{ info: { name: 'helpers', type: 'script' }, script: 'module.exports = { a: 1 };' }]
-  } as any;
+  } as unknown as OpenCollection;
 
   it('shows a .js file as an editable script with no request controls', () => {
     const session = createSession();
     session.workspace.replaceCollection(hydrateWithUUIDs(withScript));
-    const scriptUuid = getItemUuid((session.workspace.get().collection as any).items[0])!;
+    const scriptUuid = getItemUuid(session.workspace.get().collection!.items![0])!;
     session.playground.selection.set({ uuid: scriptUuid, exampleIndex: null });
 
-    const ref = React.createRef<HTMLDivElement>();
+    const ref = React.createRef<string>();
     const root = useRenderToDom(
       <TestProviders session={session}>
         <MemoryRouter>
@@ -77,7 +78,7 @@ describe('PlaygroundBody script file view', () => {
             dock="modal"
             onCloseSidebar={() => {}}
             onOpenSidebar={() => {}}
-            appliedSlugRef={ref as any}
+            appliedSlugRef={ref}
           />
         </MemoryRouter>
       </TestProviders>

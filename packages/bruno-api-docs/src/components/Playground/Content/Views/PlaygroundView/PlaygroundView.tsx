@@ -20,13 +20,18 @@ import { useSplitPane } from '@/hooks/useSplitPane';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import { SplitDivider } from '@/components/SplitDivider/SplitDivider';
 import { playgroundRuns, PLAYGROUND_CLOSED } from '@/session/playgroundRuns';
+import type { RunRequestResponse } from '@/types/run';
+import type { Environment } from '@opencollection/types/config/environments';
+
+type WithUuid = { uuid: string };
+type LegacyCollection = OpenCollectionCollection & { environments?: Environment[] };
 
 interface PlaygroundViewProps {
   item: HttpRequest;
   collection: OpenCollectionCollection;
   selectedEnvironment?: string;
   orientation?: 'horizontal' | 'vertical';
-  response: any;
+  response: RunRequestResponse;
   requestStartedAt: number | null;
   actions: Workspace;
 }
@@ -42,7 +47,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
 }) => {
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const itemName = getItemName(editableItem) || 'Untitled Request';
-  const itemUuid = (item as any).uuid;
+  const itemUuid = (item as WithUuid).uuid;
   const isLoading = requestStartedAt !== null;
   const promptVariablesController = usePromptVariables();
   const { collect: collectPromptVariables } = promptVariablesController;
@@ -87,8 +92,8 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
   const handleItemChange = useCallback((updatedItem: HttpRequest) => {
     setEditableItem(updatedItem);
 
-    const itemUuid = (updatedItem as any).uuid || (item as any).uuid;
-    if (itemUuid) scheduleSave({ uuid: itemUuid, item: { ...updatedItem, uuid: itemUuid } as any });
+    const itemUuid = (updatedItem as WithUuid).uuid || (item as WithUuid).uuid;
+    if (itemUuid) scheduleSave({ uuid: itemUuid, item: { ...updatedItem, uuid: itemUuid } as HttpRequest });
   }, [scheduleSave, item]);
 
   const handleSendRequest = useCallback(async () => {
@@ -100,9 +105,9 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
     try {
       // Check both root level and config level for environments
       // TODO: Remove this
-      const envs = (collection as any).environments || collection?.config?.environments || [];
+      const envs = (collection as LegacyCollection).environments || collection?.config?.environments || [];
       const environment = envs.find(
-        (env: any) => env.name === selectedEnvironment
+        (env: Environment) => env.name === selectedEnvironment
       );
       const { requestRunner } = await import('@/runner');
 

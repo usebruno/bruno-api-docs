@@ -1,10 +1,11 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
+import type { HttpRequest, HttpRequestExample } from '@opencollection/types/requests/http';
 import { ExampleView } from './ExampleView';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
 
-const request = { type: 'http', method: 'POST', url: '{{baseUrl}}/api/v1/auth/login' } as any;
+const request = { type: 'http', method: 'POST', url: '{{baseUrl}}/api/v1/auth/login' } as unknown as HttpRequest;
 const example = {
   name: 'Successful Login',
   description: 'Valid credentials.',
@@ -17,7 +18,7 @@ const example = {
     statusText: 'OK',
     body: { type: 'json', data: '{ "token": "abc" }' }
   }
-} as any;
+} as HttpRequestExample;
 
 describe('ExampleView', () => {
   it('renders name, request and response panes read-only', () => {

@@ -19,7 +19,14 @@ interface InlineDockProps {
   children: React.ReactNode;
 }
 
-const InlineDock: React.FC<InlineDockProps> = ({ dock, onDockChange, sidebarOpen, onToggleSidebar, onClose, children }) => {
+const InlineDock: React.FC<InlineDockProps> = ({
+  dock,
+  onDockChange,
+  sidebarOpen,
+  onToggleSidebar,
+  onClose,
+  children
+}) => {
   const initialWidth = useMemo(
     () => readStoredNumber(areaFor('session'), WIDTH_STORAGE_KEY, Math.round(getViewportWidth() * 0.4)),
     []

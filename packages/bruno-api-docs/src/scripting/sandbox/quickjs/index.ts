@@ -9,11 +9,18 @@ import { newQuickJSWASMModule, memoizePromiseFactory } from 'quickjs-emscripten'
 import { marshallToVm } from './utils';
 import { getBundledCode } from './bundled-libraries.iife.js';
 import { addRequireShimToContext } from './shims/require';
+import type { ContextOptions, QuickJSContext } from 'quickjs-emscripten';
 import type { OpenCollection } from '@opencollection/types';
+import type Bru from '@/scripting/utils/bru';
+import type BrunoRequest from '@/scripting/utils/bruno-request';
+import type BrunoResponse from '@/scripting/utils/bruno-response';
+import type { CallableResponse } from '@/scripting/utils/bruno-response';
+import type { BruTestResultMethods } from '@/scripting/utils/test';
+import type { ConsoleLike } from './shims/console';
 
-let QuickJSSyncContext: any;
+let QuickJSSyncContext: QuickJSContext;
 const loader = memoizePromiseFactory(() => newQuickJSWASMModule());
-const getContext = (opts?: any) => loader().then((mod) => (QuickJSSyncContext = mod.newContext(opts)));
+const getContext = (opts?: ContextOptions) => loader().then((mod) => (QuickJSSyncContext = mod.newContext(opts)));
 getContext();
 
 const toNumber = (value: string) => {
@@ -28,7 +35,23 @@ const removeQuotes = (str: string) => {
   return str;
 };
 
-const executeQuickJsVm = ({ script: externalScript, context: externalContext, scriptType = 'template-literal' }: { script: any; context: any; scriptType?: string }) => {
+type VmContext = Record<string, unknown> & {
+  bru?: Bru;
+  req?: BrunoRequest;
+  res?: BrunoResponse;
+};
+
+type AsyncVmContext = VmContext & {
+  test?: BruTestResultMethods['test'];
+  __brunoTestResults?: BruTestResultMethods['__brunoTestResults'];
+  console?: ConsoleLike;
+};
+
+const executeQuickJsVm = ({
+  script: externalScript,
+  context: externalContext,
+  scriptType = 'template-literal'
+}: { script: string; context: VmContext; scriptType?: string }) => {
   if (!externalScript?.length || typeof externalScript !== 'string') {
     return externalScript;
   }
@@ -61,7 +84,7 @@ const executeQuickJsVm = ({ script: externalScript, context: externalContext, sc
 
     if (bru) addBruShimToContext(vm, bru);
     if (req) addBrunoRequestShimToContext(vm, req);
-    if (res) addBrunoResponseShimToContext(vm, res);
+    if (res) addBrunoResponseShimToContext(vm, res as CallableResponse);
 
     Object.entries(variables)?.forEach(([key, value]) => {
       vm.setProp(vm.global, key, marshallToVm(value, vm));
@@ -93,7 +116,7 @@ const executeQuickJsVmAsync = async ({
   context: externalContext,
   collectionPath: _collectionPath,
   collection
-}: { script: any; context: any; collectionPath: any; collection?: OpenCollection }) => {
+}: { script: string; context: AsyncVmContext; collectionPath?: string; collection?: OpenCollection }) => {
   if (!externalScript?.length || typeof externalScript !== 'string') {
     return externalScript;
   }
@@ -129,7 +152,7 @@ const executeQuickJsVmAsync = async ({
     if (consoleFn) addConsoleShimToContext(vm, consoleFn);
     if (bru) addBruShimToContext(vm, bru);
     if (req) addBrunoRequestShimToContext(vm, req);
-    if (res) addBrunoResponseShimToContext(vm, res);
+    if (res) addBrunoResponseShimToContext(vm, res as CallableResponse);
     if (test && __brunoTestResults) addTestShimToContext(vm, __brunoTestResults);
 
     addAxiosShimToContext(vm);

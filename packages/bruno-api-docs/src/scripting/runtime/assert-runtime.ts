@@ -35,7 +35,9 @@ const isUnaryOperator = (operator: string) => {
   return unaryOperators.includes(operator);
 };
 
-const evaluateRhsOperand = (rhsOperand: string | undefined, operator: string, context: any) => {
+type VmContext = Parameters<typeof executeQuickJsVm>[0]['context'];
+
+const evaluateRhsOperand = (rhsOperand: string | undefined, operator: string, context: VmContext) => {
   if (isUnaryOperator(operator) || !rhsOperand) {
     return undefined;
   }
@@ -93,9 +95,9 @@ const generateUid = () => {
 export class AssertRuntime {
   runAssertions(
     assertions: Assertion[],
-    request: any,
-    response: any,
-    variables: any
+    request: ConstructorParameters<typeof BrunoRequest>[0],
+    response: ConstructorParameters<typeof BrunoResponse>[0],
+    variables: NonNullable<ConstructorParameters<typeof Bru>[0]['variables']>
   ): AssertionResult[] {
     const enabledAssertions = assertions.filter((a) => !a.disabled);
     if (!enabledAssertions.length) {
@@ -233,10 +235,11 @@ export class AssertRuntime {
             }
             expect(lhs.endsWith(rhs)).to.be.true;
             break;
-          case 'between':
+          case 'between': {
             const [min, max] = rhs;
             expect(lhs).to.be.within(min, max);
             break;
+          }
           case 'isEmpty':
             expect(lhs).to.be.empty;
             break;

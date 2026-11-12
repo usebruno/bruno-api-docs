@@ -1,5 +1,10 @@
 import React from 'react';
-import type { HttpRequest } from '@opencollection/types/requests/http';
+import type {
+  FileBodyVariant,
+  FormUrlEncodedEntry,
+  HttpRequest,
+  MultipartFormEntry
+} from '@opencollection/types/requests/http';
 import CodeEditor from '@/ui/CodeEditor/CodeEditor';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { VariableInfoCard } from '@/components/VariableInfoCard/VariableInfoCard';
@@ -38,7 +43,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
   const handleMultipartChange = (rows: KeyValueRow[]) => {
     // Rebuild the text fields from the table; preserve any file fields untouched.
     const textEntries = rows.map((r) => ({ ...keyValueRowToEntry(r), type: 'text' as const }));
-    const fileEntries = (((body as { data?: any[] })?.data as any[]) || []).filter((e) => e?.type === 'file');
+    const fileEntries = ((body as { data?: MultipartFormEntry[] })?.data || []).filter((e) => e?.type === 'file');
     onItemChange({
       ...item,
       http: {
@@ -87,7 +92,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
       ) : Array.isArray(body) || (body?.type === 'form-urlencoded' && Array.isArray(body?.data)) ? (
         (() => {
           const formDataArray = Array.isArray(body) ? body : (body?.data || []);
-          const formBodyData: KeyValueRow[] = (formDataArray as any[]).map((field: any, index: number) => ({
+          const formBodyData: KeyValueRow[] = (formDataArray as FormUrlEncodedEntry[]).map((field, index: number) => ({
             id: `form-${index}`,
             name: field.name || '',
             value: field.value || '',
@@ -115,13 +120,13 @@ export const BodyTab: React.FC<BodyTabProps> = ({
         })()
       ) : body?.type === 'multipart-form' && Array.isArray(body?.data) ? (
         (() => {
-          const entries = body.data as any[];
+          const entries = body.data;
           const textRows: KeyValueRow[] = entries
             .filter((e) => e?.type !== 'file')
             .map((e, index) => ({
               id: `mp-${index}`,
               name: e.name || '',
-              value: e.value || '',
+              value: (e.value || '') as string,
               enabled: e.disabled !== true,
               description: getDescription(e)
             }));
@@ -159,7 +164,7 @@ export const BodyTab: React.FC<BodyTabProps> = ({
         })()
       ) : body?.type === 'file' && Array.isArray(body?.data) ? (
         (() => {
-          const variants = body.data as any[];
+          const variants: FileBodyVariant[] = body.data;
           const selected = variants.find((v) => v?.selected) || variants[0];
 
           return (

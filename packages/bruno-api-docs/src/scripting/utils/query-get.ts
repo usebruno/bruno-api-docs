@@ -1,10 +1,12 @@
+import type { JsonValue } from './bruno-response';
+
 /**
  * If value is an array returns the deeply flattened array, otherwise value
  */
-function normalize(value: any) {
+function normalize(value: unknown): unknown {
   if (!Array.isArray(value)) return value;
 
-  const values = [] as any[];
+  const values = [] as unknown[];
 
   value.forEach((item) => {
     const value = normalize(item);
@@ -25,20 +27,21 @@ function normalize(value: any) {
  *
  * Once a value is found will not recurse further into that value.
  */
-function getValue(source: any, prop: string, deep = false): any {
+function getValue(source: unknown, prop: string, deep = false): unknown {
   if (typeof source !== 'object') return;
 
-  let value;
+  let value: unknown;
 
   if (Array.isArray(source)) {
     value = source.map((item) => getValue(item, prop, deep));
   } else {
-    value = source[prop];
+    const record = source as Record<string, unknown>;
+    value = record[prop];
     if (deep) {
       value = [value];
-      for (const [key, item] of Object.entries(source)) {
+      for (const [key, item] of Object.entries(record)) {
         if (key !== prop && typeof item === 'object') {
-          value.push(getValue(source[key], prop, deep));
+          (value as unknown[]).push(getValue(record[key], prop, deep));
         }
       }
     }
@@ -47,15 +50,15 @@ function getValue(source: any, prop: string, deep = false): any {
   return normalize(value);
 }
 
-type PredicateOrMapper = ((obj: any) => any) | Record<string, any>;
+type PredicateOrMapper = ((obj: JsonValue) => unknown) | Record<string, JsonValue>;
 
 /**
  * Make a predicate function that checks scalar properties for equality
  */
-function objectPredicate(obj: Record<string, any>) {
-  return (item: any) => {
+function objectPredicate(obj: Record<string, JsonValue>) {
+  return (item: JsonValue) => {
     for (const [key, value] of Object.entries(obj)) {
-      if (item[key] !== value) return false;
+      if ((item as Record<string, JsonValue>)[key] !== value) return false;
     }
     return true;
   };
@@ -66,11 +69,11 @@ function objectPredicate(obj: Record<string, any>) {
  *
  * If the filter returns a non boolean non null value it is treated as a mapped value
  */
-function filterOrMap(source: any, funOrObj: PredicateOrMapper) {
+function filterOrMap(source: unknown, funOrObj: PredicateOrMapper) {
   const fun = typeof funOrObj === 'object' ? objectPredicate(funOrObj) : funOrObj;
   const isArray = Array.isArray(source);
   const list = isArray ? source : [source];
-  const result = [] as any[];
+  const result = [] as unknown[];
   for (const item of list) {
     if (item == null) continue;
     const value = fun(item);
@@ -111,7 +114,7 @@ function filterOrMap(source: any, funOrObj: PredicateOrMapper) {
  *    get(data, '..items[?].amount', i => i.amount + 10)
  *    ```
  */
-export function get(source: any, path: string, ...fns: PredicateOrMapper[]) {
+export function get(source: unknown, path: string, ...fns: PredicateOrMapper[]): JsonValue | undefined {
   const paths = path
     .replace(/\s+/g, '')
     .split(/(\.{1,2}|\[\?\]|\[\d+\])/g) // ["..", "items", "[?]", ".", "amount", "[0]" ]
@@ -140,7 +143,7 @@ export function get(source: any, path: string, ...fns: PredicateOrMapper[]) {
         break;
       }
       case typeof token === 'number': {
-        source = normalize(source[token]);
+        source = normalize((source as Record<number, unknown>)[token]);
         break;
       }
       default:
@@ -150,5 +153,5 @@ export function get(source: any, path: string, ...fns: PredicateOrMapper[]) {
     lookbehind = token;
   }
 
-  return source;
+  return source as JsonValue | undefined;
 }

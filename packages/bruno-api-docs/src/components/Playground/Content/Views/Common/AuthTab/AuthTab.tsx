@@ -7,11 +7,13 @@ import type { InheritedAuthSummary } from '@/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 import NoContentText from '@/ui/NoContentText/NoContentText';
 
+type AuthFields = { type: string; [field: string]: string | undefined };
+
 interface AuthTabProps {
-  auth: any;
+  auth: unknown;
   onAuthChange: (authType: string) => void;
-  onItemChange?: (item: any) => void;
-  item?: any;
+  onItemChange?(item: object): void;
+  item?: object;
   title?: string;
   description?: string;
   showInherit?: boolean;
@@ -30,7 +32,8 @@ export const AuthTab: React.FC<AuthTabProps> = ({
   showFullAuth = false,
   inheritedAuth
 }) => {
-  const authType = typeof auth === 'object' && auth !== null ? auth.type : auth === 'inherit' ? 'inherit' : 'none';
+  const fields = auth as AuthFields;
+  const authType = typeof auth === 'object' && auth !== null ? fields.type : auth === 'inherit' ? 'inherit' : 'none';
 
   const modeOptions: SelectOption[] = [
     { value: 'none', label: 'No Auth' },
@@ -43,10 +46,11 @@ export const AuthTab: React.FC<AuthTabProps> = ({
     // Write auth where getRequestAuth reads it: a request keeps it in its protocol block
     // (http/graphql/…); a Collection/Folder nests it under `request` (created if absent).
     const protocolKey = REQUEST_PROTOCOL_KEYS.find((key) => key in item);
+    const owner = item as Record<string, object | undefined>;
     if (protocolKey) {
-      onItemChange({ ...item, [protocolKey]: { ...item[protocolKey], auth: newAuth } });
+      onItemChange({ ...item, [protocolKey]: { ...owner[protocolKey], auth: newAuth } });
     } else {
-      onItemChange({ ...item, request: { ...item.request, auth: newAuth } });
+      onItemChange({ ...item, request: { ...owner.request, auth: newAuth } });
     }
   };
 
@@ -65,7 +69,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
   };
 
   const handleFieldChange = (field: string, value: string) => {
-    updateItemAuth({ ...auth, [field]: value });
+    updateItemAuth({ ...fields, [field]: value });
   };
 
   const textField = (field: string, label: string) => (
@@ -73,7 +77,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
       <Field.Input
         id={`auth-field-${field}`}
         testId={`auth-${field}`}
-        value={auth[field] || ''}
+        value={fields[field] || ''}
         placeholder={label}
         onChange={(value) => handleFieldChange(field, value)}
       />
@@ -86,7 +90,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
         secret
         id={`auth-field-${field}`}
         testId={`auth-${field}`}
-        value={auth[field] || ''}
+        value={fields[field] || ''}
         placeholder={label}
         onChange={(value) => handleFieldChange(field, value)}
       />
@@ -94,7 +98,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
   );
 
   const renderForm = () => {
-    switch (auth.type) {
+    switch (fields.type) {
       case 'basic':
       case 'digest':
         return (
@@ -115,7 +119,7 @@ export const AuthTab: React.FC<AuthTabProps> = ({
                 id="auth-field-placement"
                 testId="auth-placement"
                 ariaLabel="Add To"
-                value={auth.placement || 'header'}
+                value={fields.placement || 'header'}
                 options={PLACEMENT_OPTIONS}
                 onChange={(value) => handleFieldChange('placement', value)}
               />

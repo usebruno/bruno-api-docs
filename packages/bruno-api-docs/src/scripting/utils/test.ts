@@ -1,11 +1,14 @@
 import { nanoid } from 'nanoid';
+import type * as ChaiModule from 'chai';
+import type Bru from './bru';
+import type { JsonValue } from './bruno-response';
 
 interface TestResult {
   uid?: string;
   status: 'pass' | 'fail' | 'skip';
   description: string;
-  expected?: any;
-  actual?: any;
+  expected?: JsonValue;
+  actual?: JsonValue;
   error?: string;
 }
 
@@ -14,7 +17,7 @@ interface AssertionResult {
   lhsExpr?: string;
   rhsExpr?: string;
   operator?: string;
-  rhsOperand?: any;
+  rhsOperand?: JsonValue;
   error?: string;
 }
 
@@ -64,7 +67,11 @@ interface BruTestResultMethods {
   test: (description: string, callback: () => Promise<void> | void) => Promise<void>;
 }
 
-const createBruTestResultMethods = (bru: any, assertionResults: AssertionResult[], chai: any): BruTestResultMethods => {
+const createBruTestResultMethods = (
+  bru: Bru,
+  assertionResults: AssertionResult[],
+  chai: typeof ChaiModule
+): BruTestResultMethods => {
   const __brunoTestResults = new TestResults();
   const test = Test(__brunoTestResults, chai);
   setupBruTestMethods(bru, __brunoTestResults, assertionResults);
@@ -77,8 +84,8 @@ interface TestResultsResponse {
   results: Array<{
     status: string;
     description: string;
-    expected?: any;
-    actual?: any;
+    expected?: JsonValue;
+    actual?: JsonValue;
     error?: string;
   }>;
 }
@@ -90,12 +97,12 @@ interface AssertionResultsResponse {
     lhsExpr?: string;
     rhsExpr?: string;
     operator?: string;
-    rhsOperand?: any;
+    rhsOperand?: JsonValue;
     error?: string;
   }>;
 }
 
-const setupBruTestMethods = (bru: any, __brunoTestResults: TestResults, assertionResults: AssertionResult[]) => {
+const setupBruTestMethods = (bru: Bru, __brunoTestResults: TestResults, assertionResults: AssertionResult[]) => {
   const getTestResults = async (): Promise<TestResultsResponse> => {
     const results = await __brunoTestResults.getResults();
     const summary = getResultsSummary(results);
@@ -140,13 +147,16 @@ const setupBruTestMethods = (bru: any, __brunoTestResults: TestResults, assertio
   };
 };
 
-const Test = (__brunoTestResults: TestResults, chai: any) => async (description: string, callback: () => Promise<void> | void): Promise<void> => {
+const Test = (__brunoTestResults: TestResults, chai: typeof ChaiModule) => async (
+  description: string,
+  callback: () => Promise<void> | void
+): Promise<void> => {
   try {
     await callback();
     __brunoTestResults.addResult({ description, status: 'pass' });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof chai.AssertionError) {
-      const { message, actual, expected } = error;
+      const { message, actual, expected } = error as Error & { actual?: JsonValue; expected?: JsonValue };
       __brunoTestResults.addResult({
         description,
         status: 'fail',
@@ -158,7 +168,7 @@ const Test = (__brunoTestResults: TestResults, chai: any) => async (description:
       __brunoTestResults.addResult({
         description,
         status: 'fail',
-        error: error?.message || 'An unexpected error occurred.'
+        error: (error as Error | undefined)?.message || 'An unexpected error occurred.'
       });
     }
   }

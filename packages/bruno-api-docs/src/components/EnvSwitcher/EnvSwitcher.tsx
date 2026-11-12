@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
 import type { Environment } from '@opencollection/types/config/environments';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
-import { selectActiveEnvName, setActiveEnv } from '@/store/slices/env';
+import { useEnvState, useSession } from '@/session/session';
 import { ChevronDownIcon } from '@/assets/icons';
 import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
 import MenuDropdown, { type MenuDropdownItem } from '@/ui/MenuDropdown';
@@ -24,9 +24,9 @@ export interface EnvSwitcherProps {
  * above every playground dock.
  */
 const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId = 'env-switcher' }) => {
-  const dispatch = useAppDispatch();
+  const { env } = useSession();
   const collection = useAppSelector(selectDocsCollection);
-  const activeEnvName = useAppSelector(selectActiveEnvName);
+  const { activeEnvName } = useEnvState();
 
   const environments = useMemo(
     () => (collection?.config?.environments ?? []) as Environment[],
@@ -44,9 +44,9 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId
   // so the persisted selection self-heals to a real environment.
   useEffect(() => {
     if (activeEnv && activeEnv.name !== activeEnvName) {
-      dispatch(setActiveEnv(activeEnv.name));
+      env.setActiveEnv(activeEnv.name);
     }
-  }, [activeEnv, activeEnvName, dispatch]);
+  }, [activeEnv, activeEnvName, env]);
 
   if (hideWhenEmpty && !hasEnvironments) return null;
 
@@ -62,7 +62,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId
         ),
         ariaLabel: environment.name,
         title: environment.name,
-        onClick: () => dispatch(setActiveEnv(environment.name))
+        onClick: () => env.setActiveEnv(environment.name)
       }))
     : [];
 

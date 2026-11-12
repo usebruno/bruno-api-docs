@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import appReducer from '@/store/slices/app';
 import docsReducer from '@/store/slices/docs';
-import envReducer, { persistEnv } from '@/store/slices/env';
+import envReducer from '@/store/slices/env';
 import playgroundReducer from '@/store/slices/playground';
+import type { EnvSession } from '@/session/env';
 
-export const createOpenCollectionStore = () => {
+export const createOpenCollectionStore = ({ env }: { env?: EnvSession } = {}) => {
   const store = configureStore({
     reducer: {
       app: appReducer,
@@ -14,14 +15,7 @@ export const createOpenCollectionStore = () => {
     }
   });
 
-  let lastEnv = store.getState().env;
-  store.subscribe(() => {
-    const state = store.getState();
-    if (state.env !== lastEnv) {
-      lastEnv = state.env;
-      persistEnv(state.env);
-    }
-  });
+  store.subscribe(() => env?.setShowVars(store.getState().env.showVars));
 
   return store;
 };

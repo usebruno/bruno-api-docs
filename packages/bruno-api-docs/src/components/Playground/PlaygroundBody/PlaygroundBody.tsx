@@ -14,7 +14,7 @@ import {
   toggleFolderCollapse,
   expandFolders
 } from '@/store/slices/playground';
-import { selectActiveEnvName } from '@/store/slices/env';
+import { useEnvState } from '@/session/session';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { useNavModel } from '@/routing/hooks';
 import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
@@ -69,7 +69,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const viewMode = useAppSelector(selectViewMode);
   const selectedItemId = useAppSelector(selectSelectedItemId);
   const selectedExampleIndex = useAppSelector(selectSelectedExampleIndex);
-  const activeEnvName = useAppSelector(selectActiveEnvName);
+  const { activeEnvName } = useEnvState();
   const orientationOverride = useAppSelector(selectResponsePaneOrientation);
 
   const uuidToSlug = useMemo<Map<string, string>>(() => {

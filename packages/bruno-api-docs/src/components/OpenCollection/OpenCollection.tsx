@@ -181,8 +181,8 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
   const sessionRef = useRef<Session | null>(null);
 
   if (!storeRef.current) {
-    storeRef.current = createOpenCollectionStore();
     sessionRef.current = createSession({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
+    storeRef.current = createOpenCollectionStore({ env: sessionRef.current.env });
   }
 
   return (

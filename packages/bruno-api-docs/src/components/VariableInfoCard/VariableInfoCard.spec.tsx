@@ -1,9 +1,9 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
+import { createSession } from '@/session/session';
 import { setDocsCollection } from '@/store/slices/docs';
-import { setActiveEnv } from '@/store/slices/env';
 import { VariableResolverProvider, ItemVariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { query } from '@/test-utils/dom';
@@ -45,14 +45,15 @@ const collection: any = {
 
 const cardTree = (name: string) => {
   const store = createOpenCollectionStore();
+  const session = createSession();
   store.dispatch(setDocsCollection(collection));
-  store.dispatch(setActiveEnv('Dev'));
+  session.env.setActiveEnv('Dev');
   return (
-    <Provider store={store}>
+    <TestProviders store={store} session={session}>
       <VariableResolverProvider>
         <VariableInfoCard name={name} />
       </VariableResolverProvider>
-    </Provider>
+    </TestProviders>
   );
 };
 
@@ -95,13 +96,15 @@ describe('VariableInfoCard', () => {
     expect(part(useRenderToDom(cardTree('vaultKey')), 'scope').text).toBe('Undefined');
 
     const store = createOpenCollectionStore();
-    store.dispatch(setActiveEnv('Dev'));
+
+    const session = createSession();
+    session.env.setActiveEnv('Dev');
     const docsItemTree = (
-      <Provider store={store}>
+      <TestProviders store={store} session={session}>
         <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null}>
           <VariableInfoCard name="vaultKey" />
         </ItemVariableResolverProvider>
-      </Provider>
+      </TestProviders>
     );
     expect(part(useRenderToDom(docsItemTree), 'scope').text).toBe('Undefined');
   });
@@ -154,13 +157,14 @@ describe('VariableInfoCard', () => {
 // Editing needs a writable resolver, which only ItemVariableResolverProvider supplies.
 const editableCardTree = (name: string) => {
   const store = createOpenCollectionStore();
-  store.dispatch(setActiveEnv('Dev'));
+  const session = createSession();
+  session.env.setActiveEnv('Dev');
   return (
-    <Provider store={store}>
+    <TestProviders store={store} session={session}>
       <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>
-    </Provider>
+    </TestProviders>
   );
 };
 
@@ -184,14 +188,15 @@ describe('VariableInfoCard (editable)', () => {
 
   it('stays read-only when the resolver cannot write, even with editable set', () => {
     const store = createOpenCollectionStore();
+    const session = createSession();
     store.dispatch(setDocsCollection(collection));
-    store.dispatch(setActiveEnv('Dev'));
+    session.env.setActiveEnv('Dev');
     const tree = (
-      <Provider store={store}>
+      <TestProviders store={store} session={session}>
         <VariableResolverProvider>
           <VariableInfoCard name="host" editable />
         </VariableResolverProvider>
-      </Provider>
+      </TestProviders>
     );
     const value = part(useRenderToDom(tree), 'value');
     expect(value.classList.contains('var-value-editable')).toBe(false);

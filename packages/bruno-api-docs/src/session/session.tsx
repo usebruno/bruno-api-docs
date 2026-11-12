@@ -2,9 +2,11 @@ import React, { createContext, useContext } from 'react';
 import { useObservable } from '@/observable/observable';
 import { createThemeMode } from '@/theme/themeMode';
 import type { ThemeState } from '@/theme/types';
+import { createEnv, type EnvState } from './env';
 
 export const createSession = ({ theme }: { theme?: ThemeState } = {}) => ({
-  theme: createThemeMode(theme)
+  theme: createThemeMode(theme),
+  env: createEnv()
 });
 
 export type Session = ReturnType<typeof createSession>;
@@ -22,3 +24,5 @@ export const useSession = (): Session => {
 };
 
 export const useThemeState = (): ThemeState => useObservable(useSession().theme);
+
+export const useEnvState = (): EnvState => useObservable(useSession().env);

@@ -1,10 +1,9 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import { createOpenCollectionStore } from '@/store/store';
-import { createSession, SessionProvider } from '@/session/session';
+import { TestProviders } from '@/test-utils/providers';
 import { setDocsCollection } from '@/store/slices/docs';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
@@ -25,13 +24,11 @@ const useAppShellAt = (url: string, hidePlayground: boolean) => {
   const store = createOpenCollectionStore();
   store.dispatch(setDocsCollection(hydrateWithUUIDs(collection)));
   return useRenderToDom(
-    <Provider store={store}>
-      <SessionProvider session={createSession()}>
-        <MemoryRouter initialEntries={[url]}>
-          <AppShell hidePlayground={hidePlayground} />
-        </MemoryRouter>
-      </SessionProvider>
-    </Provider>
+    <TestProviders store={store}>
+      <MemoryRouter initialEntries={[url]}>
+        <AppShell hidePlayground={hidePlayground} />
+      </MemoryRouter>
+    </TestProviders>
   );
 };
 

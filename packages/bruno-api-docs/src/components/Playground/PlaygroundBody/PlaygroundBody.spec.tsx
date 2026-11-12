@@ -1,6 +1,5 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('@/ui/CodeEditor/CodeEditor', () => ({
@@ -9,6 +8,7 @@ vi.mock('@/ui/CodeEditor/CodeEditor', () => ({
 
 import PlaygroundBody from './PlaygroundBody';
 import { createOpenCollectionStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { getByTestId } from '@/test-utils/dom';
 import {
@@ -43,7 +43,7 @@ describe('PlaygroundBody example view', () => {
 
     const ref = React.createRef<HTMLDivElement>();
     const root = useRenderToDom(
-      <Provider store={store}>
+      <TestProviders store={store}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}
@@ -55,7 +55,7 @@ describe('PlaygroundBody example view', () => {
             appliedSlugRef={ref as any}
           />
         </MemoryRouter>
-      </Provider>
+      </TestProviders>
     );
     expect(root.querySelector('[data-testid="example-view"]')).not.toBeNull();
   });
@@ -76,7 +76,7 @@ describe('PlaygroundBody script file view', () => {
 
     const ref = React.createRef<HTMLDivElement>();
     const root = useRenderToDom(
-      <Provider store={store}>
+      <TestProviders store={store}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}
@@ -88,7 +88,7 @@ describe('PlaygroundBody script file view', () => {
             appliedSlugRef={ref as any}
           />
         </MemoryRouter>
-      </Provider>
+      </TestProviders>
     );
     expect(getByTestId(root, 'playground-script-file-title').textContent).toBe('helpers');
     expect(getByTestId(root, 'code-editor').textContent).toBe('module.exports = { a: 1 };');

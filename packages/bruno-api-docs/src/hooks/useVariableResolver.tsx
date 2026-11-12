@@ -7,7 +7,8 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
 import { setPlaygroundVariable } from '@/store/slices/playground';
 import { promptVariableName } from '@/utils/promptVariables';
-import { selectActiveEnvName, selectShowVars } from '@/store/slices/env';
+import { selectShowVars } from '@/store/slices/env';
+import { useEnvState } from '@/session/session';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
 import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
@@ -151,7 +152,7 @@ const itemSource = (item: Item): VariableSource =>
 
 export const useVariableResolver = (): VariableResolver => {
   const collection = useAppSelector(selectDocsCollection) as OpenCollection | null;
-  const activeEnvName = useAppSelector(selectActiveEnvName);
+  const { activeEnvName } = useEnvState();
   const showVars = useAppSelector(selectShowVars);
 
   const model = useMemo(
@@ -230,7 +231,7 @@ export const ItemVariableResolverProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ collection, ancestry, item, writable = false, children }) => {
   const dispatch = useAppDispatch();
-  const activeEnvName = useAppSelector(selectActiveEnvName);
+  const { activeEnvName } = useEnvState();
   const showVars = useAppSelector(selectShowVars);
 
   // Both the docs pages and the playground mount this provider; only the

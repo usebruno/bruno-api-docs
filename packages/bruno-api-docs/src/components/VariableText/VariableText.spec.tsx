@@ -1,9 +1,10 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
+import { createOpenCollectionStore, type AppStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
+import { createSession, type Session } from '@/session/session';
 import { setDocsCollection } from '@/store/slices/docs';
-import { setActiveEnv, setShowVars } from '@/store/slices/env';
+import { setShowVars } from '@/store/slices/env';
 import { VariableResolverProvider } from '@/hooks';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { VariableText } from './VariableText';
@@ -12,21 +13,22 @@ const collection: any = {
   config: { environments: [{ name: 'Dev', variables: [{ name: 'baseUrl', value: 'https://dev.test' }] }] }
 };
 
-const tree = (value: string, configure?: (store: ReturnType<typeof createOpenCollectionStore>) => void) => {
+const tree = (value: string, configure?: (session: Session, store: AppStore) => void) => {
   const store = createOpenCollectionStore();
+  const session = createSession();
   store.dispatch(setDocsCollection(collection));
-  configure?.(store);
+  configure?.(session, store);
   return (
-    <Provider store={store}>
+    <TestProviders store={store} session={session}>
       <VariableResolverProvider>
         <VariableText value={value} />
       </VariableResolverProvider>
-    </Provider>
+    </TestProviders>
   );
 };
 
-const withShowVars = (store: ReturnType<typeof createOpenCollectionStore>) => {
-  store.dispatch(setActiveEnv('Dev'));
+const withShowVars = (session: Session, store: AppStore) => {
+  session.env.setActiveEnv('Dev');
   store.dispatch(setShowVars(true));
 };
 

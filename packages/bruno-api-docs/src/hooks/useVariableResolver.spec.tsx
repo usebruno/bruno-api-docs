@@ -1,10 +1,11 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
+import { createOpenCollectionStore, type AppStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
+import { createSession, type Session } from '@/session/session';
 import { setDocsCollection } from '@/store/slices/docs';
-import { setActiveEnv, setShowVars } from '@/store/slices/env';
+import { setShowVars } from '@/store/slices/env';
 import { useVariableResolver, useResolvedVariables, ItemVariableResolverProvider } from './useVariableResolver';
 
 const collection: any = {
@@ -35,27 +36,28 @@ const Probe: React.FC = () => {
   );
 };
 
-const render = (configure: (store: ReturnType<typeof createOpenCollectionStore>) => void): string => {
+const render = (configure: (session: Session, store: AppStore) => void): string => {
   const store = createOpenCollectionStore();
+  const session = createSession();
   store.dispatch(setDocsCollection(collection));
-  configure(store);
+  configure(session, store);
   return renderToStaticMarkup(
-    <Provider store={store}>
+    <TestProviders store={store} session={session}>
       <Probe />
-    </Provider>
+    </TestProviders>
   );
 };
 
 describe('useVariableResolver', () => {
   it('returns raw placeholders when showVars is off', () => {
-    const html = render((s) => s.dispatch(setActiveEnv('Dev')));
+    const html = render((session) => session.env.setActiveEnv('Dev'));
     expect(html).toContain('<span data-testid="base">{{baseUrl}}</span>');
     expect(html).toContain('<span data-testid="coll">{{collectionVar}}</span>');
   });
 
   it('resolves env + collection vars against the active env when on', () => {
-    const html = render((s) => {
-      s.dispatch(setActiveEnv('Dev'));
+    const html = render((session, s) => {
+      session.env.setActiveEnv('Dev');
       s.dispatch(setShowVars(true));
     });
     expect(html).toContain('<span data-testid="base">https://dev.test</span>');
@@ -63,16 +65,16 @@ describe('useVariableResolver', () => {
   });
 
   it('reflects the active env (switching changes the value)', () => {
-    const html = render((s) => {
-      s.dispatch(setActiveEnv('Prod'));
+    const html = render((session, s) => {
+      session.env.setActiveEnv('Prod');
       s.dispatch(setShowVars(true));
     });
     expect(html).toContain('<span data-testid="base">https://prod.test</span>');
   });
 
   it('never resolves a secret to plaintext, even when on', () => {
-    const html = render((s) => {
-      s.dispatch(setActiveEnv('Dev'));
+    const html = render((session, s) => {
+      session.env.setActiveEnv('Dev');
       s.dispatch(setShowVars(true));
     });
     expect(html).toContain('<span data-testid="secret-ref">authToken</span>');
@@ -98,15 +100,16 @@ describe('lookup (variable hover card)', () => {
 
   const renderLookup = (name: string, showVars = false): string => {
     const store = createOpenCollectionStore();
+    const session = createSession();
     store.dispatch(setDocsCollection(collection));
-    store.dispatch(setActiveEnv('Dev'));
+    session.env.setActiveEnv('Dev');
     if (showVars) store.dispatch(setShowVars(true));
     return renderToStaticMarkup(
-      <Provider store={store}>
+      <TestProviders store={store} session={session}>
         <ItemVariableResolverProvider collection={collection} ancestry={[folder]} item={requestItem}>
           <LookupProbe name={name} />
         </ItemVariableResolverProvider>
-      </Provider>
+      </TestProviders>
     );
   };
 
@@ -165,16 +168,17 @@ describe('nested variable resolution', () => {
 
   it('follows a variable that points at another variable, for display and for interpolation', () => {
     const store = createOpenCollectionStore();
+    const session = createSession();
     store.dispatch(setDocsCollection(nested));
-    store.dispatch(setActiveEnv('Dev'));
+    session.env.setActiveEnv('Dev');
     store.dispatch(setShowVars(true));
 
     const html = renderToStaticMarkup(
-      <Provider store={store}>
+      <TestProviders store={store} session={session}>
         <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
           <NestedProbe />
         </ItemVariableResolverProvider>
-      </Provider>
+      </TestProviders>
     );
 
     expect(html).toContain('<span data-testid="nested-resolve">https://api.test/v1</span>');
@@ -183,16 +187,17 @@ describe('nested variable resolution', () => {
 
   it('gates resolve on showVars but never interpolate', () => {
     const store = createOpenCollectionStore();
+    const session = createSession();
     store.dispatch(setDocsCollection(nested));
-    store.dispatch(setActiveEnv('Dev'));
+    session.env.setActiveEnv('Dev');
     store.dispatch(setShowVars(false));
 
     const html = renderToStaticMarkup(
-      <Provider store={store}>
+      <TestProviders store={store} session={session}>
         <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
           <NestedProbe />
         </ItemVariableResolverProvider>
-      </Provider>
+      </TestProviders>
     );
 
     expect(html).toContain('<span data-testid="nested-resolve">{{endpoint}}</span>');

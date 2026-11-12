@@ -1,7 +1,7 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
 import { setPlaygroundCollection } from '@/store/slices/playground';
 import {
   ItemVariableResolverProvider,
@@ -28,11 +28,11 @@ const probeTree = (store: ReturnType<typeof createOpenCollectionStore>) => {
   return {
     box,
     tree: (
-      <Provider store={store}>
+      <TestProviders store={store}>
         <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
           <Probe />
         </ItemVariableResolverProvider>
-      </Provider>
+      </TestProviders>
     )
   };
 };
@@ -107,11 +107,11 @@ describe('a prompt token outside the playground', () => {
     };
 
     useRenderToDom(
-      <Provider store={newStore()}>
+      <TestProviders store={newStore()}>
         <VariableResolverProvider>
           <Probe />
         </VariableResolverProvider>
-      </Provider>
+      </TestProviders>
     );
 
     expect((box.current as VariableResolver).lookup('?Region').scope).toBe('prompt');

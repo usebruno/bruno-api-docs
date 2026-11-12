@@ -70,7 +70,8 @@ if it fails you see `playground-load-error`.
   resolves with `window.__brunoApiPlayground`. It loads once per page, even with two instances.
   A classic script works cross-origin and from `file://`, which is how exported HTML loads it.
   The script carries the nonce of the `api-docs.js` tag, so a nonce-only CSP allows it. A failed
-  load removes the script and clears the memo, and `Playground.tsx` swaps in a fresh `lazy`, so
+  load, or one that never defines `window.__brunoApiPlayground` (an HTML error page served with
+  200, or a file that throws), removes the script and clears the memo, and `Playground.tsx` swaps in a fresh `lazy`, so
   the next open retries.
 - `bruno-api-playground/vite.config.cdn.ts` builds the playground as an IIFE named
   `__brunoApiPlayground`. Its externals are read from `Bruno.__rt`. The one list of them, name to

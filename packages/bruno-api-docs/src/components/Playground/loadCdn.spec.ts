@@ -69,6 +69,20 @@ describe('loadPlayground from the CDN', () => {
     await expect(loading).rejects.toThrow('api-playground-abc.js');
   });
 
+  it('rejects and retries when the script loads without defining the playground', async () => {
+    const failed = loadPlayground();
+    scripts[0].onload!();
+    await expect(failed).rejects.toThrow('api-playground-abc.js');
+
+    const retried = loadPlayground();
+    const Body = () => null;
+    globals.__brunoApiPlayground = Body;
+    scripts[1].onload!();
+
+    expect(scripts[0].remove).toHaveBeenCalledOnce();
+    expect(await retried).toEqual({ default: Body });
+  });
+
   it('injects a fresh script on the next call after a failed load', async () => {
     const failed = loadPlayground();
     scripts[0].onerror!();

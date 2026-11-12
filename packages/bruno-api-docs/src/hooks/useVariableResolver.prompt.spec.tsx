@@ -32,7 +32,6 @@ const probeTree = (session: Session) => {
         <ItemVariableResolverProvider
           ancestry={[]}
           item={null}
-          writable
           onWriteVariable={session.workspace.setVariable}
         >
           <Probe />

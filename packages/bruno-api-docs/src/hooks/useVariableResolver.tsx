@@ -219,20 +219,18 @@ export const ShowVarsOverrideProvider: React.FC<{
   return <VariableResolverContext.Provider value={value}>{children}</VariableResolverContext.Provider>;
 };
 
-const noWrite = () => {};
-
 export const ItemVariableResolverProvider: React.FC<{
   ancestry: Item[];
   item: Item | null;
-  writable?: boolean;
   onWriteVariable?: (write: VariableWrite) => void;
   children: React.ReactNode;
-}> = ({ ancestry, item, writable = false, onWriteVariable = noWrite, children }) => {
+}> = ({ ancestry, item, onWriteVariable, children }) => {
+  const writable = onWriteVariable !== undefined;
   const collection = useWorkingCollection();
   const { activeEnvName, showVars } = useEnvState();
 
   // Both the docs pages and the playground mount this provider; only the
-  // playground passes `writable`, and only it can supply an external secret.
+  // playground passes `onWriteVariable`, and only it can supply an external secret.
   const model = useMemo(() => {
     const sources: VariableSource[] = collectionAndEnvSources(collection, activeEnvName, writable);
     for (const folder of ancestry) {
@@ -248,18 +246,18 @@ export const ItemVariableResolverProvider: React.FC<{
     (name: string, value: string) => {
       const { name: varName, scope } = resolver.lookup(name);
       if (scope === 'environment' || scope === '$secrets') {
-        if (activeEnvName) onWriteVariable({ scope, name: varName, value, envName: activeEnvName });
+        if (activeEnvName) onWriteVariable?.({ scope, name: varName, value, envName: activeEnvName });
       } else if (scope === 'collection') {
-        onWriteVariable({ scope, name: varName, value });
+        onWriteVariable?.({ scope, name: varName, value });
       } else if (scope === 'request') {
         const itemUuid = getItemUuid(item);
-        if (itemUuid) onWriteVariable({ scope, name: varName, value, itemUuid });
+        if (itemUuid) onWriteVariable?.({ scope, name: varName, value, itemUuid });
       } else if (scope === 'folder') {
         const owner = [...ancestry].reverse().find((folder) =>
           folderVariables(folder).some((v) => v.name === varName && !v.disabled)
         );
         const itemUuid = getItemUuid(owner);
-        if (itemUuid) onWriteVariable({ scope, name: varName, value, itemUuid });
+        if (itemUuid) onWriteVariable?.({ scope, name: varName, value, itemUuid });
       }
     },
     [resolver, onWriteVariable, activeEnvName, item, ancestry]

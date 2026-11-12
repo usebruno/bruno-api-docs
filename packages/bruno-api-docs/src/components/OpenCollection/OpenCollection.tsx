@@ -146,8 +146,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   const { status: collectionStatus, error: collectionError, sourceText, document } = useCollectionLoader(collection);
 
-  const isInitialLoad = collectionStatus === 'idle' && !document;
-  const isLoading = collectionStatus === 'loading' || isInitialLoad;
+  const isLoading = collectionStatus === 'idle' || collectionStatus === 'loading';
 
   if (isLoading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;

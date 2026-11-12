@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession } from '@/session/session';
 import { VariableResolverProvider, ItemVariableResolverProvider } from '@/hooks';
@@ -154,7 +154,7 @@ const editableCardTree = (name: string) => {
   session.env.setActiveEnv('Dev');
   return (
     <TestProviders document={collection} session={session}>
-      <ItemVariableResolverProvider ancestry={[]} item={null} writable>
+      <ItemVariableResolverProvider ancestry={[]} item={null} onWriteVariable={vi.fn()}>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>
     </TestProviders>

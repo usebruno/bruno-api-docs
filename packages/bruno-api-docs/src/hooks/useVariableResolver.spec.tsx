@@ -1,6 +1,6 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession, type Session } from '@/session/session';
 import { useVariableResolver, useResolvedVariables, ItemVariableResolverProvider } from './useVariableResolver';
@@ -178,7 +178,7 @@ describe('nested variable resolution', () => {
 
     const html = renderToStaticMarkup(
       <TestProviders document={nested} session={session}>
-        <ItemVariableResolverProvider ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider ancestry={[]} item={null} onWriteVariable={vi.fn()}>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -194,7 +194,7 @@ describe('nested variable resolution', () => {
 
     const html = renderToStaticMarkup(
       <TestProviders document={nested} session={session}>
-        <ItemVariableResolverProvider ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider ancestry={[]} item={null} onWriteVariable={vi.fn()}>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </TestProviders>

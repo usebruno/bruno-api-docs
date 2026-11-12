@@ -163,7 +163,6 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
     <ItemVariableResolverProvider
       ancestry={ancestry}
       item={editableItem as unknown as Item}
-      writable
       onWriteVariable={actions.setVariable}
     >
       <div className="request-runner-container h-full flex flex-col px-5" style={{ backgroundColor: 'var(--bg-primary)' }}>

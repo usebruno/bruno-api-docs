@@ -41,20 +41,18 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     return getInheritedAuthSummary(collection, ancestry, folder);
   }, [folder, collection]);
 
-  const commitFolder = onFolderChange;
-
   const postResponseVars = actionsToPostResponseVars(folder.request?.actions);
 
   const handleHeadersChange = (headers: KeyValueRow[]) => {
-    commitFolder({ ...folder, request: { ...folder.request, headers: headers.map(keyValueRowToEntry) } });
+    onFolderChange({ ...folder, request: { ...folder.request, headers: headers.map(keyValueRowToEntry) } });
   };
 
   const handleVariablesChange = (variables: KeyValueRow[]) => {
-    commitFolder({ ...folder, request: { ...folder.request, variables: variables.map(rowToVariable) } });
+    onFolderChange({ ...folder, request: { ...folder.request, variables: variables.map(rowToVariable) } });
   };
 
   const handlePostResponseVarsChange = (rows: KeyValueRow[]) => {
-    commitFolder({
+    onFolderChange({
       ...folder,
       request: { ...folder.request, actions: postResponseVarsToActions(rows, folder.request?.actions) }
     });
@@ -62,7 +60,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
 
   const handleScriptChange = (scriptType: 'preRequest' | 'postResponse' | 'tests', value: string) => {
     const updatedScriptsObj = { ...scriptsArrayToObject(folder.request?.scripts), [scriptType]: value };
-    commitFolder({
+    onFolderChange({
       ...folder,
       request: { ...folder.request, scripts: scriptsObjectToArray(updatedScriptsObj) }
     } as Folder);
@@ -75,7 +73,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     } else if (authType === 'none') {
       auth = undefined;
     }
-    commitFolder({ ...folder, request: { ...folder.request, auth } });
+    onFolderChange({ ...folder, request: { ...folder.request, auth } });
   };
 
   const renderOverview = () => (
@@ -107,7 +105,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     <AuthTab
       auth={folder.request?.auth}
       onAuthChange={handleAuthChange}
-      onItemChange={commitFolder}
+      onItemChange={onFolderChange}
       item={folder}
       description="Configures authentication for this folder. This applies to all requests using the Inherit option in the Auth tab."
       showInherit={true}

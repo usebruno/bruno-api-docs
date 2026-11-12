@@ -4,10 +4,10 @@ import {
   extractTestNames,
   collectTests,
   collectRawTestScripts,
-  findItemByUuid,
   getAncestorsByUuid,
   hydrateWithUUIDs
 } from './fileUtils';
+import { findItemByUuid } from './itemUtils';
 
 describe('extractTestNames', () => {
   it('extracts test/it titles across quote styles', () => {

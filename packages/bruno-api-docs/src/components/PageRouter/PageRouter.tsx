@@ -5,8 +5,8 @@ import type { ScriptFile, Folder as FolderItem } from '@opencollection/types/col
 import type { RequestItem } from '@/utils/schemaHelpers';
 import { useActiveResolution, useNavModel } from '@/routing/hooks';
 import { useDocument } from '@/document/document';
-import { getItemUuid } from '@/utils/itemUtils';
-import { findItemByUuid, getAncestorsByUuid } from '@/utils/fileUtils';
+import { findItemByUuid, getItemUuid } from '@/utils/itemUtils';
+import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { useWorkingCollection } from '@/session/session';
 import { ItemVariableResolverProvider } from '@/hooks';
 import type { Item } from '@opencollection/types/collection/item';

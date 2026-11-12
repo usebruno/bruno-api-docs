@@ -102,18 +102,6 @@ const getUuid = (item: Item | null | undefined): string | undefined =>
 
 const childItems = (item: Item): Item[] => ((item as { items?: Item[] }).items ?? []);
 
-export const findItemByUuid = (items: Item[] | undefined, uuid: string): Item | null => {
-  if (!items || !uuid) return null;
-  for (const item of items) {
-    if (getUuid(item) === uuid) return item;
-    if (isFolder(item)) {
-      const found = findItemByUuid(childItems(item), uuid);
-      if (found) return found;
-    }
-  }
-  return null;
-};
-
 export const getAncestorsByUuid = (collection: OpenCollection | null | undefined, uuid: string): Item[] => {
   if (!collection?.items || !uuid) return [];
   const path: Item[] = [];

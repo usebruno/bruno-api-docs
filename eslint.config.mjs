@@ -90,7 +90,7 @@ export default [
         caughtErrorsIgnorePattern: '^_'
       }],
 
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
       'eqeqeq': ['error', 'always', { null: 'ignore' }],

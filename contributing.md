@@ -29,10 +29,12 @@ Run these from `packages/bruno-api-docs`:
 
 ## Making changes
 
+Read [ARCHITECTURE.md](./ARCHITECTURE.md) for how the code is laid out and follow [CODING_STANDARDS.md](./CODING_STANDARDS.md).
+
 1. Open or comment on an issue first for anything beyond a small fix.
-2. Create a branch from `main`.
+2. Create a branch from the active `release/vX.Y.0` branch. Pull requests target that branch, not `main`.
 3. Make your change and add or update tests. Run `npm run lint` and `npm run test:run` before pushing; run `npm run test:e2e` when UI behavior changed.
-4. Open a pull request against `main` describing the change and linking the issue.
+4. Open a pull request against that release branch describing the change and linking the issue.
 
 Continuous integration runs the end-to-end tests on pull requests via GitHub Actions.
 

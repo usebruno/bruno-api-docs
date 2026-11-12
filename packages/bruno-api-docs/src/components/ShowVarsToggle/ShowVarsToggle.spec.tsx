@@ -8,7 +8,7 @@ const render = (configure?: (s: Session) => void): string => {
   const session = createSession();
   configure?.(session);
   return renderToStaticMarkup(
-    <SessionProvider session={session}>
+    <SessionProvider value={session}>
       <ShowVarsToggle />
     </SessionProvider>
   );

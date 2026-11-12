@@ -14,7 +14,7 @@ export const TestProviders: React.FC<{
 }) => {
   if (!session.workspace.get().collection) session.workspace.replaceCollection(document);
   return (
-    <SessionProvider session={session}>
+    <SessionProvider value={session}>
       <DocumentProvider document={document}>{children}</DocumentProvider>
     </SessionProvider>
   );

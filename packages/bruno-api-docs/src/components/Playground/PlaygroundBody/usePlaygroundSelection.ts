@@ -5,7 +5,7 @@ import { useSession } from '@/session/session';
 import { useObservable } from '@/observable/observable';
 import { selectedUuid, type PlaygroundSelection } from '@/session/playground';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import { useNavModel } from '@/routing/hooks';
+import { useNavModel } from '@/document/document';
 import { usePlaygroundUrlState } from '@/hooks';
 import { findItemByUuid } from '@/utils/itemUtils';
 import { isFolder } from '@/utils/schemaHelpers';

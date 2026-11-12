@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavModel } from '@/routing/hooks';
+import { useNavModel } from '@/document/document';
 import { useClickOutside, useDocsNavigate } from '@/hooks';
 import {
   buildSearchRecords,

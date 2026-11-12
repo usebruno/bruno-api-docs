@@ -10,7 +10,7 @@ import { SidebarComponent } from '../components/sidebar.component';
 import { PlaygroundComponent } from '../components/playground.component';
 import { ResponsePaneComponent } from '../components/playground/response-pane.component';
 
-export type StandaloneTarget = 'first' | 'second';
+type StandaloneTarget = 'first' | 'second';
 
 type ApiDocsOptions = Record<string, unknown> & { content: unknown };
 

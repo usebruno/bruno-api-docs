@@ -16,7 +16,7 @@ const sameSelection = (a: PlaygroundSelection, b: PlaygroundSelection): boolean 
 export const selectedUuid = (selection: PlaygroundSelection): string | null =>
   typeof selection === 'object' && selection !== null ? selection.uuid : null;
 
-export type ResponsePaneOrientation = 'horizontal' | 'vertical';
+type ResponsePaneOrientation = 'horizontal' | 'vertical';
 
 const createKeyed = <V>() => {
   const state = createObservable<Record<string, V>>({ initial: {} });

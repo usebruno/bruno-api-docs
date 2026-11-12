@@ -182,7 +182,7 @@ const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
 
   return (
     <HashRouter useTransitions={false}>
-      <SessionProvider session={sessionRef.current}>
+      <SessionProvider value={sessionRef.current}>
         <OpenCollectionContent {...props} />
       </SessionProvider>
     </HashRouter>

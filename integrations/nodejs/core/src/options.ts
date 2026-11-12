@@ -4,12 +4,12 @@ export interface Filter {
 }
 
 export interface CollectionFilters {
-  environments?: Filter;
-  tags?: Filter;
+  environments?: Filter | '*';
+  tags?: Filter | '*';
 }
 
 /** Where the collection comes from, in priority order: the first one set is used. */
-export const SOURCE_KEYS = ['content', 'url', 'collectionPath'] as const;
+export const SOURCE_KEYS = ['content', 'collectionPath', 'url'] as const;
 export type SourceKey = typeof SOURCE_KEYS[number];
 
 export interface CollectionOptions extends CollectionFilters, Partial<Record<SourceKey, string>> {}
@@ -27,6 +27,9 @@ export class ConfigError extends Error {}
 
 const KNOWN_OPTIONS = new Set<string>([...SOURCE_KEYS, 'environments', 'tags', 'logo', 'repositoryUrl', 'pageTitle']);
 
+const isNameList = (value: unknown): boolean =>
+  Array.isArray(value) && value.every((item) => typeof item === 'string');
+
 export function validateOptions(options: ApiDocsOptions): void {
   const unknown = Object.keys(options).filter((key) => !KNOWN_OPTIONS.has(key));
   if (unknown.length > 0) {
@@ -41,12 +44,25 @@ export function validateOptions(options: ApiDocsOptions): void {
 
   for (const name of ['environments', 'tags'] as const) {
     const filter = options[name];
-    if (typeof filter?.include === 'string' && filter.include !== '*') {
+    if (filter === undefined || filter === '*') {
+      continue;
+    }
+    if (typeof filter !== 'object' || filter === null || Array.isArray(filter)) {
+      throw new ConfigError(`apiDocs: \`${name}\` takes '*' or { include, exclude }`);
+    }
+    const unknownKeys = Object.keys(filter).filter((key) => key !== 'include' && key !== 'exclude');
+    if (unknownKeys.length > 0) {
+      throw new ConfigError(`apiDocs: unknown key in \`${name}\`: ${unknownKeys.join(', ')}`);
+    }
+    if (filter.include !== undefined && filter.include !== '*' && !isNameList(filter.include)) {
       throw new ConfigError(`apiDocs: \`${name}.include\` takes a list of names or '*'`);
+    }
+    if (filter.exclude !== undefined && !isNameList(filter.exclude)) {
+      throw new ConfigError(`apiDocs: \`${name}.exclude\` takes a list of names`);
     }
   }
 
-  const env = options.environments;
+  const env = options.environments === '*' ? undefined : options.environments;
   const hasBase = env?.include === '*' || Boolean(env?.include?.length);
   if (env?.exclude?.length && !hasBase) {
     throw new ConfigError("apiDocs: `environments.exclude` needs a base: set `include: '*'` or an `include` list");

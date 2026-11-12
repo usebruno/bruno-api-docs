@@ -14,6 +14,7 @@ import {
   getItemDescription,
   getItemTags,
   getInheritedTags,
+  isWebSocketRequest,
   type SupportedRequestItem
 } from '@/utils/schemaHelpers';
 import {
@@ -45,10 +46,11 @@ export const useRequestPageData = (
   const url = getRequestUrl(item);
   const headers = getRequestHeaders(item);
   const params = getRequestParams(item);
+  const hasParamsModel = !isWebSocketRequest(item);
 
   const { path: pathParams, query: queryParams } = useMemo(
-    () => resolvePathAndQueryParams(params, url),
-    [params, url]
+    () => (hasParamsModel ? resolvePathAndQueryParams(params, url) : { path: [], query: [] }),
+    [hasParamsModel, params, url]
   );
 
   const descHtml = useMemo(() => {

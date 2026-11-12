@@ -89,7 +89,7 @@ const TestResultsTab: React.FC<TestResultsTabProps> = ({ testResults, assertionR
       >
         <path d="M6 9l6 6 6-6" />
       </svg>
-      <span>
+      <span data-testid={`${title.toLowerCase()}-results-summary`}>
         {title} ({summary.total}), Passed: {summary.passed}, Failed: {summary.failed}
       </span>
     </button>

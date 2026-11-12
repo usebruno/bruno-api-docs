@@ -19,7 +19,8 @@
 import type { DigestBuildFailure } from './utils/digest-auth';
 
 export type RequestErrorType
-  = | 'timeout'
+  = | 'cancelled'
+    | 'timeout'
     | 'mixed-content'
     | 'browser-blocked'
     | 'unreachable'
@@ -43,6 +44,8 @@ interface ClassifyOptions {
   requestUrl?: string;
   /** The page URL the docs are running on, typically window.location.href. */
   pageUrl?: string;
+  /** Whether the request was cancelled by the user. */
+  cancelled?: boolean;
 }
 
 export type DigestFailureReason = DigestBuildFailure | 'challenge-unreadable' | 'redirected-challenge';
@@ -61,8 +64,8 @@ export const DEFAULT_TIMEOUT_MS = 30000;
 
 /**
  * `AbortSignal.timeout()` rejects with a DOMException named `TimeoutError`.
- * A manual `AbortController.abort()` rejects with one named `AbortError`.
- * Older engines surface neither name cleanly, so we also sniff the message.
+ * Older engines reject it with an `AbortError` or don't surface the name
+ * cleanly, so we also accept that name and sniff the message.
  */
 const isTimeoutError = (error: unknown): boolean => {
   if (!(error instanceof Error)) return false;
@@ -104,6 +107,12 @@ const safeParseUrl = (url?: string): URL | null => {
   } catch {
     return null;
   }
+};
+
+const CANCELLED: ClassifiedRequestError = {
+  type: 'cancelled',
+  title: 'Request cancelled',
+  message: 'The request was cancelled.'
 };
 
 const TIMEOUT: ClassifiedRequestError = {
@@ -172,6 +181,10 @@ export const classifyRequestError = (
   error: unknown,
   options: ClassifyOptions = {}
 ): ClassifiedRequestError => {
+  if (options.cancelled) {
+    return CANCELLED;
+  }
+
   if (error instanceof DigestAuthError) {
     return DIGEST_FAILURES[error.reason];
   }

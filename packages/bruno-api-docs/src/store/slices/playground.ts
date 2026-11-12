@@ -1,8 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { cloneDeep } from 'lodash-es';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
-import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
+import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 import type { RootState } from '@/store/store';
@@ -18,8 +17,8 @@ export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'coll
 export interface PlaygroundState {
   collection: OpenCollectionCollection | null;
   hydratedCollection: OpenCollectionCollection | null;
-  pristineEnvironments: Environment[] | null;
   responses: Record<string, any>; // Store responses by item UUID
+  requestStartedAt: Record<string, number>; // When each running request started, by item UUID
   // UI State
   viewMode: ViewMode;
   selectedItemId: string | null;
@@ -32,8 +31,8 @@ export interface PlaygroundState {
 const initialState: PlaygroundState = {
   collection: null,
   hydratedCollection: null,
-  pristineEnvironments: null,
   responses: {},
+  requestStartedAt: {},
   // UI State
   viewMode: 'playground',
   selectedItemId: null,
@@ -45,12 +44,6 @@ const initialState: PlaygroundState = {
 
 const readEnvironments = (collection: OpenCollectionCollection): Environment[] | null =>
   (collection as any).environments ?? collection.config?.environments ?? null;
-
-const writeEnvironments = (collection: OpenCollectionCollection, environments: Environment[] | null): void => {
-  if ((collection as any).environments !== undefined) (collection as any).environments = environments ?? undefined;
-  if (collection.config) collection.config.environments = environments ?? undefined;
-  else if (environments) collection.config = { environments };
-};
 
 const findAndUpdateItemInCollection = (
   items: OpenCollectionItem[] | undefined,
@@ -133,12 +126,8 @@ const playgroundSlice = createSlice({
 
       if (!action.payload) {
         state.hydratedCollection = null;
-        state.pristineEnvironments = null;
         return;
       }
-
-      const envs = readEnvironments(action.payload);
-      state.pristineEnvironments = envs ? cloneDeep(envs) : null;
 
       const hydrated = hydrateWithUUIDs(action.payload);
 
@@ -154,8 +143,8 @@ const playgroundSlice = createSlice({
     clearPlaygroundCollection: (state: PlaygroundState) => {
       state.collection = null;
       state.hydratedCollection = null;
-      state.pristineEnvironments = null;
       state.responses = {};
+      state.requestStartedAt = {};
       state.selectedItemId = null;
       state.selectedExampleIndex = null;
     },
@@ -164,6 +153,14 @@ const playgroundSlice = createSlice({
       if (state.collection?.items) findAndUpdateItemInCollection(state.collection.items, uuid, item);
       if (state.hydratedCollection?.items) findAndUpdateItemInCollection(state.hydratedCollection.items, uuid, item);
     },
+    updatePlaygroundScriptFile: (state: PlaygroundState, action: PayloadAction<{ uuid: string; script: string }>) => {
+      const { uuid, script } = action.payload;
+      const apply = (item: ScriptFile) => {
+        item.script = script;
+      };
+      if (state.collection?.items) findAndUpdateItem(state.collection.items, uuid, apply);
+      if (state.hydratedCollection?.items) findAndUpdateItem(state.hydratedCollection.items, uuid, apply);
+    },
     setPlaygroundResponse: (state: PlaygroundState, action: PayloadAction<{ uuid: string; response: any }>) => {
       const { uuid, response } = action.payload;
       state.responses[uuid] = response;
@@ -171,6 +168,19 @@ const playgroundSlice = createSlice({
     clearPlaygroundResponse: (state: PlaygroundState, action: PayloadAction<string>) => {
       const uuid = action.payload;
       delete state.responses[uuid];
+    },
+    setPlaygroundRequestStarted: (
+      state: PlaygroundState,
+      action: PayloadAction<{ uuid: string; startedAt: number }>
+    ) => {
+      const { uuid, startedAt } = action.payload;
+      state.requestStartedAt[uuid] = startedAt;
+    },
+    clearPlaygroundRequestStarted: (state: PlaygroundState, action: PayloadAction<string>) => {
+      delete state.requestStartedAt[action.payload];
+    },
+    clearAllPlaygroundRequestsStarted: (state: PlaygroundState) => {
+      state.requestStartedAt = {};
     },
     // UI State Actions
     setViewMode: (state: PlaygroundState, action: PayloadAction<ViewMode>) => {
@@ -261,11 +271,6 @@ const playgroundSlice = createSlice({
         });
       }
     },
-    resetPlaygroundEnvironments: (state: PlaygroundState) => {
-      const environments = state.pristineEnvironments ? cloneDeep(state.pristineEnvironments) : null;
-      if (state.hydratedCollection) writeEnvironments(state.hydratedCollection, environments);
-      if (state.collection) writeEnvironments(state.collection, environments);
-    },
     setPlaygroundVariable: (
       state: PlaygroundState,
       action: PayloadAction<{
@@ -331,8 +336,12 @@ export const {
   setPlaygroundCollection,
   clearPlaygroundCollection,
   updatePlaygroundItem,
+  updatePlaygroundScriptFile,
   setPlaygroundResponse,
   clearPlaygroundResponse,
+  setPlaygroundRequestStarted,
+  clearPlaygroundRequestStarted,
+  clearAllPlaygroundRequestsStarted,
   setViewMode,
   setSelectedItemId,
   setSelectedExampleIndex,
@@ -343,7 +352,6 @@ export const {
   updateCollectionEnvironments,
   applyScriptVariableChanges,
   updateFolderInCollection,
-  resetPlaygroundEnvironments,
   setPlaygroundVariable,
   setResponseFormat,
   setShowResponsePreview
@@ -354,6 +362,8 @@ export const selectPlaygroundCollection = (state: RootState) => state.playground
 export const selectHydratedCollection = (state: RootState) => state.playground.hydratedCollection;
 export const selectPlaygroundResponses = (state: RootState) => state.playground.responses;
 export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
+export const selectPlaygroundRequestStartedAt = (state: RootState, uuid: string): number | null =>
+  state.playground.requestStartedAt[uuid] ?? null;
 export const selectViewMode = (state: RootState) => state.playground.viewMode;
 export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
 export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;

@@ -23,9 +23,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: appConfig.webServerCommand,
-    url: appConfig.baseURL,
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: appConfig.webServerCommand,
+      url: appConfig.baseURL,
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command: 'node e2e/server/test-server.mjs',
+      url: `${appConfig.testServerURL}/health`,
+      env: { PORT: new URL(appConfig.testServerURL).port },
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });

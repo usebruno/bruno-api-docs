@@ -3,9 +3,12 @@ export interface AppConfig {
   baseURL: string;
   /** Command Playwright runs to start the app (the `webServer`). */
   webServerCommand: string;
+  /** Origin of the e2e test server (`e2e/server/test-server.mjs`), separate from the app so CORS applies. */
+  testServerURL: string;
 }
 
 export const appConfig: AppConfig = {
   baseURL: 'http://127.0.0.1:3001',
-  webServerCommand: 'npm run dev'
+  webServerCommand: 'npm run dev',
+  testServerURL: 'http://127.0.0.1:3900'
 };

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { newQuickJSWASMModule } from 'quickjs-emscripten';
 import addCryptoUtilsShimToContext from './shims/lib/crypto-utils';
 import addAxiosShimToContext from './shims/lib/axios';
-import { getRequireCode } from './shims/require';
+import { addRequireShimToContext } from './shims/require';
 import { getBundledCode } from './bundled-libraries.iife.js';
 
 const SUPPORTED_MODULES = [
@@ -33,11 +33,12 @@ describe('sandbox library parity with desktop safe mode', () => {
     vm = module.newContext();
     addCryptoUtilsShimToContext(vm);
     const boot = vm.evalCode(
-      `(${getBundledCode.toString()})(); ${getRequireCode()}; `
+      `(${getBundledCode.toString()})(); `
       + `globalThis.console = { log() {}, debug() {}, info() {}, warn() {}, error() {} };`
     );
     expect(boot.error).toBeUndefined();
     boot.value.dispose();
+    addRequireShimToContext(vm);
     addAxiosShimToContext(vm);
   });
 

@@ -16,13 +16,13 @@ import type { Item as OpenCollectionItem, Folder, ScriptFile } from '@opencollec
 import type { HttpRequest, HttpRequestHeader, HttpRequestParam, HttpRequestExample, HttpRequestBody, HttpRequestBodyVariant } from '@opencollection/types/requests/http';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
-import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
+import type { WebSocketRequest, WebSocketMessageType } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
 import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
-export type SupportedRequestItem = HttpRequest | GraphQLRequest | GrpcRequest;
+export type SupportedRequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;
 
-export type RequestItem = SupportedRequestItem | WebSocketRequest;
+export type RequestItem = SupportedRequestItem;
 
 /** A request body as stored on an item: a single body, a list of body variants, or none. */
 export type RequestBody = HttpRequestBody | HttpRequestBodyVariant[] | undefined;
@@ -263,6 +263,25 @@ export const getGrpcMessages = (item: OpenCollectionItem | null | undefined): Gr
   }
 
   return [];
+};
+
+export interface WebSocketMessageEntry {
+  title: string;
+  type: WebSocketMessageType;
+  data: string;
+}
+
+export const getWebSocketMessages = (item: OpenCollectionItem | null | undefined): WebSocketMessageEntry[] => {
+  const payload = item && 'websocket' in item ? (item as WebSocketRequest).websocket?.message : undefined;
+  if (!payload) return [];
+
+  const variants = Array.isArray(payload) ? payload : [{ title: '', message: payload }];
+
+  return variants.map((variant, index) => ({
+    title: variant.title || `Message ${index + 1}`,
+    type: variant.message?.type ?? 'text',
+    data: variant.message?.data ?? ''
+  }));
 };
 
 export const getGrpcProtoFilePath = (item: OpenCollectionItem | null | undefined): string | undefined =>
@@ -540,7 +559,7 @@ export const scriptsArrayToObject = (scripts: Scripts | null | undefined): Scrip
   const result: ScriptsObject = {};
 
   // Map new type names to old property names for UI compatibility
-  const typeMap: Record<ScriptType, keyof ScriptsObject> = {
+  const typeMap: Partial<Record<ScriptType, keyof ScriptsObject>> = {
     'before-request': 'preRequest',
     'after-response': 'postResponse',
     'tests': 'tests',
@@ -569,14 +588,14 @@ export const getScriptByType = (scripts: Scripts | null | undefined, type: Scrip
   }
 
   // Handle old object format
-  const typeMap: Record<ScriptType, string> = {
+  const typeMap: Partial<Record<ScriptType, string>> = {
     'before-request': 'preRequest',
     'after-response': 'postResponse',
     'tests': 'tests',
     'hooks': 'hooks'
   };
 
-  return (scripts as any)[typeMap[type]];
+  return typeMap[type] ? (scripts as any)[typeMap[type]] : undefined;
 };
 
 /**

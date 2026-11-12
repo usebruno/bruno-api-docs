@@ -32,11 +32,14 @@ interface RequestPageLayoutProps {
   hasConfigContent: boolean;
   emptyConfigSubheading: string;
   snippetBody?: HttpRequestBody | HttpRequestBodyVariant[];
+  showCodeSnippet?: boolean;
+  showExecutionContext?: boolean;
+  beforeColumns?: React.ReactNode;
   afterColumns?: React.ReactNode;
   onTryClick?: () => void;
   onBreadcrumbClick?: (uuid: string) => void;
   testId?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
@@ -46,6 +49,9 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
   hasConfigContent,
   emptyConfigSubheading,
   snippetBody,
+  showCodeSnippet = true,
+  showExecutionContext = true,
+  beforeColumns,
   afterColumns,
   onTryClick,
   onBreadcrumbClick,
@@ -82,6 +88,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
     scriptFlow,
     hasExecutionContext
   } = data;
+  const hasTags = tags.length > 0 || inheritedTags.length > 0;
 
   const authBadge
     = ownAuth === 'inherit' ? (
@@ -93,6 +100,17 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
     ) : null;
 
   const hasLeftColumn = showAuth || hasParams || hasConfigContent || hasHeaders || hasInheritedHeaders;
+  const hasRightColumn = showCodeSnippet || hasTags;
+  const showConfigEmptyState = !hasLeftColumn && !beforeColumns && !(showExecutionContext && hasExecutionContext);
+
+  const configEmptyState = (
+    <EmptyState
+      testId="request-config-empty"
+      icon={<FileIcon />}
+      heading="No request configuration"
+      subheading={emptyConfigSubheading}
+    />
+  );
 
   return (
     <PageWrapper>
@@ -116,110 +134,117 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
           </ViewMore>
         )}
 
-        <div className="request-columns">
-          <div className="request-col-left">
-            {hasLeftColumn ? (
-              <>
-                {hasParams && (
-                  <Section label="Params" testId="request-section-params" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} labelClassName="section-label-lower">
-                    <RequestParams path={pathParams} query={queryParams} />
+        {beforeColumns && <div className="request-before-columns">{beforeColumns}</div>}
+
+        {hasLeftColumn || hasRightColumn ? (
+          <div className="request-columns">
+            <div className="request-col-left">
+              {hasLeftColumn ? (
+                <>
+                  {hasParams && (
+                    <Section label="Params" testId="request-section-params" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} labelClassName="section-label-lower">
+                      <RequestParams path={pathParams} query={queryParams} />
+                    </Section>
+                  )}
+
+                  {children}
+
+                  {(hasHeaders || hasInheritedHeaders) && (
+                    <Section
+                      label="Headers"
+                      testId="request-section-headers"
+                      navGroup={NAV_GROUP.configuration}
+                      navLevel={NAV_LEVEL.configItem}
+                      labelClassName="section-label-lower"
+                      badge={
+                        hasInheritedHeaders ? (
+                          <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
+                        ) : null
+                      }
+                    >
+                      <PropertyTable rows={headerTableRows} onNavigate={onBreadcrumbClick} />
+                    </Section>
+                  )}
+
+                  {showAuth && (
+                    <Section label="Auth" testId="request-section-auth" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} badge={authBadge} labelClassName="section-label-lower">
+                      <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
+                    </Section>
+                  )}
+                </>
+              ) : (
+                showConfigEmptyState && configEmptyState
+              )}
+            </div>
+
+            {hasRightColumn && (
+              <div className="request-col-right">
+                {showCodeSnippet && (
+                  <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>
+                    <CodeSnippetTabs
+                      method={method}
+                      url={url}
+                      headers={effectiveHeaders}
+                      body={snippetBody}
+                      auth={effectiveAuth}
+                    />
                   </Section>
                 )}
-
-                {children}
-
-                {(hasHeaders || hasInheritedHeaders) && (
+                {hasTags && (
                   <Section
-                    label="Headers"
-                    testId="request-section-headers"
-                    navGroup={NAV_GROUP.configuration}
-                    navLevel={NAV_LEVEL.configItem}
-                    labelClassName="section-label-lower"
+                    label="Tags"
+                    testId="request-section-tags"
+                    hideFromNav
                     badge={
-                      hasInheritedHeaders ? (
-                        <ContentTypeBadge label={inheritedCountLabel(inheritedHeaders.length, 'header')} />
-                      ) : null
+                      inheritedTags.length > 0 ? (
+                        <ContentTypeBadge label={inheritedCountLabel(inheritedTags.length, 'tag')} />
+                      ) : undefined
                     }
                   >
-                    <PropertyTable rows={headerTableRows} onNavigate={onBreadcrumbClick} />
+                    <Tags tags={tags} inheritedTags={inheritedTags} testId="request-tags" />
                   </Section>
                 )}
-
-                {showAuth && (
-                  <Section label="Auth" testId="request-section-auth" navGroup={NAV_GROUP.configuration} navLevel={NAV_LEVEL.configItem} badge={authBadge} labelClassName="section-label-lower">
-                    <AuthDetails auth={effectiveAuth} authModeLabels={AUTH_MODE_LABELS} emptyMessage="No auth" />
-                  </Section>
-                )}
-              </>
-            ) : hasExecutionContext ? null : (
-              <EmptyState
-                testId="request-config-empty"
-                icon={<FileIcon />}
-                heading="No request configuration"
-                subheading={emptyConfigSubheading}
-              />
+              </div>
             )}
           </div>
-
-          <div className="request-col-right">
-            <Section label="Code Snippet" testId="request-section-code-snippet" hideFromNav>
-              <CodeSnippetTabs
-                method={method}
-                url={url}
-                headers={effectiveHeaders}
-                body={snippetBody}
-                auth={effectiveAuth}
-              />
-            </Section>
-            {(tags.length > 0 || inheritedTags.length > 0) && (
-              <Section
-                label="Tags"
-                testId="request-section-tags"
-                hideFromNav
-                badge={
-                  inheritedTags.length > 0 ? (
-                    <ContentTypeBadge label={inheritedCountLabel(inheritedTags.length, 'tag')} />
-                  ) : undefined
-                }
-              >
-                <Tags tags={tags} inheritedTags={inheritedTags} testId="request-tags" />
-              </Section>
-            )}
-          </div>
-        </div>
+        ) : (
+          showConfigEmptyState && <div className="request-empty-fullwidth">{configEmptyState}</div>
+        )}
 
         {afterColumns}
 
-        <Section
-          label="Execution Context"
-          testId="request-section-execution-context"
-          className="request-fullwidth"
-          collapsible={hasExecutionContext}
-          storageKey="request-execution-context"
-        >
-          {hasExecutionContext ? (
-            <ExecutionContext
-              scriptChain={scriptChain}
-              preVars={preVars}
-              postVars={postVars}
-              inheritedPreVars={inheritedPreVars}
-              inheritedPostVars={inheritedPostVars}
-              assertions={assertions}
-              tests={tests}
-              testScripts={testScripts}
-              flow={scriptFlow}
-              requestLabel={requestLabel}
-              onNavigate={onBreadcrumbClick}
-            />
-          ) : (
-            <EmptyState
-              testId="execution-context-empty"
-              icon={<RefreshIcon />}
-              heading="No execution context"
-              subheading="This request has no scripts, variables, asserts, or tests configured."
-            />
-          )}
-        </Section>
+        {showExecutionContext && (
+          <Section
+            label="Execution Context"
+            testId="request-section-execution-context"
+            className="request-fullwidth"
+            collapsible={hasExecutionContext}
+            storageKey="request-execution-context"
+          >
+            {hasExecutionContext ? (
+              <ExecutionContext
+                scriptChain={scriptChain}
+                preVars={preVars}
+                postVars={postVars}
+                inheritedPreVars={inheritedPreVars}
+                inheritedPostVars={inheritedPostVars}
+                assertions={assertions}
+                tests={tests}
+                testScripts={testScripts}
+                flow={scriptFlow}
+                requestLabel={requestLabel}
+                onNavigate={onBreadcrumbClick}
+              />
+            ) : (
+              <EmptyState
+                testId="execution-context-empty"
+                icon={<RefreshIcon />}
+                heading="No execution context"
+                subheading="This request has no scripts, variables, asserts, or tests configured."
+              />
+            )}
+          </Section>
+        )}
       </StyledWrapper>
     </PageWrapper>
   );

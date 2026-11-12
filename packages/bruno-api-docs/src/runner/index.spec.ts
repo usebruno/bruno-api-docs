@@ -528,6 +528,35 @@ items:
       global.fetch = originalFetch;
     });
 
+    it('returns a cancelled response and skips the scripts after the request when the signal aborts', async () => {
+      const abortError = new DOMException('The operation was aborted', 'AbortError');
+      global.fetch = vi.fn().mockRejectedValue(abortError);
+      const collection = parseYaml(`
+opencollection: "1.0.0"
+info:
+  name: "Cancel"
+items:
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com/"
+    scripts:
+      tests: |
+        test("never runs", function () { expect(1).to.equal(1); });
+`);
+      const controller = new AbortController();
+      controller.abort();
+
+      const response = await new RequestRunner().runRequest({
+        item: collection.items[0], collection, runtimeVariables: {}, signal: controller.signal
+      });
+
+      expect(response.errorType).toBe('cancelled');
+      expect(response.testResults).toBeUndefined();
+      expect((global.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].signal.aborted).toBe(true);
+      global.fetch = originalFetch;
+    });
+
     describe('script errors after the response arrived', () => {
       const scriptErrorCollection = (scripts: string) => parseYaml(`
 opencollection: "1.0.0"
@@ -1434,5 +1463,43 @@ items:
       item: collection.items[0], collection, environment, timeout: 5000
     });
     expect(response.environmentVariables).toEqual({ envName: 'Dev', variables: { shared: 'fromScript' }, deleted: [] });
+  });
+});
+
+describe('RequestRunner - require() of a .js file in the collection', () => {
+  it('lets a request script use a .js file from the collection', async () => {
+    const originalFetch = global.fetch;
+    let headers: Record<string, string> = {};
+    global.fetch = vi.fn().mockImplementation((url: string, init: RequestInit) => {
+      headers = init.headers as Record<string, string>;
+      return okFetch()(url, init);
+    });
+    const collection = parseYaml(`
+opencollection: "1.0.0"
+info:
+  name: "require"
+items:
+  - name: "lib"
+    type: "folder"
+    items:
+      - name: "helpers"
+        type: "script"
+        script: |
+          module.exports = { token: () => 'from-helpers' };
+  - name: "req"
+    type: "http"
+    method: "GET"
+    url: "https://example.com/"
+    scripts:
+      preRequest: |
+        const { token } = require('./lib/helpers.js');
+        req.setHeader('X-Token', token());
+`);
+
+    const response = await new RequestRunner().runRequest({ item: collection.items[1], collection, timeout: 5000 });
+    global.fetch = originalFetch;
+
+    expect(response.error).toBeUndefined();
+    expect(headers['X-Token']).toBe('from-helpers');
   });
 });

@@ -5,6 +5,15 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
+const build = {
+  sha: process.env.BUILD_SHA ?? null,
+  ref: process.env.BUILD_REF ?? null,
+  version: process.env.BUILD_VERSION ?? null,
+  env: process.env.BUILD_ENV ?? null,
+  run: process.env.BUILD_RUN ?? null,
+  built_at: process.env.BUILD_TIME ?? null
+};
+
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
@@ -17,7 +26,8 @@ export default defineConfig({
     react()
   ],
   define: {
-    'process.env.NODE_ENV': '"production"'
+    'process.env.NODE_ENV': '"production"',
+    '__BRUNO_BUILD__': JSON.stringify(build)
   },
   build: {
     lib: {

@@ -198,6 +198,15 @@ export const StyledWrapper = styled.div`
     min-width: 0;
     flex: 1;
   }
+
+  .tab-panels {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+  }
   .tab-panel:focus {
     outline: none;
   }

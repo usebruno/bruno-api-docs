@@ -1,12 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import reducer, {
   setPlaygroundCollection,
-  updateCollectionEnvironments,
   updatePlaygroundItem,
-  resetPlaygroundEnvironments,
+  updatePlaygroundScriptFile,
   selectHydratedCollection,
   selectPlaygroundCollection,
   setViewMode,
+  setSelectedItemId,
   setSelectedExampleIndex,
   clearPlaygroundCollection,
   toggleFolderCollapse,
@@ -36,31 +36,21 @@ const envExternalSecrets = (store: ReturnType<typeof createOpenCollectionStore>)
   (selectHydratedCollection(store.getState())!.config!.environments![0].externalSecrets!
     .variables as unknown) as { name: string; value?: string; secretName?: string }[];
 
-describe('resetPlaygroundEnvironments', () => {
-  it('restores the original environments after an edit', () => {
+describe('playground edits', () => {
+  it('keeps an environment edit through the navigation the playground dispatches on open', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(makeCollection()));
+    store.dispatch(setPlaygroundVariable({ scope: 'environment', envName: 'Dev', name: 'a', value: 'edited' }));
 
-    const edited = makeCollection();
-    edited.config.environments[0].variables = [{ name: 'a', value: '1' }];
-    store.dispatch(updateCollectionEnvironments(edited));
-    expect(envVariables(store)).toHaveLength(1);
+    // what PlaygroundBody dispatches when the playground opens on a view
+    store.dispatch(setSelectedItemId(null));
+    store.dispatch(setSelectedExampleIndex(null));
+    store.dispatch(setViewMode('environments'));
+    store.dispatch(setViewMode('playground'));
 
-    store.dispatch(resetPlaygroundEnvironments());
-    expect(envVariables(store).map((v: any) => v.name)).toEqual(['a', 'b']);
-  });
-
-  it('keeps the restore independent of later edits (cloned, not shared)', () => {
-    const store = createOpenCollectionStore();
-    store.dispatch(setPlaygroundCollection(makeCollection()));
-
-    store.dispatch(resetPlaygroundEnvironments());
-    const edited = makeCollection();
-    edited.config.environments[0].variables = [];
-    store.dispatch(updateCollectionEnvironments(edited));
-
-    store.dispatch(resetPlaygroundEnvironments());
-    expect(envVariables(store)).toHaveLength(2);
+    expect(envVariables(store)).toEqual([{ name: 'a', value: 'edited' }, { name: 'b', value: '2' }]);
+    expect(selectPlaygroundCollection(store.getState())!.config!.environments![0].variables![0])
+      .toMatchObject({ value: 'edited' });
   });
 });
 
@@ -99,6 +89,38 @@ describe('updatePlaygroundItem', () => {
     expect(firstItem(store, selectHydratedCollection).http.url).toBe('new');
     expect(firstItem(store, selectHydratedCollection).uuid).toBe('r1');
     expect(firstItem(store, selectPlaygroundCollection).http.url).toBe('new');
+  });
+});
+
+describe('updatePlaygroundScriptFile', () => {
+  const withScript = () =>
+    ({
+      info: { name: 'Test', version: '1.0.0' },
+      items: [{ info: { name: 'helpers', type: 'script' }, uuid: 's1', script: 'const a = 1;' }]
+    }) as unknown as OpenCollectionCollection;
+
+  const scriptSource = (store: ReturnType<typeof createOpenCollectionStore>, select: typeof selectHydratedCollection) =>
+    (select(store.getState())!.items![0] as unknown as { script: string }).script;
+
+  it('edits the script in both the hydrated and base collections', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withScript()));
+
+    store.dispatch(updatePlaygroundScriptFile({ uuid: 's1', script: 'const a = 2;' }));
+
+    expect(scriptSource(store, selectHydratedCollection)).toBe('const a = 2;');
+    expect(scriptSource(store, selectPlaygroundCollection)).toBe('const a = 2;');
+  });
+
+  it('restores the original source when the collection is loaded again', () => {
+    const store = createOpenCollectionStore();
+    store.dispatch(setPlaygroundCollection(withScript()));
+    store.dispatch(updatePlaygroundScriptFile({ uuid: 's1', script: 'const a = 2;' }));
+
+    // what updateCollection (and a reload) dispatches
+    store.dispatch(setPlaygroundCollection(withScript()));
+
+    expect(scriptSource(store, selectHydratedCollection)).toBe('const a = 1;');
   });
 });
 

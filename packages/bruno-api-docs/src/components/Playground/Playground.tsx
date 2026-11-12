@@ -1,12 +1,13 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { usePlaygroundUrlState, useIsMobilePhone } from '@/hooks';
-import { useAppDispatch } from '@/store/hooks';
-import { resetPlaygroundEnvironments } from '@/store/slices/playground';
 import InlineDock from './docks/InlineDock/InlineDock';
 import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
 import ModalDock from './docks/ModalDock/ModalDock';
 import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
+import { playgroundRuns, PLAYGROUND_CLOSED } from './Content/Views/PlaygroundView/playgroundRuns';
+import { useAppDispatch } from '@/store/hooks';
+import { clearAllPlaygroundRequestsStarted } from '@/store/slices/playground';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
 const PlaygroundBody = lazy(() => import('./PlaygroundBody/PlaygroundBody'));
@@ -43,10 +44,6 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
   // the sidebar-open default and PlaygroundBody's overlay behaviour follow.
   const effectiveDock = isPhone ? 'inline' : dock;
 
-  // discard environment edits when the playground reopens
-  useEffect(() => {
-    if (open) dispatch(resetPlaygroundEnvironments());
-  }, [open, dispatch]);
   // In the inline dock the sidebar is an overlay over the request/response, so it
   // starts closed (content full width) and opens on demand; bottom/modal show it
   // side by side, so it starts open. Reset to the dock's default when the dock changes.
@@ -61,6 +58,11 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
   // request when the user is on the gear/a folder), while close -> reopen resets
   // it so re-opening a request re-applies it.
   const appliedSlugRef = useRef<string | null>(null);
+
+  useEffect(() => () => {
+    playgroundRuns.abortAll(PLAYGROUND_CLOSED);
+    dispatch(clearAllPlaygroundRequestsStarted());
+  }, [dispatch]);
 
   if (!open) return null;
 

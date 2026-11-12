@@ -17,6 +17,14 @@ export const StyledWrapper = styled.div`
     box-shadow: 0 0 0 1rem var(--content-bg);
   }
 
+  .request-before-columns {
+    margin-top: 1.5rem;
+  }
+
+  .request-empty-fullwidth {
+    margin-top: 1.5rem;
+  }
+
   .request-columns {
     display: grid;
     grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);

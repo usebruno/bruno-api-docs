@@ -1,6 +1,7 @@
 import { test, expect } from '../../playwright';
 import type { Page } from '@playwright/test';
 import type { CodeEditorComponent } from '../../components/code-editor/code-editor.component';
+import type { PlaygroundComponent } from '../../components/playground.component';
 
 const BRU_TESTS_SCRIPT = `
 test('bru runtime variables round-trip, delete, and deleteAll', function () {
@@ -84,9 +85,12 @@ await test('bru.sleep, sendRequest, getTestResults, getAssertionResults, and run
   expect(tests.results[0].status).to.equal('pass');
   
   var asserts = await bru.getAssertionResults();
-  expect(asserts).to.be.an('object');
-  expect(asserts.summary).to.be.an('object');
-  expect(Array.isArray(asserts.results)).to.equal(true);
+  expect(asserts.summary.total).to.be.at.least(1);
+  expect(asserts.summary.passed).to.be.at.least(1);
+  expect(asserts.summary.failed).to.equal(0);
+  expect(asserts.results.length).to.equal(asserts.summary.total);
+  expect(asserts.results[0].status).to.equal('pass');
+  expect(asserts.results[0].operator).to.equal('eq');
   
   var missing = await bru.runRequest('__no_such_request__');
   expect(missing).to.be.an('object');
@@ -94,10 +98,47 @@ await test('bru.sleep, sendRequest, getTestResults, getAssertionResults, and run
 });
 `;
 
+const unsupportedWarning = (api: string): string =>
+  `${api} is not currently supported in the Bruno playground. Please use the Bruno desktop app.`;
+
+const UNSUPPORTED_BRU_APIS = [
+  'bru.visualize',
+  'bru.clearVisualizations',
+  'bru.cwd',
+  'bru.getProcessEnv',
+  'bru.getOauth2CredentialVar',
+  'bru.resetOauth2Credential',
+  'bru.setNextRequest',
+  'bru.runner.setNextRequest',
+  'bru.runner.skipRequest',
+  'bru.runner.stopExecution',
+  'bru.runner.iterationIndex',
+  'bru.runner.totalIterations',
+  'bru.runner.iterationData',
+  'bru.runner.iterationData.get',
+  'bru.cookies.get',
+  'bru.cookies.jar',
+  'bru.getAllGlobalEnvVars',
+  'bru.hasGlobalEnvVar',
+  'bru.getGlobalEnvVar',
+  'bru.setGlobalEnvVar',
+  'bru.deleteGlobalEnvVar',
+  'bru.deleteAllGlobalEnvVars'
+];
+
 const setEditorScript = async (page: Page, editor: CodeEditorComponent, script: string): Promise<void> => {
   await editor.focus();
   await page.keyboard.press('ControlOrMeta+a');
   await page.keyboard.insertText(script);
+};
+
+const addPassingStatusAssertion = async (playground: PlaygroundComponent): Promise<void> => {
+  await playground.selectTab('assertions');
+  const { keyValueTable } = playground;
+  await keyValueTable.nameInputs.last().fill('res.status');
+  await expect(keyValueTable.nameInputs.first()).toHaveValue('res.status');
+  await keyValueTable.valueInputs.first().fill('200');
+  await expect(keyValueTable.valueInputs.first()).toHaveValue('200');
 };
 
 test.describe('The bru object available to scripts (end-to-end in the playground)', () => {
@@ -120,14 +161,14 @@ test.describe('The bru object available to scripts (end-to-end in the playground
     await page.goto('/#/?pg=1&dock=bottom');
     await playground.openSidebarItem('get users');
 
+    await addPassingStatusAssertion(playground);
     await playground.selectTab('tests');
     await setEditorScript(page, playground.testsEditor, BRU_TESTS_SCRIPT);
 
     await responsePane.send();
     await responsePane.switchToTab('tests');
 
-    await expect(page.getByText(/Passed: [1-9]\d*, Failed: 0/).first()).toBeVisible();
-    await expect(page.getByText(/Failed: [1-9]/)).toHaveCount(0);
+    await expect(responsePane.testsPanel.getByTestId('tests-results-summary')).toHaveText('Tests (7), Passed: 7, Failed: 0');
   });
 
   test('an out-of-scope bru method surfaces a warning in the response pane instead of silently doing nothing', async ({ page, playground, responsePane }) => {
@@ -163,23 +204,9 @@ test.describe('The bru object available to scripts (end-to-end in the playground
 
     const banner = page.getByTestId('warning-banner');
     await expect(banner).toBeVisible();
-    await expect(banner).toContainText(
-      'bru.visualize is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
-    );
-    await expect(banner).toContainText(
-      'bru.runner.skipRequest is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
-    );
-    await expect(banner).toContainText(
-      'bru.runner.iterationIndex is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
-    );
-    await expect(banner).toContainText(
-      'bru.getAllGlobalEnvVars is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
-    );
-    await expect(banner).toContainText(
-      'bru.cookies.jar is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
-    );
-    await expect(banner).toContainText(
-      'bru.setNextRequest is not currently supported in the Bruno playground. Please use the Bruno desktop app.'
-    );
+    await expect(banner.getByTestId('warning-message')).toHaveCount(UNSUPPORTED_BRU_APIS.length);
+    for (const api of UNSUPPORTED_BRU_APIS) {
+      await expect(banner).toContainText(unsupportedWarning(api));
+    }
   });
 });

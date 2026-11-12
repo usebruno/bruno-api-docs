@@ -19,14 +19,14 @@ export class AppModule {}
 
 Open `http://localhost:<port>/docs/`. The path counts from `dist/main.js`, so a collection beside `src/` is `'../api-collection'`.
 
-`mountPath` defaults to `'/docs'`. A global prefix moves the docs with everything else. Both adapters work.
+`route` defaults to `'/docs'`. A global prefix moves the docs with everything else. Both adapters work.
 
 ## Options
 
 ```ts
 ApiDocsModule.forRoot({
   collectionPath: '../api-collection',
-  mountPath: '/docs',
+  route: '/docs',
   environments: { include: ['Local'] },
   tags: { exclude: ['internal'] },
   pageTitle: 'Acme API',
@@ -39,9 +39,9 @@ ApiDocsModule.forRoot({
 
 `url` is the public address of a bundled collection file, `https://example.com/api/opencollection.yml`, fetched once at start.
 
-`content` is the document itself as a string. When more than one source is set the first of `content`, `url`, `collectionPath` wins.
+`content` is the document itself as a string. When more than one source is set the first of `content`, `collectionPath`, `url` wins.
 
-`environments` and `tags` take `{ include, exclude }`, where `include` is a list of names or `'*'`. Leave `environments` out and none are published. Excluded tags drop their requests from the served collection.
+`environments` and `tags` take `'*'` for all, or `{ include, exclude }`, where `include` is a list of names or `'*'` and `exclude` is a list of names. Leave `environments` out and none are published. Excluded tags drop their requests from the served collection.
 
 ## Auth
 

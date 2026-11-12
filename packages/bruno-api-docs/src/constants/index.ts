@@ -16,14 +16,15 @@ export {
   REQUEST_TYPE_LABELS,
   BODY_LANGUAGE,
   BODY_CONTENT_TYPE,
-  GRPC_METHOD_TYPE_LABELS
+  GRPC_METHOD_TYPE_LABELS,
+  WEBSOCKET_MESSAGE_TYPE_LABELS
 } from './request';
 
 export { RESPONSE_LANGUAGE, RESPONSE_CONTENT_TYPE, STATUS_CODE_PHRASES } from './response';
 
 export { TEMPLATE_VARIABLE_BODY_PATTERN, TEMPLATE_VARIABLE_SOURCE_PATTERN } from './regex';
 
-export { MANAGER_LABELS } from './environment';
+export { MANAGER_LABELS, externalSecretPointer } from './environment';
 
 export { SCOPE_LABELS, INVALID_NAME_WARNING, SECRET_MASK } from './variable';
 

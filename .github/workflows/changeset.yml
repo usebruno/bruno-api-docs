@@ -2,14 +2,34 @@ name: Changeset
 
 on:
   pull_request:
-    types: [labeled]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
     branches: [main, 'release/**']
 
 jobs:
+  changeset_check:
+    if: >
+      github.event.pull_request.draft == false &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-changeset')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Package changes need a changeset
+        run: |
+          git diff --quiet HEAD^1 HEAD -- packages/bruno-api-docs ':!*.md' && exit 0
+          [ -n "$(git diff --name-only --diff-filter=A HEAD^1 HEAD -- '.changeset/*.md' ':!.changeset/README.md')" ] && exit 0
+          echo "::error::This PR changes packages/bruno-api-docs but adds no changeset. Use the link in the changeset bot's comment, or run npx changeset. Tests-only or chore PRs can add the skip-changeset label."
+          exit 1
+
   changeset:
     # A fork PR gets a read-only token, so the push would 403. Skip cleanly instead of
-    # failing. fork contributors are covered by the changeset status check.
+    # failing. Fork contributors add the changeset themselves, the check job enforces it.
     if: >
+      github.event.action == 'labeled' &&
       startsWith(github.event.label.name, 'changeset:') &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
@@ -17,7 +37,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}

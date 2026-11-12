@@ -34,9 +34,9 @@ jobs:
       run:
         working-directory: integrations
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: ${{ matrix.node }}
 
@@ -46,7 +46,7 @@ jobs:
 
       - run: bash nodejs/scripts/matrix.sh --family ${{ matrix.family }} --results results
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: matrix-${{ matrix.node }}-${{ matrix.family }}
@@ -61,14 +61,14 @@ jobs:
       run:
         working-directory: integrations
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 20
       - run: npm ci
       - run: npm run build
       - run: bash nodejs/scripts/matrix.sh --results results
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: matrix-20-all
@@ -83,9 +83,9 @@ jobs:
       run:
         working-directory: integrations
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: matrix-*
           merge-multiple: true
@@ -110,7 +110,7 @@ jobs:
           fail-on-error: false
 
       # one comment per PR, updated in place on every run
-      - if: github.event_name == 'pull_request'
+      - if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}

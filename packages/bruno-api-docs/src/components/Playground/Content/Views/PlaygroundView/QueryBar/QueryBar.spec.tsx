@@ -16,14 +16,38 @@ const item: HttpRequest = {
   }
 } as HttpRequest;
 
-const queryBar = <QueryBar item={item} onSendRequest={() => {}} isLoading={false} onItemChange={() => {}} />;
+const queryBar = (isLoading: boolean) => (
+  <QueryBar
+    item={item}
+    onSendRequest={() => {}}
+    onCancelRequest={() => {}}
+    isLoading={isLoading}
+    onItemChange={() => {}}
+  />
+);
 
 describe('Playground QueryBar: code snippet', () => {
   it('offers the code-snippet control alongside the copy-url action', () => {
-    const root = useRenderToDom(queryBar);
+    const root = useRenderToDom(queryBar(false));
 
     expect(queryByTestId(root, 'query-bar-code-snippet-trigger')).not.toBeNull();
     expect(queryByTestId(root, 'query-bar-copy-url')).not.toBeNull();
+  });
+});
+
+describe('Playground QueryBar: Send and Cancel', () => {
+  it('shows Send and no Cancel when no request is running', () => {
+    const root = useRenderToDom(queryBar(false));
+
+    expect(queryByTestId(root, 'query-bar-send')).not.toBeNull();
+    expect(queryByTestId(root, 'query-bar-cancel')).toBeNull();
+  });
+
+  it('swaps Send for Cancel while a request is running', () => {
+    const root = useRenderToDom(queryBar(true));
+
+    expect(queryByTestId(root, 'query-bar-send')).toBeNull();
+    expect(queryByTestId(root, 'query-bar-cancel')).not.toBeNull();
   });
 });
 

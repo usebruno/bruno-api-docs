@@ -170,11 +170,11 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     await expect(page.getByTestId('section-nav-rail')).toBeHidden();
   });
 
-  test('appears on an unsupported-request page that has documentation headings', async ({
-    unsupportedRequestPage,
+  test('appears on a websocket request page that has documentation headings', async ({
+    websocketRequestPage,
     page
   }) => {
-    await unsupportedRequestPage.open(['Realtime', 'Live Updates']);
+    await websocketRequestPage.open(['Realtime', 'Live Updates']);
     await expect(page.getByTestId('section-nav-rail')).toBeVisible();
   });
 

@@ -134,11 +134,25 @@ export class OpenCollectionRenderer {
 
 export default OpenCollectionRenderer;
 
+let warnedDeprecated = false;
+
+class DeprecatedOpenCollection extends OpenCollectionRenderer {
+  constructor(options: OpenCollectionOptions) {
+    if (!warnedDeprecated) {
+      warnedDeprecated = true;
+      // window.console: the standalone build drops bare console.* calls (terser drop_console)
+      window.console.warn('[Bruno API Docs] window.OpenCollection is deprecated and will be removed in a future release. Use Bruno.apiDocs(target, { content }) instead.');
+    }
+    super(options);
+  }
+}
+
 if (typeof window !== 'undefined') {
   const globals = window as any;
-  globals.OpenCollection = OpenCollectionRenderer;
+  globals.OpenCollection = DeprecatedOpenCollection;
   globals.Bruno = {
     ...globals.Bruno,
+    build: __BRUNO_BUILD__,
     apiDocs: (target: HTMLElement, { content, repositoryUrl, gitCollectionUrl, ...options }: ApiDocsOptions) =>
       new OpenCollectionRenderer({
         target,

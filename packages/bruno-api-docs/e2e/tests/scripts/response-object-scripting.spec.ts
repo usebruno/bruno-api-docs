@@ -135,8 +135,7 @@ test.describe('The res object available to scripts (end-to-end in the playground
     await responsePane.send();
     await responsePane.switchToTab('tests');
 
-    await expect(page.getByText(/Passed: [1-9]\d*, Failed: 0/).first()).toBeVisible();
-    await expect(page.getByText(/Failed: [1-9]/)).toHaveCount(0);
+    await expect(responsePane.testsPanel.getByTestId('tests-results-summary')).toHaveText('Tests (11), Passed: 11, Failed: 0');
   });
 
   test('res.setBody in a post-response script replaces the body shown in the response pane', async ({ page, playground, responsePane }) => {
@@ -176,7 +175,6 @@ test.describe('The res object available to scripts (end-to-end in the playground
     await responsePane.send();
     await responsePane.switchToTab('tests');
 
-    await expect(page.getByText(/Passed: [1-9]\d*, Failed: 0/).first()).toBeVisible();
-    await expect(page.getByText(/Failed: [1-9]/)).toHaveCount(0);
+    await expect(responsePane.testsPanel.getByTestId('tests-results-summary')).toHaveText('Tests (1), Passed: 1, Failed: 0');
   });
 });

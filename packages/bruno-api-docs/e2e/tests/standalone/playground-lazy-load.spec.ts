@@ -103,4 +103,40 @@ test.describe('The playground file on a host page', () => {
     await first.sidebar.item('Beta').click();
     await expect(first.requestPage.title).toHaveText('Beta');
   });
+
+  test('leaves the docs snippet highlighting alone when it loads', async ({ page, standalonePage }) => {
+    await page.route('**/alpha**', (route) =>
+      route.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: '{"ok":1}' })
+    );
+    await standalonePage.goto('#/alpha');
+    await standalonePage.mount('first', { content: generalFixtureCollection });
+    const first = standalonePage.instance('first');
+    const { codeSnippet } = first.requestPage;
+    const docsTokens = codeSnippet.code.getByTestId(/^variable-token-/);
+    await expect(docsTokens).toHaveCount(10);
+
+    const playgroundFile = page.waitForResponse(/\/api-playground-[\w-]+\.js$/);
+    await first.requestPage.urlBar.tryButton.click();
+    expect((await (await playgroundFile).text()).includes('highlightAll:function')).toBe(false);
+    await first.responsePane.sendButton.click();
+    await expect(first.responsePane.status).toHaveText('200 OK');
+    await expect(docsTokens).toHaveCount(10);
+
+    await first.playground.closeButton.click();
+    await codeSnippet.selectLanguage('javascript');
+    await expect(codeSnippet.code).toContainText('fetch(');
+    await expect(docsTokens).toHaveCount(10);
+  });
+
+  test('highlights playground snippets with the shared javascript grammar', async ({ standalonePage }) => {
+    await standalonePage.goto('#/alpha');
+    await standalonePage.mount('first', { content: generalFixtureCollection });
+    const first = standalonePage.instance('first');
+    await first.requestPage.urlBar.tryButton.click();
+    const { codeSnippet } = first.playground;
+    await codeSnippet.openFromIcon();
+    await codeSnippet.selectModalLanguage('javascript');
+
+    await expect.poll(() => codeSnippet.modalTokenTexts('var-name')).toEqual(['options']);
+  });
 });

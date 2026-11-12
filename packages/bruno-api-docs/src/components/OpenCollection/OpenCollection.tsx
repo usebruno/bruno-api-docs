@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { HashRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
@@ -16,18 +16,9 @@ import {
   setPlaygroundCollection,
   clearPlaygroundCollection
 } from '@/store/slices/playground';
-import {
-  selectCollectionStatus,
-  selectCollectionError,
-  setCollectionLoading,
-  setCollectionSucceeded,
-  setCollectionFailed,
-  resetCollectionState,
-  setGitCollectionUrl,
-  setCollectionSourceText
-} from '@/store/slices/app';
 import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
+import { createObservable, useObservable } from '@/observable/observable';
 import { createSession, SessionProvider, useSession, type Session } from '@/session/session';
 import type { ThemeState } from '@/theme/types';
 import { isEqual } from 'lodash-es';
@@ -47,6 +38,12 @@ const parseCollectionContent = (content: string): OpenCollectionCollection => {
     }
   }
 };
+
+interface LoadState {
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+  sourceText: string | null;
+}
 
 interface ResolvedCollection {
   collection: OpenCollectionCollection;
@@ -97,12 +94,8 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
   const dispatch = useAppDispatch();
   const session = useSession();
   const docsCollection = useAppSelector(selectDocsCollection);
-  const collectionStatus = useAppSelector(selectCollectionStatus);
-  const collectionError = useAppSelector(selectCollectionError);
-
-  useEffect(() => {
-    dispatch(setGitCollectionUrl(gitCollectionUrl ?? null));
-  }, [gitCollectionUrl, dispatch]);
+  const [loadState] = useState(() => createObservable<LoadState>({ initial: { status: 'idle', error: null, sourceText: null } }));
+  const { status: collectionStatus, error: collectionError, sourceText } = useObservable(loadState);
 
   const lastThemeProp = useRef(theme);
   const lastHideThemeSwitcherProp = useRef(hideThemeSwitcher);
@@ -117,31 +110,28 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     let isActive = true;
 
     const load = async () => {
-      dispatch(setCollectionLoading());
+      loadState.set({ ...loadState.get(), status: 'loading', error: null });
 
       try {
         const { collection: resolved, sourceText } = await resolveCollectionSource(collection);
         if (!isActive) return;
-        dispatch(setCollectionSourceText(sourceText));
         const hydrated = hydrateWithUUIDs(resolved);
         dispatch(setDocsCollection(hydrated));
         dispatch(setPlaygroundCollection(hydrated));
-        dispatch(setCollectionSucceeded());
+        loadState.set({ status: 'succeeded', error: null, sourceText });
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
-        dispatch(setCollectionFailed(message));
         dispatch(clearDocsCollection());
-        dispatch(setCollectionSourceText(null));
         dispatch(clearPlaygroundCollection());
+        loadState.set({ status: 'failed', error: message, sourceText: null });
       }
     };
 
     if (collection == null) {
       dispatch(clearDocsCollection());
-      dispatch(setCollectionSourceText(null));
       dispatch(clearPlaygroundCollection());
-      dispatch(resetCollectionState());
+      loadState.set({ status: 'idle', error: null, sourceText: null });
       return () => { isActive = false; };
     }
 
@@ -150,13 +140,12 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
       dispatch(setDocsCollection(hydrated));
-      dispatch(setCollectionSourceText(null));
       dispatch(setPlaygroundCollection(hydrated));
-      dispatch(setCollectionSucceeded());
+      loadState.set({ status: 'succeeded', error: null, sourceText: null });
     }
 
     return () => { isActive = false; };
-  }, [collection, dispatch]);
+  }, [collection, dispatch, loadState]);
 
   const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
@@ -171,7 +160,13 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <div className="oc-playground">
-      <AppShell logo={logo} hidePlayground={hidePlayground} hideThemeSwitcher={hideThemeSwitcher} />
+      <AppShell
+        logo={logo}
+        hidePlayground={hidePlayground}
+        hideThemeSwitcher={hideThemeSwitcher}
+        gitCollectionUrl={gitCollectionUrl}
+        collectionSourceText={sourceText}
+      />
     </div>
   );
 };

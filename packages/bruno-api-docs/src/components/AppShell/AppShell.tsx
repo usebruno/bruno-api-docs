@@ -13,7 +13,6 @@ import SearchBar from '../Search/SearchBar/SearchBar';
 import { useSearchHotkey, usePlaygroundUrlState, useElementWidth, useResizableSidebar } from '@/hooks';
 import { useAppSelector } from '@/store/hooks';
 import { selectDocsCollection } from '@/store/slices/docs';
-import { selectGitCollectionUrl, selectCollectionSourceText } from '@/store/slices/app';
 import { useActiveResolution } from '@/routing/hooks';
 import { layoutModeForWidth } from '@/hooks/useTopbarLayout';
 import { buildFetchInBrunoUrl } from '@/utils/buildFetchInBrunoUrl';
@@ -27,17 +26,19 @@ interface AppShellProps {
   testId?: string;
   hideThemeSwitcher?: boolean;
   hidePlayground?: boolean;
+  gitCollectionUrl?: string;
+  collectionSourceText?: string | null;
 }
 
 const AppShell: React.FC<AppShellProps> = ({
   logo,
   testId = 'app-shell',
   hideThemeSwitcher = false,
-  hidePlayground = false
+  hidePlayground = false,
+  gitCollectionUrl,
+  collectionSourceText = null
 }) => {
   const collection = useAppSelector(selectDocsCollection);
-  const gitCollectionUrl = useAppSelector(selectGitCollectionUrl);
-  const collectionSourceText = useAppSelector(selectCollectionSourceText);
   const openInBrunoHref = buildFetchInBrunoUrl(gitCollectionUrl);
   const [openInBrunoOpen, setOpenInBrunoOpen] = useState(false);
   const closeOpenInBruno = useCallback(() => setOpenInBrunoOpen(false), []);

@@ -5,6 +5,7 @@ import EnvSwitcher from '../EnvSwitcher/EnvSwitcher';
 import ShowVarsToggle from '../ShowVarsToggle/ShowVarsToggle';
 import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import Sidebar from '../Docs/Sidebar/Sidebar';
+import { useFolderCollapse } from '../Docs/Sidebar/hooks/useFolderCollapse';
 import SidebarDrawer from '../SidebarDrawer/SidebarDrawer';
 import IconButton from '@/ui/IconButton/IconButton';
 import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
@@ -39,6 +40,7 @@ const AppShell: React.FC<AppShellProps> = ({
   collectionSourceText = null
 }) => {
   const collection = useAppSelector(selectDocsCollection);
+  const folders = useFolderCollapse(collection);
   const openInBrunoHref = buildFetchInBrunoUrl(gitCollectionUrl);
   const [openInBrunoOpen, setOpenInBrunoOpen] = useState(false);
   const closeOpenInBruno = useCallback(() => setOpenInBrunoOpen(false), []);
@@ -162,7 +164,7 @@ const AppShell: React.FC<AppShellProps> = ({
             {isDesktop && !sidebarCollapsed && (
               <>
                 <aside className="appshell-sidebar" data-testid="app-sidebar">
-                  <Sidebar />
+                  <Sidebar folders={folders} />
                 </aside>
                 <div
                   className="appshell-sidebar-resizer"
@@ -206,7 +208,7 @@ const AppShell: React.FC<AppShellProps> = ({
 
       {!isDesktop && (
         <SidebarDrawer open={drawerOpen} onClose={closeDrawer}>
-          <Sidebar onNavigate={closeDrawer} />
+          <Sidebar folders={folders} onNavigate={closeDrawer} />
         </SidebarDrawer>
       )}
     </StyledWrapper>

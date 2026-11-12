@@ -1,6 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item as OpenCollectionItem, Folder } from '@opencollection/types/collection/item';
 import { getItemName, getItemSeq, getItemType, isFolder, isScriptFile, isGraphQLRequest, getRequestBadgeLabel } from '@/utils/schemaHelpers';
+import { getItemUuid } from '@/utils/itemUtils';
 import { slugifySegment, dedupeSiblingSlugs } from './slug';
 import type { BreadcrumbSegment, NavEntry, NavModel, PageType } from './types';
 
@@ -144,9 +145,12 @@ export const buildNavModel = (collection: OpenCollection | null | undefined): Na
   walk(collection?.items, '', [], 0, ordered);
 
   const bySlug = new Map<string, NavEntry>();
+  const slugByUuid = new Map<string, string>();
   for (const entry of ordered) {
     bySlug.set(entry.slug, entry);
+    const uuid = getItemUuid(entry.item);
+    if (uuid) slugByUuid.set(uuid, entry.slug);
   }
 
-  return { ordered, bySlug };
+  return { ordered, bySlug, slugByUuid };
 };

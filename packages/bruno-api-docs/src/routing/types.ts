@@ -41,6 +41,7 @@ export interface SeqNeighbor {
 export interface NavModel {
   ordered: NavEntry[];
   bySlug: Map<string, NavEntry>;
+  slugByUuid: Map<string, string>;
 }
 
 /** What every page component receives. */

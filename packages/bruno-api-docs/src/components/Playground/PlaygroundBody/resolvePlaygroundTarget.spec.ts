@@ -31,9 +31,10 @@ const model: NavModel = {
   bySlug: new Map([
     [folderEntry.slug, folderEntry],
     [requestEntry.slug, requestEntry]
-  ])
+  ]),
+  slugByUuid: new Map()
 };
-const emptyModel: NavModel = { ordered: [], bySlug: new Map() };
+const emptyModel: NavModel = { ordered: [], bySlug: new Map(), slugByUuid: new Map() };
 
 describe('resolvePlaygroundTarget', () => {
   it('maps the ~environments token to the environments view (no item, no reveal)', () => {

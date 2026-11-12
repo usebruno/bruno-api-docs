@@ -5,7 +5,7 @@ import { exampleSlugForIndex } from '@/routing/slug';
 import type { NavModel } from '@/routing';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 
-export function useActiveExample(model: NavModel, uuidToSlug: Map<string, string>, onNavigate?: () => void) {
+export function useActiveExample(model: NavModel, onNavigate?: () => void) {
   // The active example is read from the route (<request-slug>/<example-slug>),
   // so it is shareable/deep-linked, survives reload, and back/forward restore it.
   const resolution = useActiveResolution();
@@ -17,7 +17,7 @@ export function useActiveExample(model: NavModel, uuidToSlug: Map<string, string
       : null;
 
   const goToExample = (requestUuid: string, index: number) => {
-    const slug = uuidToSlug.get(requestUuid);
+    const slug = model.slugByUuid.get(requestUuid);
     if (slug == null) return;
     const item = model.bySlug.get(slug)?.item as HttpRequest | null;
     const exampleSlug = exampleSlugForIndex(item, index);

@@ -29,11 +29,12 @@ const loadedModel: NavModel = {
   bySlug: new Map([
     [folderEntry.slug, folderEntry],
     [requestEntry.slug, requestEntry]
-  ])
+  ]),
+  slugByUuid: new Map()
 };
 
 // The model before the collection has hydrated (reload): nothing resolves yet.
-const emptyModel: NavModel = { ordered: [], bySlug: new Map() };
+const emptyModel: NavModel = { ordered: [], bySlug: new Map(), slugByUuid: new Map() };
 
 describe('computeAutoReveal', () => {
   it('does NOT claim or expand when the model cannot resolve the slug yet', () => {

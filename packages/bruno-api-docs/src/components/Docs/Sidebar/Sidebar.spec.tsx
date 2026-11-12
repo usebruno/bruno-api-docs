@@ -24,7 +24,7 @@ const buildSidebar = () => {
   return (
     <Provider store={store}>
       <MemoryRouter initialEntries={['/login/ok']}>
-        <Sidebar />
+        <Sidebar folders={{ isCollapsed: () => true, toggle: () => {}, expand: () => {} }} />
       </MemoryRouter>
     </Provider>
   );

@@ -39,17 +39,6 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const docsNavigate = useDocsNavigate();
   const pageBodyRef = useRef<HTMLDivElement>(null);
 
-  // Map each item's runtime uuid -> its stable slug so breadcrumb clicks
-  // navigate by URL (the same mapping the sidebar uses).
-  const uuidToSlug = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const entry of model.ordered) {
-      const uuid = getItemUuid(entry.item);
-      if (uuid) map.set(uuid, entry.slug);
-    }
-    return map;
-  }, [model]);
-
   const item = resolution?.entry?.item ?? null;
   const ancestry = useMemo(
     () => (item && collection ? getAncestorsByUuid(collection, getItemUuid(item) ?? '') : []),
@@ -66,7 +55,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const sectionNavTitle = entry.name;
 
   const goToUuid = (uuid: string) => {
-    const slug = uuidToSlug.get(uuid);
+    const slug = model.slugByUuid.get(uuid);
     // A known item navigates to its slug; the leading collection crumb (and any
     // unknown uuid) falls back to the overview.
     docsNavigate(slug ?? '');

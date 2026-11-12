@@ -72,14 +72,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const { activeEnvName } = useEnvState();
   const orientationOverride = useAppSelector(selectResponsePaneOrientation);
 
-  const uuidToSlug = useMemo<Map<string, string>>(() => {
-    const map = new Map<string, string>();
-    for (const entry of model.ordered) {
-      const uuid = getItemUuid(entry.item);
-      if (uuid) map.set(uuid, entry.slug);
-    }
-    return map;
-  }, [model]);
+  const uuidToSlug = model.slugByUuid;
 
   const selectedItem = useMemo(
     () => findItemByUuid(collection?.items, selectedItemId),

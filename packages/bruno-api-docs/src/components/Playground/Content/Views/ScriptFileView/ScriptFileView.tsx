@@ -2,8 +2,6 @@ import React, { useCallback, useState } from 'react';
 import type { ScriptFile } from '@opencollection/types/collection/item';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import CodeEditor from '@/ui/CodeEditor/CodeEditor';
-import { useAppDispatch } from '@/store/hooks';
-import { updatePlaygroundScriptFile } from '@/store/slices/playground';
 import { getItemName } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
@@ -11,17 +9,15 @@ import { StyledWrapper } from './StyledWrapper';
 
 interface ScriptFileViewProps {
   item: ScriptFile;
+  onScriptChange: (save: { uuid: string; script: string }) => void;
 }
 
-const ScriptFileView: React.FC<ScriptFileViewProps> = ({ item }) => {
-  const dispatch = useAppDispatch();
+const ScriptFileView: React.FC<ScriptFileViewProps> = ({ item, onScriptChange }) => {
   const uuid = getItemUuid(item);
   const name = getItemName(item) || 'Script';
   const [source, setSource] = useState(item.script ?? '');
 
-  const scheduleSave = useDebouncedSave((save: { uuid: string; script: string }) => {
-    dispatch(updatePlaygroundScriptFile(save));
-  });
+  const scheduleSave = useDebouncedSave(onScriptChange);
 
   const handleChange = useCallback((value: string) => {
     setSource(value);

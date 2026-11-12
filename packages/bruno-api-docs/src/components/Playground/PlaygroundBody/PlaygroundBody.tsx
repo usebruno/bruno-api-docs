@@ -1,7 +1,20 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import type { Item } from '@opencollection/types/collection/item';
-import { useAppSelector } from '@/store/hooks';
-import { selectHydratedCollection } from '@/store/slices/playground';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import {
+  selectHydratedCollection,
+  updateCollectionSettings,
+  updatePlaygroundItem,
+  updatePlaygroundScriptFile,
+  updateFolderInCollection,
+  setPlaygroundVariable,
+  applyScriptVariableChanges,
+  setPlaygroundResponse,
+  clearPlaygroundResponse,
+  setPlaygroundRequestStarted,
+  clearPlaygroundRequestStarted
+} from '@/store/slices/playground';
+import type { WorkspaceActions } from '@/session/workspace';
 import { isFolderCollapsed } from '@/session/playgroundFolders';
 import { useSession } from '@/session/session';
 import { useObservable } from '@/observable/observable';
@@ -36,6 +49,19 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   appliedSlugRef
 }) => {
   const collection = useAppSelector(selectHydratedCollection);
+  const dispatch = useAppDispatch();
+  const actions = useMemo<WorkspaceActions>(() => ({
+    replaceCollection: (next) => dispatch(updateCollectionSettings(next)),
+    updateRequestItem: (payload) => dispatch(updatePlaygroundItem(payload)),
+    updateScriptFile: (payload) => dispatch(updatePlaygroundScriptFile(payload)),
+    updateFolder: (payload) => dispatch(updateFolderInCollection(payload)),
+    setVariable: (write) => dispatch(setPlaygroundVariable(write)),
+    applyScriptVariableChanges: (changes) => dispatch(applyScriptVariableChanges(changes)),
+    setResponse: (payload) => dispatch(setPlaygroundResponse(payload)),
+    clearResponse: (uuid) => dispatch(clearPlaygroundResponse(uuid)),
+    startRequest: (payload) => dispatch(setPlaygroundRequestStarted(payload)),
+    finishRequest: (uuid) => dispatch(clearPlaygroundRequestStarted(uuid))
+  }), [dispatch]);
   const { orientation: orientationState, folders } = useSession().playground;
   const orientationOverride = useObservable(orientationState);
   const folderState = useObservable(folders);
@@ -117,6 +143,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
           collection={collection}
           dock={dock}
           orientation={orientation}
+          actions={actions}
         />
       </div>
     </StyledWrapper>

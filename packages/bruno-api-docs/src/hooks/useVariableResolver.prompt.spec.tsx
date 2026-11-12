@@ -2,7 +2,7 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
-import { setPlaygroundCollection } from '@/store/slices/playground';
+import { setPlaygroundCollection, setPlaygroundVariable } from '@/store/slices/playground';
 import {
   ItemVariableResolverProvider,
   VariableResolverProvider,
@@ -29,7 +29,13 @@ const probeTree = (store: ReturnType<typeof createOpenCollectionStore>) => {
     box,
     tree: (
       <TestProviders store={store}>
-        <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider
+          collection={collection}
+          ancestry={[]}
+          item={null}
+          writable
+          onWriteVariable={(write) => store.dispatch(setPlaygroundVariable(write))}
+        >
           <Probe />
         </ItemVariableResolverProvider>
       </TestProviders>

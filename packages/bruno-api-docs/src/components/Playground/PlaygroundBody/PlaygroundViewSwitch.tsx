@@ -3,6 +3,9 @@ import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder, Item, ScriptFile } from '@opencollection/types/collection/item';
 import { useEnvState } from '@/session/session';
+import type { WorkspaceActions } from '@/session/workspace';
+import { useAppSelector } from '@/store/hooks';
+import { selectPlaygroundResponse, selectPlaygroundRequestStartedAt } from '@/store/slices/playground';
 import { getItemUuid } from '@/utils/itemUtils';
 import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
 import type { DockMode } from '@/utils/playgroundDock';
@@ -21,6 +24,7 @@ interface PlaygroundViewSwitchProps {
   collection: OpenCollection | null;
   dock: DockMode;
   orientation: 'horizontal' | 'vertical';
+  actions: WorkspaceActions;
 }
 
 const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
@@ -29,15 +33,33 @@ const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
   selectedExampleIndex,
   collection,
   dock,
-  orientation
+  orientation,
+  actions
 }) => {
   const { activeEnvName } = useEnvState();
+  const selectedItemUuid = getItemUuid(selectedItem) ?? '';
+  const response = useAppSelector((state) => selectPlaygroundResponse(state, selectedItemUuid));
+  const requestStartedAt = useAppSelector((state) => selectPlaygroundRequestStartedAt(state, selectedItemUuid));
 
-  if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} />;
-  if (viewMode === 'environments' && collection) return <EnvironmentsView collection={collection} compact={dock === 'inline'} />;
-  if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
+  if (viewMode === 'collection-settings' && collection) {
+    return <CollectionSettingsView collection={collection} onCollectionChange={actions.replaceCollection} />;
+  }
+  if (viewMode === 'environments' && collection) {
     return (
-      <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={() => undefined} />
+      <EnvironmentsView
+        collection={collection}
+        compact={dock === 'inline'}
+        onCollectionChange={actions.replaceCollection}
+      />
+    );
+  }
+  if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
+    const onFolderChange = (folder: Folder) => {
+      const uuid = getItemUuid(folder);
+      if (uuid) actions.updateFolder({ uuid, folder });
+    };
+    return (
+      <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={onFolderChange} />
     );
   }
   if (
@@ -52,7 +74,13 @@ const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
     }
   }
   if (viewMode === 'playground' && selectedItem && isScriptFile(selectedItem)) {
-    return <ScriptFileView key={getItemUuid(selectedItem)} item={selectedItem as ScriptFile} />;
+    return (
+      <ScriptFileView
+        key={getItemUuid(selectedItem)}
+        item={selectedItem as ScriptFile}
+        onScriptChange={actions.updateScriptFile}
+      />
+    );
   }
   if ((viewMode === 'playground' || viewMode === 'example') && selectedItem && !isFolder(selectedItem) && collection) {
     return (
@@ -61,6 +89,9 @@ const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
         collection={collection}
         selectedEnvironment={activeEnvName ?? ''}
         orientation={orientation}
+        response={response}
+        requestStartedAt={requestStartedAt}
+        actions={actions}
       />
     );
   }

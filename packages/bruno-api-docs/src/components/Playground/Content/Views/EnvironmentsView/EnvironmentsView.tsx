@@ -12,13 +12,11 @@ import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel
 import EnvVarCards from './EnvVarCards/EnvVarCards';
 import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
 import { GlobeIcon } from '@/assets/icons';
-import { useAppDispatch } from '@/store/hooks';
 import { cx } from '@/utils/cx';
 import { externalSecretPointer } from '@/constants';
 import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
 import { countEnabled } from '@/utils/schemaHelpers';
 import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@/utils/variableResolution';
-import { updateCollectionEnvironments } from '@/store/slices/playground';
 
 const ENV_TABS = [
   { id: 'variables', label: 'Variables' },
@@ -41,10 +39,10 @@ const TabPanel: React.FC<TabPanelProps> = ({ isEmpty, heading, subheading, child
 interface EnvironmentsViewProps {
   collection: OpenCollection | null;
   compact?: boolean;
+  onCollectionChange: (collection: OpenCollection) => void;
 }
 
-const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false }) => {
-  const dispatch = useAppDispatch();
+const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false, onCollectionChange }) => {
   const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
 
   const environments = (collection as any)?.environments || collection?.config?.environments || [];
@@ -85,7 +83,7 @@ const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact
       (updatedCollection as any).environments = updatedEnvironments;
     }
 
-    dispatch(updateCollectionEnvironments(updatedCollection));
+    onCollectionChange(updatedCollection);
   };
 
   const commit = (plain: KeyValueRow[], secrets: KeyValueRow[]) =>

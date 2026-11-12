@@ -9,8 +9,6 @@ import AuthTab from '../Common/AuthTab/AuthTab';
 import ScriptsTab from '../Common/ScriptsTab/ScriptsTab';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
-import { useAppDispatch } from '@/store/hooks';
-import { updateCollectionSettings } from '@/store/slices/playground';
 import { countEnabled, getItemDocs, scriptsArrayToObject, scriptsObjectToArray } from '@/utils/schemaHelpers';
 import { rowToVariable } from '@/utils/variableDataType';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
@@ -19,14 +17,14 @@ import { StyledWrapper } from './StyledWrapper';
 
 interface CollectionSettingsProps {
   collection: OpenCollection;
+  onCollectionChange: (collection: OpenCollection) => void;
 }
 
-const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection }) => {
-  const dispatch = useAppDispatch();
+const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection, onCollectionChange }) => {
   const [activeTab, setActiveTab] = useState('overview');
 
   const updateRequest = (request: NonNullable<OpenCollection['request']>) => {
-    dispatch(updateCollectionSettings({ ...collection, request }));
+    onCollectionChange({ ...collection, request });
   };
 
   const handleHeadersChange = (rows: KeyValueRow[]) => {
@@ -49,10 +47,6 @@ const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection }) =
   const handleAuthChange = (authType: string) => {
     const auth = authType === 'none' ? undefined : authType === 'inherit' ? 'inherit' : { type: authType };
     updateRequest({ ...collection.request, auth: auth as NonNullable<OpenCollection['request']>['auth'] });
-  };
-
-  const handleCollectionChange = (updatedCollection: OpenCollection) => {
-    dispatch(updateCollectionSettings(updatedCollection));
   };
 
   const headers = collection.request?.headers ?? [];
@@ -107,7 +101,7 @@ const CollectionSettings: React.FC<CollectionSettingsProps> = ({ collection }) =
         <AuthTab
           auth={collection.request?.auth}
           onAuthChange={handleAuthChange}
-          onItemChange={handleCollectionChange}
+          onItemChange={onCollectionChange}
           item={collection}
           description="Configures authentication for the entire collection. This applies to all requests using the Inherit option in the Auth tab."
           showInherit={false}

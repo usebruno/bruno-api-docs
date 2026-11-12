@@ -26,7 +26,7 @@ interface ResponsePaneProps {
   requestStartedAt: number | null;
   onCancelRequest: () => void;
   orientation: 'vertical' | 'horizontal';
-  itemUuid: string;
+  onClearResponse: () => void;
 }
 
 const ResponsePane: React.FC<ResponsePaneProps> = ({
@@ -35,7 +35,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({
   requestStartedAt,
   onCancelRequest,
   orientation,
-  itemUuid
+  onClearResponse
 }) => {
   const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundResponseTab', 'response');
   const [dismissedScriptErrorKeys, setDismissedScriptErrorKeys] = useState<string[]>([]);
@@ -198,7 +198,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({
       </div>
       <ResponseActions
         orientation={orientation}
-        itemUuid={itemUuid}
+        onClear={onClearResponse}
         response={response}
         selectedFormat={selectedFormat}
         showPreview={showPreview}
@@ -213,7 +213,7 @@ const ResponsePane: React.FC<ResponsePaneProps> = ({
           <ResponseActions
             renderActionButtonsOnly
             orientation={orientation}
-            itemUuid={itemUuid}
+            onClear={onClearResponse}
             response={response}
             selectedFormat={selectedFormat}
             showPreview={showPreview}

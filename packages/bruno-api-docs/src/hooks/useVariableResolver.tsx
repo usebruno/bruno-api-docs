@@ -3,9 +3,8 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import { useAppDispatch } from '@/store/hooks';
 import { useDocument } from '@/document/document';
-import { setPlaygroundVariable } from '@/store/slices/playground';
+import type { VariableWrite } from '@/session/workspace';
 import { promptVariableName } from '@/utils/promptVariables';
 import { useEnvState } from '@/session/session';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
@@ -221,14 +220,16 @@ export const ShowVarsOverrideProvider: React.FC<{
   return <VariableResolverContext.Provider value={value}>{children}</VariableResolverContext.Provider>;
 };
 
+const noWrite = () => {};
+
 export const ItemVariableResolverProvider: React.FC<{
   collection: OpenCollection | null;
   ancestry: Item[];
   item: Item | null;
   writable?: boolean;
+  onWriteVariable?: (write: VariableWrite) => void;
   children: React.ReactNode;
-}> = ({ collection, ancestry, item, writable = false, children }) => {
-  const dispatch = useAppDispatch();
+}> = ({ collection, ancestry, item, writable = false, onWriteVariable = noWrite, children }) => {
   const { activeEnvName, showVars } = useEnvState();
 
   // Both the docs pages and the playground mount this provider; only the
@@ -248,21 +249,21 @@ export const ItemVariableResolverProvider: React.FC<{
     (name: string, value: string) => {
       const { name: varName, scope } = resolver.lookup(name);
       if (scope === 'environment' || scope === '$secrets') {
-        if (activeEnvName) dispatch(setPlaygroundVariable({ scope, name: varName, value, envName: activeEnvName }));
+        if (activeEnvName) onWriteVariable({ scope, name: varName, value, envName: activeEnvName });
       } else if (scope === 'collection') {
-        dispatch(setPlaygroundVariable({ scope, name: varName, value }));
+        onWriteVariable({ scope, name: varName, value });
       } else if (scope === 'request') {
         const itemUuid = getItemUuid(item);
-        if (itemUuid) dispatch(setPlaygroundVariable({ scope, name: varName, value, itemUuid }));
+        if (itemUuid) onWriteVariable({ scope, name: varName, value, itemUuid });
       } else if (scope === 'folder') {
         const owner = [...ancestry].reverse().find((folder) =>
           folderVariables(folder).some((v) => v.name === varName && !v.disabled)
         );
         const itemUuid = getItemUuid(owner);
-        if (itemUuid) dispatch(setPlaygroundVariable({ scope, name: varName, value, itemUuid }));
+        if (itemUuid) onWriteVariable({ scope, name: varName, value, itemUuid });
       }
     },
-    [resolver, dispatch, activeEnvName, item, ancestry]
+    [resolver, onWriteVariable, activeEnvName, item, ancestry]
   );
 
   const interpolateWithSecrets = useCallback(

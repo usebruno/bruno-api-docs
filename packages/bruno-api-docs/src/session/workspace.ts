@@ -241,3 +241,16 @@ export const finishRequest = (state: WorkspaceState, uuid: string): WorkspaceSta
   uuid in state.requestStartedAt ? { ...state, requestStartedAt: without(state.requestStartedAt, uuid) } : state;
 
 export const clearAllRequests = (state: WorkspaceState): WorkspaceState => ({ ...state, requestStartedAt: {} });
+
+export interface WorkspaceActions {
+  replaceCollection: (collection: OpenCollection) => void;
+  updateRequestItem: (payload: { uuid: string; item: HttpRequest }) => void;
+  updateScriptFile: (payload: { uuid: string; script: string }) => void;
+  updateFolder: (payload: { uuid: string; folder: Folder }) => void;
+  setVariable: (write: VariableWrite) => void;
+  applyScriptVariableChanges: (changes: ScriptVariableChanges) => void;
+  setResponse: (payload: { uuid: string; response: any }) => void;
+  clearResponse: (uuid: string) => void;
+  startRequest: (payload: { uuid: string; startedAt: number }) => void;
+  finishRequest: (uuid: string) => void;
+}

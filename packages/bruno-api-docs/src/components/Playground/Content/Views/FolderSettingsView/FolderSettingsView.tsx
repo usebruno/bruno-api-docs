@@ -10,8 +10,6 @@ import HeadersTab from '../Common/HeadersTab/HeadersTab';
 import VariablesTab from '../Common/VariablesTab/VariablesTab';
 import AuthTab from '../Common/AuthTab/AuthTab';
 import ScriptsTab from '../Common/ScriptsTab/ScriptsTab';
-import { useAppDispatch } from '@/store/hooks';
-import { updateFolderInCollection } from '@/store/slices/playground';
 import {
   countEnabled,
   getItemDocs,
@@ -32,7 +30,6 @@ interface FolderSettingsProps {
 }
 
 const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onFolderChange }) => {
-  const dispatch = useAppDispatch();
   const [activeTab, setActiveTab] = useState('overview');
 
   // The folder's own auth may itself be `inherit` — resolve the nearest configured parent so the
@@ -44,15 +41,7 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     return getInheritedAuthSummary(collection, ancestry, folder);
   }, [folder, collection]);
 
-  // Every edit rebuilds the folder and persists it the same way: push it into the collection (by the
-  // hydrated uuid) and bubble it up. Centralised so the handlers below stay one-liners.
-  const commitFolder = (updatedFolder: Folder) => {
-    const uuid = (updatedFolder as Folder & { uuid?: string }).uuid;
-    if (uuid) {
-      dispatch(updateFolderInCollection({ uuid, folder: updatedFolder }));
-    }
-    onFolderChange(updatedFolder);
-  };
+  const commitFolder = onFolderChange;
 
   const postResponseVars = actionsToPostResponseVars(folder.request?.actions);
 

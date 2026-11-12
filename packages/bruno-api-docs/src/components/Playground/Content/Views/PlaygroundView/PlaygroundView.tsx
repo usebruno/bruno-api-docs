@@ -9,18 +9,9 @@ import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import QueryBar from './QueryBar/QueryBar';
 import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { usePromptVariables } from './usePromptVariables';
 import { PromptVariablesModal } from '@/components/PromptVariablesModal/PromptVariablesModal';
-import {
-  updatePlaygroundItem,
-  setPlaygroundResponse,
-  selectPlaygroundResponse,
-  setPlaygroundRequestStarted,
-  clearPlaygroundRequestStarted,
-  selectPlaygroundRequestStartedAt,
-  applyScriptVariableChanges
-} from '@/store/slices/playground';
+import type { WorkspaceActions } from '@/session/workspace';
 import { getItemName, isPlaygroundUnsupported, getRequestAuth, getRequestHeaders } from '@/utils/schemaHelpers';
 import { getInheritedAuthSummary, resolveInheritedAuth, getInheritedHeaders } from '@/utils/request';
 import UnsupportedRequest from '@/components/UnsupportedRequest/UnsupportedRequest';
@@ -35,15 +26,23 @@ interface PlaygroundViewProps {
   collection: OpenCollectionCollection;
   selectedEnvironment?: string;
   orientation?: 'horizontal' | 'vertical';
+  response: any;
+  requestStartedAt: number | null;
+  actions: WorkspaceActions;
 }
 
-const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collection, selectedEnvironment = '', orientation = 'horizontal' }) => {
-  const dispatch = useAppDispatch();
+const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
+  item,
+  collection,
+  selectedEnvironment = '',
+  orientation = 'horizontal',
+  response,
+  requestStartedAt,
+  actions
+}) => {
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const itemName = getItemName(editableItem) || 'Untitled Request';
   const itemUuid = (item as any).uuid;
-  const response = useAppSelector((state) => selectPlaygroundResponse(state, itemUuid));
-  const requestStartedAt = useAppSelector((state) => selectPlaygroundRequestStartedAt(state, itemUuid));
   const isLoading = requestStartedAt !== null;
   const promptVariablesController = usePromptVariables();
   const { collect: collectPromptVariables } = promptVariablesController;
@@ -85,9 +84,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
   }, [item]);
 
   // Save changes to Redux with debouncing.
-  const scheduleSave = useDebouncedSave((save: { uuid: string; item: HttpRequest }) => {
-    dispatch(updatePlaygroundItem(save));
-  });
+  const scheduleSave = useDebouncedSave(actions.updateRequestItem);
 
   const handleItemChange = useCallback((updatedItem: HttpRequest) => {
     setEditableItem(updatedItem);
@@ -120,7 +117,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
 
       controller = new AbortController();
       playgroundRuns.start(uuid, controller);
-      dispatch(setPlaygroundRequestStarted({ uuid, startedAt: Date.now() }));
+      actions.startRequest({ uuid, startedAt: Date.now() });
       const result = await requestRunner.runRequest({
         item: editableItem,
         collection,
@@ -137,32 +134,32 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
         if (!serverReplied || superseded) return;
       }
 
-      dispatch(setPlaygroundResponse({ uuid, response: result }));
+      actions.setResponse({ uuid, response: result });
 
       if (result.environmentVariables || result.collectionVariables) {
-        dispatch(applyScriptVariableChanges({
+        actions.applyScriptVariableChanges({
           environmentVariables: result.environmentVariables,
           collectionVariables: result.collectionVariables
-        }));
+        });
       }
     } catch (error) {
-      dispatch(setPlaygroundResponse({
+      actions.setResponse({
         uuid,
         response: {
           error: error instanceof Error ? error.message : 'Unknown error occurred'
         }
-      }));
+      });
     } finally {
       if (playgroundRuns.finish(uuid, controller)) {
-        dispatch(clearPlaygroundRequestStarted(uuid));
+        actions.finishRequest(uuid);
       }
     }
-  }, [collection, editableItem, selectedEnvironment, itemUuid, dispatch, collectPromptVariables]);
+  }, [collection, editableItem, selectedEnvironment, itemUuid, actions, collectPromptVariables]);
 
   const handleCancelRequest = useCallback(() => {
     if (!playgroundRuns.cancel(itemUuid)) return;
-    dispatch(clearPlaygroundRequestStarted(itemUuid));
-  }, [dispatch, itemUuid]);
+    actions.finishRequest(itemUuid);
+  }, [actions, itemUuid]);
 
   return (
     <ItemVariableResolverProvider
@@ -170,6 +167,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
       ancestry={ancestry}
       item={editableItem as unknown as Item}
       writable
+      onWriteVariable={actions.setVariable}
     >
       <div className="request-runner-container h-full flex flex-col px-5" style={{ backgroundColor: 'var(--bg-primary)' }}>
         {promptVariablesController.pending && (
@@ -219,7 +217,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
               requestStartedAt={requestStartedAt}
               onCancelRequest={handleCancelRequest}
               orientation={orientation}
-              itemUuid={itemUuid}
+              onClearResponse={() => actions.clearResponse(itemUuid)}
             />
           </div>
         </div>

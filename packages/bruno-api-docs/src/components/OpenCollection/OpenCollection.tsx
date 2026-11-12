@@ -6,9 +6,8 @@ import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import AppShell from '../AppShell/AppShell';
 import { parseYaml } from '@/utils/yamlUtils';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { useAppDispatch } from '@/store/hooks';
 import {
-  selectDocsCollection,
   setDocsCollection,
   clearDocsCollection
 } from '@/store/slices/docs';
@@ -43,7 +42,10 @@ interface LoadState {
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
   sourceText: string | null;
+  document: OpenCollectionCollection | null;
 }
+
+const IDLE: LoadState = { status: 'idle', error: null, sourceText: null, document: null };
 
 interface ResolvedCollection {
   collection: OpenCollectionCollection;
@@ -83,28 +85,9 @@ export interface OpenCollectionProps {
   hidePlayground?: boolean;
 }
 
-const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
-  collection,
-  logo,
-  gitCollectionUrl,
-  theme,
-  hideThemeSwitcher,
-  hidePlayground = false
-}) => {
+const useCollectionLoader = (collection: OpenCollectionProps['collection']): LoadState => {
   const dispatch = useAppDispatch();
-  const session = useSession();
-  const docsCollection = useAppSelector(selectDocsCollection);
-  const [loadState] = useState(() => createObservable<LoadState>({ initial: { status: 'idle', error: null, sourceText: null } }));
-  const { status: collectionStatus, error: collectionError, sourceText } = useObservable(loadState);
-
-  const lastThemeProp = useRef(theme);
-  const lastHideThemeSwitcherProp = useRef(hideThemeSwitcher);
-  useEffect(() => {
-    if (isEqual(theme, lastThemeProp.current) && hideThemeSwitcher === lastHideThemeSwitcherProp.current) return;
-    lastThemeProp.current = theme;
-    lastHideThemeSwitcherProp.current = hideThemeSwitcher;
-    session.theme.set(getApiDocsTheme(theme, hideThemeSwitcher));
-  }, [theme, session, hideThemeSwitcher]);
+  const [loadState] = useState(() => createObservable<LoadState>({ initial: IDLE }));
 
   useEffect(() => {
     let isActive = true;
@@ -118,20 +101,20 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
         const hydrated = hydrateWithUUIDs(resolved);
         dispatch(setDocsCollection(hydrated));
         dispatch(setPlaygroundCollection(hydrated));
-        loadState.set({ status: 'succeeded', error: null, sourceText });
+        loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrated });
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
         dispatch(clearDocsCollection());
         dispatch(clearPlaygroundCollection());
-        loadState.set({ status: 'failed', error: message, sourceText: null });
+        loadState.set({ ...IDLE, status: 'failed', error: message });
       }
     };
 
     if (collection == null) {
       dispatch(clearDocsCollection());
       dispatch(clearPlaygroundCollection());
-      loadState.set({ status: 'idle', error: null, sourceText: null });
+      loadState.set(IDLE);
       return () => { isActive = false; };
     }
 
@@ -141,13 +124,37 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
       dispatch(setDocsCollection(hydrated));
       dispatch(setPlaygroundCollection(hydrated));
-      loadState.set({ status: 'succeeded', error: null, sourceText: null });
+      loadState.set({ status: 'succeeded', error: null, sourceText: null, document: hydrated });
     }
 
     return () => { isActive = false; };
   }, [collection, dispatch, loadState]);
 
-  const isInitialLoad = collectionStatus === 'idle' && !docsCollection;
+  return useObservable(loadState);
+};
+
+const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
+  collection,
+  logo,
+  gitCollectionUrl,
+  theme,
+  hideThemeSwitcher,
+  hidePlayground = false
+}) => {
+  const session = useSession();
+
+  const lastThemeProp = useRef(theme);
+  const lastHideThemeSwitcherProp = useRef(hideThemeSwitcher);
+  useEffect(() => {
+    if (isEqual(theme, lastThemeProp.current) && hideThemeSwitcher === lastHideThemeSwitcherProp.current) return;
+    lastThemeProp.current = theme;
+    lastHideThemeSwitcherProp.current = hideThemeSwitcher;
+    session.theme.set(getApiDocsTheme(theme, hideThemeSwitcher));
+  }, [theme, session, hideThemeSwitcher]);
+
+  const { status: collectionStatus, error: collectionError, sourceText, document } = useCollectionLoader(collection);
+
+  const isInitialLoad = collectionStatus === 'idle' && !document;
   const isLoading = collectionStatus === 'loading' || isInitialLoad;
 
   if (isLoading) {

@@ -35,5 +35,12 @@ export default defineConfig({
       env: { PORT: new URL(appConfig.testServerURL).port },
       reuseExistingServer: !process.env.CI,
     },
+    {
+      command: 'npm run build:lib-bundle && npm run build:standalone && node e2e/server/test-server.mjs',
+      url: `${appConfig.standaloneURL}/health`,
+      env: { PORT: new URL(appConfig.standaloneURL).port },
+      reuseExistingServer: !process.env.CI,
+      timeout: 300_000,
+    },
   ],
 });

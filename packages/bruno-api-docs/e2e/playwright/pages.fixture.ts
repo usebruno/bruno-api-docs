@@ -7,6 +7,7 @@ import { ScriptPage } from '../pages/script.page';
 import { FolderPage } from '../pages/folder.page';
 import { GrpcRequestPage } from '../pages/grpc-request.page';
 import { WebsocketRequestPage } from '../pages/websocket-request.page';
+import { StandalonePage } from '../pages/standalone.page';
 import { SidebarComponent } from '../components/sidebar.component';
 import { TooltipComponent } from '../components/tooltip.component';
 import { PlaygroundComponent } from '../components/playground.component';
@@ -29,6 +30,7 @@ type Fixtures = {
   folderPage: FolderPage;
   grpcRequestPage: GrpcRequestPage;
   websocketRequestPage: WebsocketRequestPage;
+  standalonePage: StandalonePage;
   sidebar: SidebarComponent;
   tooltip: TooltipComponent;
   playground: PlaygroundComponent;
@@ -67,6 +69,9 @@ export const test = base.extend<Fixtures>({
   },
   websocketRequestPage: async ({ page }, use) => {
     await use(new WebsocketRequestPage(page));
+  },
+  standalonePage: async ({ page }, use) => {
+    await use(new StandalonePage(page));
   },
   sidebar: async ({ page }, use) => {
     await use(new SidebarComponent(page));

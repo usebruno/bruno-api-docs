@@ -47,6 +47,10 @@ playground sends to it.
 | `/echo` | 200, JSON of the method, path, query, headers and body it received |
 | `/cors/deny` | 200 with no CORS headers, so the browser blocks it |
 | `/health` | 200 `ok`, used by Playwright to know the server is up |
+| `/<file>` | a file from `server/standalone/` or the built `dist-standalone/` |
+
+A second copy runs on `standaloneURL` (port 3901) after building the standalone bundle, so
+`tests/standalone/` can load `index.html` and drive `Bruno.apiDocs` like an embedding site.
 
 Every route except `/cors/deny` answers CORS and preflight requests. Use it for what the
 playground sends over the network; keep `page.route` stubs for tests about how a response

@@ -1,6 +1,14 @@
 import type { Locator } from '@playwright/test';
 import { BasePage } from './base.page';
 import { appConfig } from '../config/app.config';
+import { OverviewPage } from './overview.page';
+import { RequestPage } from './request.page';
+import { PageHeaderComponent } from '../components/layout/page-header.component';
+import { EnvSwitcherComponent } from '../components/layout/env-switcher.component';
+import { ThemeToggleComponent } from '../components/layout/theme-toggle.component';
+import { SidebarComponent } from '../components/sidebar.component';
+import { PlaygroundComponent } from '../components/playground.component';
+import { ResponsePaneComponent } from '../components/playground/response-pane.component';
 
 export type StandaloneTarget = 'first' | 'second';
 
@@ -26,6 +34,20 @@ export class StandalonePage extends BasePage {
 
   target(id: StandaloneTarget): Locator {
     return this.page.getByTestId(`standalone-${id}`);
+  }
+
+  instance(id: StandaloneTarget) {
+    const scope = this.target(id);
+    return {
+      header: new PageHeaderComponent(this.page, scope),
+      envSwitcher: new EnvSwitcherComponent(this.page, 'env-switcher', scope),
+      themeToggle: new ThemeToggleComponent(this.page, scope),
+      sidebar: new SidebarComponent(this.page, scope),
+      overviewPage: new OverviewPage(this.page, scope),
+      requestPage: new RequestPage(this.page, scope),
+      playground: new PlaygroundComponent(this.page, scope),
+      responsePane: new ResponsePaneComponent(this.page, scope)
+    };
   }
 
   url(hash = ''): string {

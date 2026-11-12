@@ -45,7 +45,7 @@ export class PlaygroundComponent extends BaseComponent {
   });
 
   readonly gear = this.page.getByTestId('playground-env-settings');
-  readonly view = this.page.getByTestId('playground-view');
+  readonly view = this.root.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
   readonly closeButton = this.page.getByTestId('playground-close');

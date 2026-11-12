@@ -10,14 +10,14 @@ import { VariableCardComponent } from '../components/variable-card/variable-card
 
 export class RequestPage extends BasePage {
   readonly root = this.page.getByTestId('request-page');
-  readonly title = this.page.getByTestId('request-title');
+  readonly title = this.scope.getByTestId('request-title');
   readonly description = this.page.getByTestId('request-description');
   readonly tagChips = this.page.getByTestId('request-tags-chip');
   readonly inheritedTagChips = this.page.getByTestId('request-tags-inherited-chip');
 
   readonly sidebar = new SidebarComponent(this.page);
   readonly breadcrumb = new BreadcrumbComponent(this.page, 'request-breadcrumb');
-  readonly urlBar = new RequestUrlBarComponent(this.page);
+  readonly urlBar = new RequestUrlBarComponent(this.page, this.scope);
   readonly codeSnippet = new CodeSnippetComponent(this.page);
 
   readonly examples = new ExamplesComponent(this.page);

@@ -4,6 +4,7 @@ import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 import { createObservable } from '@/observable/observable';
+import { deepFreeze } from '@/utils/deepFreeze';
 import { isFolder } from '@/utils/schemaHelpers';
 import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
@@ -253,7 +254,8 @@ export interface WorkspaceActions {
 }
 
 export const createWorkspace = () => {
-  const state = createObservable<WorkspaceState>({ initial: EMPTY_WORKSPACE });
+  const observable = createObservable<WorkspaceState>({ initial: EMPTY_WORKSPACE });
+  const state = { ...observable, set: (next: WorkspaceState) => observable.set(deepFreeze(next)) };
   const apply = <P>(update: (current: WorkspaceState, payload: P) => WorkspaceState) =>
     (payload: P) => state.set(update(state.get(), payload));
   const actions: WorkspaceActions = {

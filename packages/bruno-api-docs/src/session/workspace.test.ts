@@ -470,3 +470,15 @@ describe('createWorkspace', () => {
     expect(b.get().responses).toEqual({});
   });
 });
+
+describe('workspace freezing', () => {
+  it('freezes the seeded collection, including objects the host still holds, as the redux store did', () => {
+    const hostInfo = { name: 'Host' };
+    const workspace = createWorkspace();
+    workspace.seed({ info: hostInfo, items: [] } as unknown as Parameters<typeof workspace.seed>[0]);
+    expect(Object.isFrozen(hostInfo)).toBe(true);
+    expect(() => {
+      (hostInfo as { name: string }).name = 'changed';
+    }).toThrow(TypeError);
+  });
+});

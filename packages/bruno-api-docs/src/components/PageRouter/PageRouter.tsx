@@ -75,7 +75,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
       case 'overview':
         return <Overview collection={collection} />;
       case 'environments':
-        return <Environments {...pageProps} />;
+        return <Environments {...pageProps} collection={workingCollection ?? collection} />;
       case 'folder':
         return item ? (
           <ItemVariableResolverProvider ancestry={variableAncestry} item={variableItem as Item}>

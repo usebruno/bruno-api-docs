@@ -28,6 +28,22 @@ test.describe('Docs variables resolve against the playground working copy', () =
     await expect(requestPage.variableCard.value).toHaveText('https://from-env-view.example.com');
   });
 
+  test('an environment value edited in the Environments view shows on the docs Environments page', async ({
+    playground,
+    envEditor,
+    environmentsPage
+  }) => {
+    await playground.openEnvironments();
+    await envEditor.selectEnvironment('Dev');
+    await expect(playground.keyValueTable.nameInputs.first()).toHaveValue('host');
+    await playground.keyValueTable.valueInputs.first().fill('https://from-env-view.example.com');
+    await playground.close();
+
+    await environmentsPage.sidebar.environments.click();
+    await environmentsPage.tab('Dev').click();
+    await expect(environmentsPage.table.valueOf('host').first()).toHaveText('https://from-env-view.example.com');
+  });
+
   test('a variable edited from the playground hover card shows on the docs page', async ({
     playground,
     requestPage

@@ -79,4 +79,10 @@ describe('createThemeMode', () => {
     theme.toggle();
     expect(theme.get().mode).toBe('dark');
   });
+
+  it('toggle follows what the button showed, even if the system changed since it rendered', () => {
+    const theme = createThemeMode({ variant: 'default', mode: 'system' });
+    theme.toggle(true);
+    expect(theme.get().mode).toBe('light');
+  });
 });

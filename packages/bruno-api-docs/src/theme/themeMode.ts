@@ -18,9 +18,8 @@ export const createThemeMode = (initial: ThemeState = { variant: DEFAULT_THEME_V
     set: (next: ThemeState) => {
       if (!isEqual(next, state.get())) state.set(next);
     },
-    toggle: () => {
-      const current = state.get();
-      const next: ThemeState = { ...current, mode: isDarkMode(current.mode) ? 'light' : 'dark' };
+    toggle: (fromDark: boolean = isDarkMode(state.get().mode)) => {
+      const next: ThemeState = { ...state.get(), mode: fromDark ? 'light' : 'dark' };
       state.set(next);
       saved.write(next);
     }

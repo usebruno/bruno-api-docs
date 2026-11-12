@@ -53,7 +53,7 @@ const ThemeToggle: React.FC<{ testId?: string }> = ({ testId = 'theme-toggle' })
         type="button"
         data-testid={testId}
         aria-label={label}
-        onClick={theme.toggle}
+        onClick={() => theme.toggle(isDark)}
       >
         {isDark ? <SunIcon /> : <MoonIcon />}
       </Button>

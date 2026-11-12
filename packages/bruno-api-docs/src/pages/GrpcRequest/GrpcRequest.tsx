@@ -192,7 +192,7 @@ export const GrpcRequest: React.FC<GrpcRequestProps> = ({
         </div>
 
         {descHtml && (
-          <ViewMore className="grpc-request-description" collapsedHeight="4.5rem" testId="grpc-request-description">
+          <ViewMore className="grpc-request-description" testId="grpc-request-description">
             <MarkdownContent
               className="markdown-documentation"
               navHeadings

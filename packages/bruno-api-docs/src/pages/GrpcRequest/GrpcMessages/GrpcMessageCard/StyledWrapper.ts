@@ -64,6 +64,11 @@ export const StyledWrapper = styled.div`
   .grpc-message-detail-body {
     border-top: 1px solid var(--border-color);
   }
+  .grpc-message-detail-body .code-content-numbered:has(.code-line-numbers > span:only-child) .code-line-numbers,
+  .grpc-message-detail-body .code-content-numbered:has(.code-line-numbers > span:only-child) .code-content--numbered {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .grpc-message-detail {

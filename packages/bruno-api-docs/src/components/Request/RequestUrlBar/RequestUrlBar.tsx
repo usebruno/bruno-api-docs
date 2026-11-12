@@ -3,7 +3,6 @@ import cx from '@/utils/cx';
 import { MethodBadge } from '../../MethodBadge/MethodBadge';
 import { VariableText } from '../../VariableText/VariableText';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { SendIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
@@ -35,9 +34,9 @@ export const RequestUrlBar: React.FC<RequestUrlBarProps> = ({
       <span className="request-url-bar-method" data-testid="request-method">
         <MethodBadge method={method} capitalizeMethod={capitalizeMethod} />
       </span>
-      <TruncatedText className="request-url-bar-url" testId="request-url" text={url}>
+      <span className="request-url-bar-url" data-testid="request-url">
         <VariableText value={url} />
-      </TruncatedText>
+      </span>
       <span className="request-url-bar-actions">
         <CopyButton text={resolve(url)} label="Copy URL" />
         {onTry && (

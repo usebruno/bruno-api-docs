@@ -20,12 +20,17 @@ export const StyledWrapper = styled.div`
     top: 8px;
     right: 8px;
     z-index: 1;
-    opacity: 0;
+    opacity: 1;
     transition: opacity 0.15s ease;
   }
-  &:hover .code-copy-floating,
-  .code-copy-floating:focus-visible {
-    opacity: 1;
+  @media (hover: hover) {
+    .code-copy-floating {
+      opacity: 0;
+    }
+    &:hover .code-copy-floating,
+    .code-copy-floating:focus-visible {
+      opacity: 1;
+    }
   }
 
   .code-content {

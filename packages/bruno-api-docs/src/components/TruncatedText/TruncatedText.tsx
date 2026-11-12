@@ -22,7 +22,13 @@ export const TruncatedText: React.FC<TruncatedTextProps> = ({
   className,
   testId = 'truncated-text'
 }) => (
-  <Tooltip content={text} disabled={!text.trim()} shouldOpen={isOverflowing} touch={touch} multiline={multilineTooltip}>
+  <Tooltip
+    content={text}
+    disabled={!text.trim()}
+    shouldOpen={multilineTooltip && text.includes('\n') ? undefined : isOverflowing}
+    touch={touch}
+    multiline={multilineTooltip}
+  >
     <StyledWrapper className={['oc-truncate', className].filter(Boolean).join(' ')} data-testid={testId}>
       {children ?? text}
     </StyledWrapper>

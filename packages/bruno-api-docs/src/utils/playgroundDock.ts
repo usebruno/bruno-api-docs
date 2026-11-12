@@ -1,7 +1,7 @@
 export type DockMode = 'inline' | 'bottom' | 'modal';
 
 export const DOCK_MODES: DockMode[] = ['inline', 'bottom', 'modal'];
-export const DEFAULT_DOCK: DockMode = 'bottom';
+export const DEFAULT_DOCK: DockMode = 'modal';
 
 export const PARAM_OPEN = 'pg';
 export const PARAM_DOCK = 'dock';

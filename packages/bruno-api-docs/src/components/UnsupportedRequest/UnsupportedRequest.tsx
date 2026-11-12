@@ -91,7 +91,7 @@ export const UnsupportedRequest: React.FC<UnsupportedRequestProps> = ({
       <RequestUrlBar className={showRequestDocs ? 'mt-3' : 'mt-2'} method={shortName} url={getRequestUrl(item)} />
 
       {showRequestDocs && (
-        <ViewMore collapsedHeight="4.5rem" testId="overview-markdown-view-more">
+        <ViewMore testId="overview-markdown-view-more">
           <MarkdownContent
             className="overview-markdown markdown-documentation mt-5"
             testId="overview-markdown-documentation"

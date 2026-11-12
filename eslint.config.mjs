@@ -136,6 +136,44 @@ export default [
     }
   },
   {
+    files: ['packages/bruno-shared/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: [
+            '@usebruno/api-docs', '@usebruno/api-docs/*', '**/bruno-api-docs/**',
+            '@usebruno/api-playground', '@usebruno/api-playground/*', '**/bruno-api-playground/**'
+          ],
+          message: 'Shared imports nothing from docs or playground.'
+        }]
+      }]
+    }
+  },
+  {
+    files: ['packages/bruno-api-playground/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@usebruno/api-docs', '@usebruno/api-docs/*', '**/bruno-api-docs/**'],
+          message: 'Playground imports only from shared, never from docs.'
+        }]
+      }]
+    }
+  },
+  {
+    // The one value import is the dynamic import() in Playground/load.ts, which this rule does not cover.
+    files: ['packages/bruno-api-docs/{src,e2e}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@usebruno/api-playground', '@usebruno/api-playground/*', '**/bruno-api-playground/**'],
+          allowTypeImports: true,
+          message: 'Docs loads the playground lazily through Playground/load.ts; import only its types.'
+        }]
+      }]
+    }
+  },
+  {
     // Tests and dev scripts legitimately log.
     files: [
       'packages/**/*.{test,spec}.{ts,tsx}',

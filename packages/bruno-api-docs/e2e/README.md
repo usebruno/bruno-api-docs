@@ -47,14 +47,16 @@ playground sends to it.
 | `/echo` | 200, JSON of the method, path, query, headers and body it received |
 | `/cors/deny` | 200 with no CORS headers, so the browser blocks it |
 | `/health` | 200 `ok`, used by Playwright to know the server is up |
-| `/<file>` | a file from `server/standalone/` or the built `dist-standalone/` |
+| `/<file>`, `/api-docs/<file>` | a file from `server/standalone/` or the built `dist-standalone/`, with no CORS headers |
 
 `tests/standalone/` runs under its own config (`npm run test:e2e:standalone`), which builds the
 standalone bundle and starts a second copy on `standaloneURL` (port 3901), so specs can load
 `index.html` and drive `Bruno.apiDocs` like an embedding site. The main config skips that folder,
 so other specs don't pay for the build. `npm run test:e2e` runs both.
 
-Every route except `/cors/deny` answers CORS and preflight requests. Use it for what the
+Every route except `/cors/deny` and the static files answers CORS and preflight requests. The
+`exported-*.html` pages are what Bruno's "Generate Documentation" writes, served from 3901 with the
+bundle loaded from 3900, so a bundle that stops working as a cross-origin classic script fails. Use it for what the
 playground sends over the network; keep `page.route` stubs for tests about how a response
 is shown. Run it on its own with `node e2e/server/test-server.mjs`.
 

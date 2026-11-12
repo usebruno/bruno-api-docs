@@ -63,8 +63,8 @@ const handle = async (req, res) => {
     return send(res, 200, { ...cors, 'Content-Type': 'application/json' }, JSON.stringify(echoed));
   }
 
-  const file = await readStatic(url.pathname.slice(1));
-  if (file) return send(res, 200, { ...cors, 'Content-Type': contentTypes[extname(url.pathname)] ?? 'text/plain' }, file);
+  const file = await readStatic(url.pathname.replace(/^\/(api-docs\/)?/, ''));
+  if (file) return send(res, 200, { 'Content-Type': contentTypes[extname(url.pathname)] ?? 'text/plain' }, file);
 
   send(res, 404, { ...cors, 'Content-Type': 'text/plain' }, 'not found');
 };

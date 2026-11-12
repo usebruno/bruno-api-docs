@@ -11,12 +11,8 @@ import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { getByTestId } from '@/test-utils/dom';
-import {
-  setPlaygroundCollection,
-  setSelectedItemId,
-  setSelectedExampleIndex,
-  setViewMode
-} from '@/store/slices/playground';
+import { setPlaygroundCollection } from '@/store/slices/playground';
+import { createSession } from '@/session/session';
 import { getItemUuid } from '@/utils/itemUtils';
 
 const collection = {
@@ -37,13 +33,12 @@ describe('PlaygroundBody example view', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(collection));
     const requestUuid = getItemUuid((store.getState().playground.hydratedCollection as any).items[0])!;
-    store.dispatch(setSelectedItemId(requestUuid));
-    store.dispatch(setSelectedExampleIndex(0));
-    store.dispatch(setViewMode('example'));
+    const session = createSession();
+    session.playground.selection.set({ uuid: requestUuid, exampleIndex: 0 });
 
     const ref = React.createRef<HTMLDivElement>();
     const root = useRenderToDom(
-      <TestProviders store={store}>
+      <TestProviders store={store} session={session}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}
@@ -71,12 +66,12 @@ describe('PlaygroundBody script file view', () => {
     const store = createOpenCollectionStore();
     store.dispatch(setPlaygroundCollection(withScript));
     const scriptUuid = getItemUuid((store.getState().playground.hydratedCollection as any).items[0])!;
-    store.dispatch(setSelectedItemId(scriptUuid));
-    store.dispatch(setViewMode('playground'));
+    const session = createSession();
+    session.playground.selection.set({ uuid: scriptUuid, exampleIndex: null });
 
     const ref = React.createRef<HTMLDivElement>();
     const root = useRenderToDom(
-      <TestProviders store={store}>
+      <TestProviders store={store} session={session}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}

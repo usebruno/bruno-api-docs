@@ -4,17 +4,12 @@ import type { Folder, ScriptFile } from '@opencollection/types/collection/item';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectHydratedCollection,
-  selectViewMode,
-  selectSelectedItemId,
-  selectSelectedExampleIndex,
   selectResponsePaneOrientation,
-  setViewMode,
-  setSelectedItemId,
-  setSelectedExampleIndex,
   toggleFolderCollapse,
   expandFolders
 } from '@/store/slices/playground';
-import { useEnvState } from '@/session/session';
+import { useEnvState, useSession } from '@/session/session';
+import { useObservable } from '@/observable/observable';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { useNavModel } from '@/routing/hooks';
 import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
@@ -35,6 +30,7 @@ import {
   PLAYGROUND_COLLECTION_SLUG
 } from './resolvePlaygroundTarget';
 import { StyledWrapper } from './StyledWrapper';
+import { selectedUuid, type PlaygroundSelection } from '@/session/playground';
 
 const ORIENTATION_BREAKPOINT = 640;
 
@@ -66,9 +62,10 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const model = useNavModel();
   const { setRequestSlug, setRequestExample } = usePlaygroundUrlState();
   const collection = useAppSelector(selectHydratedCollection);
-  const viewMode = useAppSelector(selectViewMode);
-  const selectedItemId = useAppSelector(selectSelectedItemId);
-  const selectedExampleIndex = useAppSelector(selectSelectedExampleIndex);
+  const { selection: selectionState } = useSession().playground;
+  const selection = useObservable(selectionState);
+  const selectedItemId = selectedUuid(selection);
+  const selectedExampleIndex = typeof selection === 'object' && selection ? selection.exampleIndex : null;
   const { activeEnvName } = useEnvState();
   const orientationOverride = useAppSelector(selectResponsePaneOrientation);
 
@@ -78,6 +75,12 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     () => findItemByUuid(collection?.items, selectedItemId),
     [collection, selectedItemId]
   );
+
+  const viewMode = typeof selection === 'string'
+    ? selection
+    : selectedExampleIndex != null
+      ? 'example'
+      : selectedItem && isFolder(selectedItem) ? 'folder-settings' : 'playground';
 
   const activeSlug = viewMode !== 'example' && selectedItemId ? uuidToSlug.get(selectedItemId) ?? '' : '';
 
@@ -118,11 +121,9 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     const exampleIndex
       = exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
     appliedSlugRef.current = key;
-    dispatch(setSelectedItemId(target.uuid));
-    dispatch(setSelectedExampleIndex(exampleIndex));
-    dispatch(setViewMode(exampleIndex != null ? 'example' : target.view));
+    selectionState.set(target.uuid ? { uuid: target.uuid, exampleIndex } : target.view as PlaygroundSelection);
     if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
-  }, [requestSlug, exampleSlug, model, collection, dispatch, appliedSlugRef]);
+  }, [requestSlug, exampleSlug, model, collection, dispatch, appliedSlugRef, selectionState]);
 
   const closeSidebarIfInline = () => {
     if (dock === 'inline') onCloseSidebar();
@@ -131,9 +132,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const handleNavigate = (slug: string) => {
     const target = resolvePlaygroundTarget(slug, model);
     if (!target || !target.uuid) return;
-    dispatch(setSelectedItemId(target.uuid));
-    dispatch(setSelectedExampleIndex(null));
-    dispatch(setViewMode(target.view));
+    selectionState.set({ uuid: target.uuid, exampleIndex: null });
     if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
     appliedSlugRef.current = slug;
     setRequestSlug(slug);
@@ -144,9 +143,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const handleExpandFolder = (uuid: string) => dispatch(expandFolders([uuid]));
 
   const handleExampleClick = (requestUuid: string, index: number) => {
-    dispatch(setSelectedItemId(requestUuid));
-    dispatch(setSelectedExampleIndex(index));
-    dispatch(setViewMode('example'));
+    selectionState.set({ uuid: requestUuid, exampleIndex: index });
     const slug = uuidToSlug.get(requestUuid);
     if (slug) {
       const item = findItemByUuid(collection?.items, requestUuid);
@@ -159,18 +156,14 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   };
 
   const openEnvironments = () => {
-    dispatch(setViewMode('environments'));
-    dispatch(setSelectedItemId(null));
-    dispatch(setSelectedExampleIndex(null));
+    selectionState.set('environments');
     appliedSlugRef.current = PLAYGROUND_ENVIRONMENTS_SLUG;
     setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG); // persist so a reload restores it
     closeSidebarIfInline();
   };
 
   const openCollection = () => {
-    dispatch(setViewMode('collection-settings'));
-    dispatch(setSelectedItemId(null));
-    dispatch(setSelectedExampleIndex(null));
+    selectionState.set('collection-settings');
     appliedSlugRef.current = PLAYGROUND_COLLECTION_SLUG;
     setRequestSlug(PLAYGROUND_COLLECTION_SLUG); // persist so a reload restores it
     closeSidebarIfInline();

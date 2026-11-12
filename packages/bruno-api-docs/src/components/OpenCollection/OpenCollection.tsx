@@ -84,6 +84,7 @@ export interface OpenCollectionProps {
 
 const useCollectionLoader = (collection: OpenCollectionProps['collection']): LoadState => {
   const dispatch = useAppDispatch();
+  const { selection } = useSession().playground;
   const [loadState] = useState(() => createObservable<LoadState>({ initial: IDLE }));
 
   useEffect(() => {
@@ -102,12 +103,14 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
         dispatch(clearPlaygroundCollection());
+        selection.set(null);
         loadState.set({ ...IDLE, status: 'failed', error: message });
       }
     };
 
     if (collection == null) {
       dispatch(clearPlaygroundCollection());
+      selection.set(null);
       loadState.set(IDLE);
       return () => { isActive = false; };
     }
@@ -121,7 +124,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
     }
 
     return () => { isActive = false; };
-  }, [collection, dispatch, loadState]);
+  }, [collection, dispatch, loadState, selection]);
 
   return useObservable(loadState);
 };

@@ -1,15 +1,14 @@
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
-import { createOpenCollectionStore } from '@/store/store';
+import { TestProviders } from '@/test-utils/providers';
 import type { RunRequestResponse } from '@/runner';
 import ResponsePane from './ResponsePane';
 
 const previousResponse = { status: 200, headers: {}, data: { ok: true } } as unknown as RunRequestResponse;
 
 const pane = (isLoading: boolean, response?: RunRequestResponse) => (
-  <Provider store={createOpenCollectionStore()}>
+  <TestProviders>
     <ResponsePane
       response={response as RunRequestResponse}
       isLoading={isLoading}
@@ -18,7 +17,7 @@ const pane = (isLoading: boolean, response?: RunRequestResponse) => (
       orientation="horizontal"
       itemUuid="item-1"
     />
-  </Provider>
+  </TestProviders>
 );
 
 describe('Playground ResponsePane: loading state', () => {

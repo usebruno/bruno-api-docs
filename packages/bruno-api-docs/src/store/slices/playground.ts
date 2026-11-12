@@ -12,16 +12,11 @@ import { reconcileScriptVariables } from '@/utils/scriptVariables';
 import type { Variables } from '@/runner/utils/variable-interpolator';
 import type { ResponseBodyFormat } from '@/constants';
 
-export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
-
 export interface PlaygroundState {
   hydratedCollection: OpenCollectionCollection | null;
   responses: Record<string, any>; // Store responses by item UUID
   requestStartedAt: Record<string, number>; // When each running request started, by item UUID
   // UI State
-  viewMode: ViewMode;
-  selectedItemId: string | null;
-  selectedExampleIndex: number | null;
   responsePaneOrientation: 'horizontal' | 'vertical' | null;
   selectedResponseFormat: Record<string, ResponseBodyFormat>;
   showResponsePreview: Record<string, boolean>;
@@ -32,9 +27,6 @@ const initialState: PlaygroundState = {
   responses: {},
   requestStartedAt: {},
   // UI State
-  viewMode: 'playground',
-  selectedItemId: null,
-  selectedExampleIndex: null,
   responsePaneOrientation: null,
   selectedResponseFormat: {},
   showResponsePreview: {}
@@ -140,8 +132,6 @@ const playgroundSlice = createSlice({
       state.hydratedCollection = null;
       state.responses = {};
       state.requestStartedAt = {};
-      state.selectedItemId = null;
-      state.selectedExampleIndex = null;
     },
     updatePlaygroundItem: (state: PlaygroundState, action: PayloadAction<{ uuid: string; item: HttpRequest }>) => {
       const { uuid, item } = action.payload;
@@ -176,15 +166,6 @@ const playgroundSlice = createSlice({
       state.requestStartedAt = {};
     },
     // UI State Actions
-    setViewMode: (state: PlaygroundState, action: PayloadAction<ViewMode>) => {
-      state.viewMode = action.payload;
-    },
-    setSelectedItemId: (state: PlaygroundState, action: PayloadAction<string | null>) => {
-      state.selectedItemId = action.payload;
-    },
-    setSelectedExampleIndex: (state: PlaygroundState, action: PayloadAction<number | null>) => {
-      state.selectedExampleIndex = action.payload;
-    },
     setResponsePaneOrientation: (state: PlaygroundState, action: PayloadAction<'horizontal' | 'vertical' | null>) => {
       state.responsePaneOrientation = action.payload;
     },
@@ -294,7 +275,7 @@ const playgroundSlice = createSlice({
       apply(state.hydratedCollection);
     },
     setResponseFormat: (state: PlaygroundState, action: PayloadAction<{
-      uuid: PlaygroundState['selectedItemId'];
+      uuid: string | null;
       format: ResponseBodyFormat;
     }>) => {
       if (action.payload.uuid != null)
@@ -303,7 +284,7 @@ const playgroundSlice = createSlice({
     setShowResponsePreview: (
       state: PlaygroundState,
       action: PayloadAction<{
-        uuid: PlaygroundState['selectedItemId'];
+        uuid: string | null;
         showResponsePreview: boolean;
       }>
     ) => {
@@ -324,9 +305,6 @@ export const {
   setPlaygroundRequestStarted,
   clearPlaygroundRequestStarted,
   clearAllPlaygroundRequestsStarted,
-  setViewMode,
-  setSelectedItemId,
-  setSelectedExampleIndex,
   setResponsePaneOrientation,
   toggleFolderCollapse,
   expandFolders,
@@ -345,15 +323,12 @@ export const selectPlaygroundResponses = (state: RootState) => state.playground.
 export const selectPlaygroundResponse = (state: RootState, uuid: string) => state.playground.responses[uuid];
 export const selectPlaygroundRequestStartedAt = (state: RootState, uuid: string): number | null =>
   state.playground.requestStartedAt[uuid] ?? null;
-export const selectViewMode = (state: RootState) => state.playground.viewMode;
-export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
-export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;
 export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;
 export const selectResponseFormat
-  = (uuid: PlaygroundState['selectedItemId']) =>
+  = (uuid: string | null) =>
     (state: RootState) => uuid ? state.playground.selectedResponseFormat[uuid] : null;
 export const selectShowResponsePreview
-  = (uuid: PlaygroundState['selectedItemId']) =>
+  = (uuid: string | null) =>
     (state: RootState) => uuid ? state.playground.showResponsePreview[uuid] : null;
 
 export default playgroundSlice.reducer;

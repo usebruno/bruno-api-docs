@@ -3,10 +3,12 @@ import { useObservable } from '@/observable/observable';
 import { createThemeMode } from '@/theme/themeMode';
 import type { ThemeState } from '@/theme/types';
 import { createEnv, type EnvState } from './env';
+import { createPlayground } from './playground';
 
 export const createSession = ({ theme }: { theme?: ThemeState } = {}) => ({
   theme: createThemeMode(theme),
-  env: createEnv()
+  env: createEnv(),
+  playground: createPlayground()
 });
 
 export type Session = ReturnType<typeof createSession>;

@@ -7,15 +7,17 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   selectResponseFormat,
   selectShowResponsePreview,
-  selectSelectedItemId,
   setResponseFormat,
   setShowResponsePreview
 } from '@/store/slices/playground';
+import { useSession } from '@/session/session';
+import { useObservable } from '@/observable/observable';
+import { selectedUuid } from '@/session/playground';
 
 export function useResponseFormatter(
   response: RunRequestResponse
 ) {
-  const selectedItemId = useAppSelector(selectSelectedItemId);
+  const selectedItemId = useObservable(useSession().playground.selection, selectedUuid);
   const selectedResponseFormat = useAppSelector(selectResponseFormat(selectedItemId));
   const showResponsePreview = useAppSelector(selectShowResponsePreview(selectedItemId));
   const dispatch = useAppDispatch();

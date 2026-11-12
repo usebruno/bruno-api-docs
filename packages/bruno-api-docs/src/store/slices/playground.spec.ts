@@ -1,13 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import reducer, {
+import {
   setPlaygroundCollection,
   updatePlaygroundItem,
   updatePlaygroundScriptFile,
   selectHydratedCollection,
-  setViewMode,
-  setSelectedItemId,
-  setSelectedExampleIndex,
-  clearPlaygroundCollection,
   toggleFolderCollapse,
   expandFolders,
   setPlaygroundVariable,
@@ -34,36 +30,6 @@ const envVariables = (store: ReturnType<typeof createOpenCollectionStore>) =>
 const envExternalSecrets = (store: ReturnType<typeof createOpenCollectionStore>) =>
   (selectHydratedCollection(store.getState())!.config!.environments![0].externalSecrets!
     .variables as unknown) as { name: string; value?: string; secretName?: string }[];
-
-describe('playground edits', () => {
-  it('keeps an environment edit through the navigation the playground dispatches on open', () => {
-    const store = createOpenCollectionStore();
-    store.dispatch(setPlaygroundCollection(makeCollection()));
-    store.dispatch(setPlaygroundVariable({ scope: 'environment', envName: 'Dev', name: 'a', value: 'edited' }));
-
-    // what PlaygroundBody dispatches when the playground opens on a view
-    store.dispatch(setSelectedItemId(null));
-    store.dispatch(setSelectedExampleIndex(null));
-    store.dispatch(setViewMode('environments'));
-    store.dispatch(setViewMode('playground'));
-
-    expect(envVariables(store)).toEqual([{ name: 'a', value: 'edited' }, { name: 'b', value: '2' }]);
-  });
-});
-
-describe('playground example view', () => {
-  it('accepts the example view mode', () => {
-    const s = reducer(undefined, setViewMode('example'));
-    expect(s.viewMode).toBe('example');
-  });
-
-  it('sets and resets the selected example index', () => {
-    const set = reducer(undefined, setSelectedExampleIndex(3));
-    expect(set.selectedExampleIndex).toBe(3);
-    const cleared = reducer(set, clearPlaygroundCollection());
-    expect(cleared.selectedExampleIndex).toBeNull();
-  });
-});
 
 describe('updatePlaygroundItem', () => {
   const withRequest = () =>

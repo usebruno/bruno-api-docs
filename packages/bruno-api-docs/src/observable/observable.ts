@@ -36,8 +36,13 @@ export const createObservable = <T>({ initial, persist, onChange }: {
   };
 };
 
-export const useObservable = <T>(observable: Observable<T>): T =>
-  useSyncExternalStore(observable.subscribe, observable.get, observable.get);
+export const useObservable = <T, S = T>(
+  observable: Pick<Observable<T>, 'get' | 'subscribe'>,
+  select: (value: T) => S = (value) => value as unknown as S
+): S => {
+  const get = () => select(observable.get());
+  return useSyncExternalStore(observable.subscribe, get, get);
+};
 
 export const persisted = <T>(storage: 'localStorage' | 'sessionStorage', key: string): Persisted<T> => ({
   read: () => {

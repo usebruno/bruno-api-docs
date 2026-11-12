@@ -17,10 +17,10 @@ export const useFolderCollapse = (document: OpenCollection | null): FolderCollap
   const collapsed = state.document === document ? state.collapsed : null;
 
   const update = useCallback(
-    (apply: (collapsed: Map<string, boolean>) => void) =>
+    (apply: (collapsed: Map<string, boolean>) => boolean | void) =>
       setState((prev) => {
         const next = new Map(prev.document === document ? prev.collapsed : undefined);
-        apply(next);
+        if (apply(next) === false && prev.document === document) return prev;
         return { document, collapsed: next };
       }),
     [document]
@@ -28,13 +28,20 @@ export const useFolderCollapse = (document: OpenCollection | null): FolderCollap
 
   const toggle = useCallback(
     (uuid: string) =>
-      update((next) => next.set(uuid, !(next.get(uuid) ?? collapsedByDefault(findItemByUuid(document?.items, uuid))))),
+      update((next) => {
+        next.set(uuid, !(next.get(uuid) ?? collapsedByDefault(findItemByUuid(document?.items, uuid))));
+      }),
     [update, document]
   );
 
   const expand = useCallback(
-    (uuids: string[]) => update((next) => uuids.forEach((uuid) => next.set(uuid, false))),
-    [update]
+    (uuids: string[]) =>
+      update((next) => {
+        const open = (uuid: string) => !(next.get(uuid) ?? collapsedByDefault(findItemByUuid(document?.items, uuid)));
+        if (uuids.every(open)) return false;
+        uuids.forEach((uuid) => next.set(uuid, false));
+      }),
+    [update, document]
   );
 
   return useMemo(

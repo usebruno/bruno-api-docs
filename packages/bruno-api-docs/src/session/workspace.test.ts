@@ -472,7 +472,7 @@ describe('createWorkspace', () => {
 });
 
 describe('workspace freezing', () => {
-  it('freezes the seeded collection, including objects the host still holds, as the redux store did', () => {
+  it('freezes the seeded collection, including objects the host still holds', () => {
     const hostInfo = { name: 'Host' };
     const workspace = createWorkspace();
     workspace.seed({ info: hostInfo, items: [] } as unknown as Parameters<typeof workspace.seed>[0]);

@@ -80,10 +80,8 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
 
   useEffect(() => {
     setEditableItem(item);
-    // Don't clear response anymore - it's preserved in Redux by UUID
   }, [item]);
 
-  // Save changes to Redux with debouncing.
   const scheduleSave = useDebouncedSave(actions.updateRequestItem);
 
   const handleItemChange = useCallback((updatedItem: HttpRequest) => {

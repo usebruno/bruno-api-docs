@@ -15,7 +15,7 @@ const pane = (isLoading: boolean, response?: RunRequestResponse) => (
       requestStartedAt={isLoading ? Date.now() : null}
       onCancelRequest={() => {}}
       orientation="horizontal"
-      itemUuid="item-1"
+      onClearResponse={() => {}}
     />
   </TestProviders>
 );

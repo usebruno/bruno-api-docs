@@ -162,7 +162,7 @@ export const useVariableResolver = (): VariableResolver => {
 /**
  * Passthrough resolver: show-vars off, identity resolve, empty lookup. It is the
  * context default so a `VariableText` rendered without a provider (unit tests,
- * isolated previews) simply shows raw `{{var}}` tokens (no store required) and a
+ * isolated previews) simply shows raw `{{var}}` tokens (no session required) and a
  * hover card degrades to an "undefined" scope rather than throwing.
  */
 const PASSTHROUGH_RESOLVER: VariableResolver = {
@@ -193,10 +193,10 @@ const VariableResolverContext = createContext<VariableResolver>(PASSTHROUGH_RESO
 export const useResolvedVariables = (): VariableResolver => useContext(VariableResolverContext);
 
 /**
- * Provides the store-backed resolver (collection + active environment) to
+ * Provides the working-copy resolver (collection + active environment) to
  * descendants. Mounted once at the app shell so every `{{var}}` render site
  * resolves against one active environment without each site subscribing to the
- * store itself.
+ * session itself.
  */
 export const VariableResolverProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <VariableResolverContext.Provider value={useVariableResolver()}>{children}</VariableResolverContext.Provider>

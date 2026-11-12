@@ -21,7 +21,7 @@ const render = (props: Partial<React.ComponentProps<typeof ResponseActions>> = {
       <TestProviders>
         <ResponseActions
           orientation="horizontal"
-          itemUuid="item-1"
+          onClear={() => {}}
           response={baseResponse}
           selectedFormat="json"
           showPreview={false}

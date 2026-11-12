@@ -38,7 +38,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId
     = environments.find((environment) => environment.name === activeEnvName)
       ?? (hasEnvironments ? environments[0] : undefined);
 
-  // Sync the store when the stored name isn't the resolved one (null or stale),
+  // Sync the session env when the stored name isn't the resolved one (null or stale),
   // so the persisted selection self-heals to a real environment.
   useEffect(() => {
     if (activeEnv && activeEnv.name !== activeEnvName) {

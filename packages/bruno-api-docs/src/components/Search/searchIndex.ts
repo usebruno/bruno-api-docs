@@ -1,9 +1,9 @@
 import Fuse from 'fuse.js';
 import type { IFuseOptions, FuseResultMatch } from 'fuse.js';
 import type { Folder } from '@opencollection/types/collection/item';
-import type { NavEntry } from '@/routing/types';
-import { getRequestUrl, getItemTags } from '@/utils/schemaHelpers';
-import { getItemUuid } from '@/utils/itemUtils';
+import type { NavEntry } from '@usebruno/api-shared/routing/types';
+import { getRequestUrl, getItemTags } from '@usebruno/api-shared/utils/schemaHelpers';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 import { countFolderRequests } from '@/utils/folder';
 
 interface SearchRecordBase {

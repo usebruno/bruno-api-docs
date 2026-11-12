@@ -1,8 +1,8 @@
 import React from 'react';
-import { CaretIcon } from '@/assets/icons';
-import MenuDropdown from '@/ui/MenuDropdown';
+import { CaretIcon } from '@usebruno/api-shared/assets/icons';
+import MenuDropdown from '@usebruno/api-shared/ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
-import type { SelectOption } from '@/types/selectOption';
+import type { SelectOption } from '@usebruno/api-shared/types/selectOption';
 
 interface SelectProps {
   value: string;

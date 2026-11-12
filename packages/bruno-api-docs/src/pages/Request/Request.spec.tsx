@@ -4,10 +4,10 @@ import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item } from '@opencollection/types/collection/item';
 import { MemoryRouter } from 'react-router-dom';
-import type { RequestItem } from '@/utils/schemaHelpers';
+import type { RequestItem } from '@usebruno/api-shared/utils/schemaHelpers';
 import { Request } from './Request';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 
 const collection: OpenCollection = {
   info: { name: 'Auth API', version: '1.0.0' },

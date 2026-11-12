@@ -2,18 +2,18 @@ import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 
-vi.mock('@/ui/CodeEditor/CodeEditor', () => ({
+vi.mock('@usebruno/api-shared/ui/CodeEditor/CodeEditor', () => ({
   default: ({ value }: { value: string }) => <pre data-testid="code-editor">{value}</pre>
 }));
 
 import type { OpenCollection } from '@opencollection/types';
 import PlaygroundBody from './PlaygroundBody';
-import { TestProviders } from '@/test-utils/providers';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId } from '@/test-utils/dom';
-import { hydrateWithUUIDs } from '@/utils/fileUtils';
-import { createSession } from '@/session/session';
-import { getItemUuid } from '@/utils/itemUtils';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId } from '@usebruno/api-shared/test-utils/dom';
+import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
+import { createSession } from '@usebruno/api-shared/session/session';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 
 const collection = {
   info: { name: 'C' },

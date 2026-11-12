@@ -1,7 +1,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import { createSession, SessionProvider, type Session } from '@/session/session';
+import { createSession, SessionProvider, type Session } from '@usebruno/api-shared/session/session';
 import ShowVarsToggle from './ShowVarsToggle';
 
 const render = (configure?: (s: Session) => void): string => {

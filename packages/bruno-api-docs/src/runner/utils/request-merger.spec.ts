@@ -3,7 +3,7 @@ import { mergeAuth, mergeHeaders } from './request-merger';
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder, Item } from '@opencollection/types/collection/item';
-import { getRequestAuth, getHttpHeaders } from '@/utils/schemaHelpers';
+import { getRequestAuth, getHttpHeaders } from '@usebruno/api-shared/utils/schemaHelpers';
 
 // A playground request keeps its auth on the http protocol block; folders/collection nest
 // it under `request.auth`. Auth is either a concrete object, the string 'inherit', or

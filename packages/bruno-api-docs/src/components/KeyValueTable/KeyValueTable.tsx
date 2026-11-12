@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useResolvedVariables } from '@/hooks/useVariableResolver';
+import { useResolvedVariables } from '@usebruno/api-shared/hooks/useVariableResolver';
 import { isBlankRow, useEditableRows } from '@/hooks/useEditableRows';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
-import { WarningIcon } from '@/assets/icons';
+import { Tooltip } from '@usebruno/api-shared/ui/Tooltip/Tooltip';
+import { WarningIcon } from '@usebruno/api-shared/assets/icons';
 import HighlightedInput from '../HighlightedInput/HighlightedInput';
-import { SecretValue } from '@/ui/SecretValue/SecretValue';
-import Checkbox from '@/ui/Checkbox/Checkbox';
+import { SecretValue } from '@usebruno/api-shared/ui/SecretValue/SecretValue';
+import Checkbox from '@usebruno/api-shared/ui/Checkbox/Checkbox';
 import { StyledWrapper } from './StyledWrapper';
 
 // Smallest a column may be dragged to; the neighbour it trades width with is held to the same floor.

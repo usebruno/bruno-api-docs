@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Environment } from '@opencollection/types/config/environments';
-import type { AssertionResultsResponse, JsonValue } from '@/types/run';
-import type { InternalHttpRequest } from '@/utils/schemaHelpers';
+import type { AssertionResultsResponse, JsonValue } from '@usebruno/api-shared/types/run';
+import type { InternalHttpRequest } from '@usebruno/api-shared/utils/schemaHelpers';
 import { RequestRunner } from './index';
-import { parseYaml } from '@/utils/yamlUtils';
+import { parseYaml } from '@usebruno/api-shared/utils/yamlUtils';
 
 const okFetch = () => vi.fn().mockResolvedValue({
   ok: true,

@@ -4,7 +4,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RequestRunner } from './index';
-import { parseYaml } from '@/utils/yamlUtils';
+import { parseYaml } from '@usebruno/api-shared/utils/yamlUtils';
 
 const collectionYaml = `
 opencollection: "1.0.0"

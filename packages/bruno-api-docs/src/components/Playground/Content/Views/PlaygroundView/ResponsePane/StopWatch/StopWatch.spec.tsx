@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId } from '@usebruno/api-shared/test-utils/dom';
 import { StopWatch } from './StopWatch';
 
 const NOW = 1_700_000_000_000;

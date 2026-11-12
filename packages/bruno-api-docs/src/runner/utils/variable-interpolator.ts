@@ -1,10 +1,10 @@
 import type { HttpRequest, HttpRequestHeader, HttpRequestParam } from '@opencollection/types/requests/http';
 import { isPlainObject } from 'lodash-es';
-import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@/utils/schemaHelpers';
-import { templateVariableGlobalRegex } from '@/utils/common';
-import { isPromptVariableToken } from '@/utils/promptVariables';
-import { mockDataFunctions } from '@/utils/fakerFunctions';
-import type { JsonValue, Variables } from '@/types/run';
+import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@usebruno/api-shared/utils/schemaHelpers';
+import { templateVariableGlobalRegex } from '@usebruno/api-shared/utils/common';
+import { isPromptVariableToken } from '@usebruno/api-shared/utils/promptVariables';
+import { mockDataFunctions } from '@usebruno/api-shared/utils/fakerFunctions';
+import type { JsonValue, Variables } from '@usebruno/api-shared/types/run';
 
 // for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.
 const MOCK_PATTERN = /\{\{\$(\w+)\}\}/g;

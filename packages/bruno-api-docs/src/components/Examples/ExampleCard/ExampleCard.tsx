@@ -1,23 +1,23 @@
 import React, { Fragment, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '../../MethodBadge/MethodBadge';
+import { MethodBadge } from '@usebruno/api-shared/components/MethodBadge/MethodBadge';
 import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
-import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { PropertyTable } from '../../PropertyTable/PropertyTable';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import { VariableText } from '../../VariableText/VariableText';
-import { useResolvedVariables } from '@/hooks/useVariableResolver';
-import { Description } from '../../Description/Description';
-import { RequestParams } from '../../Request/RequestParams/RequestParams';
-import { RequestBody } from '../../Request/RequestBody/RequestBody';
-import { Code } from '../../Code/Code';
-import { resolvePathAndQueryParams } from '@/utils/pathParams';
-import { getBodyView, getDescription, headerRows } from '@/utils/request';
-import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '@/utils/exampleResponse';
-import { statusToneColor } from '@/utils/common';
+import { CopyButton } from '@usebruno/api-shared/ui/CopyButton/CopyButton';
+import { PropertyTable } from '@usebruno/api-shared/components/PropertyTable/PropertyTable';
+import { TruncatedText } from '@usebruno/api-shared/components/TruncatedText/TruncatedText';
+import { VariableText } from '@usebruno/api-shared/components/VariableText/VariableText';
+import { useResolvedVariables } from '@usebruno/api-shared/hooks/useVariableResolver';
+import { Description } from '@usebruno/api-shared/components/Description/Description';
+import { RequestParams } from '@usebruno/api-shared/components/Request/RequestParams/RequestParams';
+import { RequestBody } from '@usebruno/api-shared/components/Request/RequestBody/RequestBody';
+import { Code } from '@usebruno/api-shared/components/Code/Code';
+import { resolvePathAndQueryParams } from '@usebruno/api-shared/utils/pathParams';
+import { getBodyView, getDescription, headerRows } from '@usebruno/api-shared/utils/request';
+import { computeBodySize, formatBytes, responseBodyLanguage, responseBodyContentType, statusCodePhrase } from '@usebruno/api-shared/utils/exampleResponse';
+import { statusToneColor } from '@usebruno/api-shared/utils/common';
 import { StyledWrapper } from './StyledWrapper';
 import type { Auth } from '@opencollection/types/common/auth';
-import { CodeSnippetTabs } from '../../CodeSnippetTabs/CodeSnippetTabs';
+import { CodeSnippetTabs } from '@usebruno/api-shared/components/CodeSnippetTabs/CodeSnippetTabs';
 
 interface ExampleCardProps {
   example: HttpRequestExample;

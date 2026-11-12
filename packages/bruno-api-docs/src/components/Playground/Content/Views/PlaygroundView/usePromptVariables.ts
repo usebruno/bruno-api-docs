@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { buildPromptVariableMap } from '@/utils/promptVariables';
-import type { Variables } from '@/types/run';
+import { buildPromptVariableMap } from '@usebruno/api-shared/utils/promptVariables';
+import type { Variables } from '@usebruno/api-shared/types/run';
 
 interface PendingPrompt {
   names: string[];

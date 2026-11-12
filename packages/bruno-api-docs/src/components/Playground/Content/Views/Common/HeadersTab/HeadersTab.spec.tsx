@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { query } from '@usebruno/api-shared/test-utils/dom';
 import { HeadersTab } from './HeadersTab';
 
 const noop = () => {};

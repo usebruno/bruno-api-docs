@@ -1,6 +1,6 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
 import { usePromptVariables, type PromptVariablesController } from './usePromptVariables';
 
 const probeTree = () => {

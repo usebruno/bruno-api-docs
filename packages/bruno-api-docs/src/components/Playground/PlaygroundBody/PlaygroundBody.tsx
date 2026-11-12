@@ -1,11 +1,11 @@
 import React, { useCallback, useRef } from 'react';
 import type { Item } from '@opencollection/types/collection/item';
-import { isFolderCollapsed } from '@/session/playgroundFolders';
-import { useSession } from '@/session/session';
-import { useObservable } from '@/observable/observable';
-import { useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
+import { isFolderCollapsed } from '@usebruno/api-shared/session/playgroundFolders';
+import { useSession } from '@usebruno/api-shared/session/session';
+import { useObservable } from '@usebruno/api-shared/observable/observable';
+import { useElementWidth, useResizableSidebar, useClickOutside } from '@usebruno/api-shared/hooks';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
-import type { DockMode } from '@/utils/playgroundDock';
+import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { usePlaygroundSelection } from './usePlaygroundSelection';
 import PlaygroundViewSwitch from './PlaygroundViewSwitch';
 import { StyledWrapper } from './StyledWrapper';

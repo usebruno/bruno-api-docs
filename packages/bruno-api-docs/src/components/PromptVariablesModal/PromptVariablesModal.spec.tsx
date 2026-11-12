@@ -1,10 +1,10 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, query, queryByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, query, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 import { PromptVariablesModal } from './PromptVariablesModal';
 
-vi.mock('@/ui/Portal/Portal', () => ({
+vi.mock('@usebruno/api-shared/ui/Portal/Portal', () => ({
   Portal: ({ children }: { children: React.ReactNode }) => children
 }));
 

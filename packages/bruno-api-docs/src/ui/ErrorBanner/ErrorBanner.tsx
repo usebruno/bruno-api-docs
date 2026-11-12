@@ -1,5 +1,5 @@
 import React from 'react';
-import { CloseIcon } from '@/assets/icons';
+import { CloseIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface ErrorBannerProps {

@@ -1,14 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import SidebarNavLink from './SidebarNavLink/SidebarNavLink';
-import SidebarTree from './SidebarTree/SidebarTree';
-import { CubeIcon, GlobeIcon } from '@/assets/icons';
+import SidebarNavLink from '@usebruno/api-shared/components/Docs/Sidebar/SidebarNavLink/SidebarNavLink';
+import SidebarTree from '@usebruno/api-shared/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import { CubeIcon, GlobeIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 import { computeAutoReveal } from './autoReveal';
-import { useDocument, useNavModel } from '@/document/document';
+import { useDocument, useNavModel } from '@usebruno/api-shared/document/document';
 import { normalizeSlug, resolveSlug } from '@/routing/resolve';
-import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@/routing/navModel';
-import { useDocsNavigate, useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
+import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@usebruno/api-shared/routing/navModel';
+import { useAutoHideScrollbar, useIsMobileDevice } from '@usebruno/api-shared/hooks';
+import { useDocsNavigate } from '@/hooks/useDocsNavigate';
 import { useActiveExample } from './hooks/useActiveExample';
 import type { FolderCollapse } from './hooks/useFolderCollapse';
 

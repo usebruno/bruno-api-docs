@@ -10,11 +10,17 @@
     "./ui/MenuDropdown": "./src/ui/MenuDropdown/index.ts",
     "./assets/icons": "./src/assets/icons/index.ts",
     "./*": {
-      "types": ["./src/*.ts", "./src/*.tsx"],
+      "types": [
+        "./src/*.ts",
+        "./src/*.tsx"
+      ],
       "default": "./src/*"
     }
   },
   "scripts": {
-    "typecheck": "tsc --noEmit"
+    "gen:theme": "vite-node scripts/generate-theme-css.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run"
   }
 }

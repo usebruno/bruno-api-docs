@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { Modal } from '@/ui/Modal/Modal';
+import { Modal } from '@usebruno/api-shared/ui/Modal/Modal';
 
 export const StyledWrapper = styled(Modal)`
   .modal-dialog {

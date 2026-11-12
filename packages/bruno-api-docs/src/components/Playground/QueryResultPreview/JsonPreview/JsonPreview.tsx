@@ -1,8 +1,8 @@
 import React, { Suspense, lazy } from 'react';
 import ErrorBanner from '@/ui/ErrorBanner/ErrorBanner';
-import { useThemeState } from '@/session/session';
+import { useThemeState } from '@usebruno/api-shared/session/session';
 import { StyledWrapper } from './StyledWrapper';
-import { isDarkMode } from '@/utils/theme';
+import { isDarkMode } from '@usebruno/api-shared/utils/theme';
 
 // react-json-view touches browser globals at module load, so a static import
 // crashes under SSR (the server bundle and the renderToStaticMarkup unit tests).

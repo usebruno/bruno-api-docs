@@ -1,6 +1,6 @@
 import type { Assertion } from '@opencollection/types/common/assertions';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import { descriptionText, resolveDescription } from './description';
+import { descriptionText, resolveDescription } from '@usebruno/api-shared/utils/description';
 
 export const DEFAULT_ASSERTION_OPERATOR = 'eq';
 

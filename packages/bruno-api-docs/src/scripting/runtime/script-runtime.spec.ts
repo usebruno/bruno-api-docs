@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import type { InternalHttpRequest } from '@/utils/schemaHelpers';
+import type { InternalHttpRequest } from '@usebruno/api-shared/utils/schemaHelpers';
 import type { JsonValue } from '@/scripting/utils/bruno-response';
 import ScriptRuntime from './script-runtime';
 

@@ -5,15 +5,15 @@ import ClearResponse from './ClearResponse/ClearResponse';
 import DownloadResponse from './DownloadResponse/DownloadResponse';
 import ChangeLayout from './ChangeLayout/ChangeLayout';
 import { StyledWrapper } from './StyledWrapper';
-import MenuDropdown from '@/ui/MenuDropdown';
-import type { MenuDropdownItem } from '@/ui/MenuDropdown';
+import MenuDropdown from '@usebruno/api-shared/ui/MenuDropdown';
+import type { MenuDropdownItem } from '@usebruno/api-shared/ui/MenuDropdown';
 import ActionIconButton from './ActionIconButton/ActionIconButton';
-import type { RunRequestResponse } from '@/types/run';
-import type { ResponseBodyFormat } from '@/constants';
-import { useSession } from '@/session/session';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
+import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
+import { useSession } from '@usebruno/api-shared/session/session';
 import { downloadResponse } from '@/utils/downloadResponse';
-import useCopy from '@/hooks/useCopy';
-import { formatResponse } from '@/utils/dataFormatter';
+import useCopy from '@usebruno/api-shared/hooks/useCopy';
+import { formatResponse } from '@usebruno/api-shared/utils/dataFormatter';
 
 interface ResponseActionsProps {
   orientation: 'vertical' | 'horizontal';

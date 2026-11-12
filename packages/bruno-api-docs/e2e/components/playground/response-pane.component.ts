@@ -1,7 +1,7 @@
 import { expect, type FrameLocator, type Locator, type Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
-import type { ResponseBodyFormat } from '../../../src/utils/response';
+import type { ResponseBodyFormat } from '../../../../bruno-shared/src/utils/response';
 
 /**
  * The response pane's format controls and body editor. The format selector is a MenuDropdown

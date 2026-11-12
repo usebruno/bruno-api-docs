@@ -3,7 +3,7 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
 import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { useMarkdownRenderer } from './useMarkdownRenderer';
+import { useMarkdownRenderer } from '@usebruno/api-shared/hooks/useMarkdownRenderer';
 import {
   getItemName,
   getRequestUrl,
@@ -16,7 +16,7 @@ import {
   getInheritedTags,
   isWebSocketRequest,
   type SupportedRequestItem
-} from '@/utils/schemaHelpers';
+} from '@usebruno/api-shared/utils/schemaHelpers';
 import {
   resolveInheritedAuth,
   getPreRequestVars,
@@ -25,13 +25,13 @@ import {
   buildScriptChain,
   getScriptFlow,
   headerRows
-} from '@/utils/request';
+} from '@usebruno/api-shared/utils/request';
 import { collectAssertions } from '@/utils/assertions';
-import { collectTests, collectRawTestScripts } from '@/utils/fileUtils';
-import { resolvePathAndQueryParams } from '@/utils/pathParams';
-import { buildBreadcrumbSegments } from '@/utils/common';
+import { collectTests, collectRawTestScripts } from '@usebruno/api-shared/utils/fileUtils';
+import { resolvePathAndQueryParams } from '@usebruno/api-shared/utils/pathParams';
+import { buildBreadcrumbSegments } from '@usebruno/api-shared/utils/common';
 import { inheritedHeaderRows } from '@/components/PropertyTable/inheritedRows';
-import type { BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
+import type { BreadcrumbSegment } from '@usebruno/api-shared/ui/Breadcrumb/Breadcrumb';
 
 export const useRequestPageData = (
   collection: OpenCollection | null | undefined,

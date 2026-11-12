@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
 import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
-import { useDockResize } from '@/hooks/useDockResize';
-import { areaFor, readStoredNumber, writeStored } from '@/hooks/useStorage';
-import type { DockMode } from '@/utils/playgroundDock';
+import { useDockResize } from '@usebruno/api-shared/hooks/useDockResize';
+import { areaFor, readStoredNumber, writeStored } from '@usebruno/api-shared/hooks/useStorage';
+import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 const WIDTH_STORAGE_KEY = 'oc-docs:playgroundInlineWidth';

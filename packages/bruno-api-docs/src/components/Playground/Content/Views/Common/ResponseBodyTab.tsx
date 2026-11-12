@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
-import type { ResponseBodyFormat } from '@/constants';
-import { FORMAT_TO_MONACO } from '@/constants';
-import { formatResponse } from '@/utils/dataFormatter';
-import type { RunRequestResponse } from '@/types/run';
+import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
+import { FORMAT_TO_MONACO } from '@usebruno/api-shared/constants';
+import { formatResponse } from '@usebruno/api-shared/utils/dataFormatter';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 import LargeResponseWarning from './LargeResponseWarning/LargeResponseWarning';
 import useLargeResponse from '@/hooks/useLargeResponseWarning';
 import QueryResultPreview from '@/components/Playground/QueryResultPreview/QueryResultPreview';
 
-const CodeEditor = React.lazy(() => import('@/ui/CodeEditor/CodeEditor'));
+const CodeEditor = React.lazy(() => import('@usebruno/api-shared/ui/CodeEditor/CodeEditor'));
 
 interface ResponseBodyTabProps {
   response: RunRequestResponse;

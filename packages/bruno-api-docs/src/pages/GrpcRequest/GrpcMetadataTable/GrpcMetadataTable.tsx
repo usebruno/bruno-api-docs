@@ -1,10 +1,10 @@
 import React from 'react';
 import type { GrpcMetadata } from '@opencollection/types/requests/grpc';
-import { getDescription } from '@/utils/request';
+import { getDescription } from '@usebruno/api-shared/utils/request';
 import { Table, type TableColumn } from '@/ui/Table/Table';
-import { TruncatedText } from '@/components/TruncatedText/TruncatedText';
-import { VariableText } from '@/components/VariableText/VariableText';
-import { DisabledBadge } from '@/components/DisabledBadge/DisabledBadge';
+import { TruncatedText } from '@usebruno/api-shared/components/TruncatedText/TruncatedText';
+import { VariableText } from '@usebruno/api-shared/components/VariableText/VariableText';
+import { DisabledBadge } from '@usebruno/api-shared/components/DisabledBadge/DisabledBadge';
 import { StyledWrapper } from './StyledWrapper';
 
 const COLUMNS: TableColumn[] = [

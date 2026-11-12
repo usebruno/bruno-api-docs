@@ -1,8 +1,9 @@
 import React from 'react';
-import Portal from '@/ui/Portal/Portal';
+import Portal from '@usebruno/api-shared/ui/Portal/Portal';
 import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
-import { useEscapeKey, useLockBodyScroll } from '@/hooks';
-import type { DockMode } from '@/utils/playgroundDock';
+import { useEscapeKey } from '@usebruno/api-shared/hooks';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ModalDockProps {

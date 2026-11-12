@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo } from 'react';
-import type { RunRequestResponse } from '@/types/run';
-import { getResponseSize } from '@/utils/response';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
+import { getResponseSize } from '@usebruno/api-shared/utils/response';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 

@@ -1,17 +1,17 @@
 import React, { useMemo } from 'react';
 import type { HttpRequest, HttpRequestExample } from '@opencollection/types/requests/http';
-import { MethodBadge } from '@/components/MethodBadge/MethodBadge';
-import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { PropertyTable } from '@/components/PropertyTable/PropertyTable';
-import { RequestParams } from '@/components/Request/RequestParams/RequestParams';
-import { RequestBody } from '@/components/Request/RequestBody/RequestBody';
-import { Code } from '@/components/Code/Code';
+import { MethodBadge } from '@usebruno/api-shared/components/MethodBadge/MethodBadge';
+import { CopyButton } from '@usebruno/api-shared/ui/CopyButton/CopyButton';
+import { PropertyTable } from '@usebruno/api-shared/components/PropertyTable/PropertyTable';
+import { RequestParams } from '@usebruno/api-shared/components/Request/RequestParams/RequestParams';
+import { RequestBody } from '@usebruno/api-shared/components/Request/RequestBody/RequestBody';
+import { Code } from '@usebruno/api-shared/components/Code/Code';
 import { SplitDivider } from '@/components/SplitDivider/SplitDivider';
-import { resolvePathAndQueryParams } from '@/utils/pathParams';
-import { getBodyView, getDescription, headerRows } from '@/utils/request';
-import { getHttpMethod, getRequestUrl } from '@/utils/schemaHelpers';
-import { responseBodyLanguage, statusCodePhrase } from '@/utils/exampleResponse';
-import { statusToneColor, statusToneBackground } from '@/utils/common';
+import { resolvePathAndQueryParams } from '@usebruno/api-shared/utils/pathParams';
+import { getBodyView, getDescription, headerRows } from '@usebruno/api-shared/utils/request';
+import { getHttpMethod, getRequestUrl } from '@usebruno/api-shared/utils/schemaHelpers';
+import { responseBodyLanguage, statusCodePhrase } from '@usebruno/api-shared/utils/exampleResponse';
+import { statusToneColor, statusToneBackground } from '@usebruno/api-shared/utils/common';
 import { useSplitPane, type SplitOrientation } from '@/hooks/useSplitPane';
 import { StyledWrapper } from './StyledWrapper';
 

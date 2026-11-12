@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { cloneDeep } from 'lodash-es';
 import { get } from './query-get';
 import { createResponseHeaderList, type HeaderList, type HeadersRecord } from './header-list';
-import type { RunRequestResponse } from '@/types/run';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 
 export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
 

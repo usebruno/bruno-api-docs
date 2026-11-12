@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { TestResultsResponse, AssertionResultsResponse } from '@/types/run';
+import type { TestResultsResponse, AssertionResultsResponse } from '@usebruno/api-shared/types/run';
 import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface TestResultsTabProps {

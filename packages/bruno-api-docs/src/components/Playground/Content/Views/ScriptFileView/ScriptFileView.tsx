@@ -1,9 +1,9 @@
 import React, { useCallback, useState } from 'react';
 import type { ScriptFile } from '@opencollection/types/collection/item';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
-import CodeEditor from '@/ui/CodeEditor/CodeEditor';
-import { getItemName } from '@/utils/schemaHelpers';
-import { getItemUuid } from '@/utils/itemUtils';
+import CodeEditor from '@usebruno/api-shared/ui/CodeEditor/CodeEditor';
+import { getItemName } from '@usebruno/api-shared/utils/schemaHelpers';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
 import { StyledWrapper } from './StyledWrapper';
 

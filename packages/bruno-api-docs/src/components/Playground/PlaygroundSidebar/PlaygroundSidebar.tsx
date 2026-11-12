@@ -1,14 +1,14 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
-import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import IconButton from '@/ui/IconButton/IconButton';
-import { SettingsIcon } from '@/assets/icons';
-import { useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
-import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
+import EnvSwitcher from '@usebruno/api-shared/components/EnvSwitcher/EnvSwitcher';
+import SidebarTree from '@usebruno/api-shared/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import IconButton from '@usebruno/api-shared/ui/IconButton/IconButton';
+import { SettingsIcon } from '@usebruno/api-shared/assets/icons';
+import { useAutoHideScrollbar, useIsMobileDevice } from '@usebruno/api-shared/hooks';
+import type { ExampleHighlight } from '@usebruno/api-shared/components/Docs/Sidebar/SidebarTree/SidebarTree';
 import { StyledWrapper } from './StyledWrapper';
-import Tooltip from '@/ui/Tooltip/Tooltip';
+import Tooltip from '@usebruno/api-shared/ui/Tooltip/Tooltip';
 
 interface PlaygroundSidebarProps {
   collection: OpenCollectionCollection | null;

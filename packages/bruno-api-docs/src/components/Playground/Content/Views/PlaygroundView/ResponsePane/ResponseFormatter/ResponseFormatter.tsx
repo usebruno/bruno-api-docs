@@ -1,14 +1,14 @@
 import { IconEye } from '@tabler/icons';
-import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@/ui/MenuDropdown';
+import MenuDropdown, { type MenuDropdownItem, type MenuDropdownItems } from '@usebruno/api-shared/ui/MenuDropdown';
 import type {
-  ResponseBodyFormat } from '@/constants';
+  ResponseBodyFormat } from '@usebruno/api-shared/constants';
 import {
   STRUCTURED_FORMAT_OPTIONS,
   BYTE_FORMAT_OPTIONS,
   ALL_FORMAT_OPTIONS,
   FORMAT_LABELS,
   FORMAT_ICONS
-} from '@/constants';
+} from '@usebruno/api-shared/constants';
 import PreviewToggleHeader from './PreviewToggleHeader/PreviewToggleHeader';
 import { StyledWrapper } from './StyledWrapper';
 

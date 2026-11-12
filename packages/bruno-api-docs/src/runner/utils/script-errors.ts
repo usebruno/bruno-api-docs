@@ -1,5 +1,5 @@
 import type { TestResultsResponse } from '@/scripting/utils/test';
-import type { ScriptErrorPhase } from '@/types/run';
+import type { ScriptErrorPhase } from '@usebruno/api-shared/types/run';
 
 export const SCRIPT_ERROR_TITLES: Record<ScriptErrorPhase, string> = {
   'pre-request': 'Pre-Request Script Error',

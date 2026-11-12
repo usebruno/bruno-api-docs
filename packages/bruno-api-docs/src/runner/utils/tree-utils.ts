@@ -1,10 +1,10 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Item, Folder, ScriptFile } from '@opencollection/types/collection/item';
-import { getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest, isScriptFile } from '@/utils/schemaHelpers';
-import { getAncestorsByUuid } from '@/utils/fileUtils';
-import { getItemUuid } from '@/utils/itemUtils';
-import { sanitizeName } from '@/utils/common';
+import { getItemName, getHttpMethod, getRequestUrl, isFolder, isHttpRequest, isScriptFile } from '@usebruno/api-shared/utils/schemaHelpers';
+import { getAncestorsByUuid } from '@usebruno/api-shared/utils/fileUtils';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { sanitizeName } from '@usebruno/api-shared/utils/common';
 
 /**
  * Find the folder ancestors from the collection root to a specific item (the item excluded).

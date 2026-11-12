@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import { RequestExecutor, applyApiKeyToUrl } from './RequestExecutor';
-import type { InternalHttpRequest } from '@/utils/schemaHelpers';
+import type { InternalHttpRequest } from '@usebruno/api-shared/utils/schemaHelpers';
 import { md5 } from 'js-md5';
 
 describe('applyApiKeyToUrl', () => {

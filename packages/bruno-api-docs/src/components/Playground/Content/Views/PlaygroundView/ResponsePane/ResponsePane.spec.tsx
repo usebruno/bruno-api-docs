@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '@/test-utils/dom';
-import { TestProviders } from '@/test-utils/providers';
-import type { RunRequestResponse } from '@/types/run';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 import ResponsePane from './ResponsePane';
 
 const previousResponse = { status: 200, headers: {}, data: { ok: true } } as unknown as RunRequestResponse;

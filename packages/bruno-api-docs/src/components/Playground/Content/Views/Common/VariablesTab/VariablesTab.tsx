@@ -2,11 +2,11 @@ import React, { useMemo } from 'react';
 import type { Variable } from '@opencollection/types/common/variables';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { InfoTip } from '@/components/InfoTip/InfoTip';
-import { unwrapVariableTyped } from '@/utils/variableResolution';
-import { toDataType } from '@/utils/variableDataType';
-import { VARIABLE_NAME_REGEX } from '@/constants/regex';
+import { unwrapVariableTyped } from '@usebruno/api-shared/utils/variableResolution';
+import { toDataType } from '@usebruno/api-shared/utils/variableDataType';
+import { VARIABLE_NAME_REGEX } from '@usebruno/api-shared/constants/regex';
 import { variableTypeColumn } from '../VariableTypeControl/variableTypeColumn';
-import { getDescription, type PostResponseVar } from '@/utils/request';
+import { getDescription, type PostResponseVar } from '@usebruno/api-shared/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface VariablesTabProps {

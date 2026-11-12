@@ -2,8 +2,8 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { Folder as FolderItem } from '@opencollection/types/collection/item';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query, getByTestId, queryByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { query, getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 import { Folder } from './Folder';
 
 const collection = {

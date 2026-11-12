@@ -1,10 +1,10 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { formatBytes } from '@/utils/exampleResponse';
+import { formatBytes } from '@usebruno/api-shared/utils/exampleResponse';
 import { LargeResponseWarning } from './LargeResponseWarning';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query, getByTestId } from '@/test-utils/dom';
-import type { RunRequestResponse } from '@/types/run';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { query, getByTestId } from '@usebruno/api-shared/test-utils/dom';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 
 describe('LargeResponseWarning', () => {
   const responseSize = 11 * 1024 * 1024;

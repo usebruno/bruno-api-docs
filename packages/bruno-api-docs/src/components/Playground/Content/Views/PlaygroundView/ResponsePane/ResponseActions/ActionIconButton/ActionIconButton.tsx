@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyledWrapper } from './StyledWrapper';
-import Tooltip from '@/ui/Tooltip/Tooltip';
+import Tooltip from '@usebruno/api-shared/ui/Tooltip/Tooltip';
 
 export interface ActionIconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Accessible label — icon buttons have no visible text. */

@@ -1,10 +1,10 @@
 import React, { useCallback } from 'react';
-import { formatBytes } from '@/utils/exampleResponse';
-import type { RunRequestResponse } from '@/types/run';
+import { formatBytes } from '@usebruno/api-shared/utils/exampleResponse';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 import { downloadResponse } from '@/utils/downloadResponse';
 import { StyledWrapper } from './StyledWrapper';
 import { IconAlertTriangle, IconCheck, IconCopy, IconDownload, IconEye } from '@tabler/icons';
-import useCopy from '@/hooks/useCopy';
+import useCopy from '@usebruno/api-shared/hooks/useCopy';
 
 const LARGE_RESPONSE_THRESHOLD = 10 * 1024 * 1024; // 10 MB
 

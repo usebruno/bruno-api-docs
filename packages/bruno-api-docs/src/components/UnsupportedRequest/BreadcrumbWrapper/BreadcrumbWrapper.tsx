@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { Breadcrumb, type BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
+import { Breadcrumb, type BreadcrumbSegment } from '@usebruno/api-shared/ui/Breadcrumb/Breadcrumb';
 import type { Item } from '@opencollection/types/collection/item';
 import type { OpenCollection } from '@opencollection/types';
-import { buildBreadcrumbSegments } from '@/utils/common';
+import { buildBreadcrumbSegments } from '@usebruno/api-shared/utils/common';
 
 export interface BreadcrumbWrapperProps {
   showBreadcrumbs: boolean;

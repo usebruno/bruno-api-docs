@@ -1,11 +1,11 @@
 /* eslint-disable react-refresh/only-export-components -- dev-only entry, not a component module */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import './styles/index.css';
+import '@usebruno/api-shared/styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
-import Prism from './utils/prism';
+import Prism from '@usebruno/api-shared/utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import { getThemeStateFrom } from './utils/theme';
+import { getThemeStateFrom } from '@usebruno/api-shared/utils/theme';
 import { sampleCollectionYaml } from './sampleCollection';
 import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
 import { variablesFixtureCollection } from './e2eFixtures/variablesCollection';

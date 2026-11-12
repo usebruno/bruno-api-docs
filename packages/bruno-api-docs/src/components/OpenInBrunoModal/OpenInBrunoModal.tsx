@@ -1,6 +1,6 @@
 import React from 'react';
-import { BrunoGlyph, DownloadIcon, GoToIcon } from '@/assets/icons';
-import { SectionLabel } from '@/components/SectionLabel/SectionLabel';
+import { BrunoGlyph, DownloadIcon, GoToIcon } from '@usebruno/api-shared/assets/icons';
+import { SectionLabel } from '@usebruno/api-shared/components/SectionLabel/SectionLabel';
 import { StyledWrapper } from './StyledWrapper';
 
 export const BRUNO_DOWNLOAD_URL = 'https://www.usebruno.com/downloads';

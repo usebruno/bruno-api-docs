@@ -1,10 +1,10 @@
-import { useMarkdownRenderer } from '@/hooks';
+import { useMarkdownRenderer } from '@usebruno/api-shared/hooks';
 import { useMemo } from 'react';
 import { StyledWrapper } from './StyledWrapper';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
-import { BookIcon } from '@/assets/icons';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
+import { BookIcon } from '@usebruno/api-shared/assets/icons';
 import NoContentText from '@/ui/NoContentText/NoContentText';
-import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
+import { MarkdownContent } from '@usebruno/api-shared/components/MarkdownContent/MarkdownContent';
 
 interface OverviewTabProps {
   docs?: string;

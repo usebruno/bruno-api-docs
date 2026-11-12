@@ -7,7 +7,7 @@ import { MethodSelectorComponent } from './playground/method-selector.component'
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import { CodeSnippetComponent } from './request/code-snippet.component';
-import type { DockMode } from '../../src/utils/playgroundDock';
+import type { DockMode } from '../../../bruno-shared/src/utils/playgroundDock';
 
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);

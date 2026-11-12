@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, it, expect, vi } from 'vitest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { query } from '@usebruno/api-shared/test-utils/dom';
 
-vi.mock('@/ui/CodeEditor/CodeEditor', () => ({
+vi.mock('@usebruno/api-shared/ui/CodeEditor/CodeEditor', () => ({
   default: ({ value }: { value: string }) => <pre data-testid="code-editor">{value}</pre>
 }));
 

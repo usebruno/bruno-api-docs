@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react';
 import type { Folder } from '@opencollection/types/collection/item';
 import type { OpenCollection } from '@opencollection/types';
 import type { Auth } from '@opencollection/types/common/auth';
-import Tabs from '@/ui/Tabs/Tabs';
+import Tabs from '@usebruno/api-shared/ui/Tabs/Tabs';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
 import { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import { rowToVariable } from '@/utils/variableDataType';
+import { rowToVariable } from '@usebruno/api-shared/utils/variableDataType';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
 import HeadersTab from '../Common/HeadersTab/HeadersTab';
 import VariablesTab from '../Common/VariablesTab/VariablesTab';
@@ -17,10 +17,10 @@ import {
   getItemName,
   scriptsArrayToObject,
   scriptsObjectToArray
-} from '@/utils/schemaHelpers';
-import { getAncestorsByUuid } from '@/utils/fileUtils';
-import { getItemUuid } from '@/utils/itemUtils';
-import { actionsToPostResponseVars, getInheritedAuthSummary, postResponseVarsToActions } from '@/utils/request';
+} from '@usebruno/api-shared/utils/schemaHelpers';
+import { getAncestorsByUuid } from '@usebruno/api-shared/utils/fileUtils';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { actionsToPostResponseVars, getInheritedAuthSummary, postResponseVarsToActions } from '@usebruno/api-shared/utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
 

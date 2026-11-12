@@ -2,10 +2,10 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import Sidebar from './Sidebar';
-import { TestProviders } from '@/test-utils/providers';
-import { hydrateWithUUIDs } from '@/utils/fileUtils';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query } from '@/test-utils/dom';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
+import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { query } from '@usebruno/api-shared/test-utils/dom';
 
 const collection = {
   info: { name: 'C' },

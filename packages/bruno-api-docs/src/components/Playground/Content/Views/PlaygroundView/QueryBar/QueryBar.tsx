@@ -3,13 +3,13 @@ import type { HttpRequest, HttpRequestParam, HttpRequestHeader } from '@opencoll
 import type { Auth } from '@opencollection/types/common/auth';
 import { StyledWrapper } from './StyledWrapper';
 import HighlightedInput from '@/components/HighlightedInput/HighlightedInput';
-import { useResolvedVariables } from '@/hooks/useVariableResolver';
-import { getHttpMethod, getRequestUrl, getHttpParams, getRequestHeaders, getHttpBody } from '@/utils/schemaHelpers';
-import { buildRequestUrl, syncPathParams, syncQueryParams } from '@/utils/pathParams';
+import { useResolvedVariables } from '@usebruno/api-shared/hooks/useVariableResolver';
+import { getHttpMethod, getRequestUrl, getHttpParams, getRequestHeaders, getHttpBody } from '@usebruno/api-shared/utils/schemaHelpers';
+import { buildRequestUrl, syncPathParams, syncQueryParams } from '@usebruno/api-shared/utils/pathParams';
 import { HttpMethodSelector } from '@/components/HttpMethodSelector/HttpMethodSelector';
-import { CopyButton } from '@/ui/CopyButton/CopyButton';
-import { SendIcon } from '@/assets/icons';
-import { CodeSnippetTabs } from '@/components/CodeSnippetTabs/CodeSnippetTabs';
+import { CopyButton } from '@usebruno/api-shared/ui/CopyButton/CopyButton';
+import { SendIcon } from '@usebruno/api-shared/assets/icons';
+import { CodeSnippetTabs } from '@usebruno/api-shared/components/CodeSnippetTabs/CodeSnippetTabs';
 
 interface QueryBarProps {
   item: HttpRequest;

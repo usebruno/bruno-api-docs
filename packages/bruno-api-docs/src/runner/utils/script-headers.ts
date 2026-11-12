@@ -1,5 +1,5 @@
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { getHttpHeaders } from '@/utils/schemaHelpers';
+import { getHttpHeaders } from '@usebruno/api-shared/utils/schemaHelpers';
 
 export type HeaderSnapshot = Set<string>;
 

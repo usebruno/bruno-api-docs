@@ -9,20 +9,20 @@ import AssertRuntime, { type AssertionResult } from '@/scripting/runtime/assert-
 import { getTreePathFromCollectionToItem, mergeHeaders, mergeScripts, mergeAuth, interpolateVars, findItemByPath } from './utils';
 import { getCollectionFolderRequestVariables, getCollectionVariables } from './utils/variable-merger';
 import { snapshotEnabledHeaders, getHeaderNamesChangedByScript } from './utils/script-headers';
-import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@/utils/variableDataType';
-import { externalSecretValues, type ExternalSecretEntry } from '@/utils/variableResolution';
+import { coerceVariableValue, parseValueByDataType, type CoercedVariableValue } from '@usebruno/api-shared/utils/variableDataType';
+import { externalSecretValues, type ExternalSecretEntry } from '@usebruno/api-shared/utils/variableResolution';
 import type {
   Variables, JsonValue, RunRequestResponse, ScriptError, AssertionResultsResponse, TestResultsResponse
-} from '@/types/run';
+} from '@usebruno/api-shared/types/run';
 import type { VariableValueOrVariants, VariableValueType } from '@opencollection/types/common/variables';
 import {
   getRequestScripts, getRequestAssertions, scriptsArrayToObject,
   isHttpRequest, getItemType, getItemName, getHttpMethod, getRequestUrl,
   getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest
-} from '@/utils/schemaHelpers';
-import { extractPromptVariables } from '@/utils/promptVariables';
-import { selectBodyVariant } from '@/utils/request';
-import { getItemUuid } from '@/utils/itemUtils';
+} from '@usebruno/api-shared/utils/schemaHelpers';
+import { extractPromptVariables } from '@usebruno/api-shared/utils/promptVariables';
+import { selectBodyVariant } from '@usebruno/api-shared/utils/request';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 import { cloneDeep, isEqual } from 'lodash-es';
 
 const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : 'Unknown script error');

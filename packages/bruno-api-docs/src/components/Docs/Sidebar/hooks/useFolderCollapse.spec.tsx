@@ -2,11 +2,11 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import { DocumentProvider, useDocument, useNavModel } from '@/document/document';
-import * as navModel from '@/routing/navModel';
+import { DocumentProvider, useDocument, useNavModel } from '@usebruno/api-shared/document/document';
+import * as navModel from '@usebruno/api-shared/routing/navModel';
 import { useFolderCollapse } from './useFolderCollapse';
 
-vi.mock('@/routing/navModel', async (importOriginal) => {
+vi.mock('@usebruno/api-shared/routing/navModel', async (importOriginal) => {
   const actual = await importOriginal<typeof navModel>();
   return { ...actual, buildNavModel: vi.fn(actual.buildNavModel) };
 });

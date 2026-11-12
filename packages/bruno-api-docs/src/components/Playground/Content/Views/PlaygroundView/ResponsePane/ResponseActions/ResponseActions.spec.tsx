@@ -2,9 +2,9 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import type { RunRequestResponse } from '@/types/run';
-import { TestProviders } from '@/test-utils/providers';
-import { query, getByTestId } from '@/test-utils/dom';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
+import { query, getByTestId } from '@usebruno/api-shared/test-utils/dom';
 import ResponseActions from './ResponseActions';
 
 const baseResponse: RunRequestResponse = {

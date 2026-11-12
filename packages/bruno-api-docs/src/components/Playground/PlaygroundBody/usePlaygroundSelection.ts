@@ -1,15 +1,15 @@
 import { useEffect, useMemo, type MutableRefObject } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { useSession } from '@/session/session';
-import { useObservable } from '@/observable/observable';
-import { selectedUuid, type PlaygroundSelection } from '@/session/playground';
-import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import { useNavModel } from '@/document/document';
-import { usePlaygroundUrlState } from '@/hooks';
-import { findItemByUuid } from '@/utils/itemUtils';
-import { isFolder } from '@/utils/schemaHelpers';
-import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
+import { useSession } from '@usebruno/api-shared/session/session';
+import { useObservable } from '@usebruno/api-shared/observable/observable';
+import { selectedUuid, type PlaygroundSelection } from '@usebruno/api-shared/session/playground';
+import type { ExampleHighlight } from '@usebruno/api-shared/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import { useNavModel } from '@usebruno/api-shared/document/document';
+import { usePlaygroundUrlState } from '@usebruno/api-shared/hooks';
+import { findItemByUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
+import { exampleIndexForSlug, exampleSlugForIndex } from '@usebruno/api-shared/routing/slug';
 import {
   resolvePlaygroundTarget,
   PLAYGROUND_ENVIRONMENTS_SLUG,

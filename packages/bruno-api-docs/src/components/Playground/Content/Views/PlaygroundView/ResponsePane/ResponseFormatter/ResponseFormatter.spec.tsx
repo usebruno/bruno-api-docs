@@ -1,8 +1,8 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
-import type { ResponseBodyFormat } from '@/constants';
-import { FORMAT_LABELS } from '@/constants';
+import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
+import { FORMAT_LABELS } from '@usebruno/api-shared/constants';
 import ResponseFormatSelector from './ResponseFormatter';
 
 const ICON_TESTID = 'response-format-selector-trigger-icon';

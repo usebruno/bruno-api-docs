@@ -4,19 +4,19 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Variable } from '@opencollection/types/common/variables';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import KeyValueTable from '@/components/KeyValueTable/KeyValueTable';
-import Tabs from '@/ui/Tabs/Tabs';
+import Tabs from '@usebruno/api-shared/ui/Tabs/Tabs';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
 import { StyledWrapper } from './StyledWrapper';
-import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel';
+import { EnvironmentLabel } from '@usebruno/api-shared/components/EnvironmentLabel/EnvironmentLabel';
 import EnvVarCards from './EnvVarCards/EnvVarCards';
 import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
-import { GlobeIcon } from '@/assets/icons';
-import { cx } from '@/utils/cx';
-import { externalSecretPointer } from '@/constants';
-import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
-import { countEnabled } from '@/utils/schemaHelpers';
-import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@/utils/variableResolution';
+import { GlobeIcon } from '@usebruno/api-shared/assets/icons';
+import { cx } from '@usebruno/api-shared/utils/cx';
+import { externalSecretPointer } from '@usebruno/api-shared/constants';
+import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@usebruno/api-shared/utils/environments';
+import { countEnabled } from '@usebruno/api-shared/utils/schemaHelpers';
+import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@usebruno/api-shared/utils/variableResolution';
 
 const ENV_TABS = [
   { id: 'variables', label: 'Variables' },

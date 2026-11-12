@@ -1,5 +1,5 @@
-import type { RunRequestResponse } from '@/types/run';
-import { getContentType } from './response';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
+import { getContentType } from '@usebruno/api-shared/utils/response';
 
 // Minimal MIME -> extension map for the common API response types. Falls back to '' (no extension).
 const CONTENT_TYPE_EXTENSIONS: Record<string, string> = {

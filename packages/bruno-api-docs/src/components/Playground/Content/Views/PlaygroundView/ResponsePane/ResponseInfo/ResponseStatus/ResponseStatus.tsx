@@ -1,5 +1,5 @@
 import React from 'react';
-import { getStatusColor } from '@/utils/response';
+import { getStatusColor } from '@usebruno/api-shared/utils/response';
 
 interface ResponseStatusProps {
   status: number | null | undefined;

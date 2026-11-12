@@ -1,6 +1,6 @@
 import React from 'react';
-import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '@/utils/request';
-import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
+import { canNavigateToSource, inheritedSourceLabel, type InheritedSource } from '@usebruno/api-shared/utils/request';
+import { ContentTypeBadge } from '@usebruno/api-shared/components/ContentTypeBadge/ContentTypeBadge';
 
 interface InheritedAuthBadgeProps {
   source: InheritedSource;

@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from 'react';
-import type { ResponseBodyFormat } from '@/constants';
+import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
-import type { RunRequestResponse } from '@/types/run';
-import { getResponseFormatOptions } from '@/utils/response';
-import { useSession } from '@/session/session';
-import { useObservable } from '@/observable/observable';
-import { selectedUuid } from '@/session/playground';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
+import { getResponseFormatOptions } from '@usebruno/api-shared/utils/response';
+import { useSession } from '@usebruno/api-shared/session/session';
+import { useObservable } from '@usebruno/api-shared/observable/observable';
+import { selectedUuid } from '@usebruno/api-shared/session/playground';
 
 export function useResponseFormatter(
   response: RunRequestResponse

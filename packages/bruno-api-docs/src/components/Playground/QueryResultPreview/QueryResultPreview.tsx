@@ -3,10 +3,10 @@ import HtmlPreview from './HtmlPreview/HtmlPreview';
 import JsonPreview from './JsonPreview/JsonPreview';
 import TextPreview from './TextPreview';
 import XmlPreview from './XmlPreview/XmlPreview';
-import type { RunRequestResponse } from '@/types/run';
+import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 import { StyledWrapper } from './StyledWrapper';
-import type { ResponseBodyFormat } from '@/constants';
-import { formatToPreviewMode } from '@/constants';
+import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
+import { formatToPreviewMode } from '@usebruno/api-shared/constants';
 
 // react-pdf (pdfjs) and react-player are large and only needed for binary previews,
 // so load them on demand to keep them out of the initial bundle.

@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder as FolderItem } from '@opencollection/types/collection/item';
-import { useMarkdownRenderer } from '@/hooks';
-import { AUTH_MODE_LABELS } from '@/constants';
-import { getItemName, getItemDocs, getItemDescription, getItemTags } from '@/utils/schemaHelpers';
-import { buildBreadcrumbSegments } from '@/utils/common';
+import { useMarkdownRenderer } from '@usebruno/api-shared/hooks';
+import { AUTH_MODE_LABELS } from '@usebruno/api-shared/constants';
+import { getItemName, getItemDocs, getItemDescription, getItemTags } from '@usebruno/api-shared/utils/schemaHelpers';
+import { buildBreadcrumbSegments } from '@usebruno/api-shared/utils/common';
 import {
   getFolderConfig,
   hasFolderExecutionContext,
@@ -13,16 +13,16 @@ import {
   requestCountLabel
 } from '@/utils/folder';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
-import { Heading } from '../../components/Heading/Heading';
+import { Heading } from '@usebruno/api-shared/components/Heading/Heading';
 import { Section } from '../../components/Section/Section';
-import { Breadcrumb, type BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
-import { ViewMore } from '../../components/ViewMore/ViewMore';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { Breadcrumb, type BreadcrumbSegment } from '@usebruno/api-shared/ui/Breadcrumb/Breadcrumb';
+import { ViewMore } from '@usebruno/api-shared/components/ViewMore/ViewMore';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
 import { FolderConfiguration } from '../../components/FolderConfiguration/FolderConfiguration';
 import { Tags } from '@/components/Tags/Tags';
-import { FolderIcon, RefreshIcon } from '@/assets/icons';
+import { FolderIcon, RefreshIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
-import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
+import { MarkdownContent } from '@usebruno/api-shared/components/MarkdownContent/MarkdownContent';
 
 interface FolderProps {
   item: FolderItem;

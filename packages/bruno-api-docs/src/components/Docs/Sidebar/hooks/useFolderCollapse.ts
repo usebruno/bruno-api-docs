@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import { findItemByUuid, getItemUuid } from '@/utils/itemUtils';
+import { findItemByUuid, getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 
 export interface FolderCollapse {
   isCollapsed: (folder: Item) => boolean;

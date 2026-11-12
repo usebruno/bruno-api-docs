@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import type { HTMLElement } from 'node-html-parser';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId, query } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId, query } from '@usebruno/api-shared/test-utils/dom';
 import type { GrpcMetadata } from '@opencollection/types/requests/grpc';
 import { GrpcMetadataTable } from './GrpcMetadataTable';
 

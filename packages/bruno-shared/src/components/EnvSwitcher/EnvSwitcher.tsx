@@ -1,0 +1,103 @@
+import React, { useEffect, useMemo } from 'react';
+import type { Environment } from '@opencollection/types/config/environments';
+import { useEnvState, useSession, useWorkingCollection } from '../../session/session';
+import { ChevronDownIcon } from '../../assets/icons';
+import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
+import MenuDropdown, { type MenuDropdownItem } from '../../ui/MenuDropdown';
+import { StyledWrapper } from './StyledWrapper';
+
+export interface EnvSwitcherProps {
+  hideWhenEmpty?: boolean;
+  testId?: string;
+}
+
+/**
+ * Environment switcher for the docs: lets the reader pick which environment's
+ * values are shown, storing the choice in the session env. Self-contained (no
+ * layout assumptions) so it can sit in the topbar or elsewhere. The dot + name
+ * reuse `EnvironmentLabel`. The menu renders through `MenuDropdown` (Tippy),
+ * which portals to <body>, positions against the trigger, tracks scroll/resize,
+ * and handles outside-click and Escape — so this component owns no positioning
+ * or dismissal logic of its own. Tippy's `--z-popover` surface keeps the menu
+ * above every playground dock.
+ */
+const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId = 'env-switcher' }) => {
+  const { env } = useSession();
+  const collection = useWorkingCollection();
+  const { activeEnvName } = useEnvState();
+
+  const environments = useMemo(
+    () => (collection?.config?.environments ?? []) as Environment[],
+    [collection]
+  );
+  const hasEnvironments = environments.length > 0;
+
+  // The active env, resolving a null or stale (no longer present) selection to
+  // the first environment. Single source for both the render and the effect.
+  const activeEnv
+    = environments.find((environment) => environment.name === activeEnvName)
+      ?? (hasEnvironments ? environments[0] : undefined);
+
+  // Sync the session env when the stored name isn't the resolved one (null or stale),
+  // so the persisted selection self-heals to a real environment.
+  useEffect(() => {
+    if (activeEnv && activeEnv.name !== activeEnvName) {
+      env.setActiveEnv(activeEnv.name);
+    }
+  }, [activeEnv, activeEnvName, env]);
+
+  if (hideWhenEmpty && !hasEnvironments) return null;
+
+  const items: MenuDropdownItem[] = hasEnvironments
+    ? environments.map((environment) => ({
+        id: environment.name,
+        label: (
+          <EnvironmentLabel
+            name={environment.name}
+            color={environment.color}
+            nameClassName="environment-label-name--clamped"
+          />
+        ),
+        ariaLabel: environment.name,
+        title: environment.name,
+        onClick: () => env.setActiveEnv(environment.name)
+      }))
+    : [];
+
+  if (!hasEnvironments) {
+    return (
+      <StyledWrapper data-testid={`${testId}-root`}>
+        <span className="env-switcher-trigger env-switcher-trigger--empty" data-testid={testId}>
+          <EnvironmentLabel name="No environments" truncate />
+        </span>
+      </StyledWrapper>
+    );
+  }
+
+  return (
+    <StyledWrapper data-testid={`${testId}-root`}>
+      <MenuDropdown
+        items={items}
+        selectedItemId={activeEnv?.name}
+        showTickMark={false}
+        placement="bottom-end"
+        matchTriggerWidth
+        testId={testId}
+      >
+        <button
+          type="button"
+          className="env-switcher-trigger"
+          aria-haspopup="menu"
+          aria-label="Select environment"
+        >
+          <EnvironmentLabel name={activeEnv?.name ?? ''} color={activeEnv?.color} truncate />
+          <span className="env-switcher-chevron">
+            <ChevronDownIcon />
+          </span>
+        </button>
+      </MenuDropdown>
+    </StyledWrapper>
+  );
+};
+
+export default EnvSwitcher;

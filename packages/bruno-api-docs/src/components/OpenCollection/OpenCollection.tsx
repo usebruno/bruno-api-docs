@@ -3,15 +3,15 @@ import { HashRouter } from 'react-router-dom';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import AppShell from '../AppShell/AppShell';
-import { parseYaml } from '@/utils/yamlUtils';
-import { hydrateWithUUIDs } from '@/utils/fileUtils';
-import { VariableResolverProvider } from '@/hooks';
-import { DocumentProvider } from '@/document/document';
-import { createObservable, useObservable } from '@/observable/observable';
-import { createSession, SessionProvider, useSession, type Session } from '@/session/session';
-import type { ThemeState } from '@/theme/types';
+import { parseYaml } from '@usebruno/api-shared/utils/yamlUtils';
+import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
+import { VariableResolverProvider } from '@usebruno/api-shared/hooks';
+import { DocumentProvider } from '@usebruno/api-shared/document/document';
+import { createObservable, useObservable } from '@usebruno/api-shared/observable/observable';
+import { createSession, SessionProvider, useSession, type Session } from '@usebruno/api-shared/session/session';
+import type { ThemeState } from '@usebruno/api-shared/theme/types';
 import { isEqual } from 'lodash-es';
-import { getApiDocsTheme } from '@/utils/theme';
+import { getApiDocsTheme } from '@usebruno/api-shared/utils/theme';
 
 const isFileInstance = (value: unknown): value is File =>
   typeof File !== 'undefined' && value instanceof File;

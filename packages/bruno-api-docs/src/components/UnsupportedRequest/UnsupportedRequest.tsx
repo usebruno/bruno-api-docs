@@ -2,17 +2,17 @@ import React, { useMemo } from 'react';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest } from '@opencollection/types/requests/websocket';
-import { getItemDocs, getItemName, getItemType, getRequestUrl } from '@/utils/schemaHelpers';
-import cx from '@/utils/cx';
-import { Heading } from '../Heading/Heading';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
-import RequestUrlBar from '../Request/RequestUrlBar/RequestUrlBar';
+import { getItemDocs, getItemName, getItemType, getRequestUrl } from '@usebruno/api-shared/utils/schemaHelpers';
+import cx from '@usebruno/api-shared/utils/cx';
+import { Heading } from '@usebruno/api-shared/components/Heading/Heading';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
+import RequestUrlBar from '@usebruno/api-shared/components/Request/RequestUrlBar/RequestUrlBar';
 import BreadcrumbWrapper, { type BreadcrumbWrapperProps } from './BreadcrumbWrapper/BreadcrumbWrapper';
-import { REQUEST_TYPE_LABELS } from '@/constants';
-import ViewMore from '../ViewMore/ViewMore';
+import { REQUEST_TYPE_LABELS } from '@usebruno/api-shared/constants';
+import ViewMore from '@usebruno/api-shared/components/ViewMore/ViewMore';
 import { TitleLabel } from '../TitleLabel/TitleLabel';
-import { useMarkdownRenderer } from '@/hooks';
-import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
+import { useMarkdownRenderer } from '@usebruno/api-shared/hooks';
+import { MarkdownContent } from '@usebruno/api-shared/components/MarkdownContent/MarkdownContent';
 
 function getRequestTypeLabel(label: string | undefined) {
   const fallback = {

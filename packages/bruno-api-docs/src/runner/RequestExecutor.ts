@@ -1,14 +1,14 @@
 import { Buffer } from 'buffer';
 import type { FormUrlEncodedEntry, HttpRequest, MultipartFormEntry } from '@opencollection/types/requests/http';
-import type { JsonValue, RunRequestResponse } from '@/types/run';
-import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
-import { buildRequestUrl } from '@/utils/pathParams';
+import type { JsonValue, RunRequestResponse } from '@usebruno/api-shared/types/run';
+import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@usebruno/api-shared/utils/schemaHelpers';
+import { buildRequestUrl } from '@usebruno/api-shared/utils/pathParams';
 import { buildDigestAuthorization, findDigestChallenge, getDigestCredentials } from './utils/digest-auth';
 import { classifyRequestError, DigestAuthError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
-import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/response';
-import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
+import { detectContentTypeFromBytes, isByteFormatContentType } from '@usebruno/api-shared/utils/response';
+import { RESPONSE_LARGE_THRESHOLD } from '@usebruno/api-shared/constants';
 import stripJsonComments from 'strip-json-comments';
-import { statusCodePhrase } from '@/utils/exampleResponse';
+import { statusCodePhrase } from '@usebruno/api-shared/utils/exampleResponse';
 
 type LegacyFormRow = { name: string; value?: string | File; type?: string; disabled?: boolean };
 

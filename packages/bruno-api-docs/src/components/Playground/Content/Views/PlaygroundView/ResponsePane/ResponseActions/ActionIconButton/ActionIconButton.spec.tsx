@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import ActionIconButton from './ActionIconButton';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, query } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, query } from '@usebruno/api-shared/test-utils/dom';
 
 describe('ActionIconButton', () => {
   it('renders a button with the accessible label and its child glyph', () => {

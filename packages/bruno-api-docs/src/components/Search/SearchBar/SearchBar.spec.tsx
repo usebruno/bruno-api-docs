@@ -3,7 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import { SearchBar } from './SearchBar';
-import { TestProviders } from '@/test-utils/providers';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
 
 const renderBar = () =>
   renderToStaticMarkup(

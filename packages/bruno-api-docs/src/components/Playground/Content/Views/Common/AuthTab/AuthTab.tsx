@@ -1,9 +1,9 @@
 import React from 'react';
 import { Field } from '@/ui/Field';
-import type { SelectOption } from '@/types/selectOption';
-import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
-import { REQUEST_PROTOCOL_KEYS } from '@/utils/schemaHelpers';
-import type { InheritedAuthSummary } from '@/utils/request';
+import type { SelectOption } from '@usebruno/api-shared/types/selectOption';
+import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@usebruno/api-shared/constants';
+import { REQUEST_PROTOCOL_KEYS } from '@usebruno/api-shared/utils/schemaHelpers';
+import type { InheritedAuthSummary } from '@usebruno/api-shared/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 import NoContentText from '@/ui/NoContentText/NoContentText';
 

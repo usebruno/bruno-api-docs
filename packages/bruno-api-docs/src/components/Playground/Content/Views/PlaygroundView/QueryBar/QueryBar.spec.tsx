@@ -1,9 +1,9 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { queryByTestId } from '@/test-utils/dom';
-import { getHttpParams, getRequestUrl } from '@/utils/schemaHelpers';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { queryByTestId } from '@usebruno/api-shared/test-utils/dom';
+import { getHttpParams, getRequestUrl } from '@usebruno/api-shared/utils/schemaHelpers';
 import QueryBar, { applyUrlChange } from './QueryBar';
 
 const item: HttpRequest = {

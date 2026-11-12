@@ -11,7 +11,7 @@ import {
   type RequestSearchRecord,
   type FolderSearchRecord
 } from './searchIndex';
-import type { NavEntry } from '@/routing/types';
+import type { NavEntry } from '@usebruno/api-shared/routing/types';
 
 const requestEntry = (over: Partial<NavEntry> & { uuid: string; tags?: string[] }): NavEntry => {
   const { uuid, tags, ...rest } = over;

@@ -11,10 +11,10 @@ import {
   IconWand,
   IconX
 } from '@tabler/icons';
-import MenuDropdown from '@/ui/MenuDropdown';
-import type { MenuDropdownGroup } from '@/ui/MenuDropdown';
-import { prettifyJsonString, prettifyXmlString } from '@/utils/dataFormatter';
-import type { RequestBody } from '@/utils/schemaHelpers';
+import MenuDropdown from '@usebruno/api-shared/ui/MenuDropdown';
+import type { MenuDropdownGroup } from '@usebruno/api-shared/ui/MenuDropdown';
+import { prettifyJsonString, prettifyXmlString } from '@usebruno/api-shared/utils/dataFormatter';
+import type { RequestBody } from '@usebruno/api-shared/utils/schemaHelpers';
 import { BodyActionButton } from './StyledWrapper';
 
 interface BodyModeSelectorProps {

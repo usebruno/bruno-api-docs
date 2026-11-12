@@ -1,6 +1,6 @@
 import React from 'react';
-import { useEnvState, useSession } from '@/session/session';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
+import { useEnvState, useSession } from '@usebruno/api-shared/session/session';
+import { Tooltip } from '@usebruno/api-shared/ui/Tooltip/Tooltip';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface ShowVarsToggleProps {

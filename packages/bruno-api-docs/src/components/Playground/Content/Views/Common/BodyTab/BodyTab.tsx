@@ -5,12 +5,12 @@ import type {
   HttpRequest,
   MultipartFormEntry
 } from '@opencollection/types/requests/http';
-import CodeEditor from '@/ui/CodeEditor/CodeEditor';
+import CodeEditor from '@usebruno/api-shared/ui/CodeEditor/CodeEditor';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import { VariableInfoCard } from '@/components/VariableInfoCard/VariableInfoCard';
-import { getDescription } from '@/utils/request';
+import { VariableInfoCard } from '@usebruno/api-shared/components/VariableInfoCard/VariableInfoCard';
+import { getDescription } from '@usebruno/api-shared/utils/request';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
-import type { RequestBody } from '@/utils/schemaHelpers';
+import type { RequestBody } from '@usebruno/api-shared/utils/schemaHelpers';
 import { StyledWrapper } from './StyledWrapper';
 
 interface BodyTabProps {

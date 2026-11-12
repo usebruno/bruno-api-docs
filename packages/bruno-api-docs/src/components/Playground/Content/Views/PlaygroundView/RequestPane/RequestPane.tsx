@@ -1,10 +1,10 @@
 import React from 'react';
 import type { HttpRequest, HttpRequestParam } from '@opencollection/types/requests/http';
 import type { Assertion } from '@opencollection/types/common/assertions';
-import Tabs from '@/ui/Tabs/Tabs';
-import { useSessionStorage } from '@/hooks';
+import Tabs from '@usebruno/api-shared/ui/Tabs/Tabs';
+import { useSessionStorage } from '@usebruno/api-shared/hooks';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
-import { rowToVariable } from '@/utils/variableDataType';
+import { rowToVariable } from '@usebruno/api-shared/utils/variableDataType';
 import HeadersTab from '../../Common/HeadersTab/HeadersTab';
 import ParamsTab from '../../Common/ParamsTab/ParamsTab';
 import BodyTab from '../../Common/BodyTab/BodyTab';
@@ -29,9 +29,9 @@ import {
   scriptsObjectToArray,
   getRequestUrl,
   getItemDocs
-} from '@/utils/schemaHelpers';
-import { setUrlQueryParams } from '@/utils/pathParams';
-import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
+} from '@usebruno/api-shared/utils/schemaHelpers';
+import { setUrlQueryParams } from '@usebruno/api-shared/utils/pathParams';
+import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@usebruno/api-shared/utils/request';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
 
 interface RequestPaneProps {

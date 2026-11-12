@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { useSession, useThemeState } from '@/session/session';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
-import { isDarkMode } from '@/utils/theme';
+import { useSession, useThemeState } from '@usebruno/api-shared/session/session';
+import { Tooltip } from '@usebruno/api-shared/ui/Tooltip/Tooltip';
+import { isDarkMode } from '@usebruno/api-shared/utils/theme';
 
 const Button = styled.button`
   display: inline-flex;

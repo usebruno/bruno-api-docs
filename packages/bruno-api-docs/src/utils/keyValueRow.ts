@@ -1,5 +1,5 @@
 import type { KeyValueRow } from '../components/KeyValueTable/KeyValueTable';
-import { resolveDescription } from './description';
+import { resolveDescription } from '@usebruno/api-shared/utils/description';
 
 export interface KeyValueEntry {
   name: string;

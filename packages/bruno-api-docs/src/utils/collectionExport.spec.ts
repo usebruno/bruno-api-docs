@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { load } from 'js-yaml';
 import type { OpenCollection } from '@opencollection/types';
 import type { Folder } from '@opencollection/types/collection/item';
-import { getItemName } from './schemaHelpers';
+import { getItemName } from '@usebruno/api-shared/utils/schemaHelpers';
 import { stripHydration, serializeCollectionYaml, collectionFilename, resolveDownloadYaml } from './collectionExport';
 
 const hydrated = {

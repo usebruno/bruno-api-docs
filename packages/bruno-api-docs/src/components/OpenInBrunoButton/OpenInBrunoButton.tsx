@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrunoGlyph } from '@/assets/icons';
+import { BrunoGlyph } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface OpenInBrunoButtonProps {

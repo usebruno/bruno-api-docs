@@ -2,10 +2,10 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import { TestProviders } from '@/test-utils/providers';
-import { hydrateWithUUIDs } from '@/utils/fileUtils';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '@/test-utils/dom';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
+import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 import AppShell from './AppShell';
 
 const collection = {

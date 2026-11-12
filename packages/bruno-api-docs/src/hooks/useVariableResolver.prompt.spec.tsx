@@ -1,8 +1,8 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
-import { setPlaygroundCollection, setPlaygroundVariable } from '@/store/slices/playground';
+import { createSession, type Session } from '@/session/session';
+import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import {
   ItemVariableResolverProvider,
   VariableResolverProvider,
@@ -17,7 +17,7 @@ const collection: any = {
   items: []
 };
 
-const probeTree = (store: ReturnType<typeof createOpenCollectionStore>) => {
+const probeTree = (session: Session) => {
   const box: { current: VariableResolver | null } = { current: null };
 
   const Probe: React.FC = () => {
@@ -28,13 +28,13 @@ const probeTree = (store: ReturnType<typeof createOpenCollectionStore>) => {
   return {
     box,
     tree: (
-      <TestProviders store={store}>
+      <TestProviders session={session}>
         <ItemVariableResolverProvider
           collection={collection}
           ancestry={[]}
           item={null}
           writable
-          onWriteVariable={(write) => store.dispatch(setPlaygroundVariable(write))}
+          onWriteVariable={session.workspace.setVariable}
         >
           <Probe />
         </ItemVariableResolverProvider>
@@ -43,15 +43,15 @@ const probeTree = (store: ReturnType<typeof createOpenCollectionStore>) => {
   };
 };
 
-const newStore = () => {
-  const store = createOpenCollectionStore();
-  store.dispatch(setPlaygroundCollection(collection));
-  return store;
+const newSession = () => {
+  const session = createSession();
+  session.workspace.seed(hydrateWithUUIDs(collection as never));
+  return session;
 };
 
 describe('looking a prompt up through the variable resolver', () => {
   it('names it as a prompt rather than reporting an invalid variable name', () => {
-    const { box, tree } = probeTree(newStore());
+    const { box, tree } = probeTree(newSession());
     useRenderToDom(tree);
     const resolver = box.current as VariableResolver;
 
@@ -60,7 +60,7 @@ describe('looking a prompt up through the variable resolver', () => {
   });
 
   it('keeps it separate from a real variable that shares the bare name', () => {
-    const { box, tree } = probeTree(newStore());
+    const { box, tree } = probeTree(newSession());
     useRenderToDom(tree);
     const resolver = box.current as VariableResolver;
 
@@ -69,34 +69,34 @@ describe('looking a prompt up through the variable resolver', () => {
   });
 
   it('shows no value, because answers live only for the send that collected them', () => {
-    const { box, tree } = probeTree(newStore());
+    const { box, tree } = probeTree(newSession());
     useRenderToDom(tree);
 
     expect((box.current as VariableResolver).lookup('?OTP').value).toBe('');
   });
 
   it('is not editable, matching the desktop app', () => {
-    const { box, tree } = probeTree(newStore());
+    const { box, tree } = probeTree(newSession());
     useRenderToDom(tree);
 
     expect((box.current as VariableResolver).lookup('?OTP').simpleString).toBe(false);
   });
 
   it('does not treat a padded token as a prompt, matching the tokenizer', () => {
-    const { box, tree } = probeTree(newStore());
+    const { box, tree } = probeTree(newSession());
     useRenderToDom(tree);
 
     expect((box.current as VariableResolver).lookup('? OTP').scope).not.toBe('prompt');
   });
 
   it('still writes an ordinary variable that shares the bare name', () => {
-    const store = newStore();
-    const { box, tree } = probeTree(store);
+    const session = newSession();
+    const { box, tree } = probeTree(session);
     useRenderToDom(tree);
 
     (box.current as VariableResolver).updateVariable('OTP', 'changed');
 
-    const variables = store.getState().playground.hydratedCollection?.request?.variables as {
+    const variables = session.workspace.get().collection?.request?.variables as {
       value: string;
     }[];
 
@@ -113,7 +113,7 @@ describe('a prompt token outside the playground', () => {
     };
 
     useRenderToDom(
-      <TestProviders store={newStore()}>
+      <TestProviders session={newSession()}>
         <VariableResolverProvider>
           <Probe />
         </VariableResolverProvider>

@@ -1,17 +1,10 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { HashRouter } from 'react-router-dom';
-import { Provider } from 'react-redux';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import AppShell from '../AppShell/AppShell';
 import { parseYaml } from '@/utils/yamlUtils';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
-import { useAppDispatch } from '@/store/hooks';
-import {
-  setPlaygroundCollection,
-  clearPlaygroundCollection
-} from '@/store/slices/playground';
-import { createOpenCollectionStore, type AppStore } from '@/store/store';
 import { VariableResolverProvider } from '@/hooks';
 import { DocumentProvider } from '@/document/document';
 import { createObservable, useObservable } from '@/observable/observable';
@@ -83,8 +76,7 @@ export interface OpenCollectionProps {
 }
 
 const useCollectionLoader = (collection: OpenCollectionProps['collection']): LoadState => {
-  const dispatch = useAppDispatch();
-  const { selection, folders } = useSession().playground;
+  const { playground: { selection, folders }, workspace } = useSession();
   const [loadState] = useState(() => createObservable<LoadState>({ initial: IDLE }));
 
   useEffect(() => {
@@ -98,13 +90,13 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
         if (!isActive) return;
         const hydrated = hydrateWithUUIDs(resolved);
         folders.seed(hydrated.items);
-        dispatch(setPlaygroundCollection(hydrated));
+        workspace.seed(hydrated);
         loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrated });
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
         folders.seed(undefined);
-        dispatch(clearPlaygroundCollection());
+        workspace.clear();
         selection.clearRequest();
         loadState.set({ ...IDLE, status: 'failed', error: message });
       }
@@ -112,7 +104,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
 
     if (collection == null) {
       folders.seed(undefined);
-      dispatch(clearPlaygroundCollection());
+      workspace.clear();
       selection.clearRequest();
       loadState.set(IDLE);
       return () => { isActive = false; };
@@ -123,12 +115,12 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
       folders.seed(hydrated.items);
-      dispatch(setPlaygroundCollection(hydrated));
+      workspace.seed(hydrated);
       loadState.set({ status: 'succeeded', error: null, sourceText: null, document: hydrated });
     }
 
     return () => { isActive = false; };
-  }, [collection, dispatch, loadState, selection, folders]);
+  }, [collection, loadState, selection, folders, workspace]);
 
   return useObservable(loadState);
 };
@@ -183,21 +175,17 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 };
 
 const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
-  const storeRef = useRef<AppStore | null>(null);
   const sessionRef = useRef<Session | null>(null);
 
-  if (!storeRef.current) {
+  if (!sessionRef.current) {
     sessionRef.current = createSession({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
-    storeRef.current = createOpenCollectionStore();
   }
 
   return (
     <HashRouter useTransitions={false}>
-      <Provider store={storeRef.current!}>
-        <SessionProvider session={sessionRef.current!}>
-          <OpenCollectionContent {...props} />
-        </SessionProvider>
-      </Provider>
+      <SessionProvider session={sessionRef.current}>
+        <OpenCollectionContent {...props} />
+      </SessionProvider>
     </HashRouter>
   );
 };

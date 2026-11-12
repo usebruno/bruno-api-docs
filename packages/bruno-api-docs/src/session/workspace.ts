@@ -3,7 +3,7 @@ import type { Environment } from '@opencollection/types/config/environments';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import { hydrateWithUUIDs } from '@/utils/fileUtils';
+import { createObservable } from '@/observable/observable';
 import { isFolder } from '@/utils/schemaHelpers';
 import { applyScriptEnvVars } from '@/utils/environments';
 import { reconcileScriptVariables } from '@/utils/scriptVariables';
@@ -124,12 +124,9 @@ const setFolderVariable = (item: AnyItem, name: string, value: string): AnyItem 
 };
 
 export const setCollection = (state: WorkspaceState, collection: OpenCollection | null): WorkspaceState =>
-  withCollection(state, collection ? hydrateWithUUIDs(collection) : null);
+  withCollection(state, collection);
 
 export const clearCollection = (): WorkspaceState => ({ collection: null, responses: {}, requestStartedAt: {} });
-
-export const replaceCollection = (state: WorkspaceState, collection: OpenCollection): WorkspaceState =>
-  withCollection(state, collection);
 
 export const updateRequestItem = (
   state: WorkspaceState,
@@ -254,3 +251,31 @@ export interface WorkspaceActions {
   startRequest: (payload: { uuid: string; startedAt: number }) => void;
   finishRequest: (uuid: string) => void;
 }
+
+export const createWorkspace = () => {
+  const state = createObservable<WorkspaceState>({ initial: EMPTY_WORKSPACE });
+  const apply = <P>(update: (current: WorkspaceState, payload: P) => WorkspaceState) =>
+    (payload: P) => state.set(update(state.get(), payload));
+  const actions: WorkspaceActions = {
+    replaceCollection: apply(setCollection),
+    updateRequestItem: apply(updateRequestItem),
+    updateScriptFile: apply(updateScriptFile),
+    updateFolder: apply(updateFolder),
+    setVariable: apply(setVariable),
+    applyScriptVariableChanges: apply(applyScriptVariableChanges),
+    setResponse: apply(setResponse),
+    clearResponse: apply(clearResponse),
+    startRequest: apply(startRequest),
+    finishRequest: apply(finishRequest)
+  };
+  return {
+    get: state.get,
+    subscribe: state.subscribe,
+    seed: apply(setCollection),
+    clear: () => state.set(clearCollection()),
+    clearAllRequests: () => state.set(clearAllRequests(state.get())),
+    ...actions
+  };
+};
+
+export type Workspace = ReturnType<typeof createWorkspace>;

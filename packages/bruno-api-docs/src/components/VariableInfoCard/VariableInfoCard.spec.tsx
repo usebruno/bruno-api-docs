@@ -1,6 +1,5 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { createSession } from '@/session/session';
 import { VariableResolverProvider, ItemVariableResolverProvider } from '@/hooks';
@@ -92,12 +91,10 @@ describe('VariableInfoCard', () => {
   it('does not resolve an external secret on either docs provider', () => {
     expect(part(useRenderToDom(cardTree('vaultKey')), 'scope').text).toBe('Undefined');
 
-    const store = createOpenCollectionStore();
-
     const session = createSession();
     session.env.setActiveEnv('Dev');
     const docsItemTree = (
-      <TestProviders store={store} session={session}>
+      <TestProviders session={session}>
         <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null}>
           <VariableInfoCard name="vaultKey" />
         </ItemVariableResolverProvider>
@@ -153,11 +150,10 @@ describe('VariableInfoCard', () => {
 
 // Editing needs a writable resolver, which only ItemVariableResolverProvider supplies.
 const editableCardTree = (name: string) => {
-  const store = createOpenCollectionStore();
   const session = createSession();
   session.env.setActiveEnv('Dev');
   return (
-    <TestProviders store={store} session={session}>
+    <TestProviders session={session}>
       <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>

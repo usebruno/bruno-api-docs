@@ -1,12 +1,12 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder } from '@opencollection/types/collection/item';
+import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import {
   EMPTY_WORKSPACE,
   setCollection,
   clearCollection,
-  replaceCollection,
   updateRequestItem,
   updateScriptFile,
   updateFolder,
@@ -17,6 +17,7 @@ import {
   startRequest,
   finishRequest,
   clearAllRequests,
+  createWorkspace,
   type WorkspaceState
 } from './workspace';
 
@@ -29,7 +30,7 @@ const deepFreeze = <T>(value: T): T => {
 };
 
 const seeded = (collection: OpenCollectionCollection): WorkspaceState =>
-  deepFreeze(setCollection(EMPTY_WORKSPACE, collection));
+  deepFreeze(setCollection(EMPTY_WORKSPACE, hydrateWithUUIDs(collection)));
 
 const makeCollection = () =>
   ({
@@ -350,28 +351,24 @@ describe('updateFolder', () => {
   });
 });
 
-describe('replaceCollection', () => {
+describe('setCollection and clearCollection', () => {
   it('swaps in the edited collection and bails out when it is the same one', () => {
     const state = seeded(makeCollection());
     const edited = { ...state.collection!, request: { headers: [] } } as OpenCollectionCollection;
 
-    expect(replaceCollection(state, edited).collection).toBe(edited);
-    expect(replaceCollection(state, state.collection!)).toBe(state);
+    expect(setCollection(state, edited).collection).toBe(edited);
+    expect(setCollection(state, state.collection!)).toBe(state);
   });
-});
 
-describe('setCollection and clearCollection', () => {
-  it('hydrates uuids and keeps responses across a re-seed', () => {
-    const state = setResponse(seeded(makeCollection()), { uuid: 'r1', response: { status: 200 } });
-    const next = setCollection(state, { info: { name: 'T' }, items: [{ type: 'http', name: 'x' }] } as any);
+  it('keeps responses and run starts across a re-seed', () => {
+    const state = startRequest(setResponse(seeded(makeCollection()), { uuid: 'r1', response: { status: 200 } }), {
+      uuid: 'r1',
+      startedAt: 1
+    });
+    const next = setCollection(state, hydrateWithUUIDs(makeCollection()));
 
-    expect((next.collection!.items![0] as any).uuid).toEqual(expect.any(String));
     expect(next.responses).toBe(state.responses);
-  });
-
-  it('keeps existing uuids', () => {
-    const next = setCollection(EMPTY_WORKSPACE, { info: { name: 'T' }, items: [{ type: 'http', uuid: 'keep' }] } as any);
-    expect((next.collection!.items![0] as any).uuid).toBe('keep');
+    expect(next.requestStartedAt).toBe(state.requestStartedAt);
   });
 
   it('a null collection empties it, and is a no-op when already empty', () => {
@@ -439,5 +436,37 @@ describe('purity', () => {
     updateRequestItem(env, { uuid: 'r2', item: { http: { url: 'v' } } as unknown as HttpRequest });
 
     expect(collection).toEqual(before);
+  });
+});
+
+describe('createWorkspace', () => {
+  it('runs the updaters on its own state and notifies only when something changed', () => {
+    const workspace = createWorkspace();
+    const listener = vi.fn();
+    workspace.subscribe(listener);
+
+    workspace.seed(hydrateWithUUIDs({ info: { name: 'T' }, items: [{ type: 'http', uuid: 'r1' }] } as any));
+    workspace.setResponse({ uuid: 'r1', response: { status: 200 } });
+    workspace.startRequest({ uuid: 'r1', startedAt: 1 });
+    expect(listener).toHaveBeenCalledTimes(3);
+
+    workspace.clearResponse('missing');
+    workspace.finishRequest('missing');
+    workspace.updateScriptFile({ uuid: 'missing', script: '' });
+    expect(listener).toHaveBeenCalledTimes(3);
+
+    workspace.clearAllRequests();
+    expect(workspace.get().requestStartedAt).toEqual({});
+    expect(workspace.get().responses).toEqual({ r1: { status: 200 } });
+
+    workspace.clear();
+    expect(workspace.get()).toEqual(EMPTY_WORKSPACE);
+  });
+
+  it('two workspaces do not share state', () => {
+    const a = createWorkspace();
+    const b = createWorkspace();
+    a.setResponse({ uuid: 'r1', response: 1 });
+    expect(b.get().responses).toEqual({});
   });
 });

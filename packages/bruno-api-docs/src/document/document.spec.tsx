@@ -2,13 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect, vi } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import { createOpenCollectionStore } from '@/store/store';
-import {
-  setPlaygroundCollection,
-  updatePlaygroundItem,
-  updateCollectionEnvironments,
-  selectHydratedCollection
-} from '@/store/slices/playground';
+import { createWorkspace } from '@/session/workspace';
 import * as navModel from '@/routing/navModel';
 import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { DocumentProvider, useNavModel } from './document';
@@ -20,10 +14,11 @@ vi.mock('@/routing/navModel', async (importOriginal) => {
 
 const raw = {
   info: { name: 'C' },
-  config: { environments: [{ name: 'Dev', variables: [] }] },
+  config: { environments: [{ name: 'Dev', variables: [{ name: 'v', value: '1' }] }] },
   items: [
     {
       info: { name: 'Folder', type: 'folder' },
+      request: { variables: [{ name: 'fv', value: '1' }] },
       items: [{ info: { name: 'Ping', type: 'http' }, http: { method: 'GET', url: 'https://x.test' } }]
     }
   ]
@@ -49,14 +44,23 @@ describe('document', () => {
   it('stays as loaded while the playground seeded from it is edited', () => {
     const document = hydrateWithUUIDs(raw);
     const before = structuredClone(document);
-    const request = (document.items![0] as { items: { uuid: string }[] }).items[0];
-    const store = createOpenCollectionStore();
+    const folder = document.items![0] as { uuid: string; items: { uuid: string }[] };
+    const request = folder.items[0];
+    const workspace = createWorkspace();
 
-    store.dispatch(setPlaygroundCollection(document));
-    store.dispatch(updatePlaygroundItem({ uuid: request.uuid, item: { ...request, http: { method: 'POST' } } as never }));
-    const working = selectHydratedCollection(store.getState())!;
-    store.dispatch(updateCollectionEnvironments({ ...working, config: { environments: [] } }));
+    workspace.seed(document);
+    workspace.updateRequestItem({ uuid: request.uuid, item: { ...request, http: { method: 'POST' } } as never });
+    workspace.setVariable({ scope: 'environment', name: 'v', value: 'edited', envName: 'Dev' });
+    workspace.applyScriptVariableChanges({
+      environmentVariables: { envName: 'Dev', variables: { v: 'script', added: 'x' }, deleted: [] },
+      collectionVariables: { variables: { c: 'script' }, deleted: [] }
+    });
+    workspace.setVariable({ scope: 'folder', name: 'fv', value: 'edited', itemUuid: folder.uuid });
+    workspace.updateFolder({ uuid: folder.uuid, folder: { ...folder, request: { headers: [] } } as never });
+    const working = workspace.get().collection!;
+    workspace.replaceCollection({ ...working, config: { environments: [] } });
 
     expect(document).toEqual(before);
+    expect(workspace.get().collection).not.toEqual(before);
   });
 });

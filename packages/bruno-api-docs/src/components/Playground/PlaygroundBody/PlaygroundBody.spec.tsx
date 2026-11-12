@@ -7,11 +7,10 @@ vi.mock('@/ui/CodeEditor/CodeEditor', () => ({
 }));
 
 import PlaygroundBody from './PlaygroundBody';
-import { createOpenCollectionStore } from '@/store/store';
 import { TestProviders } from '@/test-utils/providers';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
 import { getByTestId } from '@/test-utils/dom';
-import { setPlaygroundCollection } from '@/store/slices/playground';
+import { hydrateWithUUIDs } from '@/utils/fileUtils';
 import { createSession } from '@/session/session';
 import { getItemUuid } from '@/utils/itemUtils';
 
@@ -30,15 +29,14 @@ const collection = {
 
 describe('PlaygroundBody example view', () => {
   it('renders ExampleView when viewMode is example', () => {
-    const store = createOpenCollectionStore();
-    store.dispatch(setPlaygroundCollection(collection));
-    const requestUuid = getItemUuid((store.getState().playground.hydratedCollection as any).items[0])!;
     const session = createSession();
+    session.workspace.seed(hydrateWithUUIDs(collection));
+    const requestUuid = getItemUuid((session.workspace.get().collection as any).items[0])!;
     session.playground.selection.set({ uuid: requestUuid, exampleIndex: 0 });
 
     const ref = React.createRef<HTMLDivElement>();
     const root = useRenderToDom(
-      <TestProviders store={store} session={session}>
+      <TestProviders session={session}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}
@@ -63,15 +61,14 @@ describe('PlaygroundBody script file view', () => {
   } as any;
 
   it('shows a .js file as an editable script with no request controls', () => {
-    const store = createOpenCollectionStore();
-    store.dispatch(setPlaygroundCollection(withScript));
-    const scriptUuid = getItemUuid((store.getState().playground.hydratedCollection as any).items[0])!;
     const session = createSession();
+    session.workspace.seed(hydrateWithUUIDs(withScript));
+    const scriptUuid = getItemUuid((session.workspace.get().collection as any).items[0])!;
     session.playground.selection.set({ uuid: scriptUuid, exampleIndex: null });
 
     const ref = React.createRef<HTMLDivElement>();
     const root = useRenderToDom(
-      <TestProviders store={store} session={session}>
+      <TestProviders session={session}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}

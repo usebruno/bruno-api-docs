@@ -1,12 +1,10 @@
 /* eslint-disable react-refresh/only-export-components -- dev-only entry, not a component module */
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { Provider } from 'react-redux';
 import './styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
 import Prism from './utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import { createOpenCollectionStore } from './store/store';
 import { getThemeStateFrom } from './utils/theme';
 import { sampleCollectionYaml } from './sampleCollection';
 import { foldersFixtureCollection } from './e2eFixtures/foldersCollection';
@@ -57,8 +55,6 @@ if (typeof window !== 'undefined') {
 
 // Development App component
 const DevApp: React.FC = () => {
-  const store = createOpenCollectionStore();
-
   if (unknownFixture) {
     return (
       <div data-testid="unknown-fixture">
@@ -68,17 +64,15 @@ const DevApp: React.FC = () => {
   }
 
   return (
-    <Provider store={store}>
-      <div style={{ height: '100vh', width: '100vw' }}>
-        <OpenCollection
-          collection={devCollection}
-          gitCollectionUrl={noGit ? undefined : 'https://github.com/usebruno/bruno-testbench.git'}
-          theme={theme}
-          hideThemeSwitcher={hideThemeSwitcher}
-          hidePlayground={hidePlayground}
-        />
-      </div>
-    </Provider>
+    <div style={{ height: '100vh', width: '100vw' }}>
+      <OpenCollection
+        collection={devCollection}
+        gitCollectionUrl={noGit ? undefined : 'https://github.com/usebruno/bruno-testbench.git'}
+        theme={theme}
+        hideThemeSwitcher={hideThemeSwitcher}
+        hidePlayground={hidePlayground}
+      />
+    </div>
   );
 };
 

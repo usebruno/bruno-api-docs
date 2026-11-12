@@ -4,11 +4,13 @@ import { createThemeMode } from '@/theme/themeMode';
 import type { ThemeState } from '@/theme/types';
 import { createEnv, type EnvState } from './env';
 import { createPlayground } from './playground';
+import { createWorkspace } from './workspace';
 
 export const createSession = ({ theme }: { theme?: ThemeState } = {}) => ({
   theme: createThemeMode(theme),
   env: createEnv(),
-  playground: createPlayground()
+  playground: createPlayground(),
+  workspace: createWorkspace()
 });
 
 export type Session = ReturnType<typeof createSession>;

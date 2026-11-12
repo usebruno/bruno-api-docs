@@ -3,10 +3,9 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import { useDocument } from '@/document/document';
 import type { VariableWrite } from '@/session/workspace';
 import { promptVariableName } from '@/utils/promptVariables';
-import { useEnvState } from '@/session/session';
+import { useEnvState, useWorkingCollection } from '@/session/session';
 import { getRequestVariables, isFolder } from '@/utils/schemaHelpers';
 import { getItemUuid } from '@/utils/itemUtils';
 import { mockDataFunctions, timeBasedDynamicVars } from '@/runner/utils/faker-functions';
@@ -149,7 +148,7 @@ const itemSource = (item: Item): VariableSource =>
     : { scope: 'request', variables: getRequestVariables(item as never) as (Variable | SecretVariable)[] };
 
 export const useVariableResolver = (): VariableResolver => {
-  const collection = useDocument();
+  const collection = useWorkingCollection();
   const { activeEnvName, showVars } = useEnvState();
 
   const model = useMemo(
@@ -223,13 +222,13 @@ export const ShowVarsOverrideProvider: React.FC<{
 const noWrite = () => {};
 
 export const ItemVariableResolverProvider: React.FC<{
-  collection: OpenCollection | null;
   ancestry: Item[];
   item: Item | null;
   writable?: boolean;
   onWriteVariable?: (write: VariableWrite) => void;
   children: React.ReactNode;
-}> = ({ collection, ancestry, item, writable = false, onWriteVariable = noWrite, children }) => {
+}> = ({ ancestry, item, writable = false, onWriteVariable = noWrite, children }) => {
+  const collection = useWorkingCollection();
   const { activeEnvName, showVars } = useEnvState();
 
   // Both the docs pages and the playground mount this provider; only the

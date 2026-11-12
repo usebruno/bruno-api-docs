@@ -28,9 +28,8 @@ const probeTree = (session: Session) => {
   return {
     box,
     tree: (
-      <TestProviders session={session}>
+      <TestProviders document={collection} session={session}>
         <ItemVariableResolverProvider
-          collection={collection}
           ancestry={[]}
           item={null}
           writable

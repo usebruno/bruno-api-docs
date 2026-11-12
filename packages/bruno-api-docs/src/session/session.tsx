@@ -30,3 +30,5 @@ export const useSession = (): Session => {
 export const useThemeState = (): ThemeState => useObservable(useSession().theme);
 
 export const useEnvState = (): EnvState => useObservable(useSession().env);
+
+export const useWorkingCollection = () => useObservable(useSession().workspace, (state) => state.collection);

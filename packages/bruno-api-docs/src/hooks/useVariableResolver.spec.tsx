@@ -67,6 +67,18 @@ describe('useVariableResolver', () => {
     expect(html).toContain('<span data-testid="base">https://prod.test</span>');
   });
 
+  it('resolves against the playground working copy, not the loaded document', () => {
+    const html = render((session) => {
+      session.workspace.seed(collection);
+      session.workspace.setVariable({ scope: 'environment', name: 'baseUrl', value: 'https://edited.test', envName: 'Dev' });
+      session.workspace.setVariable({ scope: 'collection', name: 'collectionVar', value: 'edited' });
+      session.env.setActiveEnv('Dev');
+      session.env.toggleShowVars();
+    });
+    expect(html).toContain('<span data-testid="base">https://edited.test</span>');
+    expect(html).toContain('<span data-testid="coll">edited</span>');
+  });
+
   it('never resolves a secret to plaintext, even when on', () => {
     const html = render((session) => {
       session.env.setActiveEnv('Dev');
@@ -99,7 +111,7 @@ describe('lookup (variable hover card)', () => {
     if (showVars) session.env.toggleShowVars();
     return renderToStaticMarkup(
       <TestProviders document={collection} session={session}>
-        <ItemVariableResolverProvider collection={collection} ancestry={[folder]} item={requestItem}>
+        <ItemVariableResolverProvider ancestry={[folder]} item={requestItem}>
           <LookupProbe name={name} />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -166,7 +178,7 @@ describe('nested variable resolution', () => {
 
     const html = renderToStaticMarkup(
       <TestProviders document={nested} session={session}>
-        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider ancestry={[]} item={null} writable>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -182,7 +194,7 @@ describe('nested variable resolution', () => {
 
     const html = renderToStaticMarkup(
       <TestProviders document={nested} session={session}>
-        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} writable>
+        <ItemVariableResolverProvider ancestry={[]} item={null} writable>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </TestProviders>

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react';
 import type { Environment } from '@opencollection/types/config/environments';
-import { useDocument } from '@/document/document';
-import { useEnvState, useSession } from '@/session/session';
+import { useEnvState, useSession, useWorkingCollection } from '@/session/session';
 import { ChevronDownIcon } from '@/assets/icons';
 import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
 import MenuDropdown, { type MenuDropdownItem } from '@/ui/MenuDropdown';
@@ -24,7 +23,7 @@ export interface EnvSwitcherProps {
  */
 const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId = 'env-switcher' }) => {
   const { env } = useSession();
-  const collection = useDocument();
+  const collection = useWorkingCollection();
   const { activeEnvName } = useEnvState();
 
   const environments = useMemo(

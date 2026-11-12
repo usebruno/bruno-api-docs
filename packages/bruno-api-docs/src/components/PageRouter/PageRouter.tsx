@@ -6,7 +6,8 @@ import type { RequestItem } from '@/utils/schemaHelpers';
 import { useActiveResolution, useNavModel } from '@/routing/hooks';
 import { useDocument } from '@/document/document';
 import { getItemUuid } from '@/utils/itemUtils';
-import { getAncestorsByUuid } from '@/utils/fileUtils';
+import { findItemByUuid, getAncestorsByUuid } from '@/utils/fileUtils';
+import { useWorkingCollection } from '@/session/session';
 import { ItemVariableResolverProvider } from '@/hooks';
 import type { Item } from '@opencollection/types/collection/item';
 import PrevNext from '../PrevNext/PrevNext';
@@ -35,6 +36,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const resolution = useActiveResolution();
   const model = useNavModel();
   const collection = useDocument();
+  const workingCollection = useWorkingCollection();
   const docsNavigate = useDocsNavigate();
   const pageBodyRef = useRef<HTMLDivElement>(null);
 
@@ -42,6 +44,15 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const ancestry = useMemo(
     () => (item && collection ? getAncestorsByUuid(collection, getItemUuid(item) ?? '') : []),
     [collection, item]
+  );
+  const itemUuid = getItemUuid(item) ?? '';
+  const variableAncestry = useMemo(
+    () => getAncestorsByUuid(workingCollection, itemUuid),
+    [workingCollection, itemUuid]
+  );
+  const variableItem = useMemo(
+    () => findItemByUuid(workingCollection?.items, itemUuid) ?? item,
+    [workingCollection, itemUuid, item]
   );
 
   if (!resolution) return <Navigate to="/" replace />;
@@ -67,7 +78,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         return <Environments {...pageProps} />;
       case 'folder':
         return item ? (
-          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider ancestry={variableAncestry} item={variableItem as Item}>
             <Folder item={item as FolderItem} ancestry={ancestry} collection={collection} onBreadcrumbClick={goToUuid} />
           </ItemVariableResolverProvider>
         ) : (
@@ -79,7 +90,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         ) : null;
       case 'graphql':
         return item ? (
-          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider ancestry={variableAncestry} item={variableItem as Item}>
             <GraphqlRequest
               item={item as GraphQLRequest}
               ancestry={ancestry}
@@ -91,7 +102,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
       case 'request':
       default:
         return item ? (
-          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider ancestry={variableAncestry} item={variableItem as Item}>
             <Request
               item={item as RequestItem}
               ancestry={ancestry}

@@ -111,6 +111,31 @@ describe('EnvSwitcher', () => {
   });
 });
 
+describe('EnvSwitcher reads the playground working copy', () => {
+  it('shows an environment that exists only in the working copy', () => {
+    const trigger = getByTestId(
+      render(withEnvs, (s) => {
+        s.workspace.seed(collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }]));
+        s.env.setActiveEnv('Added');
+      }),
+      'env-switcher'
+    );
+    expect(trigger.text).toContain('Added');
+  });
+
+  it('falls back to the first working-copy env when the active env is gone from the working copy', () => {
+    const trigger = getByTestId(
+      render(withEnvs, (s) => {
+        s.workspace.seed(collectionWith([{ name: 'Staging' }]));
+        s.env.setActiveEnv('Prod');
+      }),
+      'env-switcher'
+    );
+    expect(trigger.text).toContain('Staging');
+    expect(trigger.text).not.toContain('Prod');
+  });
+});
+
 describe('EnvSwitcher hideWhenEmpty', () => {
   it('renders nothing when the collection has no environments', () => {
     const root = render(collectionWith([]), undefined, { hideWhenEmpty: true });

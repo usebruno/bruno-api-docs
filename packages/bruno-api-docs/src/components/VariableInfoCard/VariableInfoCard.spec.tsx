@@ -94,8 +94,8 @@ describe('VariableInfoCard', () => {
     const session = createSession();
     session.env.setActiveEnv('Dev');
     const docsItemTree = (
-      <TestProviders session={session}>
-        <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null}>
+      <TestProviders document={collection} session={session}>
+        <ItemVariableResolverProvider ancestry={[]} item={null}>
           <VariableInfoCard name="vaultKey" />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -153,8 +153,8 @@ const editableCardTree = (name: string) => {
   const session = createSession();
   session.env.setActiveEnv('Dev');
   return (
-    <TestProviders session={session}>
-      <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} writable>
+    <TestProviders document={collection} session={session}>
+      <ItemVariableResolverProvider ancestry={[]} item={null} writable>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>
     </TestProviders>

@@ -86,6 +86,10 @@ export class PlaygroundComponent extends BaseComponent {
     return this.treeItems.filter({ hasText: name }).first();
   }
 
+  folderChevron(name: string): Locator {
+    return this.sidebarItem(name).locator('.navlink-chevron');
+  }
+
   async openSidebarItem(name: string): Promise<void> {
     await this.ensureSidebarOpen();
     await this.sidebarItem(name).click();

@@ -94,6 +94,10 @@ export const StyledWrapper = styled.div`
     white-space: nowrap;
   }
 
+  .navlink-script {
+    color: var(--oc-colors-accent);
+  }
+
   .navlink-spacer {
     flex-shrink: 0;
     width: 12px;

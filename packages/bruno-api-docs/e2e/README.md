@@ -49,8 +49,10 @@ playground sends to it.
 | `/health` | 200 `ok`, used by Playwright to know the server is up |
 | `/<file>` | a file from `server/standalone/` or the built `dist-standalone/` |
 
-A second copy runs on `standaloneURL` (port 3901) after building the standalone bundle, so
-`tests/standalone/` can load `index.html` and drive `Bruno.apiDocs` like an embedding site.
+`tests/standalone/` runs under its own config (`npm run test:e2e:standalone`), which builds the
+standalone bundle and starts a second copy on `standaloneURL` (port 3901), so specs can load
+`index.html` and drive `Bruno.apiDocs` like an embedding site. The main config skips that folder,
+so other specs don't pay for the build. `npm run test:e2e` runs both.
 
 Every route except `/cors/deny` answers CORS and preflight requests. Use it for what the
 playground sends over the network; keep `page.route` stubs for tests about how a response

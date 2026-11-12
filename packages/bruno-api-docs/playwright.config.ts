@@ -3,6 +3,7 @@ import { appConfig } from './e2e/config/app.config';
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: 'tests/standalone/**',
   tsconfig: './e2e/tsconfig.json',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -34,13 +35,6 @@ export default defineConfig({
       url: `${appConfig.testServerURL}/health`,
       env: { PORT: new URL(appConfig.testServerURL).port },
       reuseExistingServer: !process.env.CI,
-    },
-    {
-      command: 'npm run build:lib-bundle && npm run build:standalone && node e2e/server/test-server.mjs',
-      url: `${appConfig.standaloneURL}/health`,
-      env: { PORT: new URL(appConfig.standaloneURL).port },
-      reuseExistingServer: !process.env.CI,
-      timeout: 300_000,
     },
   ],
 });

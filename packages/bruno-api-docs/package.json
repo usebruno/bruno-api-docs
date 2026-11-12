@@ -50,7 +50,8 @@
     "test": "vitest",
     "pretest:run": "npm run build:lib-bundle",
     "test:run": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "playwright test && playwright test -c playwright.standalone.config.ts",
+    "test:e2e:standalone": "playwright test -c playwright.standalone.config.ts",
     "test:e2e:ui": "playwright test --ui",
     "clean": "rimraf dist",
     "clean:standalone": "rimraf dist-standalone"

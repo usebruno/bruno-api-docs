@@ -115,7 +115,7 @@ describe('EnvSwitcher reads the playground working copy', () => {
   it('shows an environment that exists only in the working copy', () => {
     const trigger = getByTestId(
       render(withEnvs, (s) => {
-        s.workspace.seed(collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }]));
+        s.workspace.replaceCollection(collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }]));
         s.env.setActiveEnv('Added');
       }),
       'env-switcher'
@@ -126,7 +126,7 @@ describe('EnvSwitcher reads the playground working copy', () => {
   it('falls back to the first working-copy env when the active env is gone from the working copy', () => {
     const trigger = getByTestId(
       render(withEnvs, (s) => {
-        s.workspace.seed(collectionWith([{ name: 'Staging' }]));
+        s.workspace.replaceCollection(collectionWith([{ name: 'Staging' }]));
         s.env.setActiveEnv('Prod');
       }),
       'env-switcher'

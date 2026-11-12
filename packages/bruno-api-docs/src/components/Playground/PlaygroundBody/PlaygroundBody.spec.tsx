@@ -30,7 +30,7 @@ const collection = {
 describe('PlaygroundBody example view', () => {
   it('renders ExampleView when viewMode is example', () => {
     const session = createSession();
-    session.workspace.seed(hydrateWithUUIDs(collection));
+    session.workspace.replaceCollection(hydrateWithUUIDs(collection));
     const requestUuid = getItemUuid((session.workspace.get().collection as any).items[0])!;
     session.playground.selection.set({ uuid: requestUuid, exampleIndex: 0 });
 
@@ -62,7 +62,7 @@ describe('PlaygroundBody script file view', () => {
 
   it('shows a .js file as an editable script with no request controls', () => {
     const session = createSession();
-    session.workspace.seed(hydrateWithUUIDs(withScript));
+    session.workspace.replaceCollection(hydrateWithUUIDs(withScript));
     const scriptUuid = getItemUuid((session.workspace.get().collection as any).items[0])!;
     session.playground.selection.set({ uuid: scriptUuid, exampleIndex: null });
 

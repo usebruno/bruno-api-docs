@@ -44,7 +44,7 @@ const probeTree = (session: Session) => {
 
 const newSession = () => {
   const session = createSession();
-  session.workspace.seed(hydrateWithUUIDs(collection as never));
+  session.workspace.replaceCollection(hydrateWithUUIDs(collection as never));
   return session;
 };
 

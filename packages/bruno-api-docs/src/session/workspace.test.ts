@@ -377,7 +377,7 @@ describe('setCollection and clearCollection', () => {
   });
 
   it('clearing drops the collection, responses and run starts', () => {
-    expect(clearCollection()).toEqual(EMPTY_WORKSPACE);
+    expect(clearCollection()).toBe(EMPTY_WORKSPACE);
   });
 });
 
@@ -445,7 +445,7 @@ describe('createWorkspace', () => {
     const listener = vi.fn();
     workspace.subscribe(listener);
 
-    workspace.seed(hydrateWithUUIDs({ info: { name: 'T' }, items: [{ type: 'http', uuid: 'r1' }] } as any));
+    workspace.replaceCollection(hydrateWithUUIDs({ info: { name: 'T' }, items: [{ type: 'http', uuid: 'r1' }] } as any));
     workspace.setResponse({ uuid: 'r1', response: { status: 200 } });
     workspace.startRequest({ uuid: 'r1', startedAt: 1 });
     expect(listener).toHaveBeenCalledTimes(3);
@@ -475,7 +475,7 @@ describe('workspace freezing', () => {
   it('freezes the seeded collection, including objects the host still holds', () => {
     const hostInfo = { name: 'Host' };
     const workspace = createWorkspace();
-    workspace.seed({ info: hostInfo, items: [] } as unknown as Parameters<typeof workspace.seed>[0]);
+    workspace.replaceCollection({ info: hostInfo, items: [] } as unknown as OpenCollectionCollection);
     expect(Object.isFrozen(hostInfo)).toBe(true);
     expect(() => {
       (hostInfo as { name: string }).name = 'changed';

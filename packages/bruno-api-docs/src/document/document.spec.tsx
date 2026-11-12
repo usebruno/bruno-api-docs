@@ -48,7 +48,7 @@ describe('document', () => {
     const request = folder.items[0];
     const workspace = createWorkspace();
 
-    workspace.seed(document);
+    workspace.replaceCollection(document);
     workspace.updateRequestItem({ uuid: request.uuid, item: { ...request, http: { method: 'POST' } } as never });
     workspace.setVariable({ scope: 'environment', name: 'v', value: 'edited', envName: 'Dev' });
     workspace.applyScriptVariableChanges({

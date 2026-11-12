@@ -90,7 +90,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
         if (!isActive) return;
         const hydrated = hydrateWithUUIDs(resolved);
         folders.seed(hydrated.items);
-        workspace.seed(hydrated);
+        workspace.replaceCollection(hydrated);
         loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrated });
       } catch (err) {
         if (!isActive) return;
@@ -115,7 +115,7 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
     } else {
       const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
       folders.seed(hydrated.items);
-      workspace.seed(hydrated);
+      workspace.replaceCollection(hydrated);
       loadState.set({ status: 'succeeded', error: null, sourceText: null, document: hydrated });
     }
 

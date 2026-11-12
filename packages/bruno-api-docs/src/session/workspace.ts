@@ -36,7 +36,7 @@ export interface ScriptVariableChanges {
 type AnyItem = Item & { uuid?: string; [key: string]: any };
 type VariableList = (Variable | SecretVariable)[];
 
-const withCollection = (state: WorkspaceState, collection: OpenCollection | null): WorkspaceState =>
+export const setCollection = (state: WorkspaceState, collection: OpenCollection | null): WorkspaceState =>
   collection === state.collection ? state : { ...state, collection };
 
 const updateItemIn = (items: Item[], uuid: string, update: (item: AnyItem) => AnyItem): Item[] => {
@@ -124,10 +124,7 @@ const setFolderVariable = (item: AnyItem, name: string, value: string): AnyItem 
   return variables === item.request?.variables ? item : { ...item, request: { ...item.request, variables } };
 };
 
-export const setCollection = (state: WorkspaceState, collection: OpenCollection | null): WorkspaceState =>
-  withCollection(state, collection);
-
-export const clearCollection = (): WorkspaceState => ({ collection: null, responses: {}, requestStartedAt: {} });
+export const clearCollection = (): WorkspaceState => EMPTY_WORKSPACE;
 
 export const updateRequestItem = (
   state: WorkspaceState,
@@ -157,7 +154,7 @@ export const setVariable = (
   const collection = state.collection;
   if (!collection) return state;
   if (scope === '$secrets') {
-    return withCollection(state, updateEnvironment(collection, envName, (env) => {
+    return setCollection(state, updateEnvironment(collection, envName, (env) => {
       const variables = setInList(env.externalSecrets?.variables as VariableList | undefined, name, value);
       return variables === env.externalSecrets?.variables
         ? env
@@ -165,7 +162,7 @@ export const setVariable = (
     }));
   }
   if (scope === 'environment') {
-    return withCollection(state, updateEnvironment(collection, envName, (env) => {
+    return setCollection(state, updateEnvironment(collection, envName, (env) => {
       const variables = setInList(env.variables, name, value);
       return variables === env.variables ? env : { ...env, variables };
     }));
@@ -174,7 +171,7 @@ export const setVariable = (
     const variables = setInList(collection.request?.variables as VariableList | undefined, name, value);
     if (variables === collection.request?.variables) return state;
     const request = { ...collection.request, variables: variables as Variable[] };
-    return withCollection(state, { ...collection, request });
+    return setCollection(state, { ...collection, request });
   }
   if (!itemUuid) return state;
   return updateItem(state, itemUuid, (item) =>
@@ -208,7 +205,7 @@ export const applyScriptVariableChanges = (
       }
     };
   }
-  return withCollection(state, collection);
+  return setCollection(state, collection);
 };
 
 export const setResponse = (
@@ -273,7 +270,6 @@ export const createWorkspace = () => {
   return {
     get: state.get,
     subscribe: state.subscribe,
-    seed: apply(setCollection),
     clear: () => state.set(clearCollection()),
     clearAllRequests: () => state.set(clearAllRequests(state.get())),
     ...actions

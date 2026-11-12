@@ -69,7 +69,7 @@ describe('useVariableResolver', () => {
 
   it('resolves against the playground working copy, not the loaded document', () => {
     const html = render((session) => {
-      session.workspace.seed(collection);
+      session.workspace.replaceCollection(collection);
       session.workspace.setVariable({ scope: 'environment', name: 'baseUrl', value: 'https://edited.test', envName: 'Dev' });
       session.workspace.setVariable({ scope: 'collection', name: 'collectionVar', value: 'edited' });
       session.env.setActiveEnv('Dev');

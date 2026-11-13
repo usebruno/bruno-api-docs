@@ -1,0 +1,329 @@
+import type { HttpRequest, HttpRequestHeader, HttpRequestParam } from '@opencollection/types/requests/http';
+import { isPlainObject } from 'lodash-es';
+import { getRequestUrl, getHttpMethod, getHttpHeaders, getHttpBody, getHttpParams, getRequestAuth } from '@usebruno/api-shared/utils/schemaHelpers';
+import { templateVariableGlobalRegex } from '@usebruno/api-shared/utils/common';
+import { isPromptVariableToken } from '@usebruno/api-shared/utils/promptVariables';
+import { mockDataFunctions } from '@usebruno/api-shared/utils/fakerFunctions';
+import type { JsonValue, Variables } from '@usebruno/api-shared/types/run';
+
+// for dynamic vars ({{$randomUUID}} etc.), ported from @usebruno/common.
+const MOCK_PATTERN = /\{\{\$(\w+)\}\}/g;
+const JSON_SPECIAL_CHARS = /[\\\n\r\t"]/;
+
+const MAX_RESOLUTION_DEPTH = 64;
+
+const escapeJSONString = (str: string): string => {
+  if (!JSON_SPECIAL_CHARS.test(str)) {
+    return str;
+  }
+
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    .replace(/"/g, '\\"');
+};
+
+const prepareMock = (str: string, escapeJSONStrings: boolean): string => {
+  return str.replace(MOCK_PATTERN, (match, keyword) => {
+    let generatedValue = mockDataFunctions[keyword as keyof typeof mockDataFunctions]?.();
+
+    if (generatedValue === undefined) {
+      return match;
+    }
+
+    generatedValue = String(generatedValue);
+
+    return escapeJSONStrings ? escapeJSONString(generatedValue) : generatedValue;
+  });
+};
+
+const prepareMockObj = (obj: Variables, escapeJSONStrings: boolean): Variables => {
+  const processed: Variables = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (typeof value === 'string') {
+      processed[key] = prepareMock(value, escapeJSONStrings);
+    } else if (isPlainObject(value)) {
+      // plain object only, to skip special objects like Date, RegExp, etc.
+      processed[key] = prepareMockObj(value as Variables, escapeJSONStrings);
+    } else {
+      processed[key] = value;
+    }
+  }
+
+  return processed;
+};
+
+/**
+ * Resolve `{{...}}` in a string: built-in dynamic `{{$var}}` tokens first, then
+ * regular `{{var}}` lookups (also resolving dynamic tokens inside var values).
+ */
+export const interpolate = (
+  str: string, variables: Variables, options: { escapeJSONStrings?: boolean } = {}
+): string => {
+  if (!str || typeof str !== 'string') {
+    return str;
+  }
+
+  const escapeJSONStrings = options.escapeJSONStrings ?? false;
+  const mocked = prepareMock(str, escapeJSONStrings);
+  const preparedVars = isPlainObject(variables) ? prepareMockObj(variables, escapeJSONStrings) : variables;
+
+  const resolving = new Set<string>();
+
+  const expandInside = (name: string, value: string): string => {
+    if (resolving.size >= MAX_RESOLUTION_DEPTH) {
+      return value;
+    }
+
+    resolving.add(name);
+    const expanded = substitute(value);
+    resolving.delete(name);
+    return expanded;
+  };
+
+  const substitute = (input: string): string =>
+    input.replace(templateVariableGlobalRegex(), (match, variableName) => {
+      const trimmedName = variableName.trim();
+
+      if (resolving.has(trimmedName)) {
+        return match;
+      }
+
+      // Handle nested object access (e.g., process.env.NODE_ENV)
+      const value = getNestedValue(preparedVars, trimmedName);
+
+      if (value === null) {
+        return match; // Keep original if variable not found
+      }
+
+      if (typeof value === 'object') {
+        return expandInside(trimmedName, JSON.stringify(value));
+      }
+
+      let result = String(value);
+      if (escapeJSONStrings && typeof value === 'string' && !isPromptVariableToken(trimmedName)) {
+        result = result.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+      }
+
+      return expandInside(trimmedName, result);
+    });
+
+  return substitute(mocked);
+};
+
+/**
+ * Get nested value from object using dot notation
+ */
+const getNestedValue = (obj: JsonValue, path: string): JsonValue => {
+  if (path.startsWith('?') && obj != null && typeof obj === 'object') {
+    return (obj as { [k: string]: JsonValue })[path] ?? null;
+  }
+  return path.split('.').reduce<JsonValue>((current, key) => {
+    if (current != null && typeof current === 'object') {
+      return (current as { [k: string]: JsonValue })[key] ?? null;
+    }
+    return null;
+  }, obj);
+};
+
+/**
+ * Enhanced variable interpolation that handles all variable types like Bruno
+ */
+export const interpolateVars = (
+  request: HttpRequest,
+  variableSources: {
+    globalEnvironmentVariables?: Variables;
+    oauth2CredentialVariables?: Variables;
+    collectionVariables?: Variables;
+    folderVariables?: Variables;
+    requestVariables?: Variables;
+    environmentVariables?: Variables;
+    runtimeVariables?: Variables;
+    processEnvVars?: Variables;
+    promptVariables?: Variables;
+  } = {}
+): HttpRequest => {
+  // Clone the request to avoid mutation
+  const interpolatedRequest = JSON.parse(JSON.stringify(request)) as HttpRequest;
+
+  // Combine all variable sources with proper precedence (later overrides earlier)
+  const {
+    globalEnvironmentVariables = {},
+    oauth2CredentialVariables = {},
+    collectionVariables = {},
+    folderVariables = {},
+    requestVariables = {},
+    environmentVariables = {},
+    runtimeVariables = {},
+    processEnvVars = {},
+    promptVariables = {}
+  } = variableSources;
+
+  const combinedVariables = {
+    ...globalEnvironmentVariables,
+    ...collectionVariables,
+    ...environmentVariables,
+    ...folderVariables,
+    ...requestVariables,
+    ...oauth2CredentialVariables,
+    ...runtimeVariables,
+    ...promptVariables,
+    process: {
+      env: {
+        ...processEnvVars
+      }
+    }
+  };
+
+  // Create interpolation function with combined variables
+  const _interpolate = (str: string, options: { escapeJSONStrings?: boolean } = {}): string => {
+    if (!str || typeof str !== 'string') {
+      return str;
+    }
+
+    return interpolate(str, combinedVariables, options);
+  };
+
+  // Ensure http block exists for mutations, carrying the real method/url so a
+  // flat-shape request's method isn't lost to a hardcoded default.
+  if (!interpolatedRequest.http) {
+    interpolatedRequest.http = { method: getHttpMethod(interpolatedRequest), url: getRequestUrl(interpolatedRequest) };
+  }
+
+  // Ensure runtime block exists for mutations
+  if (!interpolatedRequest.runtime) {
+    interpolatedRequest.runtime = {};
+  }
+
+  // Interpolate URL
+  const currentUrl = getRequestUrl(interpolatedRequest);
+  if (currentUrl) {
+    interpolatedRequest.http.url = _interpolate(currentUrl);
+  }
+
+  // Interpolate headers
+  const currentHeaders = getHttpHeaders(interpolatedRequest);
+  if (currentHeaders && currentHeaders.length > 0) {
+    const newHeaders: HttpRequestHeader[] = [];
+    currentHeaders.forEach((header: HttpRequestHeader) => {
+      newHeaders.push({
+        ...header,
+        name: _interpolate(header.name),
+        value: _interpolate(header.value)
+      });
+    });
+    interpolatedRequest.http.headers = newHeaders;
+  }
+
+  // Interpolate body based on content type
+  const currentBody = getHttpBody(interpolatedRequest);
+  if (currentBody) {
+    const body = currentBody;
+
+    if ('type' in body && 'data' in body) {
+      if (body.type === 'json') {
+        // Handle JSON body with proper escaping
+        if (typeof body.data === 'string' && body.data.length > 0) {
+          body.data = _interpolate(body.data, { escapeJSONStrings: true });
+        }
+      } else if (body.type === 'form-urlencoded') {
+        // Handle form-urlencoded body
+        if ('data' in body && Array.isArray(body.data)) {
+          body.data = body.data.map((entry) => ({
+            ...entry,
+            value: _interpolate(entry.value)
+          }));
+        }
+      } else if (body.type === 'multipart-form') {
+        // Handle multipart form body
+        if ('data' in body && Array.isArray(body.data)) {
+          body.data = body.data.map((entry) => ({
+            ...entry,
+            value: Array.isArray(entry.value)
+              ? entry.value.map((v) => _interpolate(String(v)))
+              : _interpolate(String(entry.value))
+          }));
+        }
+      } else {
+        // Handle other body types
+        if (typeof body.data === 'string') {
+          body.data = _interpolate(body.data);
+        }
+      }
+      interpolatedRequest.http.body = body;
+    }
+  }
+
+  // Interpolate query parameters
+  const currentParams = getHttpParams(interpolatedRequest);
+  if (currentParams && currentParams.length > 0) {
+    interpolatedRequest.http.params = currentParams.map((param: HttpRequestParam) => ({
+      ...param,
+      name: _interpolate(param.name),
+      value: _interpolate(param.value)
+    }));
+  }
+
+  // Interpolate authentication
+  const currentAuth = getRequestAuth(interpolatedRequest);
+  if (currentAuth && typeof currentAuth === 'object') {
+    const auth = currentAuth;
+
+    switch (auth.type) {
+      case 'basic':
+        if ('username' in auth) auth.username = _interpolate(auth.username || '');
+        if ('password' in auth) auth.password = _interpolate(auth.password || '');
+        break;
+      case 'bearer':
+        if ('token' in auth) auth.token = _interpolate(auth.token || '');
+        break;
+      case 'apikey':
+        if ('key' in auth) auth.key = _interpolate(auth.key || '');
+        if ('value' in auth) auth.value = _interpolate(auth.value || '');
+        break;
+      case 'awsv4':
+        if ('accessKeyId' in auth) auth.accessKeyId = _interpolate(auth.accessKeyId || '');
+        if ('secretAccessKey' in auth) auth.secretAccessKey = _interpolate(auth.secretAccessKey || '');
+        if ('sessionToken' in auth) auth.sessionToken = _interpolate(auth.sessionToken || '');
+        if ('service' in auth) auth.service = _interpolate(auth.service || '');
+        if ('region' in auth) auth.region = _interpolate(auth.region || '');
+        if ('profileName' in auth) auth.profileName = _interpolate(auth.profileName || '');
+        break;
+      case 'digest':
+        if ('username' in auth) auth.username = _interpolate(auth.username || '');
+        if ('password' in auth) auth.password = _interpolate(auth.password || '');
+        break;
+      case 'ntlm':
+        if ('username' in auth) auth.username = _interpolate(auth.username || '');
+        if ('password' in auth) auth.password = _interpolate(auth.password || '');
+        if ('domain' in auth) auth.domain = _interpolate(auth.domain || '');
+        break;
+      case 'wsse':
+        if ('username' in auth) auth.username = _interpolate(auth.username || '');
+        if ('password' in auth) auth.password = _interpolate(auth.password || '');
+        break;
+    }
+  }
+
+  return interpolatedRequest;
+};
+
+/**
+ * Helper function to create variables object for interpolation
+ */
+export const createInterpolationVariables = (
+  envVars: Variables = {},
+  runtimeVariables: Variables = {},
+  processEnvVars: Variables = {},
+  promptVariables: Variables = {}
+): Variables => {
+  return {
+    ...envVars,
+    ...runtimeVariables,
+    ...promptVariables,
+    processEnvVars
+  };
+};

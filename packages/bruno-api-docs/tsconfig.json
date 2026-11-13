@@ -19,12 +19,13 @@
     "module": "ESNext",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "@slices/*": ["src/store/slices/*"]
+      "@/*": ["src/*"]
     }
   },
   "include": [
-    "src"
+    "src",
+    "../bruno-shared/src/types/*.d.ts",
+    "../bruno-api-playground/src/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

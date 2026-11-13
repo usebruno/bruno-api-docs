@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { ScopeTag } from '../ScopeTag/ScopeTag';
-import { Code } from '../../Code/Code';
+import { Code } from '@usebruno/api-shared/components/Code/Code';
 import { Collapse } from '@/ui/Collapse/Collapse';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import type { TestRow } from '@/utils/fileUtils';
+import { TruncatedText } from '@usebruno/api-shared/components/TruncatedText/TruncatedText';
+import type { TestRow } from '@usebruno/api-shared/utils/fileUtils';
 import { StyledWrapper } from './StyledWrapper';
 
 interface TestListProps {

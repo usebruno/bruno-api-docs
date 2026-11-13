@@ -1,13 +1,13 @@
 import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import './styles/index.css';
+import '@usebruno/api-shared/styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
-import Prism from './utils/prism';
+import Prism from '@usebruno/api-shared/utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
 import type { OpenCollection as IOpenCollection } from '@opencollection/types';
-import { parseCollectionContent } from './utils/yamlUtils';
-import type { ThemeState } from './theme/types';
+import { parseCollectionContent } from '@usebruno/api-shared/utils/yamlUtils';
+import type { ThemeState } from '@usebruno/api-shared/theme/types';
 import { isEmpty, isPlainObject } from 'lodash-es';
 
 // Ensure Prism is available globally for any code that might access it

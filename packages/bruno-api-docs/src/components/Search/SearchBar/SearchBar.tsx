@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useNavModel } from '@/routing/hooks';
-import { useClickOutside, useDocsNavigate } from '@/hooks';
+import { useNavModel } from '@usebruno/api-shared/document/document';
+import { useClickOutside } from '@usebruno/api-shared/hooks';
+import { useDocsNavigate } from '@/hooks/useDocsNavigate';
 import {
   buildSearchRecords,
   collectTags,
@@ -11,7 +12,7 @@ import {
   type SearchHit,
   type SearchRecord
 } from '../searchIndex';
-import { SearchIcon, CloseIcon } from '@/assets/icons';
+import { SearchIcon, CloseIcon } from '@usebruno/api-shared/assets/icons';
 import MethodChips from '../MethodChips/MethodChips';
 import TagFilter from '../TagFilter/TagFilter';
 import SearchResultItem from '../SearchResultItem/SearchResultItem';

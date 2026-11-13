@@ -2,13 +2,13 @@ import React, { useMemo, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { ScriptFile, Folder as FolderItem } from '@opencollection/types/collection/item';
-import type { RequestItem } from '@/utils/schemaHelpers';
-import { useActiveResolution, useNavModel } from '@/routing/hooks';
-import { useAppSelector } from '@/store/hooks';
-import { selectDocsCollection } from '@/store/slices/docs';
-import { getItemUuid } from '@/utils/itemUtils';
-import { getAncestorsByUuid } from '@/utils/fileUtils';
-import { ItemVariableResolverProvider } from '@/hooks';
+import type { RequestItem } from '@usebruno/api-shared/utils/schemaHelpers';
+import { useActiveResolution } from '@/routing/hooks';
+import { useDocument, useNavModel } from '@usebruno/api-shared/document/document';
+import { findItemByUuid, getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { getAncestorsByUuid } from '@usebruno/api-shared/utils/fileUtils';
+import { useWorkingCollection } from '@usebruno/api-shared/session/session';
+import { ItemVariableResolverProvider } from '@usebruno/api-shared/hooks';
 import type { Item } from '@opencollection/types/collection/item';
 import PrevNext from '../PrevNext/PrevNext';
 import SectionNav from '../SectionNav/SectionNav';
@@ -22,8 +22,8 @@ import GraphqlRequest from '@/pages/GraphqlRequest/GraphqlRequest';
 import Script from '@/pages/Script/Script';
 import Folder from '@/pages/Folder/Folder';
 import Environments from '@/pages/Environments/Environments';
-import type { PageProps, PageType } from '@/routing/types';
-import { useDocsNavigate } from '@/hooks';
+import type { PageProps, PageType } from '@usebruno/api-shared/routing/types';
+import { useDocsNavigate } from '@/hooks/useDocsNavigate';
 
 interface PageRouterProps {
   onOpenPlayground?: () => void;
@@ -35,29 +35,20 @@ const PAGES_WITHOUT_SECTION_NAV = new Set<PageType>(['environments']);
 const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'page' }) => {
   const resolution = useActiveResolution();
   const model = useNavModel();
-  const collection = useAppSelector(selectDocsCollection);
+  const loaded = useDocument();
+  const collection = useWorkingCollection() ?? loaded;
   const docsNavigate = useDocsNavigate();
   const pageBodyRef = useRef<HTMLDivElement>(null);
 
-  // Map each item's runtime uuid -> its stable slug so breadcrumb clicks
-  // navigate by URL (the same mapping the sidebar uses).
-  const uuidToSlug = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const entry of model.ordered) {
-      const uuid = getItemUuid(entry.item);
-      if (uuid) map.set(uuid, entry.slug);
-    }
-    return map;
-  }, [model]);
-
-  const item = resolution?.entry?.item ?? null;
-  const ancestry = useMemo(
-    () => (item && collection ? getAncestorsByUuid(collection, getItemUuid(item) ?? '') : []),
-    [collection, item]
+  const navItem = resolution?.entry?.item ?? null;
+  const itemUuid = getItemUuid(navItem) ?? '';
+  const item = useMemo(
+    () => findItemByUuid(collection?.items, itemUuid) ?? navItem,
+    [collection, itemUuid, navItem]
   );
+  const ancestry = useMemo(() => getAncestorsByUuid(collection, itemUuid), [collection, itemUuid]);
 
   if (!resolution) return <Navigate to="/" replace />;
-  if (!collection) return null;
 
   const { entry, prev, next } = resolution;
   const pageProps: PageProps = { node: entry, prev, next, collection, onOpenPlayground };
@@ -66,7 +57,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
   const sectionNavTitle = entry.name;
 
   const goToUuid = (uuid: string) => {
-    const slug = uuidToSlug.get(uuid);
+    const slug = model.slugByUuid.get(uuid);
     // A known item navigates to its slug; the leading collection crumb (and any
     // unknown uuid) falls back to the overview.
     docsNavigate(slug ?? '');
@@ -80,7 +71,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         return <Environments {...pageProps} />;
       case 'folder':
         return item ? (
-          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider ancestry={ancestry} item={item as Item}>
             <Folder item={item as FolderItem} ancestry={ancestry} collection={collection} onBreadcrumbClick={goToUuid} />
           </ItemVariableResolverProvider>
         ) : (
@@ -92,7 +83,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         ) : null;
       case 'graphql':
         return item ? (
-          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider ancestry={ancestry} item={item as Item}>
             <GraphqlRequest
               item={item as GraphQLRequest}
               ancestry={ancestry}
@@ -104,7 +95,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
       case 'request':
       default:
         return item ? (
-          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider ancestry={ancestry} item={item as Item}>
             <Request
               item={item as RequestItem}
               ancestry={ancestry}

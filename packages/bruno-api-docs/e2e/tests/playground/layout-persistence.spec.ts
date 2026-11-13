@@ -1,5 +1,5 @@
 import { test, expect } from '../../playwright';
-import { DOCK_STORAGE_KEY, HEIGHT_STORAGE_KEY } from '../../../src/utils/playgroundDock';
+import { DOCK_STORAGE_KEY, HEIGHT_STORAGE_KEY } from '../../../../bruno-shared/src/utils/playgroundDock';
 
 const DESKTOP = { width: 1280, height: 900 };
 const openAt = (dock: string): string => `/#/?pg=1&dock=${dock}`;

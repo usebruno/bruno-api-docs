@@ -8,7 +8,7 @@ import { ConfigurationSection } from '../components/overview/collection-configur
 import { VariableCardComponent } from '../components/variable-card/variable-card.component';
 
 export class OverviewPage extends BasePage {
-  readonly root = this.page.getByTestId('overview');
+  readonly root = this.scope.getByTestId('overview');
 
   readonly header = new HeaderSection(this.page);
   readonly stats = new StatsSection(this.page);

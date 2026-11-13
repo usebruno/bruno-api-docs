@@ -2,7 +2,7 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Item as CollectionItem } from '@opencollection/types/collection/item';
 import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
-import { isFolder } from './schemaHelpers';
+import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
 
 export interface CollectionStats {
   requestCount: number;

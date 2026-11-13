@@ -1,18 +1,16 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Provider } from 'react-redux';
 import { describe, it, expect } from 'vitest';
-import { createOpenCollectionStore } from '@/store/store';
-import { setShowVars } from '@/store/slices/env';
+import { createSession, SessionProvider, type Session } from '@usebruno/api-shared/session/session';
 import ShowVarsToggle from './ShowVarsToggle';
 
-const render = (configure?: (s: ReturnType<typeof createOpenCollectionStore>) => void): string => {
-  const store = createOpenCollectionStore();
-  configure?.(store);
+const render = (configure?: (s: Session) => void): string => {
+  const session = createSession();
+  configure?.(session);
   return renderToStaticMarkup(
-    <Provider store={store}>
+    <SessionProvider value={session}>
       <ShowVarsToggle />
-    </Provider>
+    </SessionProvider>
   );
 };
 
@@ -25,6 +23,6 @@ describe('ShowVarsToggle', () => {
   });
 
   it('reflects the showVars flag via aria-checked', () => {
-    expect(render((s) => s.dispatch(setShowVars(true)))).toContain('aria-checked="true"');
+    expect(render((s) => s.env.toggleShowVars())).toContain('aria-checked="true"');
   });
 });

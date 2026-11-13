@@ -34,6 +34,13 @@ export class ExecutionContextComponent extends BaseComponent {
     return this.variablesPanel.getByText(name, { exact: true });
   }
 
+  variableValue(name: string): Locator {
+    return this.variablesPanel
+      .getByTestId('property-row')
+      .filter({ has: this.page.getByText(name, { exact: true }) })
+      .getByTestId('property-value');
+  }
+
   assertion(text: string): Locator {
     return this.assertsPanel.getByText(text);
   }

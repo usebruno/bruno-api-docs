@@ -12,6 +12,22 @@ import tsParser from '@typescript-eslint/parser';
 // tokens and reach components as CSS custom properties.
 const HEX_COLOUR = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b/;
 
+// Each package declares what its own runtime code imports, so a dep used by
+// shared or playground cannot hide behind docs' package.json.
+const noExtraneousDependencies = (packageDir) => ({
+  'import/no-extraneous-dependencies': ['error', {
+    packageDir,
+    devDependencies: [
+      '**/*.{test,spec}.{ts,tsx}',
+      '**/e2e/**',
+      '**/test-utils/**',
+      '**/*.config.{ts,mts,js,mjs,cjs}'
+    ]
+  }]
+});
+
+const packages = ['bruno-api-docs', 'bruno-api-playground', 'bruno-shared'];
+
 export default [
   {
     ignores: [
@@ -90,7 +106,7 @@ export default [
         caughtErrorsIgnorePattern: '^_'
       }],
 
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
       'eqeqeq': ['error', 'always', { null: 'ignore' }],
@@ -99,24 +115,7 @@ export default [
       'prefer-const': 'error',
       'no-console': ['error', { allow: ['warn', 'error'] }],
 
-      // This package is published, so anything imported by runtime code has to
-      // be a real dependency — a devDependency would break consumers the moment
-      // a dep stops being bundled.
-      'import/no-extraneous-dependencies': ['error', {
-        packageDir: ['.', './packages/bruno-api-docs'],
-        devDependencies: [
-          '**/*.{test,spec}.{ts,tsx}',
-          '**/e2e/**',
-          '**/test-utils/**',
-          '**/*.config.{ts,mts,js,mjs,cjs}'
-        ]
-      }],
-      'no-restricted-imports': ['error', {
-        patterns: [{
-          group: ['**/store/slices/*', '!@/store/slices/*', '@slices/*'],
-          message: 'Import slices through the @/store/slices/* alias.'
-        }]
-      }],
+      ...noExtraneousDependencies('.'),
 
       'no-restricted-syntax': ['error',
         {
@@ -133,12 +132,54 @@ export default [
       'react-hooks/exhaustive-deps': 'warn'
     }
   },
+  ...packages.map((name) => ({
+    files: [`packages/${name}/src/**/*.{ts,tsx}`, `packages/${name}/e2e/**/*.{ts,tsx,mjs}`],
+    rules: noExtraneousDependencies(`./packages/${name}`)
+  })),
   {
     // The theme tokens are where colours are allowed to be literal — everything
     // else consumes them as CSS custom properties.
     files: ['packages/**/src/theme/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': 'off'
+    }
+  },
+  {
+    files: ['packages/bruno-shared/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: [
+            '@usebruno/api-docs', '@usebruno/api-docs/*', '**/bruno-api-docs/**',
+            '@usebruno/api-playground', '@usebruno/api-playground/*', '**/bruno-api-playground/**'
+          ],
+          message: 'Shared imports nothing from docs or playground.'
+        }]
+      }]
+    }
+  },
+  {
+    files: ['packages/bruno-api-playground/src/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@usebruno/api-docs', '@usebruno/api-docs/*', '**/bruno-api-docs/**'],
+          message: 'Playground imports only from shared, never from docs.'
+        }]
+      }]
+    }
+  },
+  {
+    // The one value import is the dynamic import() in Playground/load.ts, which this rule does not cover.
+    files: ['packages/bruno-api-docs/{src,e2e}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [{
+          group: ['@usebruno/api-playground', '@usebruno/api-playground/*', '**/bruno-api-playground/**'],
+          allowTypeImports: true,
+          message: 'Docs loads the playground lazily through Playground/load.ts; import only its types.'
+        }]
+      }]
     }
   },
   {

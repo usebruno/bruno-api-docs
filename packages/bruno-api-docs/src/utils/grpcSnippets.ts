@@ -1,8 +1,8 @@
 import type { GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
 import type { Auth } from '@opencollection/types/common/auth';
-import type { GrpcMessageEntry } from '@/utils/schemaHelpers';
-import { templateVariableGlobalRegex } from '@/utils/common';
-import { authToHeaders } from '@/utils/codeSnippets';
+import type { GrpcMessageEntry } from '@usebruno/api-shared/utils/schemaHelpers';
+import { templateVariableGlobalRegex } from '@usebruno/api-shared/utils/common';
+import { authToHeaders } from '@usebruno/api-shared/utils/codeSnippets';
 
 export interface GrpcSnippetInput {
   url: string;

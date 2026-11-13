@@ -5,8 +5,8 @@ import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { Item } from '@opencollection/types/collection/item';
 import { MemoryRouter } from 'react-router-dom';
 import { GraphqlRequest } from './GraphqlRequest';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 
 const collection: OpenCollection = {
   info: { name: 'Country API', version: '1.0.0' },

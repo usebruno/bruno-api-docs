@@ -1,11 +1,11 @@
 import React from 'react';
-import { Tabs, type Tab } from '@/ui/Tabs/Tabs';
+import { Tabs, type Tab } from '@usebruno/api-shared/ui/Tabs/Tabs';
 import { ScriptChain } from './ScriptChain/ScriptChain';
 import { VariablesPanel } from './VariablesPanel/VariablesPanel';
 import { AssertList } from './AssertList/AssertList';
 import { TestList } from './TestList/TestList';
 import { ViewAllTests } from './ViewAllTests/ViewAllTests';
-import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
+import { ContentTypeBadge } from '@usebruno/api-shared/components/ContentTypeBadge/ContentTypeBadge';
 import { StyledWrapper } from './StyledWrapper';
 import {
   inheritedCountLabel,
@@ -15,9 +15,9 @@ import {
   type PostResponseVarRow,
   type InheritedPreRequestVarRow,
   type InheritedPostResponseVarRow
-} from '@/utils/request';
+} from '@usebruno/api-shared/utils/request';
 import type { AssertionRow } from '@/utils/assertions';
-import type { TestRow, RawTestScript } from '@/utils/fileUtils';
+import type { TestRow, RawTestScript } from '@usebruno/api-shared/utils/fileUtils';
 
 interface ExecutionContextProps {
   scriptChain: ScriptChainStep[];

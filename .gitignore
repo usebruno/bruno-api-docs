@@ -2,11 +2,13 @@ node_modules
 dist
 .DS_Store
 dist-standalone
+dist-cdn
 test.js
 
 # Claude Code
 .claude/
 CLAUDE.md
+!/CLAUDE.md
 test-results
 !integrations/contract-tests/fixtures/walk-safety/node_modules/
 integrations/dist-tarballs

@@ -3,6 +3,7 @@ import { appConfig } from './e2e/config/app.config';
 
 export default defineConfig({
   testDir: './e2e',
+  testIgnore: 'tests/standalone/**',
   tsconfig: './e2e/tsconfig.json',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

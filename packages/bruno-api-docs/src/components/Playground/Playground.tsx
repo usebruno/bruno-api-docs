@@ -1,16 +1,24 @@
 import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import { usePlaygroundUrlState, useIsMobilePhone } from '@/hooks';
+import { usePlaygroundUrlState, useIsMobilePhone } from '@usebruno/api-shared/hooks';
 import InlineDock from './docks/InlineDock/InlineDock';
 import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
 import ModalDock from './docks/ModalDock/ModalDock';
 import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
-import { playgroundRuns, PLAYGROUND_CLOSED } from './Content/Views/PlaygroundView/playgroundRuns';
-import { useAppDispatch } from '@/store/hooks';
-import { clearAllPlaygroundRequestsStarted } from '@/store/slices/playground';
+import { playgroundRuns, PLAYGROUND_CLOSED } from '@usebruno/api-shared/session/playgroundRuns';
+import { useSession } from '@usebruno/api-shared/session/session';
+import { loadPlayground } from './load';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
-const PlaygroundBody = lazy(() => import('./PlaygroundBody/PlaygroundBody'));
+// A failed load swaps in a fresh lazy, since React caches the rejection, so the next open retries.
+const lazyBody = () =>
+  lazy(() =>
+    loadPlayground().catch((error: unknown) => {
+      PlaygroundBody = lazyBody();
+      throw error;
+    })
+  );
+let PlaygroundBody = lazyBody();
 
 const playgroundLoadError = (
   <div
@@ -36,7 +44,7 @@ interface PlaygroundProps {
 }
 
 const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
-  const dispatch = useAppDispatch();
+  const { workspace } = useSession();
   const { open, dock, requestSlug, exampleSlug, setDock, closePlayground } = usePlaygroundUrlState();
   const isPhone = useIsMobilePhone();
   // On a phone the playground is always the fullscreen MobileDock, and its
@@ -61,8 +69,8 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
 
   useEffect(() => () => {
     playgroundRuns.abortAll(PLAYGROUND_CLOSED);
-    dispatch(clearAllPlaygroundRequestsStarted());
-  }, [dispatch]);
+    workspace.clearAllRequests();
+  }, [workspace]);
 
   if (!open) return null;
 

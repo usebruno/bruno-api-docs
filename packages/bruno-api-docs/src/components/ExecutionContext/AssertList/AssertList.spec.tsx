@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { AssertList } from './AssertList';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
 import type { AssertionRow } from '@/utils/assertions';
 
 const binary: AssertionRow = { level: 'request', expression: 'res.status', operatorLabel: 'equals', value: '200', isUnary: false, description: 'Status must be OK' };

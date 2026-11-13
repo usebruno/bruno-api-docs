@@ -17,7 +17,7 @@ import {
   getItemTags,
   getInheritedTags,
   countEnabled
-} from '@/utils/schemaHelpers';
+} from '@usebruno/api-shared/utils/schemaHelpers';
 import {
   resolveInheritedAuth,
   getPreRequestVars,
@@ -25,33 +25,33 @@ import {
   buildScriptChain,
   getScriptFlow,
   inheritedCountLabel
-} from '@/utils/request';
+} from '@usebruno/api-shared/utils/request';
 import { collectAssertions } from '@/utils/assertions';
-import { collectTests, collectRawTestScripts } from '@/utils/fileUtils';
+import { collectTests, collectRawTestScripts } from '@usebruno/api-shared/utils/fileUtils';
 import { ExecutionContext } from '@/components/ExecutionContext/ExecutionContext';
 import { generateGrpcurlCommand, generateGrpcJavaScriptCode, grpcMethodPath } from '@/utils/grpcSnippets';
-import { SnippetTabs, type Snippet } from '@/components/SnippetTabs/SnippetTabs';
+import { SnippetTabs, type Snippet } from '@usebruno/api-shared/components/SnippetTabs/SnippetTabs';
 import { Tags } from '@/components/Tags/Tags';
-import { useMarkdownRenderer, useResolvedVariables } from '@/hooks';
-import { singleReferenceName } from '@/utils/variableResolution';
-import { buildBreadcrumbSegments } from '@/utils/common';
-import { AUTH_MODE_LABELS, GRPC_METHOD_TYPE_LABELS } from '@/constants';
+import { useMarkdownRenderer, useResolvedVariables } from '@usebruno/api-shared/hooks';
+import { singleReferenceName } from '@usebruno/api-shared/utils/variableResolution';
+import { buildBreadcrumbSegments } from '@usebruno/api-shared/utils/common';
+import { AUTH_MODE_LABELS, GRPC_METHOD_TYPE_LABELS } from '@usebruno/api-shared/constants';
 import { Section } from '@/components/Section/Section';
-import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
+import { ContentTypeBadge } from '@usebruno/api-shared/components/ContentTypeBadge/ContentTypeBadge';
 import { InheritedAuthBadge } from '@/components/InheritedAuthBadge/InheritedAuthBadge';
 import { AuthDetails } from '@/components/AuthDetails/AuthDetails';
 import { GrpcMethodTypeIcon } from './GrpcMethodTypeIcon/GrpcMethodTypeIcon';
 import { GrpcMessages } from './GrpcMessages/GrpcMessages';
 import { GrpcMetadataTable } from './GrpcMetadataTable/GrpcMetadataTable';
 import { PageWrapper } from '@/components/PageWrapper/PageWrapper';
-import { Heading } from '@/components/Heading/Heading';
-import { ViewMore } from '@/components/ViewMore/ViewMore';
-import { Breadcrumb, type BreadcrumbSegment } from '@/ui/Breadcrumb/Breadcrumb';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
-import { RequestUrlBar } from '@/components/Request/RequestUrlBar/RequestUrlBar';
+import { Heading } from '@usebruno/api-shared/components/Heading/Heading';
+import { ViewMore } from '@usebruno/api-shared/components/ViewMore/ViewMore';
+import { Breadcrumb, type BreadcrumbSegment } from '@usebruno/api-shared/ui/Breadcrumb/Breadcrumb';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
+import { RequestUrlBar } from '@usebruno/api-shared/components/Request/RequestUrlBar/RequestUrlBar';
 import { StyledWrapper } from './StyledWrapper';
-import { FileIcon, RefreshIcon } from '@/assets/icons';
-import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
+import { FileIcon, RefreshIcon } from '@usebruno/api-shared/assets/icons';
+import { MarkdownContent } from '@usebruno/api-shared/components/MarkdownContent/MarkdownContent';
 
 const NO_ANCESTRY: Item[] = [];
 

@@ -1,0 +1,107 @@
+import * as chai from 'chai';
+import type { OpenCollection } from '@opencollection/types';
+import Bru, { type RunRequestCallback } from '../utils/bru';
+import BrunoRequest from '../utils/bruno-request';
+import BrunoResponse from '../utils/bruno-response';
+import { executeQuickJsVmAsync } from '../sandbox/quickjs';
+import type { AssertionResult } from '../utils/test';
+import { createBruTestResultMethods, type BruTestResultMethods, type TestResultsResponse } from '../utils/test';
+
+interface RunScriptOptions {
+  script: string;
+  request?: ConstructorParameters<typeof BrunoRequest>[0];
+  response?: ConstructorParameters<typeof BrunoResponse>[0];
+  collectionName?: string;
+  collectionPath?: string;
+  collection?: OpenCollection;
+  variables?: ConstructorParameters<typeof Bru>[0]['variables'];
+  assertionResults?: AssertionResult[];
+  warnings?: string[];
+  runRequest?: RunRequestCallback;
+}
+
+export interface ScriptRunError extends Error {
+  partialTestResults?: TestResultsResponse;
+}
+
+class ScriptRuntime {
+  constructor() { }
+
+  async runScript({
+    script,
+    request,
+    response,
+    collectionName,
+    collectionPath,
+    collection,
+    variables,
+    assertionResults,
+    warnings,
+    runRequest
+  }: RunScriptOptions): Promise<Bru> {
+    const bru = new Bru({ collectionPath, collectionName, variables, warnings, runRequest });
+    let req, res;
+    if (request) {
+      req = new BrunoRequest(request, warnings);
+    }
+    if (response) {
+      res = new BrunoResponse(response);
+    }
+
+    // extend bru with result getter methods
+    const { __brunoTestResults, test }: BruTestResultMethods = createBruTestResultMethods(
+      bru,
+      assertionResults || [],
+      chai
+    );
+
+    type ScriptContext = {
+      bru: Bru;
+      req?: BrunoRequest;
+      res?: BrunoResponse;
+      test: (description: string, callback: () => Promise<void> | void) => Promise<void>;
+      __brunoTestResults: BruTestResultMethods['__brunoTestResults'];
+      console: {
+        log: typeof console.log;
+        debug: typeof console.debug;
+        info: typeof console.info;
+        warn: typeof console.warn;
+        error: typeof console.error;
+      };
+    };
+
+    const { log, debug, info, warn, error } = console;
+    const context: ScriptContext = {
+      bru,
+      req,
+      res,
+      test,
+      __brunoTestResults: __brunoTestResults,
+      console: {
+        log,
+        debug,
+        info,
+        warn,
+        error
+      }
+    };
+
+    try {
+      await executeQuickJsVmAsync({
+        script: script,
+        context: context,
+        collectionPath,
+        collection
+      });
+    } catch (error) {
+      const scriptError: ScriptRunError = error instanceof Error ? error : new Error(String(error));
+      if (bru.getTestResults) scriptError.partialTestResults = await bru.getTestResults();
+      throw scriptError;
+    }
+
+    // Return bru object so caller can access test results
+    return bru;
+  }
+}
+
+export default ScriptRuntime;

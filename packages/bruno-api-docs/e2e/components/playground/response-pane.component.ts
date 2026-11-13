@@ -1,7 +1,7 @@
 import { expect, type FrameLocator, type Locator, type Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 import { CodeEditorComponent } from '../code-editor/code-editor.component';
-import type { ResponseBodyFormat } from '../../../src/utils/response';
+import type { ResponseBodyFormat } from '../../../../bruno-shared/src/utils/response';
 
 /**
  * The response pane's format controls and body editor. The format selector is a MenuDropdown
@@ -10,13 +10,13 @@ import type { ResponseBodyFormat } from '../../../src/utils/response';
  */
 export class ResponsePaneComponent extends BaseComponent {
   readonly bodyEditor = new CodeEditorComponent(this.page, 'response-body-editor');
-  readonly sendButton = this.page.getByTestId('query-bar-send');
+  readonly sendButton = this.root.getByTestId('query-bar-send');
   readonly queryBarCancelButton = this.page.getByTestId('query-bar-cancel');
   readonly loadingView = this.page.getByTestId('response-loading');
   readonly stopwatch = this.loadingView.getByTestId('response-stopwatch');
   readonly loadingText = this.loadingView.getByTestId('response-loading-text');
   readonly cancelButton = this.loadingView.getByTestId('response-cancel-request');
-  readonly status = this.page.getByTestId('response-status');
+  readonly status = this.root.getByTestId('response-status');
   readonly bodyPanel = this.page.getByTestId('response-tabs-panel-response');
   readonly errorBanner = this.bodyPanel.getByTestId('error-banner');
   readonly errorTitle = this.bodyPanel.getByTestId('error-title');

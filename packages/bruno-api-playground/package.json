@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build:lib-bundle": "vite build --config vite.config.libraries-bundle.ts",
+    "pretypecheck": "npm run build:lib-bundle",
     "typecheck": "tsc --noEmit",
     "pretest": "npm run build:lib-bundle",
     "test": "vitest",

@@ -1,9 +1,4 @@
 #!/usr/bin/env bash
-# pages-preview.sh <pr-number> — publish a PR's current head as a QA build at
-# https://usebruno.github.io/bruno-api-docs/pr-<n>/ by pushing the tag preview/pr-<n>.
-# Needs write access to usebruno/bruno-api-docs and the gh CLI. Re-run to publish the PR's latest commit.
-# A tag push runs the PR's own copy of the workflow, so this refuses PRs that change .github/.
-# Pushing a preview/pr-* tag by hand skips that check: review the PR's .github/ changes first.
 set -euo pipefail
 
 pr="${1:-}"

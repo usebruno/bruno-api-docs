@@ -15,7 +15,7 @@ const ANIMATION_MS = 260;
 
 export const ViewMore: React.FC<ViewMoreProps> = ({
   children,
-  collapsedHeight = '30vh',
+  collapsedHeight = '12rem',
   className,
   style,
   testId

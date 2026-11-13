@@ -4,7 +4,6 @@ import { MethodBadge } from '../../MethodBadge/MethodBadge';
 import { ChevronArrow } from '../../ChevronArrow/ChevronArrow';
 import { CopyButton } from '@/ui/CopyButton/CopyButton';
 import { PropertyTable } from '../../PropertyTable/PropertyTable';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
 import { VariableText } from '../../VariableText/VariableText';
 import { useResolvedVariables } from '@/hooks/useVariableResolver';
 import { Description } from '../../Description/Description';
@@ -326,9 +325,9 @@ export const ExampleCard: React.FC<ExampleCardProps> = ({ example, method, url, 
 
               <div className="example-url-row">
                 <MethodBadge method={displayMethod} />
-                <TruncatedText className="example-url-text" text={displayUrl}>
+                <span className="example-url-text">
                   <VariableText value={displayUrl} />
-                </TruncatedText>
+                </span>
                 <CodeSnippetTabs
                   variant="embedded"
                   method={displayMethod}

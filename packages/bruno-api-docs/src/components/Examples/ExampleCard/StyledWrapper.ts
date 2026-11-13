@@ -104,15 +104,33 @@ export const StyledWrapper = styled.div`
     border-top: 1px solid var(--border-color);
     border-bottom: 1px solid var(--border-color);
   }
+
+  @media (hover: hover) {
+    .example-url-row > .code-snippet-tabs,
+    .example-url-row > .copy-button {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .example-url-row:hover > .code-snippet-tabs,
+    .example-url-row:hover > .copy-button,
+    .example-url-row > .code-snippet-tabs:focus-within,
+    .example-url-row > .copy-button:focus-visible {
+      opacity: 1;
+    }
+  }
   .example-url-text {
     flex: 1;
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: 0.75rem;
     letter-spacing: 0;
+    min-width: 0;
+    overflow-x: auto;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    scrollbar-width: none;
+  }
+  .example-url-text::-webkit-scrollbar {
+    display: none;
   }
 
   .example-grid {

@@ -28,9 +28,12 @@ export const StyledWrapper = styled.div`
     font-size: 0.75rem;
     line-height: 1.125rem;
     color: var(--text-primary);
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow-x: auto;
     white-space: nowrap;
+    scrollbar-width: none;
+  }
+  .request-url-bar-url::-webkit-scrollbar {
+    display: none;
   }
   .request-url-bar-actions {
     display: inline-flex;
@@ -43,6 +46,17 @@ export const StyledWrapper = styled.div`
     height: 1.5rem;
     background-color: var(--oc-background-base);
     border-color: var(--oc-table-border);
+  }
+
+  @media (hover: hover) {
+    .request-url-bar-actions .copy-button {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    &:hover .request-url-bar-actions .copy-button,
+    .request-url-bar-actions .copy-button:focus-visible {
+      opacity: 1;
+    }
   }
 
   .request-try {

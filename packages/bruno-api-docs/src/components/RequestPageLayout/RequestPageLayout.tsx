@@ -124,7 +124,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
         </div>
 
         {descHtml && (
-          <ViewMore collapsedHeight="4.5rem" style={{ marginTop: '1.5rem' }} testId="request-description">
+          <ViewMore style={{ marginTop: '1.5rem' }} testId="request-description">
             <MarkdownContent
               className="markdown-documentation"
               navHeadings

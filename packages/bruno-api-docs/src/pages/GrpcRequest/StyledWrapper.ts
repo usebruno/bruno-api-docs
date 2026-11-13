@@ -6,7 +6,7 @@ export const StyledWrapper = styled.div`
   color: var(--text-primary);
   padding-top: 0.1rem;
   padding-bottom: 0.1rem;
-  --sticky-url-clearance: 4.25rem;
+  --sticky-url-clearance: 4.45rem;
 
   .grpc-request-title {
     margin-top: 0.25rem;
@@ -57,6 +57,8 @@ export const StyledWrapper = styled.div`
     position: sticky;
     top: var(--sticky-url-clearance);
     align-self: start;
+    max-height: calc(100vh - 8.5rem);
+    overflow-y: auto;
   }
 
   .grpc-field {
@@ -102,6 +104,8 @@ export const StyledWrapper = styled.div`
     }
     .grpc-request-col-right {
       position: static;
+      max-height: none;
+      overflow-y: visible;
     }
   }
 `;

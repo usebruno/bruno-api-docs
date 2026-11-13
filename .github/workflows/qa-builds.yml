@@ -132,24 +132,3 @@ jobs:
           done
           echo "Pages did not serve $SHA within 10 minutes"
           exit 1
-
-  notify:
-    needs: [build, publish, verify]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Post to Slack
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          FOLDER: ${{ needs.build.outputs.folder }}
-          SHA: ${{ needs.build.outputs.sha }}
-          OK: ${{ needs.verify.result == 'success' }}
-          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          [ -z "$SLACK_WEBHOOK_URL" ] && echo "no SLACK_WEBHOOK_URL, skipping" && exit 0
-          if [ "$OK" = "true" ]; then
-            text=":white_check_mark: $FOLDER updated to $SHA: $PAGES_URL/$FOLDER/ (check Bruno.build.sha in the console)"
-          else
-            text=":x: $GITHUB_REF_NAME build failed: $RUN"
-          fi
-          jq -n --arg text "$text" '{text: $text}' | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"

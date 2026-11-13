@@ -25,6 +25,7 @@ export type RequestErrorType
     | 'browser-blocked'
     | 'unreachable'
     | 'unknown'
+    | 'unresolved-variable'
     | 'digest-challenge-unreadable'
     | 'digest-malformed-challenge'
     | 'digest-unsupported-algorithm'
@@ -57,6 +58,16 @@ export class DigestAuthError extends Error {
     super(`Digest authentication failed: ${reason}`);
     this.name = 'DigestAuthError';
     this.reason = reason;
+  }
+}
+
+export class UnresolvedVariableError extends Error {
+  readonly variable: string;
+
+  constructor(variable: string) {
+    super(`Variable not found: ${variable}`);
+    this.name = 'UnresolvedVariableError';
+    this.variable = variable;
   }
 }
 
@@ -187,6 +198,14 @@ export const classifyRequestError = (
 
   if (error instanceof DigestAuthError) {
     return DIGEST_FAILURES[error.reason];
+  }
+
+  if (error instanceof UnresolvedVariableError) {
+    return {
+      type: 'unresolved-variable',
+      title: 'Variable not found',
+      message: `{{${error.variable}}} is not defined. Select an environment that defines it, or add it as a variable.`
+    };
   }
 
   if (isTimeoutError(error)) {

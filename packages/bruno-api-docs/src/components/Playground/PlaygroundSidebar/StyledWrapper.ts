@@ -7,55 +7,72 @@ export const StyledWrapper = styled.div`
   min-height: 0;
   background-color: var(--oc-background-base);
 
-  .controls {
+  .search {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     flex-shrink: 0;
-    padding: 0.75rem;
+    height: 1.75rem;
+    margin: 0.75rem 0.75rem 0;
+    padding: 0 0.5rem;
+    border: 0.0625rem solid var(--oc-border-border0);
+    border-radius: var(--oc-radius);
+    background: var(--oc-background-mantle);
   }
 
-  .controls > :first-child {
+  .search:focus-within {
+    border-color: var(--oc-border-border1);
+  }
+
+  .search-icon,
+  .search-clear {
+    display: inline-flex;
+    color: var(--oc-colors-text-subtext0);
+  }
+
+  .search-icon svg,
+  .search-clear svg {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  .search-clear {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .search-input {
     flex: 1;
     min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--oc-text);
   }
 
-  .controls .env-switcher-trigger {
-    width: 100%;
-    height: 1.75rem;
-    justify-content: space-between;
-    padding: 0.3125rem 0.5rem;
-    border-radius: var(--oc-radius);
+  .search-input::placeholder {
+    color: var(--oc-colors-text-subtext1);
   }
 
-  .controls .env-switcher-trigger-name {
-    max-width: none;
+  .search-hl {
+    font-weight: 700;
   }
 
-  .env-settings {
-    flex: none;
-    width: 1.75rem;
-    height: 1.75rem;
-    border: 1px solid var(--oc-border-border2);
-    border-radius: var(--oc-radius);
-    color: var(--text-secondary);
-  }
-
-  .env-settings svg {
-    width: 15px;
-    height: 15px;
-  }
-
-  .env-settings.active {
-    color: var(--oc-colors-accent);
-    border-color: var(--oc-colors-accent);
+  .search-empty {
+    padding: 0.5rem 0.25rem;
+    font-size: 0.75rem;
+    color: var(--oc-colors-text-subtext1);
   }
 
   .tree {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: 0.25rem 0.75rem 0.75rem;
+    padding: 0.75rem;
   }
 
   &.mobile .navlink-main {

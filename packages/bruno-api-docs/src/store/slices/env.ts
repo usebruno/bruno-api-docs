@@ -17,6 +17,9 @@ export interface EnvState {
 
 export const ENV_STORAGE_KEY = 'oc-docs.env';
 
+// "No environment" picked by the user. null means nothing picked yet (the first environment is used).
+export const NO_ENVIRONMENT = '';
+
 const defaultState: EnvState = {
   activeEnvName: null,
   showVars: false

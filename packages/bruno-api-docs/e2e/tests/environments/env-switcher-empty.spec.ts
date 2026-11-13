@@ -9,23 +9,14 @@ test.describe('Environment switcher with no environments', () => {
     await expect(envSwitcher.root).toHaveCount(0);
   });
 
-  test('still shows its empty state in the playground sidebar', async ({ page, playground }) => {
+  test('opens a menu with "No Environment" and Configure in the playground header', async ({ page, playground }) => {
     await page.goto(`${NO_ENVIRONMENTS}#/?pg=1&dock=bottom`);
-    await playground.ensureSidebarOpen();
-    await expect(playground.envSwitcher.trigger).toBeVisible();
-    await expect(playground.envSwitcher.trigger).toContainText('No environments');
-  });
+    await expect(playground.envSwitcher.trigger).toContainText('No Environment');
 
-  test('shows plain text in the playground, with no caret and nothing to open', async ({ page, playground }) => {
-    await page.goto(`${NO_ENVIRONMENTS}#/?pg=1&dock=bottom`);
-    await playground.ensureSidebarOpen();
-    const { trigger } = playground.envSwitcher;
+    await playground.envSwitcher.open();
+    await expect(playground.envSwitcher.option('no-environment')).toBeVisible();
 
-    await expect(trigger).toContainText('No environments');
-    await expect(playground.envSwitcher.root.getByRole('button')).toHaveCount(0);
-    await expect(trigger.locator('.env-switcher-chevron')).toHaveCount(0);
-
-    await trigger.click();
-    await expect(playground.envSwitcher.menu).toHaveCount(0);
+    await playground.envSwitcher.option('configure-actions').click();
+    await expect(playground.view.getByText('No environments found in this collection')).toBeVisible();
   });
 });

@@ -47,10 +47,6 @@ test.describe('env selector dropdown stacks above the docks', () => {
     await playground.open('modal');
     await expect(playground.modalPanel).toBeVisible();
 
-    // The playground env switcher lives in the playground sidebar, so it must be
-    // on screen before we can open it.
-    await expect(playground.sidebarPanel).toBeVisible();
-
     const envSwitcher = new EnvSwitcherComponent(page, 'playground-env-switcher');
     await envSwitcher.open();
 

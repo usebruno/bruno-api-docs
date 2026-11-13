@@ -139,4 +139,32 @@ export const StyledWrapper = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .navlink-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-self: baseline;
+  }
+
+  .navlink-main.has-sublabel .navlink-method,
+  .navlink-main.has-sublabel .navlink-text {
+    align-self: center;
+  }
+
+  .navlink-text .navlink-label {
+    flex: none;
+    align-self: stretch;
+  }
+
+  .navlink-sublabel {
+    font-family: var(--font-mono);
+    font-size: var(--oc-font-size-xs);
+    line-height: 1.2;
+    color: var(--oc-colors-text-subtext1);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 `;

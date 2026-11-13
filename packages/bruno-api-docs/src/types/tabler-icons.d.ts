@@ -34,6 +34,7 @@ declare module '@tabler/icons' {
   export const IconLayoutColumns: TablerIcon;
   export const IconLayoutRows: TablerIcon;
   export const IconDots: TablerIcon;
+  export const IconSettings: TablerIcon;
   export const IconFileCode: TablerIcon;
   export const IconBrandJavascript: TablerIcon;
   export const IconHexagons: TablerIcon;

@@ -147,6 +147,31 @@ export const StyledWrapper = styled.div`
       }
     }
 
+    &.dropdown-item-muted {
+      color: var(--oc-colors-text-subtext0);
+      padding-left: 1.625rem;
+    }
+
+    &.dropdown-item-centered {
+      justify-content: center;
+      padding: 0.25rem 1.125rem 0.25rem 0.625rem;
+      margin: 0;
+      line-height: 1;
+
+      .dropdown-label {
+        flex: none;
+      }
+
+      .dropdown-icon {
+        color: inherit;
+        opacity: 1;
+      }
+
+      &:hover:not(:disabled):not(.disabled) {
+        background-color: transparent;
+      }
+    }
+
     /* Focused state - applied during keyboard navigation */
     &.dropdown-item-focused {
       background-color: var(--oc-dropdown-hover-bg);

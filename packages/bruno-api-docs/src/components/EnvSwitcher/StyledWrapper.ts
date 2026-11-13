@@ -28,12 +28,20 @@ export const StyledWrapper = styled.div`
     background: var(--oc-app-collection-toolbar-environment-selector-hover-bg);
   }
 
-  .env-switcher-trigger--empty,
-  .env-switcher-trigger--empty:hover {
+  .env-switcher-trigger--none {
     color: var(--oc-app-collection-toolbar-environment-selector-no-environment-text);
     background: var(--oc-app-collection-toolbar-environment-selector-no-environment-bg);
-    border-color: var(--oc-border-border1);
-    cursor: default;
+    border: 0.0625rem dashed var(--oc-app-collection-toolbar-environment-selector-no-environment-border);
+  }
+
+  .env-switcher-trigger--none:hover,
+  .env-switcher-trigger--none[aria-expanded='true'] {
+    background: var(--oc-app-collection-toolbar-environment-selector-no-environment-hover-bg);
+    border-color: var(--oc-app-collection-toolbar-environment-selector-no-environment-hover-border);
+  }
+
+  .env-switcher-trigger--none .environment-label-dot {
+    display: none;
   }
 
   .env-switcher-chevron {

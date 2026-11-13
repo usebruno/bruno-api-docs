@@ -7,8 +7,8 @@ export const StyledWrapper = styled.div`
   margin: 0;
   padding: 0.5rem;
   font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  line-height: 1.25rem;
+  font-size: var(--oc-font-size-base);
+  line-height: 1.5;
   color: var(--text-primary);
   background: var(--bg-primary);
   border: 0.0625rem solid var(--border-color);
@@ -33,7 +33,7 @@ export const StyledWrapper = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 600;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1;
     color: var(--text-primary);
   }
@@ -45,7 +45,7 @@ export const StyledWrapper = styled.div`
     height: 1.1875rem;
     padding: 0 0.375rem;
     font-weight: 500;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1;
     letter-spacing: 0.03125rem;
     color: var(--primary-color);
@@ -70,9 +70,9 @@ export const StyledWrapper = styled.div`
     min-height: 1.25rem;
     padding-right: 1.5rem;
     font-family: var(--font-sans);
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 400;
-    line-height: 1.25rem;
+    line-height: 1.5;
     color: var(--text-primary);
     word-break: break-all;
     overflow-wrap: break-word;
@@ -99,9 +99,9 @@ export const StyledWrapper = styled.div`
     margin: 0;
     padding: 0 1.5rem 0 0;
     font-family: var(--font-sans);
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 400;
-    line-height: 1.25rem;
+    line-height: 1.5;
     color: var(--text-primary);
     background: transparent;
     border: none;
@@ -136,7 +136,7 @@ export const StyledWrapper = styled.div`
     align-items: center;
     justify-content: center;
     padding: 0.125rem;
-    font-size: 0.875rem;
+    font-size: var(--oc-font-size-md);
     color: var(--text-secondary);
     background: transparent;
     border: none;
@@ -167,15 +167,15 @@ export const StyledWrapper = styled.div`
 
   .var-readonly-note {
     margin-top: 0.25rem;
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     color: var(--text-muted);
     opacity: 0.6;
   }
 
   .var-warning-note {
     margin-top: 0.375rem;
-    font-size: 0.75rem;
-    line-height: 1.25rem;
+    font-size: var(--oc-font-size-sm);
+    line-height: 1.7;
     color: var(--oc-status-danger-text);
   }
 `;

@@ -61,7 +61,7 @@ export const StyledWrapper = styled.nav`
   }
 
   .prevnext-label {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     line-height: 1;
     letter-spacing: normal;
@@ -73,7 +73,7 @@ export const StyledWrapper = styled.nav`
     gap: 0.375rem;
     max-width: 100%;
     min-width: 0;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.4;
     font-weight: 600;
     color: var(--oc-text);
@@ -89,7 +89,7 @@ export const StyledWrapper = styled.nav`
   }
   .prevnext-method {
     flex-shrink: 0;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 700;
     line-height: 1;
     font-family: 'Fira Code', var(--font-mono);
@@ -113,10 +113,10 @@ export const StyledWrapper = styled.nav`
     }
     .prevnext-label,
     .prevnext-name {
-      font-size: 0.75rem;
+      font-size: var(--oc-font-size-sm);
     }
     .prevnext-method {
-      font-size: 0.6875rem;
+      font-size: var(--oc-font-size-xs);
     }
     .prevnext-name,
     .prevnext-method {

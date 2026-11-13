@@ -20,7 +20,7 @@ export const StyledWrapper = styled.div`
     flex: 1;
     min-width: 0;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-primary);
   }
 `;

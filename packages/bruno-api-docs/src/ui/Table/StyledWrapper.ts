@@ -95,13 +95,13 @@ export const StyledWrapper = styled.div`
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.2;
     color: var(--text-primary);
   }
 
   .table-group-label {
-    font-size: 0.75rem; /* 12px */
+    font-size: var(--oc-font-size-sm); /* 12px */
     font-weight: 600;
     color: var(--text-primary); /* #343434 */
     white-space: nowrap;
@@ -115,7 +115,7 @@ export const StyledWrapper = styled.div`
     padding: 0.125rem 0.375rem;
     border-radius: var(--oc-radius);
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     font-weight: 500;
     line-height: 1;
     letter-spacing: 0;
@@ -125,7 +125,7 @@ export const StyledWrapper = styled.div`
   .table-group-badge {
     padding: 1px 8px;
     border-radius: 999px;
-    font-size: 0.6875rem; /* 11px */
+    font-size: var(--oc-font-size-xs); /* 11px */
     font-weight: 600;
     color: var(--text-muted); /* #838383 */
     background: var(--oc-background-surface0); /* #f1f1f1 */
@@ -153,7 +153,7 @@ export const StyledWrapper = styled.div`
 
   .table-cell {
     padding: 0.5rem 0.875rem; /* 8px 14px */
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.3;
     color: var(--text-primary);
     text-align: left;

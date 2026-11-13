@@ -69,7 +69,7 @@ export const StyledWrapper = styled.div`
     justify-content: center;
     flex: 1;
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: var(--oc-font-size-base);
   }
 
   &[data-overlay-sidebar='true'] {

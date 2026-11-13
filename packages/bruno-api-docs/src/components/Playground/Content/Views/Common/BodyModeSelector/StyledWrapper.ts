@@ -11,7 +11,7 @@ export const BodyActionButton = styled.button`
   border: 0.0625rem solid var(--oc-border-border1);
   border-radius: var(--oc-border-radius-base);
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   font-weight: 500;
   line-height: 1;
   letter-spacing: 0;

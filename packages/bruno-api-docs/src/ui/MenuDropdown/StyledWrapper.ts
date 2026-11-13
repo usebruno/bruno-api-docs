@@ -10,7 +10,7 @@ export const StyledWrapper = styled.div`
      (<= --z-modal). Keep it at --z-popover — the top of the app's z-scale. */
   z-index: var(--z-popover);
   min-width: 10rem;
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
   color: var(--oc-dropdown-color);
   background-color: var(--oc-dropdown-bg);
   box-shadow: var(--oc-dropdown-shadow);
@@ -69,7 +69,7 @@ export const StyledWrapper = styled.div`
     display: flex;
     align-items: center;
     padding: 0.375rem 0.625rem 0.25rem 0.625rem;
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     font-weight: 600;
     letter-spacing: 0.025em;
     color: var(--oc-dropdown-color);
@@ -88,7 +88,7 @@ export const StyledWrapper = styled.div`
     cursor: pointer;
     border-radius: 0.375rem;
     margin: 1px 0;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
 
     .dropdown-label {
       flex: 1;
@@ -138,7 +138,7 @@ export const StyledWrapper = styled.div`
 
     &.dropdown-item-link {
       margin-top: 0.25rem;
-      font-size: 0.75rem;
+      font-size: var(--oc-font-size-sm);
       font-weight: 400;
       color: var(--oc-text-link);
 
@@ -217,7 +217,7 @@ export const TriggerButton = styled.button`
   padding: 0 0.5rem;
   box-sizing: border-box;
   font-family: inherit;
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   font-weight: 500;
   line-height: 1;
   cursor: pointer;

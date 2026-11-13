@@ -37,7 +37,7 @@ export const StyledWrapper = styled.div`
     max-width: 22rem;
     font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.5;
     color: var(--text-secondary);
   }

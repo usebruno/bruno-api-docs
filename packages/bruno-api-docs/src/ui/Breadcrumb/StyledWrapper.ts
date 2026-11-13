@@ -11,7 +11,7 @@ export const StyledWrapper = styled.nav`
     gap: 0.375rem;
     font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.2;
     letter-spacing: 0;
   }
@@ -21,7 +21,7 @@ export const StyledWrapper = styled.nav`
     gap: 0.375rem;
   }
   .breadcrumb-sep {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--oc-breadcrumb-color-segments, var(--text-muted));
   }
   .breadcrumb-link,

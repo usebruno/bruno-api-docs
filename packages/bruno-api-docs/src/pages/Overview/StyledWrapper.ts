@@ -12,7 +12,7 @@ export const StyledWrapper = styled.div`
   }
   .overview-version {
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-tertiary);
     margin-bottom: 0.3rem;
     font-weight: 600;

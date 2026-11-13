@@ -16,7 +16,7 @@ export const StyledWrapper = styled.div`
     border-radius: var(--oc-radius);
     cursor: pointer;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 500;
     color: var(--oc-app-collection-toolbar-environment-selector-text);
     transition: border-color 0.12s ease;

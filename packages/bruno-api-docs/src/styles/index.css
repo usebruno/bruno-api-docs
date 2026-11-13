@@ -126,7 +126,7 @@ body {
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-size: 14px;
+  font-size: var(--oc-font-size-md);
   line-height: 1.6;
   letter-spacing: -0.011em;
 }
@@ -254,7 +254,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.875rem;
+    font-size: var(--oc-font-size-md);
     padding: 0.625rem;
     border-radius: var(--oc-radius);
     transition: all 0.2s ease;
@@ -284,7 +284,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0.15rem 0.45rem;
-  font-size: 0.625rem;
+  font-size: var(--oc-font-size-xxs);
   font-weight: 700;
   border-radius: var(--oc-radius);
   text-transform: uppercase;
@@ -344,7 +344,7 @@ body {
   padding: 1rem 1.25rem;
   overflow: auto;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--oc-font-size-base);
   line-height: 1.65;
   scrollbar-width: thin;
 }
@@ -477,7 +477,7 @@ body {
   background-color: var(--table-header-bg);
   border-bottom: 1px solid var(--border-color);
   color: var(--text-secondary);
-  font-size: 0.6875rem;
+  font-size: var(--oc-font-size-xs);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -486,7 +486,7 @@ body {
 .api-table td {
   padding: 0.5rem 0.75rem;
   border-bottom: 1px solid var(--border-color);
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
 }
 
 .api-table tr:last-child td {
@@ -524,14 +524,14 @@ tr.themed-row:nth-child(even) {
 .minimal-table th {
   @apply px-3 py-1.5 text-left font-semibold uppercase;
   color: var(--text-tertiary);
-  font-size: 0.625rem;
+  font-size: var(--oc-font-size-xxs);
   letter-spacing: 0.08em;
 }
 
 .minimal-table td {
   @apply px-3 py-2 border-t;
   border-color: var(--border-color);
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
 }
 
 .minimal-table tbody tr {
@@ -544,14 +544,14 @@ tr.themed-row:nth-child(even) {
 
 .table-value {
   @apply font-mono;
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   color: var(--text-primary);
 }
 
 .section-title {
   @apply text-xs font-semibold mb-2 uppercase;
   color: var(--text-tertiary);
-  font-size: 0.625rem;
+  font-size: var(--oc-font-size-xxs);
   letter-spacing: 0.1em;
 }
 
@@ -598,7 +598,7 @@ tr.themed-row:nth-child(even) {
   border-radius: var(--oc-radius);
   transition: all 0.15s ease;
   cursor: pointer;
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
 }
 
 .btn-primary {
@@ -626,7 +626,7 @@ tr.themed-row:nth-child(even) {
 .status-badge {
   @apply inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold;
   transition: all 0.15s ease;
-  font-size: 0.6875rem;
+  font-size: var(--oc-font-size-xs);
 }
 
 /* ================================================================
@@ -686,8 +686,8 @@ tr.themed-row:nth-child(even) {
   max-width: none !important;
   font-family: var(--font-sans) !important;
   font-weight: 400 !important;
-  font-size: 0.75rem !important;
-  line-height: 1.125rem !important;
+  font-size: var(--oc-font-size-sm) !important;
+  line-height: 1.5 !important;
   letter-spacing: normal !important;
 }
 
@@ -1038,7 +1038,7 @@ tr.themed-row:nth-child(even) {
 .endpoint-method-url {
   display: flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: var(--oc-font-size-lg);
   flex-wrap: wrap;
 }
 
@@ -1052,7 +1052,7 @@ tr.themed-row:nth-child(even) {
   word-break: break-all;
   max-width: 100%;
   color: var(--text-primary);
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
 }
 
 .endpoint-description {
@@ -1097,7 +1097,7 @@ tr.themed-row:nth-child(even) {
 .param-name, .param-value {
   font-family: var(--font-mono);
   word-break: break-all;
-  font-size: 0.8125rem;
+  font-size: var(--oc-font-size-base);
 }
 
 .param-name {

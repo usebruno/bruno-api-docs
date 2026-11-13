@@ -15,7 +15,7 @@ export const StyledWrapper = styled.div`
   .test-name {
     min-width: 0;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -41,7 +41,7 @@ export const StyledWrapper = styled.div`
     padding: 0;
     cursor: pointer;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 500;
     color: var(--primary-text);
   }

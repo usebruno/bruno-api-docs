@@ -26,7 +26,7 @@ export const StyledWrapper = styled.div`
     border: none;
     background: transparent;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 500;
     line-height: 1;
     letter-spacing: 0;
@@ -70,7 +70,7 @@ export const StyledWrapper = styled.div`
   .environment-name {
     font-family: 'Fira Code', var(--font-mono);
     font-weight: 500;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1;
     letter-spacing: 0;
     color: var(--oc-primary-strong);
@@ -83,7 +83,7 @@ export const StyledWrapper = styled.div`
   .environment-value {
     font-family: 'Fira Code', var(--font-mono);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1;
     letter-spacing: 0;
     color: var(--text-primary); /* #343434 */
@@ -95,7 +95,7 @@ export const StyledWrapper = styled.div`
 
   .environment-empty {
     font-style: italic;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-muted); /* #838383 */
   }
 
@@ -104,7 +104,7 @@ export const StyledWrapper = styled.div`
     align-items: center;
     gap: 0.375rem;
     font-style: italic;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-muted); /* #838383 */
   }
   .environment-secret svg {
@@ -115,7 +115,7 @@ export const StyledWrapper = styled.div`
   .environment-type {
     font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     letter-spacing: 0;
     color: var(--text-secondary); /* #666666 */
   }

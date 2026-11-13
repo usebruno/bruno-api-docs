@@ -25,8 +25,8 @@ export const StyledWrapper = styled.div`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.75rem;
-    line-height: 1.125rem;
+    font-size: var(--oc-font-size-sm);
+    line-height: 1.5;
     letter-spacing: 0.04em;
     min-width: unset;
     padding: 0;
@@ -41,8 +41,8 @@ export const StyledWrapper = styled.div`
     background-color: transparent;
     font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 0.75rem;
-    line-height: 1.125rem;
+    font-size: var(--oc-font-size-sm);
+    line-height: 1.5;
     letter-spacing: 0.02em;
     text-transform: uppercase;
   }

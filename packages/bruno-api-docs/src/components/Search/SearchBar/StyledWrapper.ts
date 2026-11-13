@@ -76,12 +76,12 @@ export const StyledWrapper = styled.div`
     outline: none;
     background: transparent;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     color: var(--oc-text);
   }
   .search-panel[data-open='true'] .search-input {
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
   }
   .search-input::placeholder {
     color: var(--oc-colors-text-subtext1);
@@ -135,7 +135,7 @@ export const StyledWrapper = styled.div`
     background: transparent;
     border: 0;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 400;
     color: var(--oc-colors-text-subtext1);
     white-space: nowrap;
@@ -188,7 +188,7 @@ export const StyledWrapper = styled.div`
     height: 1.375rem;
   }
   .search-empty-title {
-    font-size: 0.875rem;
+    font-size: var(--oc-font-size-md);
     font-weight: 600;
     color: var(--oc-text);
   }

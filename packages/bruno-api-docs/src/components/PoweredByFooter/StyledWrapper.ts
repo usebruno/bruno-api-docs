@@ -5,7 +5,7 @@ export const StyledWrapper = styled.div`
   padding: 0 1rem 1rem;
   text-align: center;
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   font-weight: 400;
   line-height: 1;
   color: var(--text-muted);

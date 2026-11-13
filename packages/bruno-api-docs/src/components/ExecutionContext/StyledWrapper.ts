@@ -19,12 +19,12 @@ export const StyledWrapper = styled.div`
     gap: 0.5rem 0.75rem;
   }
   .exec-card-title {
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 600;
     color: var(--text-primary);
   }
   .exec-card-meta {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-muted);
   }
 
@@ -40,7 +40,7 @@ export const StyledWrapper = styled.div`
 
   .exec-flow {
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     font-weight: 500;
     line-height: 1;
     letter-spacing: 0;

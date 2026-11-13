@@ -15,7 +15,7 @@ export const StyledWrapper = styled.div`
     border: 1px solid var(--oc-border-border0);
     border-radius: var(--oc-radius);
     font-family: var(--font-sans);
-    font-size: 0.875rem;
+    font-size: var(--oc-font-size-md);
     color: var(--oc-colors-text-subtext2);
   }
 

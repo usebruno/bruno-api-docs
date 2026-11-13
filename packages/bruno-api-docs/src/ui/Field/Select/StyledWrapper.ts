@@ -20,7 +20,7 @@ export const StyledWrapper = styled.button`
   transition: border-color 0.15s ease;
 
   .oc-select-label {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 600;
     line-height: 1;
     white-space: nowrap;

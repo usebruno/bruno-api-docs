@@ -39,7 +39,7 @@ export const StyledWrapper = styled.div`
     min-width: 28rem;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
   }
 
   .key-value-table thead {
@@ -54,7 +54,7 @@ export const StyledWrapper = styled.div`
     position: relative;
     padding: 0.5rem 0.625rem 0.4375rem;
     text-align: left;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 600;
     line-height: 1;
     letter-spacing: 0;
@@ -190,7 +190,7 @@ export const StyledWrapper = styled.div`
     width: 100%;
     border: 0.0625rem solid transparent;
     padding: 0.625rem;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.25;
     color: var(--text-primary);
     font-family: inherit;
@@ -220,7 +220,7 @@ export const StyledWrapper = styled.div`
   }
 
   .key-value-table .col-value .secret-value .secret-value-input {
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
   }
 
   .key-value-table .value-cell-trailing {

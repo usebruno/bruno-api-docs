@@ -5,7 +5,7 @@ export const StyledWrapper = styled.span`
   align-items: center;
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   letter-spacing: 0.02em;
 
   &.method-badge--as-written {

@@ -1,0 +1,134 @@
+name: QA builds
+
+on:
+  push:
+    branches: ['release/**']
+    tags: ['preview/pr-*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-builds-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PAGES_URL: https://usebruno.github.io/bruno-api-docs
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      folder: ${{ steps.target.outputs.folder }}
+      sha: ${{ steps.target.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - id: target
+        run: |
+          case "$GITHUB_REF" in
+            refs/heads/release/*) folder="${GITHUB_REF_NAME//\//-}" ;;
+            refs/tags/preview/pr-*) folder="${GITHUB_REF_NAME#preview/}" ;;
+            *) echo "unexpected ref $GITHUB_REF"; exit 1 ;;
+          esac
+          echo "folder=$folder" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build info
+        env:
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "BUILD_SHA=$(git rev-parse --short HEAD)"
+            echo "BUILD_REF=$GITHUB_REF_NAME"
+            echo "BUILD_VERSION=$(jq -r .version packages/bruno-api-docs/package.json)"
+            echo "BUILD_ENV=qa"
+            echo "BUILD_RUN=$RUN"
+            echo "BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } >> "$GITHUB_ENV"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        working-directory: packages/bruno-api-docs
+        run: |
+          npm run build:lib-bundle
+          npm run build:standalone
+          jq -n '{sha: env.BUILD_SHA, ref: env.BUILD_REF, version: env.BUILD_VERSION, env: env.BUILD_ENV, run: env.BUILD_RUN, built_at: env.BUILD_TIME}' > dist-standalone/version.json
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: site
+          path: packages/bruno-api-docs/dist-standalone/
+          retention-days: 1
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      FOLDER: ${{ needs.build.outputs.folder }}
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: site
+          path: incoming
+
+      - name: Publish this folder to gh-pages
+        env:
+          TOKEN: ${{ github.token }}
+          SHA: ${{ needs.build.outputs.sha }}
+        run: |
+          remote="https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          for attempt in 1 2 3 4 5; do
+            rm -rf site && git init -q site && cd site
+            base=""
+            if git fetch -q --depth 1 "$remote" gh-pages; then
+              base=$(git rev-parse FETCH_HEAD)
+              git checkout -q FETCH_HEAD
+            fi
+            rm -rf "$FOLDER" && cp -R ../incoming "$FOLDER" && touch .nojekyll
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>api-docs QA builds</title><h1>api-docs QA builds</h1>'
+              echo '<p>Point a generated docs page at <code>&lt;base&gt;/api-docs.js</code> and <code>api-docs.css</code>, then check <code>Bruno.build.sha</code>.</p><ul>'
+              for f in */version.json; do
+                d="${f%/version.json}"
+                jq -r --arg d "$d" --arg base "$PAGES_URL" '"<li><code>\($base)/\($d)/</code> \(.ref) \(.sha) \(.built_at) <a href=\"\($d)/version.json\">version.json</a></li>"' "$f"
+              done
+              echo '</ul>'
+            } > index.html
+            git checkout -q --orphan next
+            git add -A
+            git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -q -m "deploy $FOLDER at $SHA"
+            if git push -q --force-with-lease="gh-pages:$base" "$remote" next:gh-pages; then
+              echo "published $FOLDER on attempt $attempt"
+              exit 0
+            fi
+            cd .. && sleep $((attempt * 5))
+          done
+          echo "gh-pages kept changing under us, giving up"
+          exit 1
+
+  verify:
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait until Pages serves this build
+        env:
+          FOLDER: ${{ needs.build.outputs.folder }}
+          SHA: ${{ needs.build.outputs.sha }}
+        run: |
+          for _ in $(seq 1 40); do
+            live=$(curl -fsS "$PAGES_URL/$FOLDER/version.json?nocache=$RANDOM" | jq -r .sha || true)
+            [ "$live" = "$SHA" ] && echo "live: $PAGES_URL/$FOLDER/" && exit 0
+            sleep 15
+          done
+          echo "Pages did not serve $SHA within 10 minutes"
+          exit 1

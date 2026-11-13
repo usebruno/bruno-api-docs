@@ -99,6 +99,23 @@ test.describe('The playground file on a host page', () => {
     expect(loads).toHaveLength(1);
   });
 
+  test('is never loaded with hidePlayground, even for a deep link to an open playground', async ({
+    page,
+    standalonePage
+  }) => {
+    const loads = playgroundFileRequests(page);
+    await standalonePage.goto('#/alpha?pg=1&dock=bottom&pgReq=alpha');
+    await standalonePage.mount('first', { content: generalFixtureCollection, hidePlayground: true });
+    const first = standalonePage.instance('first');
+
+    await expect(first.requestPage.title).toHaveText('Alpha');
+    await expect(first.requestPage.urlBar.tryButton).toHaveCount(0);
+    await expect(first.playground.view).toHaveCount(0);
+    await first.sidebar.item('Beta').click();
+    await expect(first.requestPage.title).toHaveText('Beta');
+    expect(loads).toEqual([]);
+  });
+
   test('shows the load error when the file is missing and keeps the docs usable', async ({ page, standalonePage }) => {
     await page.route('**/api-playground-*', (route) => route.fulfill({ status: 404, body: 'not found' }));
     await standalonePage.goto('#/alpha');

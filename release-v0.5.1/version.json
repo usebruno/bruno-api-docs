@@ -1,0 +1,8 @@
+{
+  "sha": "9b9b034",
+  "ref": "release/v0.5.1",
+  "version": "0.5.1",
+  "env": "qa",
+  "run": "https://github.com/usebruno/bruno-api-docs/actions/runs/43449322318",
+  "built_at": "2026-11-13T15:07:09Z"
+}

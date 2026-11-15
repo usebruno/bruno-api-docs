@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import CodeEditor from '@/ui/CodeEditor/CodeEditor';
 import type { KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { parseBulkKeyValue, preserveDescriptions, serializeBulkKeyValue } from '@/utils/bulkKeyValue';
@@ -14,6 +14,15 @@ const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix = 'bulk' }
   const originalRef = useRef(data);
   const [text, setText] = useState(() => serializeBulkKeyValue(data));
 
+  useEffect(() => {
+    const incoming = serializeBulkKeyValue(data);
+    setText((current) => {
+      if (incoming === serializeBulkKeyValue(parseBulkKeyValue(current))) return current;
+      originalRef.current = data;
+      return incoming;
+    });
+  }, [data]);
+
   const handleChange = (value: string) => {
     setText(value);
     onChange(preserveDescriptions(parseBulkKeyValue(value), originalRef.current, idPrefix));
@@ -21,7 +30,14 @@ const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix = 'bulk' }
 
   return (
     <StyledWrapper className="space-y-3">
-      <CodeEditor value={text} onChange={handleChange} language="plaintext" height="200px" placeholder="name: value" />
+      <CodeEditor
+        value={text}
+        onChange={handleChange}
+        language="plaintext"
+        height="200px"
+        placeholder="name: value"
+        testId={`${idPrefix}-bulk-editor`}
+      />
     </StyledWrapper>
   );
 };

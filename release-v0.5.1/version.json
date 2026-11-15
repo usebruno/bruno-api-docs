@@ -1,0 +1,8 @@
+{
+  "sha": "4db323c",
+  "ref": "release/v0.5.1",
+  "version": "0.5.1",
+  "env": "qa",
+  "run": "https://github.com/usebruno/bruno-api-docs/actions/runs/43772651109",
+  "built_at": "2026-11-15T23:03:13Z"
+}

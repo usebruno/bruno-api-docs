@@ -7,8 +7,8 @@ export const StyledWrapper = styled.li`
   padding: 0.3rem 0;
   font-family: var(--font-sans);
   font-weight: 400;
-  font-size: 0.75rem;
-  line-height: 1.125rem;
+  font-size: var(--oc-font-size-sm);
+  line-height: 1.5;
   letter-spacing: normal;
   color: var(--oc-text);
 

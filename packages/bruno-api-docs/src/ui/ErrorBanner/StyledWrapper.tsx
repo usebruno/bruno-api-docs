@@ -16,8 +16,8 @@ export const StyledWrapper = styled.div`
 
   .error-message {
     font-family: var(--font-mono);
-    font-size: 0.8125rem;
-    line-height: 1.3rem;
+    font-size: var(--oc-font-size-base);
+    line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-all;
     color: var(--text-primary);
@@ -42,8 +42,8 @@ export const StyledWrapper = styled.div`
 
   .error-hint {
     margin-top: 0.75rem;
-    font-size: 0.8125rem;
-    line-height: 1.3rem;
+    font-size: var(--oc-font-size-base);
+    line-height: 1.6;
     white-space: pre-wrap;
     color: var(--text-secondary);
   }

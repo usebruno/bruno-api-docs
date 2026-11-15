@@ -41,7 +41,7 @@ export const StyledWrapper = styled.div`
     background: var(--oc-background-surface0);
     font-family: var(--font-sans);
     font-weight: 700;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1;
     letter-spacing: 0;
     color: var(--oc-colors-text-subtext1);

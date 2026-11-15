@@ -85,6 +85,20 @@ const createBackstageTheme = (base: Theme, mode: ResolvedThemeMode, p: Backstage
   draftColor: p.status.warning,
   bg: p.background.paper,
 
+  // Backstage UI type scale (--bui-font-size-*); sm has no BUI step and sits between 2 and 3.
+  font: {
+    size: {
+      xxs: '0.625rem', // 10px — bui-font-size-1
+      xs: '0.75rem', // 12px — bui-font-size-2
+      sm: '0.8125rem', // 13px
+      base: '0.875rem', // 14px — bui-font-size-3 (body)
+      md: '1rem', // 16px — bui-font-size-4
+      lg: '1.25rem', // 20px — bui-font-size-5
+      xl: '1.5rem', // 24px — bui-font-size-6
+      xxl: '2rem' // 32px — bui-font-size-7
+    }
+  },
+
   background: {
     base: p.background.paper,
     mantle: p.background.default,

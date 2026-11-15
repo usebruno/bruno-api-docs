@@ -7,7 +7,7 @@ export const StyledWrapper = styled.div`
   width: 100%;
 
   .oc-label {
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 400;
     line-height: 1;
     color: var(--text-muted);

@@ -18,7 +18,7 @@ export const StyledWrapper = styled.div`
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
     font-family: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     text-align: left;
     color: var(--text-primary);
     background: transparent;

@@ -17,7 +17,7 @@ export const StyledWrapper = styled.div`
   .method-chip {
     flex: 0 0 auto;
     font-family: 'Fira Code', var(--font-mono);
-    font-size: 10px;
+    font-size: var(--oc-font-size-xxs);
     font-weight: 500;
     line-height: 1.3;
     letter-spacing: 0;

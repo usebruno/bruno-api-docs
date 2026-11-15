@@ -30,7 +30,7 @@ export const StyledWrapper = styled.div`
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 500;
     line-height: 1;
     color: var(--text-muted);
@@ -114,7 +114,7 @@ export const StyledWrapper = styled.div`
     margin-right: 0.5rem;
     padding: 0.3rem 0.5rem;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 500;
     line-height: 1;
     white-space: nowrap;
@@ -139,7 +139,7 @@ export const StyledWrapper = styled.div`
     gap: 0.375rem;
     padding: 0.3rem 0.5rem;
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     font-weight: 500;
     line-height: 1;
     white-space: nowrap;

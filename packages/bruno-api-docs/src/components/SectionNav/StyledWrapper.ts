@@ -28,8 +28,8 @@ export const StyledWrapper = styled.div`
     border: none;
     border-radius: 0.3125rem;
     font: inherit;
-    font-size: 0.8125rem;
-    line-height: 1.15rem;
+    font-size: var(--oc-font-size-base);
+    line-height: 1.4;
     color: var(--text-secondary);
     cursor: pointer;
     transition: color 0.12s ease, background 0.12s ease;

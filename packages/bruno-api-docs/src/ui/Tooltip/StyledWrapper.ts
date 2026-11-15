@@ -9,7 +9,7 @@ export const StyledWrapper = styled.div`
   background: var(--oc-background-surface0);
   color: var(--oc-text);
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   font-weight: 400;
   line-height: 1.35;
   white-space: normal;

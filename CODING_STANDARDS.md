@@ -61,8 +61,8 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
   - Read-only document, per load: `bruno-shared/src/document/document.tsx`. Docs read only this.
   - Per-instance session (theme, env): `bruno-shared/src/session/session.tsx`
   - Playground state (working copy, responses, run starts, selection, view, folders):
-    `bruno-api-playground/src/state/playground.ts`, held in the session's `slot` so it outlives
-    a close. Docs never read it.
+    `bruno-api-playground/src/state/playground.ts`, held per session in a `WeakMap` so it
+    outlives a close. Docs never read it.
   - Playground deep links live in the URL only: `bruno-shared/src/utils/playgroundDock.ts`
 - Session state is a small observable, not a store. Don't add a store library.
   see: `bruno-shared/src/observable/observable.ts`

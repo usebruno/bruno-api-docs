@@ -123,8 +123,11 @@ stable uuids keeps responses, selection and folder collapse.
 
 The playground seeds itself from the document: when it is first opened, when it reopens after
 the document changed, and when the document changes while it is open
-(`sync` in `bruno-api-playground/src/state/playground.ts`, run from `PlaygroundBody`). A new
-document replaces the working copy, so edits are dropped; responses, selection and folder
+(`sync` in `bruno-api-playground/src/state/playground.ts`, run from `PlaygroundBody` when the
+playground next opens, immediately if it is open). `PlaygroundBody` renders nothing until the
+working copy is seeded from the current document, so nothing under it ever sees a stale one;
+a document change while it is open remounts the view under it.
+A new document replaces the working copy, so edits are dropped; responses, selection and folder
 collapse are keyed by uuid and carry over when the uuids are stable, and point at nothing when
 they are regenerated. The same document again is a no-op, so edits survive close, reopen and
 dock switches.
@@ -139,9 +142,9 @@ One owner per fact. Everything else reads it or derives it.
 | Theme | session, `bruno-shared/src/theme/themeMode.ts` | yes | yes, if toggled (`oc-docs.theme`, localStorage) | kept |
 | Active env, show vars | session, `bruno-shared/src/session/env.ts` | yes | yes, same tab (`oc-docs.env`, sessionStorage) | kept |
 | Playground view: selection, orientation, response format/preview | playground, `bruno-api-playground/src/state/playground.ts` | yes | no (selection comes back from the URL) | kept |
-| Playground folder collapse | playground, `bruno-api-playground/src/state/playgroundFolders.ts` | yes | no | re-seeded when the playground next renders, open/closed carried over by uuid |
+| Playground folder collapse | playground, `bruno-api-playground/src/state/playgroundFolders.ts` | yes | no | re-seeded when the playground next opens (immediately if it is open), open/closed carried over by uuid |
 | Docs folder collapse | `bruno-api-docs/src/components/Docs/Sidebar/hooks/useFolderCollapse.ts` (AppShell local state) | yes | no | reset |
-| Working copy (playground edits) | playground, `bruno-api-playground/src/state/workspace.ts` | yes | no | replaced when the playground next renders, edits dropped |
+| Working copy (playground edits) | playground, `bruno-api-playground/src/state/workspace.ts` | yes | no | replaced when the playground next opens (immediately if it is open), edits dropped |
 | Responses | playground workspace | yes | no | stay, but keyed by old uuids |
 | Run starts | playground workspace + `bruno-shared/src/session/playgroundRuns.ts` | no, close aborts runs | no | n/a |
 | Playground deep link: `pg`, `dock`, `pgReq`, `pgEx` | URL query, `bruno-shared/src/utils/playgroundDock.ts` | no, close clears all four | yes | kept |
@@ -161,21 +164,21 @@ Docs and playground each own their state. Shared holds only what crosses:
   the header, and a switch in either place shows in both. Both env switchers list the
   document's environments; the playground can edit an environment's variables but cannot add,
   rename or remove one.
-- **`session.slot(key, create)`**: a `Map` on the session that hands back one object per key,
-  created on first use. The playground keeps its whole state there under `'playground'`
-  (`usePlayground` in `bruno-api-playground/src/state/playground.ts`), created lazily on first
-  open, so it survives close, reopen and dock switches and stays per instance. Docs never reads
-  the slot.
+- **Session identity**: the playground keeps its whole state in a module-level
+  `WeakMap<Session, Playground>` (`playgroundFor` in
+  `bruno-api-playground/src/state/playground.ts`), created lazily on first open, so it survives
+  close, reopen and dock switches and stays per instance. The session itself carries nothing
+  for the playground, and docs never reads the map.
 - **Run tracking** (`bruno-shared/src/session/playgroundRuns.ts`): the dock shell aborts every
-  run when the playground closes. On the next render the playground drops run starts whose run
+  run when the playground closes. When the playground next opens it drops run starts whose run
   is no longer in flight, so a reopened request is not stuck loading.
 
 `OpenCollection` renders `SessionProvider`, `DocumentProvider` and a variable resolver over the
 document. `PlaygroundBody` renders its own resolver over the working copy, so playground
 `{{var}}` sites resolve against its edits. In the CDN build the session, document, resolver and
 run modules are externals, so both sides share them; the playground's state modules are bundled
-only in the playground file, which is fine because the objects they create live in the shared
-session's slot.
+only in the playground file, which is fine because that file is evaluated once per page, so
+there is one `WeakMap`, keyed by each instance's session.
 
 ## Routing
 
@@ -196,8 +199,8 @@ session's slot.
 - Navigation (sidebar, slugs, search, prev/next) always comes from the document snapshot.
 - Docs pages, the docs Environments page, both EnvSwitchers and the docs variable
   resolver read only the document. Edits made in the playground never show on docs pages.
-- The playground unmounts on close. Its state lives in the session slot, so edits and the open
-  view survive close, reopen and dock switches. A reload drops them.
+- The playground unmounts on close. Its state lives in the per-session `WeakMap`, so edits and
+  the open view survive close, reopen and dock switches. A reload drops them.
 - Selection is restored from `pgReq`/`pgEx` once per URL value
   (`bruno-api-playground/src/components/Playground/PlaygroundBody/usePlaygroundSelection.ts`).
 

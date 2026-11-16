@@ -191,7 +191,7 @@ export const Environments: React.FC<EnvironmentsProps> = ({ collection }) => {
               className="environment-panel"
             >
               {descriptionHtml && (
-                <ViewMore collapsedHeight="4.5rem" className="environment-description" testId="environment-description">
+                <ViewMore className="environment-description" testId="environment-description">
                   <MarkdownContent className="markdown-documentation" html={descriptionHtml} />
                 </ViewMore>
               )}

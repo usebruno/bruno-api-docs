@@ -32,7 +32,7 @@ describe('usePlaygroundUrlState (read path)', () => {
   it('reports closed with the default dock when no params are present', () => {
     const probe = useProbeAt('/');
     expect(probe.getAttribute('data-open')).toBe('false');
-    expect(probe.getAttribute('data-dock')).toBe('bottom');
+    expect(probe.getAttribute('data-dock')).toBe('modal');
     expect(probe.getAttribute('data-req')).toBe('');
     expect(probe.getAttribute('data-disabled')).toBe('false');
   });

@@ -673,6 +673,32 @@ items:
 
       Line one<br/>line two
 
+      #### Task with a link
+
+      - [x](https://example.com)
+
+      #### Raw HTML
+
+      <div>raw html</div>
+
+      <img alt="Billing badge" width="40" height="40" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" onerror="window.__ocInjected = 'img'">
+
+      <script>window.__ocInjected = 'script'</script>
+
+      <div class="fixed inset-0 md-table-scroll" style="position:fixed;inset:0" data-nav-headings id="overlay">Styled block</div>
+
+      <form action="https://example.com/collect"><input type="text" name="password"><button>Sign in</button></form>
+
+      <a href="javascript:window.__ocInjected='link'">Unsafe link</a>
+
+      #### Sparse rows
+
+      | Name | Value |
+      | --- | --- |
+      | alpha | 1 |
+      | | |
+      | beta | 2 |
+
       #### Invoice fields
 
       | Field | Example |

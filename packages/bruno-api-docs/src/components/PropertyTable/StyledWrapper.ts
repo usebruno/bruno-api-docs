@@ -29,7 +29,7 @@ export const StyledWrapper = styled.div`
     font-weight: 500;
     font-style: italic;
     font-size: var(--oc-font-size-base);
-    line-height: 1;
+    line-height: 1.2;
     letter-spacing: normal;
     color: var(--text-secondary);
   }
@@ -122,6 +122,9 @@ export const StyledWrapper = styled.div`
   }
   .property-row:has(.description) > .inherited-source {
     grid-row: 1 / span 2;
+  }
+  .property-row:has(> .inherited-source) {
+    padding-right: 0;
   }
   .property-row:has(> .inherited-source) .property-value-cell {
     padding-right: 2.5rem;

@@ -64,7 +64,7 @@ test.describe('playground layout persistence (desktop)', () => {
   }) => {
     await requestPage.open(REQUEST_PATH);
     await requestPage.urlBar.tryButton.click();
-    await expect(playground.bottomPanel).toBeVisible();
+    await expect(playground.modalPanel).toBeVisible();
 
     await playground.selectDock('inline');
     await expect(playground.inlinePanel).toBeVisible();
@@ -76,7 +76,7 @@ test.describe('playground layout persistence (desktop)', () => {
 
     await requestPage.urlBar.tryButton.click();
     await expect(playground.inlinePanel).toBeVisible();
-    await expect(playground.bottomPanel).toHaveCount(0);
+    await expect(playground.modalPanel).toHaveCount(0);
   });
 
   test('a dock in the URL wins over the stored dock', async ({ page, playground }) => {
@@ -100,7 +100,7 @@ test.describe('playground layout persistence (desktop)', () => {
 
     await requestPage.open(REQUEST_PATH);
     await requestPage.urlBar.tryButton.click();
-    await expect(playground.bottomPanel).toBeVisible();
+    await expect(playground.modalPanel).toBeVisible();
   });
 
   test('a collapsed bottom sheet stays collapsed after a reload', async ({ page, playground }) => {
@@ -143,6 +143,7 @@ test.describe('playground layout persistence (desktop)', () => {
   test('Try it after collapsing expands to the persisted height', async ({ requestPage, playground }) => {
     await requestPage.open(REQUEST_PATH);
     await requestPage.urlBar.tryButton.click();
+    await playground.selectDock('bottom');
     await expect(playground.bottomPanel).toBeVisible();
 
     await playground.grabBottomResizer();
@@ -225,11 +226,11 @@ test.describe('playground layout persistence (desktop)', () => {
     expect(height).toBeLessThanOrEqual(900);
   });
 
-  test('a fresh Try it with no stored dock opens in the bottom dock', async ({ requestPage, playground }) => {
+  test('a fresh Try it with no stored dock opens in the modal dock', async ({ requestPage, playground }) => {
     await requestPage.open(REQUEST_PATH);
     await requestPage.urlBar.tryButton.click();
-    await expect(playground.bottomPanel).toBeVisible();
+    await expect(playground.modalPanel).toBeVisible();
     await expect(playground.inlinePanel).toHaveCount(0);
-    await expect(playground.modalPanel).toHaveCount(0);
+    await expect(playground.bottomPanel).toHaveCount(0);
   });
 });

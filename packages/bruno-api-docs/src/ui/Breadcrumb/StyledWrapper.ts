@@ -51,6 +51,6 @@ export const StyledWrapper = styled.nav`
     border-radius: 2px;
   }
   .breadcrumb-current {
-    color: var(--oc-breadcrumb-color-current, var(--primary-text));
+    color: var(--oc-breadcrumb-color-current, var(--text-primary));
   }
 `;

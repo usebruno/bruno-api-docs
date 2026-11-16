@@ -217,6 +217,38 @@ describe('GrpcRequest', () => {
     expect(getByTestId(root, 'grpc-request-section-auth').text).toContain('Bearer Token');
   });
 
+  it('names the collection when nothing up the chain sets auth', () => {
+    const root = useRenderToDom(
+      <GrpcRequest
+        item={grpcItem({
+          info: { name: 'Order Service', type: 'grpc' },
+          grpc: { url: 'grpc://localhost:50051', method: '/orders.OrderService/GetOrder', auth: 'inherit' }
+        })}
+        collection={{ info: { name: 'Testbench' } } as never}
+      />
+    );
+
+    expect(getByTestId(root, 'grpc-request-auth-inherited').text).toBe('Inherited from collection: Testbench');
+    expect(getByTestId(root, 'grpc-request-section-auth').text).toContain('No auth');
+  });
+
+  it('says an inherited auth gRPC cannot use falls back to no auth', () => {
+    const root = useRenderToDom(
+      <GrpcRequest
+        item={grpcItem({
+          info: { name: 'Order Service', type: 'grpc' },
+          grpc: { url: 'grpc://localhost:50051', method: '/orders.OrderService/GetOrder', auth: 'inherit' }
+        })}
+        collection={{ info: { name: 'Testbench' }, request: { auth: { type: 'digest', username: 'u', password: 'p' } } } as never}
+      />
+    );
+
+    expect(getByTestId(root, 'grpc-request-auth-inherited').text).toBe('Inherited from collection: Testbench');
+    const section = getByTestId(root, 'grpc-request-section-auth').text;
+    expect(section).toContain('Digest Auth is not supported by gRPC. Using no auth instead.');
+    expect(section).not.toContain('Username');
+  });
+
   it('masks a secret rather than printing it', () => {
     const root = useRenderToDom(
       <GrpcRequest

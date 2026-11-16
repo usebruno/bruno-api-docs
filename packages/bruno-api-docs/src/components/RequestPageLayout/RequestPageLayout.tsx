@@ -91,12 +91,8 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
   const hasTags = tags.length > 0 || inheritedTags.length > 0;
 
   const authBadge
-    = ownAuth === 'inherit' ? (
-      authSource ? (
-        <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
-      ) : (
-        <ContentTypeBadge label="Inherited" />
-      )
+    = ownAuth === 'inherit' && authSource ? (
+      <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
     ) : null;
 
   const hasLeftColumn = showAuth || hasParams || hasConfigContent || hasHeaders || hasInheritedHeaders;
@@ -124,7 +120,7 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
         </div>
 
         {descHtml && (
-          <ViewMore collapsedHeight="4.5rem" style={{ marginTop: '1.5rem' }} testId="request-description">
+          <ViewMore style={{ marginTop: '1.5rem' }} testId="request-description">
             <MarkdownContent
               className="markdown-documentation"
               navHeadings

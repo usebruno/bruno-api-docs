@@ -15,6 +15,14 @@ export const AUTH_TYPES = {
 
 export type AuthType = (typeof AUTH_TYPES)[keyof typeof AUTH_TYPES];
 
+export const GRPC_AUTH_TYPES: readonly string[] = [
+  AUTH_TYPES.BASIC,
+  AUTH_TYPES.BEARER,
+  AUTH_TYPES.API_KEY,
+  AUTH_TYPES.OAUTH2,
+  AUTH_TYPES.WSSE
+];
+
 export const AUTH_MODE_LABELS: Record<string, string> = {
   'basic': 'Basic Auth',
   'bearer': 'Bearer Token',

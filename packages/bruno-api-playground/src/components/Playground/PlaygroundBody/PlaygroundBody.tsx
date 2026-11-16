@@ -1,7 +1,8 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useLayoutEffect, useRef } from 'react';
 import type { Item } from '@opencollection/types/collection/item';
-import { isFolderCollapsed } from '@usebruno/api-shared/session/playgroundFolders';
-import { useSession } from '@usebruno/api-shared/session/session';
+import { useDocument } from '@usebruno/api-shared/document/document';
+import { isFolderCollapsed } from '../../../state/playgroundFolders';
+import { usePlayground } from '../../../state/playground';
 import { useObservable } from '@usebruno/api-shared/observable/observable';
 import { useElementWidth, useResizableSidebar, useClickOutside, VariableResolverProvider } from '@usebruno/api-shared/hooks';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
@@ -33,7 +34,9 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   onOpenSidebar,
   appliedSlugRef
 }) => {
-  const { playground: { orientation: orientationState, folders }, workspace } = useSession();
+  const document = useDocument();
+  const { orientation: orientationState, folders, workspace, sync } = usePlayground();
+  useLayoutEffect(() => sync(document), [sync, document]);
   const collection = useObservable(workspace, (state) => state.collection);
   const orientationOverride = useObservable(orientationState);
   const folderState = useObservable(folders);

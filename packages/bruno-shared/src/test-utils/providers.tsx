@@ -11,11 +11,8 @@ export const TestProviders: React.FC<{
   session = createSession(),
   document = {} as OpenCollection,
   children
-}) => {
-  if (!session.workspace.get().collection) session.workspace.replaceCollection(document);
-  return (
-    <SessionProvider value={session}>
-      <DocumentProvider document={document}>{children}</DocumentProvider>
-    </SessionProvider>
-  );
-};
+}) => (
+  <SessionProvider value={session}>
+    <DocumentProvider document={document}>{children}</DocumentProvider>
+  </SessionProvider>
+);

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder } from '@opencollection/types/collection/item';
-import { hydrateWithUUIDs } from '../utils/fileUtils';
+import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
 import {
   EMPTY_WORKSPACE,
   setCollection,
@@ -492,5 +492,42 @@ describe('workspace freezing', () => {
     expect(() => {
       (hostInfo as { name: string }).name = 'changed';
     }).toThrow(TypeError);
+  });
+});
+
+describe('the document the workspace is seeded from', () => {
+  const raw = {
+    info: { name: 'C' },
+    config: { environments: [{ name: 'Dev', variables: [{ name: 'v', value: '1' }] }] },
+    items: [
+      {
+        info: { name: 'Folder', type: 'folder' },
+        request: { variables: [{ name: 'fv', value: '1' }] },
+        items: [{ info: { name: 'Ping', type: 'http' }, http: { method: 'GET', url: 'https://x.test' } }]
+      }
+    ]
+  } as unknown as OpenCollectionCollection;
+
+  it('stays as loaded while the playground seeded from it is edited', () => {
+    const document = hydrateWithUUIDs(raw);
+    const before = structuredClone(document);
+    const folder = document.items![0] as { uuid: string; items: { uuid: string }[] };
+    const request = folder.items[0];
+    const workspace = createWorkspace();
+
+    workspace.replaceCollection(document);
+    workspace.updateRequestItem({ uuid: request.uuid, item: { ...request, http: { method: 'POST' } } as never });
+    workspace.setVariable({ scope: 'environment', name: 'v', value: 'edited', envName: 'Dev' });
+    workspace.applyScriptVariableChanges({
+      environmentVariables: { envName: 'Dev', variables: { v: 'script', added: 'x' }, deleted: [] },
+      collectionVariables: { variables: { c: 'script' }, deleted: [] }
+    });
+    workspace.setVariable({ scope: 'folder', name: 'fv', value: 'edited', itemUuid: folder.uuid });
+    workspace.updateFolder({ uuid: folder.uuid, folder: { ...folder, request: { headers: [] } } as never });
+    const working = workspace.get().collection!;
+    workspace.replaceCollection({ ...working, config: { environments: [] } });
+
+    expect(document).toEqual(before);
+    expect(workspace.get().collection).not.toEqual(before);
   });
 });

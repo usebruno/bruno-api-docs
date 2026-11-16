@@ -10,7 +10,7 @@ import type { MenuDropdownItem } from '@usebruno/api-shared/ui/MenuDropdown';
 import ActionIconButton from './ActionIconButton/ActionIconButton';
 import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
-import { useSession } from '@usebruno/api-shared/session/session';
+import { usePlayground } from '../../../../../../../state/playground';
 import { downloadResponse } from '../../../../../../../utils/downloadResponse';
 import useCopy from '@usebruno/api-shared/hooks/useCopy';
 import { formatResponse } from '@usebruno/api-shared/utils/dataFormatter';
@@ -49,7 +49,7 @@ const ResponseActions: React.FC<ResponseActionsProps> = ({
     getText: getCopyText,
     disabled: copyDisabled
   });
-  const { orientation: orientationState } = useSession().playground;
+  const { orientation: orientationState } = usePlayground();
 
   const downloadDisabled = !response?.base64Data;
   const onDownload = () => downloadResponse(response);

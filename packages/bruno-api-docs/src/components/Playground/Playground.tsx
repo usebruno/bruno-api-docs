@@ -6,7 +6,6 @@ import ModalDock from './docks/ModalDock/ModalDock';
 import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { playgroundRuns, PLAYGROUND_CLOSED } from '@usebruno/api-shared/session/playgroundRuns';
-import { useSession } from '@usebruno/api-shared/session/session';
 import { loadPlayground } from './load';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
@@ -44,7 +43,6 @@ interface PlaygroundProps {
 }
 
 const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
-  const { workspace } = useSession();
   const { open, dock, requestSlug, exampleSlug, setDock, closePlayground } = usePlaygroundUrlState();
   const isPhone = useIsMobilePhone();
   // On a phone the playground is always the fullscreen MobileDock, and its
@@ -67,10 +65,7 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
   // it so re-opening a request re-applies it.
   const appliedSlugRef = useRef<string | null>(null);
 
-  useEffect(() => () => {
-    playgroundRuns.abortAll(PLAYGROUND_CLOSED);
-    workspace.clearAllRequests();
-  }, [workspace]);
+  useEffect(() => () => playgroundRuns.abortAll(PLAYGROUND_CLOSED), []);
 
   if (!open) return null;
 

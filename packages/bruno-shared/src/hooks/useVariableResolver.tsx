@@ -3,7 +3,6 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
-import type { VariableWrite } from '../session/workspace';
 import { promptVariableName } from '../utils/promptVariables';
 import { useEnvState } from '../session/session';
 import { getRequestVariables, isFolder } from '../utils/schemaHelpers';
@@ -23,6 +22,14 @@ import {
   type VariableScope,
   type VariableSource
 } from '../utils/variableResolution';
+
+export interface VariableWrite {
+  scope: 'environment' | 'collection' | 'folder' | 'request' | '$secrets';
+  name: string;
+  value: string;
+  envName?: string;
+  itemUuid?: string;
+}
 
 export type DynamicVariableKind = 'random' | 'time' | 'unknown';
 

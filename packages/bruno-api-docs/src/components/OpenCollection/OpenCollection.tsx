@@ -76,7 +76,6 @@ export interface OpenCollectionProps {
 }
 
 const useCollectionLoader = (collection: OpenCollectionProps['collection']): LoadState => {
-  const { playground: { selection, folders }, workspace } = useSession();
   const [loadState] = useState(() => createObservable<LoadState>({ initial: IDLE }));
 
   useEffect(() => {
@@ -88,24 +87,15 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
       try {
         const { collection: resolved, sourceText } = await resolveCollectionSource(collection);
         if (!isActive) return;
-        const hydrated = hydrateWithUUIDs(resolved);
-        folders.seed(hydrated.items);
-        workspace.replaceCollection(hydrated);
-        loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrated });
+        loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrateWithUUIDs(resolved) });
       } catch (err) {
         if (!isActive) return;
         const message = err instanceof Error ? err.message : 'Failed to load API collection';
-        folders.seed(undefined);
-        workspace.clear();
-        selection.clearRequest();
         loadState.set({ ...IDLE, status: 'failed', error: message });
       }
     };
 
     if (collection == null) {
-      folders.seed(undefined);
-      workspace.clear();
-      selection.clearRequest();
       loadState.set(IDLE);
       return () => { isActive = false; };
     }
@@ -113,14 +103,16 @@ const useCollectionLoader = (collection: OpenCollectionProps['collection']): Loa
     if (isFileInstance(collection) || typeof collection === 'string') {
       void load();
     } else {
-      const hydrated = hydrateWithUUIDs(collection as OpenCollectionCollection);
-      folders.seed(hydrated.items);
-      workspace.replaceCollection(hydrated);
-      loadState.set({ status: 'succeeded', error: null, sourceText: null, document: hydrated });
+      loadState.set({
+        status: 'succeeded',
+        error: null,
+        sourceText: null,
+        document: hydrateWithUUIDs(collection as OpenCollectionCollection)
+      });
     }
 
     return () => { isActive = false; };
-  }, [collection, loadState, selection, folders, workspace]);
+  }, [collection, loadState]);
 
   return useObservable(loadState);
 };

@@ -1,9 +1,8 @@
 import { useEffect, useMemo, type MutableRefObject } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { useSession } from '@usebruno/api-shared/session/session';
 import { useObservable } from '@usebruno/api-shared/observable/observable';
-import { selectedUuid, type PlaygroundSelection } from '@usebruno/api-shared/session/playground';
+import { selectedUuid, usePlayground, type PlaygroundSelection } from '../../../state/playground';
 import type { ExampleHighlight } from '@usebruno/api-shared/components/Docs/Sidebar/SidebarTree/SidebarTree';
 import { useNavModel } from '@usebruno/api-shared/document/document';
 import { usePlaygroundUrlState } from '@usebruno/api-shared/hooks';
@@ -38,7 +37,7 @@ export const usePlaygroundSelection = ({
 }: Options) => {
   const model = useNavModel();
   const { setRequestSlug, setRequestExample } = usePlaygroundUrlState();
-  const { selection: selectionState, folders } = useSession().playground;
+  const { selection: selectionState, folders } = usePlayground();
   const selection = useObservable(selectionState);
   const selectedItemId = selectedUuid(selection);
   const selectedExampleIndex = typeof selection === 'object' && selection ? selection.exampleIndex : null;
@@ -75,8 +74,8 @@ export const usePlaygroundSelection = ({
     if (!requestSlug || appliedSlugRef.current === key) return;
     const target = resolvePlaygroundTarget(requestSlug, model);
     if (!target) return;
-    if (target.uuid && !collection?.items) return;
     const item = target.uuid ? findItemByUuid(collection?.items, target.uuid) : undefined;
+    if (target.uuid && !item) return;
     const exampleIndex
       = exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
     appliedSlugRef.current = key;

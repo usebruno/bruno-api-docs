@@ -14,6 +14,7 @@ import { getByTestId } from '@usebruno/api-shared/test-utils/dom';
 import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
 import { createSession } from '@usebruno/api-shared/session/session';
 import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { createPlayground } from '../../../state/playground';
 
 const collection = {
   info: { name: 'C' },
@@ -31,13 +32,13 @@ const collection = {
 describe('PlaygroundBody example view', () => {
   it('renders ExampleView when viewMode is example', () => {
     const session = createSession();
-    session.workspace.replaceCollection(hydrateWithUUIDs(collection));
-    const requestUuid = getItemUuid(session.workspace.get().collection!.items![0])!;
-    session.playground.selection.set({ uuid: requestUuid, exampleIndex: 0 });
+    const document = hydrateWithUUIDs(collection);
+    const requestUuid = getItemUuid(document.items![0])!;
+    session.slot('playground', () => createPlayground(document)).selection.set({ uuid: requestUuid, exampleIndex: 0 });
 
     const ref = React.createRef<string>();
     const root = useRenderToDom(
-      <TestProviders session={session}>
+      <TestProviders session={session} document={document}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}
@@ -63,13 +64,13 @@ describe('PlaygroundBody script file view', () => {
 
   it('shows a .js file as an editable script with no request controls', () => {
     const session = createSession();
-    session.workspace.replaceCollection(hydrateWithUUIDs(withScript));
-    const scriptUuid = getItemUuid(session.workspace.get().collection!.items![0])!;
-    session.playground.selection.set({ uuid: scriptUuid, exampleIndex: null });
+    const document = hydrateWithUUIDs(withScript);
+    const scriptUuid = getItemUuid(document.items![0])!;
+    session.slot('playground', () => createPlayground(document)).selection.set({ uuid: scriptUuid, exampleIndex: null });
 
     const ref = React.createRef<string>();
     const root = useRenderToDom(
-      <TestProviders session={session}>
+      <TestProviders session={session} document={document}>
         <MemoryRouter>
           <PlaygroundBody
             requestSlug={null}

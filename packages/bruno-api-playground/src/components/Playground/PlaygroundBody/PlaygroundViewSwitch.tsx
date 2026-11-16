@@ -2,7 +2,8 @@ import React from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder, Item, ScriptFile } from '@opencollection/types/collection/item';
-import { useEnvState, useSession } from '@usebruno/api-shared/session/session';
+import { useEnvState } from '@usebruno/api-shared/session/session';
+import { usePlayground } from '../../../state/playground';
 import { useObservable } from '@usebruno/api-shared/observable/observable';
 import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 import { isFolder, isScriptFile } from '@usebruno/api-shared/utils/schemaHelpers';
@@ -33,7 +34,7 @@ const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
   orientation
 }) => {
   const { activeEnvName } = useEnvState();
-  const { workspace } = useSession();
+  const { workspace } = usePlayground();
   const selectedItemUuid = getItemUuid(selectedItem) ?? '';
   const response = useObservable(workspace, (state) => state.responses[selectedItemUuid]);
   const requestStartedAt = useObservable(workspace, (state) => state.requestStartedAt[selectedItemUuid] ?? null);

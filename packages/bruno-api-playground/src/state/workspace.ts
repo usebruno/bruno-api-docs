@@ -4,12 +4,13 @@ import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 import { findLastIndex, omit } from 'lodash-es';
-import { createObservable } from '../observable/observable';
-import { deepFreeze } from '../utils/deepFreeze';
-import { isFolder } from '../utils/schemaHelpers';
-import { applyScriptEnvVars } from '../utils/environments';
-import { reconcileScriptVariables } from '../utils/scriptVariables';
-import type { RunRequestResponse, Variables } from '../types/run';
+import { createObservable } from '@usebruno/api-shared/observable/observable';
+import { deepFreeze } from '@usebruno/api-shared/utils/deepFreeze';
+import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
+import { applyScriptEnvVars } from '@usebruno/api-shared/utils/environments';
+import { reconcileScriptVariables } from '@usebruno/api-shared/utils/scriptVariables';
+import type { RunRequestResponse, Variables } from '@usebruno/api-shared/types/run';
+import type { VariableWrite } from '@usebruno/api-shared/hooks/useVariableResolver';
 
 export interface WorkspaceState {
   collection: OpenCollection | null;
@@ -18,16 +19,6 @@ export interface WorkspaceState {
 }
 
 export const EMPTY_WORKSPACE: WorkspaceState = { collection: null, responses: {}, requestStartedAt: {} };
-
-export type VariableScope = 'environment' | 'collection' | 'folder' | 'request' | '$secrets';
-
-export interface VariableWrite {
-  scope: VariableScope;
-  name: string;
-  value: string;
-  envName?: string;
-  itemUuid?: string;
-}
 
 export interface ScriptVariableChanges {
   environmentVariables?: { envName: string; variables: Variables; deleted: string[] };

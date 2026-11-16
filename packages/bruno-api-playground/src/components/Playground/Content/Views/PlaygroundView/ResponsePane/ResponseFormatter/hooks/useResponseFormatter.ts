@@ -3,14 +3,13 @@ import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
 import { useInitialResponseFormat } from './useInitialResponseFormat';
 import type { RunRequestResponse } from '@usebruno/api-shared/types/run';
 import { getResponseFormatOptions } from '@usebruno/api-shared/utils/response';
-import { useSession } from '@usebruno/api-shared/session/session';
 import { useObservable } from '@usebruno/api-shared/observable/observable';
-import { selectedUuid } from '@usebruno/api-shared/session/playground';
+import { selectedUuid, usePlayground } from '../../../../../../../../state/playground';
 
 export function useResponseFormatter(
   response: RunRequestResponse
 ) {
-  const { selection, responseFormat, responsePreview } = useSession().playground;
+  const { selection, responseFormat, responsePreview } = usePlayground();
   const selectedItemId = useObservable(selection, selectedUuid);
   const forSelected = <V>(byUuid: Record<string, V>) => (selectedItemId ? byUuid[selectedItemId] : null);
   const selectedResponseFormat = useObservable(responseFormat, forSelected);

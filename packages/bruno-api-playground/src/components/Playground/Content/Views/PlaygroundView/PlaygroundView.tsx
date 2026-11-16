@@ -11,7 +11,7 @@ import RequestPane from './RequestPane/RequestPane';
 import ResponsePane from './ResponsePane/ResponsePane';
 import { usePromptVariables } from './usePromptVariables';
 import { PromptVariablesModal } from '../../../../PromptVariablesModal/PromptVariablesModal';
-import type { Workspace } from '@usebruno/api-shared/session/workspace';
+import type { Workspace } from '../../../../../state/workspace';
 import { getItemName, isPlaygroundUnsupported, getRequestAuth, getRequestHeaders } from '@usebruno/api-shared/utils/schemaHelpers';
 import { getInheritedAuthSummary, resolveInheritedAuth, getInheritedHeaders } from '@usebruno/api-shared/utils/request';
 import UnsupportedRequest from '../../../../UnsupportedRequest/UnsupportedRequest';

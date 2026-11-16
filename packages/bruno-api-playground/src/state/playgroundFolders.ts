@@ -1,7 +1,7 @@
 import type { Item } from '@opencollection/types/collection/item';
-import { createObservable } from '../observable/observable';
-import { findItemByUuid, getItemUuid } from '../utils/itemUtils';
-import { isFolder } from '../utils/schemaHelpers';
+import { createObservable } from '@usebruno/api-shared/observable/observable';
+import { findItemByUuid, getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
 
 export interface PlaygroundFolderState {
   items: Item[] | undefined;

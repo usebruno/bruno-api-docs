@@ -1,6 +1,11 @@
-import { createObservable } from '../observable/observable';
-import type { ResponseBodyFormat } from '../constants';
+import type { OpenCollection } from '@opencollection/types';
+import { createObservable } from '@usebruno/api-shared/observable/observable';
+import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
+import { useSession } from '@usebruno/api-shared/session/session';
+import { useDocument } from '@usebruno/api-shared/document/document';
+import { playgroundRuns } from '@usebruno/api-shared/session/playgroundRuns';
 import { createPlaygroundFolders } from './playgroundFolders';
+import { createWorkspace } from './workspace';
 
 export type PlaygroundSelection
   = | { uuid: string; exampleIndex: number | null }
@@ -30,8 +35,24 @@ const createKeyed = <V>() => {
   };
 };
 
-export const createPlayground = () => {
+export const createPlayground = (document: OpenCollection) => {
   const selection = createObservable<PlaygroundSelection>({ initial: null });
+  const folders = createPlaygroundFolders();
+  const workspace = createWorkspace();
+  let seededFrom: OpenCollection | null = null;
+
+  const sync = (next: OpenCollection) => {
+    if (next !== seededFrom) {
+      seededFrom = next;
+      folders.seed(next.items);
+      workspace.replaceCollection(next);
+    }
+    for (const uuid of Object.keys(workspace.get().requestStartedAt)) {
+      if (!playgroundRuns.isSending(uuid)) workspace.finishRequest(uuid);
+    }
+  };
+  sync(document);
+
   return {
     selection: {
       get: selection.get,
@@ -46,6 +67,15 @@ export const createPlayground = () => {
     orientation: createObservable<ResponsePaneOrientation | null>({ initial: null }),
     responseFormat: createKeyed<ResponseBodyFormat>(),
     responsePreview: createKeyed<boolean>(),
-    folders: createPlaygroundFolders()
+    folders,
+    workspace,
+    sync
   };
+};
+
+export type Playground = ReturnType<typeof createPlayground>;
+
+export const usePlayground = (): Playground => {
+  const document = useDocument();
+  return useSession().slot('playground', () => createPlayground(document));
 };

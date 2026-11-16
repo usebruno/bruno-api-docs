@@ -118,7 +118,8 @@ Known limits:
 
 States: `idle` → `loading` → `succeeded` or `failed`. Idle and loading show "Loading...",
 failed shows the error. Neither renders the playground, and neither touches its state: the next
-document re-seeds it.
+document re-seeds it, so `updateCollection(null)` or a failed load followed by a collection with
+stable uuids keeps responses, selection and folder collapse.
 
 The playground seeds itself from the document: when it is first opened, when it reopens after
 the document changed, and when the document changes while it is open

@@ -68,6 +68,29 @@ test.describe('The playground after updateCollection', () => {
     await expect(playground.urlInput).toHaveValue('{{host}}/rooms');
   });
 
+  test('clearing the collection and loading it again keeps the open request and its response when its items keep their uuids', async ({
+    page,
+    standalonePage,
+    playground,
+    responsePane
+  }) => {
+    await page.route('**/rooms**', (route) =>
+      route.fulfill({ status: 200, headers: { 'content-type': 'application/json' }, body: '{"r":1}' })
+    );
+    await standalonePage.mount('first', { content: foldersWithUuids });
+    await playground.folderChevron('Rooms').click();
+    await playground.openRequest('List Rooms');
+    await responsePane.send();
+    await expect(responsePane.status).toHaveText('200 OK');
+
+    await standalonePage.updateCollection('first', null);
+    await expect(standalonePage.root).toContainText('Loading...');
+    await standalonePage.updateCollection('first', foldersWithUuids);
+
+    await expect(playground.urlInput).toHaveValue('{{host}}/rooms');
+    await expect(responsePane.status).toHaveText('200 OK');
+  });
+
   test('the environments view comes back on reopen after the collection is cleared and loaded again', async ({
     standalonePage,
     playground,

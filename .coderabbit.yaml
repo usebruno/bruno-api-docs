@@ -72,8 +72,10 @@ reviews:
         - A change to the externals in vite.config.cdn.ts without the matching Bruno.__rt
           entry in packages/bruno-api-docs/src/components/Playground/loadCdn.ts, or the other
           way round.
-        - State that must outlive the playground kept inside it instead of in the shared
-          session or workspace.
+        - State that must outlive a close kept in a component instead of in the playground
+          state (src/state/playground.ts) held by the session slot.
+        - A pure workspace updater that mutates, rebuilds untouched branches, or returns a new
+          object on a no-op (src/state/workspace.ts).
     - path: 'packages/bruno-api-docs/**'
       instructions: |
         Docs view, the playground dock shell, the standalone CDN entry and all e2e. Flag:
@@ -82,6 +84,8 @@ reviews:
         - Anything that makes the playground load before Try or a deep link.
         - Changes to the public Bruno.apiDocs API or the bundle file names.
         - Docs code that runs requests or scripts; that belongs in the playground.
+        - Docs code that reads playground state (working copy, responses, selection) or the
+          session slot. Docs pages read only the loaded document.
     - path: 'packages/bruno-shared/src/{session,observable,document}/**'
       instructions: |
         State rules from CODING_STANDARDS.md §State. Flag:
@@ -94,7 +98,7 @@ reviews:
     - path: 'packages/*/src/components/**'
       instructions: |
         React rules from CODING_STANDARDS.md §React and §Styling. Flag:
-        - A leaf reading the session or workspace directly instead of taking props and callbacks.
+        - A leaf reading the session or playground state directly instead of taking props and callbacks.
         - An effect that computes something derivable during render.
         - A handler reading live state at click time instead of a value from render.
         - A context hook that doesn't throw outside its provider.

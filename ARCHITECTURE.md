@@ -25,7 +25,7 @@ keeps that dependency from tripping its ignored-package check.
 | Package | Folder | What lives there |
 |---|---|---|
 | `@usebruno/api-docs` | `bruno-api-docs/` | The docs view (pages, sidebar, search, topbar), the playground dock shell (`bruno-api-docs/src/components/Playground/`), the standalone CDN entry, the dev entry and all e2e. |
-| `@usebruno/api-playground` | `bruno-api-playground/` | `PlaygroundBody` and everything under it, the request runner (`bruno-api-playground/src/runner/`), the QuickJS scripting (`bruno-api-playground/src/scripting/`), the libraries bundle and the CDN build of the playground. |
+| `@usebruno/api-playground` | `bruno-api-playground/` | `PlaygroundBody` and everything under it, the playground's own state (`bruno-api-playground/src/state/`), the request runner (`bruno-api-playground/src/runner/`), the QuickJS scripting (`bruno-api-playground/src/scripting/`), the libraries bundle and the CDN build of the playground. |
 | `@usebruno/api-shared` | `bruno-shared/` | What both need: session, document, observable, routing, theme and styles (`gen:theme`), ui primitives, shared components, hooks, utils and the unit test utils. |
 
 ### The boundary
@@ -113,12 +113,20 @@ Known limits:
 2. Text is parsed as YAML, then JSON as a fallback.
 3. `hydrateWithUUIDs` (`bruno-shared/src/utils/fileUtils.ts`) gives every item a uuid. Uuids
    are random, so a reload or a new collection gives new ones.
-4. The hydrated collection becomes the read-only **document** (`DocumentProvider`), seeds the
-   **workspace** working copy, and seeds the playground folder state.
+4. The hydrated collection becomes the read-only **document** (`DocumentProvider`). The loader
+   touches nothing else.
 
 States: `idle` → `loading` → `succeeded` or `failed`. Idle and loading show "Loading...",
-failed shows the error. A failed or null collection clears the workspace and the playground
-selection.
+failed shows the error. Neither renders the playground, and neither touches its state: the next
+document re-seeds it.
+
+The playground seeds itself from the document: when it is first opened, when it reopens after
+the document changed, and when the document changes while it is open
+(`sync` in `bruno-api-playground/src/state/playground.ts`, run from `PlaygroundBody`). A new
+document replaces the working copy, so edits are dropped; responses, selection and folder
+collapse are keyed by uuid and carry over when the uuids are stable, and point at nothing when
+they are regenerated. The same document again is a no-op, so edits survive close, reopen and
+dock switches.
 
 ## Who owns what
 
@@ -129,12 +137,12 @@ One owner per fact. Everything else reads it or derives it.
 | Document (hydrated snapshot) + nav model | `bruno-shared/src/document/document.tsx` | yes | re-loaded | replaced |
 | Theme | session, `bruno-shared/src/theme/themeMode.ts` | yes | yes, if toggled (`oc-docs.theme`, localStorage) | kept |
 | Active env, show vars | session, `bruno-shared/src/session/env.ts` | yes | yes, same tab (`oc-docs.env`, sessionStorage) | kept |
-| Playground view: selection, orientation, response format/preview | session, `bruno-shared/src/session/playground.ts` | yes | no (selection comes back from the URL) | kept |
-| Playground folder collapse | session, `bruno-shared/src/session/playgroundFolders.ts` | yes | no | re-seeded, open/closed carried over by uuid |
+| Playground view: selection, orientation, response format/preview | playground, `bruno-api-playground/src/state/playground.ts` | yes | no (selection comes back from the URL) | kept |
+| Playground folder collapse | playground, `bruno-api-playground/src/state/playgroundFolders.ts` | yes | no | re-seeded when the playground next renders, open/closed carried over by uuid |
 | Docs folder collapse | `bruno-api-docs/src/components/Docs/Sidebar/hooks/useFolderCollapse.ts` (AppShell local state) | yes | no | reset |
-| Working copy (playground edits) | workspace, `bruno-shared/src/session/workspace.ts` | yes | no | replaced, edits dropped |
-| Responses | workspace | yes | no | stay, but keyed by old uuids |
-| Run starts | workspace + `bruno-shared/src/session/playgroundRuns.ts` | no, close aborts runs | no | n/a |
+| Working copy (playground edits) | playground, `bruno-api-playground/src/state/workspace.ts` | yes | no | replaced when the playground next renders, edits dropped |
+| Responses | playground workspace | yes | no | stay, but keyed by old uuids |
+| Run starts | playground workspace + `bruno-shared/src/session/playgroundRuns.ts` | no, close aborts runs | no | n/a |
 | Playground deep link: `pg`, `dock`, `pgReq`, `pgEx` | URL query, `bruno-shared/src/utils/playgroundDock.ts` | no, close clears all four | yes | kept |
 
 The session is created once per `<OpenCollection>` mount (`bruno-shared/src/session/session.tsx`),
@@ -144,12 +152,29 @@ pure updaters plus one observable, and deep-freezes its state.
 
 ### Across the boundary
 
-Session, document and workspace all live in shared. Docs owns them: `OpenCollection` creates
-the session and renders `SessionProvider`, `DocumentProvider` and the variable resolver
-provider. The playground renders inside those providers and reads them with the same hooks
-docs uses. It owns no state of its own that outlives it: the dock shell aborts runs and clears
-the workspace's in-flight requests when the playground unmounts. In the CDN build this works
-only because those modules are externals (see above).
+Docs and playground each own their state. Shared holds only what crosses:
+
+- **Document**: docs creates it; both read it. The playground reads it only to seed itself and
+  for the nav model (slugs).
+- **Env** (active env name, show vars): one per session, so Try opens with the env picked in
+  the header, and a switch in either place shows in both. Each env switcher lists the
+  environments of its own collection: the docs header the document's, the playground sidebar
+  the working copy's.
+- **`session.slot(key, create)`**: a `Map` on the session that hands back one object per key,
+  created on first use. The playground keeps its whole state there under `'playground'`
+  (`usePlayground` in `bruno-api-playground/src/state/playground.ts`), created lazily on first
+  open, so it survives close, reopen and dock switches and stays per instance. Docs never reads
+  the slot.
+- **Run tracking** (`bruno-shared/src/session/playgroundRuns.ts`): the dock shell aborts every
+  run when the playground closes. On the next render the playground drops run starts whose run
+  is no longer in flight, so a reopened request is not stuck loading.
+
+`OpenCollection` renders `SessionProvider`, `DocumentProvider` and a variable resolver over the
+document. `PlaygroundBody` renders its own resolver over the working copy, so playground
+`{{var}}` sites resolve against its edits. In the CDN build the session, document, resolver and
+run modules are externals, so both sides share them; the playground's state modules are bundled
+only in the playground file, which is fine because the objects they create live in the shared
+session's slot.
 
 ## Routing
 
@@ -168,11 +193,10 @@ only because those modules are externals (see above).
 ## Docs vs playground
 
 - Navigation (sidebar, slugs, search, prev/next) always comes from the document snapshot.
-- Docs page content reads the workspace working copy, falling back to the document. So edits
-  made in the playground show on docs pages until reload. EnvSwitcher and the variable
-  resolver read the working copy too.
-- The playground unmounts on close. Its state lives above it in the session and workspace, so
-  edits and the open view survive close, reopen and dock switches.
+- Docs pages, the docs Environments page, the header EnvSwitcher and the docs variable
+  resolver read only the document. Edits made in the playground never show on docs pages.
+- The playground unmounts on close. Its state lives in the session slot, so edits and the open
+  view survive close, reopen and dock switches. A reload drops them.
 - Selection is restored from `pgReq`/`pgEx` once per URL value
   (`bruno-api-playground/src/components/Playground/PlaygroundBody/usePlaygroundSelection.ts`).
 
@@ -244,7 +268,7 @@ playground fails to load. Before this ships, the builder must:
 
 | Suite | Command | Protects |
 |---|---|---|
-| Unit (Vitest, node) | `npm run test:run` at the root runs every package. One package: `npm run test:run -w @usebruno/api-shared` (or `api-playground`, `api-docs`). | Each package's own specs, next to its code. Shared: session, workspace, routing, theme, utils. Playground: runner, scripting, playground views. Docs: pages, hooks, `standalone.ts`, `dev.tsx`, `loadCdn.ts`. Components render as static markup. |
+| Unit (Vitest, node) | `npm run test:run` at the root runs every package. One package: `npm run test:run -w @usebruno/api-shared` (or `api-playground`, `api-docs`). | Each package's own specs, next to its code. Shared: session, document, routing, theme, utils. Playground: state, runner, scripting, playground views. Docs: pages, hooks, `standalone.ts`, `dev.tsx`, `loadCdn.ts`. Components render as static markup. |
 | Main e2e (Playwright) | `npm run test:e2e` in docs | The app in a browser via `npm run dev` plus `bruno-api-docs/e2e/server/test-server.mjs` on a second origin, so CORS is real. Config: `bruno-api-docs/playwright.config.ts`. |
 | Standalone e2e | `npm run test:e2e:standalone` in docs | The built bundle as a host page uses it: `Bruno.apiDocs`, `updateCollection`, `updateOptions`, `destroy`, two instances. Config: `bruno-api-docs/playwright.standalone.config.ts`, specs in `bruno-api-docs/e2e/tests/standalone/`. |
 
@@ -265,7 +289,8 @@ configs. Locally, run only the specs your change touches; CI (repo root
 - awsv4, ntlm and wsse auth silently do nothing on the wire.
 - Every network failure looks the same (`TypeError`); see
   `bruno-api-playground/src/runner/classifyRequestError.ts`.
-- Playground edits live in memory only. Reload or `updateCollection` drops them.
+- Playground edits live in memory only and only in the playground. Reload or `updateCollection`
+  drops them, and docs pages never show them.
 - `description` is `string | { content }`. Read it through the helpers in
   `bruno-shared/src/utils/description.ts`, never directly.
 - Storage keys, the `.oc-playground` class and the bundle names carry old naming on purpose.

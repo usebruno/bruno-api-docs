@@ -15,7 +15,6 @@ import {
   clearResponse,
   startRequest,
   finishRequest,
-  clearAllRequests,
   createWorkspace,
   type WorkspaceState
 } from './workspace';
@@ -411,8 +410,6 @@ describe('responses and run starts', () => {
     expect(startRequest(started, { uuid: 'r1', startedAt: 5 })).toBe(started);
     expect(finishRequest(started, 'r1').requestStartedAt).toEqual({});
     expect(finishRequest(started, 'r2')).toBe(started);
-    expect(clearAllRequests(started).requestStartedAt).toEqual({});
-    expect(clearAllRequests(started).responses).toBe(started.responses);
   });
 });
 
@@ -466,13 +463,6 @@ describe('createWorkspace', () => {
     workspace.finishRequest('missing');
     workspace.updateScriptFile({ uuid: 'missing', script: '' });
     expect(listener).toHaveBeenCalledTimes(3);
-
-    workspace.clearAllRequests();
-    expect(workspace.get().requestStartedAt).toEqual({});
-    expect(workspace.get().responses).toEqual({ r1: { status: 200 } });
-
-    workspace.clear();
-    expect(workspace.get()).toBe(EMPTY_WORKSPACE);
   });
 
   it('two workspaces do not share state', () => {

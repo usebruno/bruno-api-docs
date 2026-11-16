@@ -227,8 +227,6 @@ export const startRequest = (
 export const finishRequest = (state: WorkspaceState, uuid: string): WorkspaceState =>
   uuid in state.requestStartedAt ? { ...state, requestStartedAt: omit(state.requestStartedAt, uuid) } : state;
 
-export const clearAllRequests = (state: WorkspaceState): WorkspaceState => ({ ...state, requestStartedAt: {} });
-
 export const createWorkspace = () => {
   const observable = createObservable<WorkspaceState>({ initial: EMPTY_WORKSPACE });
   const state = { ...observable, set: (next: WorkspaceState) => observable.set(deepFreeze(next)) };
@@ -237,8 +235,6 @@ export const createWorkspace = () => {
   return {
     get: state.get,
     subscribe: state.subscribe,
-    clear: () => state.set(EMPTY_WORKSPACE),
-    clearAllRequests: () => state.set(clearAllRequests(state.get())),
     replaceCollection: apply(setCollection),
     updateRequestItem: apply(updateRequestItem),
     updateScriptFile: apply(updateScriptFile),

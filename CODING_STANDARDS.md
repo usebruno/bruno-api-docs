@@ -27,7 +27,7 @@ These are the smells we reject in review. Each line says how to spot it.
 - **A guard for an input that cannot happen.** Drop it. `strict` types already say what can be
   null. Guard at real boundaries only: parsed collections, URL params, storage, network.
 - **Hand-rolled code where lodash-es, the platform or existing code does it.** Use theirs.
-  see: `bruno-shared/src/session/workspace.ts` (`findLastIndex`, `omit` from lodash-es)
+  see: `bruno-api-playground/src/state/workspace.ts` (`findLastIndex`, `omit` from lodash-es)
 - **Anything "for later".** Every added line has a live user in the same change.
 - **Dead code leaves with its feature.** Removing a view also removes its props, styles,
   state and tests.
@@ -58,18 +58,20 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
 - One owner per fact. Everything else reads it or derives it during render.
   see: `ARCHITECTURE.md` (state owners table)
 - Three owners, three lifetimes. Put new state with the owner whose lifetime it needs.
-  - Read-only document, per load: `bruno-shared/src/document/document.tsx`
-  - Per-instance session (theme, env, playground view, folders): `bruno-shared/src/session/session.tsx`
-  - Playground working copy, responses, run starts: `bruno-shared/src/session/workspace.ts`
+  - Read-only document, per load: `bruno-shared/src/document/document.tsx`. Docs read only this.
+  - Per-instance session (theme, env): `bruno-shared/src/session/session.tsx`
+  - Playground state (working copy, responses, run starts, selection, view, folders):
+    `bruno-api-playground/src/state/playground.ts`, held in the session's `slot` so it outlives
+    a close. Docs never read it.
   - Playground deep links live in the URL only: `bruno-shared/src/utils/playgroundDock.ts`
 - Session state is a small observable, not a store. Don't add a store library.
   see: `bruno-shared/src/observable/observable.ts`
 - Leaves get props and callbacks, not the session. Containers read the session and pass down.
   see: `bruno-api-playground/src/components/Playground/PlaygroundBody/PlaygroundBody.tsx`
 - Updates are pure `(state, payload) => state`. They never mutate. The workspace deep-freezes
-  its state, so a mutation throws. see: `bruno-shared/src/session/workspace.ts`
+  its state, so a mutation throws. see: `bruno-api-playground/src/state/workspace.ts`
 - Keep the identity of every branch you didn't change. A no-op returns the same state object.
-  see: `bruno-shared/src/session/workspace.ts` (`updateItemIn`, `setResponse`)
+  see: `bruno-api-playground/src/state/workspace.ts` (`updateItemIn`, `setResponse`)
 - Each owner persists itself. Nothing else writes its storage key.
   see: `bruno-shared/src/session/env.ts`, `bruno-shared/src/theme/themeMode.ts`
 - Docs navigation comes from the URL and the nav model, never from stored selection.
@@ -108,7 +110,7 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
 ## File naming
 
 - Components: `PascalCase.tsx`, named after the component. see: `bruno-api-playground/src/components/Playground/PlaygroundBody/PlaygroundViewSwitch.tsx`
-- Hooks and everything else in `src`: `camelCase.ts`. see: `bruno-api-docs/src/components/Docs/Sidebar/hooks/useFolderCollapse.ts`, `bruno-shared/src/session/workspace.ts`
+- Hooks and everything else in `src`: `camelCase.ts`. see: `bruno-api-docs/src/components/Docs/Sidebar/hooks/useFolderCollapse.ts`, `bruno-api-playground/src/state/workspace.ts`
 - Specs sit next to the file with the same name: `workspace.ts` and `workspace.test.ts`.
 - E2E specs and page objects: `kebab-case`. see: `bruno-api-docs/e2e/tests/playground/playground-edits-stay-out-of-docs.spec.ts`
 - `bruno-api-playground/src/runner/` and `bruno-api-playground/src/scripting/` still have older kebab-case files. Leave them until a
@@ -138,7 +140,7 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
 - Pin behaviour before you change it. Write the test, see it pass on the old code, then change
   the code. A behaviour change ships with a test that fails without it.
 - Assert what survives with exact values, not "is defined" or a substring the fixture already
-  has. see: `bruno-shared/src/session/workspace.test.ts`
+  has. see: `bruno-api-playground/src/state/workspace.test.ts`
 - Assertions are unconditional. No `?.`, `if` or `try` that lets one be skipped.
 
 ### Unit (Vitest)

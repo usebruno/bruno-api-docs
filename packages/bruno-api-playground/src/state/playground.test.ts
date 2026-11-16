@@ -98,6 +98,17 @@ describe('playground sync', () => {
     expect(folders.get().collapsed.get('f')).toBe(false);
   });
 
+  it('reports the document it was last seeded from', () => {
+    const first = documentWith('/a');
+    const { seededFrom, sync } = createPlayground(first);
+    expect(seededFrom.get()).toBe(first);
+    const next = documentWith('/b');
+
+    sync(next);
+
+    expect(seededFrom.get()).toBe(next);
+  });
+
   it('drops request starts whose run is no longer in flight, and keeps live ones', () => {
     const document = documentWith('/a');
     const { workspace, sync } = createPlayground(document);

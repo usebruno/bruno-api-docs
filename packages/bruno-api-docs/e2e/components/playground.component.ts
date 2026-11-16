@@ -64,6 +64,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly scriptFile = this.view.getByTestId('playground-script-file');
   readonly scriptFileTitle = this.view.getByTestId('playground-script-file-title');
   readonly exampleView = this.page.getByTestId('example-view');
+  readonly exampleViewName = this.page.getByTestId('example-view-name');
   readonly exampleViewRequest = this.page.getByTestId('example-view-request');
   readonly exampleViewResponse = this.page.getByTestId('example-view-response');
 

@@ -75,7 +75,6 @@ export const usePlaygroundSelection = ({
     const target = resolvePlaygroundTarget(requestSlug, model);
     if (!target) return;
     const item = target.uuid ? findItemByUuid(collection?.items, target.uuid) : undefined;
-    if (target.uuid && !item) return;
     const exampleIndex
       = exampleSlug && item && !isFolder(item) ? exampleIndexForSlug(item as HttpRequest, exampleSlug) : null;
     appliedSlugRef.current = key;

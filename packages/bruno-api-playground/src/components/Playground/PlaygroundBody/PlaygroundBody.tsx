@@ -25,7 +25,7 @@ interface PlaygroundBodyProps {
   appliedSlugRef: React.MutableRefObject<string | null>;
 }
 
-const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
+const SeededPlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   requestSlug,
   exampleSlug,
   sidebarOpen,
@@ -34,9 +34,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   onOpenSidebar,
   appliedSlugRef
 }) => {
-  const document = useDocument();
-  const { orientation: orientationState, folders, workspace, sync } = usePlayground();
-  useLayoutEffect(() => sync(document), [sync, document]);
+  const { orientation: orientationState, folders, workspace } = usePlayground();
   const collection = useObservable(workspace, (state) => state.collection);
   const orientationOverride = useObservable(orientationState);
   const folderState = useObservable(folders);
@@ -124,6 +122,14 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
       </StyledWrapper>
     </VariableResolverProvider>
   );
+};
+
+const PlaygroundBody: React.FC<PlaygroundBodyProps> = (props) => {
+  const document = useDocument();
+  const { seededFrom, sync } = usePlayground();
+  useLayoutEffect(() => sync(document), [sync, document]);
+  const seeded = useObservable(seededFrom) === document;
+  return seeded ? <SeededPlaygroundBody {...props} /> : null;
 };
 
 export default PlaygroundBody;

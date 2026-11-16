@@ -39,13 +39,13 @@ export const createPlayground = (document: OpenCollection) => {
   const selection = createObservable<PlaygroundSelection>({ initial: null });
   const folders = createPlaygroundFolders();
   const workspace = createWorkspace();
-  let seededFrom: OpenCollection | null = null;
+  const seededFrom = createObservable<OpenCollection | null>({ initial: null });
 
   const sync = (next: OpenCollection) => {
-    if (next !== seededFrom) {
-      seededFrom = next;
+    if (next !== seededFrom.get()) {
       folders.seed(next.items);
       workspace.replaceCollection(next);
+      seededFrom.set(next);
     }
     for (const uuid of Object.keys(workspace.get().requestStartedAt)) {
       if (!playgroundRuns.isSending(uuid)) workspace.finishRequest(uuid);
@@ -66,6 +66,7 @@ export const createPlayground = (document: OpenCollection) => {
     responsePreview: createKeyed<boolean>(),
     folders,
     workspace,
+    seededFrom: { get: seededFrom.get, subscribe: seededFrom.subscribe },
     sync
   };
 };

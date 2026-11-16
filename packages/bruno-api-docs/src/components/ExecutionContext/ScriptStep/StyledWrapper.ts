@@ -24,7 +24,7 @@ export const StyledWrapper = styled.div`
 
   .script-step-label {
     flex: none;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 600;
     color: var(--text-primary);
     text-transform: none;
@@ -37,7 +37,7 @@ export const StyledWrapper = styled.div`
   .script-step-source {
     min-width: 0;
     font-family: var(--font-sans);
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     font-weight: 400;
     color: var(--text-secondary);
     text-transform: none;
@@ -70,7 +70,7 @@ export const StyledWrapper = styled.div`
     padding: 0;
     cursor: pointer;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 500;
     color: var(--primary-text);
   }

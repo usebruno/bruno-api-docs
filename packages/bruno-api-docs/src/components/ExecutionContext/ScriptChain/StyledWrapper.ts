@@ -16,7 +16,7 @@ export const StyledWrapper = styled.div`
   .step-num {
     justify-self: start;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-muted);
   }
 
@@ -33,7 +33,7 @@ export const StyledWrapper = styled.div`
   }
   .script-http-label {
     flex: none;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 600;
     color: var(--primary-text);
   }

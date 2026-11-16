@@ -23,7 +23,7 @@ const render = (
   const root = parse(
     renderToStaticMarkup(
       <TestProviders document={collection} session={session}>
-        <EnvSwitcher collection={collection} {...props} />
+        <EnvSwitcher {...props} />
       </TestProviders>
     )
   );
@@ -110,24 +110,21 @@ describe('EnvSwitcher', () => {
   });
 });
 
-describe('EnvSwitcher lists the collection it is given', () => {
-  it('shows an environment that exists only in that collection, not the loaded document', () => {
+describe('EnvSwitcher lists the environments of the loaded document', () => {
+  it('shows an environment the document has', () => {
     const trigger = getByTestId(
-      render(withEnvs, (s) => s.env.setActiveEnv('Added'), {
-        collection: collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }])
-      }),
+      render(collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }]), (s) => s.env.setActiveEnv('Added')),
       'env-switcher'
     );
-    expect(trigger.text).toContain('Added');
+    expect(trigger.text).toBe('Added');
   });
 
-  it('falls back to that collection\'s first env when the active env is gone from it', () => {
+  it('falls back to the document\'s first env when the active env is not in it', () => {
     const trigger = getByTestId(
-      render(withEnvs, (s) => s.env.setActiveEnv('Prod'), { collection: collectionWith([{ name: 'Staging' }]) }),
+      render(collectionWith([{ name: 'Staging' }]), (s) => s.env.setActiveEnv('Prod')),
       'env-switcher'
     );
-    expect(trigger.text).toContain('Staging');
-    expect(trigger.text).not.toContain('Prod');
+    expect(trigger.text).toBe('Staging');
   });
 });
 

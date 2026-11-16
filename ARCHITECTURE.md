@@ -157,9 +157,9 @@ Docs and playground each own their state. Shared holds only what crosses:
 - **Document**: docs creates it; both read it. The playground reads it only to seed itself and
   for the nav model (slugs).
 - **Env** (active env name, show vars): one per session, so Try opens with the env picked in
-  the header, and a switch in either place shows in both. Each env switcher lists the
-  environments of its own collection: the docs header the document's, the playground sidebar
-  the working copy's.
+  the header, and a switch in either place shows in both. Both env switchers list the
+  document's environments; the playground can edit an environment's variables but cannot add,
+  rename or remove one.
 - **`session.slot(key, create)`**: a `Map` on the session that hands back one object per key,
   created on first use. The playground keeps its whole state there under `'playground'`
   (`usePlayground` in `bruno-api-playground/src/state/playground.ts`), created lazily on first
@@ -193,7 +193,7 @@ session's slot.
 ## Docs vs playground
 
 - Navigation (sidebar, slugs, search, prev/next) always comes from the document snapshot.
-- Docs pages, the docs Environments page, the header EnvSwitcher and the docs variable
+- Docs pages, the docs Environments page, both EnvSwitchers and the docs variable
   resolver read only the document. Edits made in the playground never show on docs pages.
 - The playground unmounts on close. Its state lives in the session slot, so edits and the open
   view survive close, reopen and dock switches. A reload drops them.

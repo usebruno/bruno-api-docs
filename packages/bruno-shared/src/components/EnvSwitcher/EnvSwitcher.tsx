@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
-import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import { useEnvState, useSession } from '../../session/session';
+import { useDocument } from '../../document/document';
 import { ChevronDownIcon } from '../../assets/icons';
 import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
 import MenuDropdown, { type MenuDropdownItem } from '../../ui/MenuDropdown';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface EnvSwitcherProps {
-  collection: OpenCollection | null;
   hideWhenEmpty?: boolean;
   testId?: string;
 }
@@ -23,12 +22,13 @@ export interface EnvSwitcherProps {
  * or dismissal logic of its own. Tippy's `--z-popover` surface keeps the menu
  * above every playground dock.
  */
-const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ collection, hideWhenEmpty = false, testId = 'env-switcher' }) => {
+const EnvSwitcher: React.FC<EnvSwitcherProps> = ({ hideWhenEmpty = false, testId = 'env-switcher' }) => {
   const { env } = useSession();
+  const collection = useDocument();
   const { activeEnvName } = useEnvState();
 
   const environments = useMemo(
-    () => (collection?.config?.environments ?? []) as Environment[],
+    () => (collection.config?.environments ?? []) as Environment[],
     [collection]
   );
   const hasEnvironments = environments.length > 0;

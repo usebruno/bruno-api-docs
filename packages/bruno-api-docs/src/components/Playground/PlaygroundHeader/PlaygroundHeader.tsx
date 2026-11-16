@@ -6,6 +6,7 @@ import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
 import { usePlaygroundUrlState } from '@/hooks';
 import { PLAYGROUND_ENVIRONMENTS_SLUG } from '../PlaygroundBody/resolvePlaygroundTarget';
 import type { DockMode } from '@/utils/playgroundDock';
+import cx from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 interface PlaygroundHeaderProps {
@@ -59,7 +60,7 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
         {showDockSwitcher && <DockSwitcher dock={dock} onDockChange={onDockChange} />}
         {onToggleCollapse && (
           <IconButton
-            className={`header-collapse${collapsed ? ' collapsed' : ''}`}
+            className={cx('header-collapse', { collapsed })}
             label={collapsed ? 'Expand playground' : 'Collapse playground'}
             title={collapsed ? 'Expand' : 'Collapse'}
             data-testid="playground-collapse"

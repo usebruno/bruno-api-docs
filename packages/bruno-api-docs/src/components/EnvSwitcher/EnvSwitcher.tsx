@@ -7,6 +7,7 @@ import { IconSettings } from '@tabler/icons';
 import { ChevronDownIcon } from '@/assets/icons';
 import { EnvironmentLabel } from '../EnvironmentLabel/EnvironmentLabel';
 import MenuDropdown, { type MenuDropdownItem } from '@/ui/MenuDropdown';
+import cx from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 const NO_ENVIRONMENT_LABEL = 'No Environment';
@@ -105,7 +106,7 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
       >
         <button
           type="button"
-          className={activeEnv.name ? 'env-switcher-trigger' : 'env-switcher-trigger env-switcher-trigger--none'}
+          className={cx('env-switcher-trigger', { 'env-switcher-trigger--none': !activeEnv.name })}
           aria-haspopup="menu"
           aria-label="Select environment"
         >

@@ -1,7 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import { playgroundRuns } from '@usebruno/api-shared/session/playgroundRuns';
-import { createPlayground, selectedUuid } from './playground';
+import { createSession } from '@usebruno/api-shared/session/session';
+import { createPlayground, playgroundFor, selectedUuid } from './playground';
 
 const EMPTY = {} as OpenCollection;
 
@@ -120,5 +121,17 @@ describe('playground sync', () => {
 
     expect(workspace.get().requestStartedAt).toEqual({ live: 1 });
     playgroundRuns.finish('live', null);
+  });
+});
+
+describe('playgroundFor', () => {
+  it('hands back one playground per session, seeded from the document it was first asked with', () => {
+    const first = createSession();
+    const document = { items: [] } as unknown as OpenCollection;
+    const playground = playgroundFor(first, document);
+
+    expect(playgroundFor(first, EMPTY)).toBe(playground);
+    expect(playground.seededFrom.get()).toBe(document);
+    expect(playgroundFor(createSession(), document)).not.toBe(playground);
   });
 });

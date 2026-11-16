@@ -14,7 +14,7 @@ import { getByTestId } from '@usebruno/api-shared/test-utils/dom';
 import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
 import { createSession } from '@usebruno/api-shared/session/session';
 import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
-import { createPlayground } from '../../../state/playground';
+import { playgroundFor } from '../../../state/playground';
 
 const collection = {
   info: { name: 'C' },
@@ -34,7 +34,7 @@ describe('PlaygroundBody example view', () => {
     const session = createSession();
     const document = hydrateWithUUIDs(collection);
     const requestUuid = getItemUuid(document.items![0])!;
-    session.slot('playground', () => createPlayground(document)).selection.set({ uuid: requestUuid, exampleIndex: 0 });
+    playgroundFor(session, document).selection.set({ uuid: requestUuid, exampleIndex: 0 });
 
     const ref = React.createRef<string>();
     const root = useRenderToDom(
@@ -66,7 +66,7 @@ describe('PlaygroundBody script file view', () => {
     const session = createSession();
     const document = hydrateWithUUIDs(withScript);
     const scriptUuid = getItemUuid(document.items![0])!;
-    session.slot('playground', () => createPlayground(document)).selection.set({ uuid: scriptUuid, exampleIndex: null });
+    playgroundFor(session, document).selection.set({ uuid: scriptUuid, exampleIndex: null });
 
     const ref = React.createRef<string>();
     const root = useRenderToDom(

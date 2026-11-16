@@ -4,17 +4,10 @@ import { createThemeMode } from '../theme/themeMode';
 import type { ThemeState } from '../theme/types';
 import { createEnv, type EnvState } from './env';
 
-export const createSession = ({ theme }: { theme?: ThemeState } = {}) => {
-  const slots = new Map<string, unknown>();
-  return {
-    theme: createThemeMode(theme),
-    env: createEnv(),
-    slot: <T,>(key: string, create: () => T): T => {
-      if (!slots.has(key)) slots.set(key, create());
-      return slots.get(key) as T;
-    }
-  };
-};
+export const createSession = ({ theme }: { theme?: ThemeState } = {}) => ({
+  theme: createThemeMode(theme),
+  env: createEnv()
+});
 
 export type Session = ReturnType<typeof createSession>;
 

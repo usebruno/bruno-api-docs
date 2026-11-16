@@ -1,7 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import { createObservable } from '@usebruno/api-shared/observable/observable';
 import type { ResponseBodyFormat } from '@usebruno/api-shared/constants';
-import { useSession } from '@usebruno/api-shared/session/session';
+import { useSession, type Session } from '@usebruno/api-shared/session/session';
 import { useDocument } from '@usebruno/api-shared/document/document';
 import { playgroundRuns } from '@usebruno/api-shared/session/playgroundRuns';
 import { createPlaygroundFolders } from './playgroundFolders';
@@ -73,7 +73,15 @@ export const createPlayground = (document: OpenCollection) => {
 
 export type Playground = ReturnType<typeof createPlayground>;
 
-export const usePlayground = (): Playground => {
-  const document = useDocument();
-  return useSession().slot('playground', () => createPlayground(document));
+const playgrounds = new WeakMap<Session, Playground>();
+
+export const playgroundFor = (session: Session, document: OpenCollection): Playground => {
+  let playground = playgrounds.get(session);
+  if (!playground) {
+    playground = createPlayground(document);
+    playgrounds.set(session, playground);
+  }
+  return playground;
 };
+
+export const usePlayground = (): Playground => playgroundFor(useSession(), useDocument());

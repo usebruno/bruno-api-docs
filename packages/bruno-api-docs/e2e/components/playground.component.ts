@@ -44,10 +44,11 @@ export class PlaygroundComponent extends BaseComponent {
     name: /Bruno Testbench|Collection/
   });
 
-  readonly gear = this.page.getByTestId('playground-env-settings');
   readonly view = this.page.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
+  readonly searchInput = this.page.getByTestId('playground-sidebar-search');
+  readonly clearSearchButton = this.sidebarPanel.getByRole('button', { name: 'Clear search' });
   readonly closeButton = this.page.getByTestId('playground-close');
   readonly collapseButton = this.page.getByTestId('playground-collapse');
   readonly inlinePanel = this.page.getByTestId('playground-dock-inline-panel');
@@ -84,6 +85,10 @@ export class PlaygroundComponent extends BaseComponent {
 
   sidebarItem(name: string): Locator {
     return this.treeItems.filter({ hasText: name }).first();
+  }
+
+  folderToggle(name: string): Locator {
+    return this.sidebarItem(name).getByRole('button', { name: /Collapse folder|Expand folder/ });
   }
 
   async openSidebarItem(name: string): Promise<void> {
@@ -130,8 +135,8 @@ export class PlaygroundComponent extends BaseComponent {
   }
 
   async openEnvironments(): Promise<void> {
-    await this.ensureSidebarOpen();
-    await this.gear.click();
+    await this.envSwitcher.open();
+    await this.envSwitcher.option('configure-actions').click();
   }
 
   async selectDock(mode: DockMode): Promise<void> {

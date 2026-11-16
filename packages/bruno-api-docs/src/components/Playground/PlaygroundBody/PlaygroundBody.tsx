@@ -29,11 +29,7 @@ import ExampleView from '../Content/Views/ExampleView/ExampleView';
 import ScriptFileView from '../Content/Views/ScriptFileView/ScriptFileView';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 import type { DockMode } from '@/utils/playgroundDock';
-import {
-  resolvePlaygroundTarget,
-  PLAYGROUND_ENVIRONMENTS_SLUG,
-  PLAYGROUND_COLLECTION_SLUG
-} from './resolvePlaygroundTarget';
+import { resolvePlaygroundTarget, PLAYGROUND_COLLECTION_SLUG } from './resolvePlaygroundTarget';
 import { StyledWrapper } from './StyledWrapper';
 
 const ORIENTATION_BREAKPOINT = 640;
@@ -165,15 +161,6 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     closeSidebarIfInline();
   };
 
-  const openEnvironments = () => {
-    dispatch(setViewMode('environments'));
-    dispatch(setSelectedItemId(null));
-    dispatch(setSelectedExampleIndex(null));
-    appliedSlugRef.current = PLAYGROUND_ENVIRONMENTS_SLUG;
-    setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG); // persist so a reload restores it
-    closeSidebarIfInline();
-  };
-
   const openCollection = () => {
     dispatch(setViewMode('collection-settings'));
     dispatch(setSelectedItemId(null));
@@ -242,8 +229,6 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
               onNavigate={handleNavigate}
               onToggleFolder={handleToggleFolder}
               onExpandFolder={handleExpandFolder}
-              onOpenEnvironments={openEnvironments}
-              environmentsActive={viewMode === 'environments'}
               onOpenCollection={openCollection}
               collectionActive={viewMode === 'collection-settings'}
               activeExample={activeExample}

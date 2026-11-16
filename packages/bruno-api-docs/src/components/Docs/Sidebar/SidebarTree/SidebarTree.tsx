@@ -37,6 +37,8 @@ interface SidebarTreeProps {
   collectionRoot?: CollectionRoot;
   activeExample: ExampleHighlight | null;
   onExampleClick?: (requestUuid: string, index: number) => void;
+  nameMatches?: Map<string, Array<[number, number]>>;
+  urlMatches?: Map<string, { url: string; ranges: Array<[number, number]> }>;
 }
 
 const SidebarTree: React.FC<SidebarTreeProps> = ({
@@ -49,7 +51,9 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
   onExpandFolder,
   collectionRoot,
   activeExample,
-  onExampleClick
+  onExampleClick,
+  nameMatches,
+  urlMatches
 }) => {
   // Explicit expand/collapse intent per request uuid. When a request has no
   // entry it follows the active example (auto-expand); once the user clicks the
@@ -83,6 +87,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
             <div key={key}>
               <SidebarNavLink
                 label={name}
+                highlight={uuid ? nameMatches?.get(uuid) : undefined}
                 level={itemLevel}
                 active={active}
                 chevron={(
@@ -118,6 +123,7 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
         const script = isScriptFile(item);
         const displayName = script && !/\.[jt]s$/i.test(name) ? `${name}.js` : name;
         const method = getRequestBadgeLabel(item);
+        const urlMatch = uuid ? urlMatches?.get(uuid) : undefined;
 
         const examples: HttpRequestExample[]
           = !script && uuid !== undefined ? ((item as HttpRequest).examples ?? []) : [];
@@ -131,6 +137,9 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
             <div key={key}>
               <SidebarNavLink
                 label={displayName}
+                highlight={nameMatches?.get(uuid)}
+                subLabel={urlMatch?.url}
+                subHighlight={urlMatch?.ranges}
                 level={itemLevel}
                 active={active}
                 method={method}
@@ -179,6 +188,9 @@ const SidebarTree: React.FC<SidebarTreeProps> = ({
           <SidebarNavLink
             key={key}
             label={displayName}
+            highlight={uuid ? nameMatches?.get(uuid) : undefined}
+            subLabel={urlMatch?.url}
+            subHighlight={urlMatch?.ranges}
             level={itemLevel}
             active={active}
             method={method}

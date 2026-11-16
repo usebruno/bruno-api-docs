@@ -1,13 +1,10 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
 import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import IconButton from '@/ui/IconButton/IconButton';
-import { SettingsIcon } from '@/assets/icons';
-import { useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
+import { useAutoHideScrollbar, useIsMobileDevice, usePlaygroundSearch } from '@/hooks';
+import { SearchIcon, CloseIcon } from '@/assets/icons';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { StyledWrapper } from './StyledWrapper';
-import Tooltip from '@/ui/Tooltip/Tooltip';
 
 interface PlaygroundSidebarProps {
   collection: OpenCollectionCollection | null;
@@ -16,8 +13,6 @@ interface PlaygroundSidebarProps {
   onNavigate: (slug: string) => void;
   onToggleFolder: (uuid: string) => void;
   onExpandFolder: (uuid: string) => void;
-  onOpenEnvironments: () => void;
-  environmentsActive: boolean;
   onOpenCollection: () => void;
   collectionActive: boolean;
   testId?: string;
@@ -32,8 +27,6 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   onNavigate,
   onToggleFolder,
   onExpandFolder,
-  onOpenEnvironments,
-  environmentsActive,
   onOpenCollection,
   collectionActive,
   testId = 'playground-sidebar',
@@ -42,6 +35,9 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
 }) => {
   const [collectionCollapsed, setCollectionCollapsed] = useState(false);
   const name = collection?.info?.name || 'Collection';
+
+  const { query, onSearchChange, isSearching, items, nameMatches, urlMatches, toggleFolder, expandFolder }
+    = usePlaygroundSearch(collection, onToggleFolder, onExpandFolder);
 
   // Show the scrollbar while the tree is in use, then fade it after 1s idle - same as the docs sidebar.
   const treeRef = useRef<HTMLDivElement>(null);
@@ -52,39 +48,48 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
 
   return (
     <StyledWrapper className={isMobileDevice ? 'mobile' : undefined} data-testid={testId}>
-      <div className="controls">
-        <EnvSwitcher testId="playground-env-switcher" />
-        <Tooltip
-          content="Configure Environments"
-        >
-          <IconButton
-            className={`env-settings${environmentsActive ? ' active' : ''}`}
-            label="Environment settings"
-            aria-label="Environment settings"
-            data-testid="playground-env-settings"
-            onClick={onOpenEnvironments}
-          >
-            <SettingsIcon />
-          </IconButton>
-        </Tooltip>
+      <div className="search">
+        <span className="search-icon">
+          <SearchIcon />
+        </span>
+        <input
+          className="search-input"
+          type="text"
+          placeholder="Search requests"
+          aria-label="Search requests"
+          data-testid="playground-sidebar-search"
+          value={query}
+          onChange={(e) => onSearchChange(e.target.value)}
+        />
+        {query && (
+          <button type="button" className="search-clear" aria-label="Clear search" onClick={() => onSearchChange('')}>
+            <CloseIcon />
+          </button>
+        )}
       </div>
 
       <div className="tree" ref={treeRef}>
-        {collection?.items ? (
+        {isSearching && items.length === 0 ? (
+          <div className="search-empty">No results found</div>
+        ) : collection?.items ? (
           <SidebarTree
-            items={collection.items}
+            items={items}
             activeSlug={activeSlug}
             uuidToSlug={uuidToSlug}
             onNavigate={onNavigate}
-            onToggleFolder={onToggleFolder}
-            onExpandFolder={onExpandFolder}
+            onToggleFolder={toggleFolder}
+            nameMatches={nameMatches}
+            urlMatches={urlMatches}
+            onExpandFolder={expandFolder}
             activeExample={activeExample}
             onExampleClick={onExampleClick}
             collectionRoot={{
               name,
-              collapsed: collectionCollapsed,
+              collapsed: collectionCollapsed && !isSearching,
               active: collectionActive,
-              onToggle: () => setCollectionCollapsed((v) => !v),
+              onToggle: () => {
+                if (!isSearching) setCollectionCollapsed((v) => !v);
+              },
               // Clicking the collection name opens its settings and reopens the
               // tree, the same way clicking a folder shows its contents.
               onClick: () => {

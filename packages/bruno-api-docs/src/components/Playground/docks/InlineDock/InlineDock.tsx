@@ -27,7 +27,7 @@ const InlineDock: React.FC<InlineDockProps> = ({ dock, onDockChange, sidebarOpen
   const { size, dragging, startDrag } = useDockResize({
     axis: 'x',
     initial: initialWidth,
-    min: 360,
+    min: 445,
     max: () => Math.round(getViewportWidth() * 0.7)
   });
 

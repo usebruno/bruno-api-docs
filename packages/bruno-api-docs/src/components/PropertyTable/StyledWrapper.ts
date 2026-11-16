@@ -29,7 +29,7 @@ export const StyledWrapper = styled.div`
     font-weight: 500;
     font-style: italic;
     font-size: 0.8125rem;
-    line-height: 1;
+    line-height: 1.2;
     letter-spacing: normal;
     color: var(--text-secondary);
   }

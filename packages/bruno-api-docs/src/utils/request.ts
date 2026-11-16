@@ -110,15 +110,10 @@ export const resolveInheritedAuth = (
   }
 
   const collectionAuth = collection?.request?.auth as Auth | undefined;
-  if (isConcrete(collectionAuth)) {
-    return {
-      auth: collectionAuth,
-      source: collectionSource(collection)
-    };
-  }
-
-  // Nothing concrete anywhere up the chain — the request effectively sends No Auth, not "Inherit".
-  return { auth: undefined };
+  return {
+    auth: isConcrete(collectionAuth) ? collectionAuth : undefined,
+    source: collectionSource(collection)
+  };
 };
 
 /**

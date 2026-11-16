@@ -100,6 +100,7 @@ html, body {
   font-kerning: normal;
   text-rendering: optimizeLegibility;
   letter-spacing: -0.011em;
+  font-feature-settings: 'calt' 1;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
@@ -879,6 +880,11 @@ tr.themed-row:nth-child(even) {
   border-bottom: 1px solid var(--oc-table-border) !important;
   text-align: left !important;
   overflow-wrap: anywhere !important;
+}
+
+.markdown-documentation th:empty::after,
+.markdown-documentation td:empty::after {
+  content: '\200b';
 }
 
 .markdown-documentation tr:last-child td,

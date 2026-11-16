@@ -44,6 +44,32 @@ test.describe('Playground state survives navigation inside the page', () => {
     expect(await sendAndCaptureUrl(page, responsePane)).toMatch(new RegExp(`^${PROD_HOST}/alpha`));
   });
 
+  test('an environment picked in the docs while the playground is closed is the one it reopens with', async ({
+    page,
+    requestPage,
+    envSwitcher,
+    playground,
+    responsePane
+  }) => {
+    await mockEndpoint(page, 'alpha', '{}');
+    await page.goto('/?fixture=general');
+    await requestPage.sidebar.item('Alpha').click();
+    await expect(requestPage.title).toHaveText('Alpha');
+    await requestPage.urlBar.tryButton.click();
+    await playground.view.waitFor({ state: 'visible' });
+    await expect(playground.envSwitcher.trigger).toHaveText('Dev');
+    expect(await sendAndCaptureUrl(page, responsePane)).toMatch(new RegExp(`^${DEV_HOST}/alpha`));
+    await playground.close();
+    await expect(playground.header).toHaveCount(0);
+
+    await envSwitcher.selectEnvironment('Prod');
+    await requestPage.urlBar.tryButton.click();
+    await playground.view.waitFor({ state: 'visible' });
+
+    await expect(playground.envSwitcher.trigger).toHaveText('Prod');
+    expect(await sendAndCaptureUrl(page, responsePane)).toMatch(new RegExp(`^${PROD_HOST}/alpha`));
+  });
+
   test('switching the environment in the playground changes where the request is sent', async ({
     page,
     playground,

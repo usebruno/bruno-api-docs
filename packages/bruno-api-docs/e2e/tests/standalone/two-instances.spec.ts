@@ -1,6 +1,7 @@
 import { test, expect } from '../../playwright';
 import { generalFixtureCollection } from '../../../src/e2eFixtures/generalCollection';
 
+const ALPHA_URL = '{{host}}/alpha?q={{special}}&m={{onlyInDev}}&t={{apiToken}}';
 const secondCollection = { ...generalFixtureCollection, info: { name: 'Second', version: '1.0.0' } };
 
 test.use({ viewport: { width: 1280, height: 900 }, colorScheme: 'light' });
@@ -64,6 +65,25 @@ test.describe('Two Bruno.apiDocs instances on one page', () => {
     await expect(page).toHaveURL(standalonePage.url('#/alpha'));
     await expect(second.overviewPage.root).toBeVisible();
     await expect(second.requestPage.title).toHaveCount(0);
+  });
+
+  test('a URL edited in one playground is not in the other\'s, and is still there on reopen', async ({ standalonePage }) => {
+    const first = standalonePage.instance('first');
+    const second = standalonePage.instance('second');
+    await first.sidebar.item('Alpha').click();
+    await first.requestPage.urlBar.tryButton.click();
+    await first.playground.urlInput.fill('https://edited.example.com/alpha');
+    await first.playground.closeButton.click();
+    await expect(first.playground.view).toHaveCount(0);
+
+    await second.sidebar.item('Alpha').click();
+    await second.requestPage.urlBar.tryButton.click();
+    await expect(second.playground.urlInput).toHaveValue(ALPHA_URL);
+    await second.playground.closeButton.click();
+    await expect(second.playground.view).toHaveCount(0);
+
+    await first.requestPage.urlBar.tryButton.click();
+    await expect(first.playground.urlInput).toHaveValue('https://edited.example.com/alpha');
   });
 
   test('a request sent from one playground shows its response only in that instance', async ({ page, standalonePage }) => {

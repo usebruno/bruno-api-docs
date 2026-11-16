@@ -59,10 +59,6 @@ export const StyledWrapper = styled.div`
     border-radius: 0;
   }
 
-  && .code-copy-floating {
-    opacity: 1;
-  }
-
   .code-snippet-expand {
     align-self: center;
     flex: 0 0 auto;

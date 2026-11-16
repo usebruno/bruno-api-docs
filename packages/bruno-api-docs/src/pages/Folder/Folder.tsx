@@ -76,7 +76,7 @@ export const Folder: React.FC<FolderProps> = ({ item, ancestry = [], collection,
 
         {docsHtml && (
           <Section label="Documentation" testId="folder-section-documentation" className="folder-fullwidth" labelClassName="section-label-muted">
-            <ViewMore collapsedHeight="4.5rem" testId="folder-docs">
+            <ViewMore testId="folder-docs">
               <MarkdownContent
                 className="markdown-documentation"
                 navHeadings

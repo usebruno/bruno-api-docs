@@ -211,6 +211,7 @@ test.describe('Section navigator (the "on this page" outline)', () => {
 
     // The bottom dock splits the screen, so the rail stays but is capped to the docs area's height.
     await page.getByTestId('request-try-button').click();
+    await page.getByTestId('playground-dock-bottom').click();
     await expect(page.getByTestId('playground-content')).toBeVisible();
 
     const rail = page.getByTestId('section-nav-rail');
@@ -231,6 +232,7 @@ test.describe('Section navigator (the "on this page" outline)', () => {
 
     // The bottom dock opens to 60% of the viewport, leaving the docs column too short for the rail.
     await page.getByTestId('request-try-button').click();
+    await page.getByTestId('playground-dock-bottom').click();
     await expect(page.getByTestId('playground-content')).toBeVisible();
     await expect(page.getByTestId('section-nav-rail')).toBeHidden();
   });

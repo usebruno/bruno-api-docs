@@ -33,6 +33,7 @@ import {
 import { setUrlQueryParams } from '@/utils/pathParams';
 import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
+import { getItemUuid } from '@/utils/itemUtils';
 
 interface RequestPaneProps {
   item: HttpRequest;
@@ -118,6 +119,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
 
   const renderParams = () => (
     <ParamsTab
+      itemUuid={getItemUuid(item)}
       params={params}
       onParamsChange={handleParamsChange}
     />
@@ -135,6 +137,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
 
   const renderHeaders = () => (
     <HeadersTab
+      itemUuid={getItemUuid(item)}
       headers={headers}
       onHeadersChange={handleHeadersChange}
       description="Headers sent with this request."

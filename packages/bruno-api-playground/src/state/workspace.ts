@@ -5,7 +5,7 @@ import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 import { findLastIndex, omit } from 'lodash-es';
 import { createObservable } from '@usebruno/api-shared/observable/observable';
-import { deepFreeze } from '@usebruno/api-shared/utils/deepFreeze';
+import { deepFreeze } from '../utils/deepFreeze';
 import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
 import { applyScriptEnvVars } from '@usebruno/api-shared/utils/environments';
 import { reconcileScriptVariables } from '@usebruno/api-shared/utils/scriptVariables';

@@ -5,11 +5,9 @@ import type { ScriptFile, Folder as FolderItem } from '@opencollection/types/col
 import type { RequestItem } from '@usebruno/api-shared/utils/schemaHelpers';
 import { useActiveResolution } from '@/routing/hooks';
 import { useDocument, useNavModel } from '@usebruno/api-shared/document/document';
-import { findItemByUuid, getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 import { getAncestorsByUuid } from '@usebruno/api-shared/utils/fileUtils';
-import { useWorkingCollection } from '@usebruno/api-shared/session/session';
 import { ItemVariableResolverProvider } from '@usebruno/api-shared/hooks';
-import type { Item } from '@opencollection/types/collection/item';
 import PrevNext from '../PrevNext/PrevNext';
 import SectionNav from '../SectionNav/SectionNav';
 import PoweredByFooter from '../PoweredByFooter/PoweredByFooter';
@@ -35,17 +33,12 @@ const PAGES_WITHOUT_SECTION_NAV = new Set<PageType>(['environments']);
 const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'page' }) => {
   const resolution = useActiveResolution();
   const model = useNavModel();
-  const loaded = useDocument();
-  const collection = useWorkingCollection() ?? loaded;
+  const collection = useDocument();
   const docsNavigate = useDocsNavigate();
   const pageBodyRef = useRef<HTMLDivElement>(null);
 
-  const navItem = resolution?.entry?.item ?? null;
-  const itemUuid = getItemUuid(navItem) ?? '';
-  const item = useMemo(
-    () => findItemByUuid(collection?.items, itemUuid) ?? navItem,
-    [collection, itemUuid, navItem]
-  );
+  const item = resolution?.entry?.item ?? null;
+  const itemUuid = getItemUuid(item) ?? '';
   const ancestry = useMemo(() => getAncestorsByUuid(collection, itemUuid), [collection, itemUuid]);
 
   if (!resolution) return <Navigate to="/" replace />;
@@ -71,7 +64,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         return <Environments {...pageProps} />;
       case 'folder':
         return item ? (
-          <ItemVariableResolverProvider ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item}>
             <Folder item={item as FolderItem} ancestry={ancestry} collection={collection} onBreadcrumbClick={goToUuid} />
           </ItemVariableResolverProvider>
         ) : (
@@ -83,7 +76,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
         ) : null;
       case 'graphql':
         return item ? (
-          <ItemVariableResolverProvider ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item}>
             <GraphqlRequest
               item={item as GraphQLRequest}
               ancestry={ancestry}
@@ -95,7 +88,7 @@ const PageRouter: React.FC<PageRouterProps> = ({ onOpenPlayground, testId = 'pag
       case 'request':
       default:
         return item ? (
-          <ItemVariableResolverProvider ancestry={ancestry} item={item as Item}>
+          <ItemVariableResolverProvider collection={collection} ancestry={ancestry} item={item}>
             <Request
               item={item as RequestItem}
               ancestry={ancestry}

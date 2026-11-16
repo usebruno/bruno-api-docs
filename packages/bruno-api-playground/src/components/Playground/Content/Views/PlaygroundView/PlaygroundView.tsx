@@ -166,6 +166,7 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
 
   return (
     <ItemVariableResolverProvider
+      collection={collection}
       ancestry={ancestry}
       item={editableItem as unknown as Item}
       onWriteVariable={actions.setVariable}

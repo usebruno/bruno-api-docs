@@ -110,7 +110,7 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
 - Components: `PascalCase.tsx`, named after the component. see: `bruno-api-playground/src/components/Playground/PlaygroundBody/PlaygroundViewSwitch.tsx`
 - Hooks and everything else in `src`: `camelCase.ts`. see: `bruno-api-docs/src/components/Docs/Sidebar/hooks/useFolderCollapse.ts`, `bruno-shared/src/session/workspace.ts`
 - Specs sit next to the file with the same name: `workspace.ts` and `workspace.test.ts`.
-- E2E specs and page objects: `kebab-case`. see: `bruno-api-docs/e2e/tests/playground/edits-reach-docs-variables.spec.ts`
+- E2E specs and page objects: `kebab-case`. see: `bruno-api-docs/e2e/tests/playground/playground-edits-stay-out-of-docs.spec.ts`
 - `bruno-api-playground/src/runner/` and `bruno-api-playground/src/scripting/` still have older kebab-case files. Leave them until a
   rename-only PR; new files there follow the rule above. Don't copy the neighbouring file's style.
 

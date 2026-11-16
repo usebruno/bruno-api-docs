@@ -16,7 +16,7 @@ const tree = (value: string, configure?: (session: Session) => void) => {
   configure?.(session);
   return (
     <TestProviders document={collection} session={session}>
-      <VariableResolverProvider>
+      <VariableResolverProvider collection={collection}>
         <VariableText value={value} />
       </VariableResolverProvider>
     </TestProviders>

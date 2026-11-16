@@ -47,7 +47,7 @@ const cardTree = (name: string) => {
   session.env.setActiveEnv('Dev');
   return (
     <TestProviders document={collection} session={session}>
-      <VariableResolverProvider>
+      <VariableResolverProvider collection={collection}>
         <VariableInfoCard name={name} />
       </VariableResolverProvider>
     </TestProviders>
@@ -96,7 +96,7 @@ describe('VariableInfoCard', () => {
     session.env.setActiveEnv('Dev');
     const docsItemTree = (
       <TestProviders document={collection} session={session}>
-        <ItemVariableResolverProvider ancestry={[]} item={null}>
+        <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null}>
           <VariableInfoCard name="vaultKey" />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -155,7 +155,7 @@ const editableCardTree = (name: string) => {
   session.env.setActiveEnv('Dev');
   return (
     <TestProviders document={collection} session={session}>
-      <ItemVariableResolverProvider ancestry={[]} item={null} onWriteVariable={vi.fn()}>
+      <ItemVariableResolverProvider collection={collection} ancestry={[]} item={null} onWriteVariable={vi.fn()}>
         <VariableInfoCard name={name} editable />
       </ItemVariableResolverProvider>
     </TestProviders>
@@ -185,7 +185,7 @@ describe('VariableInfoCard (editable)', () => {
     session.env.setActiveEnv('Dev');
     const tree = (
       <TestProviders document={collection} session={session}>
-        <VariableResolverProvider>
+        <VariableResolverProvider collection={collection}>
           <VariableInfoCard name="host" editable />
         </VariableResolverProvider>
       </TestProviders>

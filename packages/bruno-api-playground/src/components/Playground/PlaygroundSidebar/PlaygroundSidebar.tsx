@@ -56,7 +56,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   return (
     <StyledWrapper className={isMobileDevice ? 'mobile' : undefined} data-testid={testId}>
       <div className="controls">
-        <EnvSwitcher testId="playground-env-switcher" />
+        <EnvSwitcher collection={collection} testId="playground-env-switcher" />
         <Tooltip
           content="Configure Environments"
         >

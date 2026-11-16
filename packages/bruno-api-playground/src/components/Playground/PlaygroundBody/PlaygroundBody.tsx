@@ -3,7 +3,7 @@ import type { Item } from '@opencollection/types/collection/item';
 import { isFolderCollapsed } from '@usebruno/api-shared/session/playgroundFolders';
 import { useSession } from '@usebruno/api-shared/session/session';
 import { useObservable } from '@usebruno/api-shared/observable/observable';
-import { useElementWidth, useResizableSidebar, useClickOutside } from '@usebruno/api-shared/hooks';
+import { useElementWidth, useResizableSidebar, useClickOutside, VariableResolverProvider } from '@usebruno/api-shared/hooks';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { usePlaygroundSelection } from './usePlaygroundSelection';
@@ -64,60 +64,62 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   });
 
   return (
-    <StyledWrapper
-      data-testid="playground-runner"
-      data-overlay-sidebar={dock === 'inline' ? 'true' : undefined}
-      style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}
-    >
-      {sidebarOpen && dock === 'inline' && (
-        <div
-          className="sidebar-backdrop"
-          data-testid="playground-sidebar-backdrop"
-          aria-hidden="true"
-          onClick={onCloseSidebar}
-        />
-      )}
-      {sidebarOpen && (
-        <>
-          <aside className="sidebar" data-testid="playground-sidebar-panel" ref={sidebarRef}>
-            <PlaygroundSidebar
-              collection={collection}
-              activeSlug={selection.activeSlug}
-              uuidToSlug={selection.uuidToSlug}
-              onNavigate={selection.navigate}
-              onToggleFolder={folders.toggle}
-              onExpandFolder={(uuid) => folders.expand([uuid])}
-              isFolderCollapsed={isCollapsed}
-              onOpenEnvironments={selection.openEnvironments}
-              environmentsActive={selection.viewMode === 'environments'}
-              onOpenCollection={selection.openCollection}
-              collectionActive={selection.viewMode === 'collection-settings'}
-              activeExample={selection.activeExample}
-              onExampleClick={selection.selectExample}
-            />
-          </aside>
+    <VariableResolverProvider collection={collection}>
+      <StyledWrapper
+        data-testid="playground-runner"
+        data-overlay-sidebar={dock === 'inline' ? 'true' : undefined}
+        style={{ '--sidebar-width': `${sidebarWidth}px` } as React.CSSProperties}
+      >
+        {sidebarOpen && dock === 'inline' && (
           <div
-            className="sidebar-resizer"
-            data-testid="playground-sidebar-resizer"
-            data-dragging={sidebarDragging ? 'true' : undefined}
-            role="separator"
-            aria-orientation="vertical"
-            aria-label="Resize sidebar"
-            onPointerDown={startSidebarResize}
+            className="sidebar-backdrop"
+            data-testid="playground-sidebar-backdrop"
+            aria-hidden="true"
+            onClick={onCloseSidebar}
           />
-        </>
-      )}
-      <div className="view" data-testid="playground-view" ref={viewRef}>
-        <PlaygroundViewSwitch
-          viewMode={selection.viewMode}
-          selectedItem={selection.selectedItem}
-          selectedExampleIndex={selection.selectedExampleIndex}
-          collection={collection}
-          dock={dock}
-          orientation={orientation}
-        />
-      </div>
-    </StyledWrapper>
+        )}
+        {sidebarOpen && (
+          <>
+            <aside className="sidebar" data-testid="playground-sidebar-panel" ref={sidebarRef}>
+              <PlaygroundSidebar
+                collection={collection}
+                activeSlug={selection.activeSlug}
+                uuidToSlug={selection.uuidToSlug}
+                onNavigate={selection.navigate}
+                onToggleFolder={folders.toggle}
+                onExpandFolder={(uuid) => folders.expand([uuid])}
+                isFolderCollapsed={isCollapsed}
+                onOpenEnvironments={selection.openEnvironments}
+                environmentsActive={selection.viewMode === 'environments'}
+                onOpenCollection={selection.openCollection}
+                collectionActive={selection.viewMode === 'collection-settings'}
+                activeExample={selection.activeExample}
+                onExampleClick={selection.selectExample}
+              />
+            </aside>
+            <div
+              className="sidebar-resizer"
+              data-testid="playground-sidebar-resizer"
+              data-dragging={sidebarDragging ? 'true' : undefined}
+              role="separator"
+              aria-orientation="vertical"
+              aria-label="Resize sidebar"
+              onPointerDown={startSidebarResize}
+            />
+          </>
+        )}
+        <div className="view" data-testid="playground-view" ref={viewRef}>
+          <PlaygroundViewSwitch
+            viewMode={selection.viewMode}
+            selectedItem={selection.selectedItem}
+            selectedExampleIndex={selection.selectedExampleIndex}
+            collection={collection}
+            dock={dock}
+            orientation={orientation}
+          />
+        </div>
+      </StyledWrapper>
+    </VariableResolverProvider>
   );
 };
 

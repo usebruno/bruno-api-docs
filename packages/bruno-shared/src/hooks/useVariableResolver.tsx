@@ -5,7 +5,7 @@ import type { Item } from '@opencollection/types/collection/item';
 import type { Variable, SecretVariable } from '@opencollection/types/common/variables';
 import type { VariableWrite } from '../session/workspace';
 import { promptVariableName } from '../utils/promptVariables';
-import { useEnvState, useWorkingCollection } from '../session/session';
+import { useEnvState } from '../session/session';
 import { getRequestVariables, isFolder } from '../utils/schemaHelpers';
 import { getItemUuid } from '../utils/itemUtils';
 import { mockDataFunctions, timeBasedDynamicVars } from '../utils/fakerFunctions';
@@ -147,8 +147,7 @@ const itemSource = (item: Item): VariableSource =>
     ? { scope: 'folder', variables: folderVariables(item) }
     : { scope: 'request', variables: getRequestVariables(item as never) as (Variable | SecretVariable)[] };
 
-export const useVariableResolver = (): VariableResolver => {
-  const collection = useWorkingCollection();
+export const useVariableResolver = (collection: OpenCollection | null): VariableResolver => {
   const { activeEnvName, showVars } = useEnvState();
 
   const model = useMemo(
@@ -193,13 +192,18 @@ const VariableResolverContext = createContext<VariableResolver>(PASSTHROUGH_RESO
 export const useResolvedVariables = (): VariableResolver => useContext(VariableResolverContext);
 
 /**
- * Provides the working-copy resolver (collection + active environment) to
- * descendants. Mounted once at the app shell so every `{{var}}` render site
- * resolves against one active environment without each site subscribing to the
- * session itself.
+ * Provides the resolver for one collection (plus the active environment) to
+ * descendants. Docs mount it over the document, the playground over its working
+ * copy, so every `{{var}}` render site resolves against one active environment
+ * without each site subscribing to the session itself.
  */
-export const VariableResolverProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <VariableResolverContext.Provider value={useVariableResolver()}>{children}</VariableResolverContext.Provider>
+export const VariableResolverProvider: React.FC<{ collection: OpenCollection | null; children: React.ReactNode }> = ({
+  collection,
+  children
+}) => (
+  <VariableResolverContext.Provider value={useVariableResolver(collection)}>
+    {children}
+  </VariableResolverContext.Provider>
 );
 
 export const ShowVarsOverrideProvider: React.FC<{
@@ -220,13 +224,13 @@ export const ShowVarsOverrideProvider: React.FC<{
 };
 
 export const ItemVariableResolverProvider: React.FC<{
+  collection: OpenCollection | null;
   ancestry: Item[];
   item: Item | null;
   onWriteVariable?: (write: VariableWrite) => void;
   children: React.ReactNode;
-}> = ({ ancestry, item, onWriteVariable, children }) => {
+}> = ({ collection, ancestry, item, onWriteVariable, children }) => {
   const writable = onWriteVariable !== undefined;
-  const collection = useWorkingCollection();
   const { activeEnvName, showVars } = useEnvState();
 
   // Both the docs pages and the playground mount this provider; only the

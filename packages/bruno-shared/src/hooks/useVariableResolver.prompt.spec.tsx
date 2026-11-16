@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { TestProviders } from '../test-utils/providers';
 import { createSession, type Session } from '../session/session';
 import { hydrateWithUUIDs } from '../utils/fileUtils';
@@ -18,7 +18,7 @@ const collection = {
   items: []
 } as OpenCollection;
 
-const probeTree = (session: Session) => {
+const probeTree = (session: Session, onWriteVariable = vi.fn()) => {
   const box: { current: VariableResolver | null } = { current: null };
 
   const Probe: React.FC = () => {
@@ -31,9 +31,10 @@ const probeTree = (session: Session) => {
     tree: (
       <TestProviders document={collection} session={session}>
         <ItemVariableResolverProvider
+          collection={hydrateWithUUIDs(collection as never)}
           ancestry={[]}
           item={null}
-          onWriteVariable={session.workspace.setVariable}
+          onWriteVariable={onWriteVariable}
         >
           <Probe />
         </ItemVariableResolverProvider>
@@ -42,15 +43,9 @@ const probeTree = (session: Session) => {
   };
 };
 
-const newSession = () => {
-  const session = createSession();
-  session.workspace.replaceCollection(hydrateWithUUIDs(collection as never));
-  return session;
-};
-
 describe('looking a prompt up through the variable resolver', () => {
   it('names it as a prompt rather than reporting an invalid variable name', () => {
-    const { box, tree } = probeTree(newSession());
+    const { box, tree } = probeTree(createSession());
     useRenderToDom(tree);
     const resolver = box.current as VariableResolver;
 
@@ -59,7 +54,7 @@ describe('looking a prompt up through the variable resolver', () => {
   });
 
   it('keeps it separate from a real variable that shares the bare name', () => {
-    const { box, tree } = probeTree(newSession());
+    const { box, tree } = probeTree(createSession());
     useRenderToDom(tree);
     const resolver = box.current as VariableResolver;
 
@@ -68,38 +63,34 @@ describe('looking a prompt up through the variable resolver', () => {
   });
 
   it('shows no value, because answers live only for the send that collected them', () => {
-    const { box, tree } = probeTree(newSession());
+    const { box, tree } = probeTree(createSession());
     useRenderToDom(tree);
 
     expect((box.current as VariableResolver).lookup('?OTP').value).toBe('');
   });
 
   it('is not editable, matching the desktop app', () => {
-    const { box, tree } = probeTree(newSession());
+    const { box, tree } = probeTree(createSession());
     useRenderToDom(tree);
 
     expect((box.current as VariableResolver).lookup('?OTP').simpleString).toBe(false);
   });
 
   it('does not treat a padded token as a prompt, matching the tokenizer', () => {
-    const { box, tree } = probeTree(newSession());
+    const { box, tree } = probeTree(createSession());
     useRenderToDom(tree);
 
     expect((box.current as VariableResolver).lookup('? OTP').scope).not.toBe('prompt');
   });
 
   it('still writes an ordinary variable that shares the bare name', () => {
-    const session = newSession();
-    const { box, tree } = probeTree(session);
+    const onWriteVariable = vi.fn();
+    const { box, tree } = probeTree(createSession(), onWriteVariable);
     useRenderToDom(tree);
 
     (box.current as VariableResolver).updateVariable('OTP', 'changed');
 
-    const variables = session.workspace.get().collection?.request?.variables as {
-      value: string;
-    }[];
-
-    expect(variables[0].value).toBe('changed');
+    expect(onWriteVariable).toHaveBeenCalledWith({ scope: 'collection', name: 'OTP', value: 'changed' });
   });
 });
 
@@ -112,8 +103,8 @@ describe('a prompt token outside the playground', () => {
     };
 
     useRenderToDom(
-      <TestProviders session={newSession()}>
-        <VariableResolverProvider>
+      <TestProviders session={createSession()}>
+        <VariableResolverProvider collection={collection}>
           <Probe />
         </VariableResolverProvider>
       </TestProviders>

@@ -158,7 +158,7 @@ const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
 
   return (
     <DocumentProvider document={document}>
-      <VariableResolverProvider>
+      <VariableResolverProvider collection={document}>
         <div className="oc-playground">
           <AppShell
             logo={logo}

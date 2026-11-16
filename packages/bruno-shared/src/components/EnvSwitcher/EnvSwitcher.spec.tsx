@@ -23,7 +23,7 @@ const render = (
   const root = parse(
     renderToStaticMarkup(
       <TestProviders document={collection} session={session}>
-        <EnvSwitcher {...props} />
+        <EnvSwitcher collection={collection} {...props} />
       </TestProviders>
     )
   );
@@ -110,24 +110,20 @@ describe('EnvSwitcher', () => {
   });
 });
 
-describe('EnvSwitcher reads the playground working copy', () => {
-  it('shows an environment that exists only in the working copy', () => {
+describe('EnvSwitcher lists the collection it is given', () => {
+  it('shows an environment that exists only in that collection, not the loaded document', () => {
     const trigger = getByTestId(
-      render(withEnvs, (s) => {
-        s.workspace.replaceCollection(collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }]));
-        s.env.setActiveEnv('Added');
+      render(withEnvs, (s) => s.env.setActiveEnv('Added'), {
+        collection: collectionWith([{ name: 'Dev' }, { name: 'Prod' }, { name: 'Added' }])
       }),
       'env-switcher'
     );
     expect(trigger.text).toContain('Added');
   });
 
-  it('falls back to the first working-copy env when the active env is gone from the working copy', () => {
+  it('falls back to that collection\'s first env when the active env is gone from it', () => {
     const trigger = getByTestId(
-      render(withEnvs, (s) => {
-        s.workspace.replaceCollection(collectionWith([{ name: 'Staging' }]));
-        s.env.setActiveEnv('Prod');
-      }),
+      render(withEnvs, (s) => s.env.setActiveEnv('Prod'), { collection: collectionWith([{ name: 'Staging' }]) }),
       'env-switcher'
     );
     expect(trigger.text).toContain('Staging');

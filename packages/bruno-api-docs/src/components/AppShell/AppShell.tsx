@@ -145,7 +145,7 @@ const AppShell: React.FC<AppShellProps> = ({
           envSwitcherSlot={(
             <>
               <ShowVarsToggle />
-              <EnvSwitcher hideWhenEmpty />
+              <EnvSwitcher collection={collection} hideWhenEmpty />
             </>
           )}
           openInBrunoHref={openInBrunoHref}

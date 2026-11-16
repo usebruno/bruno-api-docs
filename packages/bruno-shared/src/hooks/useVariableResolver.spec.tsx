@@ -23,8 +23,8 @@ const collection = {
   }
 } as OpenCollection;
 
-const Probe: React.FC = () => {
-  const r = useVariableResolver();
+const Probe: React.FC<{ collection: OpenCollection }> = ({ collection }) => {
+  const r = useVariableResolver(collection);
   return (
     <div>
       <span data-testid="base">{r.resolve('{{baseUrl}}')}</span>
@@ -35,12 +35,12 @@ const Probe: React.FC = () => {
   );
 };
 
-const render = (configure: (session: Session) => void): string => {
+const render = (configure: (session: Session) => void, resolveAgainst = collection): string => {
   const session = createSession();
   configure(session);
   return renderToStaticMarkup(
     <TestProviders document={collection} session={session}>
-      <Probe />
+      <Probe collection={resolveAgainst} />
     </TestProviders>
   );
 };
@@ -69,14 +69,15 @@ describe('useVariableResolver', () => {
     expect(html).toContain('<span data-testid="base">https://prod.test</span>');
   });
 
-  it('resolves against the playground working copy, not the loaded document', () => {
+  it('resolves against the collection it is given, not the loaded document', () => {
+    const edited = {
+      request: { variables: [{ name: 'collectionVar', value: 'edited' }] },
+      config: { environments: [{ name: 'Dev', variables: [{ name: 'baseUrl', value: 'https://edited.test' }] }] }
+    } as OpenCollection;
     const html = render((session) => {
-      session.workspace.replaceCollection(collection);
-      session.workspace.setVariable({ scope: 'environment', name: 'baseUrl', value: 'https://edited.test', envName: 'Dev' });
-      session.workspace.setVariable({ scope: 'collection', name: 'collectionVar', value: 'edited' });
       session.env.setActiveEnv('Dev');
       session.env.toggleShowVars();
-    });
+    }, edited);
     expect(html).toContain('<span data-testid="base">https://edited.test</span>');
     expect(html).toContain('<span data-testid="coll">edited</span>');
   });
@@ -113,7 +114,7 @@ describe('lookup (variable hover card)', () => {
     if (showVars) session.env.toggleShowVars();
     return renderToStaticMarkup(
       <TestProviders document={collection} session={session}>
-        <ItemVariableResolverProvider ancestry={[folder]} item={requestItem}>
+        <ItemVariableResolverProvider collection={collection} ancestry={[folder]} item={requestItem}>
           <LookupProbe name={name} />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -180,7 +181,7 @@ describe('nested variable resolution', () => {
 
     const html = renderToStaticMarkup(
       <TestProviders document={nested} session={session}>
-        <ItemVariableResolverProvider ancestry={[]} item={null} onWriteVariable={vi.fn()}>
+        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} onWriteVariable={vi.fn()}>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </TestProviders>
@@ -196,7 +197,7 @@ describe('nested variable resolution', () => {
 
     const html = renderToStaticMarkup(
       <TestProviders document={nested} session={session}>
-        <ItemVariableResolverProvider ancestry={[]} item={null} onWriteVariable={vi.fn()}>
+        <ItemVariableResolverProvider collection={nested} ancestry={[]} item={null} onWriteVariable={vi.fn()}>
           <NestedProbe />
         </ItemVariableResolverProvider>
       </TestProviders>

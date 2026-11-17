@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, headerTexts, query } from '@/test-utils/dom';
+import { getByTestId, headerTexts, query, queryByTestId } from '@/test-utils/dom';
 import KeyValueTable, { type KeyValueRow } from './KeyValueTable';
 
 const noop = () => {};
@@ -84,5 +84,48 @@ describe('KeyValueTable: first column header alignment', () => {
   it('does not flag the table when the checkbox column is hidden', () => {
     const root = useRenderToDom(<KeyValueTable data={rows} onChange={noop} showEnabled={false} />);
     expect(getByTestId(root, 'key-value-table-table').classList.contains('key-value-table--with-toggle')).toBe(false);
+  });
+});
+
+describe('KeyValueTable — rowConfig', () => {
+  const mixedRows: KeyValueRow[] = [
+    { id: 's1', name: '', value: '', enabled: true, rowType: 'section' },
+    { id: 'i1', name: 'X-Tenant', value: 'acme', enabled: true, description: 'Tenant', rowType: 'inherited' },
+    { id: 'r1', name: 'X-Trace', value: 'abc', enabled: true }
+  ];
+  const rowConfig = {
+    isEditable: (row: KeyValueRow) => !row.rowType,
+    isCheckboxDisabled: (row: KeyValueRow) => row.rowType === 'inherited',
+    className: (row: KeyValueRow) => (row.rowType ? `${row.rowType}-row` : ''),
+    testId: (row: KeyValueRow) => (row.rowType ? `${row.rowType}-row` : undefined),
+    renderFullWidth: (row: KeyValueRow) => (row.rowType === 'section' ? <span>Inherited</span> : null),
+    renderActionCell: (row: KeyValueRow) => (row.rowType === 'inherited' ? <span data-testid="source-link" /> : null)
+  };
+  const table = <KeyValueTable data={mixedRows} onChange={noop} showDescription rowConfig={rowConfig} />;
+
+  it('renders a full-width row spanning every column', () => {
+    const cell = query(getByTestId(useRenderToDom(table), 'section-row'), 'td');
+    expect(cell.getAttribute('class')).toBe('full-width-row');
+    expect(cell.getAttribute('colspan')).toBe('4');
+    expect(cell.text).toBe('Inherited');
+  });
+
+  it('renders read-only rows as text with a disabled checkbox and the custom action', () => {
+    const row = getByTestId(useRenderToDom(table), 'inherited-row');
+    expect(row.getAttribute('class')).toBe('inherited-row');
+    expect(queryByTestId(row, 'key-value-table-name-input')).toBeNull();
+    expect(getByTestId(row, 'key-value-table-name-text').text).toBe('X-Tenant');
+    expect(getByTestId(row, 'key-value-table-value-text').text).toBe('acme');
+    expect(getByTestId(row, 'key-value-table-description-text').text).toBe('Tenant');
+    expect(query(row, 'input[type="checkbox"]').hasAttribute('disabled')).toBe(true);
+    getByTestId(row, 'source-link');
+    expect(row.querySelector('.delete-button')).toBeNull();
+  });
+
+  it('keeps editable rows editable and appends the trailing blank row after them', () => {
+    const bodyRows = useRenderToDom(table).querySelectorAll('tbody tr');
+    expect(bodyRows).toHaveLength(4);
+    expect(bodyRows[2].querySelector('.delete-button')).toBeTruthy();
+    expect(bodyRows[3].getAttribute('class')).toBe('empty-row');
   });
 });

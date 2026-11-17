@@ -4,6 +4,7 @@ import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
 import { getByTestId, query } from '@/test-utils/dom';
 import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
+import { COLLECTION_ROOT_CRUMB } from '@/utils/common';
 import { AuthTab } from './AuthTab';
 
 const render = (ui: React.ReactElement) => {
@@ -52,18 +53,89 @@ describe('AuthTab', () => {
     expect(getByTestId(root, 'no-content-text').text.trim()).toBe('No authentication configured.');
   });
 
-  it('names the inherited source and its effective mode, matching the app', () => {
-    const { root, getByTestId } = renderAuth('inherit', {
+  it('names the collection it inherits from and shows its bearer token read-only', () => {
+    const { getByTestId, byTestId } = renderAuth('inherit', {
       showInherit: true,
-      inheritedAuth: { sourceName: 'Users', modeLabel: 'Bearer Token' }
+      inheritedAuth: {
+        auth: { type: 'bearer', token: 'collection-token' },
+        source: { level: 'collection', name: 'Bruno Testbench', uuid: COLLECTION_ROOT_CRUMB }
+      }
     });
-    expect(query(root, '.auth-empty').text.replace(/\s+/g, ' ').trim()).toBe('Auth inherited from Users: Bearer Token');
-    expect(getByTestId('inherited-auth-mode').text.trim()).toBe('Bearer Token');
+    expect(getByTestId('auth-inherited-source').text.replace(/\s+/g, ' ').trim()).toBe(
+      'Auth inherited from Bruno Testbench Bearer Token'
+    );
+    const token = getByTestId('auth-inherited-token');
+    expect(token.getAttribute('value')).toBe('collection-token');
+    expect(token.getAttribute('type')).toBe('password');
+    expect(token.hasAttribute('readonly')).toBe(true);
+    getByTestId('auth-inherited-token-toggle');
+    expect(byTestId('auth-token')).toBeNull();
+  });
+
+  it('makes the mode a navigation button only when a handler and a source uuid exist', () => {
+    const source = { level: 'folder', name: 'invoices', uuid: 'folder-uuid' };
+    const auth = { type: 'bearer', token: 't' };
+    const withHandler = renderAuth('inherit', { showInherit: true, inheritedAuth: { auth, source }, onNavigateToSource: noop });
+    const link = withHandler.getByTestId('inherited-auth-mode');
+    expect(link.tagName).toBe('BUTTON');
+    expect(link.getAttribute('aria-label')).toBe('Open Bearer Token auth in invoices');
+
+    const withoutHandler = renderAuth('inherit', { showInherit: true, inheritedAuth: { auth, source } });
+    expect(withoutHandler.getByTestId('inherited-auth-mode').tagName).toBe('SPAN');
+
+    const withoutUuid = renderAuth('inherit', {
+      showInherit: true,
+      inheritedAuth: { auth, source: { ...source, uuid: '' } },
+      onNavigateToSource: noop
+    });
+    expect(withoutUuid.getByTestId('inherited-auth-mode').tagName).toBe('SPAN');
+  });
+
+  it('shows an inherited API key read-only with its placement locked', () => {
+    const { getByTestId } = renderAuth('inherit', {
+      showInherit: true,
+      inheritedAuth: {
+        auth: { type: 'apikey', key: 'X-API-Key', value: 'secret', placement: 'header' },
+        source: { level: 'folder', name: 'invoices', uuid: 'folder-uuid' }
+      }
+    });
+    expect(getByTestId('inherited-auth-mode').text.trim()).toBe('API Key');
+    expect(getByTestId('auth-inherited-key').getAttribute('value')).toBe('X-API-Key');
+    expect(getByTestId('auth-inherited-key').hasAttribute('readonly')).toBe(true);
+    expect(getByTestId('auth-inherited-placement').text).toContain('Header');
+    expect(getByTestId('auth-inherited-placement').hasAttribute('disabled')).toBe(true);
+  });
+
+  it('says No Auth and renders no fields when the source configures no auth', () => {
+    const { getByTestId, byTestId } = renderAuth('inherit', {
+      showInherit: true,
+      inheritedAuth: { auth: undefined, source: { level: 'collection', name: 'C', uuid: COLLECTION_ROOT_CRUMB } }
+    });
+    expect(getByTestId('inherited-auth-mode').text.trim()).toBe('No Auth');
+    expect(byTestId('auth-inherited-fields')).toBeNull();
+  });
+
+  it('hides the mode select when showModeSelect is false', () => {
+    const { byTestId } = renderAuth({ type: 'bearer', token: 'abc' }, { showModeSelect: false });
+    expect(byTestId('auth-mode-select')).toBeNull();
   });
 
   it('falls back to a generic inherit note when the source is not resolved', () => {
     const { root } = renderAuth('inherit', { showInherit: true });
     expect(query(root, '.auth-empty').text.trim()).toBe('Auth inherited from the parent folder or collection.');
+  });
+
+  it('shows the own auth form instead of the inherited notice when the request sets its own auth', () => {
+    const { byTestId, getByTestId } = renderAuth({ type: 'bearer', token: 'abc' }, {
+      showInherit: true,
+      inheritedAuth: {
+        auth: { type: 'basic', username: 'u', password: 'p' },
+        source: { level: 'collection', name: 'C', uuid: COLLECTION_ROOT_CRUMB }
+      }
+    });
+    expect(byTestId('auth-inherit-notice')).toBeNull();
+    expect(byTestId('auth-inherited-source')).toBeNull();
+    getByTestId('auth-token');
   });
 
   it('renders basic auth with a plain username and a masked, revealable password', () => {

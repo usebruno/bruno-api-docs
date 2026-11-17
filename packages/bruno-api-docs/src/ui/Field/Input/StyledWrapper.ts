@@ -30,6 +30,12 @@ export const StyledWrapper = styled.div`
     outline: none;
   }
 
+  &.oc-input-wrapper--readonly .oc-input {
+    color: var(--text-muted);
+    background-color: var(--oc-background-mantle);
+    cursor: default;
+  }
+
   &.oc-input-wrapper--secret .oc-input {
     padding-right: 2.25rem;
   }

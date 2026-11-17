@@ -19,6 +19,7 @@ import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTre
 import { useNavModel } from '@/routing/hooks';
 import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
 import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
+import { COLLECTION_ROOT_CRUMB } from '@/utils/common';
 import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
 import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
 import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
@@ -183,12 +184,27 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     closeSidebarIfInline();
   };
 
+  const openInheritedSource = (uuid: string) => {
+    if (uuid === COLLECTION_ROOT_CRUMB) {
+      openCollection();
+      return;
+    }
+    const slug = uuidToSlug.get(uuid);
+    if (slug) handleNavigate(slug);
+  };
+
   const view = (() => {
     if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} />;
     if (viewMode === 'environments' && collection) return <EnvironmentsView collection={collection} compact={dock === 'inline'} />;
     if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
       return (
-        <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={() => undefined} />
+        <FolderSettingsView
+          key={getItemUuid(selectedItem)}
+          folder={selectedItem as Folder}
+          collection={collection}
+          onFolderChange={() => undefined}
+          onNavigateToSource={openInheritedSource}
+        />
       );
     }
     if (
@@ -212,6 +228,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
           collection={collection}
           selectedEnvironment={activeEnvName ?? ''}
           orientation={orientation}
+          onNavigateToSource={openInheritedSource}
         />
       );
     }

@@ -3,6 +3,7 @@ import { BaseComponent } from './base.component';
 import { KeyValueTableComponent } from './key-value-table/key-value-table.component';
 import { CodeEditorComponent } from './code-editor/code-editor.component';
 import { RequestAuthComponent } from './playground/auth.component';
+import { InheritedHeadersComponent } from './playground/inherited-headers.component';
 import { MethodSelectorComponent } from './playground/method-selector.component';
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
@@ -16,6 +17,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly pathParams = new KeyValueTableComponent(this.page, 'params-path');
   // The Auth tab lives inside the playground request pane; open it with selectTab('auth').
   readonly auth = new RequestAuthComponent(this.page);
+  readonly inheritedHeaders = new InheritedHeadersComponent(this.page);
   readonly methodSelector = new MethodSelectorComponent(this.page);
   readonly preRequestScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-pre-request');
   readonly postResponseScriptEditor = new CodeEditorComponent(this.page, 'scripts-editor-post-response');
@@ -46,6 +48,7 @@ export class PlaygroundComponent extends BaseComponent {
 
   readonly gear = this.page.getByTestId('playground-env-settings');
   readonly view = this.page.getByTestId('playground-view');
+  readonly viewTitle = this.view.getByTestId('title-label');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
   readonly closeButton = this.page.getByTestId('playground-close');

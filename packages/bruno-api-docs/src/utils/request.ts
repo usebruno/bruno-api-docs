@@ -28,11 +28,10 @@ import {
 import { getItemUuid } from './itemUtils';
 import { isSecretVariable, unwrapVariableValue } from './variableResolution';
 import { COLLECTION_ROOT_CRUMB } from './common';
-import { AUTH_MODE_LABELS, BODY_CONTENT_TYPE, BODY_LANGUAGE } from '@/constants';
+import { BODY_CONTENT_TYPE, BODY_LANGUAGE } from '@/constants';
 import type {
   InheritedSource,
   ResolvedAuth,
-  InheritedAuthSummary,
   BodyTableRow,
   FileBodyRow,
   BodyView,
@@ -54,12 +53,6 @@ import type {
 
 export type * from './request.types';
 
-export const humanizeAuthMode = (auth: Auth | undefined, labels: Record<string, string>): string => {
-  if (!auth) return 'No Auth';
-  if (auth === 'inherit') return 'Inherit';
-  return labels[auth.type] || auth.type;
-};
-
 /** Identity of an inherited-config source — the single source of truth shared by the auth resolvers
  *  and the header/variable collectors, so an inherited row and the auth chip link to the same node. */
 export const folderSource = (folder: Item): InheritedSource => ({
@@ -76,11 +69,11 @@ export const collectionSource = (collection: OpenCollection | null | undefined):
 
 /** Provenance label shown on inherited-config affordances (the auth chip and per-row goto links). */
 export const inheritedSourceLabel = (source: InheritedSource): string =>
-  `Inherited from ${source.level}: ${source.name}`;
+  source && `Inherited from ${source.level}: ${source.name}`;
 
 /** Whether an inherited-source affordance can navigate: a handler exists and the source has a uuid. */
-export const canNavigateToSource = (source: InheritedSource, onNavigate?: (uuid: string) => void): boolean =>
-  Boolean(onNavigate && source.uuid);
+export const canNavigateToSource = (source: InheritedSource | null, onNavigate?: (uuid: string) => void): boolean =>
+  Boolean(onNavigate && source?.uuid);
 
 const folderAuth = (folder: Item): Auth | undefined =>
   (folder as { request?: { auth?: Auth } }).request?.auth;
@@ -119,24 +112,6 @@ export const resolveInheritedAuth = (
 
   // Nothing concrete anywhere up the chain — the request effectively sends No Auth, not "Inherit".
   return { auth: undefined };
-};
-
-/**
- * Resolve the inherited-auth summary an Auth tab shows ("Auth inherited from {name}: {mode}"),
- * or null when the item doesn't inherit. Names the nearest configured parent (falling back
- * to the collection) and its effective mode, matching the desktop app.
- */
-export const getInheritedAuthSummary = (
-  collection: OpenCollection | null | undefined,
-  ancestors: Item[],
-  item: Item
-): InheritedAuthSummary | null => {
-  if (getRequestAuth(item as RequestItem) !== 'inherit') return null;
-  const resolved = resolveInheritedAuth(collection, ancestors, item);
-  return {
-    sourceName: resolved.source?.name || collection?.info?.name || 'Collection',
-    modeLabel: humanizeAuthMode(resolved.auth, AUTH_MODE_LABELS)
-  };
 };
 
 export const getDescription = (item: unknown): string | undefined => {

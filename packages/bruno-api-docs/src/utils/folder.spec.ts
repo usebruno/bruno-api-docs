@@ -103,6 +103,23 @@ describe('getFolderConfig', () => {
     const folder: any = { request: { auth: 'inherit' } };
     expect(getFolderConfig(null, [], folder).auth).toBeUndefined();
   });
+
+  it('inherits ancestor headers that the folder does not set itself', () => {
+    const withHeaders = {
+      ...collection,
+      request: { headers: [{ name: 'X-Tenant', value: 'c' }, { name: 'X-Trace', value: 't' }] }
+    } as OpenCollection;
+    const parent = {
+      uuid: 'parent-uid',
+      info: { name: 'Parent' },
+      request: { headers: [{ name: 'X-Tenant', value: 'p' }] }
+    } as unknown as Folder;
+    const folder = { request: { headers: [{ name: 'x-trace', value: 'own' }] } } as Folder;
+
+    expect(getFolderConfig(withHeaders, [parent], folder).inheritedHeaders).toEqual([
+      expect.objectContaining({ name: 'X-Tenant', value: 'p', source: { level: 'folder', name: 'Parent', uuid: 'parent-uid' } })
+    ]);
+  });
 });
 
 describe('countFolderRequests', () => {

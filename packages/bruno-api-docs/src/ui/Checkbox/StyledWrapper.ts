@@ -24,6 +24,16 @@ export const StyledWrapper = styled.div`
     border-color: var(--oc-checkbox-checked-bg);
   }
 
+  input:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  input:disabled:checked {
+    background-color: var(--oc-colors-text-muted);
+    border-color: var(--oc-colors-text-muted);
+  }
+
   .checkbox-check {
     position: absolute;
     inset: 0;

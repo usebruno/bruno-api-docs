@@ -7,6 +7,7 @@ import HighlightedInput from '../HighlightedInput/HighlightedInput';
 import { SecretValue } from '@/ui/SecretValue/SecretValue';
 import Checkbox from '@/ui/Checkbox/Checkbox';
 import { StyledWrapper } from './StyledWrapper';
+import cx from '@/utils/cx';
 
 // Smallest a column may be dragged to; the neighbour it trades width with is held to the same floor.
 const MIN_COLUMN_WIDTH = 60;
@@ -304,7 +305,7 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
               const fullWidthContent = renderFullWidth?.(row);
               if (fullWidthContent) {
                 return (
-                  <tr key={row.id} className={rowClasses.filter(Boolean).join(' ')} data-testid={rowTestId?.(row)}>
+                  <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row)}>
                     <td className="full-width-row" colSpan={columnCount}>
                       {fullWidthContent}
                     </td>
@@ -380,7 +381,7 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
               );
 
               return (
-                <tr key={row.id} className={rowClasses.filter(Boolean).join(' ')} data-testid={rowTestId?.(row)}>
+                <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row)}>
                   <td className="col-key">
                     <div className="key-cell">
                       {showEnabled && (

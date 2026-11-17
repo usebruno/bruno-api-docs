@@ -186,7 +186,7 @@ items:
 
           ### 🔄 How WebSockets Work
 
-          * **The Handshake:** A WebSocket session begins with an HTTP GET request containing a specific 'Upgrade' header. If both sides agree, the server responds with a '101 Switching Protocols' status code. 
+          * **The Handshake:** A WebSocket session begins with an HTTP GET request containing a specific 'Upgrade' header. If both sides agree, the server responds with a '101 Switching Protocols' status code.
           * **Data Transfer:** After the handshake, the connection is upgraded. Clients and servers can send data back and forth as messages, which are composed of one or more data frames.
           * **Control Frames:** Besides payload data, the connection maintains its health using control frames such as *ping* and *pong* to detect dead connections, and *close* frames to gracefully disconnect.
 
@@ -688,7 +688,9 @@ items:
       headers:
         - name: "X-Billing-Account"
           value: "acct_billing_folder"
-      auth: inherit
+      auth:
+        type: "bearer"
+        token: "{{vineet_bearer_auth_token}}"
       scripts:
         - type: before-request
           code: |

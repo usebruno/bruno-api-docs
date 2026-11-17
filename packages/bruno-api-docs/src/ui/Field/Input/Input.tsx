@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeOffIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import cx from '@/utils/cx';
 
 interface InputProps {
   value: string;
@@ -26,9 +27,13 @@ export const Input: React.FC<InputProps> = ({
 
   return (
     <StyledWrapper
-      className={['oc-input-wrapper', secret && 'oc-input-wrapper--secret', readOnly && 'oc-input-wrapper--readonly']
-        .filter(Boolean)
-        .join(' ')}
+      className={cx([
+        'oc-input-wrapper',
+        {
+          'oc-input-wrapper--secret': secret,
+          'oc-input-wrapper--readonly': readOnly
+        }
+      ])}
     >
       <input
         id={id}

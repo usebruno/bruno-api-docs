@@ -15,14 +15,12 @@ export const useInheritance = (
     [collection, ancestry, item]
   );
   const effectiveAuth = resolvedAuth.auth;
-  const inheritedAuth: InheritedAuth | null = getRequestAuth(item) === 'inherit'
-    ? { auth: resolvedAuth.auth, source: resolvedAuth.source ?? collectionSource(collection) }
-    : null;
+  const inheritedAuth: InheritedAuth | null
+    = getRequestAuth(item) === 'inherit'
+      ? { auth: resolvedAuth.auth, source: resolvedAuth.source ?? collectionSource(collection) }
+      : null;
 
-  const inheritedConfig = useMemo(
-    () => getInheritedConfig(collection, ancestry, item),
-    [collection, ancestry, item]
-  );
+  const inheritedConfig = useMemo(() => getInheritedConfig(collection, ancestry, item), [collection, ancestry, item]);
   const { headers: inheritedHeaders, preVars: inheritedPreVars, postVars: inheritedPostVars } = inheritedConfig;
 
   const effectiveHeaders = useMemo<HttpRequestHeader[]>(() => {
@@ -39,13 +37,24 @@ export const useInheritance = (
     return [...ownRows, ...inheritedRows];
   }, [item, inheritedHeaders, effectiveAuth]);
 
-  return {
-    resolvedAuth,
-    effectiveAuth,
-    inheritedAuth,
-    inheritedHeaders,
-    inheritedPreVars,
-    inheritedPostVars,
-    effectiveHeaders
-  };
+  return useMemo(
+    () => ({
+      resolvedAuth,
+      effectiveAuth,
+      inheritedAuth,
+      inheritedHeaders,
+      inheritedPreVars,
+      inheritedPostVars,
+      effectiveHeaders
+    }),
+    [
+      resolvedAuth,
+      effectiveAuth,
+      inheritedAuth,
+      inheritedHeaders,
+      inheritedPreVars,
+      inheritedPostVars,
+      effectiveHeaders
+    ]
+  );
 };

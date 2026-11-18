@@ -15,10 +15,13 @@ export const useInheritance = (
     [collection, ancestry, item]
   );
   const effectiveAuth = resolvedAuth.auth;
-  const inheritedAuth: InheritedAuth | null
-    = getRequestAuth(item) === 'inherit'
-      ? { auth: resolvedAuth.auth, source: resolvedAuth.source ?? collectionSource(collection) }
-      : null;
+  const inheritedAuth = useMemo<InheritedAuth | null>(
+    () =>
+      getRequestAuth(item) === 'inherit'
+        ? { auth: resolvedAuth.auth, source: resolvedAuth.source ?? collectionSource(collection) }
+        : null,
+    [item, resolvedAuth, collection]
+  );
 
   const inheritedConfig = useMemo(() => getInheritedConfig(collection, ancestry, item), [collection, ancestry, item]);
   const { headers: inheritedHeaders, preVars: inheritedPreVars, postVars: inheritedPostVars } = inheritedConfig;
@@ -33,7 +36,7 @@ export const useInheritance = (
     const ownRows = getRequestHeaders(item).filter(keep);
     const inheritedRows = inheritedHeaders
       .filter(keep)
-      .map((header) => ({ name: header.name, value: header.value ?? '', disabled: header.disabled }));
+      .map((header) => ({ name: header.name, value: header.value ?? '' }));
     return [...ownRows, ...inheritedRows];
   }, [item, inheritedHeaders, effectiveAuth]);
 

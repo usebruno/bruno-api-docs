@@ -2,7 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { parse } from 'node-html-parser';
 import { describe, it, expect } from 'vitest';
-import { getByTestId, query } from '@/test-utils/dom';
+import { getByTestId, query, queryByTestId } from '@/test-utils/dom';
 import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
 import { COLLECTION_ROOT_CRUMB } from '@/utils/common';
 import { AuthTab } from './AuthTab';
@@ -113,6 +113,86 @@ describe('AuthTab', () => {
     });
     expect(getByTestId('inherited-auth-mode').text.trim()).toBe('No Auth');
     expect(byTestId('auth-inherited-fields')).toBeNull();
+  });
+
+  it('labels an unknown inherited auth type by its raw type and renders no fields for it', () => {
+    const { getByTestId } = renderAuth('inherit', {
+      showInherit: true,
+      inheritedAuth: {
+        auth: { type: 'future-scheme-v9', secret: 'x' },
+        source: { level: 'collection', name: 'C', uuid: COLLECTION_ROOT_CRUMB }
+      }
+    });
+    expect(getByTestId('inherited-auth-mode').text.trim()).toBe('future-scheme-v9');
+    expect(getByTestId('auth-inherited-source').text.replace(/\s+/g, ' ').trim()).toBe(
+      'Auth inherited from C future-scheme-v9'
+    );
+    const fields = getByTestId('auth-inherited-fields');
+    expect(fields.querySelector('input')).toBeNull();
+    expect(queryByTestId(fields, 'auth-inherited-placement')).toBeNull();
+  });
+
+  it('labels an inherited OAuth 2.0 auth and renders no fields for it', () => {
+    const { getByTestId } = renderAuth('inherit', {
+      showInherit: true,
+      inheritedAuth: {
+        auth: { type: 'oauth2' },
+        source: { level: 'collection', name: 'C', uuid: COLLECTION_ROOT_CRUMB }
+      }
+    });
+    expect(getByTestId('inherited-auth-mode').text.trim()).toBe('OAuth 2.0');
+    expect(getByTestId('auth-inherited-fields').querySelector('input')).toBeNull();
+  });
+
+  [
+    { type: 'basic', label: 'Basic Auth' },
+    { type: 'digest', label: 'Digest Auth' }
+  ].forEach(({ type, label }) => {
+    it(`shows an inherited ${label} username and masked password read-only`, () => {
+      const { getByTestId, byTestId } = renderAuth('inherit', {
+        showInherit: true,
+        inheritedAuth: {
+          auth: { type, username: 'admin', password: 's3cr3t' },
+          source: { level: 'folder', name: 'invoices', uuid: 'folder-uuid' }
+        }
+      });
+      expect(getByTestId('inherited-auth-mode').text.trim()).toBe(label);
+      const username = getByTestId('auth-inherited-username');
+      expect(username.getAttribute('type')).toBe('text');
+      expect(username.getAttribute('value')).toBe('admin');
+      expect(username.hasAttribute('readonly')).toBe(true);
+      const password = getByTestId('auth-inherited-password');
+      expect(password.getAttribute('type')).toBe('password');
+      expect(password.getAttribute('value')).toBe('s3cr3t');
+      expect(password.hasAttribute('readonly')).toBe(true);
+      getByTestId('auth-inherited-password-toggle');
+      expect(byTestId('auth-username')).toBeNull();
+    });
+  });
+
+  it('shows all six inherited AWS Signature v4 fields read-only, masking only the secret access key', () => {
+    const { getByTestId } = renderAuth('inherit', {
+      showInherit: true,
+      inheritedAuth: {
+        auth: {
+          type: 'awsv4',
+          accessKeyId: 'AKIA',
+          secretAccessKey: 'secret',
+          sessionToken: 'session',
+          service: 's3',
+          region: 'us-east-1',
+          profileName: 'default'
+        },
+        source: { level: 'collection', name: 'C', uuid: COLLECTION_ROOT_CRUMB }
+      }
+    });
+    expect(getByTestId('inherited-auth-mode').text.trim()).toBe('AWS Signature v4');
+    ['accessKeyId', 'secretAccessKey', 'sessionToken', 'service', 'region', 'profileName'].forEach((field) => {
+      const input = getByTestId(`auth-inherited-${field}`);
+      expect(input.hasAttribute('readonly')).toBe(true);
+      expect(input.getAttribute('type')).toBe(field === 'secretAccessKey' ? 'password' : 'text');
+    });
+    expect(getByTestId('auth-inherited-region').getAttribute('value')).toBe('us-east-1');
   });
 
   it('hides the mode select when showModeSelect is false', () => {

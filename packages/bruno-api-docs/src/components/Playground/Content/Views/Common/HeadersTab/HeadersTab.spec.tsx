@@ -123,6 +123,16 @@ describe('HeadersTab', () => {
         const values = root.querySelectorAll('input.text-input').map((input) => input.getAttribute('value'));
         expect(values).toContain('X-Trace');
       });
+
+      it('renders an inherited header without a source with an empty actions cell', () => {
+        const root = useRenderToDom(
+          <HeadersTab headers={[]} onHeadersChange={noop} inheritedHeaders={[{ name: 'X-NoSrc', value: 'v' }]} />
+        );
+        const row = getByTestId(root, 'inherited-header-row-x-nosrc');
+        expect(queryByTestId(row, 'inherited-header-source-x-nosrc')).toBeNull();
+        expect(row.querySelector('.delete-button')).toBeNull();
+        expect(query(row, 'td.col-actions').innerHTML).toBe('');
+      });
     });
   });
 });

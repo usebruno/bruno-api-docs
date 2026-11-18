@@ -52,6 +52,17 @@ test.describe('Playground query bar — code snippet', () => {
     // Empty path params keep their placeholder instead of collapsing.
     await expect(playground.codeSnippet.modalCode).toContainText('/posts/1/:commentId');
   });
+
+  test('the snippet includes headers inherited from the collection and folders', async ({ playground }) => {
+    await playground.openTreeItem(['billing', 'customers', 'Get All Customers']);
+    await playground.codeSnippet.openFromIcon();
+
+    const { modalCode } = playground.codeSnippet;
+    await expect(modalCode).toContainText('collection-header-value');
+    await expect(modalCode).toContainText('acct_billing_folder');
+    await expect(modalCode).toContainText('X-Tenant-Id');
+    await expect(modalCode).toContainText('tenant_customers_folder');
+  });
 });
 
 test.describe('Playground code snippet — Interpolate Variables', () => {

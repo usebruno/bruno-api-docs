@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { Auth } from '@opencollection/types/common/auth';
 import { useMarkdownRenderer } from './useMarkdownRenderer';
+import { useInheritance } from './useInheritance';
 import {
   getItemName,
   getRequestUrl,
@@ -18,10 +18,8 @@ import {
   type SupportedRequestItem
 } from '@/utils/schemaHelpers';
 import {
-  resolveInheritedAuth,
   getPreRequestVars,
   getPostResponseVars,
-  getInheritedConfig,
   buildScriptChain,
   getScriptFlow,
   headerRows
@@ -59,15 +57,19 @@ export const useRequestPageData = (
   }, [item, md]);
 
   const ownAuth = getRequestAuth(item) as Auth | undefined;
-  const resolved = useMemo(() => resolveInheritedAuth(collection, ancestry, item), [collection, ancestry, item]);
-  const effectiveAuth = ownAuth === 'inherit' ? resolved.auth : ownAuth;
+  const {
+    resolvedAuth,
+    effectiveAuth,
+    inheritedHeaders,
+    inheritedPreVars,
+    inheritedPostVars,
+    effectiveHeaders
+  } = useInheritance(collection, ancestry, item);
   const showAuth = ownAuth !== undefined;
-  const authSource = ownAuth === 'inherit' ? resolved.source : undefined;
+  const authSource = ownAuth === 'inherit' ? resolvedAuth.source : undefined;
 
   const preVars = useMemo(() => getPreRequestVars(item), [item]);
   const postVars = useMemo(() => getPostResponseVars(item), [item]);
-  const inherited = useMemo(() => getInheritedConfig(collection, ancestry, item), [collection, ancestry, item]);
-  const { headers: inheritedHeaders, preVars: inheritedPreVars, postVars: inheritedPostVars } = inherited;
 
   const scriptChain = useMemo(() => buildScriptChain(collection, ancestry, item), [collection, ancestry, item]);
   const scriptFlow = useMemo(() => getScriptFlow(collection), [collection]);
@@ -85,14 +87,6 @@ export const useRequestPageData = (
     () => buildBreadcrumbSegments(collection, ancestry),
     [collection, ancestry]
   );
-
-  const effectiveHeaders = useMemo<HttpRequestHeader[]>(() => {
-    const authIsConcrete = Boolean(effectiveAuth) && effectiveAuth !== 'inherit';
-    const inheritedRows = inheritedHeaders
-      .filter((h) => !(authIsConcrete && (h.name || '').toLowerCase() === 'authorization'))
-      .map((h) => ({ name: h.name, value: h.value ?? '', disabled: h.disabled }));
-    return [...headers, ...inheritedRows];
-  }, [headers, inheritedHeaders, effectiveAuth]);
 
   const headerTableRows = useMemo(
     () => [...headerRows(headers), ...inheritedHeaderRows(inheritedHeaders)],

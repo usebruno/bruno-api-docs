@@ -19,6 +19,11 @@ export const StyledWrapper = styled.button`
   cursor: pointer;
   transition: border-color 0.15s ease;
 
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
   .oc-select-label {
     font-size: var(--oc-font-size-sm);
     font-weight: 600;

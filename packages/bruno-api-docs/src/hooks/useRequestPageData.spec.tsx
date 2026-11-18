@@ -219,7 +219,7 @@ describe('useRequestPageData', () => {
       expect(names).toContain('X-Collection');
     });
 
-    it('drops an inherited raw Authorization header from effectiveHeaders when a concrete auth is in effect', () => {
+    it('drops an inherited Authorization header from effectiveHeaders when bearer auth with a token is in effect', () => {
       const collection: OpenCollection = {
         info: { name: 'C', version: '1.0.0' },
         request: { headers: [{ name: 'Authorization', value: 'Basic legacy' }] }
@@ -244,6 +244,38 @@ describe('useRequestPageData', () => {
         collection
       );
       expect(data.effectiveHeaders.some((h) => h.name.toLowerCase() === 'authorization')).toBe(true);
+    });
+
+    it('drops an own Authorization header when bearer is in effect', () => {
+      const data = dataFor({
+        info: { name: 'R', type: 'http' },
+        http: {
+          method: 'get',
+          url: '/x',
+          auth: { type: 'bearer', token: 't' },
+          headers: [
+            { name: 'Authorization', value: 'Bearer stale' },
+            { name: 'X-Own', value: '1' }
+          ]
+        }
+      } as unknown as HttpRequest);
+      expect(data.effectiveHeaders.map((h) => h.name)).toEqual(['X-Own']);
+      expect(data.headerTableRows.map((r) => r.label)).toEqual(['Authorization', 'X-Own']);
+    });
+
+    it('keeps an inherited Authorization header under apikey auth', () => {
+      const collection: OpenCollection = {
+        info: { name: 'C', version: '1.0.0' },
+        request: { headers: [{ name: 'Authorization', value: 'Custom legacy' }] }
+      } as unknown as OpenCollection;
+      const data = dataFor(
+        {
+          info: { name: 'R', type: 'http' },
+          http: { method: 'get', url: '/x', auth: { type: 'apikey', key: 'X-Api-Key', value: 'k', placement: 'header' } }
+        } as unknown as HttpRequest,
+        collection
+      );
+      expect(data.effectiveHeaders).toContainEqual({ name: 'Authorization', value: 'Custom legacy', disabled: undefined });
     });
   });
 

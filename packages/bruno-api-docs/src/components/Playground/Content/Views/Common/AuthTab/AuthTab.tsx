@@ -1,8 +1,10 @@
 import React from 'react';
-import { Field, type SelectOption } from '@/ui/Field';
-import { AUTH_DEFAULTS, AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
+import { Field } from '@/ui/Field';
+import { AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
 import { REQUEST_PROTOCOL_KEYS } from '@/utils/schemaHelpers';
-import type { InheritedAuthSummary } from '@/utils/request';
+import { canNavigateToSource, type InheritedAuth } from '@/utils/request';
+import { GoToIcon } from '@/assets/icons';
+import AuthModeSelect, { authForMode, authModeOf } from '../AuthModeSelect/AuthModeSelect';
 import { StyledWrapper } from './StyledWrapper';
 import NoContentText from '@/ui/NoContentText/NoContentText';
 
@@ -15,7 +17,9 @@ interface AuthTabProps {
   description?: string;
   showInherit?: boolean;
   showFullAuth?: boolean;
-  inheritedAuth?: InheritedAuthSummary | null;
+  showModeSelect?: boolean;
+  inheritedAuth?: InheritedAuth | null;
+  onNavigateToSource?: (uuid: string) => void;
 }
 
 export const AuthTab: React.FC<AuthTabProps> = ({
@@ -27,16 +31,10 @@ export const AuthTab: React.FC<AuthTabProps> = ({
   description,
   showInherit = false,
   showFullAuth = false,
-  inheritedAuth
+  showModeSelect = true,
+  inheritedAuth,
+  onNavigateToSource
 }) => {
-  const authType = typeof auth === 'object' && auth !== null ? auth.type : auth === 'inherit' ? 'inherit' : 'none';
-
-  const modeOptions: SelectOption[] = [
-    { value: 'none', label: 'No Auth' },
-    ...(showInherit ? [{ value: 'inherit', label: 'Inherit' }] : []),
-    ...Object.keys(AUTH_DEFAULTS).map((mode) => ({ value: mode, label: AUTH_MODE_LABELS[mode] ?? mode }))
-  ];
-
   const updateItemAuth = (newAuth: unknown) => {
     if (!onItemChange || !item) return;
     // Write auth where getRequestAuth reads it: a request keeps it in its protocol block
@@ -54,46 +52,44 @@ export const AuthTab: React.FC<AuthTabProps> = ({
       onAuthChange(newAuthType);
       return;
     }
-    if (newAuthType === 'none') {
-      updateItemAuth(undefined);
-    } else if (newAuthType === 'inherit') {
-      updateItemAuth('inherit');
-    } else {
-      updateItemAuth({ ...(AUTH_DEFAULTS[newAuthType] ?? { type: newAuthType }) });
-    }
+    updateItemAuth(authForMode(newAuthType));
   };
 
   const handleFieldChange = (field: string, value: string) => {
     updateItemAuth({ ...auth, [field]: value });
   };
 
-  const textField = (field: string, label: string) => (
-    <Field label={label} htmlFor={`auth-field-${field}`}>
-      <Field.Input
-        id={`auth-field-${field}`}
-        testId={`auth-${field}`}
-        value={auth[field] || ''}
-        placeholder={label}
-        onChange={(value) => handleFieldChange(field, value)}
-      />
-    </Field>
-  );
+  const renderForm = (formAuth: Record<string, string | undefined>, readOnly = false) => {
+    const prefix = readOnly ? 'auth-inherited' : 'auth';
 
-  const secretField = (field: string, label: string) => (
-    <Field label={label} htmlFor={`auth-field-${field}`}>
-      <Field.Input
-        secret
-        id={`auth-field-${field}`}
-        testId={`auth-${field}`}
-        value={auth[field] || ''}
-        placeholder={label}
-        onChange={(value) => handleFieldChange(field, value)}
-      />
-    </Field>
-  );
+    const textField = (field: string, label: string) => (
+      <Field label={label} htmlFor={`${prefix}-field-${field}`}>
+        <Field.Input
+          id={`${prefix}-field-${field}`}
+          testId={`${prefix}-${field}`}
+          value={formAuth[field] || ''}
+          placeholder={label}
+          readOnly={readOnly}
+          onChange={(value) => handleFieldChange(field, value)}
+        />
+      </Field>
+    );
 
-  const renderForm = () => {
-    switch (auth.type) {
+    const secretField = (field: string, label: string) => (
+      <Field label={label} htmlFor={`${prefix}-field-${field}`}>
+        <Field.Input
+          secret
+          id={`${prefix}-field-${field}`}
+          testId={`${prefix}-${field}`}
+          value={formAuth[field] || ''}
+          placeholder={label}
+          readOnly={readOnly}
+          onChange={(value) => handleFieldChange(field, value)}
+        />
+      </Field>
+    );
+
+    switch (formAuth.type) {
       case 'basic':
       case 'digest':
         return (
@@ -109,13 +105,14 @@ export const AuthTab: React.FC<AuthTabProps> = ({
           <>
             {textField('key', 'Key')}
             {textField('value', 'Value')}
-            <Field label="Add To" htmlFor="auth-field-placement">
+            <Field label="Add To" htmlFor={`${prefix}-field-placement`}>
               <Field.Select
-                id="auth-field-placement"
-                testId="auth-placement"
+                id={`${prefix}-field-placement`}
+                testId={`${prefix}-placement`}
                 ariaLabel="Add To"
-                value={auth.placement || 'header'}
+                value={formAuth.placement || 'header'}
                 options={PLACEMENT_OPTIONS}
+                disabled={readOnly}
                 onChange={(value) => handleFieldChange('placement', value)}
               />
             </Field>
@@ -137,28 +134,57 @@ export const AuthTab: React.FC<AuthTabProps> = ({
     }
   };
 
+  const renderInherited = (inherited: InheritedAuth) => {
+    const { auth: inheritedValue, source } = inherited;
+    const mode = authModeOf(inheritedValue);
+    const modeLabel = mode === 'none' ? 'No Auth' : AUTH_MODE_LABELS[mode] ?? mode;
+    const modeLink = canNavigateToSource(source, onNavigateToSource) ? (
+      <button
+        type="button"
+        className="auth-inherited-mode"
+        data-testid="inherited-auth-mode"
+        aria-label={`Open ${modeLabel} auth in ${source.name}`}
+        onClick={() => onNavigateToSource!(source.uuid)}
+      >
+        {modeLabel}
+        <GoToIcon width={14} height={14} />
+      </button>
+    ) : (
+      <span className="auth-inherited-mode" data-testid="inherited-auth-mode">
+        {modeLabel}
+      </span>
+    );
+
+    return (
+      <div className="auth-inherited" data-testid="auth-inherit-notice">
+        <p className="auth-inherited-source" data-testid="auth-inherited-source">
+          Auth inherited from <span className="auth-inherited-source-name">{source.name}</span> {modeLink}
+        </p>
+        {typeof inheritedValue === 'object' && (
+          <div className="auth-form" data-testid="auth-inherited-fields">
+            {renderForm(inheritedValue as unknown as Record<string, string | undefined>, true)}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderBody = () => {
     if (!auth) {
       return <NoContentText text="No authentication configured." />;
     }
     if (auth === 'inherit') {
-      return (
-        <p className="auth-empty" data-testid="auth-inherit-notice">
-          {inheritedAuth ? (
-            <>
-              Auth inherited from {inheritedAuth.sourceName}:{' '}
-              <span className="auth-inherited-mode" data-testid="inherited-auth-mode">
-                {inheritedAuth.modeLabel}
-              </span>
-            </>
-          ) : (
-            'Auth inherited from the parent folder or collection.'
-          )}
-        </p>
-      );
+      if (!inheritedAuth) {
+        return (
+          <p className="auth-empty" data-testid="auth-inherit-notice">
+            Auth inherited from the parent folder or collection.
+          </p>
+        );
+      }
+      return renderInherited(inheritedAuth);
     }
     if (showFullAuth) {
-      return <div className="auth-form">{renderForm()}</div>;
+      return <div className="auth-form">{renderForm(auth)}</div>;
     }
     return <NoContentText text="{title} auth is configured elsewhere." />;
   };
@@ -173,13 +199,9 @@ export const AuthTab: React.FC<AuthTabProps> = ({
       )}
 
       <div className="auth-body">
-        <Field.Select
-          testId="auth-mode-select"
-          ariaLabel="Authentication type"
-          value={authType}
-          options={modeOptions}
-          onChange={handleAuthTypeChange}
-        />
+        {showModeSelect && (
+          <AuthModeSelect auth={auth} showInherit={showInherit} onChange={handleAuthTypeChange} />
+        )}
         {renderBody()}
       </div>
     </StyledWrapper>

@@ -1,5 +1,5 @@
 import type { Auth } from '@opencollection/types/common/auth';
-import type { HttpRequestBody } from '@opencollection/types/requests/http';
+import type { HttpRequestBody, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { ActionVariableScope } from '@opencollection/types/common/actions';
 import type { Description } from '@opencollection/types/common/description';
 
@@ -14,10 +14,9 @@ export interface ResolvedAuth {
   source?: InheritedSource;
 }
 
-/** Display summary for an inheriting item: the parent it resolves from and that parent's mode. */
-export interface InheritedAuthSummary {
-  sourceName: string;
-  modeLabel: string;
+export interface InheritedAuth {
+  auth?: Auth;
+  source: InheritedSource;
 }
 
 export interface BodyTableRow {
@@ -94,12 +93,9 @@ export interface PostResponseRowInput {
   description?: Description;
 }
 
-export interface InheritedHeaderRow {
-  name: string;
-  value?: string;
-  disabled?: boolean;
+export interface InheritedHeaderRow extends HttpRequestHeader {
   description?: string;
-  source: InheritedSource;
+  source?: InheritedSource;
 }
 
 export type InheritedPreRequestVarRow = PreRequestVarRow & { source: InheritedSource };

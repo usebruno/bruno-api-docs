@@ -26,4 +26,11 @@ describe('Checkbox', () => {
     const root = useRenderToDom(<Checkbox testId="cb" className="enabled" checked ariaLabel="Enable host" onChange={noop} />);
     expect(getByTestId(root, 'cb').classList.contains('enabled')).toBe(true);
   });
+
+  it('renders a disabled checkbox without a change handler', () => {
+    const root = useRenderToDom(<Checkbox testId="cb" checked disabled ariaLabel="Inherited header" />);
+    const input = getByTestId(root, 'cb-input');
+    expect(input.hasAttribute('disabled')).toBe(true);
+    expect(input.hasAttribute('checked')).toBe(true);
+  });
 });

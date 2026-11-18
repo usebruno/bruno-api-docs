@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  humanizeAuthMode,
   resolveInheritedAuth,
   getBodyView,
   selectBodyVariant,
@@ -23,16 +22,9 @@ import {
   getShortMethod,
   getVariableType
 } from './request';
-import { AUTH_MODE_LABELS } from '@/constants';
 import { COLLECTION_ROOT_CRUMB } from './common';
 
 describe('requestAuth', () => {
-  it('humanizes auth modes with fallbacks', () => {
-    expect(humanizeAuthMode(undefined, AUTH_MODE_LABELS)).toBe('No Auth');
-    expect(humanizeAuthMode('inherit', AUTH_MODE_LABELS)).toBe('Inherit');
-    expect(humanizeAuthMode({ type: 'basic' } as any, AUTH_MODE_LABELS)).toBe('Basic Auth');
-  });
-
   it('returns own auth when it is not inherit', () => {
     const item: any = { runtime: { auth: { type: 'bearer', token: 't' } } };
     expect(resolveInheritedAuth(null, [], item).auth).toMatchObject({ type: 'bearer' });
@@ -79,14 +71,12 @@ describe('requestAuth', () => {
     expect(resolved.auth).toBeUndefined();
   });
 
-  it('resolves and labels an unknown/future auth type without a per-type change (scalable)', () => {
+  it('resolves an unknown/future auth type without a per-type change (scalable)', () => {
     const future: any = { type: 'future-scheme-v9', token: 't' };
     const item: any = { runtime: { auth: 'inherit' } };
     const folder: any = { info: { type: 'folder', name: 'F' }, request: { auth: future } };
     const resolved = resolveInheritedAuth({ info: { name: 'C' } } as any, [folder], item);
     expect(resolved.auth).toMatchObject(future); // resolved through untouched, whatever the type
-    // The label falls back to the raw type when no friendly label exists yet, so it never breaks.
-    expect(humanizeAuthMode(future, AUTH_MODE_LABELS)).toBe('future-scheme-v9');
   });
 });
 
@@ -576,6 +566,7 @@ describe('inherited source helpers', () => {
     expect(canNavigateToSource(source, () => {})).toBe(true);
     expect(canNavigateToSource(source, undefined)).toBe(false);
     expect(canNavigateToSource({ ...source, uuid: '' }, () => {})).toBe(false);
+    expect(canNavigateToSource(null, () => {})).toBe(false);
   });
 });
 

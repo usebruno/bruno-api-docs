@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { WebSocketMessageEntry } from '@/utils/schemaHelpers';
+import type { WebSocketMessageEntry } from '@usebruno/api-shared/utils/schemaHelpers';
 import { WebsocketMessageCard } from './WebsocketMessageCard/WebsocketMessageCard';
-import { ExpandToggle } from '@/components/ExpandToggle/ExpandToggle';
+import { ExpandToggle } from '@usebruno/api-shared/components/ExpandToggle/ExpandToggle';
 
 const COLLAPSED_COUNT = 3;
 

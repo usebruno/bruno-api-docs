@@ -1,8 +1,8 @@
 import React, { Fragment, useMemo, useState } from 'react';
-import { Code } from '../../Code/Code';
-import { Modal } from '@/ui/Modal/Modal';
-import { SectionLabel } from '../../SectionLabel/SectionLabel';
-import type { RawTestScript } from '@/utils/fileUtils';
+import { Code } from '@usebruno/api-shared/components/Code/Code';
+import { Modal } from '@usebruno/api-shared/ui/Modal/Modal';
+import { SectionLabel } from '@usebruno/api-shared/components/SectionLabel/SectionLabel';
+import type { RawTestScript } from '@usebruno/api-shared/utils/fileUtils';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ViewAllTestsProps {

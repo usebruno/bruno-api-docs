@@ -3,8 +3,8 @@ import { describe, it, expect } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { RequestPageLayout } from './RequestPageLayout';
 import type { RequestPageData } from '@/hooks/useRequestPageData';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 
 const makeData = (overrides: Partial<RequestPageData> = {}): RequestPageData =>
   ({

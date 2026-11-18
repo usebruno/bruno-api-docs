@@ -2,7 +2,7 @@ import type { Locator } from '@playwright/test';
 import { BaseComponent } from './base.component';
 
 export class SidebarComponent extends BaseComponent {
-  readonly items = this.page.getByTestId('sidebar-item');
+  readonly items = this.root.getByTestId('sidebar-item');
   readonly active = this.items.and(this.page.locator('.active'));
   readonly inline = this.page.getByTestId('app-sidebar');
   readonly overview = this.page.getByTestId('sidebar-overview');

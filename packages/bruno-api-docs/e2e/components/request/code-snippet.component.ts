@@ -56,6 +56,13 @@ export class CodeSnippetComponent extends BaseComponent {
     return this.modalCode.getByTestId(`variable-token-${name}`).first();
   }
 
+  async modalTokenTexts(type: string): Promise<string[]> {
+    return this.modalCode.evaluate(
+      (code, type) => [...code.querySelectorAll(`.token.${type}`)].map((token) => token.textContent ?? ''),
+      type
+    );
+  }
+
   languageTab(language: string): Locator {
     return this.root.getByTestId(`${this.base}-tab-${language}`);
   }

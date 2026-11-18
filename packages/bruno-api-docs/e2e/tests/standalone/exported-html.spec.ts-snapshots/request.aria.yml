@@ -1,0 +1,34 @@
+- navigation "Breadcrumb":
+  - list:
+    - listitem:
+      - button "General Fixture"
+    - listitem: Alpha
+- heading "Alpha" [level=1]
+- text: "GET {{host}}/alpha?q={{special}}&m={{onlyInDev}}&t={{apiToken}}"
+- button "Copy URL":
+  - img
+- button "Try"
+- heading "Body" [level=2]
+- text: application/json
+- button "Copy code":
+  - img
+- code: "{ \"host\": \"{{host}}\", \"token\": \"{{apiToken}}\", \"note\": \"{{special}}\" }"
+- heading "Headers" [level=2]
+- term: Authorization
+- definition: "Bearer {{apiToken}}"
+- term: X-Host
+- definition: "{{host}}"
+- term: X-Note
+- definition: "{{special}}"
+- heading "Code Snippet" [level=2]
+- tablist "Snippet language":
+  - tab "cURL" [selected]
+  - tab "Javascript"
+  - tab "Python"
+- button "Expand code snippet"
+- button "Copy code":
+  - img
+- code: "curl --request GET \\ --url '{{host}}/alpha?q={{special}}&m={{onlyInDev}}&t={{apiToken}}' \\ --header 'Authorization: Bearer {{apiToken}}' \\ --header 'Content-Type: application/json' \\ --header 'X-Host: {{host}}' \\ --header 'X-Note: {{special}}' \\ --data ' { \"host\": \"{{host}}\", \"token\": \"{{apiToken}}\", \"note\": \"{{special}}\" } '"
+- heading "Execution Context" [level=2]
+- paragraph: No execution context
+- paragraph: This request has no scripts, variables, asserts, or tests configured.

@@ -1,0 +1,233 @@
+import React, { useState, useEffect } from 'react';
+import type { OpenCollection } from '@opencollection/types';
+import type { Environment } from '@opencollection/types/config/environments';
+import type { Variable } from '@opencollection/types/common/variables';
+import type { KeyValueRow } from '../../../../KeyValueTable/KeyValueTable';
+import KeyValueTable from '../../../../KeyValueTable/KeyValueTable';
+import Tabs from '@usebruno/api-shared/ui/Tabs/Tabs';
+import TitleLabel from '../../../../TitleLabel/TitleLabel';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
+import { StyledWrapper } from './StyledWrapper';
+import { EnvironmentLabel } from '@usebruno/api-shared/components/EnvironmentLabel/EnvironmentLabel';
+import EnvVarCards from './EnvVarCards/EnvVarCards';
+import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
+import { GlobeIcon } from '@usebruno/api-shared/assets/icons';
+import { cx } from '@usebruno/api-shared/utils/cx';
+import { externalSecretPointer } from '@usebruno/api-shared/constants';
+import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@usebruno/api-shared/utils/environments';
+import { countEnabled } from '@usebruno/api-shared/utils/schemaHelpers';
+import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@usebruno/api-shared/utils/variableResolution';
+
+const ENV_TABS = [
+  { id: 'variables', label: 'Variables' },
+  { id: 'secrets', label: 'Secrets' },
+  { id: 'external', label: 'External' }
+] as const;
+
+type EnvTabId = (typeof ENV_TABS)[number]['id'];
+
+interface TabPanelProps {
+  isEmpty: boolean;
+  heading: string;
+  subheading: string;
+  children: React.ReactNode;
+}
+
+const TabPanel: React.FC<TabPanelProps> = ({ isEmpty, heading, subheading, children }) =>
+  isEmpty ? <EmptyState icon={<GlobeIcon />} heading={heading} subheading={subheading} /> : <>{children}</>;
+
+interface EnvironmentsViewProps {
+  collection: OpenCollection | null;
+  compact?: boolean;
+  onCollectionChange: (collection: OpenCollection) => void;
+}
+
+type LegacyCollection = OpenCollection & { environments?: Environment[] };
+
+const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false, onCollectionChange }) => {
+  const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
+
+  const environments = (collection as LegacyCollection | null)?.environments || collection?.config?.environments || [];
+  const selectedEnvironment
+    = selectedEnvironmentIndex !== null ? environments[selectedEnvironmentIndex] ?? null : null;
+
+  const allVariables = (selectedEnvironment?.variables ?? []) as Variable[];
+  const plainRows = allVariables.filter((v) => !isSecretVariable(v)).map(envVariableToRow);
+  const secretRows = allVariables.filter((v) => isSecretVariable(v)).map(envVariableToRow);
+
+  const secretPointerField = externalSecretPointer(selectedEnvironment?.externalSecrets?.type);
+
+  // Same predicate the resolver uses, so the checkbox and the request agree on
+  // which entries are live.
+  const externalEntries = (selectedEnvironment?.externalSecrets?.variables ?? []) as ExternalSecretEntry[];
+  const externalRows: KeyValueRow[] = externalEntries.map(
+    (variable, index: number) => ({
+      id: `ext-${index}`,
+      name: variable.name ?? '',
+      value: (variable as Record<string, string | undefined>)[secretPointerField] ?? '',
+      enabled: isExternalSecretActive(variable)
+    })
+  );
+
+  const applyToSelectedEnv = (patch: Record<string, unknown>) => {
+    if (!collection || selectedEnvironmentIndex === null) return;
+
+    const updatedEnvironments = environments.map((env: Environment, index: number) =>
+      index === selectedEnvironmentIndex ? { ...env, ...patch } : env
+    );
+    const updatedCollection: OpenCollection = {
+      ...collection,
+      config: collection.config
+        ? { ...collection.config, environments: updatedEnvironments }
+        : { environments: updatedEnvironments }
+    };
+    if ((collection as LegacyCollection).environments) {
+      (updatedCollection as LegacyCollection).environments = updatedEnvironments;
+    }
+
+    onCollectionChange(updatedCollection);
+  };
+
+  const commit = (plain: KeyValueRow[], secrets: KeyValueRow[]) =>
+    applyToSelectedEnv({ variables: [...plain, ...secrets].map(envRowToVariable) });
+
+  const commitExternal = (rows: KeyValueRow[]) =>
+    applyToSelectedEnv({
+      externalSecrets: {
+        ...(selectedEnvironment?.externalSecrets ?? {}),
+        variables: mergeExternalSecretRows(selectedEnvironment?.externalSecrets?.variables, rows, secretPointerField)
+      }
+    });
+
+  useEffect(() => {
+    if (selectedEnvironmentIndex === null && environments.length > 0) {
+      setSelectedEnvironmentIndex(0);
+    }
+  }, [environments.length, selectedEnvironmentIndex]);
+
+  useEffect(() => {
+    if (selectedEnvironmentIndex !== null && selectedEnvironmentIndex >= environments.length) {
+      setSelectedEnvironmentIndex(environments.length > 0 ? 0 : null);
+    }
+  }, [environments.length, selectedEnvironmentIndex]);
+
+  if (environments.length === 0) {
+    return (
+      <StyledWrapper>
+        <div className="env-message">
+          <p>No environments found in this collection</p>
+        </div>
+      </StyledWrapper>
+    );
+  }
+
+  interface RenderVarsOptions {
+    makeNewRow?: () => Partial<KeyValueRow>;
+    disableNewRow?: boolean;
+    editableDataType?: boolean;
+    showDescription?: boolean;
+  }
+
+  const renderVars = (
+    rows: KeyValueRow[],
+    onChange: (rows: KeyValueRow[]) => void,
+    { makeNewRow, disableNewRow = false, editableDataType = false, showDescription = false }: RenderVarsOptions = {}
+  ): React.ReactNode =>
+    compact ? (
+      <EnvVarCards
+        rows={rows}
+        onChange={onChange}
+        makeNewRow={makeNewRow}
+        disableNewRow={disableNewRow}
+        editableDataType={editableDataType}
+        showDescription={showDescription}
+        secretEditByDefault
+        addWhenComplete
+        testId="env-var-cards"
+      />
+    ) : (
+      <KeyValueTable
+        data={rows}
+        onChange={onChange}
+        keyPlaceholder="Name"
+        valuePlaceholder="Value"
+        showEnabled={true}
+        multilineValues
+        inlineActions={editableDataType}
+        showDescription={showDescription}
+        disableNewRow={disableNewRow}
+        makeNewRow={makeNewRow}
+        addWhenComplete
+        disableDelete={false}
+        secretEditByDefault
+        additionalColumns={editableDataType ? [variableTypeColumn] : []}
+      />
+    );
+
+  const panels: Record<EnvTabId, { contentIndicator: number | undefined; content: React.ReactNode }> = {
+    variables: {
+      contentIndicator: countEnabled(plainRows),
+      content: renderVars(plainRows, (rows) => commit(rows, secretRows), {
+        editableDataType: true,
+        showDescription: true
+      })
+    },
+    secrets: {
+      contentIndicator: countEnabled(secretRows),
+      content: renderVars(secretRows, (rows) => commit(plainRows, rows), {
+        makeNewRow: () => ({ secret: true }),
+        editableDataType: true,
+        showDescription: true
+      })
+    },
+    external: {
+      contentIndicator: countEnabled(externalRows),
+      content: (
+        <TabPanel isEmpty={!externalRows.length} heading="No external secrets" subheading="This environment has no external secrets configured.">
+          {renderVars(externalRows, commitExternal, { disableNewRow: true })}
+        </TabPanel>
+      )
+    }
+  };
+
+  const tabs = ENV_TABS.map(({ id, label }) => ({
+    id,
+    label,
+    contentIndicator: panels[id].contentIndicator,
+    content: panels[id].content
+  }));
+
+  return (
+    <StyledWrapper>
+      <div className="env-header">
+        <TitleLabel>Environments</TitleLabel>
+      </div>
+
+      <div className="env-pills">
+        {environments.map((env: Environment, index: number) => (
+          <button
+            key={index}
+            type="button"
+            className={cx('env-pill', { active: selectedEnvironmentIndex === index })}
+            data-testid={`env-pill-${env.name || index}`}
+            onClick={() => setSelectedEnvironmentIndex(index)}
+          >
+            <EnvironmentLabel name={env.name || `Environment ${index + 1}`} color={env.color} />
+          </button>
+        ))}
+      </div>
+
+      <div className="env-tabs-area">
+        {selectedEnvironment ? (
+          <Tabs variant="responsive" testId="environment-tabs" defaultActiveTab="variables" tabs={tabs} />
+        ) : (
+          <div className="env-message">
+            <p>Select an environment to view its variables</p>
+          </div>
+        )}
+      </div>
+    </StyledWrapper>
+  );
+};
+
+export default EnvironmentsView;

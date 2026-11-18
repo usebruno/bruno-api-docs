@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseYaml } from './utils/yamlUtils';
+import { parseYaml } from '@usebruno/api-shared/utils/yamlUtils';
 import { sampleCollectionYaml } from './sampleCollection';
 
 describe('dev.tsx sample collection YAML', () => {

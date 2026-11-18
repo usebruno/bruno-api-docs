@@ -1,18 +1,17 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect } from 'vitest';
 import { SearchBar } from './SearchBar';
-import { createOpenCollectionStore } from '@/store/store';
+import { TestProviders } from '@usebruno/api-shared/test-utils/providers';
 
 const renderBar = () =>
   renderToStaticMarkup(
-    <Provider store={createOpenCollectionStore()}>
+    <TestProviders>
       <MemoryRouter>
         <SearchBar open={false} onOpenChange={() => {}} />
       </MemoryRouter>
-    </Provider>
+    </TestProviders>
   );
 
 describe('SearchBar', () => {

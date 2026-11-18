@@ -1,5 +1,5 @@
 import { dump } from 'js-yaml';
-import { isFolder } from './schemaHelpers';
+import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 

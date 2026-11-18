@@ -4,7 +4,7 @@ vi.mock('react-dom/client', () => ({
   createRoot: () => ({ render: vi.fn(), unmount: vi.fn() })
 }));
 vi.mock('./components/OpenCollection/OpenCollection', () => ({ default: () => null }));
-vi.mock('./utils/prism', () => ({ default: {} }));
+vi.mock('@usebruno/api-shared/utils/prism', () => ({ default: {} }));
 
 const collection = { opencollection: '1.0.0', info: { name: 'x' } };
 

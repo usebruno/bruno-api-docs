@@ -1,27 +1,26 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import SidebarNavLink from './SidebarNavLink/SidebarNavLink';
-import SidebarTree from './SidebarTree/SidebarTree';
-import { CubeIcon, GlobeIcon } from '@/assets/icons';
+import SidebarNavLink from '@usebruno/api-shared/components/Docs/Sidebar/SidebarNavLink/SidebarNavLink';
+import SidebarTree from '@usebruno/api-shared/components/Docs/Sidebar/SidebarTree/SidebarTree';
+import { CubeIcon, GlobeIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 import { computeAutoReveal } from './autoReveal';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { toggleItem, expandFolders, selectDocsCollection } from '@/store/slices/docs';
-import { getItemUuid } from '@/utils/itemUtils';
-import { useNavModel } from '@/routing/hooks';
+import { useDocument, useNavModel } from '@usebruno/api-shared/document/document';
 import { normalizeSlug, resolveSlug } from '@/routing/resolve';
-import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@/routing/navModel';
-import { useDocsNavigate, useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
+import { OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@usebruno/api-shared/routing/navModel';
+import { useAutoHideScrollbar, useIsMobileDevice } from '@usebruno/api-shared/hooks';
+import { useDocsNavigate } from '@/hooks/useDocsNavigate';
 import { useActiveExample } from './hooks/useActiveExample';
+import type { FolderCollapse } from './hooks/useFolderCollapse';
 
 interface SidebarProps {
+  folders: FolderCollapse;
   onNavigate?: () => void;
   testId?: string;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onNavigate, testId = 'sidebar' }) => {
-  const dispatch = useAppDispatch();
-  const collection = useAppSelector(selectDocsCollection);
+const Sidebar: React.FC<SidebarProps> = ({ folders, onNavigate, testId = 'sidebar' }) => {
+  const collection = useDocument();
   const model = useNavModel();
   const docsNavigate = useDocsNavigate();
   const { pathname } = useLocation();
@@ -34,16 +33,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, testId = 'sidebar' }) => 
     onNavigate?.();
   };
 
-  const uuidToSlug = useMemo<Map<string, string>>(() => {
-    const map = new Map<string, string>();
-    for (const entry of model.ordered) {
-      const uuid = getItemUuid(entry.item);
-      if (uuid) map.set(uuid, entry.slug);
-    }
-    return map;
-  }, [model]);
-
-  const { activeExample, goToExample } = useActiveExample(model, uuidToSlug, onNavigate);
+  const { activeExample, goToExample } = useActiveExample(model, onNavigate);
 
   // Show the scrollbar while the list is in use, then fade it out after 1s idle.
   // Shared with the playground sidebar so both behave the same.
@@ -54,6 +44,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, testId = 'sidebar' }) => 
   // window size, so a narrow laptop window keeps the normal 13px.
   const isMobileDevice = useIsMobileDevice();
 
+  const { expand } = folders;
   const autoRevealedSlug = useRef<string | null>(null);
   useEffect(() => {
     // Open the folders around the active item so it shows up in the tree. On
@@ -62,8 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, testId = 'sidebar' }) => 
     // opens the folders then, instead of leaving them closed.
     const { claim, uuids } = computeAutoReveal(autoRevealedSlug.current, activeSlug, model);
     if (claim) autoRevealedSlug.current = activeSlug;
-    if (uuids.length) dispatch(expandFolders(uuids));
-  }, [activeSlug, model, dispatch]);
+    if (uuids.length) expand(uuids);
+  }, [activeSlug, model, expand]);
 
   return (
     <StyledWrapper className={`sidebar${isMobileDevice ? ' mobile' : ''}`} data-testid={testId}>
@@ -95,10 +86,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate, testId = 'sidebar' }) => 
             // While an example is highlighted, only the example row is active,
             // not its parent request row (even though we navigated to that page).
             activeSlug={activeExample ? '' : activeSlug}
-            uuidToSlug={uuidToSlug}
+            uuidToSlug={model.slugByUuid}
             onNavigate={goTo}
-            onToggleFolder={(uuid) => dispatch(toggleItem(uuid))}
-            onExpandFolder={(uuid) => dispatch(expandFolders([uuid]))}
+            onToggleFolder={folders.toggle}
+            onExpandFolder={(uuid) => expand([uuid])}
+            isFolderCollapsed={folders.isCollapsed}
             activeExample={activeExample}
             onExampleClick={goToExample}
           />

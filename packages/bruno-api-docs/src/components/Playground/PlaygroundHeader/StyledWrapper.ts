@@ -36,7 +36,7 @@ export const StyledWrapper = styled.div`
   }
 
   /* Muted grey for the sidebar-toggle + collapse + close controls (Figma:
-     subtext0 #9b9b9b); two-class selectors win over IconButton's default. */
+     subtext0); two-class selectors win over IconButton's default. */
   .header-left .header-sidebar-toggle,
   .header-right .header-collapse,
   .header-right .header-close {

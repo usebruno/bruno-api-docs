@@ -7,7 +7,7 @@ import { MethodSelectorComponent } from './playground/method-selector.component'
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import { CodeSnippetComponent } from './request/code-snippet.component';
-import type { DockMode } from '../../src/utils/playgroundDock';
+import type { DockMode } from '../../../bruno-shared/src/utils/playgroundDock';
 
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);
@@ -45,7 +45,7 @@ export class PlaygroundComponent extends BaseComponent {
   });
 
   readonly gear = this.page.getByTestId('playground-env-settings');
-  readonly view = this.page.getByTestId('playground-view');
+  readonly view = this.root.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
   readonly closeButton = this.page.getByTestId('playground-close');
@@ -64,6 +64,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly scriptFile = this.view.getByTestId('playground-script-file');
   readonly scriptFileTitle = this.view.getByTestId('playground-script-file-title');
   readonly exampleView = this.page.getByTestId('example-view');
+  readonly exampleViewName = this.page.getByTestId('example-view-name');
   readonly exampleViewRequest = this.page.getByTestId('example-view-request');
   readonly exampleViewResponse = this.page.getByTestId('example-view-response');
 
@@ -84,6 +85,10 @@ export class PlaygroundComponent extends BaseComponent {
 
   sidebarItem(name: string): Locator {
     return this.treeItems.filter({ hasText: name }).first();
+  }
+
+  folderChevron(name: string): Locator {
+    return this.sidebarItem(name).locator('.navlink-chevron');
   }
 
   async openSidebarItem(name: string): Promise<void> {

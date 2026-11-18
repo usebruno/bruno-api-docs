@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from '../base.component';
 
 /**
@@ -11,8 +11,8 @@ import { BaseComponent } from '../base.component';
  * Parts are found by test id or accessible name, never by class.
  */
 export class PageHeaderComponent extends BaseComponent {
-  constructor(page: Page) {
-    super(page, page.getByTestId('topbar'));
+  constructor(page: Page, scope: Page | Locator = page) {
+    super(page, scope.getByTestId('topbar'));
   }
 
   // Brand cluster

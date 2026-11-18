@@ -1,9 +1,9 @@
 import React, { useId } from 'react';
-import { SectionLabel } from '../SectionLabel/SectionLabel';
+import { SectionLabel } from '@usebruno/api-shared/components/SectionLabel/SectionLabel';
 import { ChevronArrow } from '../ChevronArrow/ChevronArrow';
 import { Collapse } from '@/ui/Collapse/Collapse';
-import { useSessionStorage } from '@/hooks';
-import { cx } from '@/utils/cx';
+import { useSessionStorage } from '@usebruno/api-shared/hooks';
+import { cx } from '@usebruno/api-shared/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 type HeadingLevel = 'h2' | 'h3' | 'h4';

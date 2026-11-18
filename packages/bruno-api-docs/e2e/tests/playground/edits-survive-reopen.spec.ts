@@ -154,6 +154,70 @@ test.describe('Playground edits survive closing and reopening, not a reload', ()
     await expect(playground.variable.value).toHaveText('https://from-script.example.com');
   });
 
+  test('URL, Environments view and folder settings edits are kept across a dock switch', async ({
+    page,
+    playground,
+    envEditor
+  }) => {
+    const envTable = playground.keyValueTable;
+    await playground.urlInput.click();
+    await page.keyboard.press('End');
+    await page.keyboard.type('&edited=1');
+    await playground.openEnvironments();
+    await envEditor.selectEnvironment('Dev');
+    await envTable.valueInputs.first().fill('https://from-env-view.example.com');
+    await playground.openTreeItem(['Customers']);
+    await playground.folderSettingsTab('variables').click();
+    await playground.preRequestVars.valueInputs.first().fill('edited-folder');
+
+    await playground.selectDock('modal');
+    await expect(playground.modalPanel).toBeVisible();
+
+    await playground.folderSettingsTab('variables').click();
+    await expect(playground.preRequestVars.valueInputs.first()).toHaveValue('edited-folder');
+    await playground.openEnvironments();
+    await envEditor.selectEnvironment('Dev');
+    await expect(envTable.valueInputs.first()).toHaveValue('https://from-env-view.example.com');
+    await playground.openRequest('Variables Demo');
+    await expect(playground.urlInput).toHaveValue(/&edited=1$/);
+  });
+
+  test('URL, Environments view and folder settings edits are kept when docs pages are visited between close and reopen', async ({
+    page,
+    playground,
+    requestPage,
+    envEditor
+  }) => {
+    const envTable = playground.keyValueTable;
+    await playground.urlInput.click();
+    await page.keyboard.press('End');
+    await page.keyboard.type('&edited=1');
+    await playground.openEnvironments();
+    await envEditor.selectEnvironment('Dev');
+    await envTable.valueInputs.first().fill('https://from-env-view.example.com');
+    await playground.openTreeItem(['Customers']);
+    await playground.folderSettingsTab('variables').click();
+    await playground.preRequestVars.valueInputs.first().fill('edited-folder');
+    await markPageLoad(page);
+    await playground.close();
+    await expect(playground.header).toHaveCount(0);
+
+    await requestPage.sidebar.overview.click();
+    await requestPage.sidebar.environments.click();
+    await requestPage.sidebar.item('Variables Demo').click();
+    await requestPage.urlBar.tryButton.click();
+    await playground.view.waitFor({ state: 'visible' });
+    expect(await isSamePageLoad(page)).toBe(true);
+
+    await expect(playground.urlInput).toHaveValue(/&edited=1$/);
+    await playground.openEnvironments();
+    await envEditor.selectEnvironment('Dev');
+    await expect(envTable.valueInputs.first()).toHaveValue('https://from-env-view.example.com');
+    await playground.openTreeItem(['Customers']);
+    await playground.folderSettingsTab('variables').click();
+    await expect(playground.preRequestVars.valueInputs.first()).toHaveValue('edited-folder');
+  });
+
   test('a reload restores the collection\'s original values', async ({ page, playground }) => {
     await playground.variable.hoverInputToken('unsetSecret');
     await playground.variable.editTo('typed-secret');

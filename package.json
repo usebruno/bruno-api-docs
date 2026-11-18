@@ -2,6 +2,8 @@
   "name": "bruno-api-docs",
   "private": true,
   "workspaces": [
+    "packages/bruno-shared",
+    "packages/bruno-api-playground",
     "packages/bruno-api-docs"
   ],
   "homepage": "https://www.opencollection.com",
@@ -12,6 +14,7 @@
     "lint:all": "LINT_ALL=1 eslint",
     "lint:fix": "eslint --fix",
     "lint:verbose": "eslint --debug",
+    "test:run": "npm run test:run --workspaces --if-present",
     "changeset": "sh scripts/changeset.sh",
     "version": "changeset version"
   },

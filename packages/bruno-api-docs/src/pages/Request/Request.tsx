@@ -9,11 +9,11 @@ import {
   isWebSocketRequest,
   isGrpcRequest,
   type RequestItem
-} from '@/utils/schemaHelpers';
-import { getBodyView } from '@/utils/request';
+} from '@usebruno/api-shared/utils/schemaHelpers';
+import { getBodyView } from '@usebruno/api-shared/utils/request';
 import { Section } from '../../components/Section/Section';
-import { RequestBody } from '../../components/Request/RequestBody/RequestBody';
-import { ContentTypeBadge } from '../../components/ContentTypeBadge/ContentTypeBadge';
+import { RequestBody } from '@usebruno/api-shared/components/Request/RequestBody/RequestBody';
+import { ContentTypeBadge } from '@usebruno/api-shared/components/ContentTypeBadge/ContentTypeBadge';
 import { Examples } from '../../components/Examples/Examples';
 import { useRequestPageData } from '@/hooks/useRequestPageData';
 import { RequestPageLayout, NAV_GROUP, NAV_LEVEL } from '@/components/RequestPageLayout/RequestPageLayout';

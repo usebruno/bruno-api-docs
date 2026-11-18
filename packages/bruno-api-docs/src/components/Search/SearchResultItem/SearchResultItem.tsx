@@ -1,8 +1,8 @@
 import React from 'react';
-import { getMethodColorVar } from '@/theme/methodColors';
-import { getShortMethod } from '@/utils/request';
-import { FolderIcon } from '@/assets/icons';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
+import { getMethodColorVar } from '@usebruno/api-shared/theme/methodColors';
+import { getShortMethod } from '@usebruno/api-shared/utils/request';
+import { FolderIcon } from '@usebruno/api-shared/assets/icons';
+import { Tooltip } from '@usebruno/api-shared/ui/Tooltip/Tooltip';
 import { requestCountLabel } from '@/utils/folder';
 import { formatBreadcrumb, type SearchRecord, type FieldMatches } from '../searchIndex';
 import { StyledWrapper } from './StyledWrapper';

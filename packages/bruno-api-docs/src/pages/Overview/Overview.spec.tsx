@@ -2,8 +2,8 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query, getByTestId, queryByTestId } from '@/test-utils/dom';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { query, getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
 import { Overview } from './Overview';
 
 /** Every Overview section shares one test id, so find a section by its text. */

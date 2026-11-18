@@ -1,0 +1,12 @@
+- text: "Version : 1.0.0"
+- heading "General Fixture" [level=1]
+- text: 2 Requests 0 Folders 2 Environments
+- heading "Overview" [level=2]
+- paragraph: No overview content yet
+- paragraph: "This collection has no description or readme. Add one in Bruno to introduce your API to readers: what it does, who it's for, and how to authenticate."
+- heading "Collection Configuration" [level=2]
+- paragraph: No configuration set
+- paragraph: This collection has no shared headers or auth. Configure them in Bruno and they'll appear here.
+- heading "Execution Context" [level=2]
+- paragraph: No execution context
+- paragraph: This collection has no shared scripts, variables, or tests.

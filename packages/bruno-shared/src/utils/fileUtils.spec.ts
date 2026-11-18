@@ -1,0 +1,145 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import {
+  extractTests,
+  extractTestNames,
+  collectTests,
+  collectRawTestScripts,
+  getAncestorsByUuid,
+  hydrateWithUUIDs
+} from './fileUtils';
+import { findItemByUuid } from './itemUtils';
+import type { OpenCollection } from '@opencollection/types';
+import type { Folder, Item } from '@opencollection/types/collection/item';
+import type { SupportedRequestItem } from './schemaHelpers';
+
+describe('extractTestNames', () => {
+  it('extracts test/it titles across quote styles', () => {
+    const code = 'test(\'a\'); it("b", () => {}); test(`c`);';
+    expect(extractTestNames(code)).toEqual(['a', 'b', 'c']);
+  });
+
+  it('handles test.skip/only and escaped quotes', () => {
+    const code = 'test.skip(\'s\'); test(\'it\\\'s ok\');';
+    expect(extractTestNames(code)).toEqual(['s', 'it\'s ok']);
+  });
+
+  it('returns [] for empty input', () => {
+    expect(extractTestNames(undefined)).toEqual([]);
+    expect(extractTestNames('')).toEqual([]);
+  });
+});
+
+describe('extractTests (source capture)', () => {
+  it('captures each test\'s full source, not a fabricated snippet', () => {
+    const code = 'test("a", function() {\n  expect(res.status).to.equal(200);\n});\nit(\'b\', () => { expect(1).to.equal(1); });';
+    const tests = extractTests(code);
+    expect(tests.map((t) => t.name)).toEqual(['a', 'b']);
+    expect(tests[0].code).toBe('test("a", function() {\n  expect(res.status).to.equal(200);\n});');
+    expect(tests[1].code).toBe('it(\'b\', () => { expect(1).to.equal(1); });');
+  });
+
+  it('balances parens that appear inside strings and the body', () => {
+    const code = 'test("x", () => { expect(")").to.equal(")"); });';
+    expect(extractTests(code)[0].code).toBe(code);
+  });
+
+  it('ignores parens inside comments', () => {
+    const code = 'test("y", () => {\n  // a ) here must not close the call\n  expect(1).to.equal(1);\n});';
+    expect(extractTests(code)[0].code).toBe(code);
+  });
+});
+
+describe('collectTests', () => {
+  it('orders tests by script flow, each with its source', () => {
+    const collection = { info: { name: 'C' }, request: { scripts: [{ type: 'tests', code: 'test(\'coll\', () => {})' }] } } as OpenCollection;
+    const folder = { info: { type: 'folder', name: 'F' }, request: { scripts: [{ type: 'tests', code: 'test(\'fold\', () => {})' }] } } as Item;
+    const item = { runtime: { scripts: [{ type: 'tests', code: 'test(\'req\', () => {})' }] } } as SupportedRequestItem;
+
+    const sequential = collectTests(collection, [folder], item, 'sequential');
+    expect(sequential.map((r) => `${r.level}:${r.name}`)).toEqual(['collection:coll', 'folder:fold', 'request:req']);
+
+    const sandwich = collectTests(collection, [folder], item, 'sandwich');
+    expect(sandwich.map((r) => `${r.level}:${r.name}`)).toEqual(['request:req', 'folder:fold', 'collection:coll']);
+    expect(collectTests(collection, [folder], item).map((r) => r.level)).toEqual(['request', 'folder', 'collection']);
+  });
+
+  it('surfaces a raw-script row when a tests script has no test()/it() wrapper (not dropped)', () => {
+    const item = { runtime: { scripts: [{ type: 'tests', code: 'expect(res.status).to.equal(200);' }] } } as SupportedRequestItem;
+    const rows = collectTests(null, [], item);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ level: 'request', name: 'Test script', raw: true, code: 'expect(res.status).to.equal(200);' });
+  });
+
+  it('does not surface a raw row for an empty/whitespace tests script', () => {
+    const item = { runtime: { scripts: [{ type: 'tests', code: '   \n ' }] } } as SupportedRequestItem;
+    expect(collectTests(null, [], item)).toEqual([]);
+  });
+});
+
+describe('collectRawTestScripts', () => {
+  it('returns the complete authored script per non-empty level, in flow order', () => {
+    const collection = { info: { name: 'C' }, request: { scripts: [{ type: 'tests', code: 'const s = 1;\ntest("coll", () => {})' }] } } as OpenCollection;
+    const folder = { info: { type: 'folder', name: 'F' }, request: { scripts: [{ type: 'tests', code: '   ' }] } } as Item;
+    const item = { runtime: { scripts: [{ type: 'tests', code: 'test(\'req\', () => {})' }] } } as SupportedRequestItem;
+
+    const sequential = collectRawTestScripts(collection, [folder], item, 'sequential');
+    expect(sequential.map((s) => s.level)).toEqual(['collection', 'request']);
+    expect(sequential[0].code).toBe('const s = 1;\ntest("coll", () => {})');
+    expect(sequential[0].sourceName).toBe('C');
+
+    const sandwich = collectRawTestScripts(collection, [folder], item);
+    expect(sandwich.map((s) => s.level)).toEqual(['request', 'collection']);
+  });
+});
+
+const collection = {
+  items: [
+    {
+      uuid: 'f1',
+      info: { type: 'folder', name: 'Auth' },
+      items: [
+        { uuid: 'r1', info: { type: 'http', name: 'Login' } },
+        {
+          uuid: 'f2',
+          info: { type: 'folder', name: 'Sub' },
+          items: [{ uuid: 'r2', info: { type: 'http', name: 'Deep' } }]
+        }
+      ]
+    },
+    { uuid: 'r3', info: { type: 'http', name: 'Top' } }
+  ]
+} as unknown as OpenCollection;
+
+describe('itemTree', () => {
+  it('finds an item by uuid, including nested ones', () => {
+    expect((findItemByUuid(collection.items, 'r2') as Folder | null)?.info?.name).toBe('Deep');
+    expect((findItemByUuid(collection.items, 'r3') as Folder | null)?.info?.name).toBe('Top');
+    expect(findItemByUuid(collection.items, 'missing')).toBeNull();
+  });
+
+  it('returns folder ancestors from root to parent', () => {
+    expect(getAncestorsByUuid(collection, 'r2').map((f) => (f as Folder).info?.name)).toEqual(['Auth', 'Sub']);
+    expect(getAncestorsByUuid(collection, 'r1').map((f) => (f as Folder).info?.name)).toEqual(['Auth']);
+    expect(getAncestorsByUuid(collection, 'r3')).toEqual([]);
+  });
+});
+
+describe('hydrateWithUUIDs', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('works without crypto.randomUUID, as on a plain http origin', () => {
+    vi.stubGlobal('crypto', {});
+    const hydrated = hydrateWithUUIDs({
+      items: [
+        { info: { type: 'folder', name: 'F' }, items: [{ info: { type: 'http', name: 'A' } }] },
+        { uuid: 'kept', info: { type: 'http', name: 'B' } }
+      ]
+    } as unknown as OpenCollection);
+
+    const [folder, request] = hydrated.items as Array<Item & { uuid: string; items: Array<{ uuid: string }> }>;
+    expect(folder.uuid).toEqual(expect.any(String));
+    expect(folder.items[0].uuid).toEqual(expect.any(String));
+    expect(folder.uuid).not.toBe(folder.items[0].uuid);
+    expect(request.uuid).toBe('kept');
+  });
+});

@@ -1,0 +1,397 @@
+import { Buffer } from 'buffer';
+import type { FormUrlEncodedEntry, HttpRequest, MultipartFormEntry } from '@opencollection/types/requests/http';
+import type { JsonValue, RunRequestResponse } from '@usebruno/api-shared/types/run';
+import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@usebruno/api-shared/utils/schemaHelpers';
+import { buildRequestUrl } from '@usebruno/api-shared/utils/pathParams';
+import { buildDigestAuthorization, findDigestChallenge, getDigestCredentials } from './utils/digest-auth';
+import { classifyRequestError, DigestAuthError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
+import { detectContentTypeFromBytes, isByteFormatContentType } from '@usebruno/api-shared/utils/response';
+import { RESPONSE_LARGE_THRESHOLD } from '@usebruno/api-shared/constants';
+import stripJsonComments from 'strip-json-comments';
+import { statusCodePhrase } from '@usebruno/api-shared/utils/exampleResponse';
+
+type LegacyFormRow = { name: string; value?: string | File; type?: string; disabled?: boolean };
+
+/** Methods `fetch` refuses to attach a request body to. */
+const BODYLESS_METHODS = ['GET', 'HEAD'];
+
+const pageHref = (): string | null => (typeof window !== 'undefined' ? window.location.href : null);
+
+const FALLBACK_BASE = 'http://localhost';
+
+export const applyApiKeyToUrl = (url: string, auth: Record<string, unknown> | undefined): string => {
+  if (auth?.type !== 'apikey' || auth.placement !== 'query' || !auth.key) {
+    return url;
+  }
+
+  try {
+    const urlObj = new URL(url);
+    urlObj.searchParams.set(String(auth.key), String(auth.value ?? ''));
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+};
+
+interface HeaderAuthConfig {
+  type?: string;
+  username?: string;
+  password?: string;
+  token?: string;
+  key?: string;
+  value?: string;
+  placement?: string;
+}
+
+const hasHeader = (headers: Record<string, string>, name: string): boolean => {
+  const lowerCaseName = name.toLowerCase();
+  return Object.keys(headers).some((key) => key.toLowerCase() === lowerCaseName);
+};
+
+const removeHeader = (headers: Record<string, string>, name: string): void => {
+  const lowerCaseName = name.toLowerCase();
+  Object.keys(headers).forEach((key) => {
+    if (key.toLowerCase() === lowerCaseName) delete headers[key];
+  });
+};
+
+const anySignal = (signals: AbortSignal[]): AbortSignal => {
+  const controller = new AbortController();
+  for (const signal of signals) {
+    if (signal.aborted) {
+      controller.abort(signal.reason);
+      break;
+    }
+    signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true });
+  }
+  return controller.signal;
+};
+
+export class RequestExecutor {
+  async executeRequest(
+    request: InternalHttpRequest,
+    options: { timeout?: number; signal?: AbortSignal } = {}
+  ): Promise<RunRequestResponse> {
+    const startTime = Date.now();
+    const timeoutMs = options.timeout ?? DEFAULT_TIMEOUT_MS;
+    const requestUrl = applyApiKeyToUrl(
+      buildRequestUrl(getRequestUrl(request), getHttpParams(request)),
+      getRequestAuth(request) as Record<string, unknown> | undefined
+    );
+
+    try {
+      const fetchOptions = await this.buildFetchOptions(request, timeoutMs, options.signal);
+      const response = await this.performFetch(requestUrl, fetchOptions, request);
+      const endTime = Date.now();
+
+      const disableJsonParsing = Boolean(request.__brunoDisableParsingResponseJson);
+      const responseData = await this.parseResponse(response, disableJsonParsing);
+      const responseHeaders = this.parseHeaders(response.headers);
+
+      return {
+        status: response.status,
+        statusText: response.statusText ? response.statusText : statusCodePhrase(response.status),
+        headers: responseHeaders,
+        data: responseData.data,
+        base64Data: responseData.base64Data,
+        detectedContentType: responseData.detectedContentType,
+        size: responseData.size,
+        duration: endTime - startTime,
+        url: response.url
+      };
+    } catch (error) {
+      const endTime = Date.now();
+      const classified = classifyRequestError(error, {
+        timeoutMs,
+        requestUrl,
+        pageUrl: pageHref() ?? undefined,
+        cancelled: options.signal?.aborted
+      });
+
+      return {
+        error: classified.message,
+        errorType: classified.type,
+        errorTitle: classified.title,
+        duration: endTime - startTime
+      };
+    }
+  }
+
+  private async buildFetchOptions(
+    request: InternalHttpRequest,
+    timeout = DEFAULT_TIMEOUT_MS,
+    cancelSignal?: AbortSignal
+  ): Promise<RequestInit> {
+    // `fetch` upper-cases only the methods it knows, so a collection storing
+    // `purge` would go out lower-cased while the badge shows PURGE.
+    const method = getHttpMethod(request).trim().toUpperCase();
+
+    const configuredTimeout = request.settings?.timeout ?? request.timeout;
+    const effectiveTimeout = typeof configuredTimeout === 'number' ? configuredTimeout : timeout;
+    const options: RequestInit = {
+      method,
+      headers: this.buildHeaders(request)
+    };
+
+    const signals: AbortSignal[] = [];
+    if (effectiveTimeout > 0) {
+      signals.push(AbortSignal.timeout(effectiveTimeout));
+    }
+    if (cancelSignal) {
+      signals.push(cancelSignal);
+    }
+
+    if (signals.length > 0) {
+      options.signal = anySignal(signals);
+    }
+
+    const body = getHttpBody(request);
+    if (body && !BODYLESS_METHODS.includes(method)) {
+      options.body = await this.buildBody(request);
+    }
+
+    return options;
+  }
+
+  private async performFetch(url: string, fetchOptions: RequestInit, request: HttpRequest): Promise<Response> {
+    const credentials = getDigestCredentials(getRequestAuth(request) as Record<string, unknown> | undefined);
+    const headers = fetchOptions.headers as Record<string, string>;
+
+    if (credentials === null || hasHeader(headers, 'Authorization')) {
+      return fetch(url, fetchOptions);
+    }
+
+    // Both digest requests must send credentials: 'omit' — a 401 challenge on a
+    // request that carries credentials makes the browser show its own login popup
+    // (and freezes the page in Firefox) instead of letting our code answer.
+    const initial = await fetch(url, { ...fetchOptions, credentials: 'omit' });
+    if (initial.status !== 401) {
+      return initial;
+    }
+
+    const requestOrigin = new URL(url, pageHref() ?? FALLBACK_BASE).origin;
+
+    if (initial.redirected && new URL(initial.url).origin !== requestOrigin) {
+      throw new DigestAuthError('redirected-challenge');
+    }
+
+    const challengeHeader = initial.headers.get('www-authenticate');
+    if (challengeHeader === null) {
+      const href = pageHref();
+      if (href !== null && requestOrigin !== new URL(href).origin) {
+        throw new DigestAuthError('challenge-unreadable');
+      }
+      return initial;
+    }
+
+    const challenge = findDigestChallenge(challengeHeader);
+    if (challenge === null) {
+      return initial;
+    }
+
+    const targetUrl = initial.redirected ? initial.url : url;
+    const parsedUrl = new URL(targetUrl, pageHref() ?? FALLBACK_BASE);
+    const result = buildDigestAuthorization({
+      challenge,
+      method: fetchOptions.method ?? 'GET',
+      uri: `${parsedUrl.pathname}${parsedUrl.search}`,
+      username: credentials.username,
+      password: credentials.password
+    });
+    if (!result.ok) {
+      throw new DigestAuthError(result.reason);
+    }
+
+    return fetch(targetUrl, { ...fetchOptions, credentials: 'omit', headers: { ...headers, Authorization: result.header } });
+  }
+
+  private buildHeaders(request: InternalHttpRequest): HeadersInit {
+    const headers: Record<string, string> = {};
+    const requestHeaders = getHttpHeaders(request);
+    const body = getHttpBody(request);
+    const auth = getRequestAuth(request) as HeaderAuthConfig | undefined;
+
+    if (requestHeaders) {
+      requestHeaders.forEach((header) => {
+        if (!header.disabled && header.name && header.value) {
+          headers[header.name] = header.value;
+        }
+      });
+    }
+
+    // Auto-set Content-Type for JSON bodies if not already set
+    if (body && 'type' in body && body.type === 'json') {
+      const hasContentType = requestHeaders?.some((h) =>
+        !h.disabled && h.name.toLowerCase() === 'content-type'
+      );
+      if (!hasContentType) {
+        headers['Content-Type'] = 'application/json';
+      }
+    }
+
+    // Let the browser set multipart/form-data with its boundary — drop any manual one.
+    if (body && 'type' in body && body.type === 'multipart-form') {
+      removeHeader(headers, 'Content-Type');
+    }
+
+    if (auth) {
+      this.setAuthHeaders(headers, auth, request.__brunoHeadersSetByScript ?? []);
+    }
+
+    return headers;
+  }
+
+  // The Auth tab overwrites a header from the Headers tab. Bearer and api key yield to a header the
+  // pre-request script wrote, basic does not: desktop applies bearer and api key before the script
+  // runs but encodes basic auth after it, so on desktop only basic overwrites a script header.
+  private setAuthHeaders(headers: Record<string, string>, auth: HeaderAuthConfig, headersSetByScript: string[]) {
+    const overwriteHeader = (name: string, value: string) => {
+      removeHeader(headers, name);
+      headers[name] = value;
+    };
+    const writeUnlessScriptSet = (name: string, value: string) => {
+      if (!headersSetByScript.includes(name.toLowerCase())) overwriteHeader(name, value);
+    };
+
+    switch (auth.type) {
+      case 'basic':
+        if (auth.username && auth.password) {
+          const credentials = btoa(`${auth.username}:${auth.password}`);
+          overwriteHeader('Authorization', `Basic ${credentials}`);
+        }
+        break;
+      case 'bearer':
+        if (auth.token) {
+          writeUnlessScriptSet('Authorization', `Bearer ${auth.token}`);
+        }
+        break;
+      case 'apikey':
+        if (auth.key && auth.value && auth.placement === 'header') {
+          writeUnlessScriptSet(auth.key, auth.value);
+        }
+        break;
+    }
+  }
+
+  private async buildBody(request: HttpRequest): Promise<BodyInit | null> {
+    const body = getHttpBody(request);
+    const headers = getHttpHeaders(request);
+
+    if (!body) return null;
+
+    if ('type' in body) {
+      switch (body.type) {
+        case 'json':
+          return stripJsonComments(body.data).replace(/,(\s*[\]}])/g, '$1');
+        case 'text':
+        case 'xml':
+        case 'sparql':
+          return body.data;
+        case 'form-urlencoded':
+          if ('data' in body && Array.isArray(body.data)) {
+            return this.buildUrlEncodedBody(body.data);
+          }
+          return null;
+        case 'multipart-form':
+          if ('data' in body && Array.isArray(body.data)) {
+            return this.buildMultipartBody(body.data);
+          }
+          return null;
+        case 'file':
+          // Browser can't read a local file path — send no file body.
+          return null;
+        default:
+          return null;
+      }
+    } else if (Array.isArray(body)) {
+      if (headers?.some((h) => h.name.toLowerCase() === 'content-type' && h.value === 'application/x-www-form-urlencoded')) {
+        return this.buildUrlEncodedBody(body as unknown as FormUrlEncodedEntry[]);
+      } else {
+        return this.buildFormDataBody(body as unknown as LegacyFormRow[]);
+      }
+    }
+
+    return null;
+  }
+
+  private buildUrlEncodedBody(data: FormUrlEncodedEntry[]): string {
+    const params = new URLSearchParams();
+    data.forEach((item) => {
+      if (item.disabled !== true && item.name) {
+        params.append(item.name, item.value || '');
+      }
+    });
+    return params.toString();
+  }
+
+  private buildFormDataBody(data: LegacyFormRow[]): FormData {
+    const formData = new FormData();
+    data.forEach((item) => {
+      if (item.disabled !== true && item.name) {
+        if (item.type === 'file' && item.value instanceof File) {
+          formData.append(item.name, item.value);
+        } else {
+          formData.append(item.name, item.value || '');
+        }
+      }
+    });
+    return formData;
+  }
+
+  private buildMultipartBody(entries: MultipartFormEntry[]): FormData {
+    const formData = new FormData();
+    entries.forEach((entry) => {
+      // File fields only carry a local path the browser can't read — omit them.
+      if (entry.disabled === true || !entry.name || entry.type === 'file') return;
+      const values = Array.isArray(entry.value) ? entry.value : [entry.value];
+      values.forEach((value: string) => formData.append(entry.name, value ?? ''));
+    });
+    return formData;
+  }
+
+  private async parseResponse(response: Response, disableJsonParsing = false) {
+    const contentType = response.headers.get('content-type') || '';
+    const arrayBuffer = await response.arrayBuffer();
+    // Read the size off the ArrayBuffer directly — no full Buffer copy needed just to measure.
+    const size = arrayBuffer.byteLength;
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Sniff the real type from the bytes (the header can be absent or wrong).
+    const detectedContentType = detectContentTypeFromBytes(buffer);
+    const isBinary = detectedContentType != null && isByteFormatContentType(detectedContentType);
+    const isLarge = size > RESPONSE_LARGE_THRESHOLD;
+
+    // Binary bytes don't decode to meaningful text — previews read `base64Data` instead.
+    let data: JsonValue | undefined;
+    if (!isBinary) {
+      const text = buffer.toString('utf-8');
+      if (!disableJsonParsing && contentType.includes('application/json')) {
+        try {
+          data = JSON.parse(text);
+        } catch {
+          data = text;
+        }
+      } else {
+        data = text;
+      }
+    }
+
+    // base64 backs binary previews/byte views and the download/copy actions, and is the faithful
+    // source when `data` can't reproduce the bytes (parsed JSON loses precision; non-ASCII bodies
+    // aren't round-trippable). A small plain-text/SVG string body carries its own bytes, so skip the
+    // redundant copy — but oversized bodies are still encoded here, since they're actioned
+    // (download/copy) from the reveal warning; only their formatting is deferred.
+    const isReconstructableText = detectedContentType === 'text/plain' && typeof data === 'string';
+    const base64Data = isReconstructableText && !isLarge ? undefined : buffer.toString('base64');
+
+    return { data, size, base64Data, detectedContentType };
+  }
+
+  private parseHeaders(headers: Headers): Record<string, string> {
+    const result: Record<string, string> = {};
+    headers.forEach((value, key) => {
+      result[key] = value;
+    });
+    return result;
+  }
+}

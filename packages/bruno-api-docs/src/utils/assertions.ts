@@ -1,6 +1,6 @@
 import type { Assertion } from '@opencollection/types/common/assertions';
-import { getRequestAssertions, type SupportedRequestItem } from './schemaHelpers';
-import { getDescription } from './request';
+import { getRequestAssertions, type SupportedRequestItem } from '@usebruno/api-shared/utils/schemaHelpers';
+import { getDescription } from '@usebruno/api-shared/utils/request';
 
 const OPERATOR_LABELS: Record<string, string> = {
   eq: 'equals',

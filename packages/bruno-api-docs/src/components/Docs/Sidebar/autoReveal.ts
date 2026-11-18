@@ -1,5 +1,5 @@
-import type { NavModel } from '@/routing/types';
-import { getItemUuid } from '@/utils/itemUtils';
+import type { NavModel } from '@usebruno/api-shared/routing/types';
+import { getItemUuid } from '@usebruno/api-shared/utils/itemUtils';
 
 export interface AutoRevealResult {
   /** True once the slug can be resolved, telling the caller to remember it as

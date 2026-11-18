@@ -1,21 +1,21 @@
 import React, { useMemo, useRef, useState } from 'react';
 import type { OpenCollection } from '@opencollection/types';
-import { getEnvironmentVariables } from '@/utils/environments';
-import { getDescription } from '@/utils/request';
-import { useMarkdownRenderer } from '@/hooks';
+import { getEnvironmentVariables } from '@usebruno/api-shared/utils/environments';
+import { getDescription } from '@usebruno/api-shared/utils/request';
+import { useMarkdownRenderer } from '@usebruno/api-shared/hooks';
 import { Table, type TableColumn, type TableGroup } from '@/ui/Table/Table';
-import { EnvironmentLabel } from '../../components/EnvironmentLabel/EnvironmentLabel';
-import { VariableText } from '../../components/VariableText/VariableText';
-import { TruncatedText } from '../../components/TruncatedText/TruncatedText';
-import { Description } from '../../components/Description/Description';
-import { DisabledBadge } from '../../components/DisabledBadge/DisabledBadge';
-import { ViewMore } from '../../components/ViewMore/ViewMore';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { EnvironmentLabel } from '@usebruno/api-shared/components/EnvironmentLabel/EnvironmentLabel';
+import { VariableText } from '@usebruno/api-shared/components/VariableText/VariableText';
+import { TruncatedText } from '@usebruno/api-shared/components/TruncatedText/TruncatedText';
+import { Description } from '@usebruno/api-shared/components/Description/Description';
+import { DisabledBadge } from '@usebruno/api-shared/components/DisabledBadge/DisabledBadge';
+import { ViewMore } from '@usebruno/api-shared/components/ViewMore/ViewMore';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
-import { Heading } from '../../components/Heading/Heading';
-import { GlobeIcon } from '@/assets/icons';
+import { Heading } from '@usebruno/api-shared/components/Heading/Heading';
+import { GlobeIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
-import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
+import { MarkdownContent } from '@usebruno/api-shared/components/MarkdownContent/MarkdownContent';
 
 const COLUMNS: TableColumn[] = [
   { key: 'name', header: 'Name', width: '13rem' },

@@ -1,0 +1,46 @@
+import React from 'react';
+import { CaretIcon } from '@usebruno/api-shared/assets/icons';
+import MenuDropdown from '@usebruno/api-shared/ui/MenuDropdown';
+import { StyledWrapper } from './StyledWrapper';
+import type { SelectOption } from '@usebruno/api-shared/types/selectOption';
+
+interface SelectProps {
+  value: string;
+  options: SelectOption[];
+  onChange: (value: string) => void;
+  id?: string;
+  ariaLabel?: string;
+  testId?: string;
+}
+
+export const Select: React.FC<SelectProps> = ({
+  value,
+  options,
+  onChange,
+  id,
+  ariaLabel,
+  testId
+}) => {
+  const selected = options.find((option) => option.value === value);
+
+  const items = options.map((option) => ({
+    id: option.value,
+    label: option.label,
+    onClick: () => onChange(option.value)
+  }));
+
+  return (
+    <MenuDropdown items={items} selectedItemId={value} placement="bottom-start" role="listbox" testId={testId}>
+      <StyledWrapper className="oc-select" id={id} aria-label={ariaLabel}>
+        <span className="oc-select-label" aria-hidden="true">
+          {selected ? selected.label : ''}
+        </span>
+        <span className="oc-select-caret" aria-hidden="true">
+          <CaretIcon />
+        </span>
+      </StyledWrapper>
+    </MenuDropdown>
+  );
+};
+
+export default Select;

@@ -73,6 +73,31 @@ test.describe('Bruno.apiPlayground from api-playground.js', () => {
     expect(apiPlaygroundPage.scriptRequests).toEqual(['/api-playground.js']);
   });
 
+  test('sends a bearer token taken from the active environment', async ({ page, apiPlaygroundPage }) => {
+    const authed = {
+      opencollection: '1.0.0',
+      info: { name: 'Authed' },
+      config: {
+        environments: [{ name: 'Local', variables: [{ name: 'host', value: appConfig.testServerURL }, { name: 'token', value: 'local-token' }] }]
+      },
+      items: [
+        {
+          info: { name: 'Me', type: 'http' },
+          http: { method: 'GET', url: '{{host}}/echo?me=1', auth: { type: 'bearer', token: '{{token}}' } }
+        }
+      ]
+    };
+    await apiPlaygroundPage.mount('first', authed);
+    const first = apiPlaygroundPage.instance('first');
+    await first.treeItem('Me').click();
+
+    const sent = page.waitForRequest(`${appConfig.testServerURL}/echo?me=1`);
+    await first.responsePane.send();
+
+    expect((await sent).headers()['authorization']).toBe('Bearer local-token');
+    await expect(first.responsePane.status).toHaveText('200 OK');
+  });
+
   test('sends the edited URL', async ({ page, apiPlaygroundPage }) => {
     await apiPlaygroundPage.mount('first', collection);
     const first = apiPlaygroundPage.instance('first');

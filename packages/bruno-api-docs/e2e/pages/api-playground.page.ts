@@ -27,9 +27,13 @@ type HostWindow = Window & {
  */
 export class ApiPlaygroundPage extends BasePage {
   readonly scriptRequests: string[] = [];
+  readonly consoleLogs: string[] = [];
 
   constructor(page: Page) {
     super(page);
+    page.on('console', (message) => {
+      if (message.type() === 'log') this.consoleLogs.push(message.text());
+    });
     page.on('request', (request) => {
       const url = new URL(request.url());
       if (request.resourceType() === 'script' && url.origin === appConfig.standaloneURL) this.scriptRequests.push(url.pathname);

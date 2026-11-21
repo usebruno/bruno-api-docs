@@ -6,6 +6,8 @@ const PROD_HOST = 'https://api.prod.example.com';
 const COLLECTION_URL = 'https://collections.example.com/playground.yml';
 const SCRIPT_HEADER = 'pre-request';
 
+type Target = 'first' | 'second';
+
 const collection = {
   opencollection: '1.0.0',
   info: { name: 'Playground Only' },
@@ -113,6 +115,44 @@ test.describe('Bruno.apiPlayground from api-playground.js', () => {
     await apiPlaygroundPage.destroy('first');
 
     await expect(apiPlaygroundPage.target('first')).toBeEmpty();
+  });
+
+  test('destroy aborts its own in-flight request, before its after-response script, and leaves a sibling\'s alone', async ({
+    page,
+    apiPlaygroundPage
+  }) => {
+    const slowUrl = (id: Target, ms: number) => `${appConfig.testServerURL}/delay?ms=${ms}&id=${id}`;
+    const slow = (id: Target, ms: number) => ({
+      opencollection: '1.0.0',
+      info: { name: `Slow ${id}` },
+      items: [
+        {
+          info: { name: 'Slow', type: 'http' },
+          http: { method: 'GET', url: slowUrl(id, ms) },
+          runtime: { scripts: [{ type: 'after-response', code: `console.log('after-response ${id}');` }] }
+        }
+      ]
+    });
+    await apiPlaygroundPage.mount('first', slow('first', 1500));
+    await apiPlaygroundPage.mount('second', slow('second', 2500));
+    const first = apiPlaygroundPage.instance('first');
+    const second = apiPlaygroundPage.instance('second');
+    await first.treeItem('Slow').click();
+    await second.treeItem('Slow').click();
+
+    const firstSent = page.waitForRequest(slowUrl('first', 1500));
+    await first.responsePane.send();
+    await firstSent;
+    const secondSent = page.waitForRequest(slowUrl('second', 2500));
+    await second.responsePane.send();
+    await secondSent;
+    const aborted = page.waitForEvent('requestfailed', (request) => request.url() === slowUrl('first', 1500));
+    await apiPlaygroundPage.destroy('first');
+
+    expect((await aborted).failure()).toEqual({ errorText: 'net::ERR_ABORTED' });
+    await expect(second.responsePane.status).toHaveText('200 OK');
+    expect(apiPlaygroundPage.consoleLogs).toContain('after-response second');
+    expect(apiPlaygroundPage.consoleLogs).not.toContain('after-response first');
   });
 
   test('a URL string is fetched and rendered', async ({ page, apiPlaygroundPage }) => {

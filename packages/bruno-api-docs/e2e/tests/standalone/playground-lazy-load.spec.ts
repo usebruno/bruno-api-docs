@@ -16,7 +16,7 @@ const NONCE_CSP = [
 const playgroundFileRequests = (page: Page): string[] => {
   const urls: string[] = [];
   page.on('request', (request) => {
-    if (/\/api-playground-[\w-]+\.js$/.test(new URL(request.url()).pathname)) urls.push(request.url());
+    if (/\/playground-view-[\w-]+\.js$/.test(new URL(request.url()).pathname)) urls.push(request.url());
   });
   return urls;
 };
@@ -55,7 +55,7 @@ for (const variant of ['new', 'old'] as const) {
     await expect(playground.view).toBeVisible();
 
     expect(loads).toHaveLength(1);
-    expect(loads[0]).toMatch(new RegExp(`^${appConfig.testServerURL}/api-docs/api-playground-`));
+    expect(loads[0]).toMatch(new RegExp(`^${appConfig.testServerURL}/api-docs/playground-view-`));
     expect(exportedHtmlPage.consoleErrors).toEqual([]);
   });
 }
@@ -117,7 +117,7 @@ test.describe('The playground file on a host page', () => {
   });
 
   test('shows the load error when the file is missing and keeps the docs usable', async ({ page, standalonePage }) => {
-    await page.route('**/api-playground-*', (route) => route.fulfill({ status: 404, body: 'not found' }));
+    await page.route('**/playground-view-*', (route) => route.fulfill({ status: 404, body: 'not found' }));
     await standalonePage.goto('#/alpha');
     await standalonePage.mount('first', { content: generalFixtureCollection });
     const first = standalonePage.instance('first');
@@ -136,7 +136,7 @@ test.describe('The playground file on a host page', () => {
     test(`retries the file on the next open after ${failure}`, async ({ page, standalonePage }) => {
       const loads = playgroundFileRequests(page);
       let failures = 1;
-      await page.route('**/api-playground-*', (route) =>
+      await page.route('**/playground-view-*', (route) =>
         failures-- > 0 ? route.fulfill(response) : route.continue()
       );
       await page.route('**/alpha**', (route) =>
@@ -187,7 +187,7 @@ test.describe('The playground file on a host page', () => {
     const docsTokens = codeSnippet.code.getByTestId(/^variable-token-/);
     await expect(docsTokens).toHaveCount(10);
 
-    const playgroundFile = page.waitForResponse(/\/api-playground-[\w-]+\.js$/);
+    const playgroundFile = page.waitForResponse(/\/playground-view-[\w-]+\.js$/);
     await first.requestPage.urlBar.tryButton.click();
     expect((await (await playgroundFile).text()).includes('highlightAll:function')).toBe(false);
     await first.responsePane.sendButton.click();

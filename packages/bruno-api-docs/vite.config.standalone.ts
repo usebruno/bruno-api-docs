@@ -7,8 +7,8 @@ import { fileURLToPath } from 'node:url';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
 const playgroundDir = resolve(__dirname, '../bruno-api-playground/dist-cdn');
-const playgroundFile = readdirSync(playgroundDir).find((name) => /^api-playground-.+\.js$/.test(name));
-if (!playgroundFile) throw new Error(`No api-playground-*.js in ${playgroundDir}; run build:cdn in bruno-api-playground`);
+const playgroundFile = readdirSync(playgroundDir).find((name) => /^playground-view-.+\.js$/.test(name));
+if (!playgroundFile) throw new Error(`No playground-view-*.js in ${playgroundDir}; run build:cdn in bruno-api-playground`);
 
 const playgroundCdn = (): Plugin => ({
   name: 'playground-cdn',

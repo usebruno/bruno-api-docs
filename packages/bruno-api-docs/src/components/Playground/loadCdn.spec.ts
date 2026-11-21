@@ -29,7 +29,7 @@ describe('loadPlayground from the CDN', () => {
       head: { appendChild: () => {} },
       currentScript: { nonce: 'n1' }
     });
-    vi.stubGlobal('__API_PLAYGROUND_FILE__', 'api-playground-abc.js');
+    vi.stubGlobal('__API_PLAYGROUND_FILE__', 'playground-view-abc.js');
     ({ loadPlayground } = await import('./loadCdn'));
     globals = { Bruno: {} };
     vi.stubGlobal('window', globals);
@@ -48,7 +48,7 @@ describe('loadPlayground from the CDN', () => {
 
     expect(second).toBe(first);
     expect(scripts).toHaveLength(1);
-    expect(scripts[0].src).toMatch(/\/api-playground-abc\.js$/);
+    expect(scripts[0].src).toMatch(/\/playground-view-abc\.js$/);
     expect(scripts[0].nonce).toBe('n1');
     expect(await first).toEqual({ default: Body });
   });
@@ -66,13 +66,13 @@ describe('loadPlayground from the CDN', () => {
     const loading = loadPlayground();
     scripts[0].onerror!();
 
-    await expect(loading).rejects.toThrow('api-playground-abc.js');
+    await expect(loading).rejects.toThrow('playground-view-abc.js');
   });
 
   it('rejects and retries when the script loads without defining the playground', async () => {
     const failed = loadPlayground();
     scripts[0].onload!();
-    await expect(failed).rejects.toThrow('api-playground-abc.js');
+    await expect(failed).rejects.toThrow('playground-view-abc.js');
 
     const retried = loadPlayground();
     const Body = () => null;
@@ -86,7 +86,7 @@ describe('loadPlayground from the CDN', () => {
   it('injects a fresh script on the next call after a failed load', async () => {
     const failed = loadPlayground();
     scripts[0].onerror!();
-    await expect(failed).rejects.toThrow('api-playground-abc.js');
+    await expect(failed).rejects.toThrow('playground-view-abc.js');
 
     const retried = loadPlayground();
     const Body = () => null;

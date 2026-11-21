@@ -44,7 +44,7 @@ export default defineConfig({
     rollupOptions: {
       external: (id) => runtimeModules.has(id),
       output: {
-        entryFileNames: 'api-playground-[hash].js',
+        entryFileNames: 'playground-view-[hash].js',
         interop: 'esModule',
         globals: (id) => `Bruno.__rt.${runtimeModules.get(id)}`
       }

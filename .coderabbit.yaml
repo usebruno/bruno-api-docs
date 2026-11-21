@@ -66,7 +66,7 @@ reviews:
       instructions: |
         The playground: PlaygroundBody and below, the runner and QuickJS scripting. It is
         loaded lazily, as an ES module in dev and as the classic script
-        api-playground-<hash>.js in the CDN build. Flag:
+        playground-view-<hash>.js in the CDN build. Flag:
         - Any import from @usebruno/api-docs or a relative path into packages/bruno-api-docs.
         - An `@/` import; the playground uses relative imports or package names.
         - A change to the externals in vite.config.cdn.ts without the matching Bruno.__rt

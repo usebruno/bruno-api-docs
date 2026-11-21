@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
 import { query } from '@usebruno/api-shared/test-utils/dom';
 import { ErrorBoundary } from './ErrorBoundary';
@@ -26,5 +26,17 @@ describe('ErrorBoundary', () => {
 
   it('flags an error via getDerivedStateFromError', () => {
     expect(ErrorBoundary.getDerivedStateFromError()).toEqual({ hasError: true });
+  });
+
+  it('leaves the fallback when resetKey changes, and only then', () => {
+    const boundary = new ErrorBoundary({ children: null, resetKey: 'b' });
+    boundary.state = { hasError: true };
+    const setState = vi.spyOn(boundary, 'setState').mockImplementation(() => {});
+
+    boundary.componentDidUpdate({ children: null, resetKey: 'b' });
+    expect(setState).not.toHaveBeenCalled();
+
+    boundary.componentDidUpdate({ children: null, resetKey: 'a' });
+    expect(setState).toHaveBeenCalledWith({ hasError: false });
   });
 });

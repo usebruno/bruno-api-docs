@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { usePlaygroundUrlState, useIsMobilePhone } from '@usebruno/api-shared/hooks';
 import InlineDock from './docks/InlineDock/InlineDock';
 import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
@@ -7,35 +7,11 @@ import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
 import { playgroundRuns, PLAYGROUND_CLOSED } from '@usebruno/api-shared/session/playgroundRuns';
 import { loadPlayground } from './load';
+import { retryableLazy } from './retryableLazy';
+import PlaygroundLoadError from './PlaygroundLoadError';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
-// A failed load swaps in a fresh lazy, since React caches the rejection, so the next open retries.
-const lazyBody = () =>
-  lazy(() =>
-    loadPlayground().catch((error: unknown) => {
-      PlaygroundBody = lazyBody();
-      throw error;
-    })
-  );
-let PlaygroundBody = lazyBody();
-
-const playgroundLoadError = (
-  <div
-    data-testid="playground-load-error"
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      padding: 16,
-      textAlign: 'center',
-      color: 'var(--text-secondary)',
-      fontSize: 13
-    }}
-  >
-    The playground failed to load in this environment.
-  </div>
-);
+const playgroundBody = retryableLazy(loadPlayground);
 
 interface PlaygroundProps {
   /** Bumped on each Try click, so the bottom sheet can re-expand from collapsed. */
@@ -69,6 +45,8 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
 
   if (!open) return null;
 
+  const PlaygroundBody = playgroundBody();
+
   const shared = {
     dock: effectiveDock,
     onDockChange: setDock,
@@ -78,7 +56,7 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
   };
 
   const body = (
-    <ErrorBoundary fallback={playgroundLoadError}>
+    <ErrorBoundary fallback={<PlaygroundLoadError />}>
       <Suspense fallback={<div data-testid="playground-loading" style={{ padding: 16 }} />}>
         <PlaygroundBody
           requestSlug={requestSlug}

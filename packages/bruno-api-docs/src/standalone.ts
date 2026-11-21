@@ -1,4 +1,4 @@
-import React, { lazy } from 'react';
+import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import '@usebruno/api-shared/styles/index.css';
@@ -11,7 +11,7 @@ import {
   parseContent,
   type ApiPlaygroundOptions
 } from '@usebruno/api-shared/utils/standalone';
-import { loadPlayground } from './components/Playground/load';
+import ApiPlaygroundView from './components/Playground/ApiPlaygroundView';
 import type { ThemeState } from '@usebruno/api-shared/theme/types';
 import { isEmpty, isPlainObject } from 'lodash-es';
 
@@ -106,10 +106,6 @@ export class OpenCollectionRenderer {
 
 export default OpenCollectionRenderer;
 
-const StandalonePlayground = lazy(() =>
-  loadPlayground().then((playground) => ({ default: playground.StandalonePlayground }))
-);
-
 let warnedDeprecated = false;
 
 class DeprecatedOpenCollection extends OpenCollectionRenderer {
@@ -137,6 +133,6 @@ if (typeof window !== 'undefined') {
         ...options
       }),
     apiPlayground: (target: HTMLElement, options: ApiPlaygroundOptions) =>
-      mountApiPlayground(target, options, StandalonePlayground)
+      mountApiPlayground(target, options, ApiPlaygroundView)
   };
 }

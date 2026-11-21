@@ -59,6 +59,7 @@ export class ApiPlaygroundPage extends BasePage {
       root: scope.getByTestId('standalone-playground'),
       docsShell: scope.getByTestId('app-shell'),
       dockHeader: scope.getByTestId('playground-header'),
+      loadError: scope.getByTestId('playground-load-error'),
       treeItems: sidebar.getByTestId('sidebar-item'),
       treeItem: (name: string) => sidebar.getByTestId('sidebar-item').filter({ hasText: name }),
       urlInput: scope.getByTestId('query-bar-url'),
@@ -101,6 +102,10 @@ export class ApiPlaygroundPage extends BasePage {
 
   brunoKeys(): Promise<string[]> {
     return this.page.evaluate(() => Object.keys((window as unknown as HostWindow).Bruno).sort());
+  }
+
+  async failPlaygroundViewOnce(): Promise<void> {
+    await this.page.route(/\/playground-view-[\w-]+\.js$/, (route) => route.fulfill({ status: 404, body: 'not found' }), { times: 1 });
   }
 
   async forwardToEcho(origin: string): Promise<void> {

@@ -204,6 +204,33 @@ test.describe('Bruno.apiPlayground next to Bruno.apiDocs', () => {
     expect(page.url()).toBe(apiPlaygroundPage.url('index.html'));
   });
 
+  test('a failed playground load shows the load error, and the next apiPlayground call retries', async ({
+    apiPlaygroundPage
+  }) => {
+    await apiPlaygroundPage.goto('index.html');
+    await apiPlaygroundPage.failPlaygroundViewOnce();
+
+    await apiPlaygroundPage.mount('first', collection);
+    await expect(apiPlaygroundPage.instance('first').loadError).toBeVisible();
+
+    await apiPlaygroundPage.mount('second', collection);
+    await expect(apiPlaygroundPage.instance('second').treeItems).toHaveText(['GETEcho', 'POSTOther']);
+    await expect(apiPlaygroundPage.instance('first').loadError).toBeVisible();
+  });
+
+  test('a failed playground load is retried by updateCollection', async ({ apiPlaygroundPage }) => {
+    await apiPlaygroundPage.goto('index.html');
+    await apiPlaygroundPage.failPlaygroundViewOnce();
+    await apiPlaygroundPage.mount('first', collection);
+    const first = apiPlaygroundPage.instance('first');
+    await expect(first.loadError).toBeVisible();
+
+    await apiPlaygroundPage.updateCollection('first', swapped);
+
+    await expect(first.treeItems).toHaveText(['GETPing']);
+    await expect(first.loadError).toHaveCount(0);
+  });
+
   test('loading both bundles keeps every entry and the build on Bruno', async ({ apiPlaygroundPage }) => {
     await apiPlaygroundPage.goto();
     await apiPlaygroundPage.addApiDocsScript();

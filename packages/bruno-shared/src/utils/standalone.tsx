@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import CollectionShell from '../components/CollectionShell/CollectionShell';
@@ -57,11 +57,7 @@ export const mountApiPlayground = (
     root?.render(
       <MemoryRouter useTransitions={false}>
         <CollectionShell collection={collection}>
-          {() => (
-            <Suspense fallback={<div data-testid="playground-loading" />}>
-              <View />
-            </Suspense>
-          )}
+          {() => <View />}
         </CollectionShell>
       </MemoryRouter>
     );

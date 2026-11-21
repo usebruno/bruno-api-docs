@@ -51,7 +51,8 @@ playground sends to it.
 
 `tests/standalone/` runs under its own config (`npm run test:e2e:standalone`), which builds the
 standalone bundle and starts a second copy on `standaloneURL` (port 3901), so specs can load
-`index.html` and drive `Bruno.apiDocs` like an embedding site. The main config skips that folder,
+`index.html` (`api-docs.js`) or `api-playground.html` (`api-playground.js` only) and drive
+`Bruno.apiDocs` or `Bruno.apiPlayground` like an embedding site. The main config skips that folder,
 so other specs don't pay for the build. `npm run test:e2e` runs both.
 
 Every route except `/cors/deny` and the static files answers CORS and preflight requests. The

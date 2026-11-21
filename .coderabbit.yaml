@@ -82,7 +82,7 @@ reviews:
         - A value import of @usebruno/api-playground. Only types may be imported; the one
           value import is the lazy import() in src/components/Playground/load.ts.
         - Anything that makes the playground load before Try or a deep link.
-        - Changes to the public Bruno.apiDocs API or the bundle file names.
+        - Changes to the public Bruno.apiDocs or Bruno.apiPlayground API or the bundle file names.
         - Docs code that runs requests or scripts; that belongs in the playground.
         - Docs code that reads playground state (working copy, responses, selection) or the
           session slot. Docs pages read only the loaded document.
@@ -151,8 +151,9 @@ reviews:
         instructions: |
           Fail if the PR renames or removes the storage keys oc-docs.theme, oc-docs.env,
           oc-docs:docsSidebarWidth, oc-docs:playgroundSidebarWidth or any other oc-docs key,
-          the .oc-playground class, the dist bundle file names, or the Bruno.apiDocs API
-          (updateCollection, updateOptions, destroy).
+          the .oc-playground class, the dist bundle file names, the Bruno.apiDocs API
+          (updateCollection, updateOptions, destroy) or the Bruno.apiPlayground API
+          (updateCollection, destroy).
       - name: 'E2E conventions'
         mode: 'warning'
         instructions: |

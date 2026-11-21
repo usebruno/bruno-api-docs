@@ -10,10 +10,16 @@ how to write the code; this file says where things live and why. Paths are relat
 embedded playground that sends real requests. Think of it as a small API client, not a document
 viewer.
 
-It is not published to npm. It ships as a standalone CDN bundle built by
-`bruno-api-docs/vite.config.standalone.ts`. A host page calls
-`Bruno.apiDocs(target, { content, ... })` and gets back an object with `updateCollection`,
-`updateOptions` and `destroy`.
+It is not published to npm. It ships as standalone CDN bundles built by
+`bruno-api-docs/vite.config.standalone.ts`. A host page renders one of two things into a target:
+
+- `Bruno.apiDocs(target, { content, ... })`: the docs, with the playground behind Try. Returns
+  `updateCollection`, `updateOptions` and `destroy`.
+- `Bruno.apiPlayground(target, { content })`: only the playground (sidebar, request, response),
+  filling the target. Returns `updateCollection` and `destroy`. Its routing is in memory, so it
+  never reads or writes the host page URL. The theme is the reader's saved one, else the system's.
+
+Both take the same `content`: an object, a YAML or JSON string, a `File` or an `http(s)` URL.
 
 ## Packages
 
@@ -24,16 +30,17 @@ keeps that dependency from tripping its ignored-package check.
 
 | Package | Folder | What lives there |
 |---|---|---|
-| `@usebruno/api-docs` | `bruno-api-docs/` | The docs view (pages, sidebar, search, topbar), the playground dock shell (`bruno-api-docs/src/components/Playground/`), the standalone CDN entry, the dev entry and all e2e. |
-| `@usebruno/api-playground` | `bruno-api-playground/` | `PlaygroundBody` and everything under it, the playground's own state (`bruno-api-playground/src/state/`), the request runner (`bruno-api-playground/src/runner/`), the QuickJS scripting (`bruno-api-playground/src/scripting/`), the libraries bundle and the CDN build of the playground. |
-| `@usebruno/api-shared` | `bruno-shared/` | What both need: session, document, observable, routing, theme and styles (`gen:theme`), ui primitives, shared components, hooks, utils and the unit test utils. |
+| `@usebruno/api-docs` | `bruno-api-docs/` | The docs view (pages, sidebar, search, topbar), the playground dock shell (`bruno-api-docs/src/components/Playground/`), the `api-docs.js` entry, the dev entry, the standalone build config and all e2e. |
+| `@usebruno/api-playground` | `bruno-api-playground/` | `PlaygroundBody` and everything under it, the full-size `StandalonePlayground` view, the playground's own state (`bruno-api-playground/src/state/`), the request runner (`bruno-api-playground/src/runner/`), the QuickJS scripting (`bruno-api-playground/src/scripting/`), the libraries bundle, the CDN build of the lazy playground view and the `api-playground.js` entry (`bruno-api-playground/src/standalone.ts`). |
+| `@usebruno/api-shared` | `bruno-shared/` | What both need: the collection shell (loader, session, document, variable resolver), the `Bruno.apiPlayground` mount, session, document, observable, routing, theme and styles (`gen:theme`), ui primitives, shared components, hooks, utils and the unit test utils. |
 
 ### The boundary
 
 - Shared imports nothing from docs or playground.
 - Playground imports only from shared, never from docs.
 - Docs imports playground types only. The one value import is the lazy
-  `import('@usebruno/api-playground')` in `bruno-api-docs/src/components/Playground/load.ts`.
+  `import('@usebruno/api-playground')` in `bruno-api-docs/src/components/Playground/load.ts`,
+  used by the dock shell for Try and by `standalone.ts` for `Bruno.apiPlayground`.
 
 ESLint enforces all three with `no-restricted-imports` in the repo root `eslint.config.mjs`.
 The rule does not see dynamic `import()`, which is why the one lazy import passes.
@@ -47,10 +54,13 @@ single shared barrel, because it would load Monaco eagerly.
 
 | Entry | What it does |
 |---|---|
-| `bruno-api-docs/src/standalone.ts` | The shipped bundle. Defines `Bruno.apiDocs` (and the deprecated `window.OpenCollection`), parses string content, renders `<OpenCollection>` into the target. `updateCollection`/`updateOptions` re-render with new props. |
+| `bruno-api-docs/src/standalone.ts` | `api-docs.js`. Defines `Bruno.apiDocs` (and the deprecated `window.OpenCollection`), which renders `<OpenCollection>` into the target; `updateCollection`/`updateOptions` re-render with new props. Also defines `Bruno.apiPlayground`, which lazy-loads the playground view the same way Try does. |
+| `bruno-api-playground/src/standalone.ts` | `api-playground.js`. Defines only `Bruno.apiPlayground`, with the playground view bundled in. |
 | `bruno-api-docs/src/dev.tsx` | `npm run dev`. Mounts the sample collection, or a fixture from `bruno-api-docs/src/e2eFixtures/` via `?fixture=`. Also reads `?themeMode`, `?hideThemeSwitcher`, `?hidePlayground`, `?nogit`. e2e runs against this. |
-| `bruno-api-docs/src/components/OpenCollection/OpenCollection.tsx` | The root component both entries render. Owns the session, the loader and the router. |
-| `bruno-api-playground/src/index.ts` | The playground's only export: `PlaygroundBody` as the default. |
+| `bruno-api-docs/src/components/OpenCollection/OpenCollection.tsx` | The docs root: `HashRouter`, the collection shell, `AppShell`. |
+| `bruno-shared/src/utils/standalone.tsx` | `mountApiPlayground`, what both `Bruno.apiPlayground`s call: `MemoryRouter`, the collection shell, the playground view. Also the string parsing and Inter font both entries use. |
+| `bruno-shared/src/components/CollectionShell/CollectionShell.tsx` | The shell both roots render: one session per mount, the loader (`useCollectionLoader.ts` next to it) with its Loading and error states, then `DocumentProvider` and the variable resolver over the document. The router is the root's choice. |
+| `bruno-api-playground/src/index.ts` | The lazy playground view: `PlaygroundBody` as the default (the dock shell renders it) and `StandalonePlayground` (what `Bruno.apiPlayground` renders). |
 
 ## How the playground loads
 
@@ -62,18 +72,19 @@ if it fails you see `playground-load-error`.
 - **Dev, unit tests, `npm run build`**: `load.ts` is a plain ESM `import()`. One module graph,
   so docs and playground share every module automatically.
 - **Standalone CDN build**: the `playground-cdn` plugin in
-  `bruno-api-docs/vite.config.standalone.ts` swaps `./load` for `./loadCdn`, copies the hashed
-  playground file from `bruno-api-playground/dist-cdn/` into `dist-standalone/`, and defines its
-  name as `__API_PLAYGROUND_FILE__`.
+  `bruno-api-docs/vite.config.standalone.ts` swaps `load.ts` for `loadCdn.ts` wherever it is
+  imported, copies the hashed `playground-view-<hash>.js` from `bruno-api-playground/dist-cdn/`
+  into `dist-standalone/`, and defines its name as `__API_PLAYGROUND_FILE__`.
 - `bruno-api-docs/src/components/Playground/loadCdn.ts` fills `window.Bruno.__rt`, adds a
   `<script>` for the playground file next to the bundle (`new URL(file, import.meta.url)`), and
-  resolves with `window.__brunoApiPlayground`. It loads once per page, even with two instances.
+  resolves with `window.__brunoApiPlayground`, the playground module (`default` and
+  `StandalonePlayground`). It loads once per page, even with two instances or both entries.
   A classic script works cross-origin and from `file://`, which is how exported HTML loads it.
   The script carries the nonce of the `api-docs.js` tag, so a nonce-only CSP allows it. A failed
   load, or one that never defines `window.__brunoApiPlayground` (an HTML error page served with
   200, or a file that throws), removes the script and clears the memo, and `Playground.tsx` swaps in a fresh `lazy`, so
   the next open retries.
-- `bruno-api-playground/vite.config.cdn.ts` builds the playground as an IIFE named
+- `bruno-api-playground/vite.config.cdn.ts` builds the playground view as an IIFE named
   `__brunoApiPlayground`. Its externals are read from `Bruno.__rt`. The one list of them, name to
   import specifier, is `bruno-shared/src/utils/cdnExternals.ts`: react, react-dom,
   react/jsx-runtime, react-router-dom, and the shared session, document, variable resolver,
@@ -104,10 +115,16 @@ Known limits:
   shared modules.
 - Under an AMD loader `document.currentScript` is null, so the playground URL falls back to
   `document.baseURI`.
+- `Bruno.apiPlayground` from `api-docs.js` has no load-error view and no retry: if the playground
+  file fails to load, React drops the tree and the target stays empty. `api-playground.js` has
+  nothing to load.
 
 ## Load pipeline
 
-`bruno-api-docs/src/components/OpenCollection/OpenCollection.tsx`, `useCollectionLoader`:
+`bruno-shared/src/components/CollectionShell/useCollectionLoader.ts`, run by the collection shell
+for both entries. String content is first parsed by `parseContent`
+(`bruno-shared/src/utils/standalone.tsx`) in the standalone entries; a string that parses to
+a URL or a plain scalar falls through to the loader.
 
 1. Input is an object, a YAML/JSON string, a `File`, or an `http(s)` URL (fetched).
 2. Text is parsed as YAML, then JSON as a fallback.
@@ -147,10 +164,11 @@ One owner per fact. Everything else reads it or derives it.
 | Working copy (playground edits) | playground, `bruno-api-playground/src/state/workspace.ts` | yes | no | replaced when the playground next opens (immediately if it is open), edits dropped |
 | Responses | playground workspace | yes | no | stay, but keyed by old uuids |
 | Run starts | playground workspace + `bruno-shared/src/session/playgroundRuns.ts` | no, close aborts runs | no | n/a |
-| Playground deep link: `pg`, `dock`, `pgReq`, `pgEx` | URL query, `bruno-shared/src/utils/playgroundDock.ts` | no, close clears all four | yes | kept |
+| Playground deep link: `pg`, `dock`, `pgReq`, `pgEx` | URL query (in memory under `Bruno.apiPlayground`), `bruno-shared/src/utils/playgroundDock.ts` | no, close clears all four | yes | kept |
 
-The session is created once per `<OpenCollection>` mount (`bruno-shared/src/session/session.tsx`),
-so two instances on one page don't share state. Session pieces are small observables
+The session is created once per mount by the collection shell
+(`bruno-shared/src/components/CollectionShell/CollectionShell.tsx`, `bruno-shared/src/session/session.tsx`),
+so two instances on one page don't share state, whichever entry made them. Session pieces are small observables
 (`bruno-shared/src/observable/observable.ts`) read with `useObservable`. The workspace is a set of
 pure updaters plus one observable, and deep-freezes its state.
 
@@ -158,7 +176,7 @@ pure updaters plus one observable, and deep-freezes its state.
 
 Docs and playground each own their state. Shared holds only what crosses:
 
-- **Document**: docs creates it; both read it. The playground reads it only to seed itself and
+- **Document**: the collection shell creates it; both read it. The playground reads it only to seed itself and
   for the nav model (slugs).
 - **Env** (active env name, show vars): one per session, so Try opens with the env picked in
   the header, and a switch in either place shows in both. Both env switchers list the
@@ -173,8 +191,8 @@ Docs and playground each own their state. Shared holds only what crosses:
   run when the playground closes. When the playground next opens it drops run starts whose run
   is no longer in flight, so a reopened request is not stuck loading.
 
-`OpenCollection` renders `SessionProvider`, `DocumentProvider` and a variable resolver over the
-document. `PlaygroundBody` renders its own resolver over the working copy, so playground
+The collection shell renders `SessionProvider`, `DocumentProvider` and a variable resolver over
+the document. `PlaygroundBody` renders its own resolver over the working copy, so playground
 `{{var}}` sites resolve against its edits. In the CDN build the session, document, resolver and
 run modules are externals, so both sides share them; the playground's state modules are bundled
 only in the playground file, which is fine because that file is evaluated once per page, so
@@ -182,9 +200,11 @@ there is one `WeakMap`, keyed by each instance's session.
 
 ## Routing
 
-- `HashRouter`. Docs pages live in the hash path; playground state lives in the query string,
+- Docs: `HashRouter`. Docs pages live in the hash path; playground state lives in the query string,
   so moving between docs pages keeps the playground open
   (`bruno-api-docs/src/hooks/useDocsNavigate.ts`).
+- `Bruno.apiPlayground`: `MemoryRouter`. The same `pgReq`/`pgEx` query state lives in memory, so
+  the playground never touches the host page URL and a reload starts with nothing selected.
 - Slugs come from item names (`bruno-shared/src/routing/slug.ts`). Overview is `#/`; built-ins
   start with `~` (`~environments`) so they can't collide with user content.
 - The nav model (order, slugs, prev/next, uuid → slug) is built once per document in
@@ -245,27 +265,42 @@ flow back into the workspace.
 ## Build outputs
 
 `npm run build:standalone` in docs runs the playground's `build:cdn` first, then the docs
-standalone build. It writes `bruno-api-docs/dist-standalone/`:
+standalone build, then the same config with `--mode playground` for `api-playground.js`. It
+writes `bruno-api-docs/dist-standalone/`:
 
 | File | Size (gzip) | What |
 |---|---|---|
-| `api-docs.js` | 4.8 MB (1.5 MB) | UMD, what hosts load as a classic script. Docs, shell, shared. |
+| `api-docs.js` | 4.8 MB (1.5 MB) | UMD, what hosts load as a classic script. Docs, shell, shared; defines `Bruno.apiDocs` and `Bruno.apiPlayground`. |
 | `api-docs.esm.js` | 6.8 MB (1.8 MB) | ES module build of the same. |
-| `api-docs.css` | 95 KB (14 KB) | All styles. |
-| `api-playground-<hash>.js` | 4.5 MB (1.5 MB) | The playground, loaded on first open. |
+| `api-docs.css` | 95 KB (14 KB) | All styles, for both entries. |
+| `playground-view-<hash>.js` | 4.4 MB (1.5 MB) | The playground view, loaded by `api-docs.js` on first open or first `Bruno.apiPlayground`. |
+| `api-playground.js` | 8.3 MB (2.7 MB) | UMD classic script. Shell, shared and playground, no docs code; defines only `Bruno.apiPlayground`. |
 
-Sizes are from this branch's build and will drift. The playground file name is hashed, so a new
-build gives a new name.
+Sizes are from this branch's build and will drift. The playground view's name is hashed, so a new
+build gives a new name. `api-playground.js` is bigger than the view because it carries its own
+React, router and the shared modules the view takes from `api-docs.js`.
+
+What a host page loads:
+
+- Docs, optionally with `Bruno.apiPlayground` too: `api-docs.css` and `api-docs.js`. The
+  playground view comes next to `api-docs.js` on its own.
+- Only the playground: `api-docs.css` and `api-playground.js`. There is no separate playground
+  stylesheet: Tailwind scans all three packages into the one file, so it would be the same file.
+  Give the target a height; the playground fills it.
+
+Loading both scripts on one page works: each adds its entries to `window.Bruno` and keeps the
+rest, including `Bruno.build`. They do not share React, so each instance uses the copy of the
+script that mounted it.
 
 ### Deploy requirement
 
 The builder (`teambruno/bruno-api-docs-builder`, `deploy-latest.yml`) today syncs every file
 with a one-year cache and `--delete`. After the split that breaks: a browser holding an old
-`api-docs.js` asks for an old `api-playground-<hash>.js` that `--delete` removed, and the
+`api-docs.js` asks for an old `playground-view-<hash>.js` that `--delete` removed, and the
 playground fails to load. Before this ships, the builder must:
 
-- upload `api-playground-*.js` as immutable and never delete old ones,
-- serve `api-docs.js`, `api-docs.esm.js` and `api-docs.css` with a short cache,
+- upload `playground-view-*.js` as immutable and never delete old ones,
+- serve `api-docs.js`, `api-docs.esm.js`, `api-docs.css` and `api-playground.js` with a short cache,
 - keep `--delete` for everything else, with those files excluded.
 
 ## Tests
@@ -274,15 +309,18 @@ playground fails to load. Before this ships, the builder must:
 |---|---|---|
 | Unit (Vitest, node) | `npm run test:run` at the root runs every package. One package: `npm run test:run -w @usebruno/api-shared` (or `api-playground`, `api-docs`). | Each package's own specs, next to its code. Shared: session, document, routing, theme, utils. Playground: state, runner, scripting, playground views. Docs: pages, hooks, `standalone.ts`, `dev.tsx`, `loadCdn.ts`. Components render as static markup. |
 | Main e2e (Playwright) | `npm run test:e2e` in docs | The app in a browser via `npm run dev` plus `bruno-api-docs/e2e/server/test-server.mjs` on a second origin, so CORS is real. Config: `bruno-api-docs/playwright.config.ts`. |
-| Standalone e2e | `npm run test:e2e:standalone` in docs | The built bundle as a host page uses it: `Bruno.apiDocs`, `updateCollection`, `updateOptions`, `destroy`, two instances. Config: `bruno-api-docs/playwright.standalone.config.ts`, specs in `bruno-api-docs/e2e/tests/standalone/`. |
+| Standalone e2e | `npm run test:e2e:standalone` in docs | The built bundles as a host page uses them: `Bruno.apiDocs`, `updateCollection`, `updateOptions`, `destroy`, two instances; `Bruno.apiPlayground` from `api-playground.js` alone and from `api-docs.js` (`bruno-api-docs/e2e/tests/standalone/api-playground.spec.ts`). Config: `bruno-api-docs/playwright.standalone.config.ts`, specs in `bruno-api-docs/e2e/tests/standalone/`. |
 
-Two standalone specs guard the split:
+Three standalone specs guard the split:
 
 - `bruno-api-docs/e2e/tests/standalone/exported-html.spec.ts` loads HTML files shaped like
   Bruno's "Generate Documentation" output (old and new mount call) with the bundle on another
   origin and no CORS. It catches a bundle that stops working as a cross-origin classic script.
 - `bruno-api-docs/e2e/tests/standalone/playground-lazy-load.spec.ts` checks the playground file
   loads only on Try or a deep link, once per page, and that a missing file shows the load error.
+- `bruno-api-docs/e2e/tests/standalone/api-playground.spec.ts` checks a page with only
+  `api-playground.js` never requests `api-docs.js`, and that both scripts on one page keep both
+  entries.
 
 All e2e lives in docs. Unit specs live with their code. `npm run test:e2e` runs both Playwright
 configs. Locally, run only the specs your change touches; CI (repo root

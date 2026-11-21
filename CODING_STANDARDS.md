@@ -173,7 +173,8 @@ Three packages; `ARCHITECTURE.md` says what lives in each.
   and the bundle file names stay as they are. Renaming a key silently drops every user's
   saved theme, env and sidebar widths.
 - **Public API stays stable.** `Bruno.apiDocs(target, { content })` and `updateCollection`,
-  `updateOptions`, `destroy`. see: `bruno-api-docs/src/standalone.ts`
+  `updateOptions`, `destroy`; `Bruno.apiPlayground(target, { content })` and `updateCollection`,
+  `destroy`. see: `bruno-api-docs/src/standalone.ts`, `bruno-api-playground/src/standalone.ts`
 - **Changesets.** Every change under any `packages/*/src` carries a changeset for
   `@usebruno/api-docs`: `npm run changeset` at the root. Shared and playground are private and
   ship inside it. see: `.changeset/config.json`

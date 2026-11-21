@@ -1,7 +1,9 @@
 # AGENTS.md
 
 `@usebruno/api-docs` renders a Bruno OpenCollection as API docs with a playground that sends
-real requests. It ships as a CDN bundle (`Bruno.apiDocs(target, { content })`), not on npm.
+real requests. It ships as CDN bundles, not on npm, with two render modes: the docs
+(`Bruno.apiDocs(target, { content })`, `api-docs.js`) and the playground alone
+(`Bruno.apiPlayground(target, { content })`, `api-playground.js` or `api-docs.js`).
 The code lives in three workspaces under `packages/`; the repo root holds lint, changesets and CI.
 
 **Read `ARCHITECTURE.md` before changing code. Follow `CODING_STANDARDS.md`.** Its core rule:
@@ -10,11 +12,13 @@ the simplest code that works, abstractions only when required.
 ## Where code goes
 
 - `packages/bruno-api-docs` (`@usebruno/api-docs`): docs pages, sidebar, search, the playground
-  dock shell, the standalone and dev entries, all e2e.
+  dock shell, the `api-docs.js` and dev entries, the standalone build config, all e2e.
 - `packages/bruno-api-playground` (`@usebruno/api-playground`, private): `PlaygroundBody` and below,
-  the runner, QuickJS scripting. Anything that runs requests or scripts goes here.
+  `StandalonePlayground`, the runner, QuickJS scripting, the `api-playground.js` entry. Anything
+  that runs requests or scripts goes here.
 - `packages/bruno-shared` (`@usebruno/api-shared`, private): session, document, routing, theme,
-  styles, ui primitives, shared components, test utils. If docs and playground both need it, it goes here.
+  styles, ui primitives, shared components, the collection shell both entries render, test utils.
+  If docs and playground both need it, it goes here.
 
 Boundary (lint): shared imports neither; playground imports only shared; docs only type-imports
 the playground, apart from the one lazy `import()` in

@@ -8,6 +8,9 @@ const SCRIPT_HEADER = 'pre-request';
 
 type Target = 'first' | 'second';
 
+const IPHONE_UA
+  = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
+
 const collection = {
   opencollection: '1.0.0',
   info: { name: 'Playground Only' },
@@ -190,6 +193,32 @@ test.describe('Bruno.apiPlayground from api-playground.js', () => {
 
     await expect(second.urlInput).toHaveValue('{{host}}/other');
     await expect(first.urlInput).toHaveValue('https://edited.example.com/echo');
+  });
+});
+
+test.describe('Bruno.apiPlayground on a phone', () => {
+  test.use({ userAgent: IPHONE_UA, viewport: { width: 375, height: 700 } });
+
+  test('the sidebar is an overlay behind a toggle, and the picked request can be sent', async ({ apiPlaygroundPage }) => {
+    await apiPlaygroundPage.goto();
+    await apiPlaygroundPage.mount('first', collection);
+    const first = apiPlaygroundPage.instance('first');
+    await expect(first.root).toBeVisible();
+    await expect(first.sidebar).toHaveCount(0);
+
+    await first.sidebarToggle.click();
+    await expect(first.sidebar).toBeVisible();
+    await first.treeItem('Echo').click();
+
+    await expect(first.sidebar).toHaveCount(0);
+    await expect(first.urlInput).toBeVisible();
+    await first.responsePane.send();
+    await expect(first.responsePane.status).toHaveText('200 OK');
+
+    await first.sidebarToggle.click();
+    await expect(first.sidebar).toBeVisible();
+    await first.sidebarBackdrop.click({ position: { x: 360, y: 300 } });
+    await expect(first.sidebar).toHaveCount(0);
   });
 });
 

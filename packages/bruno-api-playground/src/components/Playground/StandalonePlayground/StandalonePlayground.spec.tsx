@@ -33,5 +33,6 @@ describe('StandalonePlayground', () => {
     expect(queryByTestId(root, 'playground-view')).not.toBeNull();
     expect(queryByTestId(root, 'playground-header')).toBeNull();
     expect(queryByTestId(root, 'playground-sidebar-backdrop')).toBeNull();
+    expect(queryByTestId(root, 'playground-sidebar-toggle')).toBeNull();
   });
 });

@@ -3,7 +3,6 @@ import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import CollectionShell from '../components/CollectionShell/CollectionShell';
 import type { CollectionSource } from '../components/CollectionShell/useCollectionLoader';
-import { parseCollectionContent } from './yamlUtils';
 
 export const injectInterFont = () => {
   if (document.querySelector('link[href*="fonts.googleapis.com/css2?family=Inter"]')) return;
@@ -25,16 +24,6 @@ export const injectInterFont = () => {
   });
 };
 
-export const parseContent = (content: CollectionSource): CollectionSource => {
-  if (typeof content !== 'string') return content;
-  try {
-    return parseCollectionContent(content);
-  } catch (error) {
-    console.error('Failed to parse collection:', error);
-    throw new Error(`Invalid collection format: ${error instanceof Error ? error.message : 'Unknown error'}`);
-  }
-};
-
 export interface ApiPlaygroundOptions {
   content: CollectionSource;
 }
@@ -52,8 +41,7 @@ export const mountApiPlayground = (
   if (!target) throw new Error('Target element is required');
   injectInterFont();
   let root: Root | null = createRoot(target);
-  const render = (next: CollectionSource) => {
-    const collection = parseContent(next);
+  const render = (collection: CollectionSource) => {
     root?.render(
       <MemoryRouter useTransitions={false}>
         <CollectionShell collection={collection}>

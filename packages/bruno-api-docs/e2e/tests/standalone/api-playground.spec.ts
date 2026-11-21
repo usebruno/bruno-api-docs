@@ -163,6 +163,16 @@ test.describe('Bruno.apiPlayground from api-playground.js', () => {
     await expect(apiPlaygroundPage.instance('first').treeItems).toHaveText(['GETEcho', 'POSTOther']);
   });
 
+  test('invalid YAML shows the load error in the target, and destroy still empties it', async ({ apiPlaygroundPage }) => {
+    await apiPlaygroundPage.mount('first', 'a: [1, 2');
+
+    await expect(apiPlaygroundPage.target('first')).toHaveText('Error: Failed to parse collection as YAML or JSON');
+
+    await apiPlaygroundPage.destroy('first');
+
+    await expect(apiPlaygroundPage.target('first')).toBeEmpty();
+  });
+
   test('two instances keep their own selection and edits', async ({ apiPlaygroundPage }) => {
     await apiPlaygroundPage.mount('first', collection);
     await apiPlaygroundPage.mount('second', collection);

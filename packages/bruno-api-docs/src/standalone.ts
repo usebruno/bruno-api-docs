@@ -5,12 +5,9 @@ import '@usebruno/api-shared/styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
 import Prism from '@usebruno/api-shared/utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import {
-  injectInterFont,
-  mountApiPlayground,
-  parseContent,
-  type ApiPlaygroundOptions
-} from '@usebruno/api-shared/utils/standalone';
+import { injectInterFont, mountApiPlayground, type ApiPlaygroundOptions } from '@usebruno/api-shared/utils/standalone';
+import { parseCollectionContent } from '@usebruno/api-shared/utils/yamlUtils';
+import type { CollectionSource } from '@usebruno/api-shared/components/CollectionShell/useCollectionLoader';
 import ApiPlaygroundView from './components/Playground/ApiPlaygroundView';
 import type { ThemeState } from '@usebruno/api-shared/theme/types';
 import { isEmpty, isPlainObject } from 'lodash-es';
@@ -36,6 +33,16 @@ export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | '
 }
 
 export type { ApiPlaygroundOptions, ApiPlaygroundInstance } from '@usebruno/api-shared/utils/standalone';
+
+const parseContent = (content: CollectionSource): CollectionSource => {
+  if (typeof content !== 'string') return content;
+  try {
+    return parseCollectionContent(content);
+  } catch (error) {
+    console.error('Failed to parse collection:', error);
+    throw new Error(`Invalid collection format: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
 
 export class OpenCollectionRenderer {
   private root: Root | null = null;

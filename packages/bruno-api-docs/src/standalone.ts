@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { lazy } from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import '@usebruno/api-shared/styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
 import Prism from '@usebruno/api-shared/utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import type { OpenCollection as IOpenCollection } from '@opencollection/types';
-import { parseCollectionContent } from '@usebruno/api-shared/utils/yamlUtils';
+import {
+  injectInterFont,
+  mountApiPlayground,
+  parseContent,
+  type ApiPlaygroundOptions
+} from '@usebruno/api-shared/utils/standalone';
+import { loadPlayground } from './components/Playground/load';
 import type { ThemeState } from '@usebruno/api-shared/theme/types';
 import { isEmpty, isPlainObject } from 'lodash-es';
 
@@ -30,6 +35,8 @@ export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | '
   repositoryUrl?: string;
 }
 
+export type { ApiPlaygroundOptions, ApiPlaygroundInstance } from '@usebruno/api-shared/utils/standalone';
+
 export class OpenCollectionRenderer {
   private root: Root | null = null;
   private options: OpenCollectionOptions;
@@ -39,49 +46,14 @@ export class OpenCollectionRenderer {
     this.init();
   }
 
-  private injectInterFont() {
-    // Only inject if not already present
-    if (!document.querySelector('link[href*="fonts.googleapis.com/css2?family=Inter"]')) {
-      const links = [
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap'
-        }
-      ];
-
-      links.forEach((linkProps) => {
-        const link = document.createElement('link');
-        Object.entries(linkProps).forEach(([key, value]) => {
-          link.setAttribute(key, value);
-        });
-        document.head.appendChild(link);
-      });
-    }
-  }
-
   private init() {
     if (!this.options.target) {
       throw new Error('Target element is required');
     }
 
-    this.injectInterFont();
+    injectInterFont();
     this.root = createRoot(this.options.target);
     this.render();
-  }
-
-  private convertCollection(opencollection: any): IOpenCollection {
-    if (typeof opencollection === 'string') {
-      try {
-        return parseCollectionContent(opencollection) as IOpenCollection;
-      } catch (error) {
-        console.error('Failed to parse collection:', error);
-        throw new Error(`Invalid collection format: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-
-    return opencollection as IOpenCollection;
   }
 
   private createLogoElement(): React.ReactNode {
@@ -97,7 +69,7 @@ export class OpenCollectionRenderer {
   private render() {
     if (!this.root) return;
 
-    const collection = this.convertCollection(this.options.opencollection);
+    const collection = parseContent(this.options.opencollection);
 
     this.root.render(React.createElement(OpenCollection, {
       collection,
@@ -134,6 +106,10 @@ export class OpenCollectionRenderer {
 
 export default OpenCollectionRenderer;
 
+const StandalonePlayground = lazy(() =>
+  loadPlayground().then((playground) => ({ default: playground.StandalonePlayground }))
+);
+
 let warnedDeprecated = false;
 
 class DeprecatedOpenCollection extends OpenCollectionRenderer {
@@ -159,6 +135,8 @@ if (typeof window !== 'undefined') {
         opencollection: content,
         gitCollectionUrl: repositoryUrl ?? gitCollectionUrl,
         ...options
-      })
+      }),
+    apiPlayground: (target: HTMLElement, options: ApiPlaygroundOptions) =>
+      mountApiPlayground(target, options, StandalonePlayground)
   };
 }

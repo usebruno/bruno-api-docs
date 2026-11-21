@@ -43,7 +43,7 @@ describe('loadPlayground from the CDN', () => {
     const first = loadPlayground();
     const second = loadPlayground();
     const Body = () => null;
-    globals.__brunoApiPlayground = Body;
+    globals.__brunoApiPlayground = { default: Body };
     scripts[0].onload!();
 
     expect(second).toBe(first);
@@ -76,7 +76,7 @@ describe('loadPlayground from the CDN', () => {
 
     const retried = loadPlayground();
     const Body = () => null;
-    globals.__brunoApiPlayground = Body;
+    globals.__brunoApiPlayground = { default: Body };
     scripts[1].onload!();
 
     expect(scripts[0].remove).toHaveBeenCalledOnce();
@@ -90,7 +90,7 @@ describe('loadPlayground from the CDN', () => {
 
     const retried = loadPlayground();
     const Body = () => null;
-    globals.__brunoApiPlayground = Body;
+    globals.__brunoApiPlayground = { default: Body };
     scripts[1].onload!();
 
     expect(scripts).toHaveLength(2);

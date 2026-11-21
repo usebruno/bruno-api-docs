@@ -45,6 +45,7 @@ export default defineConfig({
       external: (id) => runtimeModules.has(id),
       output: {
         entryFileNames: 'playground-view-[hash].js',
+        exports: 'named',
         interop: 'esModule',
         globals: (id) => `Bruno.__rt.${runtimeModules.get(id)}`
       }

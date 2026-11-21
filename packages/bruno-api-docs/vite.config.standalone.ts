@@ -10,11 +10,16 @@ const playgroundDir = resolve(__dirname, '../bruno-api-playground/dist-cdn');
 const playgroundFile = readdirSync(playgroundDir).find((name) => /^playground-view-.+\.js$/.test(name));
 if (!playgroundFile) throw new Error(`No playground-view-*.js in ${playgroundDir}; run build:cdn in bruno-api-playground`);
 
+const loadFile = resolve(__dirname, 'src/components/Playground/load.ts');
+const loadCdnFile = resolve(__dirname, 'src/components/Playground/loadCdn.ts');
+
 const playgroundCdn = (): Plugin => ({
   name: 'playground-cdn',
   enforce: 'pre',
-  resolveId(id, importer) {
-    if (id === './load' && importer?.endsWith('/Playground/Playground.tsx')) return this.resolve('./loadCdn', importer);
+  async resolveId(id, importer) {
+    if (!id.endsWith('/load')) return;
+    const resolved = await this.resolve(id, importer, { skipSelf: true });
+    if (resolved?.id === loadFile) return loadCdnFile;
   },
   generateBundle() {
     this.emitFile({ type: 'asset', fileName: playgroundFile, source: readFileSync(resolve(playgroundDir, playgroundFile)) });

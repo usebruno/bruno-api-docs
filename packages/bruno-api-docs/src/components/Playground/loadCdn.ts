@@ -16,7 +16,7 @@ type PlaygroundModule = typeof Playground;
 
 type CdnWindow = Window & {
   Bruno: Record<string, unknown>;
-  __brunoApiPlayground?: PlaygroundModule['default'];
+  __brunoApiPlayground?: PlaygroundModule;
 };
 
 const bundleUrl = import.meta.url;
@@ -48,7 +48,7 @@ export const loadPlayground = (): Promise<PlaygroundModule> =>
       script.remove();
       reject(new Error(`Failed to load ${script.src}`));
     };
-    script.onload = () => (w.__brunoApiPlayground ? resolve({ default: w.__brunoApiPlayground }) : fail());
+    script.onload = () => (w.__brunoApiPlayground ? resolve(w.__brunoApiPlayground) : fail());
     script.onerror = fail;
     document.head.appendChild(script);
   }));

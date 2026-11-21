@@ -136,6 +136,14 @@ test.describe('Bruno.apiPlayground from api-playground.js', () => {
     await expect(first.treeItems).toHaveText(['GETPing']);
   });
 
+  test('takes the theme it is given, over a theme saved by a docs page', async ({ page, apiPlaygroundPage }) => {
+    await page.evaluate(() => localStorage.setItem('oc-docs.theme', JSON.stringify({ variant: 'default', mode: 'light' })));
+    await apiPlaygroundPage.mount('first', collection, { mode: 'dark' });
+    await expect(apiPlaygroundPage.instance('first').root).toBeVisible();
+
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'default-dark');
+  });
+
   test('destroy empties the target', async ({ apiPlaygroundPage }) => {
     await apiPlaygroundPage.mount('first', collection);
     await expect(apiPlaygroundPage.instance('first').root).toBeVisible();

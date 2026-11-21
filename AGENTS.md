@@ -3,7 +3,7 @@
 `@usebruno/api-docs` renders a Bruno OpenCollection as API docs with a playground that sends
 real requests. It ships as CDN bundles, not on npm, with two render modes: the docs
 (`Bruno.apiDocs(target, { content })`, `api-docs.js`) and the playground alone
-(`Bruno.apiPlayground(target, { content })`, `api-playground.js` or `api-docs.js`).
+(`Bruno.apiPlayground(target, { content, theme? })`, `api-playground.js` or `api-docs.js`).
 The code lives in three workspaces under `packages/`; the repo root holds lint, changesets and CI.
 
 **Read `ARCHITECTURE.md` before changing code. Follow `CODING_STANDARDS.md`.** Its core rule:

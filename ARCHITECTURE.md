@@ -15,10 +15,11 @@ It is not published to npm. It ships as standalone CDN bundles built by
 
 - `Bruno.apiDocs(target, { content, ... })`: the docs, with the playground behind Try. Returns
   `updateCollection`, `updateOptions` and `destroy`.
-- `Bruno.apiPlayground(target, { content })`: only the playground (sidebar, request, response),
+- `Bruno.apiPlayground(target, { content, theme? })`: only the playground (sidebar, request, response),
   filling the target, Loading and error states included. Returns `updateCollection` and `destroy`;
   `destroy` aborts that instance's in-flight requests and no other's. Its routing is in memory, so it
-  never reads or writes the host page URL. The theme is the reader's saved one, else the system's.
+  never reads or writes the host page URL. There is no theme toggle, so the host's `theme` applies,
+  else the system's (a saved docs choice is ignored, as with `hideThemeSwitcher` in `apiDocs`).
   On a phone (`useIsMobilePhone`, the same check the docs mobile dock uses) the sidebar is an
   overlay behind a `playground-sidebar-toggle`, as in the docs mobile dock; elsewhere it stays open.
 

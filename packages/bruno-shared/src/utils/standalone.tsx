@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import CollectionShell from '../components/CollectionShell/CollectionShell';
 import type { CollectionSource } from '../components/CollectionShell/useCollectionLoader';
+import type { ThemeState } from '../theme/types';
 
 export const injectInterFont = () => {
   if (document.querySelector('link[href*="fonts.googleapis.com/css2?family=Inter"]')) return;
@@ -26,6 +27,7 @@ export const injectInterFont = () => {
 
 export interface ApiPlaygroundOptions {
   content: CollectionSource;
+  theme?: Partial<ThemeState>;
 }
 
 export interface ApiPlaygroundInstance {
@@ -35,7 +37,7 @@ export interface ApiPlaygroundInstance {
 
 export const mountApiPlayground = (
   target: HTMLElement,
-  { content }: ApiPlaygroundOptions,
+  { content, theme }: ApiPlaygroundOptions,
   View: React.ComponentType
 ): ApiPlaygroundInstance => {
   if (!target) throw new Error('Target element is required');
@@ -44,7 +46,7 @@ export const mountApiPlayground = (
   const render = (collection: CollectionSource) => {
     root?.render(
       <MemoryRouter useTransitions={false}>
-        <CollectionShell collection={collection} heightClass="h-full">
+        <CollectionShell collection={collection} theme={theme} hideThemeSwitcher heightClass="h-full">
           {() => <View />}
         </CollectionShell>
       </MemoryRouter>

@@ -63,12 +63,15 @@ export class ApiPlaygroundPage extends BasePage {
     };
   }
 
-  async mount(id: Target, content: unknown): Promise<void> {
-    await this.page.evaluate(({ id, content }) => {
+  async mount(id: Target, content: unknown, theme?: { variant?: string; mode?: string }): Promise<void> {
+    await this.page.evaluate(({ id, content, theme }) => {
       const w = window as unknown as HostWindow;
       w.instances ??= {};
-      w.instances[id] = w.Bruno.apiPlayground(document.getElementById(id)!, { content: content as Content });
-    }, { id, content });
+      w.instances[id] = w.Bruno.apiPlayground(document.getElementById(id)!, {
+        content: content as Content,
+        ...(theme ? { theme: theme as never } : {})
+      });
+    }, { id, content, theme });
   }
 
   async mountDocs(id: Target, content: unknown): Promise<void> {

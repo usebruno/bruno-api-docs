@@ -36,28 +36,33 @@ const build = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')
     }
   },
-  plugins: [
-    react(),
-    playgroundCdn()
-  ],
+  plugins: mode === 'playground' ? [react()] : [react(), playgroundCdn()],
   define: {
     'process.env.NODE_ENV': '"production"',
     '__BRUNO_BUILD__': JSON.stringify(build),
     '__API_PLAYGROUND_FILE__': JSON.stringify(playgroundFile)
   },
   build: {
-    lib: {
-      entry: resolve(__dirname, 'src/standalone.ts'),
-      name: 'OpenCollectionPlayground',
-      fileName: (format) => format === 'umd' ? 'api-docs.js' : 'api-docs.esm.js',
-      formats: ['umd', 'es']
-    },
+    lib: mode === 'playground'
+      ? {
+          entry: resolve(__dirname, '../bruno-api-playground/src/standalone.ts'),
+          name: 'BrunoApiPlayground',
+          fileName: () => 'api-playground.js',
+          formats: ['umd']
+        }
+      : {
+          entry: resolve(__dirname, 'src/standalone.ts'),
+          name: 'OpenCollectionPlayground',
+          fileName: (format) => format === 'umd' ? 'api-docs.js' : 'api-docs.esm.js',
+          formats: ['umd', 'es']
+        },
+    emptyOutDir: mode !== 'playground',
     cssCodeSplit: false,
     rollupOptions: {
       output: {
@@ -87,4 +92,4 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.cjs'
   }
-}); 
+}));

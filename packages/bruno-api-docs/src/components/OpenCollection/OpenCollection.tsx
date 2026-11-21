@@ -1,184 +1,35 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React from 'react';
 import { HashRouter } from 'react-router-dom';
-import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
-import type { OpenCollection as IOpenCollection } from '@opencollection/types';
 import AppShell from '../AppShell/AppShell';
-import { parseYaml } from '@usebruno/api-shared/utils/yamlUtils';
-import { hydrateWithUUIDs } from '@usebruno/api-shared/utils/fileUtils';
-import { VariableResolverProvider } from '@usebruno/api-shared/hooks';
-import { DocumentProvider } from '@usebruno/api-shared/document/document';
-import { createObservable, useObservable } from '@usebruno/api-shared/observable/observable';
-import { createSession, SessionProvider, useSession, type Session } from '@usebruno/api-shared/session/session';
-import type { ThemeState } from '@usebruno/api-shared/theme/types';
-import { isEqual } from 'lodash-es';
-import { getApiDocsTheme } from '@usebruno/api-shared/utils/theme';
+import CollectionShell, { type CollectionShellProps } from '@usebruno/api-shared/components/CollectionShell/CollectionShell';
 
-const isFileInstance = (value: unknown): value is File =>
-  typeof File !== 'undefined' && value instanceof File;
-
-const parseCollectionContent = (content: string): OpenCollectionCollection => {
-  try {
-    return parseYaml(content) as OpenCollectionCollection;
-  } catch {
-    try {
-      return JSON.parse(content) as OpenCollectionCollection;
-    } catch {
-      throw new Error('Failed to parse collection as YAML or JSON');
-    }
-  }
-};
-
-interface LoadState {
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
-  sourceText: string | null;
-  document: OpenCollectionCollection | null;
-}
-
-const IDLE: LoadState = { status: 'idle', error: null, sourceText: null, document: null };
-
-interface ResolvedCollection {
-  collection: OpenCollectionCollection;
-  sourceText: string | null;
-}
-
-const resolveCollectionSource = async (
-  source: OpenCollectionCollection | string | File
-): Promise<ResolvedCollection> => {
-  if (isFileInstance(source)) {
-    const text = await source.text();
-    return { collection: parseCollectionContent(text), sourceText: text };
-  }
-
-  if (typeof source === 'string') {
-    if (source.startsWith('http://') || source.startsWith('https://')) {
-      const response = await fetch(source);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch collection: ${response.statusText}`);
-      }
-      const text = await response.text();
-      return { collection: parseCollectionContent(text), sourceText: text };
-    }
-
-    return { collection: parseCollectionContent(source), sourceText: source };
-  }
-
-  return { collection: source, sourceText: null };
-};
-
-export interface OpenCollectionProps {
-  collection: IOpenCollection | string | File;
+export interface OpenCollectionProps extends Omit<CollectionShellProps, 'children'> {
   logo?: React.ReactNode;
   gitCollectionUrl?: string;
-  theme?: Partial<ThemeState>;
-  hideThemeSwitcher?: boolean;
   hidePlayground?: boolean;
 }
 
-const useCollectionLoader = (collection: OpenCollectionProps['collection']): LoadState => {
-  const [loadState] = useState(() => createObservable<LoadState>({ initial: IDLE }));
-
-  useEffect(() => {
-    let isActive = true;
-
-    const load = async () => {
-      loadState.set({ ...loadState.get(), status: 'loading', error: null });
-
-      try {
-        const { collection: resolved, sourceText } = await resolveCollectionSource(collection);
-        if (!isActive) return;
-        loadState.set({ status: 'succeeded', error: null, sourceText, document: hydrateWithUUIDs(resolved) });
-      } catch (err) {
-        if (!isActive) return;
-        const message = err instanceof Error ? err.message : 'Failed to load API collection';
-        loadState.set({ ...IDLE, status: 'failed', error: message });
-      }
-    };
-
-    if (collection == null) {
-      loadState.set(IDLE);
-      return () => { isActive = false; };
-    }
-
-    if (isFileInstance(collection) || typeof collection === 'string') {
-      void load();
-    } else {
-      loadState.set({
-        status: 'succeeded',
-        error: null,
-        sourceText: null,
-        document: hydrateWithUUIDs(collection as OpenCollectionCollection)
-      });
-    }
-
-    return () => { isActive = false; };
-  }, [collection, loadState]);
-
-  return useObservable(loadState);
-};
-
-const OpenCollectionContent: React.FC<OpenCollectionProps> = ({
-  collection,
+const OpenCollection: React.FC<OpenCollectionProps> = ({
   logo,
   gitCollectionUrl,
-  theme,
-  hideThemeSwitcher,
-  hidePlayground = false
-}) => {
-  const session = useSession();
-
-  const lastThemeProp = useRef(theme);
-  const lastHideThemeSwitcherProp = useRef(hideThemeSwitcher);
-  useEffect(() => {
-    if (isEqual(theme, lastThemeProp.current) && hideThemeSwitcher === lastHideThemeSwitcherProp.current) return;
-    lastThemeProp.current = theme;
-    lastHideThemeSwitcherProp.current = hideThemeSwitcher;
-    session.theme.set(getApiDocsTheme(theme, hideThemeSwitcher));
-  }, [theme, session, hideThemeSwitcher]);
-
-  const { status: collectionStatus, error: collectionError, sourceText, document } = useCollectionLoader(collection);
-
-  const isLoading = collectionStatus === 'idle' || collectionStatus === 'loading';
-
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
-  }
-
-  if (collectionError || !document) {
-    return <div className="flex items-center justify-center h-screen text-red-500">Error: {collectionError}</div>;
-  }
-
-  return (
-    <DocumentProvider document={document}>
-      <VariableResolverProvider collection={document}>
+  hidePlayground = false,
+  ...shell
+}) => (
+  <HashRouter useTransitions={false}>
+    <CollectionShell {...shell}>
+      {(sourceText) => (
         <div className="oc-playground">
           <AppShell
             logo={logo}
             hidePlayground={hidePlayground}
-            hideThemeSwitcher={hideThemeSwitcher}
+            hideThemeSwitcher={shell.hideThemeSwitcher}
             gitCollectionUrl={gitCollectionUrl}
             collectionSourceText={sourceText}
           />
         </div>
-      </VariableResolverProvider>
-    </DocumentProvider>
-  );
-};
-
-const OpenCollection: React.FC<OpenCollectionProps> = (props) => {
-  const sessionRef = useRef<Session | null>(null);
-
-  if (!sessionRef.current) {
-    sessionRef.current = createSession({ theme: getApiDocsTheme(props.theme, props.hideThemeSwitcher) });
-  }
-
-  return (
-    <HashRouter useTransitions={false}>
-      <SessionProvider value={sessionRef.current}>
-        <OpenCollectionContent {...props} />
-      </SessionProvider>
-    </HashRouter>
-  );
-};
+      )}
+    </CollectionShell>
+  </HashRouter>
+);
 
 export default OpenCollection;

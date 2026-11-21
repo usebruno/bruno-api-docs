@@ -16,8 +16,11 @@ It is not published to npm. It ships as standalone CDN bundles built by
 - `Bruno.apiDocs(target, { content, ... })`: the docs, with the playground behind Try. Returns
   `updateCollection`, `updateOptions` and `destroy`.
 - `Bruno.apiPlayground(target, { content })`: only the playground (sidebar, request, response),
-  filling the target. Returns `updateCollection` and `destroy`. Its routing is in memory, so it
+  filling the target, Loading and error states included. Returns `updateCollection` and `destroy`;
+  `destroy` aborts that instance's in-flight requests and no other's. Its routing is in memory, so it
   never reads or writes the host page URL. The theme is the reader's saved one, else the system's.
+  On a phone (`useIsMobilePhone`, the same check the docs mobile dock uses) the sidebar is an
+  overlay behind a `playground-sidebar-toggle`, as in the docs mobile dock; elsewhere it stays open.
 
 Both take the same `content`: an object, a YAML or JSON string, a `File` or an `http(s)` URL.
 
@@ -54,20 +57,27 @@ single shared barrel, because it would load Monaco eagerly.
 
 | Entry | What it does |
 |---|---|
-| `bruno-api-docs/src/standalone.ts` | `api-docs.js`. Defines `Bruno.apiDocs` (and the deprecated `window.OpenCollection`), which renders `<OpenCollection>` into the target; `updateCollection`/`updateOptions` re-render with new props. Also defines `Bruno.apiPlayground`, which lazy-loads the playground view the same way Try does. |
+| `bruno-api-docs/src/standalone.ts` | `api-docs.js`. Defines `Bruno.apiDocs` (and the deprecated `window.OpenCollection`), which renders `<OpenCollection>` into the target; `updateCollection`/`updateOptions` re-render with new props. A string `content` is parsed here first, so an invalid one throws from `Bruno.apiDocs`. Also defines `Bruno.apiPlayground`, which lazy-loads the playground view through `ApiPlaygroundView`, unless `api-playground.js` already defined one, which it keeps. |
 | `bruno-api-playground/src/standalone.ts` | `api-playground.js`. Defines only `Bruno.apiPlayground`, with the playground view bundled in. |
 | `bruno-api-docs/src/dev.tsx` | `npm run dev`. Mounts the sample collection, or a fixture from `bruno-api-docs/src/e2eFixtures/` via `?fixture=`. Also reads `?themeMode`, `?hideThemeSwitcher`, `?hidePlayground`, `?nogit`. e2e runs against this. |
 | `bruno-api-docs/src/components/OpenCollection/OpenCollection.tsx` | The docs root: `HashRouter`, the collection shell, `AppShell`. |
-| `bruno-shared/src/utils/standalone.tsx` | `mountApiPlayground`, what both `Bruno.apiPlayground`s call: `MemoryRouter`, the collection shell, the playground view. Also the string parsing and Inter font both entries use. |
-| `bruno-shared/src/components/CollectionShell/CollectionShell.tsx` | The shell both roots render: one session per mount, the loader (`useCollectionLoader.ts` next to it) with its Loading and error states, then `DocumentProvider` and the variable resolver over the document. The router is the root's choice. |
+| `bruno-shared/src/utils/standalone.tsx` | `mountApiPlayground`, what both `Bruno.apiPlayground`s call: `MemoryRouter`, the collection shell (with `heightClass="h-full"`), the view the entry passes. Content goes to the shell's loader unparsed. Also the Inter font both entries use. |
+| `bruno-api-docs/standalone.d.ts` | The host-facing types: `window.Bruno` (`apiDocs`, `apiPlayground`, `build`), the deprecated `window.OpenCollection`, their options and instances. `bruno-api-docs/src/standalone.ts` and the standalone e2e page objects are typed against it, so it can't drift from the runtime. |
+| `bruno-shared/src/components/CollectionShell/CollectionShell.tsx` | The shell both roots render: one session per mount, the loader (`useCollectionLoader.ts` next to it) with its Loading and error states, then `DocumentProvider` and the variable resolver over the document. The router is the root's choice, and so is the height of the Loading and error states (`heightClass`: `h-screen` for docs, `h-full` for `Bruno.apiPlayground`). |
 | `bruno-api-playground/src/index.ts` | The lazy playground view: `PlaygroundBody` as the default (the dock shell renders it) and `StandalonePlayground` (what `Bruno.apiPlayground` renders). |
 
 ## How the playground loads
 
-`bruno-api-docs/src/components/Playground/Playground.tsx` is the dock shell. It wraps
-`lazy(() => loadPlayground())` in an `ErrorBoundary` and `Suspense`. Nothing loads until the
-playground opens, from a Try click or a deep link. While it loads you see `playground-loading`;
-if it fails you see `playground-load-error`.
+`bruno-api-docs/src/components/Playground/Playground.tsx` is the dock shell. It wraps the lazy
+playground (`retryableLazy(loadPlayground)`, `bruno-api-docs/src/components/Playground/retryableLazy.ts`)
+in an `ErrorBoundary` and `Suspense`. Nothing loads until the playground opens, from a Try click or
+a deep link. While it loads you see `playground-loading`; if it fails you see
+`playground-load-error` (`PlaygroundLoadError.tsx`).
+
+`Bruno.apiPlayground` from `api-docs.js` renders `ApiPlaygroundView.tsx` next to it: the same
+error boundary, Suspense and load error around a lazy `StandalonePlayground`. A failed load swaps
+in a fresh lazy, so the next `Bruno.apiPlayground` call retries, and the boundary resets when the
+document changes, so `updateCollection` on the failed instance retries too.
 
 - **Dev, unit tests, `npm run build`**: `load.ts` is a plain ESM `import()`. One module graph,
   so docs and playground share every module automatically.
@@ -82,8 +92,8 @@ if it fails you see `playground-load-error`.
   A classic script works cross-origin and from `file://`, which is how exported HTML loads it.
   The script carries the nonce of the `api-docs.js` tag, so a nonce-only CSP allows it. A failed
   load, or one that never defines `window.__brunoApiPlayground` (an HTML error page served with
-  200, or a file that throws), removes the script and clears the memo, and `Playground.tsx` swaps in a fresh `lazy`, so
-  the next open retries.
+  200, or a file that throws), removes the script and clears the memo, and `retryableLazy` swaps
+  in a fresh `lazy`, so the next open or `Bruno.apiPlayground` call retries.
 - `bruno-api-playground/vite.config.cdn.ts` builds the playground view as an IIFE named
   `__brunoApiPlayground`. Its externals are read from `Bruno.__rt`. The one list of them, name to
   import specifier, is `bruno-shared/src/utils/cdnExternals.ts`: react, react-dom,
@@ -115,9 +125,9 @@ Known limits:
   shared modules.
 - Under an AMD loader `document.currentScript` is null, so the playground URL falls back to
   `document.baseURI`.
-- `Bruno.apiPlayground` from `api-docs.js` has no load-error view and no retry: if the playground
-  file fails to load, React drops the tree and the target stays empty. `api-playground.js` has
-  nothing to load.
+- Closing the docs playground aborts every in-flight run on the page (`playgroundRuns.abortAll`),
+  including one in a `Bruno.apiPlayground` instance from the same `api-docs.js`, which shares the
+  run module. `destroy` on a `Bruno.apiPlayground` aborts only its own runs.
 - With both bundles on one page, each carries its own Monaco loader. If a docs playground and an
   `api-playground.js` playground open their first editor within the same few seconds, two loader
   copies race to set up Monaco on the page. Not engineered around; open one first if it matters.
@@ -125,9 +135,10 @@ Known limits:
 ## Load pipeline
 
 `bruno-shared/src/components/CollectionShell/useCollectionLoader.ts`, run by the collection shell
-for both entries. String content is first parsed by `parseContent`
-(`bruno-shared/src/utils/standalone.tsx`) in the standalone entries; a string that parses to
-a URL or a plain scalar falls through to the loader.
+for both entries. Only `Bruno.apiDocs` parses string content before that (`parseContent` in
+`bruno-api-docs/src/standalone.ts`), so an invalid string throws from the call as it always has; a
+string that parses to a URL or a plain scalar falls through to the loader. `Bruno.apiPlayground`
+hands content to the loader as is, so an invalid string shows the shell's error in the target.
 
 1. Input is an object, a YAML/JSON string, a `File`, or an `http(s)` URL (fetched).
 2. Text is parsed as YAML, then JSON as a fallback.
@@ -137,7 +148,7 @@ a URL or a plain scalar falls through to the loader.
    touches nothing else.
 
 States: `idle` → `loading` → `succeeded` or `failed`. Idle and loading show "Loading...",
-failed shows the error. Neither renders the playground, and neither touches its state: the next
+failed shows the error, both at the root's `heightClass`. Neither renders the playground, and neither touches its state: the next
 document re-seeds it, so `updateCollection(null)` or a failed load followed by a collection with
 stable uuids keeps responses, selection and folder collapse.
 
@@ -191,8 +202,11 @@ Docs and playground each own their state. Shared holds only what crosses:
   close, reopen and dock switches and stays per instance. The session itself carries nothing
   for the playground, and docs never reads the map.
 - **Run tracking** (`bruno-shared/src/session/playgroundRuns.ts`): the dock shell aborts every
-  run when the playground closes. When the playground next opens it drops run starts whose run
-  is no longer in flight, so a reopened request is not stuck loading.
+  run when the playground closes. `StandalonePlayground` aborts only the runs its own workspace
+  started when it unmounts (`destroy`, or an `updateCollection` that reloads), so a sibling
+  instance's request still completes and the aborted run's post-response script never runs. When
+  the playground next opens it drops run starts whose run is no longer in flight, so a reopened
+  request is not stuck loading.
 
 The collection shell renders `SessionProvider`, `DocumentProvider` and a variable resolver over
 the document. `PlaygroundBody` renders its own resolver over the working copy, so playground
@@ -268,8 +282,10 @@ flow back into the workspace.
 ## Build outputs
 
 `npm run build:standalone` in docs runs the playground's `build:cdn` first, then the docs
-standalone build, then the same config with `--mode playground` for `api-playground.js`. It
-writes `bruno-api-docs/dist-standalone/`:
+standalone build, then the same config with `--mode playground` for `api-playground.js`. The
+playground-file lookup, the `playground-cdn` plugin and `__API_PLAYGROUND_FILE__` exist only in
+docs mode, and playground mode fails the build if it emits any CSS, which would overwrite
+`api-docs.css`. It writes `bruno-api-docs/dist-standalone/`:
 
 | File | Size (gzip) | What |
 |---|---|---|
@@ -291,9 +307,11 @@ What a host page loads:
   stylesheet: Tailwind scans all three packages into the one file, so it would be the same file.
   Give the target a height; the playground fills it.
 
-Loading both scripts on one page works: each adds its entries to `window.Bruno` and keeps the
-rest, including `Bruno.build`. They do not share React, so each instance uses the copy of the
-script that mounted it.
+Loading both scripts on one page works, in either order: each adds its entries to `window.Bruno`
+and keeps the rest, including `Bruno.build`. `Bruno.apiPlayground` is always the one from
+`api-playground.js`: it overwrites the `api-docs.js` one when it loads second, and `api-docs.js`
+keeps it when it loads second, so the playground view is never downloaded for it. They do not
+share React, so each instance uses the copy of the script that mounted it.
 
 ### Deploy requirement
 
@@ -322,8 +340,10 @@ Three standalone specs guard the split:
 - `bruno-api-docs/e2e/tests/standalone/playground-lazy-load.spec.ts` checks the playground file
   loads only on Try or a deep link, once per page, and that a missing file shows the load error.
 - `bruno-api-docs/e2e/tests/standalone/api-playground.spec.ts` checks a page with only
-  `api-playground.js` never requests `api-docs.js`, and that both scripts on one page keep both
-  entries.
+  `api-playground.js` never requests `api-docs.js`, that both scripts on one page keep both
+  entries in either order, and the `Bruno.apiPlayground` contract: destroy aborts only its own
+  runs, a failed lazy load shows the load error and retries, an invalid string shows the shell
+  error, Loading stays in the target, bearer auth from an environment, and the phone sidebar.
 
 All e2e lives in docs. Unit specs live with their code. `npm run test:e2e` runs both Playwright
 configs. Locally, run only the specs your change touches; CI (repo root

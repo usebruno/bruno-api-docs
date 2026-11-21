@@ -107,6 +107,16 @@ export class ApiPlaygroundPage extends BasePage {
     return this.page.evaluate(() => Object.keys((window as unknown as HostWindow).Bruno).sort());
   }
 
+  async setTargetHeight(id: Target, px: number): Promise<void> {
+    await this.target(id).evaluate((element, px) => {
+      element.style.height = `${px}px`;
+    }, px);
+  }
+
+  targetOverflow(id: Target): Promise<number> {
+    return this.target(id).evaluate((element) => element.scrollHeight - element.clientHeight);
+  }
+
   async failPlaygroundViewOnce(): Promise<void> {
     await this.page.route(/\/playground-view-[\w-]+\.js$/, (route) => route.fulfill({ status: 404, body: 'not found' }), { times: 1 });
   }

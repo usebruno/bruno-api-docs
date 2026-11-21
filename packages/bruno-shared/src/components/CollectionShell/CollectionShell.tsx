@@ -11,10 +11,17 @@ export interface CollectionShellProps {
   collection: CollectionSource;
   theme?: Partial<ThemeState>;
   hideThemeSwitcher?: boolean;
+  heightClass?: string;
   children: (sourceText: string | null) => React.ReactNode;
 }
 
-const CollectionShellContent: React.FC<CollectionShellProps> = ({ collection, theme, hideThemeSwitcher, children }) => {
+const CollectionShellContent: React.FC<CollectionShellProps> = ({
+  collection,
+  theme,
+  hideThemeSwitcher,
+  heightClass = 'h-screen',
+  children
+}) => {
   const session = useSession();
 
   const lastThemeProp = useRef(theme);
@@ -29,11 +36,11 @@ const CollectionShellContent: React.FC<CollectionShellProps> = ({ collection, th
   const { status, error, sourceText, document } = useCollectionLoader(collection);
 
   if (status === 'idle' || status === 'loading') {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return <div className={`flex items-center justify-center ${heightClass}`}>Loading...</div>;
   }
 
   if (error || !document) {
-    return <div className="flex items-center justify-center h-screen text-red-500">Error: {error}</div>;
+    return <div className={`flex items-center justify-center ${heightClass} text-red-500`}>Error: {error}</div>;
   }
 
   return (

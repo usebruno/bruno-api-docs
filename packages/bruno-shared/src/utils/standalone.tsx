@@ -44,7 +44,7 @@ export const mountApiPlayground = (
   const render = (collection: CollectionSource) => {
     root?.render(
       <MemoryRouter useTransitions={false}>
-        <CollectionShell collection={collection}>
+        <CollectionShell collection={collection} heightClass="h-full">
           {() => <View />}
         </CollectionShell>
       </MemoryRouter>

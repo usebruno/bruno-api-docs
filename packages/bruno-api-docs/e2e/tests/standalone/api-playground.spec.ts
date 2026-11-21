@@ -166,6 +166,16 @@ test.describe('Bruno.apiPlayground from api-playground.js', () => {
     await expect(apiPlaygroundPage.instance('first').treeItems).toHaveText(['GETEcho', 'POSTOther']);
   });
 
+  test('Loading stays inside a short target while the collection is fetched', async ({ page, apiPlaygroundPage }) => {
+    await page.route(COLLECTION_URL, () => {});
+    await apiPlaygroundPage.setTargetHeight('first', 300);
+
+    await apiPlaygroundPage.mount('first', COLLECTION_URL);
+
+    await expect(apiPlaygroundPage.target('first')).toHaveText('Loading...');
+    expect(await apiPlaygroundPage.targetOverflow('first')).toBe(0);
+  });
+
   test('invalid YAML shows the load error in the target, and destroy still empties it', async ({ apiPlaygroundPage }) => {
     await apiPlaygroundPage.mount('first', 'a: [1, 2');
 

@@ -5,11 +5,11 @@ import '@usebruno/api-shared/styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
 import Prism from '@usebruno/api-shared/utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import { injectInterFont, mountApiPlayground, type ApiPlaygroundOptions } from '@usebruno/api-shared/utils/standalone';
+import { injectInterFont, mountApiPlayground } from '@usebruno/api-shared/utils/standalone';
+import type { ApiDocsInstance, ApiDocsOptions, ApiPlaygroundOptions, Bruno, OpenCollectionOptions } from '../standalone';
 import { parseCollectionContent } from '@usebruno/api-shared/utils/yamlUtils';
 import type { CollectionSource } from '@usebruno/api-shared/components/CollectionShell/useCollectionLoader';
 import ApiPlaygroundView from './components/Playground/ApiPlaygroundView';
-import type { ThemeState } from '@usebruno/api-shared/theme/types';
 import { isEmpty, isPlainObject } from 'lodash-es';
 
 // Ensure Prism is available globally for any code that might access it
@@ -17,22 +17,7 @@ if (typeof window !== 'undefined') {
   (window as any).Prism = Prism;
 }
 
-export interface OpenCollectionOptions {
-  target: HTMLElement;
-  opencollection: any;
-  logo?: string;
-  gitCollectionUrl?: string;
-  theme?: Partial<ThemeState>;
-  hideThemeSwitcher?: boolean;
-  hidePlayground?: boolean;
-}
-
-export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | 'opencollection'> {
-  content: OpenCollectionOptions['opencollection'];
-  repositoryUrl?: string;
-}
-
-export type { ApiPlaygroundOptions, ApiPlaygroundInstance } from '@usebruno/api-shared/utils/standalone';
+export type { ApiDocsInstance, ApiDocsOptions, ApiPlaygroundInstance, ApiPlaygroundOptions, OpenCollectionOptions } from '../standalone';
 
 const parseContent = (content: CollectionSource): CollectionSource => {
   if (typeof content !== 'string') return content;
@@ -44,7 +29,7 @@ const parseContent = (content: CollectionSource): CollectionSource => {
   }
 };
 
-export class OpenCollectionRenderer {
+export class OpenCollectionRenderer implements ApiDocsInstance {
   private root: Root | null = null;
   private options: OpenCollectionOptions;
 
@@ -88,7 +73,7 @@ export class OpenCollectionRenderer {
     }));
   }
 
-  public updateCollection(opencollection: any) {
+  public updateCollection(opencollection: CollectionSource) {
     this.options.opencollection = opencollection;
     this.render();
   }
@@ -127,10 +112,10 @@ class DeprecatedOpenCollection extends OpenCollectionRenderer {
 }
 
 if (typeof window !== 'undefined') {
-  const globals = window as any;
-  globals.OpenCollection = DeprecatedOpenCollection;
-  globals.Bruno = {
-    ...globals.Bruno,
+  const existing = window.Bruno as Partial<Bruno> | undefined;
+  window.OpenCollection = DeprecatedOpenCollection;
+  window.Bruno = {
+    ...existing,
     build: __BRUNO_BUILD__,
     apiDocs: (target: HTMLElement, { content, repositoryUrl, gitCollectionUrl, ...options }: ApiDocsOptions) =>
       new OpenCollectionRenderer({
@@ -139,7 +124,7 @@ if (typeof window !== 'undefined') {
         gitCollectionUrl: repositoryUrl ?? gitCollectionUrl,
         ...options
       }),
-    apiPlayground: globals.Bruno?.apiPlayground
+    apiPlayground: existing?.apiPlayground
       ?? ((target: HTMLElement, options: ApiPlaygroundOptions) =>
         mountApiPlayground(target, options, ApiPlaygroundView))
   };

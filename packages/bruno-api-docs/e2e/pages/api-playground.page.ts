@@ -1,24 +1,16 @@
 import type { Locator, Page } from '@playwright/test';
 import { BasePage } from './base.page';
 import { appConfig } from '../config/app.config';
+import type { ApiDocsInstance, ApiPlaygroundInstance, ApiPlaygroundOptions } from '../../standalone';
 import { EnvSwitcherComponent } from '../components/layout/env-switcher.component';
 import { ResponsePaneComponent } from '../components/playground/response-pane.component';
 
 type Target = 'first' | 'second';
 type HostFile = 'api-playground.html' | 'index.html';
 
-interface Instance {
-  updateCollection(content: unknown): void;
-  destroy(): void;
-}
+type Content = ApiPlaygroundOptions['content'];
 
-type HostWindow = Window & {
-  Bruno: Record<string, unknown> & {
-    apiPlayground(target: HTMLElement, options: { content: unknown }): Instance;
-    apiDocs(target: HTMLElement, options: { content: unknown }): Instance;
-  };
-  instances: Partial<Record<Target, Instance>>;
-};
+type HostWindow = Window & { instances: Partial<Record<Target, ApiPlaygroundInstance | ApiDocsInstance>> };
 
 /**
  * A static host page that mounts `Bruno.apiPlayground`. `api-playground.html` loads only
@@ -75,7 +67,7 @@ export class ApiPlaygroundPage extends BasePage {
     await this.page.evaluate(({ id, content }) => {
       const w = window as unknown as HostWindow;
       w.instances ??= {};
-      w.instances[id] = w.Bruno.apiPlayground(document.getElementById(id)!, { content });
+      w.instances[id] = w.Bruno.apiPlayground(document.getElementById(id)!, { content: content as Content });
     }, { id, content });
   }
 
@@ -83,13 +75,13 @@ export class ApiPlaygroundPage extends BasePage {
     await this.page.evaluate(({ id, content }) => {
       const w = window as unknown as HostWindow;
       w.instances ??= {};
-      w.instances[id] = w.Bruno.apiDocs(document.getElementById(id)!, { content });
+      w.instances[id] = w.Bruno.apiDocs(document.getElementById(id)!, { content: content as Content });
     }, { id, content });
   }
 
   async updateCollection(id: Target, content: unknown): Promise<void> {
     await this.page.evaluate(({ id, content }) => {
-      (window as unknown as HostWindow).instances[id]!.updateCollection(content);
+      (window as unknown as HostWindow).instances[id]!.updateCollection(content as Content);
     }, { id, content });
   }
 

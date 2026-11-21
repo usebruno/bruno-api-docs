@@ -139,7 +139,8 @@ if (typeof window !== 'undefined') {
         gitCollectionUrl: repositoryUrl ?? gitCollectionUrl,
         ...options
       }),
-    apiPlayground: (target: HTMLElement, options: ApiPlaygroundOptions) =>
-      mountApiPlayground(target, options, ApiPlaygroundView)
+    apiPlayground: globals.Bruno?.apiPlayground
+      ?? ((target: HTMLElement, options: ApiPlaygroundOptions) =>
+        mountApiPlayground(target, options, ApiPlaygroundView))
   };
 }

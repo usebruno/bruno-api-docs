@@ -280,6 +280,18 @@ test.describe('Bruno.apiPlayground next to Bruno.apiDocs', () => {
     await expect(first.loadError).toHaveCount(0);
   });
 
+  test('api-docs.js loaded after api-playground.js keeps its apiPlayground, so no playground view is downloaded', async ({
+    apiPlaygroundPage
+  }) => {
+    await apiPlaygroundPage.goto();
+    await apiPlaygroundPage.addApiDocsScript();
+
+    await apiPlaygroundPage.mount('first', collection);
+
+    await expect(apiPlaygroundPage.instance('first').treeItems).toHaveText(['GETEcho', 'POSTOther']);
+    expect(apiPlaygroundPage.scriptRequests).toEqual(['/api-playground.js', '/api-docs.js']);
+  });
+
   test('loading both bundles keeps every entry and the build on Bruno', async ({ apiPlaygroundPage }) => {
     await apiPlaygroundPage.goto();
     await apiPlaygroundPage.addApiDocsScript();

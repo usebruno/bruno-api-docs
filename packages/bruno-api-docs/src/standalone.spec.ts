@@ -51,4 +51,13 @@ describe('standalone globals', () => {
     const instance = globals.Bruno.apiPlayground({} as HTMLElement, { content: collection });
     expect(Object.keys(instance).sort()).toEqual(['destroy', 'updateCollection']);
   });
+
+  it('keeps a Bruno.apiPlayground that api-playground.js already defined', async () => {
+    const theirs = vi.fn();
+    vi.resetModules();
+    vi.stubGlobal('Bruno', { apiPlayground: theirs });
+    await import('./standalone');
+
+    expect(globals.Bruno.apiPlayground).toBe(theirs);
+  });
 });

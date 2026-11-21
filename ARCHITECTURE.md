@@ -118,6 +118,9 @@ Known limits:
 - `Bruno.apiPlayground` from `api-docs.js` has no load-error view and no retry: if the playground
   file fails to load, React drops the tree and the target stays empty. `api-playground.js` has
   nothing to load.
+- With both bundles on one page, each carries its own Monaco loader. If a docs playground and an
+  `api-playground.js` playground open their first editor within the same few seconds, two loader
+  copies race to set up Monaco on the page. Not engineered around; open one first if it matters.
 
 ## Load pipeline
 

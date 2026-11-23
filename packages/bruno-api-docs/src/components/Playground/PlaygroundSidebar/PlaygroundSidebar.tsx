@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import SidebarTree from '../../Docs/Sidebar/SidebarTree/SidebarTree';
-import { useAutoHideScrollbar, useIsMobileDevice, usePlaygroundSearch } from '@/hooks';
+import { useAutoHideScrollbar, useIsMobileDevice } from '@/hooks';
+import type { usePlaygroundSearch } from '@/hooks';
 import { SearchIcon, CloseIcon } from '@/assets/icons';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { StyledWrapper } from './StyledWrapper';
@@ -11,8 +12,7 @@ interface PlaygroundSidebarProps {
   activeSlug: string;
   uuidToSlug: Map<string, string>;
   onNavigate: (slug: string) => void;
-  onToggleFolder: (uuid: string) => void;
-  onExpandFolder: (uuid: string) => void;
+  search: ReturnType<typeof usePlaygroundSearch>;
   onOpenCollection: () => void;
   collectionActive: boolean;
   testId?: string;
@@ -25,8 +25,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   activeSlug,
   uuidToSlug,
   onNavigate,
-  onToggleFolder,
-  onExpandFolder,
+  search,
   onOpenCollection,
   collectionActive,
   testId = 'playground-sidebar',
@@ -36,8 +35,7 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
   const [collectionCollapsed, setCollectionCollapsed] = useState(false);
   const name = collection?.info?.name || 'Collection';
 
-  const { query, onSearchChange, isSearching, items, nameMatches, urlMatches, toggleFolder, expandFolder }
-    = usePlaygroundSearch(collection, onToggleFolder, onExpandFolder);
+  const { query, onSearchChange, isSearching, items, nameMatches, toggleFolder, expandFolder } = search;
 
   // Show the scrollbar while the tree is in use, then fade it after 1s idle - same as the docs sidebar.
   const treeRef = useRef<HTMLDivElement>(null);
@@ -79,7 +77,6 @@ const PlaygroundSidebar: React.FC<PlaygroundSidebarProps> = ({
             onNavigate={onNavigate}
             onToggleFolder={toggleFolder}
             nameMatches={nameMatches}
-            urlMatches={urlMatches}
             onExpandFolder={expandFolder}
             activeExample={activeExample}
             onExampleClick={onExampleClick}

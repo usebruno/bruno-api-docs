@@ -272,11 +272,29 @@ test.describe('playground docks (desktop)', () => {
     await page.goto(openAt('bottom'));
     await playground.envSwitcher.selectEnvironment('Prod');
     await playground.openEnvironments();
-    await expect(page.getByTestId('env-pill-Prod')).toHaveClass(/active/);
+    await expect(playground.envEditor.pill('Prod')).toHaveClass(/active/);
 
     await playground.envSwitcher.selectEnvironment('Local');
-    await expect(page.getByTestId('env-pill-Prod')).toHaveClass(/active/);
-    await expect(page.getByTestId('env-pill-Local')).not.toHaveClass(/active/);
+    await expect(playground.envEditor.pill('Prod')).toHaveClass(/active/);
+    await expect(playground.envEditor.pill('Local')).not.toHaveClass(/active/);
+  });
+
+  test('Configure again opens the newly selected environment', async ({ page, playground }) => {
+    await page.goto(openAt('bottom'));
+    await playground.envSwitcher.selectEnvironment('Prod');
+    await playground.openEnvironments();
+    await playground.envSwitcher.selectEnvironment('Local');
+
+    await playground.openEnvironments();
+    await expect(playground.envEditor.pill('Local')).toHaveClass(/active/);
+    await expect(playground.envEditor.pill('Prod')).not.toHaveClass(/active/);
+  });
+
+  test('the header environment switcher works in the inline dock', async ({ page, playground }) => {
+    await page.goto(openAt('inline'));
+    await playground.envSwitcher.selectEnvironment('Prod');
+    await playground.openEnvironments();
+    await expect(playground.envEditor.pill('Prod')).toHaveClass(/active/);
   });
 
   test('opening environments persists in the url and survives reload', async ({ page, playground }) => {

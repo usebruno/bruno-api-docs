@@ -37,6 +37,18 @@ test.describe('playground on a phone', () => {
     await expect(playground.sidebarPanel).toHaveCount(0);
   });
 
+  test('keeps the sidebar search after opening a result', async ({ page, playground }) => {
+    await page.goto(OPEN_ON_PHONE);
+    await playground.sidebarToggle.click();
+    await playground.searchInput.fill('jokes');
+    await playground.sidebarItem('Jokes').click();
+    await expect(playground.sidebarPanel).toHaveCount(0);
+
+    await playground.sidebarToggle.click();
+    await expect(playground.searchInput).toHaveValue('jokes');
+    await expect(playground.treeItems).toHaveText([/Jokes/]);
+  });
+
   test('closes from the header and clears the url state', async ({ page, playground }) => {
     await page.goto(OPEN_ON_PHONE);
     await expect(playground.mobilePanel).toBeVisible();

@@ -11,9 +11,7 @@ import cx from '@/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 const NO_ENVIRONMENT_LABEL = 'No Environment';
-const NO_ENVIRONMENT_OPTION = { name: NO_ENVIRONMENT } as Environment;
-
-const menuItemId = (environment: Environment) => environment.name || 'no-environment';
+const NO_ENVIRONMENT_ID = 'no-environment';
 
 export interface EnvSwitcherProps {
   hideWhenEmpty?: boolean;
@@ -46,17 +44,17 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
   );
   const hasEnvironments = environments.length > 0;
 
-  const options = useMemo(() => [NO_ENVIRONMENT_OPTION, ...environments], [environments]);
-
   // The active env, resolving a null or stale (no longer present) selection to
   // the first environment. Single source for both the render and the effect.
   const activeEnv
-    = options.find((environment) => environment.name === activeEnvName) ?? environments[0] ?? NO_ENVIRONMENT_OPTION;
+    = activeEnvName === NO_ENVIRONMENT
+      ? null
+      : environments.find((environment) => environment.name === activeEnvName) ?? environments[0] ?? null;
 
   // Sync the store when the stored name isn't the resolved one (null or stale),
   // so the persisted selection self-heals to a real environment.
   useEffect(() => {
-    if (activeEnv.name && activeEnv.name !== activeEnvName) {
+    if (activeEnv && activeEnv.name !== activeEnvName) {
       dispatch(setActiveEnv(activeEnv.name));
     }
   }, [activeEnv, activeEnvName, dispatch]);
@@ -64,20 +62,23 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
   if (hideWhenEmpty && !hasEnvironments) return null;
 
   const items: MenuDropdownItem[] = [
-    ...options.map((environment) => ({
-      id: menuItemId(environment),
-      label: environment.name ? (
+    {
+      id: NO_ENVIRONMENT_ID,
+      label: NO_ENVIRONMENT_LABEL,
+      className: 'dropdown-item-muted',
+      onClick: () => dispatch(setActiveEnv(NO_ENVIRONMENT))
+    },
+    ...environments.map((environment) => ({
+      id: environment.name,
+      label: (
         <EnvironmentLabel
           name={environment.name}
           color={environment.color}
           nameClassName="environment-label-name--clamped"
         />
-      ) : (
-        NO_ENVIRONMENT_LABEL
       ),
-      ariaLabel: environment.name || undefined,
-      title: environment.name || undefined,
-      className: environment.name ? undefined : 'dropdown-item-muted',
+      ariaLabel: environment.name,
+      title: environment.name,
       onClick: () => dispatch(setActiveEnv(environment.name))
     })),
     ...(onConfigure
@@ -95,10 +96,10 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
   ];
 
   return (
-    <StyledWrapper data-testid={`${testId}-root`}>
+    <StyledWrapper className="env-switcher" data-testid={`${testId}-root`}>
       <MenuDropdown
         items={items}
-        selectedItemId={menuItemId(activeEnv)}
+        selectedItemId={activeEnv?.name ?? NO_ENVIRONMENT_ID}
         showTickMark={false}
         placement="bottom-end"
         matchTriggerWidth
@@ -106,11 +107,11 @@ const EnvSwitcher: React.FC<EnvSwitcherProps> = ({
       >
         <button
           type="button"
-          className={cx('env-switcher-trigger', { 'env-switcher-trigger--none': !activeEnv.name })}
+          className={cx('env-switcher-trigger', { 'env-switcher-trigger--none': !activeEnv })}
           aria-haspopup="menu"
           aria-label="Select environment"
         >
-          <EnvironmentLabel name={activeEnv.name || NO_ENVIRONMENT_LABEL} color={activeEnv.color} truncate />
+          <EnvironmentLabel name={activeEnv?.name ?? NO_ENVIRONMENT_LABEL} color={activeEnv?.color} truncate />
           <span className="env-switcher-chevron">
             <ChevronDownIcon />
           </span>

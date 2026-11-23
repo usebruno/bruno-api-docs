@@ -50,7 +50,7 @@ export const StyledWrapper = styled.div`
     outline: none;
     background: transparent;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--oc-text);
   }
 
@@ -64,7 +64,7 @@ export const StyledWrapper = styled.div`
 
   .search-empty {
     padding: 0.5rem 0.25rem;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--oc-colors-text-subtext1);
   }
 
@@ -76,7 +76,7 @@ export const StyledWrapper = styled.div`
   }
 
   &.mobile .navlink-main {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
   }
 
   .tree::-webkit-scrollbar {

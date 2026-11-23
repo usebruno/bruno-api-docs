@@ -27,7 +27,7 @@ export const StyledWrapper = styled.div`
     min-width: 0;
   }
 
-  .header-right > [data-testid='playground-env-switcher-root'] {
+  .header-right > .env-switcher {
     flex-shrink: 1;
     min-width: 5.4375rem;
   }

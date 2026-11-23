@@ -14,11 +14,11 @@ export const StyledWrapper = styled.div`
 
   .grpc-request-url-sticky {
     position: sticky;
-    top: 1rem;
+    top: 0.75rem;
     z-index: 2;
     margin-top: 0.75rem;
     background: var(--content-bg);
-    box-shadow: 0 0 0 1rem var(--content-bg);
+    box-shadow: 0 0 0 0.75rem var(--content-bg);
   }
 
   .grpc-request-description {
@@ -79,8 +79,8 @@ export const StyledWrapper = styled.div`
     flex: 1;
     min-width: 0;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.125rem;
+    font-size: var(--oc-font-size-sm);
+    line-height: 1.5;
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -90,8 +90,8 @@ export const StyledWrapper = styled.div`
   .grpc-field-meta {
     flex-shrink: 0;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
-    line-height: 1.125rem;
+    font-size: var(--oc-font-size-sm);
+    line-height: 1.5;
     color: var(--text-tertiary);
   }
 

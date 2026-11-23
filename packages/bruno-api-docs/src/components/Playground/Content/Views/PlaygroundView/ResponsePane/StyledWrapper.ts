@@ -40,7 +40,7 @@ export const StyledWrapper = styled.div`
   }
 
   .stopwatch {
-    font-size: 1.25rem;
+    font-size: var(--oc-font-size-xxl);
     font-weight: 500;
     color: var(--text-primary);
   }
@@ -48,7 +48,7 @@ export const StyledWrapper = styled.div`
   .loading-icon {
     display: inline-flex;
     color: var(--text-secondary);
-    animation: rotateCounterClockwise 1s linear infinite;
+    animation: rotateClockwise 1s linear infinite;
   }
 
   .response-loading-overlay {
@@ -63,9 +63,9 @@ export const StyledWrapper = styled.div`
     font-weight: 500;
   }
 
-  @keyframes rotateCounterClockwise {
+  @keyframes rotateClockwise {
     to {
-      transform: rotate(-360deg);
+      transform: rotate(360deg);
     }
   }
 

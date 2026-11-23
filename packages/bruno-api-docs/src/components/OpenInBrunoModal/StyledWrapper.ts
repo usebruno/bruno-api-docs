@@ -9,7 +9,7 @@ export const StyledWrapper = styled(Modal)`
     font-family: var(--font-sans);
     font-size: var(--oc-font-size-md);
     font-weight: 600;
-    line-height: 1.25rem;
+    line-height: 1.4;
     color: var(--text-primary);
   }
 
@@ -102,7 +102,7 @@ export const StyledWrapper = styled(Modal)`
     align-items: flex-start;
     gap: 0.75rem;
     font-size: var(--oc-font-size-sm);
-    line-height: 1.25rem;
+    line-height: 1.7;
     color: var(--text-secondary);
   }
 

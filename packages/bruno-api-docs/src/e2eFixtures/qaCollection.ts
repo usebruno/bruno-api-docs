@@ -1,15 +1,20 @@
 import type { OpenCollection } from '@opencollection/types';
 
 /**
- * Manual-QA collection for the search palette, mounted at `?fixture=qa`.
+ * Awkward collection for the search palette and the docs sidebar, mounted at `?fixture=qa`.
  *
  * Built to be awkward on purpose: chains deep enough to elide, folders that
  * share a name across branches, names long enough to fight the row for width,
  * a folder whose own name contains the breadcrumb separator, and folders that
  * count zero or one request. The collection name, the `gateway_query_key` variable
  * and the Typography folder are full of descenders (g, j, p, q, y) to check that
- * truncated text never clips them. Not used by any automated spec, so it is safe
- * to keep adding hostile cases here.
+ * truncated text never clips them.
+ *
+ * Sidebar e2e depends on this shape. Renaming or removing any of these breaks CI:
+ * - Billing → Customers → Payment → Auth → Tokens → Legacy v3 → Revoke Token
+ * - "Rotate Signing Key For Legacy Token Issuance Endpoint" (truncated deep label)
+ * - Edge Cases → Empty Folder (no children)
+ * - Edge Cases → Exactly One
  */
 export const qaFixtureCollection = {
   opencollection: '1.0.0',

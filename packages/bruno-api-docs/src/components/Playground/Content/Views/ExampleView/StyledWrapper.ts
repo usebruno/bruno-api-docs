@@ -24,11 +24,11 @@ export const StyledWrapper = styled.div`
   }
   .example-view-desc {
     color: var(--text-secondary);
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
   }
   .example-view-empty {
     color: var(--text-secondary);
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     line-height: 1.4;
   }
   .example-view-urlbar {
@@ -46,8 +46,8 @@ export const StyledWrapper = styled.div`
     flex: 1 1 auto;
     min-width: 0;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    line-height: 1.125rem;
+    font-size: var(--oc-font-size-sm);
+    line-height: 1.5;
     color: var(--text-primary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -55,7 +55,7 @@ export const StyledWrapper = styled.div`
   }
   .example-view-status {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     font-weight: 700;
     padding: 0.125rem 0.375rem;
     border-radius: var(--oc-radius);
@@ -92,7 +92,7 @@ export const StyledWrapper = styled.div`
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 600;
     color: var(--text-primary);
     margin-bottom: 0.5rem;
@@ -101,7 +101,7 @@ export const StyledWrapper = styled.div`
     margin-bottom: 1rem;
   }
   .example-view-section-label {
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     font-weight: 700;
     letter-spacing: 0.06em;
     color: var(--text-secondary);

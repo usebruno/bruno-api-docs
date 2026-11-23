@@ -10,7 +10,7 @@ export const StyledWrapper = styled.button`
   border: none;
   cursor: pointer;
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   font-weight: 500;
   color: var(--text-secondary);
   transition: color 0.12s ease;

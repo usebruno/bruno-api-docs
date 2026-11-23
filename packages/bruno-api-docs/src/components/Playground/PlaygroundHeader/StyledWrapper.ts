@@ -49,7 +49,7 @@ export const StyledWrapper = styled.div`
   }
 
   .header-title {
-    font-size: 14px;
+    font-size: var(--oc-font-size-md);
     font-weight: 600;
     color: var(--text-primary);
     white-space: nowrap;

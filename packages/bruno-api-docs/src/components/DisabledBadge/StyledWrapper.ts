@@ -4,7 +4,7 @@ export const StyledWrapper = styled.span`
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  font-size: 0.625rem;
+  font-size: var(--oc-font-size-xxs);
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;

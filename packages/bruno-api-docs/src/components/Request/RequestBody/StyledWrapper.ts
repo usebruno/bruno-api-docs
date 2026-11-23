@@ -23,7 +23,7 @@ export const StyledWrapper = styled.div`
     border-radius: var(--oc-radius);
     background: var(--table-header-bg);
     font-family: var(--font-sans);
-    font-size: 0.625rem;
+    font-size: var(--oc-font-size-xxs);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -35,7 +35,7 @@ export const StyledWrapper = styled.div`
     border-radius: var(--oc-radius);
     background: var(--table-header-bg);
     font-family: var(--font-sans);
-    font-size: 0.625rem;
+    font-size: var(--oc-font-size-xxs);
     color: var(--text-secondary);
     white-space: nowrap;
   }

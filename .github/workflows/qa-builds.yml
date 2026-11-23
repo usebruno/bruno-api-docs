@@ -56,10 +56,22 @@ jobs:
 
       - name: Build
         working-directory: packages/bruno-api-docs
+        env:
+          BASE: ${{ env.PAGES_URL }}/${{ steps.target.outputs.folder }}
         run: |
           npm run build:lib-bundle
           npm run build:standalone
           jq -n '{sha: env.BUILD_SHA, ref: env.BUILD_REF, version: env.BUILD_VERSION, env: env.BUILD_ENV, run: env.BUILD_RUN, built_at: env.BUILD_TIME}' > dist-standalone/version.json
+          jq -r --arg base "$BASE" '
+            "<!doctype html><meta charset=\"utf-8\"><title>api-docs \(.ref | @html)</title>",
+            "<h1>api-docs QA build: \(.ref | @html)</h1>",
+            "<p>version \(.version | @html) · sha <code>\(.sha | @html)</code> · built \(.built_at | @html) · <a href=\"\(.run | @html)\">run</a></p>",
+            "<p>Bundle base: <code>\($base | @html)/</code></p><ul>",
+            (["api-docs.js", "api-docs.css", "api-docs.esm.js", "version.json"][] | "<li><a href=\"\(.)\">\(.)</a></li>"),
+            "</ul><p>Load it on a docs page, then check <code>Bruno.build.sha</code> is <code>\(.sha | @html)</code>:</p>",
+            "<pre>&lt;link rel=\"stylesheet\" href=\"\($base | @html)/api-docs.css\"&gt;\n&lt;script src=\"\($base | @html)/api-docs.js\"&gt;&lt;/script&gt;</pre>",
+            "<p><a href=\"../\">All QA builds</a></p>"
+          ' dist-standalone/version.json > dist-standalone/index.html
 
       - uses: actions/upload-artifact@v6
         with:
@@ -99,7 +111,7 @@ jobs:
               echo '<p>Point a generated docs page at <code>&lt;base&gt;/api-docs.js</code> and <code>api-docs.css</code>, then check <code>Bruno.build.sha</code>.</p><ul>'
               for f in */version.json; do
                 d="${f%/version.json}"
-                jq -r --arg d "$d" --arg base "$PAGES_URL" '"<li><code>\($base)/\($d)/</code> \(.ref) \(.sha) \(.built_at) <a href=\"\($d)/version.json\">version.json</a></li>"' "$f"
+                jq -r --arg d "$d" --arg base "$PAGES_URL" '"<li><a href=\"\($d)/\"><code>\($base)/\($d)/</code></a> \(.ref) \(.sha) \(.built_at) <a href=\"\($d)/version.json\">version.json</a></li>"' "$f"
               done
               echo '</ul>'
             } > index.html

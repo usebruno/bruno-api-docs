@@ -290,6 +290,16 @@ test.describe('playground docks (desktop)', () => {
     await expect(playground.envEditor.pill('Prod')).not.toHaveClass(/active/);
   });
 
+  test('navigating the docs keeps the environment picked on the Environments page', async ({ page, playground, sidebar }) => {
+    await page.goto(openAt('bottom'));
+    await playground.envSwitcher.selectEnvironment('Local');
+    await playground.openEnvironments();
+    await playground.envEditor.selectEnvironment('Prod');
+
+    await sidebar.overview.click();
+    await expect(playground.envEditor.pill('Prod')).toHaveClass(/active/);
+  });
+
   test('the header environment switcher works in the inline dock', async ({ page, playground }) => {
     await page.goto(openAt('inline'));
     await playground.envSwitcher.selectEnvironment('Prod');

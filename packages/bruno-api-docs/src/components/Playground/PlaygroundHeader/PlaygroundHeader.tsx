@@ -4,6 +4,8 @@ import { BrunoGlyph, SidebarToggleIcon, CloseIcon, ChevronDownIcon } from '@/ass
 import DockSwitcher from '../DockSwitcher/DockSwitcher';
 import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
 import { usePlaygroundUrlState } from '@/hooks';
+import { useAppDispatch } from '@/store/hooks';
+import { configureEnvironments } from '@/store/slices/playground';
 import { PLAYGROUND_ENVIRONMENTS_SLUG } from '../PlaygroundBody/resolvePlaygroundTarget';
 import type { DockMode } from '@/utils/playgroundDock';
 import cx from '@/utils/cx';
@@ -33,6 +35,7 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
   testId = 'playground-header'
 }) => {
   const { setRequestSlug } = usePlaygroundUrlState();
+  const dispatch = useAppDispatch();
 
   return (
     <StyledWrapper data-testid={testId}>
@@ -55,7 +58,10 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
       <div className="header-right">
         <EnvSwitcher
           testId="playground-env-switcher"
-          onConfigure={() => setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG)}
+          onConfigure={() => {
+            dispatch(configureEnvironments());
+            setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG);
+          }}
         />
         {showDockSwitcher && <DockSwitcher dock={dock} onDockChange={onDockChange} />}
         {onToggleCollapse && (

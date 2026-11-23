@@ -12,12 +12,12 @@ import {
   setSelectedItemId,
   setSelectedExampleIndex,
   toggleFolderCollapse,
-  expandFolders
+  expandFolders,
+  selectConfigureCount
 } from '@/store/slices/playground';
 import { selectActiveEnvName } from '@/store/slices/env';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { useNavModel } from '@/routing/hooks';
-import { useLocation } from 'react-router-dom';
 import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside, usePlaygroundSearch } from '@/hooks';
 import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
 import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
@@ -147,7 +147,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const handleToggleFolder = (uuid: string) => dispatch(toggleFolderCollapse(uuid));
   const handleExpandFolder = (uuid: string) => dispatch(expandFolders([uuid]));
   const search = usePlaygroundSearch(collection, handleToggleFolder, handleExpandFolder);
-  const { key: locationKey } = useLocation();
+  const configureCount = useAppSelector(selectConfigureCount);
 
   const handleExampleClick = (requestUuid: string, index: number) => {
     dispatch(setSelectedItemId(requestUuid));
@@ -175,7 +175,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
 
   const view = (() => {
     if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} />;
-    if (viewMode === 'environments' && collection) return <EnvironmentsView key={locationKey} collection={collection} compact={dock === 'inline'} />;
+    if (viewMode === 'environments' && collection) return <EnvironmentsView key={configureCount} collection={collection} compact={dock === 'inline'} />;
     if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
       return (
         <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={() => undefined} />

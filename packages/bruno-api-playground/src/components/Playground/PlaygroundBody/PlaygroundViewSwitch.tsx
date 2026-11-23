@@ -23,6 +23,7 @@ interface PlaygroundViewSwitchProps {
   collection: OpenCollection | null;
   dock: DockMode;
   orientation: 'horizontal' | 'vertical';
+  configureCount: number;
 }
 
 const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
@@ -31,7 +32,8 @@ const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
   selectedExampleIndex,
   collection,
   dock,
-  orientation
+  orientation,
+  configureCount
 }) => {
   const { activeEnvName } = useEnvState();
   const { workspace } = usePlayground();
@@ -45,6 +47,7 @@ const PlaygroundViewSwitch: React.FC<PlaygroundViewSwitchProps> = ({
   if (viewMode === 'environments' && collection) {
     return (
       <EnvironmentsView
+        key={configureCount}
         collection={collection}
         compact={dock === 'inline'}
         onCollectionChange={workspace.replaceCollection}

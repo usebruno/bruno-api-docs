@@ -22,6 +22,11 @@ export const StyledWrapper = styled.div`
     background-color: var(--oc-background-base);
   }
 
+  .standalone-toolbar .env-switcher {
+    margin-left: auto;
+    min-width: 5.4375rem;
+  }
+
   .standalone-toolbar .standalone-sidebar-toggle {
     color: var(--oc-colors-text-subtext0);
   }

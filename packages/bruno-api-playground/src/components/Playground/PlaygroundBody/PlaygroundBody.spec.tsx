@@ -48,6 +48,7 @@ describe('PlaygroundBody example view', () => {
             onCloseSidebar={() => {}}
             onOpenSidebar={() => {}}
             appliedSlugRef={ref}
+            configureCount={0}
           />
         </MemoryRouter>
       </TestProviders>
@@ -80,6 +81,7 @@ describe('PlaygroundBody script file view', () => {
             onCloseSidebar={() => {}}
             onOpenSidebar={() => {}}
             appliedSlugRef={ref}
+            configureCount={0}
           />
         </MemoryRouter>
       </TestProviders>

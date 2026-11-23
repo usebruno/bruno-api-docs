@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { usePlaygroundUrlState, useIsMobilePhone } from '@usebruno/api-shared/hooks';
+import { ENVIRONMENTS_SLUG } from '@usebruno/api-shared/routing';
+import EnvSwitcher from '@usebruno/api-shared/components/EnvSwitcher/EnvSwitcher';
 import { playgroundRuns } from '@usebruno/api-shared/session/playgroundRuns';
 import IconButton from '@usebruno/api-shared/ui/IconButton/IconButton';
 import { SidebarToggleIcon } from '@usebruno/api-shared/assets/icons';
@@ -10,11 +12,12 @@ import { StyledWrapper } from './StyledWrapper';
 const keepSidebarOpen = () => {};
 
 const StandalonePlayground: React.FC = () => {
-  const { requestSlug, exampleSlug } = usePlaygroundUrlState();
+  const { requestSlug, exampleSlug, setRequestSlug } = usePlaygroundUrlState();
   const appliedSlugRef = useRef<string | null>(null);
   const { workspace } = usePlayground();
   const isPhone = useIsMobilePhone();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [configureCount, setConfigureCount] = useState(0);
 
   useEffect(() => () => {
     for (const uuid of Object.keys(workspace.get().requestStartedAt)) playgroundRuns.cancel(uuid);
@@ -31,8 +34,8 @@ const StandalonePlayground: React.FC = () => {
 
   return (
     <StyledWrapper className="oc-playground" data-testid="standalone-playground">
-      {isPhone && (
-        <div className="standalone-toolbar">
+      <div className="standalone-toolbar">
+        {isPhone && (
           <IconButton
             className="standalone-sidebar-toggle"
             label="Toggle playground sidebar"
@@ -43,12 +46,21 @@ const StandalonePlayground: React.FC = () => {
           >
             <SidebarToggleIcon active={sidebarOpen} />
           </IconButton>
-        </div>
-      )}
+        )}
+        <EnvSwitcher
+          testId="playground-env-switcher"
+          onConfigure={() => {
+            setConfigureCount((count) => count + 1);
+            setRequestSlug(ENVIRONMENTS_SLUG);
+            setSidebarOpen(false);
+          }}
+        />
+      </div>
       <PlaygroundBody
         requestSlug={requestSlug}
         exampleSlug={exampleSlug}
         appliedSlugRef={appliedSlugRef}
+        configureCount={configureCount}
         {...sidebar}
       />
     </StyledWrapper>

@@ -9,11 +9,7 @@ import { usePlaygroundUrlState } from '@usebruno/api-shared/hooks';
 import { findItemByUuid } from '@usebruno/api-shared/utils/itemUtils';
 import { isFolder } from '@usebruno/api-shared/utils/schemaHelpers';
 import { exampleIndexForSlug, exampleSlugForIndex } from '@usebruno/api-shared/routing/slug';
-import {
-  resolvePlaygroundTarget,
-  PLAYGROUND_ENVIRONMENTS_SLUG,
-  PLAYGROUND_COLLECTION_SLUG
-} from './resolvePlaygroundTarget';
+import { resolvePlaygroundTarget, PLAYGROUND_COLLECTION_SLUG } from './resolvePlaygroundTarget';
 
 export type ViewMode = 'playground' | 'environments' | 'folder-settings' | 'collection-settings' | 'example';
 
@@ -105,13 +101,6 @@ export const usePlaygroundSelection = ({
     onSelected();
   };
 
-  const openEnvironments = () => {
-    selectionState.set('environments');
-    appliedSlugRef.current = PLAYGROUND_ENVIRONMENTS_SLUG;
-    setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG); // persist so a reload restores it
-    onSelected();
-  };
-
   const openCollection = () => {
     selectionState.set('collection-settings');
     appliedSlugRef.current = PLAYGROUND_COLLECTION_SLUG;
@@ -128,7 +117,6 @@ export const usePlaygroundSelection = ({
     uuidToSlug,
     navigate,
     selectExample,
-    openEnvironments,
     openCollection
   };
 };

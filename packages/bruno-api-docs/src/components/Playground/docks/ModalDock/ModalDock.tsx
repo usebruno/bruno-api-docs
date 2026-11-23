@@ -12,6 +12,7 @@ interface ModalDockProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
   onClose: () => void;
+  onConfigure: () => void;
   children: React.ReactNode;
 }
 
@@ -21,6 +22,7 @@ const ModalDock: React.FC<ModalDockProps> = ({
   sidebarOpen,
   onToggleSidebar,
   onClose,
+  onConfigure,
   children
 }) => {
   // Modal is a true full-screen overlay: lock the docs body scroll behind it and
@@ -40,6 +42,7 @@ const ModalDock: React.FC<ModalDockProps> = ({
             sidebarOpen={sidebarOpen}
             onToggleSidebar={onToggleSidebar}
             onClose={onClose}
+            onConfigure={onConfigure}
           />
           <div className="modal-content" data-testid="playground-content">
             {children}

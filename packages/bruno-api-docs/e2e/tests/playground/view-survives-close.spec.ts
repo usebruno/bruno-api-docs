@@ -45,15 +45,16 @@ test.describe('Playground selection and view state across close, reopen and dock
     page,
     playground
   }) => {
-    await playground.gear.click();
+    await playground.openEnvironments();
     await expect(page).toHaveURL(/pgReq=(~|%7E)environments/);
+    await expect(playground.view).toContainText('Environments');
     await page.goBack();
     await playground.close();
 
     await page.goBack();
 
     await expect(page).toHaveURL(OPEN_NO_REQUEST);
-    await expect(playground.gear).toHaveClass(/active/);
+    await expect(playground.view).toContainText('Environments');
     await expect(playground.urlInput).toHaveCount(0);
   });
 

@@ -6,6 +6,7 @@ import { usePlayground } from '../../../state/playground';
 import { useObservable } from '@usebruno/api-shared/observable/observable';
 import { useElementWidth, useResizableSidebar, useClickOutside, VariableResolverProvider } from '@usebruno/api-shared/hooks';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
+import { usePlaygroundSearch } from '../../../hooks/usePlaygroundSearch';
 import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { usePlaygroundSelection } from './usePlaygroundSelection';
 import PlaygroundViewSwitch from './PlaygroundViewSwitch';
@@ -23,6 +24,7 @@ interface PlaygroundBodyProps {
   // Tracks the applied request (+example) key across dock-switch remounts; owned
   // by Playground so it survives a dock switch but resets on close (see there).
   appliedSlugRef: React.MutableRefObject<string | null>;
+  configureCount: number;
 }
 
 const SeededPlaygroundBody: React.FC<PlaygroundBodyProps> = ({
@@ -32,13 +34,15 @@ const SeededPlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   dock,
   onCloseSidebar,
   onOpenSidebar,
-  appliedSlugRef
+  appliedSlugRef,
+  configureCount
 }) => {
   const { orientation: orientationState, folders, workspace } = usePlayground();
   const collection = useObservable(workspace, (state) => state.collection);
   const orientationOverride = useObservable(orientationState);
   const folderState = useObservable(folders);
   const isCollapsed = useCallback((folder: Item) => isFolderCollapsed(folderState, folder), [folderState]);
+  const search = usePlaygroundSearch(collection, folders.toggle, (uuid) => folders.expand([uuid]), isCollapsed);
 
   const viewRef = useRef<HTMLDivElement>(null);
   const viewWidth = useElementWidth(viewRef);
@@ -87,11 +91,7 @@ const SeededPlaygroundBody: React.FC<PlaygroundBodyProps> = ({
                 activeSlug={selection.activeSlug}
                 uuidToSlug={selection.uuidToSlug}
                 onNavigate={selection.navigate}
-                onToggleFolder={folders.toggle}
-                onExpandFolder={(uuid) => folders.expand([uuid])}
-                isFolderCollapsed={isCollapsed}
-                onOpenEnvironments={selection.openEnvironments}
-                environmentsActive={selection.viewMode === 'environments'}
+                search={search}
                 onOpenCollection={selection.openCollection}
                 collectionActive={selection.viewMode === 'collection-settings'}
                 activeExample={selection.activeExample}
@@ -117,6 +117,7 @@ const SeededPlaygroundBody: React.FC<PlaygroundBodyProps> = ({
             collection={collection}
             dock={dock}
             orientation={orientation}
+            configureCount={configureCount}
           />
         </div>
       </StyledWrapper>

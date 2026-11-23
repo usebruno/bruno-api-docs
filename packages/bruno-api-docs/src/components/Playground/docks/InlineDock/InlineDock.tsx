@@ -16,6 +16,7 @@ interface InlineDockProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
   onClose: () => void;
+  onConfigure: () => void;
   children: React.ReactNode;
 }
 
@@ -25,6 +26,7 @@ const InlineDock: React.FC<InlineDockProps> = ({
   sidebarOpen,
   onToggleSidebar,
   onClose,
+  onConfigure,
   children
 }) => {
   const initialWidth = useMemo(
@@ -34,7 +36,7 @@ const InlineDock: React.FC<InlineDockProps> = ({
   const { size, dragging, startDrag } = useDockResize({
     axis: 'x',
     initial: initialWidth,
-    min: 360,
+    min: 445,
     max: () => Math.round(getViewportWidth() * 0.7)
   });
 
@@ -62,6 +64,7 @@ const InlineDock: React.FC<InlineDockProps> = ({
           sidebarOpen={sidebarOpen}
           onToggleSidebar={onToggleSidebar}
           onClose={onClose}
+          onConfigure={onConfigure}
         />
         <div className="dock-content" data-testid="playground-content">
           {children}

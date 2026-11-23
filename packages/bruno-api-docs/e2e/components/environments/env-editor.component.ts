@@ -10,8 +10,12 @@ export class EnvEditorComponent extends BaseComponent {
   readonly valueInputs = this.cards.getByTestId(/^env-var-cards-value-input-\d+$/);
   readonly descriptionInputs = this.cards.getByTestId(/^env-var-cards-description-input-\d+$/);
 
+  pill(name: string): Locator {
+    return this.page.getByTestId(`env-pill-${name}`);
+  }
+
   async selectEnvironment(name: string): Promise<void> {
-    await this.page.getByTestId(`env-pill-${name}`).click();
+    await this.pill(name).click();
   }
 
   /** The card at a given index, addressed directly by its unique test id. */

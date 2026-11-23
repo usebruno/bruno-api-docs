@@ -97,7 +97,7 @@ test.describe('The playground after updateCollection', () => {
     page
   }) => {
     await standalonePage.mount('first', { content: foldersFixtureCollection });
-    await playground.gear.click();
+    await playground.openEnvironments();
     await expect(playground.view).toContainText('Environments');
     await playground.closeButton.click();
     await expect(playground.view).toHaveCount(0);

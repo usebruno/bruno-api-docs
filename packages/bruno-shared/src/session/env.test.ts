@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { fakeStorage } from '../test-utils/storage';
-import { createEnv, readPersistedEnv, ENV_STORAGE_KEY } from './env';
+import { createEnv, readPersistedEnv, ENV_STORAGE_KEY, NO_ENVIRONMENT } from './env';
 
 beforeEach(() => vi.stubGlobal('sessionStorage', fakeStorage()));
 afterEach(() => vi.unstubAllGlobals());
@@ -57,6 +57,11 @@ describe('createEnv', () => {
 });
 
 describe('readPersistedEnv', () => {
+  it('keeps "No environment" across a reload, apart from nothing picked', () => {
+    createEnv().setActiveEnv(NO_ENVIRONMENT);
+    expect(readPersistedEnv().activeEnvName).toBe(NO_ENVIRONMENT);
+  });
+
   it('returns defaults when nothing is stored', () => {
     expect(readPersistedEnv()).toEqual({ activeEnvName: null, showVars: false });
   });

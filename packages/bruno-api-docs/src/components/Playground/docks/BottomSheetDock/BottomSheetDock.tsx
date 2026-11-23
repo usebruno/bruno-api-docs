@@ -19,6 +19,7 @@ interface BottomSheetDockProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
   onClose: () => void;
+  onConfigure: () => void;
   openNonce?: number;
   children: React.ReactNode;
 }
@@ -29,6 +30,7 @@ const BottomSheetDock: React.FC<BottomSheetDockProps> = ({
   sidebarOpen,
   onToggleSidebar,
   onClose,
+  onConfigure,
   openNonce,
   children
 }) => {
@@ -82,6 +84,7 @@ const BottomSheetDock: React.FC<BottomSheetDockProps> = ({
         sidebarOpen={sidebarOpen}
         onToggleSidebar={onToggleSidebar}
         onClose={onClose}
+        onConfigure={onConfigure}
         collapsed={collapsed}
         onToggleCollapse={toggleCollapse}
       />

@@ -6,8 +6,10 @@ import { RequestAuthComponent } from './playground/auth.component';
 import { MethodSelectorComponent } from './playground/method-selector.component';
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
+import { EnvEditorComponent } from './environments/env-editor.component';
 import { CodeSnippetComponent } from './request/code-snippet.component';
 import type { DockMode } from '../../../bruno-shared/src/utils/playgroundDock';
+import { SidebarComponent } from './sidebar.component';
 
 export class PlaygroundComponent extends BaseComponent {
   readonly keyValueTable = new KeyValueTableComponent(this.page);
@@ -24,6 +26,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly scriptFileEditor = new CodeEditorComponent(this.page, 'playground-script-file-editor');
   readonly variable = new PlaygroundVariableComponent(this.page);
   readonly envSwitcher = new EnvSwitcherComponent(this.page, 'playground-env-switcher');
+  readonly envEditor = new EnvEditorComponent(this.page);
   readonly codeSnippet = new CodeSnippetComponent(this.page, 'query-bar-code-snippet');
 
   readonly urlInput = this.page.getByTestId('query-bar-url');
@@ -33,6 +36,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly runner = this.page.getByTestId('playground-runner');
   readonly loadError = this.page.getByTestId('playground-load-error');
   readonly sidebarPanel = this.page.getByTestId('playground-sidebar-panel');
+  readonly sidebarTree = new SidebarComponent(this.page, this.sidebarPanel);
   readonly sidebarResizer = this.page.getByTestId('playground-sidebar-resizer');
   readonly sidebarBackdrop = this.page.getByTestId('playground-sidebar-backdrop');
   readonly collectionNode = this.page.getByTestId('sidebar-collection-root');
@@ -44,10 +48,11 @@ export class PlaygroundComponent extends BaseComponent {
     name: /Bruno Testbench|Collection/
   });
 
-  readonly gear = this.page.getByTestId('playground-env-settings');
   readonly view = this.root.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
+  readonly searchInput = this.page.getByTestId('playground-sidebar-search');
+  readonly clearSearchButton = this.sidebarPanel.getByRole('button', { name: 'Clear search' });
   readonly closeButton = this.page.getByTestId('playground-close');
   readonly collapseButton = this.page.getByTestId('playground-collapse');
   readonly inlinePanel = this.page.getByTestId('playground-dock-inline-panel');
@@ -89,6 +94,22 @@ export class PlaygroundComponent extends BaseComponent {
 
   folderChevron(name: string): Locator {
     return this.sidebarItem(name).locator('.navlink-chevron');
+  }
+
+  sidebarItemLink(name: string): Locator {
+    return this.sidebarItem(name).getByRole('button', { name, exact: true });
+  }
+
+  searchHighlight(name: string): Locator {
+    return this.sidebarItem(name).getByTestId('search-highlight');
+  }
+
+  folderToggle(name: string): Locator {
+    return this.sidebarItem(name).getByRole('button', { name: /Collapse folder|Expand folder/ });
+  }
+
+  sidebarMethodBadge(name: string): Locator {
+    return this.sidebarTree.methodBadge(name);
   }
 
   async openSidebarItem(name: string): Promise<void> {
@@ -135,8 +156,8 @@ export class PlaygroundComponent extends BaseComponent {
   }
 
   async openEnvironments(): Promise<void> {
-    await this.ensureSidebarOpen();
-    await this.gear.click();
+    await this.envSwitcher.open();
+    await this.envSwitcher.option('configure-actions').click();
   }
 
   async selectDock(mode: DockMode): Promise<void> {

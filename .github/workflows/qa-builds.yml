@@ -132,3 +132,63 @@ jobs:
           done
           echo "Pages did not serve $SHA within 10 minutes"
           exit 1
+
+  notify:
+    needs: [build, publish, verify]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Post build status to Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GH_TOKEN: ${{ github.token }}
+          RESULT: ${{ needs.verify.result }}
+          FOLDER: ${{ needs.build.outputs.folder || github.ref_name }}
+          SHA: ${{ needs.build.outputs.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL is not set, skipping"
+            exit 0
+          fi
+
+          sha="${SHA:-${GITHUB_SHA::7}}"
+          site="$PAGES_URL/$FOLDER/"
+
+          case "$GITHUB_REF" in
+            refs/tags/preview/pr-*)
+              kind=preview
+              pr="${GITHUB_REF_NAME#preview/pr-}"
+              ;;
+            *)
+              kind=release
+              pr=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" \
+                --jq '[.[] | select(.merged_at != null)][0].number // empty')
+              ;;
+          esac
+
+          if [ -n "$pr" ]; then
+            pr_line=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr" --jq \
+              '"<\(.html_url)|#\(.number)> “\(.title | gsub("&";"&amp;") | gsub("<";"&lt;") | gsub(">";"&gt;"))” by \(.user.login)"')
+          else
+            pr_line="pushed by $GITHUB_ACTOR"
+          fi
+
+          if [ "$RESULT" = "success" ]; then
+            if [ "$kind" = preview ]; then
+              text=":mag_right: preview of #$pr is live"$'\n'"sha $sha · $site"
+            else
+              text=":white_check_mark: $FOLDER is live"$'\n'"$pr_line · sha $sha"$'\n'"$site"
+            fi
+          else
+            if [ "$kind" = preview ]; then
+              text=":x: preview of #$pr build failed"$'\n'"sha $sha"$'\n'"run: $RUN_URL"
+            else
+              text=":x: $FOLDER build failed"$'\n'"$pr_line · sha $sha"$'\n'"run: $RUN_URL"
+            fi
+          fi
+
+          jq -n --arg text "$text" '{text: $text, unfurl_links: false, unfurl_media: false}' \
+            | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK_URL"

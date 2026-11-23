@@ -7,6 +7,8 @@ export interface EnvState {
 
 export const ENV_STORAGE_KEY = 'oc-docs.env';
 
+export const NO_ENVIRONMENT = '';
+
 const saved = persisted<Partial<EnvState>>('sessionStorage', ENV_STORAGE_KEY);
 
 export const readPersistedEnv = (): EnvState => {

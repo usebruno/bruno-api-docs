@@ -17,6 +17,7 @@ import { externalSecretPointer } from '@usebruno/api-shared/constants';
 import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@usebruno/api-shared/utils/environments';
 import { countEnabled } from '@usebruno/api-shared/utils/schemaHelpers';
 import { isSecretVariable, isExternalSecretActive, type ExternalSecretEntry } from '@usebruno/api-shared/utils/variableResolution';
+import { useEnvState } from '@usebruno/api-shared/session/session';
 
 const ENV_TABS = [
   { id: 'variables', label: 'Variables' },
@@ -45,9 +46,12 @@ interface EnvironmentsViewProps {
 type LegacyCollection = OpenCollection & { environments?: Environment[] };
 
 const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false, onCollectionChange }) => {
-  const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
-
+  const { activeEnvName } = useEnvState();
   const environments = (collection as LegacyCollection | null)?.environments || collection?.config?.environments || [];
+  const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(() => {
+    const activeIndex = environments.findIndex((environment: Environment) => environment.name === activeEnvName);
+    return activeIndex >= 0 ? activeIndex : null;
+  });
   const selectedEnvironment
     = selectedEnvironmentIndex !== null ? environments[selectedEnvironmentIndex] ?? null : null;
 

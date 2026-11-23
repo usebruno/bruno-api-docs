@@ -1,6 +1,7 @@
 import React from 'react';
 import { getMethodColorVar } from '@/theme/methodColors';
 import { getShortMethod } from '@/utils/request';
+import { highlightRanges } from '@/utils/highlightRanges';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SidebarNavLinkProps {
@@ -15,6 +16,7 @@ interface SidebarNavLinkProps {
   script?: boolean;
   onClick?: () => void;
   title?: string;
+  highlight?: Array<[number, number]>;
   slug?: string;
   testId?: string;
 }
@@ -30,6 +32,7 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
   script = false,
   onClick,
   title,
+  highlight,
   slug,
   testId
 }) => {
@@ -74,7 +77,7 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
       {chevron}
       <button type="button" className="navlink-main" title={title ?? label} onClick={onClick}>
         {leading}
-        <span className="navlink-label" data-testid={partTestId('label')}>{label}</span>
+        <span className="navlink-label" data-testid={partTestId('label')}>{highlightRanges(label, highlight)}</span>
       </button>
     </StyledWrapper>
   );

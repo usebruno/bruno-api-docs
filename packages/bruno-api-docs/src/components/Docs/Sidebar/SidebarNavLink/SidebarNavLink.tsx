@@ -1,7 +1,7 @@
 import React from 'react';
 import { getMethodColorVar } from '@/theme/methodColors';
 import { getShortMethod } from '@/utils/request';
-import { highlightRanges } from '@/components/Search/SearchResultItem/SearchResultItem';
+import { highlightRanges } from '@/utils/highlightRanges';
 import { StyledWrapper } from './StyledWrapper';
 
 interface SidebarNavLinkProps {
@@ -17,8 +17,6 @@ interface SidebarNavLinkProps {
   onClick?: () => void;
   title?: string;
   highlight?: Array<[number, number]>;
-  subLabel?: string;
-  subHighlight?: Array<[number, number]>;
   slug?: string;
   testId?: string;
 }
@@ -35,8 +33,6 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
   onClick,
   title,
   highlight,
-  subLabel,
-  subHighlight,
   slug,
   testId
 }) => {
@@ -74,21 +70,9 @@ const SidebarNavLink: React.FC<SidebarNavLinkProps> = ({
       data-slug={slug}
     >
       {chevron}
-      <button
-        type="button"
-        className={subLabel ? 'navlink-main has-sublabel' : 'navlink-main'}
-        title={title ?? label}
-        onClick={onClick}
-      >
+      <button type="button" className="navlink-main" title={title ?? label} onClick={onClick}>
         {leading}
-        {subLabel ? (
-          <span className="navlink-text">
-            <span className="navlink-label">{highlightRanges(label, highlight)}</span>
-            <span className="navlink-sublabel">{highlightRanges(subLabel, subHighlight)}</span>
-          </span>
-        ) : (
-          <span className="navlink-label">{highlightRanges(label, highlight)}</span>
-        )}
+        <span className="navlink-label">{highlightRanges(label, highlight)}</span>
       </button>
     </StyledWrapper>
   );

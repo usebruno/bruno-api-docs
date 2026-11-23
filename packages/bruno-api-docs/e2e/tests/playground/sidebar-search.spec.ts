@@ -7,7 +7,6 @@ test.describe('Playground sidebar search', () => {
 
   test.beforeEach(async ({ playground }) => {
     await playground.open('bottom');
-    await expect(playground.treeItems).toHaveCount(FULL_TREE_ROWS);
   });
 
   test('filters by name and keeps the folders leading to each match open', async ({ playground }) => {
@@ -21,29 +20,17 @@ test.describe('Playground sidebar search', () => {
       /No Auth Query/
     ]);
     await expect(playground.folderToggle('GraphQL Fixtures')).toHaveAttribute('aria-label', 'Collapse folder');
-    await expect(playground.sidebarItem('03 Auth And Headers').locator('.search-hl')).toHaveText('Auth');
+    await expect(playground.searchHighlight('03 Auth And Headers')).toHaveText('Auth');
   });
 
-  test('finds requests by URL and shows the URL line only while searching', async ({ playground }) => {
-    await playground.searchInput.fill('api/users');
-
-    const getUsers = playground.sidebarItem('get users');
-    await expect(getUsers.locator('.navlink-sublabel')).toHaveText('{{host}}/api/users?page=1&limit=10');
-    await expect(getUsers.locator('.navlink-sublabel .search-hl')).not.toHaveCount(0);
-
-    await playground.clearSearchButton.click();
-    await expect(playground.sidebarPanel.locator('.navlink-sublabel')).toHaveCount(0);
+  test('matches names only, not URLs', async ({ playground }) => {
+    await playground.searchInput.fill('host');
+    await expect(playground.sidebarPanel.getByText('No results found')).toBeVisible();
   });
 
-  test('does not show a URL line for requests that matched by name', async ({ playground }) => {
-    await playground.searchInput.fill('auth');
-    await expect(playground.sidebarItem('Bearer Auth Query')).toBeVisible();
-    await expect(playground.sidebarPanel.locator('.navlink-sublabel')).toHaveCount(0);
-  });
-
-  test('does not filter until two characters are typed', async ({ playground }) => {
-    await playground.searchInput.fill('a');
-    await expect(playground.treeItems).toHaveCount(FULL_TREE_ROWS);
+  test('filters from the first character', async ({ playground }) => {
+    await playground.searchInput.fill('j');
+    await expect(playground.treeItems).toHaveText([/echo json/, /Jokes/]);
   });
 
   test('shows "No results found" when nothing matches', async ({ playground }) => {
@@ -78,7 +65,7 @@ test.describe('Playground sidebar search', () => {
     await playground.folderToggle('03 Auth And Headers').click();
     await expect(playground.sidebarItem('Bearer Auth Query')).toBeHidden();
 
-    await playground.sidebarItem('03 Auth And Headers').locator('.navlink-main').click();
+    await playground.sidebarItemLink('03 Auth And Headers').click();
     await expect(playground.sidebarItem('Bearer Auth Query')).toBeVisible();
   });
 
@@ -100,13 +87,5 @@ test.describe('Playground sidebar search', () => {
     await playground.clearSearchButton.click();
     await expect(playground.treeItems).toHaveCount(FULL_TREE_ROWS);
     await expect(playground.folderToggle('GraphQL Fixtures')).toHaveAttribute('aria-label', 'Expand folder');
-  });
-
-  test('finds a request by a URL edited in the playground', async ({ playground }) => {
-    await playground.openRequest('get users');
-    await playground.urlInput.fill('{{host}}/api/zebracorn');
-
-    await playground.searchInput.fill('zebracorn');
-    await expect(playground.sidebarItem('get users').locator('.navlink-sublabel')).toHaveText('{{host}}/api/zebracorn');
   });
 });

@@ -1,10 +1,8 @@
 import { useMemo, useState } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import { useNavModel } from '@/routing/hooks';
-import { buildSearchRecords, createSearchIndex, searchHits } from '@/components/Search/searchIndex';
-import { filterItems, findItemByUuid, getItemUuid } from '@/utils/itemUtils';
-
-const MIN_QUERY_LENGTH = 2;
+import { buildSearchRecords } from '@/components/Search/searchIndex';
+import { filterItems } from '@/utils/itemUtils';
 
 export const usePlaygroundSearch = (
   collection: OpenCollection | null,
@@ -14,40 +12,24 @@ export const usePlaygroundSearch = (
   const [query, setQuery] = useState('');
   const [closedWhileSearching, setClosedWhileSearching] = useState<Set<string>>(new Set());
 
-  const isSearching = query.trim().length >= MIN_QUERY_LENGTH;
+  const isSearching = query.trim().length > 0;
 
   const model = useNavModel();
-  const searchIndex = useMemo(() => {
-    if (!isSearching) return null;
-    const entries = model.ordered.map((entry) => {
-      const uuid = entry.item ? getItemUuid(entry.item) : undefined;
-      const item = uuid ? findItemByUuid(collection?.items, uuid) : null;
-      return item ? { ...entry, item } : entry;
-    });
-    return createSearchIndex(buildSearchRecords(entries));
-  }, [isSearching, model, collection]);
-
-  const hits = useMemo(() => (searchIndex ? searchHits(searchIndex, query) : []), [searchIndex, query]);
-
+  const records = useMemo(() => (isSearching ? buildSearchRecords(model.ordered) : []), [isSearching, model]);
+  const nameMatches = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const matches = new Map<string, Array<[number, number]>>();
+    for (const record of records) {
+      const start = record.name.toLowerCase().indexOf(needle);
+      if (start !== -1) matches.set(record.id, [[start, start + needle.length - 1]]);
+    }
+    return matches;
+  }, [records, query]);
   const items = useMemo(() => {
     const allItems = collection?.items ?? [];
     if (!isSearching) return allItems;
-    const matchedIds = new Set(hits.map((hit) => hit.record.id));
-    return filterItems(allItems, matchedIds, closedWhileSearching);
-  }, [collection, hits, isSearching, closedWhileSearching]);
-
-  const nameMatches = useMemo(
-    () => new Map(hits.map((hit) => [hit.record.id, hit.matches.name ?? []])),
-    [hits]
-  );
-
-  const urlMatches = useMemo(() => {
-    const map = new Map<string, { url: string; ranges: Array<[number, number]> }>();
-    for (const { record, matches } of hits) {
-      if (record.type === 'request' && matches.url) map.set(record.id, { url: record.url, ranges: matches.url });
-    }
-    return map;
-  }, [hits]);
+    return filterItems(allItems, new Set(nameMatches.keys()), closedWhileSearching);
+  }, [collection, nameMatches, isSearching, closedWhileSearching]);
 
   const onSearchChange = (value: string) => {
     setQuery(value);
@@ -73,5 +55,5 @@ export const usePlaygroundSearch = (
     });
   };
 
-  return { query, onSearchChange, isSearching, items, nameMatches, urlMatches, toggleFolder, expandFolder };
+  return { query, onSearchChange, isSearching, items, nameMatches, toggleFolder, expandFolder };
 };

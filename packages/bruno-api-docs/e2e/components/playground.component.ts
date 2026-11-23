@@ -6,6 +6,7 @@ import { RequestAuthComponent } from './playground/auth.component';
 import { MethodSelectorComponent } from './playground/method-selector.component';
 import { PlaygroundVariableComponent } from './playground/playground-variable.component';
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
+import { EnvEditorComponent } from './environments/env-editor.component';
 import { CodeSnippetComponent } from './request/code-snippet.component';
 import type { DockMode } from '../../src/utils/playgroundDock';
 
@@ -24,6 +25,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly scriptFileEditor = new CodeEditorComponent(this.page, 'playground-script-file-editor');
   readonly variable = new PlaygroundVariableComponent(this.page);
   readonly envSwitcher = new EnvSwitcherComponent(this.page, 'playground-env-switcher');
+  readonly envEditor = new EnvEditorComponent(this.page);
   readonly codeSnippet = new CodeSnippetComponent(this.page, 'query-bar-code-snippet');
 
   readonly urlInput = this.page.getByTestId('query-bar-url');
@@ -85,6 +87,14 @@ export class PlaygroundComponent extends BaseComponent {
 
   sidebarItem(name: string): Locator {
     return this.treeItems.filter({ hasText: name }).first();
+  }
+
+  sidebarItemLink(name: string): Locator {
+    return this.sidebarItem(name).getByRole('button', { name, exact: true });
+  }
+
+  searchHighlight(name: string): Locator {
+    return this.sidebarItem(name).getByTestId('search-highlight');
   }
 
   folderToggle(name: string): Locator {

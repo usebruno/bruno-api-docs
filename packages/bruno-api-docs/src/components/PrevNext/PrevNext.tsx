@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import type { PageType, SeqNeighbor } from '@/routing/types';
-import { getMethodColorVar } from '@/theme/methodColors';
-import { getShortMethod } from '@/utils/request';
-import { ChevronLeftIcon, ChevronRightIcon } from '@/assets/icons';
+import type { PageType, SeqNeighbor } from '@usebruno/api-shared/routing/types';
+import { getMethodColorVar } from '@usebruno/api-shared/theme/methodColors';
+import { getShortMethod } from '@usebruno/api-shared/utils/request';
+import { ChevronLeftIcon, ChevronRightIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 const toPath = (slug: string) => `/${slug}`;

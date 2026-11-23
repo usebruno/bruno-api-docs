@@ -3,10 +3,10 @@ import { describe, it, expect } from 'vitest';
 import type { HttpRequestHeader } from '@opencollection/types/requests/http';
 import { CollectionConfiguration } from './CollectionConfiguration';
 import type { Auth } from '@opencollection/types/common/auth';
-import { AUTH_MODE_LABELS } from '@/constants';
-import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, queryByTestId } from '@/test-utils/dom';
-import type { PreRequestVarRow } from '@/utils/request';
+import { AUTH_MODE_LABELS } from '@usebruno/api-shared/constants';
+import { useRenderToDom } from '@usebruno/api-shared/hooks/useRenderToDom';
+import { getByTestId, queryByTestId } from '@usebruno/api-shared/test-utils/dom';
+import type { PreRequestVarRow } from '@usebruno/api-shared/utils/request';
 
 describe('CollectionConfiguration', () => {
   it('renders nothing when there is no configuration', () => {

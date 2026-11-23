@@ -1,34 +1,18 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
-import { usePlaygroundUrlState, useIsMobilePhone } from '@/hooks';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+import { usePlaygroundUrlState, useIsMobilePhone } from '@usebruno/api-shared/hooks';
+import { ENVIRONMENTS_SLUG } from '@usebruno/api-shared/routing';
 import InlineDock from './docks/InlineDock/InlineDock';
 import BottomSheetDock from './docks/BottomSheetDock/BottomSheetDock';
 import ModalDock from './docks/ModalDock/ModalDock';
 import MobileDock from './docks/MobileDock/MobileDock';
 import { ErrorBoundary } from '../ErrorBoundary/ErrorBoundary';
-import { playgroundRuns, PLAYGROUND_CLOSED } from './Content/Views/PlaygroundView/playgroundRuns';
-import { useAppDispatch } from '@/store/hooks';
-import { clearAllPlaygroundRequestsStarted } from '@/store/slices/playground';
+import { playgroundRuns, PLAYGROUND_CLOSED } from '@usebruno/api-shared/session/playgroundRuns';
+import { loadPlayground } from './load';
+import { retryableLazy } from './retryableLazy';
+import PlaygroundLoadError from './PlaygroundLoadError';
 
 // Lazy so opening the dock shell never eagerly loads the runner/QuickJS runtime.
-const PlaygroundBody = lazy(() => import('./PlaygroundBody/PlaygroundBody'));
-
-const playgroundLoadError = (
-  <div
-    data-testid="playground-load-error"
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100%',
-      padding: 16,
-      textAlign: 'center',
-      color: 'var(--text-secondary)',
-      fontSize: 13
-    }}
-  >
-    The playground failed to load in this environment.
-  </div>
-);
+const playgroundBody = retryableLazy(loadPlayground);
 
 interface PlaygroundProps {
   /** Bumped on each Try click, so the bottom sheet can re-expand from collapsed. */
@@ -36,8 +20,7 @@ interface PlaygroundProps {
 }
 
 const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
-  const dispatch = useAppDispatch();
-  const { open, dock, requestSlug, exampleSlug, setDock, closePlayground } = usePlaygroundUrlState();
+  const { open, dock, requestSlug, exampleSlug, setDock, closePlayground, setRequestSlug } = usePlaygroundUrlState();
   const isPhone = useIsMobilePhone();
   // On a phone the playground is always the fullscreen MobileDock, and its
   // sidebar behaves like the inline dock's overlay. Feed that dock downstream so
@@ -58,24 +41,29 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
   // request when the user is on the gear/a folder), while close -> reopen resets
   // it so re-opening a request re-applies it.
   const appliedSlugRef = useRef<string | null>(null);
+  const [configureCount, setConfigureCount] = useState(0);
 
-  useEffect(() => () => {
-    playgroundRuns.abortAll(PLAYGROUND_CLOSED);
-    dispatch(clearAllPlaygroundRequestsStarted());
-  }, [dispatch]);
+  useEffect(() => () => playgroundRuns.abortAll(PLAYGROUND_CLOSED), []);
 
   if (!open) return null;
+
+  const PlaygroundBody = playgroundBody();
 
   const shared = {
     dock: effectiveDock,
     onDockChange: setDock,
     sidebarOpen,
     onToggleSidebar: () => setSidebarOpen((value) => !value),
-    onClose: closePlayground
+    onClose: closePlayground,
+    onConfigure: () => {
+      setConfigureCount((count) => count + 1);
+      setRequestSlug(ENVIRONMENTS_SLUG);
+      if (effectiveDock === 'inline') setSidebarOpen(false);
+    }
   };
 
   const body = (
-    <ErrorBoundary fallback={playgroundLoadError}>
+    <ErrorBoundary fallback={<PlaygroundLoadError />}>
       <Suspense fallback={<div data-testid="playground-loading" style={{ padding: 16 }} />}>
         <PlaygroundBody
           requestSlug={requestSlug}
@@ -85,6 +73,7 @@ const Playground: React.FC<PlaygroundProps> = ({ openNonce }) => {
           onCloseSidebar={() => setSidebarOpen(false)}
           onOpenSidebar={() => setSidebarOpen(true)}
           appliedSlugRef={appliedSlugRef}
+          configureCount={configureCount}
         />
       </Suspense>
     </ErrorBoundary>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { GrpcMessageEntry } from '@/utils/schemaHelpers';
+import type { GrpcMessageEntry } from '@usebruno/api-shared/utils/schemaHelpers';
 import { GrpcMessageCard } from './GrpcMessageCard/GrpcMessageCard';
-import { ExpandToggle } from '@/components/ExpandToggle/ExpandToggle';
+import { ExpandToggle } from '@usebruno/api-shared/components/ExpandToggle/ExpandToggle';
 
 const COLLAPSED_COUNT = 3;
 

@@ -1,9 +1,9 @@
 import React from 'react';
 import { ScopeTag } from '../ScopeTag/ScopeTag';
-import { DisabledBadge } from '../../DisabledBadge/DisabledBadge';
-import { VariableText } from '../../VariableText/VariableText';
-import { TruncatedText } from '../../TruncatedText/TruncatedText';
-import { Description } from '../../Description/Description';
+import { DisabledBadge } from '@usebruno/api-shared/components/DisabledBadge/DisabledBadge';
+import { VariableText } from '@usebruno/api-shared/components/VariableText/VariableText';
+import { TruncatedText } from '@usebruno/api-shared/components/TruncatedText/TruncatedText';
+import { Description } from '@usebruno/api-shared/components/Description/Description';
 import type { AssertionRow } from '@/utils/assertions';
 import { StyledWrapper } from './StyledWrapper';
 

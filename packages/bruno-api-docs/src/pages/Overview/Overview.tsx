@@ -1,25 +1,25 @@
 import React, { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { StructuredText } from '@opencollection/types/common/description';
-import { useMarkdownRenderer } from '@/hooks';
+import { useMarkdownRenderer } from '@usebruno/api-shared/hooks';
 import {
   getCollectionStats,
   hasCollectionExecutionContext,
   hasCollectionRequestConfig
 } from '@/utils/collectionOverview';
-import { scriptsArrayToObject } from '@/utils/schemaHelpers';
-import { getCollectionVariables } from '@/utils/request';
-import { AUTH_MODE_LABELS } from '@/constants';
+import { scriptsArrayToObject } from '@usebruno/api-shared/utils/schemaHelpers';
+import { getCollectionVariables } from '@usebruno/api-shared/utils/request';
+import { AUTH_MODE_LABELS } from '@usebruno/api-shared/constants';
 import { CollectionStats } from '../../components/CollectionStats/CollectionStats';
 import { CollectionConfiguration } from '../../components/OverviewCollectionConfiguration/CollectionConfiguration';
-import { EmptyState } from '@/ui/EmptyState/EmptyState';
+import { EmptyState } from '@usebruno/api-shared/ui/EmptyState/EmptyState';
 import { PageWrapper } from '../../components/PageWrapper/PageWrapper';
-import { Heading } from '../../components/Heading/Heading';
+import { Heading } from '@usebruno/api-shared/components/Heading/Heading';
 import { Section } from '../../components/Section/Section';
-import { ViewMore } from '../../components/ViewMore/ViewMore';
-import { BookIcon, RefreshIcon } from '@/assets/icons';
+import { ViewMore } from '@usebruno/api-shared/components/ViewMore/ViewMore';
+import { BookIcon, RefreshIcon } from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
-import { MarkdownContent } from '@/components/MarkdownContent/MarkdownContent';
+import { MarkdownContent } from '@usebruno/api-shared/components/MarkdownContent/MarkdownContent';
 
 const getDocsContent = (docs: OpenCollection['docs']): string => {
   if (!docs) return '';

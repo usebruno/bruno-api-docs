@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScriptStep } from '../ScriptStep/ScriptStep';
-import type { ScriptChainStep, ScriptFlow } from '@/utils/request';
+import type { ScriptChainStep, ScriptFlow } from '@usebruno/api-shared/utils/request';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ScriptChainProps {

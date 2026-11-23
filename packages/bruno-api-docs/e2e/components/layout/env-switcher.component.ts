@@ -19,9 +19,10 @@ export class EnvSwitcherComponent extends BaseComponent {
 
   constructor(
     page: Page,
-    private readonly base = 'env-switcher'
+    private readonly base = 'env-switcher',
+    scope: Page | Locator = page
   ) {
-    super(page, page.getByTestId(`${base}-root`));
+    super(page, scope.getByTestId(`${base}-root`));
     this.trigger = this.root.getByTestId(base);
     this.menu = this.page.getByTestId(`${base}-dropdown`);
     this.surface = this.menu.locator('xpath=ancestor::div[@data-tippy-root]');

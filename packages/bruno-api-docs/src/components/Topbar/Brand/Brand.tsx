@@ -1,6 +1,6 @@
 import React from 'react';
 import InitialsAvatar from '../../InitialsAvatar/InitialsAvatar';
-import TruncatedText from '../../TruncatedText/TruncatedText';
+import TruncatedText from '@usebruno/api-shared/components/TruncatedText/TruncatedText';
 import { StyledWrapper } from './StyledWrapper';
 
 export interface BrandProps {

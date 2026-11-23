@@ -38,7 +38,9 @@ jobs:
 
       - run: npm run lint
 
-      - run: npm run test:run -w packages/bruno-api-docs
+      - run: npm run typecheck --workspaces --if-present
+
+      - run: npm run test:run --workspaces --if-present
 
       # `draft` is null on push events, so that arm is required.
       - name: Build

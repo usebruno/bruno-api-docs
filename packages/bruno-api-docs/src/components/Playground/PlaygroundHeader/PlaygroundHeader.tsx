@@ -1,14 +1,10 @@
 import React from 'react';
-import IconButton from '@/ui/IconButton/IconButton';
-import { BrunoGlyph, SidebarToggleIcon, CloseIcon, ChevronDownIcon } from '@/assets/icons';
+import IconButton from '@usebruno/api-shared/ui/IconButton/IconButton';
+import { BrunoGlyph, SidebarToggleIcon, CloseIcon, ChevronDownIcon } from '@usebruno/api-shared/assets/icons';
 import DockSwitcher from '../DockSwitcher/DockSwitcher';
-import EnvSwitcher from '../../EnvSwitcher/EnvSwitcher';
-import { usePlaygroundUrlState } from '@/hooks';
-import { useAppDispatch } from '@/store/hooks';
-import { configureEnvironments } from '@/store/slices/playground';
-import { PLAYGROUND_ENVIRONMENTS_SLUG } from '../PlaygroundBody/resolvePlaygroundTarget';
-import type { DockMode } from '@/utils/playgroundDock';
-import cx from '@/utils/cx';
+import EnvSwitcher from '@usebruno/api-shared/components/EnvSwitcher/EnvSwitcher';
+import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
+import cx from '@usebruno/api-shared/utils/cx';
 import { StyledWrapper } from './StyledWrapper';
 
 interface PlaygroundHeaderProps {
@@ -20,6 +16,7 @@ interface PlaygroundHeaderProps {
   onClose: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  onConfigure: () => void;
   testId?: string;
 }
 
@@ -32,11 +29,9 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
   onClose,
   collapsed,
   onToggleCollapse,
+  onConfigure,
   testId = 'playground-header'
 }) => {
-  const { setRequestSlug } = usePlaygroundUrlState();
-  const dispatch = useAppDispatch();
-
   return (
     <StyledWrapper data-testid={testId}>
       <div className="header-left">
@@ -58,10 +53,7 @@ const PlaygroundHeader: React.FC<PlaygroundHeaderProps> = ({
       <div className="header-right">
         <EnvSwitcher
           testId="playground-env-switcher"
-          onConfigure={() => {
-            dispatch(configureEnvironments());
-            setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG);
-          }}
+          onConfigure={onConfigure}
         />
         {showDockSwitcher && <DockSwitcher dock={dock} onDockChange={onDockChange} />}
         {onToggleCollapse && (

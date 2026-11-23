@@ -1,5 +1,5 @@
 import React from 'react';
-import { TagIcon } from '@/assets/icons';
+import { TagIcon } from '@usebruno/api-shared/assets/icons';
 import Dropdown from '@/ui/Dropdown/Dropdown';
 
 interface TagFilterProps {

@@ -1,9 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { selectTheme, setThemeMode } from '@/store/slices/theme';
-import { Tooltip } from '@/ui/Tooltip/Tooltip';
-import { isDarkMode, persistThemeState } from '@/utils/theme';
+import { useSession, useThemeState } from '@usebruno/api-shared/session/session';
+import { Tooltip } from '@usebruno/api-shared/ui/Tooltip/Tooltip';
+import { isDarkMode } from '@usebruno/api-shared/utils/theme';
 
 const Button = styled.button`
   display: inline-flex;
@@ -44,16 +43,9 @@ const MoonIcon = () => (
 );
 
 const ThemeToggle: React.FC<{ testId?: string }> = ({ testId = 'theme-toggle' }) => {
-  const dispatch = useAppDispatch();
-  const theme = useAppSelector(selectTheme);
-  const isDark = isDarkMode(theme.mode);
+  const { theme } = useSession();
+  const isDark = isDarkMode(useThemeState().mode);
   const label = isDark ? 'Switch to light theme' : 'Switch to dark theme';
-
-  const toggleTheme = () => {
-    const nextMode = isDark ? 'light' : 'dark';
-    dispatch(setThemeMode(nextMode));
-    persistThemeState({ ...theme, mode: nextMode });
-  };
 
   return (
     <Tooltip content={label} touch={false} testId={`${testId}-tooltip`}>
@@ -61,7 +53,7 @@ const ThemeToggle: React.FC<{ testId?: string }> = ({ testId = 'theme-toggle' })
         type="button"
         data-testid={testId}
         aria-label={label}
-        onClick={toggleTheme}
+        onClick={() => theme.toggle(isDark)}
       >
         {isDark ? <SunIcon /> : <MoonIcon />}
       </Button>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>General Fixture - API Documentation</title>
+    <style>
+        body { margin: 0; padding: 0; }
+        #opencollection-container { width: 100vw; height: 100vh; }
+    </style>
+    <link rel="stylesheet" href="http://127.0.0.1:3900/api-docs/api-docs.css">
+    <script src="http://127.0.0.1:3900/api-docs/api-docs.js"></script>
+</head>
+<body>
+    <div id="opencollection-container"></div>
+    <script>
+        const collectionData = "opencollection: 1.0.0\ninfo:\n  name: General Fixture\n  version: 1.0.0\nconfig:\n  environments:\n    - name: Dev\n      variables:\n        - name: host\n          value: https://api.dev.example.com\n        - name: special\n          value: a<b>&\"'\xFC\n        - name: onlyInDev\n          value: from-dev\n        - name: apiToken\n          value: super-secret-token\n          secret: true\n    - name: Prod\n      variables:\n        - name: host\n          value: https://api.prod.example.com\n        - name: special\n          value: a<b>&\"'\xFC\n        - name: apiToken\n          value: super-secret-token\n          secret: true\nitems:\n  - name: Alpha\n    type: http\n    seq: 1\n    method: GET\n    url: '{{host}}/alpha?q={{special}}&m={{onlyInDev}}&t={{apiToken}}'\n    headers:\n      - name: Authorization\n        value: Bearer {{apiToken}}\n      - name: X-Host\n        value: '{{host}}'\n      - name: X-Note\n        value: '{{special}}'\n    body:\n      type: json\n      data: |-\n        {\n          \"host\": \"{{host}}\",\n          \"token\": \"{{apiToken}}\",\n          \"note\": \"{{special}}\"\n        }\n  - name: Beta\n    type: http\n    seq: 2\n    method: GET\n    url: '{{host}}/beta'\nextensions:\n  bruno: {}\n";
+        new window.OpenCollection({
+            target: document.getElementById('opencollection-container'),
+            opencollection: collectionData,
+            theme: 'light'
+        });
+    </script>
+</body>
+</html>

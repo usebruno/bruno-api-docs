@@ -5,7 +5,7 @@ import {
   ServerStreamingIcon,
   ClientStreamingIcon,
   BidiStreamingIcon
-} from '@/assets/icons';
+} from '@usebruno/api-shared/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
 
 // Method types borrow the HTTP method colour tokens rather than defining their own, so both

@@ -1,11 +1,11 @@
 import React from 'react';
 import type { FolderConfig } from '@/utils/folder';
-import { headerRows, inheritedCountLabel } from '@/utils/request';
-import { Code } from '../Code/Code';
-import { SectionLabel } from '../SectionLabel/SectionLabel';
-import { PropertyTable, type PropertyRow } from '../PropertyTable/PropertyTable';
+import { headerRows, inheritedCountLabel } from '@usebruno/api-shared/utils/request';
+import { Code } from '@usebruno/api-shared/components/Code/Code';
+import { SectionLabel } from '@usebruno/api-shared/components/SectionLabel/SectionLabel';
+import { PropertyTable, type PropertyRow } from '@usebruno/api-shared/components/PropertyTable/PropertyTable';
 import { AuthDetails } from '../AuthDetails/AuthDetails';
-import { ContentTypeBadge } from '../ContentTypeBadge/ContentTypeBadge';
+import { ContentTypeBadge } from '@usebruno/api-shared/components/ContentTypeBadge/ContentTypeBadge';
 import { InheritedAuthBadge } from '../InheritedAuthBadge/InheritedAuthBadge';
 import { inheritedHeaderRows, preVarRows, postVarRows } from '../PropertyTable/inheritedRows';
 import { StyledWrapper } from './StyledWrapper';

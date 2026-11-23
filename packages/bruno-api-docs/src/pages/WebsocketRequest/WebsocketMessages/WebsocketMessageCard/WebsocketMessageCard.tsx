@@ -1,12 +1,12 @@
 import React, { useId, useMemo, useState } from 'react';
 import type { WebSocketMessageType } from '@opencollection/types/requests/websocket';
-import cx from '@/utils/cx';
-import { prefersReducedMotion } from '@/utils/motion';
-import { prettifyJsonString, prettifyXmlString } from '@/utils/dataFormatter';
-import { BODY_LANGUAGE, WEBSOCKET_MESSAGE_TYPE_LABELS } from '@/constants';
+import cx from '@usebruno/api-shared/utils/cx';
+import { prefersReducedMotion } from '@usebruno/api-shared/utils/motion';
+import { prettifyJsonString, prettifyXmlString } from '@usebruno/api-shared/utils/dataFormatter';
+import { BODY_LANGUAGE, WEBSOCKET_MESSAGE_TYPE_LABELS } from '@usebruno/api-shared/constants';
 import { ChevronArrow } from '@/components/ChevronArrow/ChevronArrow';
-import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
-import { Code } from '@/components/Code/Code';
+import { ContentTypeBadge } from '@usebruno/api-shared/components/ContentTypeBadge/ContentTypeBadge';
+import { Code } from '@usebruno/api-shared/components/Code/Code';
 import { StyledWrapper } from './StyledWrapper';
 
 const prettify = (type: WebSocketMessageType, data: string): string => {

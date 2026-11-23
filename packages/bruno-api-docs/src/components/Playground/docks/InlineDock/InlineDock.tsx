@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo } from 'react';
 import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
-import { useDockResize } from '@/hooks/useDockResize';
-import { areaFor, readStoredNumber, writeStored } from '@/hooks/useStorage';
-import type { DockMode } from '@/utils/playgroundDock';
+import { useDockResize } from '@usebruno/api-shared/hooks/useDockResize';
+import { areaFor, readStoredNumber, writeStored } from '@usebruno/api-shared/hooks/useStorage';
+import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 const WIDTH_STORAGE_KEY = 'oc-docs:playgroundInlineWidth';
@@ -16,10 +16,19 @@ interface InlineDockProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
   onClose: () => void;
+  onConfigure: () => void;
   children: React.ReactNode;
 }
 
-const InlineDock: React.FC<InlineDockProps> = ({ dock, onDockChange, sidebarOpen, onToggleSidebar, onClose, children }) => {
+const InlineDock: React.FC<InlineDockProps> = ({
+  dock,
+  onDockChange,
+  sidebarOpen,
+  onToggleSidebar,
+  onClose,
+  onConfigure,
+  children
+}) => {
   const initialWidth = useMemo(
     () => readStoredNumber(areaFor('session'), WIDTH_STORAGE_KEY, Math.round(getViewportWidth() * 0.4)),
     []
@@ -55,6 +64,7 @@ const InlineDock: React.FC<InlineDockProps> = ({ dock, onDockChange, sidebarOpen
           sidebarOpen={sidebarOpen}
           onToggleSidebar={onToggleSidebar}
           onClose={onClose}
+          onConfigure={onConfigure}
         />
         <div className="dock-content" data-testid="playground-content">
           {children}

@@ -1,4 +1,6 @@
 import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { extname } from 'node:path';
 
 const port = Number(process.env.PORT ?? 3900);
 
@@ -9,6 +11,18 @@ const corsHeaders = (req) => ({
   'Access-Control-Expose-Headers': '*',
   'Vary': 'Origin'
 });
+
+const staticRoots = [new URL('./standalone/', import.meta.url), new URL('../../dist-standalone/', import.meta.url)];
+const contentTypes = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' };
+
+const readStatic = async (name) => {
+  if (!/^[\w.-]+$/.test(name)) return null;
+  for (const root of staticRoots) {
+    const body = await readFile(new URL(name, root)).catch(() => null);
+    if (body) return body;
+  }
+  return null;
+};
 
 const readBody = async (req) => {
   const chunks = [];
@@ -48,6 +62,9 @@ const handle = async (req, res) => {
     };
     return send(res, 200, { ...cors, 'Content-Type': 'application/json' }, JSON.stringify(echoed));
   }
+
+  const file = await readStatic(url.pathname.replace(/^\/(api-docs\/)?/, ''));
+  if (file) return send(res, 200, { 'Content-Type': contentTypes[extname(url.pathname)] ?? 'text/plain' }, file);
 
   send(res, 404, { ...cors, 'Content-Type': 'text/plain' }, 'not found');
 };

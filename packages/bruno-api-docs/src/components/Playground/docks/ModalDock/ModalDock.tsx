@@ -1,8 +1,9 @@
 import React from 'react';
-import Portal from '@/ui/Portal/Portal';
+import Portal from '@usebruno/api-shared/ui/Portal/Portal';
 import PlaygroundHeader from '../../PlaygroundHeader/PlaygroundHeader';
-import { useEscapeKey, useLockBodyScroll } from '@/hooks';
-import type { DockMode } from '@/utils/playgroundDock';
+import { useEscapeKey } from '@usebruno/api-shared/hooks';
+import { useLockBodyScroll } from '@/hooks/useLockBodyScroll';
+import type { DockMode } from '@usebruno/api-shared/utils/playgroundDock';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ModalDockProps {
@@ -11,10 +12,19 @@ interface ModalDockProps {
   sidebarOpen: boolean;
   onToggleSidebar: () => void;
   onClose: () => void;
+  onConfigure: () => void;
   children: React.ReactNode;
 }
 
-const ModalDock: React.FC<ModalDockProps> = ({ dock, onDockChange, sidebarOpen, onToggleSidebar, onClose, children }) => {
+const ModalDock: React.FC<ModalDockProps> = ({
+  dock,
+  onDockChange,
+  sidebarOpen,
+  onToggleSidebar,
+  onClose,
+  onConfigure,
+  children
+}) => {
   // Modal is a true full-screen overlay: lock the docs body scroll behind it and
   // close on Escape (the inline/bottom docks are persistent panels, so they get
   // neither). Focus containment / focus-return is a tracked follow-up.
@@ -32,6 +42,7 @@ const ModalDock: React.FC<ModalDockProps> = ({ dock, onDockChange, sidebarOpen, 
             sidebarOpen={sidebarOpen}
             onToggleSidebar={onToggleSidebar}
             onClose={onClose}
+            onConfigure={onConfigure}
           />
           <div className="modal-content" data-testid="playground-content">
             {children}

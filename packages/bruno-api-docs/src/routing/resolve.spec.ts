@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
-import { buildNavModel, OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from './navModel';
+import { buildNavModel, OVERVIEW_SLUG, ENVIRONMENTS_SLUG } from '@usebruno/api-shared/routing/navModel';
 import { normalizeSlug, resolveSlug } from './resolve';
 
 const req = (name: string, seq: number, method = 'GET') => ({

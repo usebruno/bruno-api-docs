@@ -8,7 +8,7 @@ import { PlaygroundVariableComponent } from './playground/playground-variable.co
 import { EnvSwitcherComponent } from './layout/env-switcher.component';
 import { EnvEditorComponent } from './environments/env-editor.component';
 import { CodeSnippetComponent } from './request/code-snippet.component';
-import type { DockMode } from '../../src/utils/playgroundDock';
+import type { DockMode } from '../../../bruno-shared/src/utils/playgroundDock';
 import { SidebarComponent } from './sidebar.component';
 
 export class PlaygroundComponent extends BaseComponent {
@@ -48,7 +48,7 @@ export class PlaygroundComponent extends BaseComponent {
     name: /Bruno Testbench|Collection/
   });
 
-  readonly view = this.page.getByTestId('playground-view');
+  readonly view = this.root.getByTestId('playground-view');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
   readonly searchInput = this.page.getByTestId('playground-sidebar-search');
@@ -69,6 +69,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly scriptFile = this.view.getByTestId('playground-script-file');
   readonly scriptFileTitle = this.view.getByTestId('playground-script-file-title');
   readonly exampleView = this.page.getByTestId('example-view');
+  readonly exampleViewName = this.page.getByTestId('example-view-name');
   readonly exampleViewRequest = this.page.getByTestId('example-view-request');
   readonly exampleViewResponse = this.page.getByTestId('example-view-response');
 
@@ -89,6 +90,10 @@ export class PlaygroundComponent extends BaseComponent {
 
   sidebarItem(name: string): Locator {
     return this.treeItems.filter({ hasText: name }).first();
+  }
+
+  folderChevron(name: string): Locator {
+    return this.sidebarItem(name).locator('.navlink-chevron');
   }
 
   sidebarItemLink(name: string): Locator {

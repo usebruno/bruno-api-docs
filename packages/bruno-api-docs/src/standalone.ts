@@ -1,13 +1,15 @@
 import React from 'react';
 import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
-import './styles/index.css';
+import '@usebruno/api-shared/styles/index.css';
 // Import Prism (with our token customizations) to ensure it's bundled
-import Prism from './utils/prism';
+import Prism from '@usebruno/api-shared/utils/prism';
 import OpenCollection from './components/OpenCollection/OpenCollection';
-import type { OpenCollection as IOpenCollection } from '@opencollection/types';
-import { parseCollectionContent } from './utils/yamlUtils';
-import type { ThemeState } from './theme/types';
+import { injectInterFont, mountApiPlayground } from '@usebruno/api-shared/utils/standalone';
+import type { ApiDocsInstance, ApiDocsOptions, ApiPlaygroundOptions, Bruno, OpenCollectionOptions } from '../standalone';
+import { parseCollectionContent } from '@usebruno/api-shared/utils/yamlUtils';
+import type { CollectionSource } from '@usebruno/api-shared/components/CollectionShell/useCollectionLoader';
+import ApiPlaygroundView from './components/Playground/ApiPlaygroundView';
 import { isEmpty, isPlainObject } from 'lodash-es';
 
 // Ensure Prism is available globally for any code that might access it
@@ -15,22 +17,19 @@ if (typeof window !== 'undefined') {
   (window as any).Prism = Prism;
 }
 
-export interface OpenCollectionOptions {
-  target: HTMLElement;
-  opencollection: any;
-  logo?: string;
-  gitCollectionUrl?: string;
-  theme?: Partial<ThemeState>;
-  hideThemeSwitcher?: boolean;
-  hidePlayground?: boolean;
-}
+export type { ApiDocsInstance, ApiDocsOptions, ApiPlaygroundInstance, ApiPlaygroundOptions, OpenCollectionOptions } from '../standalone';
 
-export interface ApiDocsOptions extends Omit<OpenCollectionOptions, 'target' | 'opencollection'> {
-  content: OpenCollectionOptions['opencollection'];
-  repositoryUrl?: string;
-}
+const parseContent = (content: CollectionSource): CollectionSource => {
+  if (typeof content !== 'string') return content;
+  try {
+    return parseCollectionContent(content);
+  } catch (error) {
+    console.error('Failed to parse collection:', error);
+    throw new Error(`Invalid collection format: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
 
-export class OpenCollectionRenderer {
+export class OpenCollectionRenderer implements ApiDocsInstance {
   private root: Root | null = null;
   private options: OpenCollectionOptions;
 
@@ -39,49 +38,14 @@ export class OpenCollectionRenderer {
     this.init();
   }
 
-  private injectInterFont() {
-    // Only inject if not already present
-    if (!document.querySelector('link[href*="fonts.googleapis.com/css2?family=Inter"]')) {
-      const links = [
-        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossOrigin: 'anonymous' },
-        {
-          rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600;700&display=swap'
-        }
-      ];
-
-      links.forEach((linkProps) => {
-        const link = document.createElement('link');
-        Object.entries(linkProps).forEach(([key, value]) => {
-          link.setAttribute(key, value);
-        });
-        document.head.appendChild(link);
-      });
-    }
-  }
-
   private init() {
     if (!this.options.target) {
       throw new Error('Target element is required');
     }
 
-    this.injectInterFont();
+    injectInterFont();
     this.root = createRoot(this.options.target);
     this.render();
-  }
-
-  private convertCollection(opencollection: any): IOpenCollection {
-    if (typeof opencollection === 'string') {
-      try {
-        return parseCollectionContent(opencollection) as IOpenCollection;
-      } catch (error) {
-        console.error('Failed to parse collection:', error);
-        throw new Error(`Invalid collection format: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      }
-    }
-
-    return opencollection as IOpenCollection;
   }
 
   private createLogoElement(): React.ReactNode {
@@ -97,7 +61,7 @@ export class OpenCollectionRenderer {
   private render() {
     if (!this.root) return;
 
-    const collection = this.convertCollection(this.options.opencollection);
+    const collection = parseContent(this.options.opencollection);
 
     this.root.render(React.createElement(OpenCollection, {
       collection,
@@ -109,7 +73,7 @@ export class OpenCollectionRenderer {
     }));
   }
 
-  public updateCollection(opencollection: any) {
+  public updateCollection(opencollection: CollectionSource) {
     this.options.opencollection = opencollection;
     this.render();
   }
@@ -148,10 +112,10 @@ class DeprecatedOpenCollection extends OpenCollectionRenderer {
 }
 
 if (typeof window !== 'undefined') {
-  const globals = window as any;
-  globals.OpenCollection = DeprecatedOpenCollection;
-  globals.Bruno = {
-    ...globals.Bruno,
+  const existing = window.Bruno as Partial<Bruno> | undefined;
+  window.OpenCollection = DeprecatedOpenCollection;
+  window.Bruno = {
+    ...existing,
     build: __BRUNO_BUILD__,
     apiDocs: (target: HTMLElement, { content, repositoryUrl, gitCollectionUrl, ...options }: ApiDocsOptions) =>
       new OpenCollectionRenderer({
@@ -159,6 +123,9 @@ if (typeof window !== 'undefined') {
         opencollection: content,
         gitCollectionUrl: repositoryUrl ?? gitCollectionUrl,
         ...options
-      })
+      }),
+    apiPlayground: existing?.apiPlayground
+      ?? ((target: HTMLElement, options: ApiPlaygroundOptions) =>
+        mountApiPlayground(target, options, ApiPlaygroundView))
   };
 }

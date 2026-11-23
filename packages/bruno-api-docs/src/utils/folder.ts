@@ -1,7 +1,7 @@
 import type { OpenCollection } from '@opencollection/types';
 import type { Item, Folder } from '@opencollection/types/collection/item';
 import type { Auth } from '@opencollection/types/common/auth';
-import { isFolder, isScriptFile, scriptsArrayToObject } from './schemaHelpers';
+import { isFolder, isScriptFile, scriptsArrayToObject } from '@usebruno/api-shared/utils/schemaHelpers';
 import {
   getDescription,
   getRequestDefaultsVars,
@@ -16,7 +16,7 @@ import {
   type InheritedHeaderRow,
   type InheritedPreRequestVarRow,
   type InheritedPostResponseVarRow
-} from './request';
+} from '@usebruno/api-shared/utils/request';
 
 export interface FolderHeaderRow {
   name: string;

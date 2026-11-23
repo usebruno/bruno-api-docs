@@ -1,7 +1,7 @@
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import { OVERVIEW_SLUG } from './navModel';
-import { exampleIndexForSlug } from './slug';
-import type { NavEntry, NavModel, SeqNeighbor } from './types';
+import { OVERVIEW_SLUG } from '@usebruno/api-shared/routing/navModel';
+import { exampleIndexForSlug } from '@usebruno/api-shared/routing/slug';
+import type { NavEntry, NavModel, SeqNeighbor } from '@usebruno/api-shared/routing/types';
 
 export interface Resolution {
   entry: NavEntry;

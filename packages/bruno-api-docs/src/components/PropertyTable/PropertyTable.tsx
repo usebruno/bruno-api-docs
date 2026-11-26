@@ -73,7 +73,7 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
           const showType = Boolean(row.type) && !hasNoValue(row);
           const hasTrailing = showType || Boolean(row.disabled) || Boolean(row.inheritedSource);
           return (
-            <div className="property-row" key={`${row.label}-${index}`}>
+            <div className="property-row" data-testid="property-row" key={`${row.label}-${index}`}>
               <dt className="property-key"><TruncatedText text={row.label} /></dt>
               <dd className="property-value-cell" data-testid={rowTestId}>
                 <div className="property-value-line" data-testid="property-value-line">

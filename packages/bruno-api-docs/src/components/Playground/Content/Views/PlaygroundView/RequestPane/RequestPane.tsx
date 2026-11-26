@@ -119,7 +119,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
 
   const renderParams = () => (
     <ParamsTab
-      itemUuid={getItemUuid(item)}
+      key={getItemUuid(item)}
       params={params}
       onParamsChange={handleParamsChange}
     />
@@ -137,7 +137,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
 
   const renderHeaders = () => (
     <HeadersTab
-      itemUuid={getItemUuid(item)}
+      key={getItemUuid(item)}
       headers={headers}
       onHeadersChange={handleHeadersChange}
       description="Headers sent with this request."

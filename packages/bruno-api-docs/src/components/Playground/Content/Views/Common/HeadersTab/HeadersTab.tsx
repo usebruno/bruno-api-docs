@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { STANDARD_HTTP_HEADERS, MIME_TYPES } from '@/constants/httpHeaders';
 import { HEADER_NAME_REGEX, HEADER_VALUE_REGEX } from '@/constants/regex';
@@ -11,7 +11,6 @@ interface HeadersTabProps {
   onHeadersChange: (headers: KeyValueRow[]) => void;
   title?: string;
   description?: string;
-  itemUuid?: string;
 }
 
 const getHeaderError = (row: KeyValueRow, _index: number, field: 'name' | 'value'): string | null => {
@@ -26,12 +25,8 @@ const getHeaderError = (row: KeyValueRow, _index: number, field: 'name' | 'value
   return null;
 };
 
-const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> = ({ headers, onHeadersChange, itemUuid }) => {
+const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> = ({ headers, onHeadersChange }) => {
   const [showKeyValueTable, setShowKeyValueTable] = useState(true);
-
-  useEffect(() => {
-    setShowKeyValueTable(true);
-  }, [itemUuid]);
   const headersData: KeyValueRow[] = (headers || []).map((header, index) => ({
     id: `header-${index}`,
     name: header.name || '',
@@ -75,7 +70,7 @@ const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> =
   );
 };
 
-export const HeadersTab: React.FC<HeadersTabProps> = ({ headers, onHeadersChange, title, description, itemUuid }) => {
+export const HeadersTab: React.FC<HeadersTabProps> = ({ headers, onHeadersChange, title, description }) => {
   return (
     <StyledWrapper className="space-y-3">
       {(Boolean(title) || Boolean(description)) && (
@@ -84,7 +79,7 @@ export const HeadersTab: React.FC<HeadersTabProps> = ({ headers, onHeadersChange
           {description && <span className="description text-xs leading-tight">{description}</span>}
         </div>
       )}
-      <HeadersDisplay headers={headers} onHeadersChange={onHeadersChange} itemUuid={itemUuid} />
+      <HeadersDisplay headers={headers} onHeadersChange={onHeadersChange} />
     </StyledWrapper>
   );
 };

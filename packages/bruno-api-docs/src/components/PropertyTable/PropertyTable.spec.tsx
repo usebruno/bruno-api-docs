@@ -100,9 +100,9 @@ describe('PropertyTable', () => {
       />
     );
     const trailing = query(root, '.property-trailing');
-    expect(trailing.querySelector('.property-type')).not.toBeNull();
-    expect(trailing.querySelector('.disabled-badge')).not.toBeNull();
-    expect(trailing.querySelector('[data-testid="inherited-source"]')).not.toBeNull();
+    expect(query(trailing, '.property-type').text).toBe('string');
+    expect(query(trailing, '.disabled-badge').text).toBe('Disabled');
+    expect(query(trailing, '.inherited-source').getAttribute('aria-label')).toBe('X-Trace: Inherited from folder: Parent');
     expect(query(root, '.property-value-line').querySelector('.disabled-badge')).toBeNull();
   });
 

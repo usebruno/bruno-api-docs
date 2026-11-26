@@ -10,7 +10,7 @@ export interface BulkEditProps {
   idPrefix?: string;
 }
 
-const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix = 'bulk' }) => {
+const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix }) => {
   const originalRef = useRef(data);
   const [text, setText] = useState(() => serializeBulkKeyValue(data));
 
@@ -25,7 +25,7 @@ const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix = 'bulk' }
 
   const handleChange = (value: string) => {
     setText(value);
-    onChange(preserveDescriptions(parseBulkKeyValue(value), originalRef.current, idPrefix));
+    onChange(preserveDescriptions(parseBulkKeyValue(value), originalRef.current, idPrefix ?? 'row'));
   };
 
   return (
@@ -36,7 +36,7 @@ const BulkEdit: React.FC<BulkEditProps> = ({ data, onChange, idPrefix = 'bulk' }
         language="plaintext"
         height="200px"
         placeholder="name: value"
-        testId={`${idPrefix}-bulk-editor`}
+        testId={idPrefix ? `${idPrefix}-bulk-editor` : 'bulk-editor'}
       />
     </StyledWrapper>
   );

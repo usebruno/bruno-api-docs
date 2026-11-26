@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { getDescription } from '@/utils/request';
 import BulkEdit from '../BulkEdit/BulkEdit';
@@ -9,7 +9,6 @@ interface ParamsTabProps {
   onParamsChange: (params: KeyValueRow[]) => void;
   title?: string;
   description?: string;
-  itemUuid?: string;
 }
 
 interface ParamsSectionProps {
@@ -70,14 +69,9 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
   params,
   onParamsChange,
   title = 'Query',
-  description,
-  itemUuid
+  description
 }) => {
   const [showKeyValueTable, setShowKeyValueTable] = useState(true);
-
-  useEffect(() => {
-    setShowKeyValueTable(true);
-  }, [itemUuid]);
 
   // Single pass: split the params into query and path rows. `type` is kept on
   // each row so it survives the round-trip back through onParamsChange.

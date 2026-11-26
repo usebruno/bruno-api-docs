@@ -33,6 +33,11 @@ const createSanitizer = (): DOMPurify | null => {
     if (node.nodeName === 'INPUT' && node.getAttribute('type')?.toLowerCase() !== 'checkbox') {
       node.remove();
     }
+
+    const href = node.getAttribute('href');
+    if (node.nodeName === 'A' && href?.startsWith('#') && !href.startsWith('#/') && href.length > 1 && !href.startsWith('#user-content-')) {
+      node.setAttribute('href', `#user-content-${href.slice(1)}`);
+    }
   });
 
   return purifier;
@@ -158,6 +163,8 @@ export const createMarkdownRenderer = (): MarkdownIt => {
   if (sanitizer) {
     const render = markdownIt.render.bind(markdownIt);
     markdownIt.render = (src, env) => sanitizer.sanitize(render(src, env), SANITIZE_CONFIG);
+    const renderInline = markdownIt.renderInline.bind(markdownIt);
+    markdownIt.renderInline = (src, env) => sanitizer.sanitize(renderInline(src, env), SANITIZE_CONFIG);
   }
 
   return markdownIt;

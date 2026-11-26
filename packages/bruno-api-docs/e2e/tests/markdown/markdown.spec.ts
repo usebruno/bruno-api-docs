@@ -140,12 +140,17 @@ test.describe('Rendered markdown documentation', () => {
     });
 
     await test.step('content cannot style itself over the page or borrow host classes and hooks', async () => {
-      const block = docs.getByText('Styled block');
+      const block = docs.getByText('Styled block', { exact: true });
       await expect(block).not.toHaveAttribute('style');
       await expect(block).not.toHaveAttribute('data-nav-headings');
       await expect(block).toHaveAttribute('class', 'md-table-scroll');
       await expect(block).toHaveAttribute('id', 'user-content-overlay');
       await expect(block).not.toHaveCSS('position', 'fixed');
+    });
+
+    await test.step('an in-page link still points at its renamed target', async () => {
+      await expect(docs.getByText('Jump to styled block')).toHaveAttribute('href', '#user-content-overlay');
+      await expect(docs.getByText('Go to customers')).toHaveAttribute('href', '#/billing/customers');
     });
 
     await test.step('forms and their controls are removed', async () => {

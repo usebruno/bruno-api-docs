@@ -687,6 +687,10 @@ items:
 
       <div class="fixed inset-0 md-table-scroll" style="position:fixed;inset:0" data-nav-headings id="overlay">Styled block</div>
 
+      <a href="#overlay">Jump to styled block</a>
+
+      [Go to customers](#/billing/customers)
+
       <form action="https://example.com/collect"><input type="text" name="password"><button>Sign in</button></form>
 
       <a href="javascript:window.__ocInjected='link'">Unsafe link</a>

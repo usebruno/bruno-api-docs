@@ -23,7 +23,7 @@ export const StyledWrapper = styled.div`
     opacity: 1;
     transition: opacity 0.15s ease;
   }
-  @media (hover: hover) {
+  @media (hover: hover) and (not (any-pointer: coarse)) {
     .code-copy-floating {
       opacity: 0;
     }

@@ -105,7 +105,7 @@ export const StyledWrapper = styled.div`
     border-bottom: 1px solid var(--border-color);
   }
 
-  @media (hover: hover) {
+  @media (hover: hover) and (not (any-pointer: coarse)) {
     .example-url-row > .code-snippet-tabs,
     .example-url-row > .copy-button {
       opacity: 0;

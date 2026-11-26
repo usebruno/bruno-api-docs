@@ -21,6 +21,7 @@ export interface PlaygroundState {
   requestStartedAt: Record<string, number>; // When each running request started, by item UUID
   // UI State
   viewMode: ViewMode;
+  configureCount: number;
   selectedItemId: string | null;
   selectedExampleIndex: number | null;
   responsePaneOrientation: 'horizontal' | 'vertical' | null;
@@ -35,6 +36,7 @@ const initialState: PlaygroundState = {
   requestStartedAt: {},
   // UI State
   viewMode: 'playground',
+  configureCount: 0,
   selectedItemId: null,
   selectedExampleIndex: null,
   responsePaneOrientation: null,
@@ -185,6 +187,9 @@ const playgroundSlice = createSlice({
     // UI State Actions
     setViewMode: (state: PlaygroundState, action: PayloadAction<ViewMode>) => {
       state.viewMode = action.payload;
+    },
+    configureEnvironments: (state: PlaygroundState) => {
+      state.configureCount += 1;
     },
     setSelectedItemId: (state: PlaygroundState, action: PayloadAction<string | null>) => {
       state.selectedItemId = action.payload;
@@ -343,6 +348,7 @@ export const {
   clearPlaygroundRequestStarted,
   clearAllPlaygroundRequestsStarted,
   setViewMode,
+  configureEnvironments,
   setSelectedItemId,
   setSelectedExampleIndex,
   setResponsePaneOrientation,
@@ -365,6 +371,7 @@ export const selectPlaygroundResponse = (state: RootState, uuid: string) => stat
 export const selectPlaygroundRequestStartedAt = (state: RootState, uuid: string): number | null =>
   state.playground.requestStartedAt[uuid] ?? null;
 export const selectViewMode = (state: RootState) => state.playground.viewMode;
+export const selectConfigureCount = (state: RootState) => state.playground.configureCount;
 export const selectSelectedItemId = (state: RootState) => state.playground.selectedItemId;
 export const selectSelectedExampleIndex = (state: RootState) => state.playground.selectedExampleIndex;
 export const selectResponsePaneOrientation = (state: RootState) => state.playground.responsePaneOrientation;

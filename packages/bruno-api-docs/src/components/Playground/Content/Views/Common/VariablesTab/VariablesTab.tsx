@@ -104,6 +104,7 @@ export const VariablesTab: React.FC<VariablesTabProps> = ({
             onChange={onPostResponseVarsChange}
             keyPlaceholder="Name"
             valuePlaceholder="Expr"
+            multilineValues={true}
             valueHeader={(
               <span className="expr-header">
                 Expr

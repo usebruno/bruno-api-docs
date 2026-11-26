@@ -29,6 +29,7 @@ export {
   type VariableLookup
 } from './useVariableResolver';
 export { usePlaygroundUrlState, type PlaygroundUrlApi } from './usePlaygroundUrlState';
+export { usePlaygroundSearch } from './usePlaygroundSearch';
 export { useDocsNavigate } from './useDocsNavigate';
 export { useElementWidth } from './useElementWidth';
 export { useAutoHideScrollbar } from './useAutoHideScrollbar';

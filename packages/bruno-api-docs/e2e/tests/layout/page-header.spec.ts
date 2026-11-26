@@ -231,7 +231,9 @@ test.describe('Header behavior', () => {
 
     await expect(envSwitcher.trigger).toContainText('Dev');
     await envSwitcher.open();
-    await expect(envSwitcher.menu.getByRole('menuitem')).toHaveCount(2);
+    // "No Environment" + the two included environments.
+    await expect(envSwitcher.menu.getByRole('menuitem')).toHaveCount(3);
+    await expect(envSwitcher.option('no-environment')).toBeVisible();
     await expect(envSwitcher.option('Dev')).toBeVisible();
     await expect(envSwitcher.option('Prod')).toBeVisible();
     await expect(envSwitcher.option('Dev')).toHaveAttribute('aria-current', 'true');
@@ -292,7 +294,9 @@ test.describe('Header behavior', () => {
 
     await expect(envSwitcher.trigger).toContainText('Staging');
     await envSwitcher.open();
-    await expect(envSwitcher.menu.getByRole('menuitem')).toHaveCount(1);
+    // "No Environment" + the single environment.
+    await expect(envSwitcher.menu.getByRole('menuitem')).toHaveCount(2);
+    await expect(envSwitcher.option('no-environment')).toBeVisible();
     await expect(envSwitcher.option('Staging')).toBeVisible();
   });
 

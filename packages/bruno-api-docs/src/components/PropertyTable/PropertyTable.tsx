@@ -70,18 +70,24 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
       <dl className="property-box">
         {rows.map((row, index) => {
           const rowTestId = testId && row.testId ? `${testId}-${row.testId}` : undefined;
+          const showType = Boolean(row.type) && !hasNoValue(row);
+          const hasTrailing = showType || Boolean(row.disabled) || Boolean(row.inheritedSource);
           return (
-            <div className="property-row" key={`${row.label}-${index}`}>
+            <div className="property-row" data-testid="property-row" key={`${row.label}-${index}`}>
               <dt className="property-key"><TruncatedText text={row.label} /></dt>
               <dd className="property-value-cell" data-testid={rowTestId}>
                 <div className="property-value-line" data-testid="property-value-line">
                   <div className="property-value-main" data-testid="property-value"><ValueCell row={row} testId={rowTestId} /></div>
-                  {row.type && !hasNoValue(row) ? <span className="property-type">{row.type}</span> : null}
-                  {row.disabled ? <DisabledBadge /> : null}
                 </div>
               </dd>
-              {row.inheritedSource ? (
-                <InheritedSourceLink source={row.inheritedSource} itemName={row.label} onNavigate={onNavigate} />
+              {hasTrailing ? (
+                <div className="property-trailing" data-testid="property-trailing">
+                  {showType ? <span className="property-type">{row.type}</span> : null}
+                  {row.disabled ? <DisabledBadge /> : null}
+                  {row.inheritedSource ? (
+                    <InheritedSourceLink source={row.inheritedSource} itemName={row.label} onNavigate={onNavigate} />
+                  ) : null}
+                </div>
               ) : null}
               <Description text={row.description} />
             </div>

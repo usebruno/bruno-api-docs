@@ -5,7 +5,8 @@ import reducer, {
   toggleShowVars,
   readPersistedEnv,
   persistEnv,
-  ENV_STORAGE_KEY
+  ENV_STORAGE_KEY,
+  NO_ENVIRONMENT
 } from './env';
 
 beforeAll(() => {
@@ -54,6 +55,11 @@ describe('envSlice persistence (sessionStorage)', () => {
   it('persistEnv round-trips the selection', () => {
     persistEnv({ activeEnvName: 'Prod', showVars: true });
     expect(readPersistedEnv()).toEqual({ activeEnvName: 'Prod', showVars: true });
+  });
+
+  it('keeps "No environment" across a reload, apart from nothing picked', () => {
+    persistEnv({ activeEnvName: NO_ENVIRONMENT, showVars: false });
+    expect(readPersistedEnv().activeEnvName).toBe(NO_ENVIRONMENT);
   });
 
   it('persists whatever on/off state was set, including off', () => {

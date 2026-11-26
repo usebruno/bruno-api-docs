@@ -124,7 +124,7 @@ export const foldersFixtureCollection = {
     {
       name: 'Setup Script',
       type: 'script',
-      seq: 6,
+      seq: 4,
       script: 'bru.setVar(\'requestedAt\', Date.now());\nconsole.log(\'Hotel API docs loaded\');'
     },
     {

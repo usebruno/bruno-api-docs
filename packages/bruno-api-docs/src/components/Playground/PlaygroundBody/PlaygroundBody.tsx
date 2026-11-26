@@ -12,12 +12,13 @@ import {
   setSelectedItemId,
   setSelectedExampleIndex,
   toggleFolderCollapse,
-  expandFolders
+  expandFolders,
+  selectConfigureCount
 } from '@/store/slices/playground';
 import { selectActiveEnvName } from '@/store/slices/env';
 import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTree';
 import { useNavModel } from '@/routing/hooks';
-import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside } from '@/hooks';
+import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside, usePlaygroundSearch } from '@/hooks';
 import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
 import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
 import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
@@ -29,11 +30,7 @@ import ExampleView from '../Content/Views/ExampleView/ExampleView';
 import ScriptFileView from '../Content/Views/ScriptFileView/ScriptFileView';
 import PlaygroundSidebar from '../PlaygroundSidebar/PlaygroundSidebar';
 import type { DockMode } from '@/utils/playgroundDock';
-import {
-  resolvePlaygroundTarget,
-  PLAYGROUND_ENVIRONMENTS_SLUG,
-  PLAYGROUND_COLLECTION_SLUG
-} from './resolvePlaygroundTarget';
+import { resolvePlaygroundTarget, PLAYGROUND_COLLECTION_SLUG } from './resolvePlaygroundTarget';
 import { StyledWrapper } from './StyledWrapper';
 
 const ORIENTATION_BREAKPOINT = 640;
@@ -149,6 +146,8 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
 
   const handleToggleFolder = (uuid: string) => dispatch(toggleFolderCollapse(uuid));
   const handleExpandFolder = (uuid: string) => dispatch(expandFolders([uuid]));
+  const search = usePlaygroundSearch(collection, handleToggleFolder, handleExpandFolder);
+  const configureCount = useAppSelector(selectConfigureCount);
 
   const handleExampleClick = (requestUuid: string, index: number) => {
     dispatch(setSelectedItemId(requestUuid));
@@ -165,15 +164,6 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     closeSidebarIfInline();
   };
 
-  const openEnvironments = () => {
-    dispatch(setViewMode('environments'));
-    dispatch(setSelectedItemId(null));
-    dispatch(setSelectedExampleIndex(null));
-    appliedSlugRef.current = PLAYGROUND_ENVIRONMENTS_SLUG;
-    setRequestSlug(PLAYGROUND_ENVIRONMENTS_SLUG); // persist so a reload restores it
-    closeSidebarIfInline();
-  };
-
   const openCollection = () => {
     dispatch(setViewMode('collection-settings'));
     dispatch(setSelectedItemId(null));
@@ -185,7 +175,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
 
   const view = (() => {
     if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} />;
-    if (viewMode === 'environments' && collection) return <EnvironmentsView collection={collection} compact={dock === 'inline'} />;
+    if (viewMode === 'environments' && collection) return <EnvironmentsView key={configureCount} collection={collection} compact={dock === 'inline'} />;
     if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
       return (
         <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={() => undefined} />
@@ -240,10 +230,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
               activeSlug={activeSlug}
               uuidToSlug={uuidToSlug}
               onNavigate={handleNavigate}
-              onToggleFolder={handleToggleFolder}
-              onExpandFolder={handleExpandFolder}
-              onOpenEnvironments={openEnvironments}
-              environmentsActive={viewMode === 'environments'}
+              search={search}
               onOpenCollection={openCollection}
               collectionActive={viewMode === 'collection-settings'}
               activeExample={activeExample}

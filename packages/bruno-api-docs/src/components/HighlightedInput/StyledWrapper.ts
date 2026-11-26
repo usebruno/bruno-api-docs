@@ -17,7 +17,7 @@ export const StyledWrapper = styled.div`
     color: transparent;
     caret-color: var(--oc-table-input-color);
     padding: 0.625rem 0;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 400;
     line-height: 1.25;
     letter-spacing: 0;
@@ -50,7 +50,7 @@ export const StyledWrapper = styled.div`
     border: 0.0625rem solid transparent;
     border-radius: 0.25rem;
     font-family: inherit;
-    font-size: 0.8125rem;
+    font-size: var(--oc-font-size-base);
     font-weight: 400;
     line-height: 1.25;
     letter-spacing: 0;
@@ -120,7 +120,7 @@ export const Suggestions = styled.ul`
   border-radius: var(--oc-radius);
   box-shadow: var(--shadow-md);
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: var(--oc-font-size-sm);
   pointer-events: auto;
 
   &::-webkit-scrollbar {
@@ -136,7 +136,7 @@ export const Suggestions = styled.ul`
     padding: 0.25rem 0.5rem;
     border-radius: var(--oc-radius);
     color: var(--text-primary);
-    line-height: 1.25rem;
+    line-height: 1.7;
     white-space: nowrap;
     cursor: pointer;
   }

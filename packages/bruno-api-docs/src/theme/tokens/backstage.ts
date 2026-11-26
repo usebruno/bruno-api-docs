@@ -17,7 +17,7 @@ interface BackstagePalette {
   border: { strong: string; base: string; subtle: string };
   link: string;
   status: { ok: string; warning: string; error: string; info: string };
-  hues: Record<'purple' | 'pink' | 'teal' | 'cyan' | 'indigo' | 'rose' | 'brown' | 'yellow', string>;
+  hues: Record<'purple' | 'pink' | 'indigo' | 'rose' | 'brown' | 'yellow', string>;
 }
 
 const backstageLightPalette: BackstagePalette = {
@@ -37,8 +37,6 @@ const backstageLightPalette: BackstagePalette = {
   hues: {
     purple: '#7B1FA2',
     pink: '#C2185B',
-    teal: '#00796B',
-    cyan: '#0097A7',
     indigo: '#303F9F',
     rose: '#AD1457',
     brown: '#5D4037',
@@ -63,11 +61,9 @@ const backstageDarkPalette: BackstagePalette = {
   hues: {
     purple: '#CE93D8',
     pink: '#FF88B2',
-    teal: '#80CBC4',
-    cyan: '#80DEEA',
     indigo: '#9FA8DA',
     rose: '#F48FB1',
-    brown: '#BCAAA4',
+    brown: '#DD8888',
     yellow: '#FEF071'
   }
 };
@@ -84,6 +80,20 @@ const createBackstageTheme = (base: Theme, mode: ResolvedThemeMode, p: Backstage
   textLink: p.link,
   draftColor: p.status.warning,
   bg: p.background.paper,
+
+  // Backstage UI type scale (--bui-font-size-*); sm has no BUI step and sits between 2 and 3.
+  font: {
+    size: {
+      xxs: '0.625rem', // 10px — bui-font-size-1
+      xs: '0.75rem', // 12px — bui-font-size-2
+      sm: '0.8125rem', // 13px
+      base: '0.875rem', // 14px — bui-font-size-3 (body)
+      md: '1rem', // 16px — bui-font-size-4
+      lg: '1.25rem', // 20px — bui-font-size-5
+      xl: '1.5rem', // 24px — bui-font-size-6
+      xxl: '2rem' // 32px — bui-font-size-7
+    }
+  },
 
   background: {
     base: p.background.paper,
@@ -164,21 +174,6 @@ const createBackstageTheme = (base: Theme, mode: ResolvedThemeMode, p: Backstage
     hoverBg: p.background.surface0,
     separator: p.border.base,
     mutedText: p.text.disabled
-  },
-
-  request: {
-    methods: {
-      get: p.status.ok,
-      post: p.hues.purple,
-      put: p.status.warning,
-      delete: p.status.error,
-      patch: p.hues.purple,
-      options: p.hues.teal,
-      head: p.hues.cyan
-    },
-    grpc: p.hues.indigo,
-    ws: p.status.warning,
-    gql: p.hues.pink
   },
 
   requestTabPanel: {

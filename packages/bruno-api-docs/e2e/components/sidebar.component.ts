@@ -1,12 +1,19 @@
-import type { Locator } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { BaseComponent } from './base.component';
 
+const exactText = (value: string) => new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
+
 export class SidebarComponent extends BaseComponent {
-  readonly items = this.page.getByTestId('sidebar-item');
-  readonly active = this.items.and(this.page.locator('.active'));
+  constructor(page: Page, root: Locator = page.getByTestId('sidebar')) {
+    super(page, root);
+  }
+
+  readonly items = this.root.getByTestId('sidebar-item');
+  readonly active = this.items.and(this.root.locator('.active'));
+  readonly labels = this.items.getByTestId('sidebar-item-label');
   readonly inline = this.page.getByTestId('app-sidebar');
-  readonly overview = this.page.getByTestId('sidebar-overview');
-  readonly environments = this.page.getByTestId('sidebar-environments');
+  readonly overview = this.root.getByTestId('sidebar-overview');
+  readonly environments = this.root.getByTestId('sidebar-environments');
   readonly collapseButton = this.page.getByTestId('sidebar-collapse');
   readonly expandButton = this.page.getByTestId('sidebar-expand');
   readonly resizer = this.page.getByTestId('sidebar-resizer');
@@ -15,15 +22,26 @@ export class SidebarComponent extends BaseComponent {
   readonly hamburger = this.page.getByTestId('topbar-menu');
 
   item(name: string): Locator {
-    return this.items.filter({ hasText: name });
+    return this.items.filter({
+      has: this.page.getByTestId('sidebar-item-label').filter({ hasText: exactText(name) })
+    });
   }
 
   itemBySlug(slug: string): Locator {
-    return this.items.and(this.page.locator(`[data-slug="${slug}"]`));
+    return this.items.and(this.root.locator(`[data-slug="${slug}"]`));
   }
 
+  methodBadge(name: string): Locator {
+    return this.item(name).getByTestId('sidebar-item-method');
+  }
+
+  itemLabel(name: string): Locator {
+    return this.item(name).getByTestId('sidebar-item-label');
+  }
+
+  /** Folder arrow. Named from its accessible label, which flips between Expand and Collapse. */
   folderChevron(name: string): Locator {
-    return this.item(name).first().locator('.navlink-chevron');
+    return this.item(name).getByRole('button', { name: /^(Expand|Collapse) folder$/ });
   }
 
   async toggleFolder(name: string): Promise<void> {
@@ -31,11 +49,13 @@ export class SidebarComponent extends BaseComponent {
   }
 
   exampleToggle(requestName: string): Locator {
-    return this.item(requestName).first().getByTestId('sidebar-example-toggle');
+    return this.item(requestName).getByTestId('sidebar-example-toggle');
   }
 
   exampleRow(exampleName: string): Locator {
-    return this.page.getByTestId('sidebar-example').filter({ hasText: exampleName });
+    return this.root.getByTestId('sidebar-example').filter({
+      has: this.page.getByTestId('sidebar-example-label').filter({ hasText: exactText(exampleName) })
+    });
   }
 
   async toggleExamples(requestName: string): Promise<void> {
@@ -44,7 +64,7 @@ export class SidebarComponent extends BaseComponent {
 
   async open(paths: string[]): Promise<void> {
     for (const name of paths) {
-      await this.item(name).first().click();
+      await this.item(name).click();
     }
   }
 

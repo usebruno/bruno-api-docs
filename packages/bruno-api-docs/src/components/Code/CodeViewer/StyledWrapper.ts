@@ -58,13 +58,13 @@ export const StyledWrapper = styled.div`
   }
 
   .code-content pre {
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-primary);
     line-height: 1.65;
   }
   .code-content code {
     color: var(--text-primary);
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
   }
  
   .code-content .var {
@@ -89,7 +89,7 @@ export const StyledWrapper = styled.div`
     padding: 0 0.625rem 0 0.75rem;
     font-family: 'Fira Code', var(--font-mono);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.65;
     letter-spacing: normal;
   }
@@ -103,7 +103,7 @@ export const StyledWrapper = styled.div`
   .code-content--numbered code {
     font-family: 'Fira Code', var(--font-mono);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     line-height: 1.65;
     letter-spacing: normal;
   }

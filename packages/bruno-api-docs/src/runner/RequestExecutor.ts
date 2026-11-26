@@ -4,7 +4,7 @@ import type { RunRequestResponse } from './index';
 import { getHttpMethod, getRequestUrl, getHttpHeaders, getHttpBody, getRequestAuth, getHttpParams, type InternalHttpRequest } from '@/utils/schemaHelpers';
 import { buildRequestUrl } from '@/utils/pathParams';
 import { buildDigestAuthorization, findDigestChallenge, getDigestCredentials } from './utils/digest-auth';
-import { classifyRequestError, DigestAuthError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
+import { classifyRequestError, DigestAuthError, UnresolvedVariableError, DEFAULT_TIMEOUT_MS } from './classifyRequestError';
 import { detectContentTypeFromBytes, isByteFormatContentType } from '@/utils/response';
 import { RESPONSE_LARGE_THRESHOLD } from '@/constants';
 import stripJsonComments from 'strip-json-comments';
@@ -78,6 +78,9 @@ export class RequestExecutor {
     );
 
     try {
+      const unresolved = requestUrl.match(/^(?:[a-z][a-z0-9+.-]*:\/\/)?[^/?#]*?\{\{([^}]+)\}\}/i);
+      if (unresolved) throw new UnresolvedVariableError(unresolved[1]);
+
       const fetchOptions = await this.buildFetchOptions(request, timeoutMs, options.signal);
       const response = await this.performFetch(requestUrl, fetchOptions, request);
       const endTime = Date.now();

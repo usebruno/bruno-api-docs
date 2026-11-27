@@ -17,11 +17,12 @@ describe('HeadersTab', () => {
         onHeadersChange={noop}
       />
     );
-    const values = root.querySelectorAll('input.text-input').map((input) => input.getAttribute('value'));
-    expect(values).toContain('Content-Type');
-    expect(values).toContain('application/json');
-    expect(values).toContain('Accept');
-    expect(values).toContain('text/html');
+    const cell = (row: string, field: 'name' | 'value') =>
+      getByTestId(getByTestId(root, `request-header-row-${row}`), `key-value-table-${field}-input`).getAttribute('value');
+    expect(cell('content-type', 'name')).toBe('Content-Type');
+    expect(cell('content-type', 'value')).toBe('application/json');
+    expect(cell('accept', 'name')).toBe('Accept');
+    expect(cell('accept', 'value')).toBe('text/html');
   });
 
   it('renders the provided description with no standalone title heading', () => {
@@ -55,7 +56,7 @@ describe('HeadersTab', () => {
     const root = useRenderToDom(
       <HeadersTab headers={[{ name: 'Content-Type', value: 'application/json' }]} onHeadersChange={noop} />
     );
-    expect(root.querySelector('.cell-error')).toBeNull();
+    expect(queryByTestId(root, 'key-value-table-error')).toBeNull();
   });
 
   it('shows a Description column with authored descriptions (bare string or {content} form)', () => {
@@ -120,8 +121,8 @@ describe('HeadersTab', () => {
         expect(getByTestId(inherited, 'key-value-table-name-text').text).toBe('X-Tenant-Id');
         expect(getByTestId(inherited, 'column-checkbox-input').hasAttribute('disabled')).toBe(true);
         getByTestId(inherited, 'inherited-header-source-x-tenant-id');
-        const values = root.querySelectorAll('input.text-input').map((input) => input.getAttribute('value'));
-        expect(values).toContain('X-Trace');
+        const requestRow = getByTestId(root, 'request-header-row-x-trace');
+        expect(getByTestId(requestRow, 'key-value-table-name-input').getAttribute('value')).toBe('X-Trace');
       });
     });
   });

@@ -112,6 +112,8 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
     renderFullWidth,
     renderActionCell
   } = rowConfig;
+  // Rows without a rowConfig id are named after their key; the unnamed trailing row is the add row.
+  const defaultRowTestId = (row: R) => (row.name ? `${testId}-row-${row.name.toLowerCase()}` : `${testId}-add-row`);
   const { isFound, names } = useResolvedVariables();
   const { rows, updateField, removeRow } = useEditableRows(data, onChange, {
     disableNewRow,
@@ -305,8 +307,8 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
               const fullWidthContent = renderFullWidth?.(row);
               if (fullWidthContent) {
                 return (
-                  <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row)}>
-                    <td className="full-width-row" colSpan={columnCount}>
+                  <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row) ?? defaultRowTestId(row)}>
+                    <td className="full-width-row" colSpan={columnCount} data-testid={`${testId}-full-width-cell`}>
                       {fullWidthContent}
                     </td>
                   </tr>
@@ -324,6 +326,7 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
                 <button
                   type="button"
                   className="delete-button"
+                  data-testid="column-delete"
                   onClick={() => removeRow(index)}
                   aria-label="Delete row"
                   title="Delete row"
@@ -381,7 +384,7 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
               );
 
               return (
-                <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row)}>
+                <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row) ?? defaultRowTestId(row)}>
                   <td className="col-key">
                     <div className="key-cell">
                       {showEnabled && (
@@ -421,7 +424,7 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
                         <div className="value-cell-field">{valueField}</div>
                         {isFilledEditableRow && cellError(row, index, 'value')}
                         {isFilledEditableRow && (additionalColumns.length > 0 || inlineDelete) && (
-                          <div className="value-cell-trailing">
+                          <div className="value-cell-trailing" data-testid={`${testId}-value-trailing`}>
                             {additionalColumns.map((col) => (
                               <React.Fragment key={col.key}>{col.render(row, index, updateCell)}</React.Fragment>
                             ))}

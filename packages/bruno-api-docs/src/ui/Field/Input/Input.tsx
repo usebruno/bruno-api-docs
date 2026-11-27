@@ -34,6 +34,7 @@ export const Input: React.FC<InputProps> = ({
           'oc-input-wrapper--readonly': readOnly
         }
       ])}
+      data-testid={testId ? `${testId}-wrapper` : undefined}
     >
       <input
         id={id}

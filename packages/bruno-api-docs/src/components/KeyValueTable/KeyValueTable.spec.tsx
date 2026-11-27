@@ -104,7 +104,7 @@ describe('KeyValueTable — rowConfig', () => {
   const table = <KeyValueTable data={mixedRows} onChange={noop} showDescription rowConfig={rowConfig} />;
 
   it('renders a full-width row spanning every column', () => {
-    const cell = query(getByTestId(useRenderToDom(table), 'section-row'), 'td');
+    const cell = getByTestId(getByTestId(useRenderToDom(table), 'section-row'), 'key-value-table-full-width-cell');
     expect(cell.getAttribute('class')).toBe('full-width-row');
     expect(cell.getAttribute('colspan')).toBe('4');
     expect(cell.text).toBe('Inherited');
@@ -119,7 +119,7 @@ describe('KeyValueTable — rowConfig', () => {
     expect(getByTestId(row, 'key-value-table-description-text').text).toBe('Tenant');
     expect(getByTestId(row, 'column-checkbox-input').hasAttribute('disabled')).toBe(true);
     getByTestId(row, 'source-link');
-    expect(row.querySelector('.delete-button')).toBeNull();
+    expect(queryByTestId(row, 'column-delete')).toBeNull();
   });
 
   describe('full-width row span', () => {
@@ -127,7 +127,7 @@ describe('KeyValueTable — rowConfig', () => {
     const typeColumn = { key: 'type', label: 'Type', render: () => <span>text</span> };
     const scopeColumn = { key: 'scope', label: 'Scope', render: () => <span>runtime</span> };
     const sectionSpan = (root: ReturnType<typeof useRenderToDom>) =>
-      query(getByTestId(root, 'section-row'), 'td').getAttribute('colspan');
+      getByTestId(getByTestId(root, 'section-row'), 'key-value-table-full-width-cell').getAttribute('colspan');
 
     it('spans key, value, an additional column and the actions column when actions are not inline', () => {
       const root = useRenderToDom(
@@ -190,7 +190,7 @@ describe('KeyValueTable — rowConfig', () => {
         />
       );
       const row = getByTestId(root, 'inherited-row');
-      expect(row.querySelector('.value-cell-trailing')).toBeNull();
+      expect(queryByTestId(row, 'key-value-table-value-trailing')).toBeNull();
       expect(queryByTestId(row, 'type-column')).toBeNull();
     });
 
@@ -198,19 +198,19 @@ describe('KeyValueTable — rowConfig', () => {
       const readOnly = useRenderToDom(
         <KeyValueTable data={inheritedRow} onChange={noop} getRowError={alwaysError} rowConfig={rowConfig} />
       );
-      expect(getByTestId(readOnly, 'inherited-row').querySelector('.cell-error')).toBeNull();
+      expect(queryByTestId(getByTestId(readOnly, 'inherited-row'), 'key-value-table-error')).toBeNull();
 
       const editable = useRenderToDom(
         <KeyValueTable data={editableRow} onChange={noop} getRowError={alwaysError} rowConfig={rowConfig} />
       );
-      expect(query(editable, 'tbody tr').querySelector('.cell-error')).toBeTruthy();
+      getByTestId(getByTestId(editable, 'key-value-table-row-x bad'), 'key-value-table-error');
     });
   });
 
   it('keeps editable rows editable and appends the trailing blank row after them', () => {
-    const bodyRows = useRenderToDom(table).querySelectorAll('tbody tr');
-    expect(bodyRows).toHaveLength(4);
-    expect(bodyRows[2].querySelector('.delete-button')).toBeTruthy();
-    expect(bodyRows[3].getAttribute('class')).toBe('empty-row');
+    const root = useRenderToDom(table);
+    getByTestId(getByTestId(root, 'key-value-table-row-x-trace'), 'column-delete');
+    expect(getByTestId(root, 'key-value-table-add-row').getAttribute('class')).toBe('empty-row');
+    expect(root.querySelectorAll('[data-testid="key-value-table-add-row"]')).toHaveLength(1);
   });
 });

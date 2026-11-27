@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import type { Auth } from '@opencollection/types/common/auth';
 import {
   resolveInheritedAuth,
   getBodyView,
@@ -14,6 +15,7 @@ import {
   getInheritedPreRequestVars,
   getInheritedPostResponseVars,
   getInheritedConfig,
+  authHeaderName,
   folderSource,
   collectionSource,
   inheritedSourceLabel,
@@ -77,6 +79,24 @@ describe('requestAuth', () => {
     const folder: any = { info: { type: 'folder', name: 'F' }, request: { auth: future } };
     const resolved = resolveInheritedAuth({ info: { name: 'C' } } as any, [folder], item);
     expect(resolved.auth).toMatchObject(future); // resolved through untouched, whatever the type
+  });
+});
+
+describe('authHeaderName', () => {
+  it.each([
+    ['basic with both fields', { type: 'basic', username: 'u', password: 'p' }, 'Authorization'],
+    ['basic without a password', { type: 'basic', username: 'u' }, undefined],
+    ['bearer with a token', { type: 'bearer', token: 't' }, 'Authorization'],
+    ['bearer without a token', { type: 'bearer' }, undefined],
+    ['api key in a header', { type: 'apikey', key: 'X-Api-Key', value: 'k', placement: 'header' }, 'X-Api-Key'],
+    ['api key in the query', { type: 'apikey', key: 'X-Api-Key', value: 'k', placement: 'query' }, undefined],
+    ['api key without a placement', { type: 'apikey', key: 'X-Api-Key', value: 'k' }, undefined],
+    ['api key without a value', { type: 'apikey', key: 'X-Api-Key', placement: 'header' }, undefined],
+    ['digest', { type: 'digest', username: 'u', password: 'p' }, undefined],
+    ['inherit', 'inherit', undefined],
+    ['no auth', undefined, undefined]
+  ])('%s', (_label, auth, expected) => {
+    expect(authHeaderName(auth as Auth | undefined)).toBe(expected);
   });
 });
 

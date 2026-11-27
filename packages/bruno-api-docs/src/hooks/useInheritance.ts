@@ -2,7 +2,13 @@ import { useMemo } from 'react';
 import type { OpenCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
 import type { HttpRequestHeader } from '@opencollection/types/requests/http';
-import { collectionSource, getInheritedConfig, resolveInheritedAuth, type InheritedAuth } from '@/utils/request';
+import {
+  authHeaderName,
+  collectionSource,
+  getInheritedConfig,
+  resolveInheritedAuth,
+  type InheritedAuth
+} from '@/utils/request';
 import { getRequestAuth, getRequestHeaders, type SupportedRequestItem } from '@/utils/schemaHelpers';
 
 export const useInheritance = (
@@ -27,12 +33,8 @@ export const useInheritance = (
   const { headers: inheritedHeaders, preVars: inheritedPreVars, postVars: inheritedPostVars } = inheritedConfig;
 
   const effectiveHeaders = useMemo<HttpRequestHeader[]>(() => {
-    const auth = effectiveAuth && effectiveAuth !== 'inherit' ? effectiveAuth : undefined;
-    const authWritesAuthorization = Boolean(
-      (auth?.type === 'bearer' && auth.token) || (auth?.type === 'basic' && auth.username && auth.password)
-    );
-    const keep = (header: { name?: string }) =>
-      !authWritesAuthorization || (header.name || '').toLowerCase() !== 'authorization';
+    const authHeader = authHeaderName(effectiveAuth)?.toLowerCase();
+    const keep = (header: { name?: string }) => !authHeader || (header.name || '').toLowerCase() !== authHeader;
     const ownRows = getRequestHeaders(item).filter(keep);
     const inheritedRows = inheritedHeaders
       .filter(keep)

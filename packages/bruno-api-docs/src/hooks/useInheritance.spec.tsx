@@ -189,5 +189,45 @@ describe('useInheritance', () => {
         expect(data.effectiveHeaders).toEqual([]);
       });
     });
+
+    describe('when an API key auth is sent as a header', () => {
+      const apiKey = { type: 'apikey', key: 'X-Api-Key', value: '{{apiKey}}', placement: 'header' };
+
+      it('drops an own header with the key name, matching case-insensitively', () => {
+        const data = dataFor(request(apiKey, [{ name: 'x-api-key', value: 'old-key' }, { name: 'X-Own', value: '1' }]));
+        expect(headerNames(data)).toEqual(['X-Own']);
+      });
+
+      it('drops an inherited header with the key name', () => {
+        const data = dataFor(
+          request(apiKey),
+          collectionWith({ headers: [{ name: 'X-Api-Key', value: 'old-key' }, { name: 'X-Collection', value: 'c' }] })
+        );
+        expect(headerNames(data)).toEqual(['X-Collection']);
+      });
+
+      it('drops headers with the key name when the API key auth is inherited', () => {
+        const data = dataFor(
+          request('inherit', [{ name: 'X-Api-Key', value: 'old-key' }]),
+          collectionWith({ auth: apiKey })
+        );
+        expect(data.effectiveHeaders).toEqual([]);
+      });
+
+      it('drops an Authorization header when the key is named Authorization', () => {
+        const data = dataFor(request({ ...apiKey, key: 'Authorization' }, [{ name: 'Authorization', value: 'stale' }]));
+        expect(data.effectiveHeaders).toEqual([]);
+      });
+
+      it('keeps the header when the key is sent as a query param', () => {
+        const data = dataFor(request({ ...apiKey, placement: 'query' }, [{ name: 'X-Api-Key', value: 'old-key' }]));
+        expect(headerNames(data)).toEqual(['X-Api-Key']);
+      });
+
+      it('keeps the header when the key has no value', () => {
+        const data = dataFor(request({ ...apiKey, value: '' }, [{ name: 'X-Api-Key', value: 'old-key' }]));
+        expect(headerNames(data)).toEqual(['X-Api-Key']);
+      });
+    });
   });
 });

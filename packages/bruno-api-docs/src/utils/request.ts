@@ -114,6 +114,25 @@ export const resolveInheritedAuth = (
   return { auth: undefined };
 };
 
+/**
+ * Name of the header an auth writes when the request is sent, or undefined when it writes none.
+ * Mirrors `setAuthHeaders` in `runner/RequestExecutor.ts`, where this header replaces any request
+ * header of the same name (case-insensitive), so keep the two in step.
+ */
+export const authHeaderName = (auth: Auth | undefined): string | undefined => {
+  if (!auth || auth === 'inherit') return undefined;
+  switch (auth.type) {
+    case 'basic':
+      return auth.username && auth.password ? 'Authorization' : undefined;
+    case 'bearer':
+      return auth.token ? 'Authorization' : undefined;
+    case 'apikey':
+      return auth.key && auth.value && auth.placement === 'header' ? auth.key : undefined;
+    default:
+      return undefined;
+  }
+};
+
 export const getDescription = (item: unknown): string | undefined => {
   if (!item || typeof item !== 'object') return undefined;
   return descriptionText((item as { description?: unknown }).description);

@@ -19,7 +19,7 @@ type RequestHeaderRow = KeyValueRow & { rowType?: undefined };
 interface InheritedHeaderTableRow extends KeyValueRow {
   description?: string;
   rowType: typeof ROW_TYPE.INHERITED;
-  source?: InheritedSource;
+  source: InheritedSource;
 };
 
 type HeaderSection = 'inherited' | 'request';
@@ -71,7 +71,7 @@ const createSectionRow = (section: HeaderSection, label: string, expanded: boole
 });
 
 const inheritedRow = (header: InheritedHeader): InheritedHeaderTableRow => ({
-  id: `inherited-header-${header.source?.uuid ?? ''}-${header.name}`,
+  id: `inherited-header-${header.source.uuid}-${header.name}`,
   name: header.name,
   value: header.value ?? '',
   enabled: !header.disabled,
@@ -152,7 +152,7 @@ const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> =
       );
     },
     renderActionCell: (row) => {
-      if (row.rowType !== ROW_TYPE.INHERITED || !row.source) return null;
+      if (row.rowType !== ROW_TYPE.INHERITED) return null;
       return (
         <InheritedSourceLink
           source={row.source}

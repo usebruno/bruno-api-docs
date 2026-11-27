@@ -69,11 +69,11 @@ export const collectionSource = (collection: OpenCollection | null | undefined):
 
 /** Provenance label shown on inherited-config affordances (the auth chip and per-row goto links). */
 export const inheritedSourceLabel = (source: InheritedSource): string =>
-  source && `Inherited from ${source.level}: ${source.name}`;
+  `Inherited from ${source.level}: ${source.name}`;
 
 /** Whether an inherited-source affordance can navigate: a handler exists and the source has a uuid. */
-export const canNavigateToSource = (source: InheritedSource | null, onNavigate?: (uuid: string) => void): boolean =>
-  Boolean(onNavigate && source?.uuid);
+export const canNavigateToSource = (source: InheritedSource, onNavigate?: (uuid: string) => void): boolean =>
+  Boolean(onNavigate && source.uuid);
 
 const folderAuth = (folder: Item): Auth | undefined =>
   (folder as { request?: { auth?: Auth } }).request?.auth;

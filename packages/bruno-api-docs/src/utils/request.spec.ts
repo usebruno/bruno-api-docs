@@ -566,7 +566,6 @@ describe('inherited source helpers', () => {
     expect(canNavigateToSource(source, () => {})).toBe(true);
     expect(canNavigateToSource(source, undefined)).toBe(false);
     expect(canNavigateToSource({ ...source, uuid: '' }, () => {})).toBe(false);
-    expect(canNavigateToSource(null, () => {})).toBe(false);
   });
 });
 

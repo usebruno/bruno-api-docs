@@ -95,7 +95,7 @@ export interface PostResponseRowInput {
 
 export interface InheritedHeaderRow extends HttpRequestHeader {
   description?: string;
-  source?: InheritedSource;
+  source: InheritedSource;
 }
 
 export type InheritedPreRequestVarRow = PreRequestVarRow & { source: InheritedSource };

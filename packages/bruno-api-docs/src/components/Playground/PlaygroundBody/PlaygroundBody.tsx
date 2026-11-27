@@ -236,6 +236,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     if ((viewMode === 'playground' || viewMode === 'example') && selectedItem && !isFolder(selectedItem) && collection) {
       return (
         <PlaygroundView
+          key={getItemUuid(selectedItem)}
           item={selectedItem as HttpRequest}
           collection={collection}
           selectedEnvironment={activeEnvName ?? ''}

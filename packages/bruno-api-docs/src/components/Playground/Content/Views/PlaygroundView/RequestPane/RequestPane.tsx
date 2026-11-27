@@ -29,14 +29,16 @@ import {
   scriptsArrayToObject,
   scriptsObjectToArray,
   getRequestUrl,
-  getItemDocs
+  getItemDocs,
+  setItemAuth
 } from '@/utils/schemaHelpers';
 import { setUrlQueryParams } from '@/utils/pathParams';
 import {
   actionsToPostResponseVars,
   postResponseVarsToActions,
   type InheritedAuth,
-  type InheritedHeaderRow
+  type InheritedHeaderRow,
+  type InheritedSourceTab
 } from '@/utils/request';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
 
@@ -45,7 +47,7 @@ interface RequestPaneProps {
   onItemChange: (item: HttpRequest) => void;
   inheritedAuth?: InheritedAuth | null;
   inheritedHeaders?: InheritedHeaderRow[];
-  onNavigateToSource?: (uuid: string) => void;
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
 }
 
 const RequestPane: React.FC<RequestPaneProps> = ({
@@ -169,7 +171,6 @@ const RequestPane: React.FC<RequestPaneProps> = ({
   const renderAuth = () => (
     <AuthTab
       auth={auth}
-      onAuthChange={() => {}} // Not used for full auth
       onItemChange={onItemChange}
       item={item}
       description="Configures authentication for this request."
@@ -264,7 +265,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({
           testId="request-auth-mode-select"
           auth={auth}
           showInherit
-          onChange={(mode) => onItemChange({ ...item, http: { ...item.http, auth: authForMode(mode) } })}
+          onChange={(mode) => onItemChange(setItemAuth(item, authForMode(mode)))}
         />
       ),
       content: renderAuth()

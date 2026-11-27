@@ -1,10 +1,12 @@
 import { describe, it, expect } from 'vitest';
 import type { Item as OpenCollectionItem } from '@opencollection/types/collection/item';
+import type { Auth } from '@opencollection/types/common/auth';
 import {
   countEnabled,
   getItemDescription,
   getRequestBadgeLabel,
   getRequestAuth,
+  setItemAuth,
   getGraphqlQuery,
   getGraphqlVariables,
   getGraphqlMethod,
@@ -87,6 +89,36 @@ describe('getRequestAuth', () => {
 
   it('treats a cleared request-block auth as no auth', () => {
     expect(getRequestAuth(requestItem({ method: 'POST', request: { auth: undefined } }))).toBeUndefined();
+  });
+});
+
+describe('setItemAuth', () => {
+  const bearer: Auth = { type: 'bearer', token: 't' };
+
+  it('writes into the http block of an http request', () => {
+    const item = { info: { name: 'R' }, http: { method: 'GET', url: '/x' } };
+    expect(setItemAuth(item, bearer)).toEqual({ info: { name: 'R' }, http: { method: 'GET', url: '/x', auth: bearer } });
+  });
+
+  it('writes into the protocol block of a non-http request', () => {
+    const item = { info: { name: 'R' }, graphql: { url: '/x', auth: 'inherit' } };
+    expect(setItemAuth(item, bearer)).toEqual({ info: { name: 'R' }, graphql: { url: '/x', auth: bearer } });
+  });
+
+  it('writes under request for a folder', () => {
+    const folder = { info: { name: 'F', type: 'folder' }, request: { headers: [] } };
+    expect(setItemAuth(folder, 'inherit')).toEqual({ info: { name: 'F', type: 'folder' }, request: { headers: [], auth: 'inherit' } });
+  });
+
+  it('creates the request block for a collection without one', () => {
+    const collection = { info: { name: 'C' } };
+    expect(setItemAuth(collection, bearer)).toEqual({ info: { name: 'C' }, request: { auth: bearer } });
+  });
+
+  it('leaves the original item untouched', () => {
+    const item = { http: { url: '/x' } };
+    setItemAuth(item, bearer);
+    expect(item).toEqual({ http: { url: '/x' } });
   });
 });
 

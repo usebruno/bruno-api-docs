@@ -22,7 +22,7 @@ const render = (ui: React.ReactElement) => {
 const noop = () => {};
 
 const renderAuth = (auth: unknown, extra: Record<string, unknown> = {}) =>
-  render(<AuthTab auth={auth} onAuthChange={noop} showFullAuth item={{ request: {} }} onItemChange={noop} {...extra} />);
+  render(<AuthTab auth={auth} showFullAuth item={{ request: {} }} onItemChange={noop} {...extra} />);
 
 describe('AuthTab', () => {
   it('offers exactly the five supported auth types and none of the unsupported ones', () => {

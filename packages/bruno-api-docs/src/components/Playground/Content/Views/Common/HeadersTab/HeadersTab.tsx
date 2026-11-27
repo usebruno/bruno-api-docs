@@ -5,7 +5,12 @@ import { ChevronDownIcon, ChevronRightIcon, EyeIcon, EyeOffIcon } from '@/assets
 import { useSessionStorage } from '@/hooks';
 import { STANDARD_HTTP_HEADERS, MIME_TYPES } from '@/constants/httpHeaders';
 import { HEADER_NAME_REGEX, HEADER_VALUE_REGEX } from '@/constants/regex';
-import { getDescription, type InheritedHeaderRow as InheritedHeader, type InheritedSource } from '@/utils/request';
+import {
+  getDescription,
+  type InheritedHeaderRow as InheritedHeader,
+  type InheritedSource,
+  type InheritedSourceTab
+} from '@/utils/request';
 import BulkEdit from '../BulkEdit/BulkEdit';
 import { StyledWrapper } from './StyledWrapper';
 
@@ -44,7 +49,7 @@ interface HeadersTabProps {
   title?: string;
   description?: string;
   inheritedHeaders?: InheritedHeader[];
-  onNavigateToSource?: (uuid: string) => void;
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
 }
 
 const getHeaderError = (row: HeaderTableRow, _index: number, field: 'name' | 'value'): string | null => {
@@ -124,6 +129,8 @@ const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> =
 
   const handleTableChange = (rows: HeaderTableRow[]) => onHeadersChange(rows.filter(isRequestRow));
 
+  const navigateToSource = onNavigateToSource && ((uuid: string) => onNavigateToSource(uuid, 'headers'));
+
   const rowConfig: KeyValueRowConfig<HeaderTableRow> = {
     isEditable: isRequestRow,
     isCheckboxDisabled: (row) => row.rowType === ROW_TYPE.INHERITED,
@@ -157,7 +164,7 @@ const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> =
         <InheritedSourceLink
           source={row.source}
           itemName={row.name}
-          onNavigate={onNavigateToSource}
+          onNavigate={navigateToSource}
           testId={`inherited-header-source-${row.name.toLowerCase()}`}
         />
       );
@@ -204,6 +211,7 @@ const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> =
           )}
         </div>
         <button
+          type="button"
           className="bulk-edit-toggle text-link select-none"
           data-testid="bulk-edit-toggle"
           onClick={toggleBulkEditView}

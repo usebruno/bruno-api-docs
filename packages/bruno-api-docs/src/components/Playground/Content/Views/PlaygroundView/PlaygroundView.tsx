@@ -21,6 +21,7 @@ import {
   applyScriptVariableChanges
 } from '@/store/slices/playground';
 import { getItemName, isPlaygroundUnsupported } from '@/utils/schemaHelpers';
+import type { InheritedSourceTab } from '@/utils/request';
 import UnsupportedRequest from '@/components/UnsupportedRequest/UnsupportedRequest';
 import { FileNotFoundIcon } from '@/assets/icons';
 import { useSplitPane } from '@/hooks/useSplitPane';
@@ -34,7 +35,7 @@ interface PlaygroundViewProps {
   collection: OpenCollectionCollection;
   selectedEnvironment?: string;
   orientation?: 'horizontal' | 'vertical';
-  onNavigateToSource?: (uuid: string) => void;
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
 }
 
 const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({

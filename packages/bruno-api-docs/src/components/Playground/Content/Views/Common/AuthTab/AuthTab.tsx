@@ -1,8 +1,9 @@
 import React from 'react';
+import type { Auth } from '@opencollection/types/common/auth';
 import { Field } from '@/ui/Field';
 import { AUTH_MODE_LABELS, PLACEMENT_OPTIONS } from '@/constants';
-import { REQUEST_PROTOCOL_KEYS } from '@/utils/schemaHelpers';
-import { canNavigateToSource, type InheritedAuth } from '@/utils/request';
+import { setItemAuth } from '@/utils/schemaHelpers';
+import { canNavigateToSource, type InheritedAuth, type InheritedSourceTab } from '@/utils/request';
 import { GoToIcon } from '@/assets/icons';
 import AuthModeSelect, { authForMode, authModeOf } from '../AuthModeSelect/AuthModeSelect';
 import { StyledWrapper } from './StyledWrapper';
@@ -10,7 +11,6 @@ import NoContentText from '@/ui/NoContentText/NoContentText';
 
 interface AuthTabProps {
   auth: any;
-  onAuthChange: (authType: string) => void;
   onItemChange?: (item: any) => void;
   item?: any;
   title?: string;
@@ -19,12 +19,11 @@ interface AuthTabProps {
   showFullAuth?: boolean;
   showModeSelect?: boolean;
   inheritedAuth?: InheritedAuth | null;
-  onNavigateToSource?: (uuid: string) => void;
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
 }
 
 export const AuthTab: React.FC<AuthTabProps> = ({
   auth,
-  onAuthChange,
   onItemChange,
   item,
   title,
@@ -35,25 +34,14 @@ export const AuthTab: React.FC<AuthTabProps> = ({
   inheritedAuth,
   onNavigateToSource
 }) => {
-  const updateItemAuth = (newAuth: unknown) => {
+  const updateItemAuth = (newAuth: Auth | undefined) => {
     if (!onItemChange || !item) return;
-    // Write auth where getRequestAuth reads it: a request keeps it in its protocol block
-    // (http/graphql/…); a Collection/Folder nests it under `request` (created if absent).
-    const protocolKey = REQUEST_PROTOCOL_KEYS.find((key) => key in item);
-    if (protocolKey) {
-      onItemChange({ ...item, [protocolKey]: { ...item[protocolKey], auth: newAuth } });
-    } else {
-      onItemChange({ ...item, request: { ...item.request, auth: newAuth } });
-    }
+    onItemChange(setItemAuth(item, newAuth));
   };
 
-  const handleAuthTypeChange = (newAuthType: string) => {
-    if (!showFullAuth || !onItemChange || !item) {
-      onAuthChange(newAuthType);
-      return;
-    }
-    updateItemAuth(authForMode(newAuthType));
-  };
+  const navigateToSource = onNavigateToSource && ((uuid: string) => onNavigateToSource(uuid, 'auth'));
+
+  const handleAuthTypeChange = (mode: string) => updateItemAuth(authForMode(mode));
 
   const handleFieldChange = (field: string, value: string) => {
     updateItemAuth({ ...auth, [field]: value });
@@ -138,13 +126,13 @@ export const AuthTab: React.FC<AuthTabProps> = ({
     const { auth: inheritedValue, source } = inherited;
     const mode = authModeOf(inheritedValue);
     const modeLabel = mode === 'none' ? 'No Auth' : AUTH_MODE_LABELS[mode] ?? mode;
-    const modeLink = canNavigateToSource(source, onNavigateToSource) ? (
+    const modeLink = canNavigateToSource(source, navigateToSource) ? (
       <button
         type="button"
         className="auth-inherited-mode"
         data-testid="inherited-auth-mode"
         aria-label={`Open ${modeLabel} auth in ${source.name}`}
-        onClick={() => onNavigateToSource!(source.uuid)}
+        onClick={() => navigateToSource!(source.uuid)}
       >
         {modeLabel}
         <GoToIcon width={14} height={14} />

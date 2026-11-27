@@ -94,23 +94,41 @@ test.describe('Playground request — inherited headers', () => {
     await expect(inheritedHeaders.requestSectionToggle).toHaveText('Request Headers (1)');
   });
 
-  test('a folder source link opens that folder settings', async ({ playground }) => {
+  test('a folder source link opens that folder settings on its Headers tab', async ({ playground }) => {
     await playground.openTreeItem(['billing', 'customers', 'Get All Customers']);
     await playground.selectTab('headers');
 
     await playground.inheritedHeaders.toggle.click();
     await playground.inheritedHeaders.sourceLink('X-Tenant-Id').click();
     await expect(playground.viewTitle).toHaveText('customers');
-    await expect(playground.folderSettingsTab('overview')).toHaveAttribute('aria-selected', 'true');
+    await expect(playground.folderSettingsTab('headers')).toHaveAttribute('aria-selected', 'true');
   });
 
-  test('a collection source link opens the collection settings', async ({ playground, collectionSettings }) => {
+  test('a collection source link opens the collection settings on its Headers tab', async ({
+    playground,
+    collectionSettings
+  }) => {
     await playground.openTreeItem(['billing', 'customers', 'Get All Customers']);
     await playground.selectTab('headers');
 
     await playground.inheritedHeaders.toggle.click();
     await playground.inheritedHeaders.sourceLink('collection-header').click();
-    await expect(collectionSettings.tab('overview')).toHaveAttribute('aria-selected', 'true');
+    await expect(collectionSettings.tab('headers')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  test('opening a folder from the sidebar after following a source link lands on its Overview tab', async ({
+    playground
+  }) => {
+    await playground.openTreeItem(['billing', 'customers', 'Get All Customers']);
+    await playground.selectTab('headers');
+
+    await playground.inheritedHeaders.toggle.click();
+    await playground.inheritedHeaders.sourceLink('X-Billing-Account').click();
+    await expect(playground.folderSettingsTab('headers')).toHaveAttribute('aria-selected', 'true');
+
+    await playground.openTreeItem(['billing', 'customers']);
+    await expect(playground.viewTitle).toHaveText('customers');
+    await expect(playground.folderSettingsTab('overview')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('adding an own header with the same name hides the inherited one, case-insensitively', async ({
@@ -192,14 +210,14 @@ test.describe('Folder settings — inherited headers', () => {
     await expect(inheritedHeaders.row('collection-header')).toBeHidden();
   });
 
-  test('a folder source link opens that folder settings on its Overview tab', async ({ playground }) => {
+  test('a folder source link opens that folder settings on its Headers tab', async ({ playground }) => {
     await playground.openTreeItem(['billing', 'customers']);
     await playground.folderSettingsTab('headers').click();
 
     await playground.inheritedHeaders.toggle.click();
     await playground.inheritedHeaders.sourceLink('X-Billing-Account').click();
     await expect(playground.viewTitle).toHaveText('billing');
-    await expect(playground.folderSettingsTab('overview')).toHaveAttribute('aria-selected', 'true');
+    await expect(playground.folderSettingsTab('headers')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('adding a folder header with the same name hides the inherited one', async ({ playground }) => {

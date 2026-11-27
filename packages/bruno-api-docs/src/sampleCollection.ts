@@ -688,9 +688,7 @@ items:
       headers:
         - name: "X-Billing-Account"
           value: "acct_billing_folder"
-      auth:
-        type: "bearer"
-        token: "{{vineet_bearer_auth_token}}"
+      auth: inherit
       scripts:
         - type: before-request
           code: |

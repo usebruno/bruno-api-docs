@@ -19,6 +19,9 @@ export interface InheritedAuth {
   source: InheritedSource;
 }
 
+/** Settings tab an inherited-source link opens on the folder or collection it points to. */
+export type InheritedSourceTab = 'auth' | 'headers';
+
 export interface BodyTableRow {
   name: string;
   value: string;

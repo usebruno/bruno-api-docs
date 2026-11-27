@@ -71,7 +71,7 @@ test.describe('Playground request — inherited auth source', () => {
     await expect(token).toHaveAttribute('type', 'text');
 
     await playground.auth.inheritedMode.click();
-    await expect(collectionSettings.tab('overview')).toHaveAttribute('aria-selected', 'true');
+    await expect(collectionSettings.tab('auth')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('a request inheriting from a folder shows its API key read-only with the placement locked', async ({
@@ -89,7 +89,7 @@ test.describe('Playground request — inherited auth source', () => {
 
     await playground.auth.inheritedMode.click();
     await expect(playground.viewTitle).toHaveText('invoices');
-    await expect(playground.folderSettingsTab('overview')).toHaveAttribute('aria-selected', 'true');
+    await expect(playground.folderSettingsTab('auth')).toHaveAttribute('aria-selected', 'true');
   });
 
   test('switching away from Inherit hides the inherited auth and switching back restores it', async ({
@@ -127,6 +127,6 @@ test.describe('Playground request — inherited auth source', () => {
 
     await expect(playground.auth.inheritedSource).toHaveText('Auth inherited from Bruno Testbench Bearer Token');
     await playground.auth.inheritedMode.click();
-    await expect(collectionSettings.tab('overview')).toHaveAttribute('aria-selected', 'true');
+    await expect(collectionSettings.tab('auth')).toHaveAttribute('aria-selected', 'true');
   });
 });

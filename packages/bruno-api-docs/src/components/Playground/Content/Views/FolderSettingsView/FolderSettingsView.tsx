@@ -25,7 +25,8 @@ import { useInheritance } from '@/hooks/useInheritance';
 import {
   actionsToPostResponseVars,
   getRequestDefaultsVars,
-  postResponseVarsToActions
+  postResponseVarsToActions,
+  type InheritedSourceTab
 } from '@/utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
@@ -34,12 +35,19 @@ interface FolderSettingsProps {
   folder: Folder;
   collection: OpenCollection;
   onFolderChange: (updatedFolder: Folder) => void;
-  onNavigateToSource?: (uuid: string) => void;
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
+  initialTab?: InheritedSourceTab;
 }
 
-const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onFolderChange, onNavigateToSource }) => {
+const FolderSettings: React.FC<FolderSettingsProps> = ({
+  folder,
+  collection,
+  onFolderChange,
+  onNavigateToSource,
+  initialTab = 'overview'
+}) => {
   const dispatch = useAppDispatch();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
   const ancestry = useMemo(() => {
     const uuid = getItemUuid(folder);
@@ -87,16 +95,6 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     } as Folder);
   };
 
-  const handleAuthChange = (authType: string) => {
-    let auth: any = 'inherit';
-    if (authType !== 'none' && authType !== 'inherit') {
-      auth = { type: authType };
-    } else if (authType === 'none') {
-      auth = undefined;
-    }
-    commitFolder({ ...folder, request: { ...folder.request, auth } });
-  };
-
   const renderOverview = () => (
     <OverviewTab
       docs={getItemDocs(folder)}
@@ -127,7 +125,6 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
   const renderAuth = () => (
     <AuthTab
       auth={folder.request?.auth}
-      onAuthChange={handleAuthChange}
       onItemChange={commitFolder}
       item={folder}
       description="Configures authentication for this folder. This applies to all requests using the Inherit option in the Auth tab."

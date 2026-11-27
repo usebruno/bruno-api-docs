@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { getByTestId, headerTexts, query } from '@/test-utils/dom';
+import { getByTestId, headerTexts, query, queryByTestId } from '@/test-utils/dom';
 import KeyValueTable, { type KeyValueRow } from './KeyValueTable';
 
 const noop = () => {};
@@ -84,5 +84,133 @@ describe('KeyValueTable: first column header alignment', () => {
   it('does not flag the table when the checkbox column is hidden', () => {
     const root = useRenderToDom(<KeyValueTable data={rows} onChange={noop} showEnabled={false} />);
     expect(getByTestId(root, 'key-value-table-table').classList.contains('key-value-table--with-toggle')).toBe(false);
+  });
+});
+
+describe('KeyValueTable — rowConfig', () => {
+  const mixedRows: KeyValueRow[] = [
+    { id: 's1', name: '', value: '', enabled: true, rowType: 'section' },
+    { id: 'i1', name: 'X-Tenant', value: 'acme', enabled: true, description: 'Tenant', rowType: 'inherited' },
+    { id: 'r1', name: 'X-Trace', value: 'abc', enabled: true }
+  ];
+  const rowConfig = {
+    isEditable: (row: KeyValueRow) => !row.rowType,
+    isCheckboxDisabled: (row: KeyValueRow) => row.rowType === 'inherited',
+    className: (row: KeyValueRow) => (row.rowType ? `${row.rowType}-row` : ''),
+    testId: (row: KeyValueRow) => (row.rowType ? `${row.rowType}-row` : undefined),
+    renderFullWidth: (row: KeyValueRow) => (row.rowType === 'section' ? <span>Inherited</span> : null),
+    renderActionCell: (row: KeyValueRow) => (row.rowType === 'inherited' ? <span data-testid="source-link" /> : null)
+  };
+  const table = <KeyValueTable data={mixedRows} onChange={noop} showDescription rowConfig={rowConfig} />;
+
+  it('renders a full-width row spanning every column', () => {
+    const cell = getByTestId(getByTestId(useRenderToDom(table), 'section-row'), 'key-value-table-full-width-cell');
+    expect(cell.getAttribute('class')).toBe('full-width-row');
+    expect(cell.getAttribute('colspan')).toBe('4');
+    expect(cell.text).toBe('Inherited');
+  });
+
+  it('renders read-only rows as text with a disabled checkbox and the custom action', () => {
+    const row = getByTestId(useRenderToDom(table), 'inherited-row');
+    expect(row.getAttribute('class')).toBe('inherited-row');
+    expect(queryByTestId(row, 'key-value-table-name-input')).toBeNull();
+    expect(getByTestId(row, 'key-value-table-name-text').text).toBe('X-Tenant');
+    expect(getByTestId(row, 'key-value-table-value-text').text).toBe('acme');
+    expect(getByTestId(row, 'key-value-table-description-text').text).toBe('Tenant');
+    expect(getByTestId(row, 'column-checkbox-input').hasAttribute('disabled')).toBe(true);
+    getByTestId(row, 'source-link');
+    expect(queryByTestId(row, 'column-delete')).toBeNull();
+  });
+
+  describe('full-width row span', () => {
+    const sectionRow: KeyValueRow[] = [{ id: 's1', name: '', value: '', enabled: true, rowType: 'section' }];
+    const typeColumn = { key: 'type', label: 'Type', render: () => <span>text</span> };
+    const scopeColumn = { key: 'scope', label: 'Scope', render: () => <span>runtime</span> };
+    const sectionSpan = (root: ReturnType<typeof useRenderToDom>) =>
+      getByTestId(getByTestId(root, 'section-row'), 'key-value-table-full-width-cell').getAttribute('colspan');
+
+    it('spans key, value, an additional column and the actions column when actions are not inline', () => {
+      const root = useRenderToDom(
+        <KeyValueTable data={sectionRow} onChange={noop} additionalColumns={[typeColumn]} rowConfig={rowConfig} />
+      );
+      expect(sectionSpan(root)).toBe('4');
+    });
+
+    it('spans only key and value when inline actions absorb the additional columns and delete', () => {
+      const root = useRenderToDom(
+        <KeyValueTable
+          data={sectionRow}
+          onChange={noop}
+          inlineActions
+          additionalColumns={[typeColumn, scopeColumn]}
+          rowConfig={rowConfig}
+        />
+      );
+      expect(sectionSpan(root)).toBe('2');
+    });
+
+    it('spans the description and a trailing actions column when inline actions have a description', () => {
+      const root = useRenderToDom(
+        <KeyValueTable data={sectionRow} onChange={noop} inlineActions showDescription rowConfig={rowConfig} />
+      );
+      expect(sectionSpan(root)).toBe('4');
+    });
+
+    it('spans only key and value when actions are hidden', () => {
+      const root = useRenderToDom(
+        <KeyValueTable data={sectionRow} onChange={noop} showActions={false} rowConfig={rowConfig} />
+      );
+      expect(sectionSpan(root)).toBe('2');
+    });
+  });
+
+  describe('read-only rows', () => {
+    const inheritedRow: KeyValueRow[] = [
+      { id: 'i1', name: 'X Bad', value: 'acme', enabled: true, rowType: 'inherited' }
+    ];
+    const editableRow: KeyValueRow[] = [{ id: 'r1', name: 'X Bad', value: 'acme', enabled: true }];
+    const typeColumn = { key: 'type', label: 'Type', render: () => <span data-testid="type-column">text</span> };
+    const alwaysError = () => 'Always wrong';
+
+    it('leaves an additional column cell empty', () => {
+      const root = useRenderToDom(
+        <KeyValueTable data={inheritedRow} onChange={noop} additionalColumns={[typeColumn]} rowConfig={rowConfig} />
+      );
+      expect(query(getByTestId(root, 'inherited-row'), 'td.col-type').innerHTML).toBe('');
+    });
+
+    it('renders no inline trailing content', () => {
+      const root = useRenderToDom(
+        <KeyValueTable
+          data={inheritedRow}
+          onChange={noop}
+          inlineActions
+          additionalColumns={[typeColumn]}
+          rowConfig={rowConfig}
+        />
+      );
+      const row = getByTestId(root, 'inherited-row');
+      expect(queryByTestId(row, 'key-value-table-value-trailing')).toBeNull();
+      expect(queryByTestId(row, 'type-column')).toBeNull();
+    });
+
+    it('shows row errors only on editable rows', () => {
+      const readOnly = useRenderToDom(
+        <KeyValueTable data={inheritedRow} onChange={noop} getRowError={alwaysError} rowConfig={rowConfig} />
+      );
+      expect(queryByTestId(getByTestId(readOnly, 'inherited-row'), 'key-value-table-error')).toBeNull();
+
+      const editable = useRenderToDom(
+        <KeyValueTable data={editableRow} onChange={noop} getRowError={alwaysError} rowConfig={rowConfig} />
+      );
+      getByTestId(getByTestId(editable, 'key-value-table-row-x bad'), 'key-value-table-error');
+    });
+  });
+
+  it('keeps editable rows editable and appends the trailing blank row after them', () => {
+    const root = useRenderToDom(table);
+    getByTestId(getByTestId(root, 'key-value-table-row-x-trace'), 'column-delete');
+    expect(getByTestId(root, 'key-value-table-add-row').getAttribute('class')).toBe('empty-row');
+    expect(root.querySelectorAll('[data-testid="key-value-table-add-row"]')).toHaveLength(1);
   });
 });

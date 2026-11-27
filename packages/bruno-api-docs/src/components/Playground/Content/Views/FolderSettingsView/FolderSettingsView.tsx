@@ -21,7 +21,13 @@ import {
 } from '@/utils/schemaHelpers';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { getItemUuid } from '@/utils/itemUtils';
-import { actionsToPostResponseVars, getInheritedAuthSummary, postResponseVarsToActions } from '@/utils/request';
+import { useInheritance } from '@/hooks/useInheritance';
+import {
+  actionsToPostResponseVars,
+  getRequestDefaultsVars,
+  postResponseVarsToActions,
+  type InheritedSourceTab
+} from '@/utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
 
@@ -29,20 +35,30 @@ interface FolderSettingsProps {
   folder: Folder;
   collection: OpenCollection;
   onFolderChange: (updatedFolder: Folder) => void;
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
+  initialTab?: InheritedSourceTab;
 }
 
-const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onFolderChange }) => {
+const FolderSettings: React.FC<FolderSettingsProps> = ({
+  folder,
+  collection,
+  onFolderChange,
+  onNavigateToSource,
+  initialTab = 'overview'
+}) => {
   const dispatch = useAppDispatch();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
-  // The folder's own auth may itself be `inherit` — resolve the nearest configured parent so the
-  // Auth tab can show "Auth inherited from {name}: {mode}" (matches the request Auth tab).
-  const inheritedAuth = useMemo(() => {
-    if (folder.request?.auth !== 'inherit') return null;
+  const ancestry = useMemo(() => {
     const uuid = getItemUuid(folder);
-    const ancestry = uuid ? getAncestorsByUuid(collection, uuid) : [];
-    return getInheritedAuthSummary(collection, ancestry, folder);
+    return uuid ? getAncestorsByUuid(collection, uuid) : [];
   }, [folder, collection]);
+
+  const ownConfig = useMemo(
+    () => ({ headers: folder.request?.headers ?? [], ...getRequestDefaultsVars(folder) }),
+    [folder]
+  );
+  const { inheritedAuth, inheritedHeaders } = useInheritance(collection, ancestry, folder, ownConfig);
 
   // Every edit rebuilds the folder and persists it the same way: push it into the collection (by the
   // hydrated uuid) and bubble it up. Centralised so the handlers below stay one-liners.
@@ -79,16 +95,6 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     } as Folder);
   };
 
-  const handleAuthChange = (authType: string) => {
-    let auth: any = 'inherit';
-    if (authType !== 'none' && authType !== 'inherit') {
-      auth = { type: authType };
-    } else if (authType === 'none') {
-      auth = undefined;
-    }
-    commitFolder({ ...folder, request: { ...folder.request, auth } });
-  };
-
   const renderOverview = () => (
     <OverviewTab
       docs={getItemDocs(folder)}
@@ -101,6 +107,8 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
       headers={folder.request?.headers || []}
       onHeadersChange={handleHeadersChange}
       description="Request headers that will be sent with every request inside this folder."
+      inheritedHeaders={inheritedHeaders}
+      onNavigateToSource={onNavigateToSource}
     />
   );
 
@@ -117,13 +125,13 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
   const renderAuth = () => (
     <AuthTab
       auth={folder.request?.auth}
-      onAuthChange={handleAuthChange}
       onItemChange={commitFolder}
       item={folder}
       description="Configures authentication for this folder. This applies to all requests using the Inherit option in the Auth tab."
       showInherit={true}
       showFullAuth={true}
       inheritedAuth={inheritedAuth}
+      onNavigateToSource={onNavigateToSource}
     />
   );
 

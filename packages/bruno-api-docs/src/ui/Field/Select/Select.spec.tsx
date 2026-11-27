@@ -42,4 +42,12 @@ describe('Select', () => {
     const root = render(<Select value="z" options={OPTIONS} onChange={noop} testId="fruit-select" />);
     expect(getByTestId(root, 'fruit-select').text.trim()).toBe('');
   });
+
+  it('disables the trigger only when disabled is set', () => {
+    const disabled = render(<Select value="a" options={OPTIONS} onChange={noop} disabled testId="fruit-select" />);
+    expect(getByTestId(disabled, 'fruit-select').hasAttribute('disabled')).toBe(true);
+
+    const enabled = render(<Select value="a" options={OPTIONS} onChange={noop} testId="fruit-select" />);
+    expect(getByTestId(enabled, 'fruit-select').hasAttribute('disabled')).toBe(false);
+  });
 });

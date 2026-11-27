@@ -14,6 +14,24 @@ export const StyledWrapper = styled.div`
     overflow-y: auto;
   }
 
+  .tabs-right .oc-select {
+    box-sizing: border-box;
+    height: 1.53125rem;
+    padding: 0.25rem 0.375rem;
+    color: var(--oc-colors-text-muted);
+    background: transparent;
+    border: 0.0625rem solid var(--oc-border-border1);
+    border-radius: var(--oc-border-radius-base);
+  }
+
+  .tabs-right .oc-select:hover {
+    color: var(--oc-text);
+  }
+
+  .tabs-right .oc-select .oc-select-label {
+    font-weight: 500;
+  }
+
   .description,
   .asserts-description {
     font-size: var(--oc-font-size-base);

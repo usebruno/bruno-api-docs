@@ -10,6 +10,7 @@ import ParamsTab from '../../Common/ParamsTab/ParamsTab';
 import BodyTab from '../../Common/BodyTab/BodyTab';
 import BodyModeSelector from '../../Common/BodyModeSelector/BodyModeSelector';
 import AuthTab from '../../Common/AuthTab/AuthTab';
+import AuthModeSelect, { authForMode } from '../../Common/AuthModeSelect/AuthModeSelect';
 import ScriptsTab from '../../Common/ScriptsTab/ScriptsTab';
 import TestsTab from '../../Common/TestsTab/TestsTab';
 import AssertsTab from '../../Common/AssertsTab/AssertsTab';
@@ -28,19 +29,34 @@ import {
   scriptsArrayToObject,
   scriptsObjectToArray,
   getRequestUrl,
-  getItemDocs
+  getItemDocs,
+  setItemAuth
 } from '@/utils/schemaHelpers';
 import { setUrlQueryParams } from '@/utils/pathParams';
-import { actionsToPostResponseVars, postResponseVarsToActions, type InheritedAuthSummary } from '@/utils/request';
+import {
+  actionsToPostResponseVars,
+  postResponseVarsToActions,
+  type InheritedAuth,
+  type InheritedHeaderRow,
+  type InheritedSourceTab
+} from '@/utils/request';
 import { keyValueRowToEntry } from '@/utils/keyValueRow';
 
 interface RequestPaneProps {
   item: HttpRequest;
   onItemChange: (item: HttpRequest) => void;
-  inheritedAuth?: InheritedAuthSummary | null;
+  inheritedAuth?: InheritedAuth | null;
+  inheritedHeaders?: InheritedHeaderRow[];
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
 }
 
-const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inheritedAuth }) => {
+const RequestPane: React.FC<RequestPaneProps> = ({
+  item,
+  onItemChange,
+  inheritedAuth,
+  inheritedHeaders,
+  onNavigateToSource
+}) => {
   const [activeTab, setActiveTab] = useSessionStorage('oc-docs:playgroundRequestTab', 'overview');
 
   const handleParamsChange = (params: KeyValueRow[]) => {
@@ -138,6 +154,8 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
       headers={headers}
       onHeadersChange={handleHeadersChange}
       description="Headers sent with this request."
+      inheritedHeaders={inheritedHeaders}
+      onNavigateToSource={onNavigateToSource}
     />
   );
 
@@ -153,13 +171,14 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
   const renderAuth = () => (
     <AuthTab
       auth={auth}
-      onAuthChange={() => {}} // Not used for full auth
       onItemChange={onItemChange}
       item={item}
       description="Configures authentication for this request."
       showInherit={true}
       showFullAuth={true}
+      showModeSelect={false}
       inheritedAuth={inheritedAuth}
+      onNavigateToSource={onNavigateToSource}
     />
   );
 
@@ -241,6 +260,14 @@ const RequestPane: React.FC<RequestPaneProps> = ({ item, onItemChange, inherited
       id: 'auth',
       label: 'Auth',
       contentIndicator: auth ? '•' : undefined,
+      rightElement: (
+        <AuthModeSelect
+          testId="request-auth-mode-select"
+          auth={auth}
+          showInherit
+          onChange={(mode) => onItemChange(setItemAuth(item, authForMode(mode)))}
+        />
+      ),
       content: renderAuth()
     },
     {

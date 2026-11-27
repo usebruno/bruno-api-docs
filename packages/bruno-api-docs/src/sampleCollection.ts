@@ -186,7 +186,7 @@ items:
 
           ### 🔄 How WebSockets Work
 
-          * **The Handshake:** A WebSocket session begins with an HTTP GET request containing a specific 'Upgrade' header. If both sides agree, the server responds with a '101 Switching Protocols' status code. 
+          * **The Handshake:** A WebSocket session begins with an HTTP GET request containing a specific 'Upgrade' header. If both sides agree, the server responds with a '101 Switching Protocols' status code.
           * **Data Transfer:** After the handshake, the connection is upgraded. Clients and servers can send data back and forth as messages, which are composed of one or more data frames.
           * **Control Frames:** Besides payload data, the connection maintains its health using control frames such as *ping* and *pong* to detect dead connections, and *close* frames to gracefully disconnect.
 
@@ -685,6 +685,9 @@ items:
       const receipt = await bru.get('/invoices/42/receipt?include=lineItems,taxes,discounts,refunds,adjustments,credits&expand=customer,subscription,paymentMethod&currency=usd&locale=en-GB&format=pdf');
       \`\`\`
     request:
+      headers:
+        - name: "X-Billing-Account"
+          value: "acct_billing_folder"
       auth: inherit
       scripts:
         - type: before-request
@@ -713,6 +716,9 @@ items:
           seq: 1
           tags: ["customers"]
         request:
+          headers:
+            - name: "X-Tenant-Id"
+              value: "tenant_customers_folder"
           auth: inherit
           scripts:
             - type: before-request
@@ -1080,7 +1086,14 @@ items:
           type: folder
           seq: 4
         request:
-          auth: inherit
+          headers:
+            - name: "collection-header"
+              value: "invoices-folder-header-value"
+          auth:
+            type: apikey
+            key: "X-API-Key"
+            value: "invoices-folder-api-key"
+            placement: header
         items:
           - info:
               name: Get All Invoices
@@ -1089,6 +1102,9 @@ items:
             http:
               method: GET
               url: '{{baseUrl}}/billing/invoices'
+              headers:
+                - name: "X-Billing-Account"
+                  value: "acct_get_all_invoices"
               auth: inherit
             settings:
               encodeUrl: true

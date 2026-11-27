@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { Folder, ScriptFile } from '@opencollection/types/collection/item';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -20,7 +20,9 @@ import type { ExampleHighlight } from '../../Docs/Sidebar/SidebarTree/SidebarTre
 import { useNavModel } from '@/routing/hooks';
 import { usePlaygroundUrlState, useElementWidth, useResizableSidebar, useClickOutside, usePlaygroundSearch } from '@/hooks';
 import { getItemUuid, findItemByUuid } from '@/utils/itemUtils';
+import { COLLECTION_ROOT_CRUMB } from '@/utils/common';
 import { isFolder, isScriptFile } from '@/utils/schemaHelpers';
+import type { InheritedSourceTab } from '@/utils/request';
 import { exampleIndexForSlug, exampleSlugForIndex } from '@/routing/slug';
 import PlaygroundView from '../Content/Views/PlaygroundView/PlaygroundView';
 import FolderSettingsView from '../Content/Views/FolderSettingsView/FolderSettingsView';
@@ -68,6 +70,8 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
   const selectedExampleIndex = useAppSelector(selectSelectedExampleIndex);
   const activeEnvName = useAppSelector(selectActiveEnvName);
   const orientationOverride = useAppSelector(selectResponsePaneOrientation);
+  // Tab the next folder/collection settings view opens on; set only by an inherited-source link.
+  const [sourceTab, setSourceTab] = useState<InheritedSourceTab>();
 
   const uuidToSlug = useMemo<Map<string, string>>(() => {
     const map = new Map<string, string>();
@@ -126,22 +130,25 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     dispatch(setSelectedExampleIndex(exampleIndex));
     dispatch(setViewMode(exampleIndex != null ? 'example' : target.view));
     if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
+    setSourceTab(undefined);
   }, [requestSlug, exampleSlug, model, collection, dispatch, appliedSlugRef]);
 
   const closeSidebarIfInline = () => {
     if (dock === 'inline') onCloseSidebar();
   };
 
-  const handleNavigate = (slug: string) => {
+  const handleNavigate = (slug: string): boolean => {
     const target = resolvePlaygroundTarget(slug, model);
-    if (!target || !target.uuid) return;
+    if (!target || !target.uuid) return false;
     dispatch(setSelectedItemId(target.uuid));
     dispatch(setSelectedExampleIndex(null));
     dispatch(setViewMode(target.view));
     if (target.expandUuids.length) dispatch(expandFolders(target.expandUuids));
+    setSourceTab(undefined);
     appliedSlugRef.current = slug;
     setRequestSlug(slug);
     closeSidebarIfInline();
+    return true;
   };
 
   const handleToggleFolder = (uuid: string) => dispatch(toggleFolderCollapse(uuid));
@@ -153,6 +160,7 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     dispatch(setSelectedItemId(requestUuid));
     dispatch(setSelectedExampleIndex(index));
     dispatch(setViewMode('example'));
+    setSourceTab(undefined);
     const slug = uuidToSlug.get(requestUuid);
     if (slug) {
       const item = findItemByUuid(collection?.items, requestUuid);
@@ -168,17 +176,36 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     dispatch(setViewMode('collection-settings'));
     dispatch(setSelectedItemId(null));
     dispatch(setSelectedExampleIndex(null));
+    setSourceTab(undefined);
     appliedSlugRef.current = PLAYGROUND_COLLECTION_SLUG;
     setRequestSlug(PLAYGROUND_COLLECTION_SLUG); // persist so a reload restores it
     closeSidebarIfInline();
   };
 
+  const openInheritedSource = (uuid: string, tab: InheritedSourceTab) => {
+    if (uuid === COLLECTION_ROOT_CRUMB) {
+      openCollection();
+    } else {
+      const slug = uuidToSlug.get(uuid);
+      if (!slug || !handleNavigate(slug)) return;
+    }
+    // After navigating: openCollection/handleNavigate clear the tab, and the two updates batch.
+    setSourceTab(tab);
+  };
+
   const view = (() => {
-    if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} />;
+    if (viewMode === 'collection-settings' && collection) return <CollectionSettingsView collection={collection} initialTab={sourceTab} />;
     if (viewMode === 'environments' && collection) return <EnvironmentsView key={configureCount} collection={collection} compact={dock === 'inline'} />;
     if (viewMode === 'folder-settings' && selectedItem && isFolder(selectedItem) && collection) {
       return (
-        <FolderSettingsView folder={selectedItem as Folder} collection={collection} onFolderChange={() => undefined} />
+        <FolderSettingsView
+          key={getItemUuid(selectedItem)}
+          folder={selectedItem as Folder}
+          collection={collection}
+          onFolderChange={() => undefined}
+          onNavigateToSource={openInheritedSource}
+          initialTab={sourceTab}
+        />
       );
     }
     if (
@@ -198,10 +225,12 @@ const PlaygroundBody: React.FC<PlaygroundBodyProps> = ({
     if ((viewMode === 'playground' || viewMode === 'example') && selectedItem && !isFolder(selectedItem) && collection) {
       return (
         <PlaygroundView
+          key={getItemUuid(selectedItem)}
           item={selectedItem as HttpRequest}
           collection={collection}
           selectedEnvironment={activeEnvName ?? ''}
           orientation={orientation}
+          onNavigateToSource={openInheritedSource}
         />
       );
     }

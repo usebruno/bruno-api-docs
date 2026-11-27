@@ -14,6 +14,7 @@ interface SelectProps {
   onChange: (value: string) => void;
   id?: string;
   ariaLabel?: string;
+  disabled?: boolean;
   testId?: string;
 }
 
@@ -23,6 +24,7 @@ export const Select: React.FC<SelectProps> = ({
   onChange,
   id,
   ariaLabel,
+  disabled = false,
   testId
 }) => {
   const selected = options.find((option) => option.value === value);
@@ -35,7 +37,7 @@ export const Select: React.FC<SelectProps> = ({
 
   return (
     <MenuDropdown items={items} selectedItemId={value} placement="bottom-start" role="listbox" testId={testId}>
-      <StyledWrapper className="oc-select" id={id} aria-label={ariaLabel}>
+      <StyledWrapper className="oc-select" id={id} aria-label={ariaLabel} disabled={disabled}>
         <span className="oc-select-label" aria-hidden="true">
           {selected ? selected.label : ''}
         </span>

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeOffIcon } from '@/assets/icons';
 import { StyledWrapper } from './StyledWrapper';
+import cx from '@/utils/cx';
 
 interface InputProps {
   value: string;
   onChange: (value: string) => void;
   id?: string;
   secret?: boolean;
+  readOnly?: boolean;
   placeholder?: string;
   testId?: string;
 }
@@ -16,6 +18,7 @@ export const Input: React.FC<InputProps> = ({
   onChange,
   id,
   secret = false,
+  readOnly = false,
   placeholder,
   testId
 }) => {
@@ -23,13 +26,23 @@ export const Input: React.FC<InputProps> = ({
   const resolvedType = secret ? (revealed ? 'text' : 'password') : 'text';
 
   return (
-    <StyledWrapper className={['oc-input-wrapper', secret && 'oc-input-wrapper--secret'].filter(Boolean).join(' ')}>
+    <StyledWrapper
+      className={cx([
+        'oc-input-wrapper',
+        {
+          'oc-input-wrapper--secret': secret,
+          'oc-input-wrapper--readonly': readOnly
+        }
+      ])}
+      data-testid={testId ? `${testId}-wrapper` : undefined}
+    >
       <input
         id={id}
         type={resolvedType}
         className="oc-input"
         value={value}
         placeholder={placeholder}
+        readOnly={readOnly}
         data-testid={testId}
         autoComplete="off"
         onChange={(event) => onChange(event.target.value)}

@@ -18,6 +18,7 @@ import type { GraphQLRequest } from '@opencollection/types/requests/graphql';
 import type { GrpcRequest, GrpcRequestDetails, GrpcMetadata, GrpcMethodType } from '@opencollection/types/requests/grpc';
 import type { WebSocketRequest, WebSocketMessageType } from '@opencollection/types/requests/websocket';
 import type { Script, Scripts, ScriptType } from '@opencollection/types/common/scripts';
+import type { Auth } from '@opencollection/types/common/auth';
 import { PROTOCOL_BADGE_LABELS } from '@/constants';
 
 export type SupportedRequestItem = HttpRequest | GraphQLRequest | GrpcRequest | WebSocketRequest;
@@ -352,8 +353,20 @@ export const getHttpParams = (item: HttpRequest | null | undefined): HttpRequest
 };
 
 // A request nests its auth inside its protocol-detail block. Reads (getRequestAuth)
-// and writes (AuthTab) share this list so the two can't drift.
+// and writes (setItemAuth) share this list so the two can't drift.
 export const REQUEST_PROTOCOL_KEYS = ['http', 'graphql', 'grpc', 'websocket'] as const;
+
+/**
+ * Copy of `item` with its auth replaced, written where getRequestAuth reads it: a request keeps
+ * it in its protocol block (http/graphql/…); a Collection/Folder nests it under `request`
+ * (created if absent).
+ */
+export const setItemAuth = <T extends object>(item: T, auth: Auth | undefined): T => {
+  const blocks = item as Record<string, object | undefined>;
+  const protocolKey = REQUEST_PROTOCOL_KEYS.find((key) => key in blocks);
+  if (protocolKey) return { ...item, [protocolKey]: { ...blocks[protocolKey], auth } };
+  return { ...item, request: { ...blocks.request, auth } };
+};
 
 export const getRequestAuth = (item: RequestItem | null | undefined): any => {
   if (!item) return undefined;

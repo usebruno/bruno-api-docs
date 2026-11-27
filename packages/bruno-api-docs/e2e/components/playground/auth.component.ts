@@ -5,12 +5,20 @@ import { BaseComponent } from '../base.component';
 // and the notice shown when a request inherits its auth. Open the tab via
 // playground.selectTab('auth').
 export class RequestAuthComponent extends BaseComponent {
-  readonly modeSelect = this.page.getByTestId('auth-mode-select');
+  readonly view = this.page.getByTestId('playground-view');
+  readonly modeSelect = this.page.getByTestId('request-auth-mode-select');
+  readonly panelModeSelect = this.view.getByTestId('auth-tab-mode-select');
   readonly inheritNotice = this.page.getByTestId('auth-inherit-notice');
-  readonly options = this.page.getByTestId(/^auth-mode-select-(?!dropdown$)/);
+  readonly options = this.page.getByTestId(/^request-auth-mode-select-(?!dropdown$)/);
+  readonly inheritedSource = this.view.getByTestId('auth-inherited-source');
+  readonly inheritedMode = this.view.getByTestId('inherited-auth-mode');
 
   option(value: string): Locator {
-    return this.page.getByTestId(`auth-mode-select-${value}`);
+    return this.page.getByTestId(`request-auth-mode-select-${value}`);
+  }
+
+  inheritedField(name: string): Locator {
+    return this.view.getByTestId(`auth-inherited-${name}`);
   }
 
   field(name: string): Locator {

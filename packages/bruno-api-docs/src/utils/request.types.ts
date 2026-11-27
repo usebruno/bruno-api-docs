@@ -1,5 +1,5 @@
 import type { Auth } from '@opencollection/types/common/auth';
-import type { HttpRequestBody } from '@opencollection/types/requests/http';
+import type { HttpRequestBody, HttpRequestHeader } from '@opencollection/types/requests/http';
 import type { ActionVariableScope } from '@opencollection/types/common/actions';
 import type { Description } from '@opencollection/types/common/description';
 
@@ -14,11 +14,13 @@ export interface ResolvedAuth {
   source?: InheritedSource;
 }
 
-/** Display summary for an inheriting item: the parent it resolves from and that parent's mode. */
-export interface InheritedAuthSummary {
-  sourceName: string;
-  modeLabel: string;
+export interface InheritedAuth {
+  auth?: Auth;
+  source: InheritedSource;
 }
+
+/** Settings tab an inherited-source link opens on the folder or collection it points to. */
+export type InheritedSourceTab = 'auth' | 'headers';
 
 export interface BodyTableRow {
   name: string;
@@ -94,10 +96,7 @@ export interface PostResponseRowInput {
   description?: Description;
 }
 
-export interface InheritedHeaderRow {
-  name: string;
-  value?: string;
-  disabled?: boolean;
+export interface InheritedHeaderRow extends HttpRequestHeader {
   description?: string;
   source: InheritedSource;
 }
@@ -118,4 +117,11 @@ export interface OwnConfigKeys {
   headers: Set<string>;
   preVars: Set<string>;
   postVars: Set<string>;
+}
+
+/** An item's own headers and variables, from which its OwnConfigKeys are taken. */
+export interface OwnConfig {
+  headers: HttpRequestHeader[];
+  preVars: PreRequestVarRow[];
+  postVars: PostResponseVarRow[];
 }

@@ -7,6 +7,7 @@ import HighlightedInput from '../HighlightedInput/HighlightedInput';
 import { SecretValue } from '@/ui/SecretValue/SecretValue';
 import Checkbox from '@/ui/Checkbox/Checkbox';
 import { StyledWrapper } from './StyledWrapper';
+import cx from '@/utils/cx';
 
 // Smallest a column may be dragged to; the neighbour it trades width with is held to the same floor.
 const MIN_COLUMN_WIDTH = 60;
@@ -29,23 +30,38 @@ export interface AdditionalColumn {
   ) => React.ReactNode;
 }
 
-interface KeyValueTableProps {
-  data: KeyValueRow[];
-  onChange: (data: KeyValueRow[]) => void;
+/** Per-row behaviour for tables that mix editable rows with read-only ones (e.g. section and inherited rows). */
+export interface KeyValueRowConfig<R extends KeyValueRow = KeyValueRow> {
+  isEditable?: (row: R) => boolean;
+  isCheckboxDisabled?: (row: R) => boolean;
+  className?: (row: R) => string;
+  testId?: (row: R) => string | undefined;
+  /** Content for a row that spans every column (e.g. a section header); return null for a normal row. */
+  renderFullWidth?: (row: R) => React.ReactNode;
+  /** Content for the trailing actions cell; return null to keep the default delete button. */
+  renderActionCell?: (row: R) => React.ReactNode;
+}
+
+const DEFAULT_ROW_CONFIG: KeyValueRowConfig = {};
+const alwaysEditable = () => true;
+
+interface KeyValueTableProps<R extends KeyValueRow = KeyValueRow> {
+  data: R[];
+  onChange: (data: R[]) => void;
   keyPlaceholder?: string;
   valuePlaceholder?: string;
   showEnabled?: boolean;
   additionalColumns?: AdditionalColumn[];
   className?: string;
   disableNewRow?: boolean;
-  makeNewRow?: () => Partial<KeyValueRow>;
+  makeNewRow?: () => Partial<R>;
   addWhenComplete?: boolean;
   disableDelete?: boolean;
   showActions?: boolean;
   readOnlyKey?: boolean;
   keyAutocomplete?: string[];
   valueAutocomplete?: string[];
-  getRowError?: (row: KeyValueRow, index: number, field: 'name' | 'value') => string | null;
+  getRowError?: (row: R, index: number, field: 'name' | 'value') => string | null;
   valueHeader?: React.ReactNode;
   inlineActions?: boolean;
   multilineValues?: boolean;
@@ -53,6 +69,7 @@ interface KeyValueTableProps {
   showDescription?: boolean;
   /** Let the user drag column dividers to resize (on by default; the delete column stays fixed). */
   resizableColumns?: boolean;
+  rowConfig?: KeyValueRowConfig<R>;
   testId?: string;
 }
 
@@ -61,7 +78,7 @@ const valueTruncated = (anchor: HTMLElement): boolean => {
   return !!field && (field.scrollWidth > field.clientWidth || field.scrollHeight > field.clientHeight);
 };
 
-const KeyValueTable: React.FC<KeyValueTableProps> = ({
+const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
   data,
   onChange,
   keyPlaceholder = 'Name',
@@ -84,16 +101,36 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
   secretEditByDefault = false,
   showDescription = false,
   resizableColumns = true,
+  rowConfig = DEFAULT_ROW_CONFIG,
   testId = 'key-value-table'
-}) => {
+}: KeyValueTableProps<R>) => {
+  const {
+    isEditable: isRowEditable = alwaysEditable,
+    isCheckboxDisabled,
+    className: rowClassName,
+    testId: rowTestId,
+    renderFullWidth,
+    renderActionCell
+  } = rowConfig;
+  // Rows without a rowConfig id are named after their key; the unnamed trailing row is the add row.
+  const defaultRowTestId = (row: R) => (row.name ? `${testId}-row-${row.name.toLowerCase()}` : `${testId}-add-row`);
   const { isFound, names } = useResolvedVariables();
-  const { rows, updateField, removeRow } = useEditableRows(data, onChange, { disableNewRow, makeNewRow, addWhenComplete });
+  const { rows, updateField, removeRow } = useEditableRows(data, onChange, {
+    disableNewRow,
+    makeNewRow,
+    addWhenComplete,
+    isEditable: isRowEditable
+  });
 
   // With a description column the delete action must sit in its own trailing column (after
   // Description) rather than inline in the value cell, so any inline extras (e.g. the variable
   // type dropdown) still render beside the value while delete stays last — matching the app.
   const actionsAsColumn = showActions && (!inlineActions || showDescription);
   const inlineDelete = showActions && !disableDelete && !actionsAsColumn;
+  const columnCount = 2
+    + (inlineActions ? 0 : additionalColumns.length)
+    + (showDescription ? 1 : 0)
+    + (actionsAsColumn ? 1 : 0);
 
   const tableRef = useRef<HTMLTableElement>(null);
   const [columnWidths, setColumnWidths] = useState<Record<string, string>>({});
@@ -208,7 +245,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
       />
     ) : null;
 
-  const cellError = (row: KeyValueRow, index: number, field: 'name' | 'value') => {
+  const cellError = (row: R, index: number, field: 'name' | 'value') => {
     const message = getRowError?.(row, index, field);
     if (!message) return null;
     return (
@@ -266,15 +303,30 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
           </thead>
           <tbody>
             {rows.map((row, index) => {
+              const rowClasses = [rowClassName?.(row)];
+              const fullWidthContent = renderFullWidth?.(row);
+              if (fullWidthContent) {
+                return (
+                  <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row) ?? defaultRowTestId(row)}>
+                    <td className="full-width-row" colSpan={columnCount} data-testid={`${testId}-full-width-cell`}>
+                      {fullWidthContent}
+                    </td>
+                  </tr>
+                );
+              }
+
+              const isEditable = isRowEditable(row);
               const isLastRow = index === rows.length - 1;
-              const isEmptyRow = isBlankRow(row);
-              const isLastEmptyRow = isLastRow && isEmptyRow;
+              const isLastEmptyRow = isEditable && isLastRow && isBlankRow(row);
+              if (isLastEmptyRow) rowClasses.push('empty-row');
+              const isFilledEditableRow = isEditable && !isLastEmptyRow;
               const updateCell = (field: string, value: unknown) => updateField(index, field, value);
 
               const deleteButton = (
                 <button
                   type="button"
                   className="delete-button"
+                  data-testid="column-delete"
                   onClick={() => removeRow(index)}
                   aria-label="Delete row"
                   title="Delete row"
@@ -295,7 +347,18 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                 </button>
               );
 
-              const valueField = row.secret ? (
+              const customAction = renderActionCell?.(row);
+              const actionCell = customAction ?? (isEditable && !isLastEmptyRow && !disableDelete && deleteButton);
+
+              const readOnlyText = (text: string, cellTestId: string) => (
+                <span className="text-readonly" title={text} data-testid={`${testId}-${cellTestId}`}>
+                  {text}
+                </span>
+              );
+
+              const valueField = !isEditable ? (
+                readOnlyText(row.value, 'value-text')
+              ) : row.secret ? (
                 <SecretValue
                   value={row.value}
                   placeholder={valuePlaceholder}
@@ -321,7 +384,7 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
               );
 
               return (
-                <tr key={row.id} className={isLastEmptyRow ? 'empty-row' : ''}>
+                <tr key={row.id} className={cx(rowClasses)} data-testid={rowTestId?.(row) ?? defaultRowTestId(row)}>
                   <td className="col-key">
                     <div className="key-cell">
                       {showEnabled && (
@@ -330,15 +393,15 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                             <Checkbox
                               checked={row.enabled}
                               ariaLabel={row.name ? `Enable ${row.name}` : 'Enable row'}
+                              disabled={isCheckboxDisabled?.(row)}
                               onChange={(e) => updateField(index, 'enabled', e.target.checked)}
+                              testId="column-checkbox"
                             />
                           )}
                         </span>
                       )}
-                      {readOnlyKey ? (
-                        <span className="text-readonly" title={row.name} data-testid={`${testId}-name-text`}>
-                          {row.name}
-                        </span>
+                      {readOnlyKey || !isEditable ? (
+                        readOnlyText(row.name, 'name-text')
                       ) : (
                         <HighlightedInput
                           value={row.name}
@@ -352,16 +415,16 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                           testId={`${testId}-name-input`}
                         />
                       )}
-                      {!isLastEmptyRow && cellError(row, index, 'name')}
+                      {isFilledEditableRow && cellError(row, index, 'name')}
                     </div>
                   </td>
                   <td className="col-value">
                     {inlineActions ? (
                       <div className="value-cell">
                         <div className="value-cell-field">{valueField}</div>
-                        {!isLastEmptyRow && cellError(row, index, 'value')}
-                        {!isLastEmptyRow && (additionalColumns.length > 0 || inlineDelete) && (
-                          <div className="value-cell-trailing">
+                        {isFilledEditableRow && cellError(row, index, 'value')}
+                        {isFilledEditableRow && (additionalColumns.length > 0 || inlineDelete) && (
+                          <div className="value-cell-trailing" data-testid={`${testId}-value-trailing`}>
                             {additionalColumns.map((col) => (
                               <React.Fragment key={col.key}>{col.render(row, index, updateCell)}</React.Fragment>
                             ))}
@@ -376,26 +439,30 @@ const KeyValueTable: React.FC<KeyValueTableProps> = ({
                   {!inlineActions
                     && additionalColumns.map((col) => (
                       <td key={col.key} className={`col-${col.key}`}>
-                        {!isLastEmptyRow && col.render(row, index, updateCell)}
+                        {isFilledEditableRow && col.render(row, index, updateCell)}
                       </td>
                     ))}
                   {showDescription && (
                     <td className="col-description">
-                      <HighlightedInput
-                        value={typeof row.description === 'string' ? row.description : ''}
-                        placeholder={isLastEmptyRow ? 'Description' : ''}
-                        onValueChange={(v) => updateField(index, 'description', v)}
-                        isFound={isFound}
-                        names={names}
-                        variablesAutocomplete={false}
-                        multiline
-                        noWrap
-                        testId={`${testId}-description-input`}
-                      />
+                      {!isEditable ? (
+                        readOnlyText(typeof row.description === 'string' ? row.description : '', 'description-text')
+                      ) : (
+                        <HighlightedInput
+                          value={typeof row.description === 'string' ? row.description : ''}
+                          placeholder={isLastEmptyRow ? 'Description' : ''}
+                          onValueChange={(v) => updateField(index, 'description', v)}
+                          isFound={isFound}
+                          names={names}
+                          variablesAutocomplete={false}
+                          multiline
+                          noWrap
+                          testId={`${testId}-description-input`}
+                        />
+                      )}
                     </td>
                   )}
                   {actionsAsColumn && (
-                    <td className="col-actions">{!isLastEmptyRow && !disableDelete && deleteButton}</td>
+                    <td className="col-actions">{actionCell}</td>
                   )}
                 </tr>
               );

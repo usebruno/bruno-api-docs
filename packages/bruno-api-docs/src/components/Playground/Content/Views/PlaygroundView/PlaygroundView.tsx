@@ -1,8 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import type { HttpRequest, HttpRequestHeader } from '@opencollection/types/requests/http';
+import type { HttpRequest } from '@opencollection/types/requests/http';
 import type { OpenCollection as OpenCollectionCollection } from '@opencollection/types';
 import type { Item } from '@opencollection/types/collection/item';
-import type { Auth } from '@opencollection/types/common/auth';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
 import { ItemVariableResolverProvider } from '@/hooks';
 import TitleLabel from '@/components/TitleLabel/TitleLabel';
@@ -21,12 +20,13 @@ import {
   selectPlaygroundRequestStartedAt,
   applyScriptVariableChanges
 } from '@/store/slices/playground';
-import { getItemName, isPlaygroundUnsupported, getRequestAuth, getRequestHeaders } from '@/utils/schemaHelpers';
-import { getInheritedAuthSummary, resolveInheritedAuth, getInheritedHeaders } from '@/utils/request';
+import { getItemName, isPlaygroundUnsupported } from '@/utils/schemaHelpers';
+import type { InheritedSourceTab } from '@/utils/request';
 import UnsupportedRequest from '@/components/UnsupportedRequest/UnsupportedRequest';
 import { FileNotFoundIcon } from '@/assets/icons';
 import { useSplitPane } from '@/hooks/useSplitPane';
 import { useDebouncedSave } from '@/hooks/useDebouncedSave';
+import { useInheritance } from '@/hooks/useInheritance';
 import { SplitDivider } from '@/components/SplitDivider/SplitDivider';
 import { playgroundRuns, PLAYGROUND_CLOSED } from './playgroundRuns';
 
@@ -35,9 +35,16 @@ interface PlaygroundViewProps {
   collection: OpenCollectionCollection;
   selectedEnvironment?: string;
   orientation?: 'horizontal' | 'vertical';
+  onNavigateToSource?: (uuid: string, tab: InheritedSourceTab) => void;
 }
 
-const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collection, selectedEnvironment = '', orientation = 'horizontal' }) => {
+const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({
+  item,
+  collection,
+  selectedEnvironment = '',
+  orientation = 'horizontal',
+  onNavigateToSource
+}) => {
   const dispatch = useAppDispatch();
   const [editableItem, setEditableItem] = useState<HttpRequest>(item);
   const itemName = getItemName(editableItem) || 'Untitled Request';
@@ -54,30 +61,11 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
     () => (collection && itemUuid ? getAncestorsByUuid(collection, itemUuid) : []),
     [collection, itemUuid]
   );
-  const inheritedAuth = useMemo(
-    () => getInheritedAuthSummary(collection, ancestry, editableItem),
-    [collection, ancestry, editableItem]
+  const { effectiveAuth, inheritedAuth, inheritedHeaders, effectiveHeaders } = useInheritance(
+    collection,
+    ancestry,
+    editableItem
   );
-  // Resolve the auth so that the runner and the code snippet show the same effective auth.
-  const effectiveAuth = useMemo<Auth | undefined>(() => {
-    const ownAuth = getRequestAuth(editableItem) as Auth | undefined;
-    return ownAuth === 'inherit' ? resolveInheritedAuth(collection, ancestry, editableItem).auth : ownAuth;
-  }, [collection, ancestry, editableItem]);
-
-  // Applies same rules as runner so that the code snippet shows the same effective headers as the runner.
-  const effectiveHeaders = useMemo<HttpRequestHeader[]>(() => {
-    const auth = effectiveAuth && effectiveAuth !== 'inherit' ? effectiveAuth : undefined;
-    const authWritesAuthorization = Boolean(
-      (auth?.type === 'bearer' && auth.token) || (auth?.type === 'basic' && auth.username && auth.password)
-    );
-    const keep = (header: { name?: string }) =>
-      !authWritesAuthorization || (header.name || '').toLowerCase() !== 'authorization';
-    const ownRows = getRequestHeaders(editableItem).filter(keep);
-    const inheritedRows = getInheritedHeaders(collection, ancestry, editableItem)
-      .filter(keep)
-      .map((header) => ({ name: header.name, value: header.value ?? '', disabled: header.disabled }));
-    return [...ownRows, ...inheritedRows];
-  }, [collection, ancestry, editableItem, effectiveAuth]);
 
   useEffect(() => {
     setEditableItem(item);
@@ -207,7 +195,13 @@ const HttpRequestPlaygroundView: React.FC<PlaygroundViewProps> = ({ item, collec
                 : { width: `${paneSize}%`, borderColor: 'var(--border-color)' }
             }
           >
-            <RequestPane item={editableItem} onItemChange={handleItemChange} inheritedAuth={inheritedAuth} />
+            <RequestPane
+              item={editableItem}
+              onItemChange={handleItemChange}
+              inheritedAuth={inheritedAuth}
+              inheritedHeaders={inheritedHeaders}
+              onNavigateToSource={onNavigateToSource}
+            />
           </div>
 
           <SplitDivider orientation={orientation} onPointerDown={startResize} active={isResizing} testId="playground-divider" />

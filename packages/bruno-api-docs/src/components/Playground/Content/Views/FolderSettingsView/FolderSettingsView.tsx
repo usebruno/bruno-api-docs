@@ -20,13 +20,12 @@ import {
   scriptsObjectToArray
 } from '@/utils/schemaHelpers';
 import { getAncestorsByUuid } from '@/utils/fileUtils';
-import { getFolderConfig } from '@/utils/folder';
 import { getItemUuid } from '@/utils/itemUtils';
+import { useInheritance } from '@/hooks/useInheritance';
 import {
   actionsToPostResponseVars,
-  collectionSource,
-  postResponseVarsToActions,
-  resolveInheritedAuth
+  getRequestDefaultsVars,
+  postResponseVarsToActions
 } from '@/utils/request';
 import TestsTab from '../Common/TestsTab/TestsTab';
 import OverviewTab from '../Common/OverviewTab/OverviewTab';
@@ -47,16 +46,11 @@ const FolderSettings: React.FC<FolderSettingsProps> = ({ folder, collection, onF
     return uuid ? getAncestorsByUuid(collection, uuid) : [];
   }, [folder, collection]);
 
-  const inheritedAuth = useMemo(() => {
-    if (folder.request?.auth !== 'inherit') return null;
-    const resolved = resolveInheritedAuth(collection, ancestry, folder);
-    return { auth: resolved.auth, source: resolved.source ?? collectionSource(collection) };
-  }, [folder, collection, ancestry]);
-
-  const inheritedHeaders = useMemo(
-    () => getFolderConfig(collection, ancestry, folder).inheritedHeaders,
-    [folder, collection, ancestry]
+  const ownConfig = useMemo(
+    () => ({ headers: folder.request?.headers ?? [], ...getRequestDefaultsVars(folder) }),
+    [folder]
   );
+  const { inheritedAuth, inheritedHeaders } = useInheritance(collection, ancestry, folder, ownConfig);
 
   // Every edit rebuilds the folder and persists it the same way: push it into the collection (by the
   // hydrated uuid) and bubble it up. Centralised so the handlers below stay one-liners.

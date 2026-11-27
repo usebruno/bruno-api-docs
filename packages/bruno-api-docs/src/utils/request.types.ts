@@ -115,3 +115,10 @@ export interface OwnConfigKeys {
   preVars: Set<string>;
   postVars: Set<string>;
 }
+
+/** An item's own headers and variables, from which its OwnConfigKeys are taken. */
+export interface OwnConfig {
+  headers: HttpRequestHeader[];
+  preVars: PreRequestVarRow[];
+  postVars: PostResponseVarRow[];
+}

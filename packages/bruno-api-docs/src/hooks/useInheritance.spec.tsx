@@ -2,32 +2,34 @@ import React from 'react';
 import { describe, it, expect } from 'vitest';
 import type { OpenCollection } from '@opencollection/types';
 import type { HttpRequest } from '@opencollection/types/requests/http';
-import type { Item } from '@opencollection/types/collection/item';
+import type { Folder, Item } from '@opencollection/types/collection/item';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useInheritance } from './useInheritance';
 import { COLLECTION_ROOT_CRUMB } from '@/utils/common';
-import { folderSource, getInheritedConfig } from '@/utils/request';
+import { folderSource, getInheritedConfig, type OwnConfig } from '@/utils/request';
 import type { SupportedRequestItem } from '@/utils/schemaHelpers';
 
 type InheritanceData = ReturnType<typeof useInheritance>;
 
 let captured: InheritanceData;
 
-const Harness: React.FC<{ item: SupportedRequestItem; collection?: OpenCollection | null; ancestry?: Item[] }> = ({
-  item,
-  collection = null,
-  ancestry = []
-}) => {
-  captured = useInheritance(collection, ancestry, item);
+const Harness: React.FC<{
+  item: SupportedRequestItem | Folder;
+  collection?: OpenCollection | null;
+  ancestry?: Item[];
+  own?: OwnConfig;
+}> = ({ item, collection = null, ancestry = [], own }) => {
+  captured = useInheritance(collection, ancestry, item, own);
   return null;
 };
 
 const dataFor = (
-  item: SupportedRequestItem,
+  item: SupportedRequestItem | Folder,
   collection: OpenCollection | null = null,
-  ancestry: Item[] = []
+  ancestry: Item[] = [],
+  own?: OwnConfig
 ): InheritanceData => {
-  renderToStaticMarkup(<Harness item={item} collection={collection} ancestry={ancestry} />);
+  renderToStaticMarkup(<Harness item={item} collection={collection} ancestry={ancestry} own={own} />);
   return captured;
 };
 
@@ -108,6 +110,22 @@ describe('useInheritance', () => {
       expect(data.inheritedPreVars).toEqual(expected.preVars);
       expect(data.inheritedPostVars).toEqual(expected.postVars);
       expect(data.inheritedHeaders.map((h) => h.name)).toEqual(['X-Shadowed', 'X-Collection']);
+    });
+
+    it('reads the own headers and variables from `own` when given, as a folder passes them', () => {
+      const collection = collectionWith({
+        headers: [{ name: 'X-Billing', value: 'c' }, { name: 'X-Collection', value: 'c' }],
+        variables: [{ name: 'colVar', value: 'cv' }]
+      });
+      const own: OwnConfig = {
+        headers: [{ name: 'x-billing', value: 'folder' }],
+        preVars: [{ name: 'colVar', value: 'fv' }],
+        postVars: []
+      };
+      const data = dataFor(folder('billing', 'inherit') as Folder, collection, [], own);
+      expect(data.inheritedHeaders.map((h) => h.name)).toEqual(['X-Collection']);
+      expect(data.inheritedPreVars).toEqual([]);
+      expect(headerNames(data)).toEqual(['x-billing', 'X-Collection']);
     });
   });
 

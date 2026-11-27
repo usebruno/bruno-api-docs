@@ -32,6 +32,7 @@ import { BODY_CONTENT_TYPE, BODY_LANGUAGE } from '@/constants';
 import type {
   InheritedSource,
   ResolvedAuth,
+  InheritedAuth,
   BodyTableRow,
   FileBodyRow,
   BodyView,
@@ -48,7 +49,8 @@ import type {
   InheritedPreRequestVarRow,
   InheritedPostResponseVarRow,
   InheritedConfig,
-  OwnConfigKeys
+  OwnConfigKeys,
+  OwnConfig
 } from './request.types';
 
 export type * from './request.types';
@@ -112,6 +114,20 @@ export const resolveInheritedAuth = (
 
   // Nothing concrete anywhere up the chain — the request effectively sends No Auth, not "Inherit".
   return { auth: undefined };
+};
+
+/**
+ * The auth an item set to Inherit receives and where it comes from, or null when the item has
+ * its own auth. With nothing configured up the chain, the collection is named as the source.
+ */
+export const getInheritedAuth = (
+  collection: OpenCollection | null | undefined,
+  ancestors: Item[],
+  item: Item
+): InheritedAuth | null => {
+  if (getRequestAuth(item as RequestItem) !== 'inherit') return null;
+  const resolved = resolveInheritedAuth(collection, ancestors, item);
+  return { auth: resolved.auth, source: resolved.source ?? collectionSource(collection) };
 };
 
 /**
@@ -463,18 +479,26 @@ export const collectInheritedConfig = (
   };
 };
 
+/** A request's own headers and variables, read from its protocol block and runtime. */
+export const getRequestOwnConfig = (item: SupportedRequestItem): OwnConfig => ({
+  headers: getRequestHeaders(item),
+  preVars: getPreRequestVars(item),
+  postVars: getPostResponseVars(item)
+});
+
 /** The full config a request inherits from its collection/folder ancestry — one ancestry walk shared
- *  by the headers table, the variables panel and the code snippet (nearest parent wins; the request's
+ *  by the headers table, the variables panel and the code snippet (nearest parent wins; the item's
  *  own enabled config overrides it; disabled entries are dropped). */
 export const getInheritedConfig = (
   collection: OpenCollection | null | undefined,
   ancestry: Item[],
-  item: SupportedRequestItem
+  item: SupportedRequestItem,
+  own: OwnConfig = getRequestOwnConfig(item)
 ): InheritedConfig =>
   collectInheritedConfig(collection, ancestry, {
-    headers: enabledHeaderKeys(getRequestHeaders(item)),
-    preVars: enabledVarKeys(getPreRequestVars(item)),
-    postVars: enabledVarKeys(getPostResponseVars(item))
+    headers: enabledHeaderKeys(own.headers),
+    preVars: enabledVarKeys(own.preVars),
+    postVars: enabledVarKeys(own.postVars)
   });
 
 /** Headers the request inherits (nearest parent wins, case-insensitive, disabled dropped). */

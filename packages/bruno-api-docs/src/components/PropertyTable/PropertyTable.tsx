@@ -82,7 +82,7 @@ export const PropertyTable: React.FC<PropertyTableProps> = ({ rows, emptyMessage
               </dd>
               {hasTrailing ? (
                 <div className="property-trailing" data-testid="property-trailing">
-                  {showType ? <span className="property-type">{row.type}</span> : null}
+                  {showType ? <span className="property-type" data-testid="property-type">{row.type}</span> : null}
                   {row.disabled ? <DisabledBadge /> : null}
                   {row.inheritedSource ? (
                     <InheritedSourceLink source={row.inheritedSource} itemName={row.label} onNavigate={onNavigate} />

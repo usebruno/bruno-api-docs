@@ -43,6 +43,19 @@ test.describe('Description tooltips', () => {
     await expect(tooltip.popup).toBeVisible();
     expect(await tooltip.popup.innerText()).toBe(MULTI_PARAGRAPH);
   });
+
+  test('opens for a short description with line breaks even though it fits', async ({ page, tooltip }) => {
+    await page.setViewportSize({ width: 1400, height: 900 });
+    await page.goto(DESCRIBED_REQUEST);
+
+    const cell = tooltip.cellWithText('Short line one');
+    expect(await cell.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+
+    await cell.hover();
+
+    await expect(tooltip.popup).toBeVisible();
+    expect(await tooltip.popup.innerText()).toBe('Short line one\nShort line two');
+  });
 });
 
 test.describe('Tooltip theme', () => {

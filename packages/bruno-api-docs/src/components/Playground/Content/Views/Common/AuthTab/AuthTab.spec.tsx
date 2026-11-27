@@ -34,16 +34,16 @@ describe('AuthTab', () => {
   });
 
   it('shows the current auth type on the mode trigger', () => {
-    expect(renderAuth(undefined).getByTestId('auth-mode-select').text).toContain('No Auth');
-    expect(renderAuth({ type: 'bearer', token: 'abc' }).getByTestId('auth-mode-select').text).toContain('Bearer Token');
-    expect(renderAuth({ type: 'digest', username: 'u', password: 'p' }).getByTestId('auth-mode-select').text).toContain('Digest Auth');
+    expect(renderAuth(undefined).getByTestId('auth-tab-mode-select').text).toContain('No Auth');
+    expect(renderAuth({ type: 'bearer', token: 'abc' }).getByTestId('auth-tab-mode-select').text).toContain('Bearer Token');
+    expect(renderAuth({ type: 'digest', username: 'u', password: 'p' }).getByTestId('auth-tab-mode-select').text).toContain('Digest Auth');
   });
 
   it('offers Inherit as a mode only when showInherit is set', () => {
     // Enabled: inherit is selectable and shows on the trigger.
-    expect(renderAuth('inherit', { showInherit: true }).getByTestId('auth-mode-select').text).toContain('Inherit');
+    expect(renderAuth('inherit', { showInherit: true }).getByTestId('auth-tab-mode-select').text).toContain('Inherit');
     // Disabled: inherit is not an option, so nothing matches and the trigger shows no label.
-    expect(renderAuth('inherit').getByTestId('auth-mode-select').text.trim()).toBe('');
+    expect(renderAuth('inherit').getByTestId('auth-tab-mode-select').text.trim()).toBe('');
   });
 
   it('renders no form for None', () => {
@@ -197,7 +197,7 @@ describe('AuthTab', () => {
 
   it('hides the mode select when showModeSelect is false', () => {
     const { byTestId } = renderAuth({ type: 'bearer', token: 'abc' }, { showModeSelect: false });
-    expect(byTestId('auth-mode-select')).toBeNull();
+    expect(byTestId('auth-tab-mode-select')).toBeNull();
   });
 
   it('falls back to a generic inherit note when the source is not resolved', () => {

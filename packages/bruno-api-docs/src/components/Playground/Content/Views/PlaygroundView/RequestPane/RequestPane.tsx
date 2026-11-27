@@ -261,6 +261,7 @@ const RequestPane: React.FC<RequestPaneProps> = ({
       contentIndicator: auth ? '•' : undefined,
       rightElement: (
         <AuthModeSelect
+          testId="request-auth-mode-select"
           auth={auth}
           showInherit
           onChange={(mode) => onItemChange({ ...item, http: { ...item.http, auth: authForMode(mode) } })}

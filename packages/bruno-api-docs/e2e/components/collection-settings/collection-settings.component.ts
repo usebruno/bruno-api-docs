@@ -8,7 +8,7 @@ export class CollectionSettingsComponent extends BaseComponent {
   readonly overviewEmpty = this.view.getByTestId('overview-empty');
   readonly bulkEditToggle = this.view.getByTestId('bulk-edit-toggle');
   readonly varsTable = this.view.getByTestId('variables-pre-request');
-  readonly authMode = this.view.getByTestId('auth-mode-select');
+  readonly authMode = this.view.getByTestId('auth-tab-mode-select');
 
   tab(id: string): Locator {
     return this.view.getByTestId(`collection-settings-tabs-tab-${id}`);
@@ -24,7 +24,7 @@ export class CollectionSettingsComponent extends BaseComponent {
 
   /** An option inside the (opened) auth-mode dropdown. */
   authModeOption(value: string): Locator {
-    return this.page.getByTestId(`auth-mode-select-${value}`);
+    return this.page.getByTestId(`auth-tab-mode-select-${value}`);
   }
 
   async open(): Promise<void> {
@@ -37,6 +37,6 @@ export class CollectionSettingsComponent extends BaseComponent {
 
   async selectAuthMode(value: string): Promise<void> {
     await this.authMode.click();
-    await this.page.getByTestId(`auth-mode-select-${value}`).click();
+    await this.page.getByTestId(`auth-tab-mode-select-${value}`).click();
   }
 }

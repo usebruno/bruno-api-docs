@@ -200,7 +200,12 @@ export const AuthTab: React.FC<AuthTabProps> = ({
 
       <div className="auth-body">
         {showModeSelect && (
-          <AuthModeSelect auth={auth} showInherit={showInherit} onChange={handleAuthTypeChange} />
+          <AuthModeSelect
+            testId="auth-tab-mode-select"
+            auth={auth}
+            showInherit={showInherit}
+            onChange={handleAuthTypeChange}
+          />
         )}
         {renderBody()}
       </div>

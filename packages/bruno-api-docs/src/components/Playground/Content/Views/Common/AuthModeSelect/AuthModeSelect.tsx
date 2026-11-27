@@ -7,6 +7,7 @@ interface AuthModeSelectProps {
   auth: unknown;
   onChange: (mode: string) => void;
   showInherit?: boolean;
+  testId?: string;
 }
 
 export const authModeOf = (auth: unknown): string => {
@@ -20,7 +21,12 @@ export const authForMode = (mode: string): Auth | undefined => {
   return { ...(AUTH_DEFAULTS[mode] ?? { type: mode }) } as unknown as Auth;
 };
 
-export const AuthModeSelect: React.FC<AuthModeSelectProps> = ({ auth, onChange, showInherit = false }) => {
+export const AuthModeSelect: React.FC<AuthModeSelectProps> = ({
+  auth,
+  onChange,
+  showInherit = false,
+  testId = 'auth-mode-select'
+}) => {
   const modeOptions: SelectOption[] = [
     { value: 'none', label: 'No Auth' },
     ...(showInherit ? [{ value: 'inherit', label: 'Inherit' }] : []),
@@ -29,7 +35,7 @@ export const AuthModeSelect: React.FC<AuthModeSelectProps> = ({ auth, onChange, 
 
   return (
     <Field.Select
-      testId="auth-mode-select"
+      testId={testId}
       ariaLabel="Authentication type"
       value={authModeOf(auth)}
       options={modeOptions}

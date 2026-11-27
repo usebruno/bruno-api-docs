@@ -133,10 +133,10 @@ test.describe('Playground request — inherited headers', () => {
   });
 
   test('the Headers tab counts only own headers', async ({ playground }) => {
-    await playground.openTreeItem(['billing', 'customers', 'Get All Customers']);
+    await playground.openTreeItem(['billing', 'invoices', 'Get All Invoices']);
     await playground.selectTab('headers');
 
-    await expect(playground.tab('headers')).toHaveText('Headers');
+    await expect(playground.tab('headers')).toHaveText('Headers1');
   });
 });
 

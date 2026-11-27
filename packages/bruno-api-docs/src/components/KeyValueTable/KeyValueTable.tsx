@@ -392,6 +392,7 @@ const KeyValueTable = <R extends KeyValueRow = KeyValueRow>({
                               ariaLabel={row.name ? `Enable ${row.name}` : 'Enable row'}
                               disabled={isCheckboxDisabled?.(row)}
                               onChange={(e) => updateField(index, 'enabled', e.target.checked)}
+                              testId="column-checkbox"
                             />
                           )}
                         </span>

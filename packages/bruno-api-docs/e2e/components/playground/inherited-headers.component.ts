@@ -13,7 +13,7 @@ export class InheritedHeadersComponent extends BaseComponent {
   }
 
   checkbox(name: string): Locator {
-    return this.row(name).getByRole('checkbox');
+    return this.row(name).getByTestId('column-checkbox-input');
   }
 
   sourceLink(name: string): Locator {

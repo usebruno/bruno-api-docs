@@ -118,7 +118,7 @@ describe('HeadersTab', () => {
         const inherited = getByTestId(root, 'inherited-header-row-x-tenant-id');
         expect(inherited.getAttribute('class')).toBe('inherited-header-row');
         expect(getByTestId(inherited, 'key-value-table-name-text').text).toBe('X-Tenant-Id');
-        expect(query(inherited, 'input[type="checkbox"]').hasAttribute('disabled')).toBe(true);
+        expect(getByTestId(inherited, 'column-checkbox-input').hasAttribute('disabled')).toBe(true);
         getByTestId(inherited, 'inherited-header-source-x-tenant-id');
         const values = root.querySelectorAll('input.text-input').map((input) => input.getAttribute('value'));
         expect(values).toContain('X-Trace');

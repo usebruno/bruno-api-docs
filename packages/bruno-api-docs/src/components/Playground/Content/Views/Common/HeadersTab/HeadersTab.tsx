@@ -131,7 +131,7 @@ const HeadersDisplay: React.FC<Omit<HeadersTabProps, 'title' | 'description'>> =
     testId: (row) => {
       if (row.rowType === ROW_TYPE.SECTION) return `${row.section}-headers-section-row`;
       if (row.rowType === ROW_TYPE.INHERITED) return `inherited-header-row-${row.name.toLowerCase()}`;
-      return undefined;
+      return row.name ? `request-header-row-${row.name.toLowerCase()}` : 'request-header-add-row';
     },
     renderFullWidth: (row) => {
       if (row.rowType !== ROW_TYPE.SECTION) return null;

@@ -117,7 +117,7 @@ describe('KeyValueTable — rowConfig', () => {
     expect(getByTestId(row, 'key-value-table-name-text').text).toBe('X-Tenant');
     expect(getByTestId(row, 'key-value-table-value-text').text).toBe('acme');
     expect(getByTestId(row, 'key-value-table-description-text').text).toBe('Tenant');
-    expect(query(row, 'input[type="checkbox"]').hasAttribute('disabled')).toBe(true);
+    expect(getByTestId(row, 'column-checkbox-input').hasAttribute('disabled')).toBe(true);
     getByTestId(row, 'source-link');
     expect(row.querySelector('.delete-button')).toBeNull();
   });

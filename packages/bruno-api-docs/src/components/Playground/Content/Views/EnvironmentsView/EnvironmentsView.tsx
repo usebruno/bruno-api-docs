@@ -12,7 +12,8 @@ import { EnvironmentLabel } from '@/components/EnvironmentLabel/EnvironmentLabel
 import EnvVarCards from './EnvVarCards/EnvVarCards';
 import { variableTypeColumn } from '../Common/VariableTypeControl/variableTypeColumn';
 import { GlobeIcon } from '@/assets/icons';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { selectActiveEnvName } from '@/store/slices/env';
 import { cx } from '@/utils/cx';
 import { externalSecretPointer } from '@/constants';
 import { envVariableToRow, envRowToVariable, mergeExternalSecretRows } from '@/utils/environments';
@@ -45,9 +46,12 @@ interface EnvironmentsViewProps {
 
 const EnvironmentsView: React.FC<EnvironmentsViewProps> = ({ collection, compact = false }) => {
   const dispatch = useAppDispatch();
-  const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(null);
-
+  const activeEnvName = useAppSelector(selectActiveEnvName);
   const environments = (collection as any)?.environments || collection?.config?.environments || [];
+  const [selectedEnvironmentIndex, setSelectedEnvironmentIndex] = useState<number | null>(() => {
+    const activeIndex = environments.findIndex((environment: Environment) => environment.name === activeEnvName);
+    return activeIndex >= 0 ? activeIndex : null;
+  });
   const selectedEnvironment
     = selectedEnvironmentIndex !== null ? environments[selectedEnvironmentIndex] ?? null : null;
 

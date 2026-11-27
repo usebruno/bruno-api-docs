@@ -63,7 +63,7 @@ export const StyledWrapper = styled.div`
   .example-status {
     flex: 0 0 auto;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: var(--oc-font-size-sm);
     font-weight: 700;
     line-height: 1;
     border-radius: var(--oc-radius);
@@ -71,7 +71,7 @@ export const StyledWrapper = styled.div`
   }
 
   .example-name {
-    font-size: 14px;
+    font-size: var(--oc-font-size-md);
     font-weight: 500;
     color: var(--text-primary);
     white-space: nowrap;
@@ -93,7 +93,7 @@ export const StyledWrapper = styled.div`
   }
   .example-description {
     margin: 0 0.5rem 0.5rem 0.5rem;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
   }
 
   .example-url-row {
@@ -108,7 +108,7 @@ export const StyledWrapper = styled.div`
     flex: 1;
     font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 0.75rem;
+    font-size: var(--oc-font-size-sm);
     letter-spacing: 0;
     white-space: nowrap;
     overflow: hidden;
@@ -153,7 +153,7 @@ export const StyledWrapper = styled.div`
     flex: 0 0 auto;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 0.6875rem;
+    font-size: var(--oc-font-size-xs);
     line-height: 1;
     letter-spacing: 0;
     color: var(--text-primary);
@@ -165,7 +165,7 @@ export const StyledWrapper = styled.div`
 
   .pane-ctype {
     flex: 0 0 auto;
-    font-size: 11px;
+    font-size: var(--oc-font-size-xs);
     color: var(--text-muted);
     font-family: var(--font-mono);
     white-space: nowrap;
@@ -173,7 +173,7 @@ export const StyledWrapper = styled.div`
 
   .pane-meta {
     flex: 0 0 auto;
-    font-size: 11px;
+    font-size: var(--oc-font-size-xs);
     color: var(--text-muted);
     font-family: var(--font-mono);
     white-space: nowrap;
@@ -271,7 +271,7 @@ export const StyledWrapper = styled.div`
     margin: 0;
     padding: 12px;
     font-style: italic;
-    font-size: 12px;
+    font-size: var(--oc-font-size-sm);
     color: var(--text-tertiary);
   }
 

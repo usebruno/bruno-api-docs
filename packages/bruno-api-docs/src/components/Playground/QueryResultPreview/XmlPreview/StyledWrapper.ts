@@ -6,8 +6,8 @@ import styled from '@emotion/styled';
  */
 export const StyledWrapper = styled.div`
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  line-height: 1.25rem;
+  font-size: var(--oc-font-size-sm);
+  line-height: 1.7;
   padding: 1rem;
   overflow: auto;
   color: var(--oc-text);

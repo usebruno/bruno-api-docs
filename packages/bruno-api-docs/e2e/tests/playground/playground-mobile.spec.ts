@@ -32,9 +32,21 @@ test.describe('playground on a phone', () => {
     await playground.sidebarToggle.click();
     await expect(playground.sidebarPanel).toBeVisible();
 
-    // Opening the environments view is a navigate; the overlay sidebar closes.
-    await playground.gear.click();
+    // Opening the environments view from the header closes the overlay sidebar.
+    await playground.openEnvironments();
     await expect(playground.sidebarPanel).toHaveCount(0);
+  });
+
+  test('keeps the sidebar search after opening a result', async ({ page, playground }) => {
+    await page.goto(OPEN_ON_PHONE);
+    await playground.sidebarToggle.click();
+    await playground.searchInput.fill('jokes');
+    await playground.sidebarItem('Jokes').click();
+    await expect(playground.sidebarPanel).toHaveCount(0);
+
+    await playground.sidebarToggle.click();
+    await expect(playground.searchInput).toHaveValue('jokes');
+    await expect(playground.treeItems).toHaveText([/Jokes/]);
   });
 
   test('closes from the header and clears the url state', async ({ page, playground }) => {

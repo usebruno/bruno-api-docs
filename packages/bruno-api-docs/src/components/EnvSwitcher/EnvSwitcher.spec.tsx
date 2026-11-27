@@ -7,7 +7,7 @@ import type { OpenCollection } from '@opencollection/types';
 import type { Environment } from '@opencollection/types/config/environments';
 import { createOpenCollectionStore } from '@/store/store';
 import { setDocsCollection } from '@/store/slices/docs';
-import { setActiveEnv } from '@/store/slices/env';
+import { setActiveEnv, NO_ENVIRONMENT } from '@/store/slices/env';
 import { getByTestId, queryByTestId } from '@/test-utils/dom';
 import EnvSwitcher, { type EnvSwitcherProps } from './EnvSwitcher';
 
@@ -63,17 +63,12 @@ describe('EnvSwitcher', () => {
     expect(trigger.text).not.toContain('Ghost');
   });
 
-  it('renders the empty state as plain text, not a button, when there are no environments', () => {
+  it('still opens a menu showing "No Environment" when there are no environments', () => {
     const root = render(collectionWith([]));
     const trigger = getByTestId(root, 'env-switcher');
-    expect(trigger.text).toContain('No environments');
-    expect(trigger.tagName.toLowerCase()).toBe('span');
-    expect(trigger.classList.contains('env-switcher-trigger--empty')).toBe(true);
-    expect(trigger.getAttribute('title')).toBeFalsy();
-    expect(trigger.getAttribute('aria-label')).toBeFalsy();
-    expect(trigger.getAttribute('aria-haspopup')).toBeFalsy();
-    expect(root.querySelector('button')).toBeNull();
-    expect(root.querySelector('.env-switcher-chevron')).toBeFalsy();
+    expect(trigger.text).toContain('No Environment');
+    expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
+    expect(root.querySelector('.env-switcher-chevron')).toBeTruthy();
   });
 
   it('keeps the caret and the menu affordance when there are environments', () => {
@@ -82,11 +77,6 @@ describe('EnvSwitcher', () => {
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     expect(trigger.getAttribute('aria-disabled')).toBeFalsy();
     expect(root.querySelector('.env-switcher-chevron')).toBeTruthy();
-  });
-
-  it('carries the empty modifier only when there are no environments', () => {
-    const trigger = getByTestId(render(withEnvs), 'env-switcher');
-    expect(trigger.classList.contains('env-switcher-trigger--empty')).toBe(false);
   });
 
   it('paints the trigger dot with the active env color', () => {
@@ -123,10 +113,13 @@ describe('EnvSwitcher hideWhenEmpty', () => {
     const root = render(withEnvs, undefined, { hideWhenEmpty: true });
     expect(getByTestId(root, 'env-switcher').text).toContain('Dev');
   });
+});
 
-  it('keeps the empty state by default, for the playground sidebar', () => {
-    const trigger = getByTestId(render(collectionWith([])), 'env-switcher');
-    expect(trigger.text).toContain('No environments');
+describe('EnvSwitcher No Environment', () => {
+  it('keeps "No Environment" instead of falling back to the first environment', () => {
+    const trigger = getByTestId(render(withEnvs, (s) => s.dispatch(setActiveEnv(NO_ENVIRONMENT))), 'env-switcher');
+    expect(trigger.text).toContain('No Environment');
+    expect(trigger.text).not.toContain('Dev');
   });
 });
 

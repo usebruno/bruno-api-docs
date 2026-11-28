@@ -91,12 +91,8 @@ export const RequestPageLayout: React.FC<RequestPageLayoutProps> = ({
   const hasTags = tags.length > 0 || inheritedTags.length > 0;
 
   const authBadge
-    = ownAuth === 'inherit' ? (
-      authSource ? (
-        <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
-      ) : (
-        <ContentTypeBadge label="Inherited" />
-      )
+    = ownAuth === 'inherit' && authSource ? (
+      <InheritedAuthBadge source={authSource} onNavigate={onBreadcrumbClick} testId="request-auth-inherited" />
     ) : null;
 
   const hasLeftColumn = showAuth || hasParams || hasConfigContent || hasHeaders || hasInheritedHeaders;

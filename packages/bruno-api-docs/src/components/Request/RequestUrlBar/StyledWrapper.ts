@@ -48,7 +48,7 @@ export const StyledWrapper = styled.div`
     border-color: var(--oc-table-border);
   }
 
-  @media (hover: hover) {
+  @media (hover: hover) and (not (any-pointer: coarse)) {
     .request-url-bar-actions .copy-button {
       opacity: 0;
       transition: opacity 0.15s ease;

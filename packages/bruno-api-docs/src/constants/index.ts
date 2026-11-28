@@ -3,6 +3,7 @@ export {
   AUTH_DEFAULTS,
   AUTH_MODE_LABELS,
   AUTH_TYPES,
+  GRPC_AUTH_TYPES,
   PLACEMENT_OPTIONS,
   type AuthType
 } from './auth';

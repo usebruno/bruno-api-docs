@@ -205,13 +205,13 @@ test.describe('Section navigator (the "on this page" outline)', () => {
       .toBeLessThan(280);
   });
 
-  test('stays visible but clips above a bottom-docked playground (no overlap)', async ({ requestPage, page }) => {
+  test('stays visible but clips above a bottom-docked playground (no overlap)', async ({ requestPage, page, playground }) => {
     await requestPage.open(REQUEST_WITH_EXEC);
     await expect(page.getByTestId('section-nav-rail')).toBeVisible();
 
     // The bottom dock splits the screen, so the rail stays but is capped to the docs area's height.
     await page.getByTestId('request-try-button').click();
-    await page.getByTestId('playground-dock-bottom').click();
+    await playground.selectDock('bottom');
     await expect(page.getByTestId('playground-content')).toBeVisible();
 
     const rail = page.getByTestId('section-nav-rail');
@@ -225,14 +225,14 @@ test.describe('Section navigator (the "on this page" outline)', () => {
     expect(railBox!.y + railBox!.height).toBeLessThanOrEqual(playgroundBox!.y);
   });
 
-  test('hides entirely when a bottom-docked playground leaves too little height', async ({ requestPage, page }) => {
+  test('hides entirely when a bottom-docked playground leaves too little height', async ({ requestPage, page, playground }) => {
     await page.setViewportSize({ width: 1280, height: 250 });
     await requestPage.open(REQUEST_WITH_EXEC);
     await expect(page.getByTestId('section-nav-rail')).toBeVisible();
 
     // The bottom dock opens to 60% of the viewport, leaving the docs column too short for the rail.
     await page.getByTestId('request-try-button').click();
-    await page.getByTestId('playground-dock-bottom').click();
+    await playground.selectDock('bottom');
     await expect(page.getByTestId('playground-content')).toBeVisible();
     await expect(page.getByTestId('section-nav-rail')).toBeHidden();
   });

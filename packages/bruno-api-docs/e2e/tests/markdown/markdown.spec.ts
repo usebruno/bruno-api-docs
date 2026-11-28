@@ -35,7 +35,7 @@ test.describe('Rendered markdown documentation', () => {
     const docs = folderPage.folderMarkdownDocs;
     const checkboxes = docs.locator('input[type="checkbox"]');
 
-    await expect(checkboxes).toHaveCount(6);
+    await expect(checkboxes).toHaveCount(7);
     await expect(docs).not.toContainText('[x]');
     await expect(docs).not.toContainText('[ ]');
 
@@ -107,6 +107,66 @@ test.describe('Rendered markdown documentation', () => {
       expect(nestedBox.y).toBeGreaterThan(parentBox.y);
       expect(nestedBox.x).toBeGreaterThan(parentBox.x);
     });
+  });
+
+  test('reads a task written as [x](url) as a checked item followed by the link, like the app', async ({ folderPage }) => {
+    const item = folderPage.folderMarkdownDocs.locator('li.task-list-item', { hasText: 'https://example.com' });
+
+    await expect(item.locator('input[type="checkbox"]')).toBeChecked();
+    await expect(item).toHaveText('(https://example.com)');
+    await expect(item.locator('a')).toHaveAttribute('href', 'https://example.com');
+  });
+
+  test('renders raw HTML like the app, but strips anything that can run code or reach outside the docs', async ({ folderPage, page }) => {
+    const docs = folderPage.folderMarkdownDocs;
+
+    await test.step('a plain block element renders as content, not as tag text', async () => {
+      await expect(docs.getByText('raw html', { exact: true })).toBeVisible();
+      await expect(docs).not.toContainText('<div');
+    });
+
+    await test.step('an image renders, without its event handler', async () => {
+      const image = docs.getByAltText('Billing badge');
+      await expect(image).toBeVisible();
+      await expect(image).not.toHaveAttribute('onerror');
+    });
+
+    await test.step('no injected script, handler or link runs', async () => {
+      await expect(docs.locator('script')).toHaveCount(0);
+      await expect(docs).not.toContainText('__ocInjected');
+      await expect(docs.getByText('Unsafe link')).not.toHaveAttribute('href');
+      await docs.getByText('Unsafe link').click();
+      expect(await page.evaluate(() => (window as { __ocInjected?: string }).__ocInjected)).toBeUndefined();
+    });
+
+    await test.step('content cannot style itself over the page or borrow host classes and hooks', async () => {
+      const block = docs.getByText('Styled block', { exact: true });
+      await expect(block).not.toHaveAttribute('style');
+      await expect(block).not.toHaveAttribute('data-nav-headings');
+      await expect(block).toHaveAttribute('class', 'md-table-scroll');
+      await expect(block).toHaveAttribute('id', 'user-content-overlay');
+      await expect(block).not.toHaveCSS('position', 'fixed');
+    });
+
+    await test.step('an in-page link still points at its renamed target', async () => {
+      await expect(docs.getByText('Jump to styled block')).toHaveAttribute('href', '#user-content-overlay');
+      await expect(docs.getByText('Go to customers')).toHaveAttribute('href', '#/billing/customers');
+    });
+
+    await test.step('forms and their controls are removed', async () => {
+      await expect(docs.locator('form, textarea, select, input:not([type="checkbox"])')).toHaveCount(0);
+      await expect(docs.getByRole('button', { name: 'Sign in' })).toHaveCount(0);
+    });
+  });
+
+  test('gives an empty table row the same height as a filled one, like the app', async ({ folderPage }) => {
+    const table = folderPage.folderMarkdownDocs.locator('table', { hasText: 'alpha' });
+    const rows = table.locator('tbody tr');
+    await expect(rows).toHaveCount(3);
+
+    const [filled, empty] = [await rows.nth(0).boundingBox(), await rows.nth(1).boundingBox()];
+    if (!filled || !empty) throw new Error('expected both rows to be laid out');
+    expect(Math.abs(empty.height - filled.height)).toBeLessThanOrEqual(1);
   });
 
   test('wraps long table cell text onto multiple lines instead of scrolling sideways', async ({ folderPage }) => {

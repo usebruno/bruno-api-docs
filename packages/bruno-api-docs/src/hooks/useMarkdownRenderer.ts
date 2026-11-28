@@ -1,30 +1,49 @@
 import { useMemo } from 'react';
 import MarkdownIt from 'markdown-it';
 import taskLists from 'markdown-it-task-lists';
+import createDOMPurify, { type Config, type DOMPurify } from 'dompurify';
 import hljs from '@/utils/highlight';
 
 let cachedRenderer: MarkdownIt | null = null;
 
-const HTML_LINE_BREAK = /<br\s*\/?>/iy;
-const LESS_THAN = 0x3C;
-
-type InlineRule = Parameters<MarkdownIt['inline']['ruler']['before']>[2];
-// This rule is used to add support for hard line breaks in markdown.
-// (state) is the current state of the parser,token is the current word being parsed
-const hardBreakFromHtmlTag: InlineRule = (state, silent) => {
-  if (state.src.charCodeAt(state.pos) !== LESS_THAN) return false;
-
-  HTML_LINE_BREAK.lastIndex = state.pos;
-  const match = HTML_LINE_BREAK.exec(state.src);
-  if (!match) return false;
-
-  if (!silent) state.push('hardbreak', 'br', 0);
-  state.pos += match[0].length;
-
-  return true;
+const SANITIZE_CONFIG: Config = {
+  FORBID_TAGS: ['style', 'form', 'button', 'textarea', 'select', 'option', 'optgroup', 'datalist'],
+  FORBID_ATTR: ['style'],
+  ALLOW_DATA_ATTR: false,
+  SANITIZE_NAMED_PROPS: true
 };
 
-const TASK_MARKER_PATTERN = /^\[([\sxX]*?)\](?:\s|(?=[^\s(]))/;
+const RENDERER_CLASS = /^(heading-[1-6]|task-list-item|task-list-item-checkbox|task-list-item-content|contains-task-list|md-table-scroll|hljs|hljs-[\w-]+|[a-z]+_{1,2}|language-[\w+#.-]+)$/;
+
+const createSanitizer = (): DOMPurify | null => {
+  if (typeof window === 'undefined') return null;
+
+  const purifier = createDOMPurify();
+  if (!purifier.isSupported) return null;
+
+  purifier.addHook('uponSanitizeAttribute', (_node, data) => {
+    if (data.attrName !== 'class') return;
+
+    const kept = data.attrValue.split(/\s+/).filter((name) => RENDERER_CLASS.test(name));
+    data.attrValue = kept.join(' ');
+    data.keepAttr = kept.length > 0;
+  });
+
+  purifier.addHook('afterSanitizeAttributes', (node) => {
+    if (node.nodeName === 'INPUT' && node.getAttribute('type')?.toLowerCase() !== 'checkbox') {
+      node.remove();
+    }
+
+    const href = node.getAttribute('href');
+    if (node.nodeName === 'A' && href?.startsWith('#') && !href.startsWith('#/') && href.length > 1 && !href.startsWith('#user-content-')) {
+      node.setAttribute('href', `#user-content-${href.slice(1)}`);
+    }
+  });
+
+  return purifier;
+};
+
+const TASK_MARKER_PATTERN = /^\[([\sxX]*?)\]\s?(?=[\s\S])/;
 
 type CoreRule = Parameters<MarkdownIt['core']['ruler']['before']>[2];
 // This rule is used to normalize task lists ,it iterates line by line through the tokens and looks for list items
@@ -44,14 +63,16 @@ const normalizeTaskMarkers: CoreRule = (state) => {
     const match = TASK_MARKER_PATTERN.exec(token.content);
     if (!match) continue;
 
-    const first = token.children?.[0];
-    if (first?.type !== 'text') continue;
-
     const marker = match[1].trim().toLowerCase() === 'x' ? 'x' : ' ';
-    const replacement = `[${marker}] `;
+    const content = `[${marker}] ${token.content.slice(match[0].length)}`;
+    if (content === token.content) continue;
 
-    token.content = replacement + token.content.slice(match[0].length);
-    first.content = replacement + first.content.slice(match[0].length);
+    const children: typeof tokens = [];
+    state.md.inline.parse(content, state.md, state.env, children);
+    if (children[0]?.type !== 'text') continue;
+
+    token.content = content;
+    token.children = children;
   }
 
   return true;
@@ -99,12 +120,10 @@ const highlightFence = (str: string, lang: string): string => {
 };
 
 export const createMarkdownRenderer = (): MarkdownIt => {
+  const sanitizer = createSanitizer();
+
   const markdownIt = new MarkdownIt({
-    // Off: docs come from (untrusted) collection content and are injected via
-    // dangerouslySetInnerHTML. Disabling raw HTML blocks script/event-handler
-    // injection at the source; markdown-it still blocks javascript:/data: links
-    // via its default link validation, so no separate sanitiser is needed.
-    html: false,
+    html: sanitizer !== null,
     linkify: true,
     // Off: smart-typography rewrites punctuation in technical docs — e.g. (c)->©,
     // --->en-dash, ...->ellipsis, straight->curly quotes — which corrupts API copy.
@@ -113,7 +132,6 @@ export const createMarkdownRenderer = (): MarkdownIt => {
     highlight: highlightFence
   });
 
-  markdownIt.inline.ruler.before('text', 'html_line_break', hardBreakFromHtmlTag);
   markdownIt.use(taskLists, { enabled: true, label: false, labelAfter: false });
 
   markdownIt.core.ruler.before('github-task-lists', 'normalize_task_markers', normalizeTaskMarkers);
@@ -141,6 +159,13 @@ export const createMarkdownRenderer = (): MarkdownIt => {
 
   markdownIt.renderer.rules.table_open = () => '<div class="md-table-scroll"><table>';
   markdownIt.renderer.rules.table_close = () => '</table></div>';
+
+  if (sanitizer) {
+    const render = markdownIt.render.bind(markdownIt);
+    markdownIt.render = (src, env) => sanitizer.sanitize(render(src, env), SANITIZE_CONFIG);
+    const renderInline = markdownIt.renderInline.bind(markdownIt);
+    markdownIt.renderInline = (src, env) => sanitizer.sanitize(renderInline(src, env), SANITIZE_CONFIG);
+  }
 
   return markdownIt;
 };

@@ -24,7 +24,8 @@ import {
   getPostResponseVars,
   buildScriptChain,
   getScriptFlow,
-  inheritedCountLabel
+  inheritedCountLabel,
+  humanizeAuthMode
 } from '@/utils/request';
 import { collectAssertions } from '@/utils/assertions';
 import { collectTests, collectRawTestScripts } from '@/utils/fileUtils';
@@ -35,7 +36,7 @@ import { Tags } from '@/components/Tags/Tags';
 import { useMarkdownRenderer, useResolvedVariables } from '@/hooks';
 import { singleReferenceName } from '@/utils/variableResolution';
 import { buildBreadcrumbSegments } from '@/utils/common';
-import { AUTH_MODE_LABELS, GRPC_METHOD_TYPE_LABELS } from '@/constants';
+import { AUTH_MODE_LABELS, GRPC_AUTH_TYPES, GRPC_METHOD_TYPE_LABELS } from '@/constants';
 import { Section } from '@/components/Section/Section';
 import { ContentTypeBadge } from '@/components/ContentTypeBadge/ContentTypeBadge';
 import { InheritedAuthBadge } from '@/components/InheritedAuthBadge/InheritedAuthBadge';
@@ -92,19 +93,22 @@ export const GrpcRequest: React.FC<GrpcRequestProps> = ({
 
   const ownAuth = getRequestAuth(item) as Auth | undefined;
   const resolvedAuth = useMemo(() => resolveInheritedAuth(collection, ancestry, item), [collection, ancestry, item]);
-  const effectiveAuth = ownAuth === 'inherit' ? resolvedAuth.auth : ownAuth;
+  const unsupportedAuth
+    = ownAuth === 'inherit' && typeof resolvedAuth.auth === 'object' && !GRPC_AUTH_TYPES.includes(resolvedAuth.auth.type)
+      ? resolvedAuth.auth
+      : undefined;
+  const effectiveAuth = ownAuth === 'inherit' ? (unsupportedAuth ? undefined : resolvedAuth.auth) : ownAuth;
+  const authEmptyMessage = unsupportedAuth
+    ? `${humanizeAuthMode(unsupportedAuth, AUTH_MODE_LABELS)} is not supported by gRPC. Using no auth instead.`
+    : 'No auth';
   const showAuth = ownAuth !== undefined;
   const authBadge
-    = ownAuth === 'inherit' ? (
-      resolvedAuth.source ? (
-        <InheritedAuthBadge
-          source={resolvedAuth.source}
-          onNavigate={onBreadcrumbClick}
-          testId="grpc-request-auth-inherited"
-        />
-      ) : (
-        <ContentTypeBadge label="Inherited" />
-      )
+    = ownAuth === 'inherit' && resolvedAuth.source ? (
+      <InheritedAuthBadge
+        source={resolvedAuth.source}
+        onNavigate={onBreadcrumbClick}
+        testId="grpc-request-auth-inherited"
+      />
     ) : undefined;
 
   const hasLeftColumn
@@ -284,7 +288,7 @@ export const GrpcRequest: React.FC<GrpcRequestProps> = ({
                   <AuthDetails
                     auth={effectiveAuth}
                     authModeLabels={AUTH_MODE_LABELS}
-                    emptyMessage="No auth"
+                    emptyMessage={authEmptyMessage}
                     testId="grpc-request-auth"
                   />
                 </Section>

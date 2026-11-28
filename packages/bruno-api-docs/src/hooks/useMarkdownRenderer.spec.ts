@@ -18,23 +18,6 @@ describe('createMarkdownRenderer', () => {
   });
 
   describe('line breaks', () => {
-    it('renders a literal <br/> as a line break, not as escaped text', () => {
-      const html = render('first line<br/>second line');
-      expect(html).toContain('<br>');
-      expect(html).not.toContain('&lt;br');
-    });
-
-    it('accepts every spelling of the tag', () => {
-      for (const tag of ['<br>', '<br/>', '<br />', '<BR/>']) {
-        expect(render(`a${tag}b`)).not.toContain('&lt;br');
-      }
-    });
-
-    it('renders a hard break inside a table cell', () => {
-      const html = render('| h |\n| --- |\n| x<br/>y |');
-      expect(html).not.toContain('&lt;br');
-    });
-
     it('still renders the CommonMark backslash hard break', () => {
       expect(render('line one\\\nline two')).toContain('<br>');
     });
@@ -129,10 +112,10 @@ describe('createMarkdownRenderer', () => {
       expect(renderText('- [x]   spaced out')).toContain('   spaced out');
     });
 
-    it('does not turn a link labelled x into a checkbox', () => {
+    it('reads [x](url) as a checked item followed by the url, as the app does', () => {
       const html = render('- [x](https://example.com)');
-      expect(html).not.toContain('type="checkbox"');
-      expect(html).toContain('<a href="https://example.com">x</a>');
+      expect(html).toContain('checked');
+      expect(html).toContain('(<a href="https://example.com">https://example.com</a>)');
     });
 
     it('wraps item content in an element that is valid inside a loose list paragraph', () => {

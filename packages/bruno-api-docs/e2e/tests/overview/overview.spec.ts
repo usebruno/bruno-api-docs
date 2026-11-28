@@ -171,7 +171,7 @@ test.describe('Collection Overview', () => {
 
     for (let i = 0; i < count; i += 1) {
       const table = tables.nth(i);
-      const rowCount = await table.locator('.property-row').count();
+      const rowCount = await table.getByTestId('property-row').count();
       await table.getByTestId('property-value').first().evaluate((el) => {
         el.textContent = 'x'.repeat(400);
       });

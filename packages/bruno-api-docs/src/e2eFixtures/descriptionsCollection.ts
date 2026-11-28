@@ -28,7 +28,8 @@ export const descriptionsFixtureCollection = {
           name: 'X-Request-Id',
           value: 'req-7',
           description: 'Identifies this request across every service that handles it, from the gateway to the database.\n\nSend a fresh value per call so retries can be told apart in the logs.'
-        }
+        },
+        { name: 'X-Short', value: 'yes', description: 'Short line one\nShort line two' }
       ],
       body: {
         type: 'form-urlencoded',

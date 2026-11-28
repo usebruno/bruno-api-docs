@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query } from '@/test-utils/dom';
+import { getByTestId, query, queryByTestId } from '@/test-utils/dom';
 import { PropertyTable } from './PropertyTable';
 
 describe('PropertyTable', () => {
@@ -99,16 +99,16 @@ describe('PropertyTable', () => {
         onNavigate={() => {}}
       />
     );
-    const trailing = query(root, '.property-trailing');
-    expect(query(trailing, '.property-type').text).toBe('string');
-    expect(query(trailing, '.disabled-badge').text).toBe('Disabled');
-    expect(query(trailing, '.inherited-source').getAttribute('aria-label')).toBe('X-Trace: Inherited from folder: Parent');
-    expect(query(root, '.property-value-line').querySelector('.disabled-badge')).toBeNull();
+    const trailing = getByTestId(root, 'property-trailing');
+    expect(getByTestId(trailing, 'property-type').text).toBe('string');
+    expect(getByTestId(trailing, 'disabled-badge').text).toBe('Disabled');
+    expect(getByTestId(trailing, 'inherited-source').getAttribute('aria-label')).toBe('X-Trace: Inherited from folder: Parent');
+    expect(queryByTestId(getByTestId(root, 'property-value-line'), 'disabled-badge')).toBeNull();
   });
 
   it('omits the trailing group when a row has no type, Disabled badge or inherited source', () => {
     const root = useRenderToDom(<PropertyTable rows={[{ label: 'Accept', value: 'application/json' }]} />);
-    expect(root.querySelector('.property-trailing')).toBeNull();
+    expect(queryByTestId(root, 'property-trailing')).toBeNull();
   });
 
   it('omits the inherited-source link when a row is not inherited', () => {

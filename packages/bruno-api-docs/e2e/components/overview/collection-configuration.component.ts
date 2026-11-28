@@ -17,7 +17,7 @@ export class ConfigurationSection extends BaseComponent {
     this.copyButton = this.root.getByTestId(`${testId}-tests-copy`);
     this.secret = new SecretValueComponent(page, `${testId}-auth-token-secret`);
     this.disabledRows = this.root
-      .getByTestId('property-value-line')
+      .getByTestId('property-row')
       .filter({ has: page.getByTestId('disabled-badge') });
   }
 

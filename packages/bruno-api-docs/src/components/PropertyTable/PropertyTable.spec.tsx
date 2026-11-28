@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { useRenderToDom } from '@/hooks/useRenderToDom';
-import { query } from '@/test-utils/dom';
+import { getByTestId, query, queryByTestId } from '@/test-utils/dom';
 import { PropertyTable } from './PropertyTable';
 
 describe('PropertyTable', () => {
@@ -92,16 +92,23 @@ describe('PropertyTable', () => {
     expect(root.querySelector('.property-type')).toBeNull();
   });
 
-  it('renders the inherited-source link as a row-level cell (sibling of the value line) so it can center across the whole row', () => {
+  it('groups the type, Disabled badge and inherited-source link together outside the value line so they stick together', () => {
     const root = useRenderToDom(
       <PropertyTable
-        rows={[{ label: 'X-Trace', value: 'abc', disabled: true, inheritedSource: { level: 'folder', name: 'Parent', uuid: 'p1' } }]}
+        rows={[{ label: 'X-Trace', value: 'abc', type: 'string', disabled: true, inheritedSource: { level: 'folder', name: 'Parent', uuid: 'p1' } }]}
         onNavigate={() => {}}
       />
     );
-    expect(query(root, '.property-row').querySelector('[data-testid="inherited-source"]')).not.toBeNull();
-    expect(query(root, '.property-value-line').querySelector('[data-testid="inherited-source"]')).toBeNull();
-    expect(query(root, '.property-value-line').querySelector('.disabled-badge')).not.toBeNull();
+    const trailing = getByTestId(root, 'property-trailing');
+    expect(getByTestId(trailing, 'property-type').text).toBe('string');
+    expect(getByTestId(trailing, 'disabled-badge').text).toBe('Disabled');
+    expect(getByTestId(trailing, 'inherited-source').getAttribute('aria-label')).toBe('X-Trace: Inherited from folder: Parent');
+    expect(queryByTestId(getByTestId(root, 'property-value-line'), 'disabled-badge')).toBeNull();
+  });
+
+  it('omits the trailing group when a row has no type, Disabled badge or inherited source', () => {
+    const root = useRenderToDom(<PropertyTable rows={[{ label: 'Accept', value: 'application/json' }]} />);
+    expect(queryByTestId(root, 'property-trailing')).toBeNull();
   });
 
   it('omits the inherited-source link when a row is not inherited', () => {

@@ -24,6 +24,7 @@ export class PlaygroundComponent extends BaseComponent {
   readonly bodyEditor = new CodeEditorComponent(this.page, 'body-editor');
   readonly testsEditor = new CodeEditorComponent(this.page, 'tests-editor');
   readonly scriptFileEditor = new CodeEditorComponent(this.page, 'playground-script-file-editor');
+  readonly paramsBulkEditor = new CodeEditorComponent(this.page, 'param-bulk-editor');
   readonly variable = new PlaygroundVariableComponent(this.page);
   readonly envSwitcher = new EnvSwitcherComponent(this.page, 'playground-env-switcher');
   readonly envEditor = new EnvEditorComponent(this.page);
@@ -49,6 +50,7 @@ export class PlaygroundComponent extends BaseComponent {
   });
 
   readonly view = this.page.getByTestId('playground-view');
+  readonly bulkEditToggle = this.view.getByTestId('bulk-edit-toggle');
   readonly sidebarToggle = this.page.getByTestId('playground-sidebar-toggle');
   readonly treeItems = this.page.getByTestId('playground-sidebar-panel').getByTestId('sidebar-item');
   readonly searchInput = this.page.getByTestId('playground-sidebar-search');

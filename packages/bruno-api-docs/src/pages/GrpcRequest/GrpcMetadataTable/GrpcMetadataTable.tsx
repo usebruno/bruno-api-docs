@@ -44,7 +44,7 @@ export const GrpcMetadataTable: React.FC<GrpcMetadataTableProps> = ({
                   {entry.disabled ? <DisabledBadge /> : null}
                 </span>
               ),
-              description: description ? <TruncatedText text={description} /> : null
+              description: description ? <TruncatedText text={description} multilineTooltip /> : null
             }
           };
         })}

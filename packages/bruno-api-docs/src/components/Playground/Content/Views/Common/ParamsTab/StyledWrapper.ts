@@ -14,4 +14,9 @@ export const StyledWrapper = styled.div`
     letter-spacing: 0;
     color: var(--oc-colors-text-subtext2);
   }
+
+  .bulk-edit-toggle {
+    color: var(--oc-text-link);
+    cursor: pointer;
+  }
 `;

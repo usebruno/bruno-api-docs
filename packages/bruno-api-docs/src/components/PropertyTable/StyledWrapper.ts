@@ -103,31 +103,29 @@ export const StyledWrapper = styled.div`
     gap: 0.5rem;
     min-width: 0;
   }
-  .property-value-line .disabled-badge {
-    margin-left: auto;
-    align-self: center;
-    flex: none;
+  .property-row:has(> .property-trailing) {
+    grid-template-columns: minmax(8.75rem, 15rem) minmax(0, 1fr) auto;
+    padding-right: 0;
   }
-  .property-row > .inherited-source {
-    grid-column: 2;
+  .property-trailing {
+    grid-column: 3;
     grid-row: 1;
-    justify-self: end;
     align-self: stretch;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     position: sticky;
     right: 0;
     z-index: 1;
     padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    padding-right: 0.875rem;
     background: var(--oc-background-base);
   }
-  .property-row:has(.description) > .inherited-source {
-    grid-row: 1 / span 2;
+  .property-trailing:has(> .inherited-source) {
+    padding-right: 0.5rem;
   }
-  .property-row:has(> .inherited-source) .property-value-cell {
-    padding-right: 2.5rem;
-  }
-  .property-row:has(> .inherited-source) .description {
-    min-width: calc(100% - 2.5rem);
+  .property-row:has(> .property-trailing) .description {
+    grid-column: 1 / 3;
   }
   .property-value-main {
     min-width: 0;
@@ -160,6 +158,9 @@ export const StyledWrapper = styled.div`
     }
     .property-row {
       grid-template-columns: 8.75rem minmax(0, 1fr);
+    }
+    .property-row:has(> .property-trailing) {
+      grid-template-columns: 8.75rem minmax(0, 1fr) auto;
     }
     .property-value-main .oc-truncate {
       overflow: hidden;

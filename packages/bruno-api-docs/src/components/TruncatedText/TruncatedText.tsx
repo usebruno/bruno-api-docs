@@ -14,6 +14,8 @@ export interface TruncatedTextProps {
 const isOverflowing = (el: HTMLElement): boolean =>
   el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
 
+const alwaysOpen = (): boolean => true;
+
 export const TruncatedText: React.FC<TruncatedTextProps> = ({
   text,
   children,
@@ -21,12 +23,22 @@ export const TruncatedText: React.FC<TruncatedTextProps> = ({
   multilineTooltip,
   className,
   testId = 'truncated-text'
-}) => (
-  <Tooltip content={text} disabled={!text.trim()} shouldOpen={isOverflowing} touch={touch} multiline={multilineTooltip}>
-    <StyledWrapper className={['oc-truncate', className].filter(Boolean).join(' ')} data-testid={testId}>
-      {children ?? text}
-    </StyledWrapper>
-  </Tooltip>
-);
+}) => {
+  const hasLineBreaks = multilineTooltip && text.includes('\n');
+
+  return (
+    <Tooltip
+      content={text}
+      disabled={!text.trim()}
+      shouldOpen={hasLineBreaks ? alwaysOpen : isOverflowing}
+      touch={touch}
+      multiline={multilineTooltip}
+    >
+      <StyledWrapper className={['oc-truncate', className].filter(Boolean).join(' ')} data-testid={testId}>
+        {children ?? text}
+      </StyledWrapper>
+    </Tooltip>
+  );
+};
 
 export default TruncatedText;

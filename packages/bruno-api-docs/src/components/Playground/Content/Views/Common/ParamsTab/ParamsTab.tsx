@@ -1,6 +1,7 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import KeyValueTable, { type KeyValueRow } from '@/components/KeyValueTable/KeyValueTable';
 import { getDescription } from '@/utils/request';
+import BulkEdit from '../BulkEdit/BulkEdit';
 import { StyledWrapper } from './StyledWrapper';
 
 interface ParamsTabProps {
@@ -70,6 +71,8 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
   title = 'Query',
   description
 }) => {
+  const [showKeyValueTable, setShowKeyValueTable] = useState(true);
+
   // Single pass: split the params into query and path rows. `type` is kept on
   // each row so it survives the round-trip back through onParamsChange.
   const { queryData, pathData } = useMemo(() => {
@@ -109,21 +112,35 @@ export const ParamsTab: React.FC<ParamsTabProps> = ({
     [onParamsChange, queryData]
   );
 
+  const toggleBulkEditView = useCallback(() => {
+    setShowKeyValueTable((prev) => !prev);
+  }, [setShowKeyValueTable]);
+
   const hasPath = pathData.length > 0;
 
   return (
     <StyledWrapper className="space-y-4">
-      {/* Query table: always shown so query params can be viewed/added
-          regardless of whether the request currently has any. */}
-      <ParamsSection
-        title={title}
-        description={description}
-        data={queryData}
-        onChange={handleQueryChange}
-      />
+      {showKeyValueTable ? (
+        <ParamsSection
+          title={title}
+          description={description}
+          data={queryData}
+          onChange={handleQueryChange}
+        />
+      ) : (
+        <BulkEdit data={queryData} onChange={handleQueryChange} idPrefix="param" />
+      )}
+      <div className="flex justify-end mt-2">
+        <button
+          className="bulk-edit-toggle text-link select-none"
+          data-testid="bulk-edit-toggle"
+          onClick={toggleBulkEditView}
+        >
+          {showKeyValueTable ? 'Bulk edit' : 'Key/Value edit'}
+        </button>
+      </div>
 
-      {/* Path table: only shown when the URL actually defines path params. */}
-      {hasPath && (
+      {showKeyValueTable && hasPath && (
         <ParamsSection
           title="Path"
           data={pathData}
